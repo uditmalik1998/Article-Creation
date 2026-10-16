@@ -16026,6 +16026,62 @@ export namespace Prisma {
     otherRoughV2: Decimal | null
     otherVdrCost: Decimal | null
     otherFinalCost: Decimal | null
+    adjusterAutoBgt: Decimal | null
+    adjusterRoughV2: Decimal | null
+    adjusterVdrCost: Decimal | null
+    adjusterFinalCost: Decimal | null
+    brotchAutoBgt: Decimal | null
+    brotchRoughV2: Decimal | null
+    brotchVdrCost: Decimal | null
+    brotchFinalCost: Decimal | null
+    buckleAutoBgt: Decimal | null
+    buckleRoughV2: Decimal | null
+    buckleVdrCost: Decimal | null
+    buckleFinalCost: Decimal | null
+    eyeletsAutoBgt: Decimal | null
+    eyeletsRoughV2: Decimal | null
+    eyeletsVdrCost: Decimal | null
+    eyeletsFinalCost: Decimal | null
+    hangingDRingAutoBgt: Decimal | null
+    hangingDRingRoughV2: Decimal | null
+    hangingDRingVdrCost: Decimal | null
+    hangingDRingFinalCost: Decimal | null
+    hookAutoBgt: Decimal | null
+    hookRoughV2: Decimal | null
+    hookVdrCost: Decimal | null
+    hookFinalCost: Decimal | null
+    labelAutoBgt: Decimal | null
+    labelRoughV2: Decimal | null
+    labelVdrCost: Decimal | null
+    labelFinalCost: Decimal | null
+    laceAutoBgt: Decimal | null
+    laceRoughV2: Decimal | null
+    laceVdrCost: Decimal | null
+    laceFinalCost: Decimal | null
+    pockettingFabricAutoBgt: Decimal | null
+    pockettingFabricRoughV2: Decimal | null
+    pockettingFabricVdrCost: Decimal | null
+    pockettingFabricFinalCost: Decimal | null
+    pockettingReadymadeAutoBgt: Decimal | null
+    pockettingReadymadeRoughV2: Decimal | null
+    pockettingReadymadeVdrCost: Decimal | null
+    pockettingReadymadeFinalCost: Decimal | null
+    santaAutoBgt: Decimal | null
+    santaRoughV2: Decimal | null
+    santaVdrCost: Decimal | null
+    santaFinalCost: Decimal | null
+    stopperAutoBgt: Decimal | null
+    stopperRoughV2: Decimal | null
+    stopperVdrCost: Decimal | null
+    stopperFinalCost: Decimal | null
+    tagAutoBgt: Decimal | null
+    tagRoughV2: Decimal | null
+    tagVdrCost: Decimal | null
+    tagFinalCost: Decimal | null
+    tasselsAutoBgt: Decimal | null
+    tasselsRoughV2: Decimal | null
+    tasselsVdrCost: Decimal | null
+    tasselsFinalCost: Decimal | null
     printAutoBgt: Decimal | null
     printRoughV2: Decimal | null
     printVendorCost: Decimal | null
@@ -16130,6 +16186,62 @@ export namespace Prisma {
     otherRoughV2: Decimal | null
     otherVdrCost: Decimal | null
     otherFinalCost: Decimal | null
+    adjusterAutoBgt: Decimal | null
+    adjusterRoughV2: Decimal | null
+    adjusterVdrCost: Decimal | null
+    adjusterFinalCost: Decimal | null
+    brotchAutoBgt: Decimal | null
+    brotchRoughV2: Decimal | null
+    brotchVdrCost: Decimal | null
+    brotchFinalCost: Decimal | null
+    buckleAutoBgt: Decimal | null
+    buckleRoughV2: Decimal | null
+    buckleVdrCost: Decimal | null
+    buckleFinalCost: Decimal | null
+    eyeletsAutoBgt: Decimal | null
+    eyeletsRoughV2: Decimal | null
+    eyeletsVdrCost: Decimal | null
+    eyeletsFinalCost: Decimal | null
+    hangingDRingAutoBgt: Decimal | null
+    hangingDRingRoughV2: Decimal | null
+    hangingDRingVdrCost: Decimal | null
+    hangingDRingFinalCost: Decimal | null
+    hookAutoBgt: Decimal | null
+    hookRoughV2: Decimal | null
+    hookVdrCost: Decimal | null
+    hookFinalCost: Decimal | null
+    labelAutoBgt: Decimal | null
+    labelRoughV2: Decimal | null
+    labelVdrCost: Decimal | null
+    labelFinalCost: Decimal | null
+    laceAutoBgt: Decimal | null
+    laceRoughV2: Decimal | null
+    laceVdrCost: Decimal | null
+    laceFinalCost: Decimal | null
+    pockettingFabricAutoBgt: Decimal | null
+    pockettingFabricRoughV2: Decimal | null
+    pockettingFabricVdrCost: Decimal | null
+    pockettingFabricFinalCost: Decimal | null
+    pockettingReadymadeAutoBgt: Decimal | null
+    pockettingReadymadeRoughV2: Decimal | null
+    pockettingReadymadeVdrCost: Decimal | null
+    pockettingReadymadeFinalCost: Decimal | null
+    santaAutoBgt: Decimal | null
+    santaRoughV2: Decimal | null
+    santaVdrCost: Decimal | null
+    santaFinalCost: Decimal | null
+    stopperAutoBgt: Decimal | null
+    stopperRoughV2: Decimal | null
+    stopperVdrCost: Decimal | null
+    stopperFinalCost: Decimal | null
+    tagAutoBgt: Decimal | null
+    tagRoughV2: Decimal | null
+    tagVdrCost: Decimal | null
+    tagFinalCost: Decimal | null
+    tasselsAutoBgt: Decimal | null
+    tasselsRoughV2: Decimal | null
+    tasselsVdrCost: Decimal | null
+    tasselsFinalCost: Decimal | null
     printAutoBgt: Decimal | null
     printRoughV2: Decimal | null
     printVendorCost: Decimal | null
@@ -16320,6 +16432,62 @@ export namespace Prisma {
     otherRoughV2: Decimal | null
     otherVdrCost: Decimal | null
     otherFinalCost: Decimal | null
+    adjusterAutoBgt: Decimal | null
+    adjusterRoughV2: Decimal | null
+    adjusterVdrCost: Decimal | null
+    adjusterFinalCost: Decimal | null
+    brotchAutoBgt: Decimal | null
+    brotchRoughV2: Decimal | null
+    brotchVdrCost: Decimal | null
+    brotchFinalCost: Decimal | null
+    buckleAutoBgt: Decimal | null
+    buckleRoughV2: Decimal | null
+    buckleVdrCost: Decimal | null
+    buckleFinalCost: Decimal | null
+    eyeletsAutoBgt: Decimal | null
+    eyeletsRoughV2: Decimal | null
+    eyeletsVdrCost: Decimal | null
+    eyeletsFinalCost: Decimal | null
+    hangingDRingAutoBgt: Decimal | null
+    hangingDRingRoughV2: Decimal | null
+    hangingDRingVdrCost: Decimal | null
+    hangingDRingFinalCost: Decimal | null
+    hookAutoBgt: Decimal | null
+    hookRoughV2: Decimal | null
+    hookVdrCost: Decimal | null
+    hookFinalCost: Decimal | null
+    labelAutoBgt: Decimal | null
+    labelRoughV2: Decimal | null
+    labelVdrCost: Decimal | null
+    labelFinalCost: Decimal | null
+    laceAutoBgt: Decimal | null
+    laceRoughV2: Decimal | null
+    laceVdrCost: Decimal | null
+    laceFinalCost: Decimal | null
+    pockettingFabricAutoBgt: Decimal | null
+    pockettingFabricRoughV2: Decimal | null
+    pockettingFabricVdrCost: Decimal | null
+    pockettingFabricFinalCost: Decimal | null
+    pockettingReadymadeAutoBgt: Decimal | null
+    pockettingReadymadeRoughV2: Decimal | null
+    pockettingReadymadeVdrCost: Decimal | null
+    pockettingReadymadeFinalCost: Decimal | null
+    santaAutoBgt: Decimal | null
+    santaRoughV2: Decimal | null
+    santaVdrCost: Decimal | null
+    santaFinalCost: Decimal | null
+    stopperAutoBgt: Decimal | null
+    stopperRoughV2: Decimal | null
+    stopperVdrCost: Decimal | null
+    stopperFinalCost: Decimal | null
+    tagAutoBgt: Decimal | null
+    tagRoughV2: Decimal | null
+    tagVdrCost: Decimal | null
+    tagFinalCost: Decimal | null
+    tasselsAutoBgt: Decimal | null
+    tasselsRoughV2: Decimal | null
+    tasselsVdrCost: Decimal | null
+    tasselsFinalCost: Decimal | null
     printAutoBgt: Decimal | null
     printRoughV2: Decimal | null
     printVendorCost: Decimal | null
@@ -16550,6 +16718,62 @@ export namespace Prisma {
     otherRoughV2: Decimal | null
     otherVdrCost: Decimal | null
     otherFinalCost: Decimal | null
+    adjusterAutoBgt: Decimal | null
+    adjusterRoughV2: Decimal | null
+    adjusterVdrCost: Decimal | null
+    adjusterFinalCost: Decimal | null
+    brotchAutoBgt: Decimal | null
+    brotchRoughV2: Decimal | null
+    brotchVdrCost: Decimal | null
+    brotchFinalCost: Decimal | null
+    buckleAutoBgt: Decimal | null
+    buckleRoughV2: Decimal | null
+    buckleVdrCost: Decimal | null
+    buckleFinalCost: Decimal | null
+    eyeletsAutoBgt: Decimal | null
+    eyeletsRoughV2: Decimal | null
+    eyeletsVdrCost: Decimal | null
+    eyeletsFinalCost: Decimal | null
+    hangingDRingAutoBgt: Decimal | null
+    hangingDRingRoughV2: Decimal | null
+    hangingDRingVdrCost: Decimal | null
+    hangingDRingFinalCost: Decimal | null
+    hookAutoBgt: Decimal | null
+    hookRoughV2: Decimal | null
+    hookVdrCost: Decimal | null
+    hookFinalCost: Decimal | null
+    labelAutoBgt: Decimal | null
+    labelRoughV2: Decimal | null
+    labelVdrCost: Decimal | null
+    labelFinalCost: Decimal | null
+    laceAutoBgt: Decimal | null
+    laceRoughV2: Decimal | null
+    laceVdrCost: Decimal | null
+    laceFinalCost: Decimal | null
+    pockettingFabricAutoBgt: Decimal | null
+    pockettingFabricRoughV2: Decimal | null
+    pockettingFabricVdrCost: Decimal | null
+    pockettingFabricFinalCost: Decimal | null
+    pockettingReadymadeAutoBgt: Decimal | null
+    pockettingReadymadeRoughV2: Decimal | null
+    pockettingReadymadeVdrCost: Decimal | null
+    pockettingReadymadeFinalCost: Decimal | null
+    santaAutoBgt: Decimal | null
+    santaRoughV2: Decimal | null
+    santaVdrCost: Decimal | null
+    santaFinalCost: Decimal | null
+    stopperAutoBgt: Decimal | null
+    stopperRoughV2: Decimal | null
+    stopperVdrCost: Decimal | null
+    stopperFinalCost: Decimal | null
+    tagAutoBgt: Decimal | null
+    tagRoughV2: Decimal | null
+    tagVdrCost: Decimal | null
+    tagFinalCost: Decimal | null
+    tasselsAutoBgt: Decimal | null
+    tasselsRoughV2: Decimal | null
+    tasselsVdrCost: Decimal | null
+    tasselsFinalCost: Decimal | null
     printAutoBgt: Decimal | null
     printRoughV2: Decimal | null
     printVendorCost: Decimal | null
@@ -16780,6 +17004,62 @@ export namespace Prisma {
     otherRoughV2: number
     otherVdrCost: number
     otherFinalCost: number
+    adjusterAutoBgt: number
+    adjusterRoughV2: number
+    adjusterVdrCost: number
+    adjusterFinalCost: number
+    brotchAutoBgt: number
+    brotchRoughV2: number
+    brotchVdrCost: number
+    brotchFinalCost: number
+    buckleAutoBgt: number
+    buckleRoughV2: number
+    buckleVdrCost: number
+    buckleFinalCost: number
+    eyeletsAutoBgt: number
+    eyeletsRoughV2: number
+    eyeletsVdrCost: number
+    eyeletsFinalCost: number
+    hangingDRingAutoBgt: number
+    hangingDRingRoughV2: number
+    hangingDRingVdrCost: number
+    hangingDRingFinalCost: number
+    hookAutoBgt: number
+    hookRoughV2: number
+    hookVdrCost: number
+    hookFinalCost: number
+    labelAutoBgt: number
+    labelRoughV2: number
+    labelVdrCost: number
+    labelFinalCost: number
+    laceAutoBgt: number
+    laceRoughV2: number
+    laceVdrCost: number
+    laceFinalCost: number
+    pockettingFabricAutoBgt: number
+    pockettingFabricRoughV2: number
+    pockettingFabricVdrCost: number
+    pockettingFabricFinalCost: number
+    pockettingReadymadeAutoBgt: number
+    pockettingReadymadeRoughV2: number
+    pockettingReadymadeVdrCost: number
+    pockettingReadymadeFinalCost: number
+    santaAutoBgt: number
+    santaRoughV2: number
+    santaVdrCost: number
+    santaFinalCost: number
+    stopperAutoBgt: number
+    stopperRoughV2: number
+    stopperVdrCost: number
+    stopperFinalCost: number
+    tagAutoBgt: number
+    tagRoughV2: number
+    tagVdrCost: number
+    tagFinalCost: number
+    tasselsAutoBgt: number
+    tasselsRoughV2: number
+    tasselsVdrCost: number
+    tasselsFinalCost: number
     printAutoBgt: number
     printRoughV2: number
     printVendorCost: number
@@ -16927,6 +17207,62 @@ export namespace Prisma {
     otherRoughV2?: true
     otherVdrCost?: true
     otherFinalCost?: true
+    adjusterAutoBgt?: true
+    adjusterRoughV2?: true
+    adjusterVdrCost?: true
+    adjusterFinalCost?: true
+    brotchAutoBgt?: true
+    brotchRoughV2?: true
+    brotchVdrCost?: true
+    brotchFinalCost?: true
+    buckleAutoBgt?: true
+    buckleRoughV2?: true
+    buckleVdrCost?: true
+    buckleFinalCost?: true
+    eyeletsAutoBgt?: true
+    eyeletsRoughV2?: true
+    eyeletsVdrCost?: true
+    eyeletsFinalCost?: true
+    hangingDRingAutoBgt?: true
+    hangingDRingRoughV2?: true
+    hangingDRingVdrCost?: true
+    hangingDRingFinalCost?: true
+    hookAutoBgt?: true
+    hookRoughV2?: true
+    hookVdrCost?: true
+    hookFinalCost?: true
+    labelAutoBgt?: true
+    labelRoughV2?: true
+    labelVdrCost?: true
+    labelFinalCost?: true
+    laceAutoBgt?: true
+    laceRoughV2?: true
+    laceVdrCost?: true
+    laceFinalCost?: true
+    pockettingFabricAutoBgt?: true
+    pockettingFabricRoughV2?: true
+    pockettingFabricVdrCost?: true
+    pockettingFabricFinalCost?: true
+    pockettingReadymadeAutoBgt?: true
+    pockettingReadymadeRoughV2?: true
+    pockettingReadymadeVdrCost?: true
+    pockettingReadymadeFinalCost?: true
+    santaAutoBgt?: true
+    santaRoughV2?: true
+    santaVdrCost?: true
+    santaFinalCost?: true
+    stopperAutoBgt?: true
+    stopperRoughV2?: true
+    stopperVdrCost?: true
+    stopperFinalCost?: true
+    tagAutoBgt?: true
+    tagRoughV2?: true
+    tagVdrCost?: true
+    tagFinalCost?: true
+    tasselsAutoBgt?: true
+    tasselsRoughV2?: true
+    tasselsVdrCost?: true
+    tasselsFinalCost?: true
     printAutoBgt?: true
     printRoughV2?: true
     printVendorCost?: true
@@ -17031,6 +17367,62 @@ export namespace Prisma {
     otherRoughV2?: true
     otherVdrCost?: true
     otherFinalCost?: true
+    adjusterAutoBgt?: true
+    adjusterRoughV2?: true
+    adjusterVdrCost?: true
+    adjusterFinalCost?: true
+    brotchAutoBgt?: true
+    brotchRoughV2?: true
+    brotchVdrCost?: true
+    brotchFinalCost?: true
+    buckleAutoBgt?: true
+    buckleRoughV2?: true
+    buckleVdrCost?: true
+    buckleFinalCost?: true
+    eyeletsAutoBgt?: true
+    eyeletsRoughV2?: true
+    eyeletsVdrCost?: true
+    eyeletsFinalCost?: true
+    hangingDRingAutoBgt?: true
+    hangingDRingRoughV2?: true
+    hangingDRingVdrCost?: true
+    hangingDRingFinalCost?: true
+    hookAutoBgt?: true
+    hookRoughV2?: true
+    hookVdrCost?: true
+    hookFinalCost?: true
+    labelAutoBgt?: true
+    labelRoughV2?: true
+    labelVdrCost?: true
+    labelFinalCost?: true
+    laceAutoBgt?: true
+    laceRoughV2?: true
+    laceVdrCost?: true
+    laceFinalCost?: true
+    pockettingFabricAutoBgt?: true
+    pockettingFabricRoughV2?: true
+    pockettingFabricVdrCost?: true
+    pockettingFabricFinalCost?: true
+    pockettingReadymadeAutoBgt?: true
+    pockettingReadymadeRoughV2?: true
+    pockettingReadymadeVdrCost?: true
+    pockettingReadymadeFinalCost?: true
+    santaAutoBgt?: true
+    santaRoughV2?: true
+    santaVdrCost?: true
+    santaFinalCost?: true
+    stopperAutoBgt?: true
+    stopperRoughV2?: true
+    stopperVdrCost?: true
+    stopperFinalCost?: true
+    tagAutoBgt?: true
+    tagRoughV2?: true
+    tagVdrCost?: true
+    tagFinalCost?: true
+    tasselsAutoBgt?: true
+    tasselsRoughV2?: true
+    tasselsVdrCost?: true
+    tasselsFinalCost?: true
     printAutoBgt?: true
     printRoughV2?: true
     printVendorCost?: true
@@ -17221,6 +17613,62 @@ export namespace Prisma {
     otherRoughV2?: true
     otherVdrCost?: true
     otherFinalCost?: true
+    adjusterAutoBgt?: true
+    adjusterRoughV2?: true
+    adjusterVdrCost?: true
+    adjusterFinalCost?: true
+    brotchAutoBgt?: true
+    brotchRoughV2?: true
+    brotchVdrCost?: true
+    brotchFinalCost?: true
+    buckleAutoBgt?: true
+    buckleRoughV2?: true
+    buckleVdrCost?: true
+    buckleFinalCost?: true
+    eyeletsAutoBgt?: true
+    eyeletsRoughV2?: true
+    eyeletsVdrCost?: true
+    eyeletsFinalCost?: true
+    hangingDRingAutoBgt?: true
+    hangingDRingRoughV2?: true
+    hangingDRingVdrCost?: true
+    hangingDRingFinalCost?: true
+    hookAutoBgt?: true
+    hookRoughV2?: true
+    hookVdrCost?: true
+    hookFinalCost?: true
+    labelAutoBgt?: true
+    labelRoughV2?: true
+    labelVdrCost?: true
+    labelFinalCost?: true
+    laceAutoBgt?: true
+    laceRoughV2?: true
+    laceVdrCost?: true
+    laceFinalCost?: true
+    pockettingFabricAutoBgt?: true
+    pockettingFabricRoughV2?: true
+    pockettingFabricVdrCost?: true
+    pockettingFabricFinalCost?: true
+    pockettingReadymadeAutoBgt?: true
+    pockettingReadymadeRoughV2?: true
+    pockettingReadymadeVdrCost?: true
+    pockettingReadymadeFinalCost?: true
+    santaAutoBgt?: true
+    santaRoughV2?: true
+    santaVdrCost?: true
+    santaFinalCost?: true
+    stopperAutoBgt?: true
+    stopperRoughV2?: true
+    stopperVdrCost?: true
+    stopperFinalCost?: true
+    tagAutoBgt?: true
+    tagRoughV2?: true
+    tagVdrCost?: true
+    tagFinalCost?: true
+    tasselsAutoBgt?: true
+    tasselsRoughV2?: true
+    tasselsVdrCost?: true
+    tasselsFinalCost?: true
     printAutoBgt?: true
     printRoughV2?: true
     printVendorCost?: true
@@ -17451,6 +17899,62 @@ export namespace Prisma {
     otherRoughV2?: true
     otherVdrCost?: true
     otherFinalCost?: true
+    adjusterAutoBgt?: true
+    adjusterRoughV2?: true
+    adjusterVdrCost?: true
+    adjusterFinalCost?: true
+    brotchAutoBgt?: true
+    brotchRoughV2?: true
+    brotchVdrCost?: true
+    brotchFinalCost?: true
+    buckleAutoBgt?: true
+    buckleRoughV2?: true
+    buckleVdrCost?: true
+    buckleFinalCost?: true
+    eyeletsAutoBgt?: true
+    eyeletsRoughV2?: true
+    eyeletsVdrCost?: true
+    eyeletsFinalCost?: true
+    hangingDRingAutoBgt?: true
+    hangingDRingRoughV2?: true
+    hangingDRingVdrCost?: true
+    hangingDRingFinalCost?: true
+    hookAutoBgt?: true
+    hookRoughV2?: true
+    hookVdrCost?: true
+    hookFinalCost?: true
+    labelAutoBgt?: true
+    labelRoughV2?: true
+    labelVdrCost?: true
+    labelFinalCost?: true
+    laceAutoBgt?: true
+    laceRoughV2?: true
+    laceVdrCost?: true
+    laceFinalCost?: true
+    pockettingFabricAutoBgt?: true
+    pockettingFabricRoughV2?: true
+    pockettingFabricVdrCost?: true
+    pockettingFabricFinalCost?: true
+    pockettingReadymadeAutoBgt?: true
+    pockettingReadymadeRoughV2?: true
+    pockettingReadymadeVdrCost?: true
+    pockettingReadymadeFinalCost?: true
+    santaAutoBgt?: true
+    santaRoughV2?: true
+    santaVdrCost?: true
+    santaFinalCost?: true
+    stopperAutoBgt?: true
+    stopperRoughV2?: true
+    stopperVdrCost?: true
+    stopperFinalCost?: true
+    tagAutoBgt?: true
+    tagRoughV2?: true
+    tagVdrCost?: true
+    tagFinalCost?: true
+    tasselsAutoBgt?: true
+    tasselsRoughV2?: true
+    tasselsVdrCost?: true
+    tasselsFinalCost?: true
     printAutoBgt?: true
     printRoughV2?: true
     printVendorCost?: true
@@ -17681,6 +18185,62 @@ export namespace Prisma {
     otherRoughV2?: true
     otherVdrCost?: true
     otherFinalCost?: true
+    adjusterAutoBgt?: true
+    adjusterRoughV2?: true
+    adjusterVdrCost?: true
+    adjusterFinalCost?: true
+    brotchAutoBgt?: true
+    brotchRoughV2?: true
+    brotchVdrCost?: true
+    brotchFinalCost?: true
+    buckleAutoBgt?: true
+    buckleRoughV2?: true
+    buckleVdrCost?: true
+    buckleFinalCost?: true
+    eyeletsAutoBgt?: true
+    eyeletsRoughV2?: true
+    eyeletsVdrCost?: true
+    eyeletsFinalCost?: true
+    hangingDRingAutoBgt?: true
+    hangingDRingRoughV2?: true
+    hangingDRingVdrCost?: true
+    hangingDRingFinalCost?: true
+    hookAutoBgt?: true
+    hookRoughV2?: true
+    hookVdrCost?: true
+    hookFinalCost?: true
+    labelAutoBgt?: true
+    labelRoughV2?: true
+    labelVdrCost?: true
+    labelFinalCost?: true
+    laceAutoBgt?: true
+    laceRoughV2?: true
+    laceVdrCost?: true
+    laceFinalCost?: true
+    pockettingFabricAutoBgt?: true
+    pockettingFabricRoughV2?: true
+    pockettingFabricVdrCost?: true
+    pockettingFabricFinalCost?: true
+    pockettingReadymadeAutoBgt?: true
+    pockettingReadymadeRoughV2?: true
+    pockettingReadymadeVdrCost?: true
+    pockettingReadymadeFinalCost?: true
+    santaAutoBgt?: true
+    santaRoughV2?: true
+    santaVdrCost?: true
+    santaFinalCost?: true
+    stopperAutoBgt?: true
+    stopperRoughV2?: true
+    stopperVdrCost?: true
+    stopperFinalCost?: true
+    tagAutoBgt?: true
+    tagRoughV2?: true
+    tagVdrCost?: true
+    tagFinalCost?: true
+    tasselsAutoBgt?: true
+    tasselsRoughV2?: true
+    tasselsVdrCost?: true
+    tasselsFinalCost?: true
     printAutoBgt?: true
     printRoughV2?: true
     printVendorCost?: true
@@ -17999,6 +18559,62 @@ export namespace Prisma {
     otherRoughV2: Decimal | null
     otherVdrCost: Decimal | null
     otherFinalCost: Decimal | null
+    adjusterAutoBgt: Decimal | null
+    adjusterRoughV2: Decimal | null
+    adjusterVdrCost: Decimal | null
+    adjusterFinalCost: Decimal | null
+    brotchAutoBgt: Decimal | null
+    brotchRoughV2: Decimal | null
+    brotchVdrCost: Decimal | null
+    brotchFinalCost: Decimal | null
+    buckleAutoBgt: Decimal | null
+    buckleRoughV2: Decimal | null
+    buckleVdrCost: Decimal | null
+    buckleFinalCost: Decimal | null
+    eyeletsAutoBgt: Decimal | null
+    eyeletsRoughV2: Decimal | null
+    eyeletsVdrCost: Decimal | null
+    eyeletsFinalCost: Decimal | null
+    hangingDRingAutoBgt: Decimal | null
+    hangingDRingRoughV2: Decimal | null
+    hangingDRingVdrCost: Decimal | null
+    hangingDRingFinalCost: Decimal | null
+    hookAutoBgt: Decimal | null
+    hookRoughV2: Decimal | null
+    hookVdrCost: Decimal | null
+    hookFinalCost: Decimal | null
+    labelAutoBgt: Decimal | null
+    labelRoughV2: Decimal | null
+    labelVdrCost: Decimal | null
+    labelFinalCost: Decimal | null
+    laceAutoBgt: Decimal | null
+    laceRoughV2: Decimal | null
+    laceVdrCost: Decimal | null
+    laceFinalCost: Decimal | null
+    pockettingFabricAutoBgt: Decimal | null
+    pockettingFabricRoughV2: Decimal | null
+    pockettingFabricVdrCost: Decimal | null
+    pockettingFabricFinalCost: Decimal | null
+    pockettingReadymadeAutoBgt: Decimal | null
+    pockettingReadymadeRoughV2: Decimal | null
+    pockettingReadymadeVdrCost: Decimal | null
+    pockettingReadymadeFinalCost: Decimal | null
+    santaAutoBgt: Decimal | null
+    santaRoughV2: Decimal | null
+    santaVdrCost: Decimal | null
+    santaFinalCost: Decimal | null
+    stopperAutoBgt: Decimal | null
+    stopperRoughV2: Decimal | null
+    stopperVdrCost: Decimal | null
+    stopperFinalCost: Decimal | null
+    tagAutoBgt: Decimal | null
+    tagRoughV2: Decimal | null
+    tagVdrCost: Decimal | null
+    tagFinalCost: Decimal | null
+    tasselsAutoBgt: Decimal | null
+    tasselsRoughV2: Decimal | null
+    tasselsVdrCost: Decimal | null
+    tasselsFinalCost: Decimal | null
     printAutoBgt: Decimal | null
     printRoughV2: Decimal | null
     printVendorCost: Decimal | null
@@ -18249,6 +18865,62 @@ export namespace Prisma {
     otherRoughV2?: boolean
     otherVdrCost?: boolean
     otherFinalCost?: boolean
+    adjusterAutoBgt?: boolean
+    adjusterRoughV2?: boolean
+    adjusterVdrCost?: boolean
+    adjusterFinalCost?: boolean
+    brotchAutoBgt?: boolean
+    brotchRoughV2?: boolean
+    brotchVdrCost?: boolean
+    brotchFinalCost?: boolean
+    buckleAutoBgt?: boolean
+    buckleRoughV2?: boolean
+    buckleVdrCost?: boolean
+    buckleFinalCost?: boolean
+    eyeletsAutoBgt?: boolean
+    eyeletsRoughV2?: boolean
+    eyeletsVdrCost?: boolean
+    eyeletsFinalCost?: boolean
+    hangingDRingAutoBgt?: boolean
+    hangingDRingRoughV2?: boolean
+    hangingDRingVdrCost?: boolean
+    hangingDRingFinalCost?: boolean
+    hookAutoBgt?: boolean
+    hookRoughV2?: boolean
+    hookVdrCost?: boolean
+    hookFinalCost?: boolean
+    labelAutoBgt?: boolean
+    labelRoughV2?: boolean
+    labelVdrCost?: boolean
+    labelFinalCost?: boolean
+    laceAutoBgt?: boolean
+    laceRoughV2?: boolean
+    laceVdrCost?: boolean
+    laceFinalCost?: boolean
+    pockettingFabricAutoBgt?: boolean
+    pockettingFabricRoughV2?: boolean
+    pockettingFabricVdrCost?: boolean
+    pockettingFabricFinalCost?: boolean
+    pockettingReadymadeAutoBgt?: boolean
+    pockettingReadymadeRoughV2?: boolean
+    pockettingReadymadeVdrCost?: boolean
+    pockettingReadymadeFinalCost?: boolean
+    santaAutoBgt?: boolean
+    santaRoughV2?: boolean
+    santaVdrCost?: boolean
+    santaFinalCost?: boolean
+    stopperAutoBgt?: boolean
+    stopperRoughV2?: boolean
+    stopperVdrCost?: boolean
+    stopperFinalCost?: boolean
+    tagAutoBgt?: boolean
+    tagRoughV2?: boolean
+    tagVdrCost?: boolean
+    tagFinalCost?: boolean
+    tasselsAutoBgt?: boolean
+    tasselsRoughV2?: boolean
+    tasselsVdrCost?: boolean
+    tasselsFinalCost?: boolean
     printAutoBgt?: boolean
     printRoughV2?: boolean
     printVendorCost?: boolean
@@ -18486,6 +19158,62 @@ export namespace Prisma {
     otherRoughV2?: boolean
     otherVdrCost?: boolean
     otherFinalCost?: boolean
+    adjusterAutoBgt?: boolean
+    adjusterRoughV2?: boolean
+    adjusterVdrCost?: boolean
+    adjusterFinalCost?: boolean
+    brotchAutoBgt?: boolean
+    brotchRoughV2?: boolean
+    brotchVdrCost?: boolean
+    brotchFinalCost?: boolean
+    buckleAutoBgt?: boolean
+    buckleRoughV2?: boolean
+    buckleVdrCost?: boolean
+    buckleFinalCost?: boolean
+    eyeletsAutoBgt?: boolean
+    eyeletsRoughV2?: boolean
+    eyeletsVdrCost?: boolean
+    eyeletsFinalCost?: boolean
+    hangingDRingAutoBgt?: boolean
+    hangingDRingRoughV2?: boolean
+    hangingDRingVdrCost?: boolean
+    hangingDRingFinalCost?: boolean
+    hookAutoBgt?: boolean
+    hookRoughV2?: boolean
+    hookVdrCost?: boolean
+    hookFinalCost?: boolean
+    labelAutoBgt?: boolean
+    labelRoughV2?: boolean
+    labelVdrCost?: boolean
+    labelFinalCost?: boolean
+    laceAutoBgt?: boolean
+    laceRoughV2?: boolean
+    laceVdrCost?: boolean
+    laceFinalCost?: boolean
+    pockettingFabricAutoBgt?: boolean
+    pockettingFabricRoughV2?: boolean
+    pockettingFabricVdrCost?: boolean
+    pockettingFabricFinalCost?: boolean
+    pockettingReadymadeAutoBgt?: boolean
+    pockettingReadymadeRoughV2?: boolean
+    pockettingReadymadeVdrCost?: boolean
+    pockettingReadymadeFinalCost?: boolean
+    santaAutoBgt?: boolean
+    santaRoughV2?: boolean
+    santaVdrCost?: boolean
+    santaFinalCost?: boolean
+    stopperAutoBgt?: boolean
+    stopperRoughV2?: boolean
+    stopperVdrCost?: boolean
+    stopperFinalCost?: boolean
+    tagAutoBgt?: boolean
+    tagRoughV2?: boolean
+    tagVdrCost?: boolean
+    tagFinalCost?: boolean
+    tasselsAutoBgt?: boolean
+    tasselsRoughV2?: boolean
+    tasselsVdrCost?: boolean
+    tasselsFinalCost?: boolean
     printAutoBgt?: boolean
     printRoughV2?: boolean
     printVendorCost?: boolean
@@ -18720,6 +19448,62 @@ export namespace Prisma {
     otherRoughV2?: boolean
     otherVdrCost?: boolean
     otherFinalCost?: boolean
+    adjusterAutoBgt?: boolean
+    adjusterRoughV2?: boolean
+    adjusterVdrCost?: boolean
+    adjusterFinalCost?: boolean
+    brotchAutoBgt?: boolean
+    brotchRoughV2?: boolean
+    brotchVdrCost?: boolean
+    brotchFinalCost?: boolean
+    buckleAutoBgt?: boolean
+    buckleRoughV2?: boolean
+    buckleVdrCost?: boolean
+    buckleFinalCost?: boolean
+    eyeletsAutoBgt?: boolean
+    eyeletsRoughV2?: boolean
+    eyeletsVdrCost?: boolean
+    eyeletsFinalCost?: boolean
+    hangingDRingAutoBgt?: boolean
+    hangingDRingRoughV2?: boolean
+    hangingDRingVdrCost?: boolean
+    hangingDRingFinalCost?: boolean
+    hookAutoBgt?: boolean
+    hookRoughV2?: boolean
+    hookVdrCost?: boolean
+    hookFinalCost?: boolean
+    labelAutoBgt?: boolean
+    labelRoughV2?: boolean
+    labelVdrCost?: boolean
+    labelFinalCost?: boolean
+    laceAutoBgt?: boolean
+    laceRoughV2?: boolean
+    laceVdrCost?: boolean
+    laceFinalCost?: boolean
+    pockettingFabricAutoBgt?: boolean
+    pockettingFabricRoughV2?: boolean
+    pockettingFabricVdrCost?: boolean
+    pockettingFabricFinalCost?: boolean
+    pockettingReadymadeAutoBgt?: boolean
+    pockettingReadymadeRoughV2?: boolean
+    pockettingReadymadeVdrCost?: boolean
+    pockettingReadymadeFinalCost?: boolean
+    santaAutoBgt?: boolean
+    santaRoughV2?: boolean
+    santaVdrCost?: boolean
+    santaFinalCost?: boolean
+    stopperAutoBgt?: boolean
+    stopperRoughV2?: boolean
+    stopperVdrCost?: boolean
+    stopperFinalCost?: boolean
+    tagAutoBgt?: boolean
+    tagRoughV2?: boolean
+    tagVdrCost?: boolean
+    tagFinalCost?: boolean
+    tasselsAutoBgt?: boolean
+    tasselsRoughV2?: boolean
+    tasselsVdrCost?: boolean
+    tasselsFinalCost?: boolean
     printAutoBgt?: boolean
     printRoughV2?: boolean
     printVendorCost?: boolean
@@ -18954,6 +19738,62 @@ export namespace Prisma {
     otherRoughV2?: boolean
     otherVdrCost?: boolean
     otherFinalCost?: boolean
+    adjusterAutoBgt?: boolean
+    adjusterRoughV2?: boolean
+    adjusterVdrCost?: boolean
+    adjusterFinalCost?: boolean
+    brotchAutoBgt?: boolean
+    brotchRoughV2?: boolean
+    brotchVdrCost?: boolean
+    brotchFinalCost?: boolean
+    buckleAutoBgt?: boolean
+    buckleRoughV2?: boolean
+    buckleVdrCost?: boolean
+    buckleFinalCost?: boolean
+    eyeletsAutoBgt?: boolean
+    eyeletsRoughV2?: boolean
+    eyeletsVdrCost?: boolean
+    eyeletsFinalCost?: boolean
+    hangingDRingAutoBgt?: boolean
+    hangingDRingRoughV2?: boolean
+    hangingDRingVdrCost?: boolean
+    hangingDRingFinalCost?: boolean
+    hookAutoBgt?: boolean
+    hookRoughV2?: boolean
+    hookVdrCost?: boolean
+    hookFinalCost?: boolean
+    labelAutoBgt?: boolean
+    labelRoughV2?: boolean
+    labelVdrCost?: boolean
+    labelFinalCost?: boolean
+    laceAutoBgt?: boolean
+    laceRoughV2?: boolean
+    laceVdrCost?: boolean
+    laceFinalCost?: boolean
+    pockettingFabricAutoBgt?: boolean
+    pockettingFabricRoughV2?: boolean
+    pockettingFabricVdrCost?: boolean
+    pockettingFabricFinalCost?: boolean
+    pockettingReadymadeAutoBgt?: boolean
+    pockettingReadymadeRoughV2?: boolean
+    pockettingReadymadeVdrCost?: boolean
+    pockettingReadymadeFinalCost?: boolean
+    santaAutoBgt?: boolean
+    santaRoughV2?: boolean
+    santaVdrCost?: boolean
+    santaFinalCost?: boolean
+    stopperAutoBgt?: boolean
+    stopperRoughV2?: boolean
+    stopperVdrCost?: boolean
+    stopperFinalCost?: boolean
+    tagAutoBgt?: boolean
+    tagRoughV2?: boolean
+    tagVdrCost?: boolean
+    tagFinalCost?: boolean
+    tasselsAutoBgt?: boolean
+    tasselsRoughV2?: boolean
+    tasselsVdrCost?: boolean
+    tasselsFinalCost?: boolean
     printAutoBgt?: boolean
     printRoughV2?: boolean
     printVendorCost?: boolean
@@ -19018,7 +19858,7 @@ export namespace Prisma {
     imageExtractionRawData?: boolean
   }
 
-  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "bTrimType" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "elasticAutoBgt" | "elasticRoughV2" | "elasticVdrCost" | "elasticFinalCost" | "fusingAutoBgt" | "fusingRoughV2" | "fusingVdrCost" | "fusingFinalCost" | "badgeAutoBgt" | "badgeRoughV2" | "badgeVdrCost" | "badgeFinalCost" | "rivetAutoBgt" | "rivetRoughV2" | "rivetVdrCost" | "rivetFinalCost" | "tapeAutoBgt" | "tapeRoughV2" | "tapeVdrCost" | "tapeFinalCost" | "otherAutoBgt" | "otherRoughV2" | "otherVdrCost" | "otherFinalCost" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
+  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "bTrimType" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "elasticAutoBgt" | "elasticRoughV2" | "elasticVdrCost" | "elasticFinalCost" | "fusingAutoBgt" | "fusingRoughV2" | "fusingVdrCost" | "fusingFinalCost" | "badgeAutoBgt" | "badgeRoughV2" | "badgeVdrCost" | "badgeFinalCost" | "rivetAutoBgt" | "rivetRoughV2" | "rivetVdrCost" | "rivetFinalCost" | "tapeAutoBgt" | "tapeRoughV2" | "tapeVdrCost" | "tapeFinalCost" | "otherAutoBgt" | "otherRoughV2" | "otherVdrCost" | "otherFinalCost" | "adjusterAutoBgt" | "adjusterRoughV2" | "adjusterVdrCost" | "adjusterFinalCost" | "brotchAutoBgt" | "brotchRoughV2" | "brotchVdrCost" | "brotchFinalCost" | "buckleAutoBgt" | "buckleRoughV2" | "buckleVdrCost" | "buckleFinalCost" | "eyeletsAutoBgt" | "eyeletsRoughV2" | "eyeletsVdrCost" | "eyeletsFinalCost" | "hangingDRingAutoBgt" | "hangingDRingRoughV2" | "hangingDRingVdrCost" | "hangingDRingFinalCost" | "hookAutoBgt" | "hookRoughV2" | "hookVdrCost" | "hookFinalCost" | "labelAutoBgt" | "labelRoughV2" | "labelVdrCost" | "labelFinalCost" | "laceAutoBgt" | "laceRoughV2" | "laceVdrCost" | "laceFinalCost" | "pockettingFabricAutoBgt" | "pockettingFabricRoughV2" | "pockettingFabricVdrCost" | "pockettingFabricFinalCost" | "pockettingReadymadeAutoBgt" | "pockettingReadymadeRoughV2" | "pockettingReadymadeVdrCost" | "pockettingReadymadeFinalCost" | "santaAutoBgt" | "santaRoughV2" | "santaVdrCost" | "santaFinalCost" | "stopperAutoBgt" | "stopperRoughV2" | "stopperVdrCost" | "stopperFinalCost" | "tagAutoBgt" | "tagRoughV2" | "tagVdrCost" | "tagFinalCost" | "tasselsAutoBgt" | "tasselsRoughV2" | "tasselsVdrCost" | "tasselsFinalCost" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
   export type ExtractionResultFlatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     comboParent?: boolean | ExtractionResultFlat$comboParentArgs<ExtArgs>
@@ -19214,6 +20054,62 @@ export namespace Prisma {
       otherRoughV2: Prisma.Decimal | null
       otherVdrCost: Prisma.Decimal | null
       otherFinalCost: Prisma.Decimal | null
+      adjusterAutoBgt: Prisma.Decimal | null
+      adjusterRoughV2: Prisma.Decimal | null
+      adjusterVdrCost: Prisma.Decimal | null
+      adjusterFinalCost: Prisma.Decimal | null
+      brotchAutoBgt: Prisma.Decimal | null
+      brotchRoughV2: Prisma.Decimal | null
+      brotchVdrCost: Prisma.Decimal | null
+      brotchFinalCost: Prisma.Decimal | null
+      buckleAutoBgt: Prisma.Decimal | null
+      buckleRoughV2: Prisma.Decimal | null
+      buckleVdrCost: Prisma.Decimal | null
+      buckleFinalCost: Prisma.Decimal | null
+      eyeletsAutoBgt: Prisma.Decimal | null
+      eyeletsRoughV2: Prisma.Decimal | null
+      eyeletsVdrCost: Prisma.Decimal | null
+      eyeletsFinalCost: Prisma.Decimal | null
+      hangingDRingAutoBgt: Prisma.Decimal | null
+      hangingDRingRoughV2: Prisma.Decimal | null
+      hangingDRingVdrCost: Prisma.Decimal | null
+      hangingDRingFinalCost: Prisma.Decimal | null
+      hookAutoBgt: Prisma.Decimal | null
+      hookRoughV2: Prisma.Decimal | null
+      hookVdrCost: Prisma.Decimal | null
+      hookFinalCost: Prisma.Decimal | null
+      labelAutoBgt: Prisma.Decimal | null
+      labelRoughV2: Prisma.Decimal | null
+      labelVdrCost: Prisma.Decimal | null
+      labelFinalCost: Prisma.Decimal | null
+      laceAutoBgt: Prisma.Decimal | null
+      laceRoughV2: Prisma.Decimal | null
+      laceVdrCost: Prisma.Decimal | null
+      laceFinalCost: Prisma.Decimal | null
+      pockettingFabricAutoBgt: Prisma.Decimal | null
+      pockettingFabricRoughV2: Prisma.Decimal | null
+      pockettingFabricVdrCost: Prisma.Decimal | null
+      pockettingFabricFinalCost: Prisma.Decimal | null
+      pockettingReadymadeAutoBgt: Prisma.Decimal | null
+      pockettingReadymadeRoughV2: Prisma.Decimal | null
+      pockettingReadymadeVdrCost: Prisma.Decimal | null
+      pockettingReadymadeFinalCost: Prisma.Decimal | null
+      santaAutoBgt: Prisma.Decimal | null
+      santaRoughV2: Prisma.Decimal | null
+      santaVdrCost: Prisma.Decimal | null
+      santaFinalCost: Prisma.Decimal | null
+      stopperAutoBgt: Prisma.Decimal | null
+      stopperRoughV2: Prisma.Decimal | null
+      stopperVdrCost: Prisma.Decimal | null
+      stopperFinalCost: Prisma.Decimal | null
+      tagAutoBgt: Prisma.Decimal | null
+      tagRoughV2: Prisma.Decimal | null
+      tagVdrCost: Prisma.Decimal | null
+      tagFinalCost: Prisma.Decimal | null
+      tasselsAutoBgt: Prisma.Decimal | null
+      tasselsRoughV2: Prisma.Decimal | null
+      tasselsVdrCost: Prisma.Decimal | null
+      tasselsFinalCost: Prisma.Decimal | null
       printAutoBgt: Prisma.Decimal | null
       printRoughV2: Prisma.Decimal | null
       printVendorCost: Prisma.Decimal | null
@@ -19870,6 +20766,62 @@ export namespace Prisma {
     readonly otherRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly otherVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly otherFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly adjusterAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly adjusterRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly adjusterVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly adjusterFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly brotchAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly brotchRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly brotchVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly brotchFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly buckleAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly buckleRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly buckleVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly buckleFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly eyeletsAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly eyeletsRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly eyeletsVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly eyeletsFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly hangingDRingAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly hangingDRingRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly hangingDRingVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly hangingDRingFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly hookAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly hookRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly hookVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly hookFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly labelAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly labelRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly labelVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly labelFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly laceAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly laceRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly laceVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly laceFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly pockettingFabricAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly pockettingFabricRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly pockettingFabricVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly pockettingFabricFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly pockettingReadymadeAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly pockettingReadymadeRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly pockettingReadymadeVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly pockettingReadymadeFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly santaAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly santaRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly santaVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly santaFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly stopperAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly stopperRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly stopperVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly stopperFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly tagAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly tagRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly tagVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly tagFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly tasselsAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly tasselsRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly tasselsVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly tasselsFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly printAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly printRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly printVendorCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
@@ -91116,6 +92068,62 @@ export namespace Prisma {
     otherRoughV2: 'otherRoughV2',
     otherVdrCost: 'otherVdrCost',
     otherFinalCost: 'otherFinalCost',
+    adjusterAutoBgt: 'adjusterAutoBgt',
+    adjusterRoughV2: 'adjusterRoughV2',
+    adjusterVdrCost: 'adjusterVdrCost',
+    adjusterFinalCost: 'adjusterFinalCost',
+    brotchAutoBgt: 'brotchAutoBgt',
+    brotchRoughV2: 'brotchRoughV2',
+    brotchVdrCost: 'brotchVdrCost',
+    brotchFinalCost: 'brotchFinalCost',
+    buckleAutoBgt: 'buckleAutoBgt',
+    buckleRoughV2: 'buckleRoughV2',
+    buckleVdrCost: 'buckleVdrCost',
+    buckleFinalCost: 'buckleFinalCost',
+    eyeletsAutoBgt: 'eyeletsAutoBgt',
+    eyeletsRoughV2: 'eyeletsRoughV2',
+    eyeletsVdrCost: 'eyeletsVdrCost',
+    eyeletsFinalCost: 'eyeletsFinalCost',
+    hangingDRingAutoBgt: 'hangingDRingAutoBgt',
+    hangingDRingRoughV2: 'hangingDRingRoughV2',
+    hangingDRingVdrCost: 'hangingDRingVdrCost',
+    hangingDRingFinalCost: 'hangingDRingFinalCost',
+    hookAutoBgt: 'hookAutoBgt',
+    hookRoughV2: 'hookRoughV2',
+    hookVdrCost: 'hookVdrCost',
+    hookFinalCost: 'hookFinalCost',
+    labelAutoBgt: 'labelAutoBgt',
+    labelRoughV2: 'labelRoughV2',
+    labelVdrCost: 'labelVdrCost',
+    labelFinalCost: 'labelFinalCost',
+    laceAutoBgt: 'laceAutoBgt',
+    laceRoughV2: 'laceRoughV2',
+    laceVdrCost: 'laceVdrCost',
+    laceFinalCost: 'laceFinalCost',
+    pockettingFabricAutoBgt: 'pockettingFabricAutoBgt',
+    pockettingFabricRoughV2: 'pockettingFabricRoughV2',
+    pockettingFabricVdrCost: 'pockettingFabricVdrCost',
+    pockettingFabricFinalCost: 'pockettingFabricFinalCost',
+    pockettingReadymadeAutoBgt: 'pockettingReadymadeAutoBgt',
+    pockettingReadymadeRoughV2: 'pockettingReadymadeRoughV2',
+    pockettingReadymadeVdrCost: 'pockettingReadymadeVdrCost',
+    pockettingReadymadeFinalCost: 'pockettingReadymadeFinalCost',
+    santaAutoBgt: 'santaAutoBgt',
+    santaRoughV2: 'santaRoughV2',
+    santaVdrCost: 'santaVdrCost',
+    santaFinalCost: 'santaFinalCost',
+    stopperAutoBgt: 'stopperAutoBgt',
+    stopperRoughV2: 'stopperRoughV2',
+    stopperVdrCost: 'stopperVdrCost',
+    stopperFinalCost: 'stopperFinalCost',
+    tagAutoBgt: 'tagAutoBgt',
+    tagRoughV2: 'tagRoughV2',
+    tagVdrCost: 'tagVdrCost',
+    tagFinalCost: 'tagFinalCost',
+    tasselsAutoBgt: 'tasselsAutoBgt',
+    tasselsRoughV2: 'tasselsRoughV2',
+    tasselsVdrCost: 'tasselsVdrCost',
+    tasselsFinalCost: 'tasselsFinalCost',
     printAutoBgt: 'printAutoBgt',
     printRoughV2: 'printRoughV2',
     printVendorCost: 'printVendorCost',
@@ -95128,6 +96136,62 @@ export namespace Prisma {
     otherRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -95364,6 +96428,62 @@ export namespace Prisma {
     otherRoughV2?: SortOrderInput | SortOrder
     otherVdrCost?: SortOrderInput | SortOrder
     otherFinalCost?: SortOrderInput | SortOrder
+    adjusterAutoBgt?: SortOrderInput | SortOrder
+    adjusterRoughV2?: SortOrderInput | SortOrder
+    adjusterVdrCost?: SortOrderInput | SortOrder
+    adjusterFinalCost?: SortOrderInput | SortOrder
+    brotchAutoBgt?: SortOrderInput | SortOrder
+    brotchRoughV2?: SortOrderInput | SortOrder
+    brotchVdrCost?: SortOrderInput | SortOrder
+    brotchFinalCost?: SortOrderInput | SortOrder
+    buckleAutoBgt?: SortOrderInput | SortOrder
+    buckleRoughV2?: SortOrderInput | SortOrder
+    buckleVdrCost?: SortOrderInput | SortOrder
+    buckleFinalCost?: SortOrderInput | SortOrder
+    eyeletsAutoBgt?: SortOrderInput | SortOrder
+    eyeletsRoughV2?: SortOrderInput | SortOrder
+    eyeletsVdrCost?: SortOrderInput | SortOrder
+    eyeletsFinalCost?: SortOrderInput | SortOrder
+    hangingDRingAutoBgt?: SortOrderInput | SortOrder
+    hangingDRingRoughV2?: SortOrderInput | SortOrder
+    hangingDRingVdrCost?: SortOrderInput | SortOrder
+    hangingDRingFinalCost?: SortOrderInput | SortOrder
+    hookAutoBgt?: SortOrderInput | SortOrder
+    hookRoughV2?: SortOrderInput | SortOrder
+    hookVdrCost?: SortOrderInput | SortOrder
+    hookFinalCost?: SortOrderInput | SortOrder
+    labelAutoBgt?: SortOrderInput | SortOrder
+    labelRoughV2?: SortOrderInput | SortOrder
+    labelVdrCost?: SortOrderInput | SortOrder
+    labelFinalCost?: SortOrderInput | SortOrder
+    laceAutoBgt?: SortOrderInput | SortOrder
+    laceRoughV2?: SortOrderInput | SortOrder
+    laceVdrCost?: SortOrderInput | SortOrder
+    laceFinalCost?: SortOrderInput | SortOrder
+    pockettingFabricAutoBgt?: SortOrderInput | SortOrder
+    pockettingFabricRoughV2?: SortOrderInput | SortOrder
+    pockettingFabricVdrCost?: SortOrderInput | SortOrder
+    pockettingFabricFinalCost?: SortOrderInput | SortOrder
+    pockettingReadymadeAutoBgt?: SortOrderInput | SortOrder
+    pockettingReadymadeRoughV2?: SortOrderInput | SortOrder
+    pockettingReadymadeVdrCost?: SortOrderInput | SortOrder
+    pockettingReadymadeFinalCost?: SortOrderInput | SortOrder
+    santaAutoBgt?: SortOrderInput | SortOrder
+    santaRoughV2?: SortOrderInput | SortOrder
+    santaVdrCost?: SortOrderInput | SortOrder
+    santaFinalCost?: SortOrderInput | SortOrder
+    stopperAutoBgt?: SortOrderInput | SortOrder
+    stopperRoughV2?: SortOrderInput | SortOrder
+    stopperVdrCost?: SortOrderInput | SortOrder
+    stopperFinalCost?: SortOrderInput | SortOrder
+    tagAutoBgt?: SortOrderInput | SortOrder
+    tagRoughV2?: SortOrderInput | SortOrder
+    tagVdrCost?: SortOrderInput | SortOrder
+    tagFinalCost?: SortOrderInput | SortOrder
+    tasselsAutoBgt?: SortOrderInput | SortOrder
+    tasselsRoughV2?: SortOrderInput | SortOrder
+    tasselsVdrCost?: SortOrderInput | SortOrder
+    tasselsFinalCost?: SortOrderInput | SortOrder
     printAutoBgt?: SortOrderInput | SortOrder
     printRoughV2?: SortOrderInput | SortOrder
     printVendorCost?: SortOrderInput | SortOrder
@@ -95605,6 +96725,62 @@ export namespace Prisma {
     otherRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -95840,6 +97016,62 @@ export namespace Prisma {
     otherRoughV2?: SortOrderInput | SortOrder
     otherVdrCost?: SortOrderInput | SortOrder
     otherFinalCost?: SortOrderInput | SortOrder
+    adjusterAutoBgt?: SortOrderInput | SortOrder
+    adjusterRoughV2?: SortOrderInput | SortOrder
+    adjusterVdrCost?: SortOrderInput | SortOrder
+    adjusterFinalCost?: SortOrderInput | SortOrder
+    brotchAutoBgt?: SortOrderInput | SortOrder
+    brotchRoughV2?: SortOrderInput | SortOrder
+    brotchVdrCost?: SortOrderInput | SortOrder
+    brotchFinalCost?: SortOrderInput | SortOrder
+    buckleAutoBgt?: SortOrderInput | SortOrder
+    buckleRoughV2?: SortOrderInput | SortOrder
+    buckleVdrCost?: SortOrderInput | SortOrder
+    buckleFinalCost?: SortOrderInput | SortOrder
+    eyeletsAutoBgt?: SortOrderInput | SortOrder
+    eyeletsRoughV2?: SortOrderInput | SortOrder
+    eyeletsVdrCost?: SortOrderInput | SortOrder
+    eyeletsFinalCost?: SortOrderInput | SortOrder
+    hangingDRingAutoBgt?: SortOrderInput | SortOrder
+    hangingDRingRoughV2?: SortOrderInput | SortOrder
+    hangingDRingVdrCost?: SortOrderInput | SortOrder
+    hangingDRingFinalCost?: SortOrderInput | SortOrder
+    hookAutoBgt?: SortOrderInput | SortOrder
+    hookRoughV2?: SortOrderInput | SortOrder
+    hookVdrCost?: SortOrderInput | SortOrder
+    hookFinalCost?: SortOrderInput | SortOrder
+    labelAutoBgt?: SortOrderInput | SortOrder
+    labelRoughV2?: SortOrderInput | SortOrder
+    labelVdrCost?: SortOrderInput | SortOrder
+    labelFinalCost?: SortOrderInput | SortOrder
+    laceAutoBgt?: SortOrderInput | SortOrder
+    laceRoughV2?: SortOrderInput | SortOrder
+    laceVdrCost?: SortOrderInput | SortOrder
+    laceFinalCost?: SortOrderInput | SortOrder
+    pockettingFabricAutoBgt?: SortOrderInput | SortOrder
+    pockettingFabricRoughV2?: SortOrderInput | SortOrder
+    pockettingFabricVdrCost?: SortOrderInput | SortOrder
+    pockettingFabricFinalCost?: SortOrderInput | SortOrder
+    pockettingReadymadeAutoBgt?: SortOrderInput | SortOrder
+    pockettingReadymadeRoughV2?: SortOrderInput | SortOrder
+    pockettingReadymadeVdrCost?: SortOrderInput | SortOrder
+    pockettingReadymadeFinalCost?: SortOrderInput | SortOrder
+    santaAutoBgt?: SortOrderInput | SortOrder
+    santaRoughV2?: SortOrderInput | SortOrder
+    santaVdrCost?: SortOrderInput | SortOrder
+    santaFinalCost?: SortOrderInput | SortOrder
+    stopperAutoBgt?: SortOrderInput | SortOrder
+    stopperRoughV2?: SortOrderInput | SortOrder
+    stopperVdrCost?: SortOrderInput | SortOrder
+    stopperFinalCost?: SortOrderInput | SortOrder
+    tagAutoBgt?: SortOrderInput | SortOrder
+    tagRoughV2?: SortOrderInput | SortOrder
+    tagVdrCost?: SortOrderInput | SortOrder
+    tagFinalCost?: SortOrderInput | SortOrder
+    tasselsAutoBgt?: SortOrderInput | SortOrder
+    tasselsRoughV2?: SortOrderInput | SortOrder
+    tasselsVdrCost?: SortOrderInput | SortOrder
+    tasselsFinalCost?: SortOrderInput | SortOrder
     printAutoBgt?: SortOrderInput | SortOrder
     printRoughV2?: SortOrderInput | SortOrder
     printVendorCost?: SortOrderInput | SortOrder
@@ -96079,6 +97311,62 @@ export namespace Prisma {
     otherRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -104403,6 +105691,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -104637,6 +105981,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -104869,6 +106269,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -105103,6 +106559,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -105336,6 +106848,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -105566,6 +107134,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -105795,6 +107419,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -115880,6 +117560,62 @@ export namespace Prisma {
     otherRoughV2?: SortOrder
     otherVdrCost?: SortOrder
     otherFinalCost?: SortOrder
+    adjusterAutoBgt?: SortOrder
+    adjusterRoughV2?: SortOrder
+    adjusterVdrCost?: SortOrder
+    adjusterFinalCost?: SortOrder
+    brotchAutoBgt?: SortOrder
+    brotchRoughV2?: SortOrder
+    brotchVdrCost?: SortOrder
+    brotchFinalCost?: SortOrder
+    buckleAutoBgt?: SortOrder
+    buckleRoughV2?: SortOrder
+    buckleVdrCost?: SortOrder
+    buckleFinalCost?: SortOrder
+    eyeletsAutoBgt?: SortOrder
+    eyeletsRoughV2?: SortOrder
+    eyeletsVdrCost?: SortOrder
+    eyeletsFinalCost?: SortOrder
+    hangingDRingAutoBgt?: SortOrder
+    hangingDRingRoughV2?: SortOrder
+    hangingDRingVdrCost?: SortOrder
+    hangingDRingFinalCost?: SortOrder
+    hookAutoBgt?: SortOrder
+    hookRoughV2?: SortOrder
+    hookVdrCost?: SortOrder
+    hookFinalCost?: SortOrder
+    labelAutoBgt?: SortOrder
+    labelRoughV2?: SortOrder
+    labelVdrCost?: SortOrder
+    labelFinalCost?: SortOrder
+    laceAutoBgt?: SortOrder
+    laceRoughV2?: SortOrder
+    laceVdrCost?: SortOrder
+    laceFinalCost?: SortOrder
+    pockettingFabricAutoBgt?: SortOrder
+    pockettingFabricRoughV2?: SortOrder
+    pockettingFabricVdrCost?: SortOrder
+    pockettingFabricFinalCost?: SortOrder
+    pockettingReadymadeAutoBgt?: SortOrder
+    pockettingReadymadeRoughV2?: SortOrder
+    pockettingReadymadeVdrCost?: SortOrder
+    pockettingReadymadeFinalCost?: SortOrder
+    santaAutoBgt?: SortOrder
+    santaRoughV2?: SortOrder
+    santaVdrCost?: SortOrder
+    santaFinalCost?: SortOrder
+    stopperAutoBgt?: SortOrder
+    stopperRoughV2?: SortOrder
+    stopperVdrCost?: SortOrder
+    stopperFinalCost?: SortOrder
+    tagAutoBgt?: SortOrder
+    tagRoughV2?: SortOrder
+    tagVdrCost?: SortOrder
+    tagFinalCost?: SortOrder
+    tasselsAutoBgt?: SortOrder
+    tasselsRoughV2?: SortOrder
+    tasselsVdrCost?: SortOrder
+    tasselsFinalCost?: SortOrder
     printAutoBgt?: SortOrder
     printRoughV2?: SortOrder
     printVendorCost?: SortOrder
@@ -116025,6 +117761,62 @@ export namespace Prisma {
     otherRoughV2?: SortOrder
     otherVdrCost?: SortOrder
     otherFinalCost?: SortOrder
+    adjusterAutoBgt?: SortOrder
+    adjusterRoughV2?: SortOrder
+    adjusterVdrCost?: SortOrder
+    adjusterFinalCost?: SortOrder
+    brotchAutoBgt?: SortOrder
+    brotchRoughV2?: SortOrder
+    brotchVdrCost?: SortOrder
+    brotchFinalCost?: SortOrder
+    buckleAutoBgt?: SortOrder
+    buckleRoughV2?: SortOrder
+    buckleVdrCost?: SortOrder
+    buckleFinalCost?: SortOrder
+    eyeletsAutoBgt?: SortOrder
+    eyeletsRoughV2?: SortOrder
+    eyeletsVdrCost?: SortOrder
+    eyeletsFinalCost?: SortOrder
+    hangingDRingAutoBgt?: SortOrder
+    hangingDRingRoughV2?: SortOrder
+    hangingDRingVdrCost?: SortOrder
+    hangingDRingFinalCost?: SortOrder
+    hookAutoBgt?: SortOrder
+    hookRoughV2?: SortOrder
+    hookVdrCost?: SortOrder
+    hookFinalCost?: SortOrder
+    labelAutoBgt?: SortOrder
+    labelRoughV2?: SortOrder
+    labelVdrCost?: SortOrder
+    labelFinalCost?: SortOrder
+    laceAutoBgt?: SortOrder
+    laceRoughV2?: SortOrder
+    laceVdrCost?: SortOrder
+    laceFinalCost?: SortOrder
+    pockettingFabricAutoBgt?: SortOrder
+    pockettingFabricRoughV2?: SortOrder
+    pockettingFabricVdrCost?: SortOrder
+    pockettingFabricFinalCost?: SortOrder
+    pockettingReadymadeAutoBgt?: SortOrder
+    pockettingReadymadeRoughV2?: SortOrder
+    pockettingReadymadeVdrCost?: SortOrder
+    pockettingReadymadeFinalCost?: SortOrder
+    santaAutoBgt?: SortOrder
+    santaRoughV2?: SortOrder
+    santaVdrCost?: SortOrder
+    santaFinalCost?: SortOrder
+    stopperAutoBgt?: SortOrder
+    stopperRoughV2?: SortOrder
+    stopperVdrCost?: SortOrder
+    stopperFinalCost?: SortOrder
+    tagAutoBgt?: SortOrder
+    tagRoughV2?: SortOrder
+    tagVdrCost?: SortOrder
+    tagFinalCost?: SortOrder
+    tasselsAutoBgt?: SortOrder
+    tasselsRoughV2?: SortOrder
+    tasselsVdrCost?: SortOrder
+    tasselsFinalCost?: SortOrder
     printAutoBgt?: SortOrder
     printRoughV2?: SortOrder
     printVendorCost?: SortOrder
@@ -116215,6 +118007,62 @@ export namespace Prisma {
     otherRoughV2?: SortOrder
     otherVdrCost?: SortOrder
     otherFinalCost?: SortOrder
+    adjusterAutoBgt?: SortOrder
+    adjusterRoughV2?: SortOrder
+    adjusterVdrCost?: SortOrder
+    adjusterFinalCost?: SortOrder
+    brotchAutoBgt?: SortOrder
+    brotchRoughV2?: SortOrder
+    brotchVdrCost?: SortOrder
+    brotchFinalCost?: SortOrder
+    buckleAutoBgt?: SortOrder
+    buckleRoughV2?: SortOrder
+    buckleVdrCost?: SortOrder
+    buckleFinalCost?: SortOrder
+    eyeletsAutoBgt?: SortOrder
+    eyeletsRoughV2?: SortOrder
+    eyeletsVdrCost?: SortOrder
+    eyeletsFinalCost?: SortOrder
+    hangingDRingAutoBgt?: SortOrder
+    hangingDRingRoughV2?: SortOrder
+    hangingDRingVdrCost?: SortOrder
+    hangingDRingFinalCost?: SortOrder
+    hookAutoBgt?: SortOrder
+    hookRoughV2?: SortOrder
+    hookVdrCost?: SortOrder
+    hookFinalCost?: SortOrder
+    labelAutoBgt?: SortOrder
+    labelRoughV2?: SortOrder
+    labelVdrCost?: SortOrder
+    labelFinalCost?: SortOrder
+    laceAutoBgt?: SortOrder
+    laceRoughV2?: SortOrder
+    laceVdrCost?: SortOrder
+    laceFinalCost?: SortOrder
+    pockettingFabricAutoBgt?: SortOrder
+    pockettingFabricRoughV2?: SortOrder
+    pockettingFabricVdrCost?: SortOrder
+    pockettingFabricFinalCost?: SortOrder
+    pockettingReadymadeAutoBgt?: SortOrder
+    pockettingReadymadeRoughV2?: SortOrder
+    pockettingReadymadeVdrCost?: SortOrder
+    pockettingReadymadeFinalCost?: SortOrder
+    santaAutoBgt?: SortOrder
+    santaRoughV2?: SortOrder
+    santaVdrCost?: SortOrder
+    santaFinalCost?: SortOrder
+    stopperAutoBgt?: SortOrder
+    stopperRoughV2?: SortOrder
+    stopperVdrCost?: SortOrder
+    stopperFinalCost?: SortOrder
+    tagAutoBgt?: SortOrder
+    tagRoughV2?: SortOrder
+    tagVdrCost?: SortOrder
+    tagFinalCost?: SortOrder
+    tasselsAutoBgt?: SortOrder
+    tasselsRoughV2?: SortOrder
+    tasselsVdrCost?: SortOrder
+    tasselsFinalCost?: SortOrder
     printAutoBgt?: SortOrder
     printRoughV2?: SortOrder
     printVendorCost?: SortOrder
@@ -116445,6 +118293,62 @@ export namespace Prisma {
     otherRoughV2?: SortOrder
     otherVdrCost?: SortOrder
     otherFinalCost?: SortOrder
+    adjusterAutoBgt?: SortOrder
+    adjusterRoughV2?: SortOrder
+    adjusterVdrCost?: SortOrder
+    adjusterFinalCost?: SortOrder
+    brotchAutoBgt?: SortOrder
+    brotchRoughV2?: SortOrder
+    brotchVdrCost?: SortOrder
+    brotchFinalCost?: SortOrder
+    buckleAutoBgt?: SortOrder
+    buckleRoughV2?: SortOrder
+    buckleVdrCost?: SortOrder
+    buckleFinalCost?: SortOrder
+    eyeletsAutoBgt?: SortOrder
+    eyeletsRoughV2?: SortOrder
+    eyeletsVdrCost?: SortOrder
+    eyeletsFinalCost?: SortOrder
+    hangingDRingAutoBgt?: SortOrder
+    hangingDRingRoughV2?: SortOrder
+    hangingDRingVdrCost?: SortOrder
+    hangingDRingFinalCost?: SortOrder
+    hookAutoBgt?: SortOrder
+    hookRoughV2?: SortOrder
+    hookVdrCost?: SortOrder
+    hookFinalCost?: SortOrder
+    labelAutoBgt?: SortOrder
+    labelRoughV2?: SortOrder
+    labelVdrCost?: SortOrder
+    labelFinalCost?: SortOrder
+    laceAutoBgt?: SortOrder
+    laceRoughV2?: SortOrder
+    laceVdrCost?: SortOrder
+    laceFinalCost?: SortOrder
+    pockettingFabricAutoBgt?: SortOrder
+    pockettingFabricRoughV2?: SortOrder
+    pockettingFabricVdrCost?: SortOrder
+    pockettingFabricFinalCost?: SortOrder
+    pockettingReadymadeAutoBgt?: SortOrder
+    pockettingReadymadeRoughV2?: SortOrder
+    pockettingReadymadeVdrCost?: SortOrder
+    pockettingReadymadeFinalCost?: SortOrder
+    santaAutoBgt?: SortOrder
+    santaRoughV2?: SortOrder
+    santaVdrCost?: SortOrder
+    santaFinalCost?: SortOrder
+    stopperAutoBgt?: SortOrder
+    stopperRoughV2?: SortOrder
+    stopperVdrCost?: SortOrder
+    stopperFinalCost?: SortOrder
+    tagAutoBgt?: SortOrder
+    tagRoughV2?: SortOrder
+    tagVdrCost?: SortOrder
+    tagFinalCost?: SortOrder
+    tasselsAutoBgt?: SortOrder
+    tasselsRoughV2?: SortOrder
+    tasselsVdrCost?: SortOrder
+    tasselsFinalCost?: SortOrder
     printAutoBgt?: SortOrder
     printRoughV2?: SortOrder
     printVendorCost?: SortOrder
@@ -116589,6 +118493,62 @@ export namespace Prisma {
     otherRoughV2?: SortOrder
     otherVdrCost?: SortOrder
     otherFinalCost?: SortOrder
+    adjusterAutoBgt?: SortOrder
+    adjusterRoughV2?: SortOrder
+    adjusterVdrCost?: SortOrder
+    adjusterFinalCost?: SortOrder
+    brotchAutoBgt?: SortOrder
+    brotchRoughV2?: SortOrder
+    brotchVdrCost?: SortOrder
+    brotchFinalCost?: SortOrder
+    buckleAutoBgt?: SortOrder
+    buckleRoughV2?: SortOrder
+    buckleVdrCost?: SortOrder
+    buckleFinalCost?: SortOrder
+    eyeletsAutoBgt?: SortOrder
+    eyeletsRoughV2?: SortOrder
+    eyeletsVdrCost?: SortOrder
+    eyeletsFinalCost?: SortOrder
+    hangingDRingAutoBgt?: SortOrder
+    hangingDRingRoughV2?: SortOrder
+    hangingDRingVdrCost?: SortOrder
+    hangingDRingFinalCost?: SortOrder
+    hookAutoBgt?: SortOrder
+    hookRoughV2?: SortOrder
+    hookVdrCost?: SortOrder
+    hookFinalCost?: SortOrder
+    labelAutoBgt?: SortOrder
+    labelRoughV2?: SortOrder
+    labelVdrCost?: SortOrder
+    labelFinalCost?: SortOrder
+    laceAutoBgt?: SortOrder
+    laceRoughV2?: SortOrder
+    laceVdrCost?: SortOrder
+    laceFinalCost?: SortOrder
+    pockettingFabricAutoBgt?: SortOrder
+    pockettingFabricRoughV2?: SortOrder
+    pockettingFabricVdrCost?: SortOrder
+    pockettingFabricFinalCost?: SortOrder
+    pockettingReadymadeAutoBgt?: SortOrder
+    pockettingReadymadeRoughV2?: SortOrder
+    pockettingReadymadeVdrCost?: SortOrder
+    pockettingReadymadeFinalCost?: SortOrder
+    santaAutoBgt?: SortOrder
+    santaRoughV2?: SortOrder
+    santaVdrCost?: SortOrder
+    santaFinalCost?: SortOrder
+    stopperAutoBgt?: SortOrder
+    stopperRoughV2?: SortOrder
+    stopperVdrCost?: SortOrder
+    stopperFinalCost?: SortOrder
+    tagAutoBgt?: SortOrder
+    tagRoughV2?: SortOrder
+    tagVdrCost?: SortOrder
+    tagFinalCost?: SortOrder
+    tasselsAutoBgt?: SortOrder
+    tasselsRoughV2?: SortOrder
+    tasselsVdrCost?: SortOrder
+    tasselsFinalCost?: SortOrder
     printAutoBgt?: SortOrder
     printRoughV2?: SortOrder
     printVendorCost?: SortOrder
@@ -125078,6 +127038,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -125310,6 +127326,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -125650,6 +127722,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -125882,6 +128010,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -126154,6 +128338,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -126387,6 +128627,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -126623,6 +128919,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -126856,6 +129208,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -127243,6 +129651,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -127476,6 +129940,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -127727,6 +130247,62 @@ export namespace Prisma {
     otherRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -128180,6 +130756,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -128413,6 +131045,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -130174,6 +132862,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -130407,6 +133151,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -130691,6 +133491,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -130924,6 +133780,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -131776,6 +134688,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -132015,6 +134983,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -132248,6 +135272,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -132480,6 +135560,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -132778,6 +135914,62 @@ export namespace Prisma {
     otherRoughV2?: Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -133122,6 +136314,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -133355,6 +136603,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -133587,6 +136891,62 @@ export namespace Prisma {
     otherRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     otherFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjusterFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    brotchFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    buckleFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    eyeletsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hangingDRingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    hookFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    labelFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    laceFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingFabricFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    pockettingReadymadeFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    santaFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    stopperFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tagFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
