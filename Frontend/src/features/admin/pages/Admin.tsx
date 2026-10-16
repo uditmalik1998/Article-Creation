@@ -3296,6 +3296,8 @@ export default function Admin() {
                   <div className="mb-3 text-xs text-muted-foreground">
                     Sheet <strong>SET_MC_MASTER</strong>, headers in row 3, data from row 5 — SET_MAJ_CAT, ROW_TYPE (PARENT / PART),
                     PART_POSITION, PART_MAJ_CAT, S_MC_CODE, S_MC_DES, DIV, SUB_DIV, HSN_CODE, STATUS (ACT / INACT).
+                    SET_MAJ_CAT is the S- set category (e.g. S-JB_B_SUIT_SL): only S- categories get the set flow, the plain
+                    category stays a normal article. PART_MAJ_CAT is the part&apos;s normal category.
                     Replaces the entire table; a file with any invalid row is rejected.
                   </div>
                   <input

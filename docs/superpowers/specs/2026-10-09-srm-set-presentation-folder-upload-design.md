@@ -112,3 +112,10 @@ which parts each set allows. Changes to this design:
 - **Submit** checks each set against its own category: it is an active set, has allowed parts, and every
   part category is one of them (plus the "AI picked — check" confirmation).
 - Sets whose category has no parts in the master (M_SUIT, MW_TRACK_SUIT, IB_ROMPER_SUIT) cannot be submitted.
+
+## Amendment 2026-10-16 — only the "S-" copy of a set category is a set
+- Each of the 49 set categories has an S- copy (S-JB_H_B_SUIT_HS, …; incl. S-L_N_SUIT). The master's `set_maj_cat`
+  is the S- name, so only S- categories switch SRM and Article Creation to the set flow; the plain category is a
+  normal one-photo article again. Parts keep their plain category; SAP gets the part's S- code from the master.
+- The S- categories carry copies of the plain category's config (sizes, attribute grid, mandatory fields, segments)
+  in MDM and SRM, with the S- MC code / sub-division from SET_MC_FINAL.xlsx.
