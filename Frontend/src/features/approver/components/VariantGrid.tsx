@@ -13,7 +13,7 @@ import {
 import { cn } from '@/lib/utils';
 
 // ─── Variants grid (design "Option E", 2026-10-12) ────────────────────────────
-// Shared by the FG (VariantSubTable), GM (GMVariantSubTable) and Fabric
+// Shared by the FG (VariantSubTable), GM (GMVariantTable) and Fabric
 // (FabricVariantSubTable) variant tables. Each page keeps its own data
 // fetching and rules and passes them in: what can be selected/deleted, how a
 // colour is deleted, the status pill, an optional weight column (FG) and an

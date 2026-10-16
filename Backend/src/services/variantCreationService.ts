@@ -138,19 +138,11 @@ export async function addColorVariants(
 
   // Skip any (size, color) combinations that already exist for this generic so
   // re-adding a color for a new size never duplicates existing variant rows.
-  // Check both the legacy table and the new fg_variants_article_data table.
   const colorUpper = color.trim().toUpperCase();
-  const [existingFlat, existingFgTable] = await Promise.all([
-    prisma.extractionResultFlat.findMany({
-      where: { genericArticleId: genericId, isGeneric: false },
-      select: { variantSize: true, variantColor: true },
-    }),
-    prisma.fgVariantArticleData.findMany({
-      where: { genericArticleId: genericId },
-      select: { variantSize: true, variantColor: true },
-    }),
-  ]);
-  const existingForColor = [...existingFlat, ...existingFgTable];
+  const existingForColor = await prisma.fgVariantArticleData.findMany({
+    where: { genericArticleId: genericId },
+    select: { variantSize: true, variantColor: true },
+  });
   const existingSizesForColor = new Set(
     existingForColor
       .filter((v) => (v.variantColor || '').trim().toUpperCase() === colorUpper)
@@ -211,25 +203,20 @@ export async function syncGenericToVariants(genericId: string, updatedData: Reco
     // Special case: sync colour from generic to variants that have no variantColor set yet
     // (variants with explicit variantColor keep their own colour)
     if (updatedData.colour !== undefined) {
-      await prisma.extractionResultFlat.updateMany({
-        where: { genericArticleId: genericId, isGeneric: false, variantColor: null },
-        data: { colour: updatedData.colour, variantColor: updatedData.colour }
+      await prisma.fgVariantArticleData.updateMany({
+        where: { genericArticleId: genericId, variantColor: null },
+        data: { variantColor: updatedData.colour }
       });
     }
 
     if (Object.keys(syncData).length === 0) return;
 
-    const variantIds = await prisma.extractionResultFlat.findMany({
-      where: { genericArticleId: genericId, isGeneric: false },
+    const variantIds = await prisma.fgVariantArticleData.findMany({
+      where: { genericArticleId: genericId },
       select: { id: true }
     });
 
-    await prisma.extractionResultFlat.updateMany({
-      where: { genericArticleId: genericId, isGeneric: false },
-      data: syncData
-    });
-
-    // Sync overlapping fields to fg_variants_article_data
+    // Sync overlapping fields to fg_variants_article_data (it holds only these columns)
     const fgSyncFields = ['mrp', 'rate', 'vendorCode', 'vendorName', 'designNumber', 'division', 'subDivision', 'majorCategory', 'imageUrl'];
     const fgSyncData: Record<string, any> = {};
     for (const key of fgSyncFields) {

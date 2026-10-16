@@ -6,6 +6,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import * as adminController from '../controllers/adminController';
 import * as expenseAccessController from '../controllers/expenseAccessController';
 import * as setMcMasterController from '../controllers/setMcMasterController';
+import * as gmSizeMasterController from '../controllers/gmSizeMasterController';
 import * as expenseAuditLogController from '../controllers/expenseAuditLogController';
 import { hierarchyService } from '../services/hierarchyService';
 import { asyncHandler } from '../middleware/asyncHandler';
@@ -204,6 +205,12 @@ router.get('/set-mc-master/template', h(setMcMasterController.downloadSetMcMaste
 router.get('/set-mc-master/download', h(setMcMasterController.downloadSetMcMasterData));
 router.post('/set-mc-master/upload', excelUpload.single('file'), h(setMcMasterController.uploadSetMcMaster));
 
+router.get('/gm-size-master/status',   h(gmSizeMasterController.getGmSizeMasterStatus));
+router.get('/gm-size-master/template', h(gmSizeMasterController.downloadGmSizeMasterTemplate));
+router.get('/gm-size-master/download', h(gmSizeMasterController.downloadGmSizeMasterData));
+router.post('/gm-size-master/upload',  excelUpload.single('file'), h(gmSizeMasterController.uploadGmSizeMaster));
+router.get('/gm-size-master/sizes',    h(gmSizeMasterController.getGmSizes));
+
 // ═══════════════════════════════════════════════════════
 // COLOR MASTER (ADMIN) — color_master
 // ═══════════════════════════════════════════════════════
@@ -235,15 +242,6 @@ router.get('/cmp-cost-master/status', h(adminController.getCmpCostMasterStatus))
 router.get('/cmp-cost-master/template', h(adminController.downloadCmpCostMasterTemplate));
 router.get('/cmp-cost-master/export', h(adminController.exportCmpCostMaster));
 router.post('/cmp-cost-master/upload', excelUpload.single('file'), h(adminController.uploadCmpCostMaster));
-
-// ═══════════════════════════════════════════════════════
-// PRECISE TRIM MASTER (precise_trim_master)
-// ═══════════════════════════════════════════════════════
-router.get('/precise-trim-master/lookup', h(adminController.lookupPreciseTrimMaster));
-router.get('/precise-trim-master/status', h(adminController.getPreciseTrimMasterStatus));
-router.get('/precise-trim-master/template', h(adminController.downloadPreciseTrimMasterTemplate));
-router.get('/precise-trim-master/export', h(adminController.exportPreciseTrimMaster));
-router.post('/precise-trim-master/upload', excelUpload.single('file'), h(adminController.uploadPreciseTrimMaster));
 
 // ═══════════════════════════════════════════════════════
 // BASIC TRIM MASTER (basic_trim_master)

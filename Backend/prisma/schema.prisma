@@ -2760,3 +2760,19 @@ model PreciseBodyArticleConsumption {
   @@map("precise_body_article_consumption")
   @@schema("public")
 }
+
+model GmSizeMaster {
+  id        Int      @id @default(autoincrement())
+  seg       String?  @db.VarChar(50)
+  div       String?  @db.VarChar(50)
+  subDiv    String?  @map("sub_div") @db.VarChar(50)
+  majCat    String   @map("maj_cat") @db.VarChar(100)
+  status    String?  @db.VarChar(20)
+  size      String   @db.VarChar(50)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([majCat])
+  @@index([div])
+  @@map("gm_size_master")
+  @@schema("public")
+}

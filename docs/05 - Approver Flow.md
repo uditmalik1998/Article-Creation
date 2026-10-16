@@ -247,3 +247,31 @@ FG Article tab pages only (`!allowGroups && !isBodyArticle`). No tab of its own:
 - "FABRIC AND CONSTRUCTION" card renamed **FAB** and given the ink theme (`CARD_THEME`); same 14 attributes + Fabric Article No./Desc. No AUTO-BGT / ROUGH-V2 / VENDOR COST / FINAL COST rows and no Create Fabric Article button (FG-only).
 - BOM card switched from yellow to the ink header.
 
+### GM Add Color Variants modal — `gm-article/components/GMAddColorModal.tsx` (2026-10-15, design "Option A · 3-step wizard")
+
+New standalone component used by `GMVariantSubTable` (GM Article tab pages). The old inline `AddColorModal` was removed from the GM file; FG (`VariantSubTable`), Fabric and the SRM tables keep their own copy unchanged.
+1. **Colors** — searchable checkbox list (color_master via `/approver/colors`, falls back to the COLOR attribute / short list), picked colors as removable chips. A color is greyed out ("already added") only when **every** size already exists for it.
+2. **Sizes** — sizes from `/approver/sizes-for-majcat/:majCat`. Per color, **all sizes are ticked by default**; untick to skip (dashed, crossed out). Sizes that already exist for that color are disabled. Select all / Clear all per color; Next is blocked while any color has no size.
+3. **Images** — one image per color (`/approver/upload-image`), applied to all its sizes.
+Footer shows the live variant count; submit sends `{ colors, sizesByColor, colorImages }`.
+
+Backend `ApproverController.addColor` now also accepts `sizesByColor` (`{ COLOR: [sizes] }`); per-color sizes win over the global `sizes` list, all are validated against the major category's sizes, and `addColorVariants` still skips existing size × color pairs.
+
+#### GM variants now use `gm_variants_article_data` (2026-10-15)
+
+All GM articles in `gm_article_data` are `source = SRM`, so the GM page renders `GMArticleVariantSubTable` — which used to call the **fabric** variant endpoints (`/fabric-article-data/...`) and never touched the GM table. Fixed:
+- New endpoints (ApproverController): `GET /approver/gm-articles/:genericId/variants`, `POST /approver/gm-articles/:genericId/variants` (`{ colors, sizesByColor, colorImages }` → one row per color × size, existing pairs skipped, sizes validated against the GM size master, image required per color), `DELETE /approver/gm-article-variant/:id` (not once approved), `GET /approver/gm-sizes-for-majcat/:majCat` (from `gm_size_master`, ACT + T-ACT, raw SQL because the generated Prisma client has no GmSizeMaster delegate).
+- `GMArticleVariantSubTable` reads/deletes via those endpoints, shows a **Size** column, and opens `GMAddColorModal` (`source="gm"`). Its old inline modal and the fabric "Retry to SAP" button were removed (there is no SAP submission for GM variants yet).
+- `GMAddColorModal` takes `source: 'gm' | 'flat'`; `GMVariantSubTable` (FG-flat GM items) passes `flat` and keeps using `/items/:id/add-color` + `maj_cat_sizes`.
+- Major categories with no rows in `gm_size_master` (e.g. LS_W_SLING_PURSE today) show a warning on the Sizes step and the API returns 422.
+
+#### GM variants table = FG grid (2026-10-16)
+
+`GMArticleVariantSubTable` and `GMVariantSubTable` were deleted (only GMArticleList used them). GM Article tab pages now render `gm-article/components/GMVariantTable.tsx` for every item: the FG `VariantGrid` (filters, colour groups, multi-select delete, Delete colour) on top of the GM logic — rows from `GET /approver/gm-articles/:id/variants`, delete via `DELETE /approver/gm-article-variant/:id` (only PENDING, no article #), Add Color via `GMAddColorModal`. `variantArticleNumber` is mapped to `sapArticleId` for the grid. No weight column or Edit (weight isn't sent in the variant RFC).
+
+**GM variants → SAP (2026-10-16):** same RFC as FG, `ZMM_VAR_ART_CRT_V8` (via `syncVariantsToSapViaRfc`), with `GENERIC_ARTICLE` = `gm_article_data.gm_article_number`. `services/zmmGMVarArtCreationService.ts → syncGmVariantsToSap(genericIds)` approves PENDING variants, back-fills `generic_article_number`, sends every variant with no `variant_article_number`, and writes `sap_sync_status` / `sap_sync_message` / `variant_article_number`. Called automatically by `POST /approver/gm-articles/submit` for generics that were created (response gets `variants: { synced, failed, skipped }`), and by `POST /approver/gm-articles/:genericId/retry-variants`, which is the "Retry Variants to SAP (n)" button on the GM Created page. No PO-Wise handoff.
+
+**GM images → article-master bucket (2026-10-16), same as FG:**
+- Generic: after `ZMM_ART_CRT_V3` succeeds, `submitGmArticles` copies `gm_article_data.image_url` to `<gm_article_number>.<ext>` with the watermark label (article no, PPT no, vendor, div, sub-div, maj cat, design no, MC code, HSN, season, rate, MRP, approver name) and saves the new URL. Upload failure is appended to `sap_sync_message`.
+- Colours: `syncGmVariantsToSap` (auto after submit, and Retry Variants — which is what a colour added on the Created page goes through) copies each SAP-created variant's image to `<generic no without leading zeros>-<COLOR>.<ext>` (no watermark, one upload per colour) and updates `image_url`. Variants already synced whose image isn't in the bucket yet are caught too. `GMAddColorModal` lost its `source` prop — it always writes `gm_variants_article_data`. The `gm_variants_article_data` table is unchanged.
+

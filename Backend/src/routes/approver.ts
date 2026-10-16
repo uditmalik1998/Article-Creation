@@ -191,6 +191,13 @@ router.get('/gm-articles', h(ApproverController.getGmArticleItems));
 router.get('/gm-articles/:id', h(ApproverController.getGmArticleById));
 router.put('/gm-articles/:id', h(ApproverController.updateGmArticleData));
 
+// GM variants (gm_variants_article_data, size × color) + GM sizes (gm_size_master)
+router.get('/gm-articles/:genericId/variants', h(ApproverController.getGmArticleVariants));
+router.post('/gm-articles/:genericId/variants', h(ApproverController.addGmArticleVariants));
+router.delete('/gm-article-variant/:id', h(ApproverController.deleteGmArticleVariant));
+router.post('/gm-articles/:genericId/retry-variants', h(ApproverController.retryGmArticleVariants));
+router.get('/gm-sizes-for-majcat/:majCat', h(ApproverController.getGmSizesForMajCat));
+
 // Reject GM articles — sets approvalStatus to REJECTED in gm_article_data
 router.post('/gm-articles/reject', requireGMApprovalRights, h(ApproverController.rejectGmArticles));
 

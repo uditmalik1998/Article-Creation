@@ -3340,7 +3340,6 @@ const ArticleCard = React.memo(
                           extraRows={groupAttrs
                             .filter((a) => !gridCfg.fields.has(a.field) && !FG_CARD_HIDDEN_SCHEMA_KEYS.has(a.schemaKey))
                             .map((a) => renderAttributeRow(a))}
-                          enablePreciseTrimLookup={g.group === 'VA ACC.'}
                           loadSavedRecord={loadFreshItem}
                           onSaveTab={(updates) => {
                             setLocalValues((prev) => ({ ...prev, ...updates }));
@@ -4004,9 +4003,9 @@ const ArticleCard = React.memo(
                                   const token = localStorage.getItem('authToken');
                                   const params = new URLSearchParams();
                                   if (effectiveMajCat) params.set('majorCategory', effectiveMajCat);
+                                  // An empty attribute is sent as '-' so it must also be empty on the match.
                                   Object.entries(SMART_ATTR_PARAM_MAP).forEach(([field, paramKey]) => {
-                                    const val = getFieldVal(field);
-                                    if (val) params.set(paramKey, val);
+                                    params.set(paramKey, getFieldVal(field) || '-');
                                   });
                                   fetch(
                                     `${APP_CONFIG.api.baseURL}/approver/precise-body-article/search?${params.toString()}`,
