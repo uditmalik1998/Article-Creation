@@ -168,7 +168,7 @@ function mapVariantExportRow(row: any): Record<string, string | number | undefin
 const PAGE_SIZE = 50;
 
 interface ApproverDashboardProps {
-  pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
+  pathType?: 'old' | 'new' | 'rejected' | 'created';
   baseRoute?: string;
   presentationsType?: string;
 }
@@ -482,6 +482,8 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
       if (dateRangeFilter?.[1]) params.set('endDate', dateRangeFilter[1].endOf('day').toISOString());
       params.set('pathType', 'created');
       params.set('presentationsType', 'FG Article');
+      // Selected cards → export only those articles (with their variants).
+      if (selectedIds.size > 0) params.set('ids', [...selectedIds].join(','));
 
       const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/export-all-with-variants?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -508,7 +510,7 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
     } finally {
       setExportingWithVariants(false);
     }
-  }, [divisionFilter, subDivisionFilter, majorCategoryFilter, sourceFilter, searchText, dateRangeFilter, exportHeaders]);
+  }, [divisionFilter, subDivisionFilter, majorCategoryFilter, sourceFilter, searchText, dateRangeFilter, exportHeaders, selectedIds]);
 
   const handleRoughCostingExport = useCallback(async () => {
     setExportingRoughCosting(true);
@@ -523,6 +525,8 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
       if (searchText) params.set('search', searchText);
       if (dateRangeFilter?.[0]) params.set('startDate', dateRangeFilter[0].startOf('day').toISOString());
       if (dateRangeFilter?.[1]) params.set('endDate', dateRangeFilter[1].endOf('day').toISOString());
+      // Selected cards → export only those articles.
+      if (selectedIds.size > 0) params.set('ids', [...selectedIds].join(','));
 
       const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/rough-costing-export?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -545,7 +549,7 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
     } finally {
       setExportingRoughCosting(false);
     }
-  }, [divisionFilter, subDivisionFilter, majorCategoryFilter, searchText, dateRangeFilter]);
+  }, [divisionFilter, subDivisionFilter, majorCategoryFilter, searchText, dateRangeFilter, selectedIds]);
 
   const handlePreciseCostingExport = useCallback(async () => {
     setExportingPreciseCosting(true);
@@ -560,6 +564,8 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
       if (searchText) params.set('search', searchText);
       if (dateRangeFilter?.[0]) params.set('startDate', dateRangeFilter[0].startOf('day').toISOString());
       if (dateRangeFilter?.[1]) params.set('endDate', dateRangeFilter[1].endOf('day').toISOString());
+      // Selected cards → export only those articles.
+      if (selectedIds.size > 0) params.set('ids', [...selectedIds].join(','));
 
       const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/precise-costing-export?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -582,7 +588,7 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
     } finally {
       setExportingPreciseCosting(false);
     }
-  }, [divisionFilter, subDivisionFilter, majorCategoryFilter, searchText, dateRangeFilter]);
+  }, [divisionFilter, subDivisionFilter, majorCategoryFilter, searchText, dateRangeFilter, selectedIds]);
 
   // ─── Selective export ─────────────────────────────────────────────────────────
 
@@ -720,7 +726,6 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
       d.pathType === 'old' ? `${d.baseRoute}/old-articles`
       : d.pathType === 'rejected' ? `${d.baseRoute}/rejected`
       : d.pathType === 'created' ? `${d.baseRoute}/created`
-      : d.pathType === 'failed' ? `${d.baseRoute}/failed`
       : d.baseRoute;
     const state: DetailNavigationState = {
       items: d.items, currentIndex: index, currentPage: d.currentPage,
@@ -750,8 +755,7 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
                 <div className="font-display truncate text-[13px] font-semibold leading-tight tracking-tight">
                   {pathType === 'old' ? 'Old Articles' : pathType === 'new' ? 'New Articles'
                     : pathType === 'rejected' ? 'Rejected Articles'
-                    : pathType === 'created' ? 'Created Articles'
-                    : pathType === 'failed' ? 'Failed Creations' : 'Approver Dashboard'}
+                    : pathType === 'created' ? 'Created Articles' : 'Approver Dashboard'}
                 </div>
                 {user?.division && (
                   <div className="truncate text-[10px] font-medium text-white/65">

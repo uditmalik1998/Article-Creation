@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingBag, Zap, SlidersHorizontal, Calendar, CheckSquare, Camera, AlertTriangle } from 'lucide-react';
+import { ShoppingBag, Zap, SlidersHorizontal, Calendar, CheckSquare, Camera } from 'lucide-react';
 import {
   Button,
   Card,
@@ -278,10 +278,8 @@ export default function Dashboard() {
   const quickActions = [
     canFgArticles && { title: 'Review new FG articles', sub: 'Approve extracted articles and push to SAP', cta: 'Open New articles', to: '/approver', Icon: CheckSquare },
     canModelGen && { title: 'Model generation', sub: 'Turn garment photos into on-model shots', cta: 'Open studio', to: '/model-generation', Icon: Camera },
-    canFgArticles && { title: 'Failed creations', sub: 'Articles SAP rejected — fix and retry', cta: 'Open Failed', to: '/approver/failed', Icon: AlertTriangle },
-    isAdmin
-      ? { title: 'Admin panel', sub: 'Users, hierarchy and uploaders', cta: 'Open Admin', to: '/admin', Icon: SlidersHorizontal }
-      : canFgArticles && { title: 'Created articles', sub: 'Articles already created in SAP', cta: 'Open Created', to: '/approver/created', Icon: ShoppingBag },
+    canFgArticles && { title: 'Created articles', sub: 'Articles already created in SAP', cta: 'Open Created', to: '/approver/created', Icon: ShoppingBag },
+    isAdmin && { title: 'Admin panel', sub: 'Users, hierarchy and uploaders', cta: 'Open Admin', to: '/admin', Icon: SlidersHorizontal },
   ].filter(Boolean) as { title: string; sub: string; cta: string; to: string; Icon: typeof Camera }[];
 
   return (
