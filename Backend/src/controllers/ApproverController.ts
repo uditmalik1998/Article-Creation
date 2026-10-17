@@ -21,7 +21,7 @@ import { prismaClient as prisma } from '../utils/prisma';
 import { syncGenericToVariants, addColorVariants, getSizesForMajCat, isSizeAllowed } from '../services/variantCreationService';
 import { hasVendorCode, isValidVendorCode, normalizeVendorCode } from '../utils/vendorCode';
 import { mirror360FlatUpdate } from '../utils/mirror360Flat';
-import { getSetMcIndex, setProblems } from '../services/setMcMasterService';
+import { getSetMcIndex, setProblems, SET_PARTS_USE_SET_MC, normalMcForCategory } from '../services/setMcMasterService';
 import { linkComboGroupForRow, recomputeComboParent, syncSetsFromRaw, COMBO_PARENT_DERIVED_FIELDS } from '../services/comboLinkService';
 
 // Fields a client is allowed to update / modify on an article. Shared by
@@ -3077,8 +3077,11 @@ export class ApproverController {
                             const setMc = setIndex.parentMc(parent.majorCategory)!;
                             setMcWrites.push({ id: parentId, mcCode: setMc.mcCode, hsnCode: setMc.hsnCode });
                             for (const c of children) {
-                                const partMc = setIndex.partMc(parent.majorCategory, c.majorCategory)!;
-                                setMcWrites.push({ id: c.id, mcCode: partMc.mcCode, hsnCode: partMc.hsnCode });
+                                // Parts keep their normal maj cat MC unless SET_PARTS_USE_SET_MC.
+                                const partMc = SET_PARTS_USE_SET_MC
+                                    ? setIndex.partMc(parent.majorCategory, c.majorCategory)!
+                                    : await normalMcForCategory(c.majorCategory);
+                                if (partMc) setMcWrites.push({ id: c.id, mcCode: partMc.mcCode, hsnCode: partMc.hsnCode });
                             }
                         }
                     }
