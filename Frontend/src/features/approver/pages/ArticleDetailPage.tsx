@@ -321,7 +321,7 @@ type ConfirmDialog =
   | null;
 
 type InfoDialog =
-  | { kind: 'mandatoryMissing'; errors: { articleId: string; missing: string[] }[] }
+  | { kind: 'mandatoryMissing'; errors: { articleId: string; itemId?: string; missing: string[] }[] }
   | { kind: 'sapSyncFailed'; failures: { id: string; message: string }[]; total: number }
   | { kind: 'sapPartialFailed'; failures: { id: string; message: string }[]; total: number }
   | null;
@@ -780,9 +780,9 @@ export default function ArticleDetailPage({
     const selectedPending = [...items, ...comboChildren].filter(i => pendingSelectedKeys.includes(i.id));
     const pendingItems = [...selectedPending, ...pendingComboChildren.filter(c => !selectedPending.some(s => s.id === c.id))];
     const comboBlock = isComboItem && pendingSelectedKeys.length > 0 && comboChildren.length === 0
-      ? [{ articleId: currentItem?.designNumber || currentItem?.id || 'Set article', missing: ['CHILD PIECES (Top / Lower not linked yet)'] }]
+      ? [{ articleId: `Set: ${[currentItem?.majorCategory, currentItem?.designNumber].filter(Boolean).join(' · ') || 'Set article'}`, itemId: currentItem?.id, missing: ['CHILD PIECES (Top / Lower not linked yet)'] }]
       : [];
-    return pendingItems.reduce<{ articleId: string; missing: string[] }[]>((acc, item) => {
+    return pendingItems.reduce<{ articleId: string; itemId?: string; missing: string[] }[]>((acc, item) => {
       const missing: string[] = [];
       if (!item.vendorCode) missing.push('VENDOR CODE');
       // Color is mandatory on New Articles — on Save & Submit the approver's
@@ -800,12 +800,46 @@ export default function ArticleDetailPage({
       missing.push(...getMissingMandatoryFields(item, isComboItem && item.id === currentItem?.id ? setTopCategory : null));
       // const missingWeightCount = variantWeightIssues[item.id];
       // if (missingWeightCount) missing.push(`VARIANT WEIGHT (${missingWeightCount} variant${missingWeightCount > 1 ? 's' : ''} missing)`);
-      const label = item.sapArticleId || item.articleNumber || item.imageName || item.id;
-      if (missing.length > 0) acc.push({ articleId: item.comboRole === 'CHILD' ? `${item.majorCategory || 'Part'} — ${label}` : label, missing });
+      // Readable name: SAP / article number once it exists, else category + design
+      // number (a new set article has neither SAP number nor image name).
+      const label = item.sapArticleId || item.articleNumber
+        || [item.majorCategory, item.designNumber].filter(Boolean).join(' · ')
+        || item.imageName || item.id;
+      const articleId = item.comboRole === 'CHILD'
+        ? `Part: ${label}`
+        : item.comboRole === 'PARENT' ? `Set: ${label}` : label;
+      if (missing.length > 0) acc.push({ articleId, itemId: item.id, missing });
       return acc;
     }, comboBlock);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingSelectedKeys, items, gridVersion, pathType, variantWeightIssues, pendingComboChildren, comboChildren, isComboItem, setTopCategory]);
+
+  // Jump to a missing field: open the right set tab, scroll its row into view and
+  // flash it. Rows carry data-field-label / data-item-id (ApproverArticleList).
+  const focusMissingField = (itemId: string | undefined, fieldLabel: string) => {
+    setInfoDialog(null);
+    if (isComboItem && itemId) {
+      if (itemId === currentItem?.id) setComboTab('parent');
+      else if (comboChildren.some(c => c.id === itemId)) setComboTab(itemId);
+    }
+    const norm = (s: string) => s.replace(/\(.*?\)/g, '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const want = norm(fieldLabel);
+    // Wait a tick so a tab switch has rendered the target card.
+    window.setTimeout(() => {
+      const rows = Array.from(document.querySelectorAll<HTMLElement>('[data-field-label]'))
+        .filter(r => norm(r.dataset.fieldLabel || '') === want);
+      const row = rows.find(r => !itemId || r.dataset.itemId === itemId) ?? rows[0];
+      if (!row) {
+        message.warning(`"${fieldLabel}" is not visible on this card — expand its section and try again.`);
+        return;
+      }
+      row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      row.classList.remove('field-jump-highlight');
+      void row.offsetWidth; // restart the animation if it is clicked twice
+      row.classList.add('field-jump-highlight');
+      window.setTimeout(() => row.classList.remove('field-jump-highlight'), 2600);
+    }, 150);
+  };
 
   const handleApproveClick = async () => {
     if (pendingSelectedKeys.length === 0) return;
@@ -1380,6 +1414,7 @@ export default function ArticleDetailPage({
                         {approveBlockedReasons.length > 5 && (
                           <div className="mt-1 text-muted-foreground">…and {approveBlockedReasons.length - 5} more</div>
                         )}
+                        <div className="mt-2 text-[11px] text-muted-foreground">Click Save &amp; Submit to go to each field.</div>
                       </div>
                     )
                     : undefined
@@ -1387,8 +1422,10 @@ export default function ArticleDetailPage({
               >
                 {/* span wrapper: disabled <button> swallows pointer events; span keeps hover alive */}
                 <span className="inline-block">
+                  {/* Not disabled when fields are missing: the click opens the list of
+                      missing fields, each of which jumps to its row. */}
                   <Button size="sm" onClick={handleApproveClick}
-                    disabled={!canApprove || pendingSelectedKeys.length === 0 || approveBlockedReasons.length > 0}
+                    disabled={!canApprove || pendingSelectedKeys.length === 0}
                     className="h-7 border-none bg-[#FF6F61] px-3 text-[12px] font-semibold text-white shadow-sm hover:bg-[#ff5b4d] disabled:bg-white/20 disabled:text-white/50">
                     <CheckCircle2 /> Save &amp; Submit
                     {approveBlockedReasons.length > 0 && <span className="ml-1 text-[10px] text-amber-200">⚠ {approveBlockedReasons.length}</span>}
@@ -1792,15 +1829,26 @@ export default function ArticleDetailPage({
           {infoDialog?.kind === 'mandatoryMissing' && (
             <>
               <DialogHeader><DialogTitle>Cannot Approve — Mandatory Fields Missing</DialogTitle></DialogHeader>
+              <div className="mb-1 text-xs text-muted-foreground">Click a field to go to it.</div>
               <div className="max-h-[400px] overflow-y-auto">
-                {infoDialog.errors.map(({ articleId, missing }) => (
-                  <div key={articleId} className="mb-3">
+                {infoDialog.errors.map(({ articleId, itemId, missing }) => (
+                  <div key={itemId ?? articleId} className="mb-3">
                     <div className="mb-1 text-[13px] font-semibold">{articleId}</div>
                     <div className="flex flex-wrap gap-1">
                       {missing.map(f => (
-                        <span key={f} className="rounded border border-red-300 bg-red-50 px-1.5 py-0.5 text-[11px] text-red-700">{f}</span>
+                        <button key={f} type="button" onClick={() => focusMissingField(itemId, f)}
+                          className="rounded border border-red-300 bg-red-50 px-1.5 py-0.5 text-[11px] text-red-700 transition-colors hover:border-red-500 hover:bg-red-100">
+                          {f} →
+                        </button>
                       ))}
                     </div>
+                    {missing.includes('SEGMENT') && (
+                      <div className="mt-1.5 rounded bg-amber-50 px-2 py-1 text-[11px] leading-relaxed text-amber-800">
+                        SEGMENT can't be typed: it is filled automatically from the MRP, using the price bands for this
+                        major category in Admin → Segment Master. If it stays empty, check that the MRP is set and that
+                        the category has bands covering that MRP.
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

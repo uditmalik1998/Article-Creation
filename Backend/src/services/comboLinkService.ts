@@ -14,7 +14,7 @@ import { getSetMcIndex } from './setMcMasterService';
 import { sortComboChildren } from '../config/comboChildTemplates';
 import { ARTICLE_DESCRIPTION_SOURCE_FIELDS, buildArticleDescription } from '../utils/articleDescriptionBuilder';
 import { getExcludedDescriptionFields } from '../utils/categoryFieldVisibility';
-import { getSegmentByCategoryAndMrp } from '../utils/segmentRangeMapper';
+import { getSegmentFromMaster } from './segmentMasterService';
 
 // Parent value = sum of children. Every name must be a column of ExtractionResultFlat
 // (tests/comboFieldsExist.test.ts checks it): these are written with prisma.update, which
@@ -203,7 +203,8 @@ export async function recomputeComboParent(parentId: string): Promise<void> {
     for (const f of COMBO_SUMMED_FIELDS) data[f] = sumDecimal(children.map((c) => (c as any)[f]));
     for (const f of COMBO_MIRRORED_FIELDS) data[f] = (primary as any)[f] ?? null;
 
-    data.segment = getSegmentByCategoryAndMrp(parent.majorCategory, data.mrp) ?? parent.segment;
+    // Segment Master (maj_cat_segment) has the set (S-…) categories; the old JSON does not.
+    data.segment = (await getSegmentFromMaster(parent.majorCategory, data.mrp)) ?? parent.segment;
     // The parent card is read-only — inherit a vendor code if SRM didn't send one.
     if (!parent.vendorCode && primary.vendorCode) data.vendorCode = primary.vendorCode;
 
