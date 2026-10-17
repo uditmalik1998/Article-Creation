@@ -10,7 +10,7 @@ import type { SchemaItem, ExtractionRequest, EnhancedExtractionResult } from '..
 import type { FashionExtractionRequest } from '../types/vlm';
 import { storageService } from '../services/storageService';
 import { getHsnCodeByMcCode } from '../utils/mcCodeMapper';
-import { getSegmentByCategoryAndMrp } from '../utils/segmentRangeMapper';
+import { getSegmentFromMaster } from '../services/segmentMasterService';
 import { buildArticleDescription } from '../utils/articleDescriptionBuilder';
 import { getExcludedDescriptionFields } from '../utils/categoryFieldVisibility';
 import { duplicateForKidsDivision } from '../services/kidsDivisionDuplicationService';
@@ -508,7 +508,7 @@ export class EnhancedExtractionController {
             const derivedStep2: Record<string, any> = {};
 
             // Segment
-            const seg = getSegmentByCategoryAndMrp(updatedRow.majorCategory, updatedRow.mrp);
+            const seg = await getSegmentFromMaster(updatedRow.majorCategory, updatedRow.mrp);
             if (seg) derivedStep2.segment = seg;
 
             // Article Description — only include fields visible in the article card for this major category

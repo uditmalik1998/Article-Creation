@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { getHsnCodeByMcCode, getMcCodeByMajorCategory } from '../utils/mcCodeMapper';
 import { parseNumericValue } from '../utils/mrpCalculator';
-import { getSegmentByCategoryAndMrp } from '../utils/segmentRangeMapper';
+import { getSegmentFromMaster } from '../services/segmentMasterService';
 import { syncApprovedItemsToSap } from '../services/sapSyncService';
 import { syncArticlesToSapViaRfc, buildModifyChangesPayload, previewRfcPayloads } from '../services/zmmArtCreationService';
 import { patchArticleAttributes } from '../services/sapModifyService';
@@ -390,7 +390,7 @@ export class ApproverController {
         const idsBySegment = new Map<string, string[]>();
 
         for (const row of rows) {
-            const segment = getSegmentByCategoryAndMrp(row.majorCategory, row.mrp);
+            const segment = await getSegmentFromMaster(row.majorCategory, row.mrp);
             if (!segment) continue;
 
             const ids = idsBySegment.get(segment) || [];
