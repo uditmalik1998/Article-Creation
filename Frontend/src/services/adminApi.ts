@@ -652,6 +652,37 @@ export async function getModifyLogs(params: ModifyLogsParams = {}): Promise<Modi
   return res.data;
 }
 
+export interface ModifyLogGroup {
+  modificationGroupId: string;
+  articleNumber: string;
+  modifiedByName: string;
+  modifiedByEmail: string;
+  modifiedAt: string;
+  fieldCount: number;
+  failedCount: number;
+  rows: ModifyLog[];
+}
+
+export interface ModifyLogGroupsResponse {
+  data: ModifyLogGroup[];
+  total: number;
+  totalChanges: number;
+  failedChanges: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+/** One entry per save (modification group), newest first; each carries all of its rows. */
+export async function getModifyLogGroups(params: ModifyLogsParams = {}): Promise<ModifyLogGroupsResponse> {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== '') query.set(k, String(v));
+  });
+  const res = await adminApi.get<ModifyLogGroupsResponse>(`/modify-logs/groups?${query.toString()}`);
+  return res.data;
+}
+
 export async function getModifyLogsByGroup(groupId: string): Promise<{ data: ModifyLog[] }> {
   const res = await adminApi.get<{ data: ModifyLog[] }>(`/modify-logs/group/${encodeURIComponent(groupId)}`);
   return res.data;

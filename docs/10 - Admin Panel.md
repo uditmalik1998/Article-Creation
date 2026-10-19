@@ -216,3 +216,17 @@ Replaced the flat list + modal with two panes (stack on narrow screens):
 - One dark slate header (`bg-slate-800`) holds "ADMIN PANEL", the title, subtitle and an outlined **Export JSON** button; the Grid Values / Size Master / Hierarchy tabs sit on its bottom edge as underline tabs (active = white text + `slate-400` 3px line, same as the article dashboard division tabs).
 - The active tab's white card attaches directly under the header (no separate header card, no ui-tw `Tabs`). Each tab's help line comes from the `TABS` array; only the active editor is mounted.
 - Canvas: https://claude.ai/artifact/GxFmi1YhVJ8Bf3J7BzPYjJ (A ink header · B one card · C left rail · D tiles · E compact toolbar).
+
+### Modification Logs page — `features/admin/pages/ModificationLogsPage.tsx` (2026-10-19, design "Option A · grouped changesets")
+
+- Lists **saves**, not rows: `GET /api/admin/modify-logs/groups` (`getModifyLogGroups`) paginates distinct `modificationGroupId`s (20/page, newest first) and returns each with ALL its rows plus `fieldCount`, `failedCount`; response also has `total` (saves), `totalChanges`, `failedChanges`. A save is listed if any row matches the filters.
+- Shared `buildModifyLogsWhere()` builds the filter for both endpoints; `sapStatus=FAILED` means "anything not SUCCESS".
+- Flat `GET /modify-logs` (used only by Export Excel) now allows `limit` up to 10000 — it was capped at 200, so exports were silently truncated to 200 rows before.
+- UI: date presets (All / Today / 7d / 30d / Custom), debounced live search, Article / Field / Person / SAP facet popovers (Person = name, or email if it contains `@`), removable active chips. Each save is an expandable card (newest open by default) splitting changes into SAP attributes (`M_*`) and Costing & other fields, Before → After with strikethrough, readable labels. The old group-details modal is gone (`getModifyLogsByGroup` stays in the API).
+- Canvas with all 5 options: https://claude.ai/artifact/SpNA2MdrtFqf3NB9MiFCkh
+
+### Pool B Uploader page — `features/admin/pages/PoolBUploaderPage.tsx` (2026-10-19, design "Option D · job console")
+
+- Flow: drop/browse Excel → preview runs automatically (no SAP call) → "Ready to run" card (counts, warnings, batch note, sample) with QA/PROD and Test/Live segmented controls → inline confirm (replaces `window.confirm`; live PROD requires typing PROD) → console.
+- Console is the same for sync reports and async jobs: dark slate panel with status pill, % and ok/failed/waiting bar, one tile per batch; below it **Needs attention** built from per-article results (`results` JSON on `pool_b_batches`, or the sync report): NIC / Locked / Error tags, MC, what-to-do text, filter chips, .xlsx download. A running batch's articles only appear once that batch finishes.
+- No backend change. Canvas with all 5 options: https://claude.ai/artifact/U2AAwYLJxHF9BPKwSpugRa

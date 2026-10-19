@@ -4716,31 +4716,16 @@ export const uploadHierarchyExcel = async (req: Request, res: Response): Promise
 // MODIFY LOGS
 // ═══════════════════════════════════════════════════════
 
-export async function getModifyLogs(req: Request, res: Response) {
-    const {
-        page,
-        limit,
-        articleNumber,
-        labelName,
-        modifiedByName,
-        modifiedByEmail,
-        sapStatus,
-        dateFrom,
-        dateTo,
-        search,
-    } = req.query as Record<string, string | undefined>;
-
-    const pageNum  = Math.max(1, parseInt(page  ?? '1',  10) || 1);
-    const limitNum = Math.min(200, Math.max(1, parseInt(limit ?? '50', 10) || 50));
-    const skip     = (pageNum - 1) * limitNum;
-
+function buildModifyLogsWhere(q: Record<string, string | undefined>): object {
+    const { articleNumber, labelName, modifiedByName, modifiedByEmail, sapStatus, dateFrom, dateTo, search } = q;
     const andConditions: object[] = [];
 
-    if (articleNumber) andConditions.push({ articleNumber: { contains: articleNumber, mode: 'insensitive' } });
-    if (labelName)       andConditions.push({ labelName:      { contains: labelName,      mode: 'insensitive' } });
+    if (articleNumber)   andConditions.push({ articleNumber:   { contains: articleNumber,   mode: 'insensitive' } });
+    if (labelName)       andConditions.push({ labelName:       { contains: labelName,       mode: 'insensitive' } });
     if (modifiedByName)  andConditions.push({ modifiedByName:  { contains: modifiedByName,  mode: 'insensitive' } });
     if (modifiedByEmail) andConditions.push({ modifiedByEmail: { contains: modifiedByEmail, mode: 'insensitive' } });
-    if (sapStatus)       andConditions.push({ sapStatus });
+    if (sapStatus === 'FAILED') andConditions.push({ NOT: { sapStatus: 'SUCCESS' } });
+    else if (sapStatus)         andConditions.push({ sapStatus });
 
     if (dateFrom || dateTo) {
         const dateFilter: Record<string, Date> = {};
@@ -4756,17 +4741,94 @@ export async function getModifyLogs(req: Request, res: Response) {
     if (search) {
         andConditions.push({
             OR: [
-                { articleNumber:  { contains: search, mode: 'insensitive' } },
-                { labelName:      { contains: search, mode: 'insensitive' } },
-                { oldValue:       { contains: search, mode: 'insensitive' } },
-                { newValue:       { contains: search, mode: 'insensitive' } },
-                { modifiedByName: { contains: search, mode: 'insensitive' } },
-                { modifiedByEmail:{ contains: search, mode: 'insensitive' } },
+                { articleNumber:   { contains: search, mode: 'insensitive' } },
+                { labelName:       { contains: search, mode: 'insensitive' } },
+                { oldValue:        { contains: search, mode: 'insensitive' } },
+                { newValue:        { contains: search, mode: 'insensitive' } },
+                { modifiedByName:  { contains: search, mode: 'insensitive' } },
+                { modifiedByEmail: { contains: search, mode: 'insensitive' } },
             ],
         });
     }
 
-    const where = andConditions.length > 0 ? { AND: andConditions } : {};
+    return andConditions.length > 0 ? { AND: andConditions } : {};
+}
+
+/**
+ * GET /api/admin/modify-logs/groups — one entry per save (modificationGroupId), newest first.
+ * A save is listed when any of its rows match the filters; `rows` holds the WHOLE save.
+ */
+export async function getModifyLogGroups(req: Request, res: Response) {
+    const q = req.query as Record<string, string | undefined>;
+    const pageNum  = Math.max(1, parseInt(q.page  ?? '1',  10) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(q.limit ?? '20', 10) || 20));
+    const where = buildModifyLogsWhere(q) as any;
+
+    const [allGroups, pageGroups, totalChanges, failedChanges] = await withPrismaRetry(() =>
+        Promise.all([
+            prisma.modifyLog.groupBy({ by: ['modificationGroupId'], where }),
+            prisma.modifyLog.groupBy({
+                by: ['modificationGroupId'],
+                where,
+                _max: { modifiedAt: true },
+                orderBy: { _max: { modifiedAt: 'desc' } },
+                skip: (pageNum - 1) * limitNum,
+                take: limitNum,
+            }),
+            prisma.modifyLog.count({ where }),
+            prisma.modifyLog.count({ where: { AND: [where, { NOT: { sapStatus: 'SUCCESS' } }] } }),
+        ])
+    );
+
+    const ids = pageGroups.map((g) => g.modificationGroupId);
+    const rows = ids.length
+        ? await withPrismaRetry(() =>
+            prisma.modifyLog.findMany({
+                where: { modificationGroupId: { in: ids } },
+                orderBy: { id: 'asc' },
+            })
+        )
+        : [];
+
+    const byGroup = new Map<string, typeof rows>();
+    for (const r of rows) {
+        const list = byGroup.get(r.modificationGroupId) ?? [];
+        list.push(r);
+        byGroup.set(r.modificationGroupId, list);
+    }
+
+    const data = ids.map((id) => {
+        const groupRows = byGroup.get(id) ?? [];
+        const first = groupRows[0];
+        return {
+            modificationGroupId: id,
+            articleNumber: first?.articleNumber ?? '',
+            modifiedByName: first?.modifiedByName ?? '',
+            modifiedByEmail: first?.modifiedByEmail ?? '',
+            modifiedAt: (pageGroups.find((g) => g.modificationGroupId === id)?._max.modifiedAt ?? first?.modifiedAt) as Date,
+            fieldCount: groupRows.length,
+            failedCount: groupRows.filter((r) => r.sapStatus !== 'SUCCESS').length,
+            rows: groupRows,
+        };
+    });
+
+    return res.json({
+        data,
+        total: allGroups.length,
+        totalChanges,
+        failedChanges,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(allGroups.length / limitNum),
+    });
+}
+
+export async function getModifyLogs(req: Request, res: Response) {
+    const q = req.query as Record<string, string | undefined>;
+    const pageNum  = Math.max(1, parseInt(q.page  ?? '1',  10) || 1);
+    const limitNum = Math.min(10000, Math.max(1, parseInt(q.limit ?? '50', 10) || 50));
+    const skip     = (pageNum - 1) * limitNum;
+    const where    = buildModifyLogsWhere(q) as any;
 
     const [total, logs] = await withPrismaRetry(() =>
         prisma.$transaction([

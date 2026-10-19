@@ -287,6 +287,7 @@ router.post('/hierarchy/upload-excel', excelUpload.single('file'), mut, h(adminC
 // ═══════════════════════════════════════════════════════
 // ORDER MATTERS: group/:groupId must come before plain :id would interfere
 router.get('/modify-logs/group/:groupId', h(adminController.getModifyLogsByGroup));
+router.get('/modify-logs/groups',        h(adminController.getModifyLogGroups));
 router.get('/modify-logs',               h(adminController.getModifyLogs));
 
 router.get('/national-grid',             h(adminController.getNationalGrid));
