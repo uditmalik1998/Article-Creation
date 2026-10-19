@@ -90,10 +90,13 @@ const ITEM_UPDATE_ALLOWED_FIELDS = [
     'stopperAutoBgt', 'stopperRoughV2', 'stopperVdrCost', 'stopperFinalCost',
     'tagAutoBgt', 'tagRoughV2', 'tagVdrCost', 'tagFinalCost',
     'tasselsAutoBgt', 'tasselsRoughV2', 'tasselsVdrCost', 'tasselsFinalCost',
+    'mBtnRate', 'mBtnQty', 'dcRate', 'dcQty', 'zipRate', 'zipQty', 'patchRate', 'patchQty', 'hTrfRate', 'hTrfQty', 'elasticRate', 'elasticQty', 'fusingRate', 'fusingQty', 'badgeRate', 'badgeQty', 'rivetRate', 'rivetQty', 'tapeRate', 'tapeQty', 'otherRate', 'otherQty', 'adjusterRate', 'adjusterQty', 'brotchRate', 'brotchQty', 'buckleRate', 'buckleQty', 'eyeletsRate', 'eyeletsQty', 'hangingDRingRate', 'hangingDRingQty', 'hookRate', 'hookQty', 'labelRate', 'labelQty', 'laceRate', 'laceQty', 'pockettingFabricRate', 'pockettingFabricQty', 'pockettingReadymadeRate', 'pockettingReadymadeQty', 'santaRate', 'santaQty', 'stopperRate', 'stopperQty', 'tagRate', 'tagQty', 'tasselsRate', 'tasselsQty',
     // V. ADD costing per item
     'printAutoBgt', 'printRoughV2', 'printVendorCost', 'printFinalCost',
     'embAutoBgt', 'embRoughV2', 'embVendorCost', 'embFinalCost',
     'washingAutoBgt', 'washingRoughV2', 'washingVendorCost', 'washingFinalCost',
+    // V. ADD extra PRINT / EMB rows (JSON arrays, app only — not in FLAT_TO_RFC so never sent to SAP)
+    'vaddPrintJson', 'vaddEmpJson',
     // PKG COST (net prices belong to the tab in pkgCostType)
     'pkgCostType', 'boppNetPrice', 'ctnNetPrice', 'barcodeNetPrice',
     'kimbleNetPrice', 'taftaNetPrice', 'threadNetPrice',
@@ -113,7 +116,20 @@ const ITEM_UPDATE_ALLOWED_FIELDS = [
 const HISTORY_EXCLUDED_FIELDS = new Set([
     'fabricArticleDescription', 'bodyArticleDescription',
     'articleDescription', 'mcCode', 'hsnTaxCode', 'mcDescription', 'attrArticleNums',
+    'vaddPrintJson', 'vaddEmpJson',
 ]);
+
+// V. ADD extra-row JSON columns: the client sends a JSON string (or an array);
+// store an array, or SQL NULL when empty / invalid.
+const VADD_JSON_FIELDS = new Set(['vaddPrintJson', 'vaddEmpJson']);
+function parseVaddJson(value: unknown): unknown {
+    let v = value;
+    if (typeof v === 'string') {
+        if (!v.trim()) return Prisma.DbNull;
+        try { v = JSON.parse(v); } catch { return Prisma.DbNull; }
+    }
+    return Array.isArray(v) && v.length > 0 ? v : Prisma.DbNull;
+}
 
 // camelCase → snake_case (e.g. fabDiv → fab_div, mrp → mrp)
 function camelToSnake(s: string): string {
@@ -1026,9 +1042,11 @@ export class ApproverController {
                     stopperAutoBgt: true, stopperRoughV2: true, stopperVdrCost: true, stopperFinalCost: true,
                     tagAutoBgt: true, tagRoughV2: true, tagVdrCost: true, tagFinalCost: true,
                     tasselsAutoBgt: true, tasselsRoughV2: true, tasselsVdrCost: true, tasselsFinalCost: true,
+                    mBtnRate: true, mBtnQty: true, dcRate: true, dcQty: true, zipRate: true, zipQty: true, patchRate: true, patchQty: true, hTrfRate: true, hTrfQty: true, elasticRate: true, elasticQty: true, fusingRate: true, fusingQty: true, badgeRate: true, badgeQty: true, rivetRate: true, rivetQty: true, tapeRate: true, tapeQty: true, otherRate: true, otherQty: true, adjusterRate: true, adjusterQty: true, brotchRate: true, brotchQty: true, buckleRate: true, buckleQty: true, eyeletsRate: true, eyeletsQty: true, hangingDRingRate: true, hangingDRingQty: true, hookRate: true, hookQty: true, labelRate: true, labelQty: true, laceRate: true, laceQty: true, pockettingFabricRate: true, pockettingFabricQty: true, pockettingReadymadeRate: true, pockettingReadymadeQty: true, santaRate: true, santaQty: true, stopperRate: true, stopperQty: true, tagRate: true, tagQty: true, tasselsRate: true, tasselsQty: true,
                     printAutoBgt: true, printRoughV2: true, printVendorCost: true, printFinalCost: true,
                     embAutoBgt: true, embRoughV2: true, embVendorCost: true, embFinalCost: true,
                     washingAutoBgt: true, washingRoughV2: true, washingVendorCost: true, washingFinalCost: true,
+                    vaddPrintJson: true, vaddEmpJson: true,
                     pkgCostType: true, boppNetPrice: true, ctnNetPrice: true, barcodeNetPrice: true,
                     kimbleNetPrice: true, taftaNetPrice: true, threadNetPrice: true,
                     // Article reference fields
@@ -1387,6 +1405,7 @@ export class ApproverController {
                     stopperAutoBgt: true, stopperRoughV2: true, stopperVdrCost: true, stopperFinalCost: true,
                     tagAutoBgt: true, tagRoughV2: true, tagVdrCost: true, tagFinalCost: true,
                     tasselsAutoBgt: true, tasselsRoughV2: true, tasselsVdrCost: true, tasselsFinalCost: true,
+                    mBtnRate: true, mBtnQty: true, dcRate: true, dcQty: true, zipRate: true, zipQty: true, patchRate: true, patchQty: true, hTrfRate: true, hTrfQty: true, elasticRate: true, elasticQty: true, fusingRate: true, fusingQty: true, badgeRate: true, badgeQty: true, rivetRate: true, rivetQty: true, tapeRate: true, tapeQty: true, otherRate: true, otherQty: true, adjusterRate: true, adjusterQty: true, brotchRate: true, brotchQty: true, buckleRate: true, buckleQty: true, eyeletsRate: true, eyeletsQty: true, hangingDRingRate: true, hangingDRingQty: true, hookRate: true, hookQty: true, labelRate: true, labelQty: true, laceRate: true, laceQty: true, pockettingFabricRate: true, pockettingFabricQty: true, pockettingReadymadeRate: true, pockettingReadymadeQty: true, santaRate: true, santaQty: true, stopperRate: true, stopperQty: true, tagRate: true, tagQty: true, tasselsRate: true, tasselsQty: true,
                     printAutoBgt: true, printRoughV2: true, printVendorCost: true, printFinalCost: true,
                     embAutoBgt: true, embRoughV2: true, embVendorCost: true, embFinalCost: true,
                     washingAutoBgt: true, washingRoughV2: true, washingVendorCost: true, washingFinalCost: true,
@@ -1671,6 +1690,7 @@ export class ApproverController {
                     stopperAutoBgt: true, stopperRoughV2: true, stopperVdrCost: true, stopperFinalCost: true,
                     tagAutoBgt: true, tagRoughV2: true, tagVdrCost: true, tagFinalCost: true,
                     tasselsAutoBgt: true, tasselsRoughV2: true, tasselsVdrCost: true, tasselsFinalCost: true,
+                    mBtnRate: true, mBtnQty: true, dcRate: true, dcQty: true, zipRate: true, zipQty: true, patchRate: true, patchQty: true, hTrfRate: true, hTrfQty: true, elasticRate: true, elasticQty: true, fusingRate: true, fusingQty: true, badgeRate: true, badgeQty: true, rivetRate: true, rivetQty: true, tapeRate: true, tapeQty: true, otherRate: true, otherQty: true, adjusterRate: true, adjusterQty: true, brotchRate: true, brotchQty: true, buckleRate: true, buckleQty: true, eyeletsRate: true, eyeletsQty: true, hangingDRingRate: true, hangingDRingQty: true, hookRate: true, hookQty: true, labelRate: true, labelQty: true, laceRate: true, laceQty: true, pockettingFabricRate: true, pockettingFabricQty: true, pockettingReadymadeRate: true, pockettingReadymadeQty: true, santaRate: true, santaQty: true, stopperRate: true, stopperQty: true, tagRate: true, tagQty: true, tasselsRate: true, tasselsQty: true,
                     printAutoBgt: true, printRoughV2: true, printVendorCost: true, printFinalCost: true,
                     embAutoBgt: true, embRoughV2: true, embVendorCost: true, embFinalCost: true,
                     washingAutoBgt: true, washingRoughV2: true, washingVendorCost: true, washingFinalCost: true,
@@ -2281,9 +2301,11 @@ export class ApproverController {
                     stopperAutoBgt: true, stopperRoughV2: true, stopperVdrCost: true, stopperFinalCost: true,
                     tagAutoBgt: true, tagRoughV2: true, tagVdrCost: true, tagFinalCost: true,
                     tasselsAutoBgt: true, tasselsRoughV2: true, tasselsVdrCost: true, tasselsFinalCost: true,
+                    mBtnRate: true, mBtnQty: true, dcRate: true, dcQty: true, zipRate: true, zipQty: true, patchRate: true, patchQty: true, hTrfRate: true, hTrfQty: true, elasticRate: true, elasticQty: true, fusingRate: true, fusingQty: true, badgeRate: true, badgeQty: true, rivetRate: true, rivetQty: true, tapeRate: true, tapeQty: true, otherRate: true, otherQty: true, adjusterRate: true, adjusterQty: true, brotchRate: true, brotchQty: true, buckleRate: true, buckleQty: true, eyeletsRate: true, eyeletsQty: true, hangingDRingRate: true, hangingDRingQty: true, hookRate: true, hookQty: true, labelRate: true, labelQty: true, laceRate: true, laceQty: true, pockettingFabricRate: true, pockettingFabricQty: true, pockettingReadymadeRate: true, pockettingReadymadeQty: true, santaRate: true, santaQty: true, stopperRate: true, stopperQty: true, tagRate: true, tagQty: true, tasselsRate: true, tasselsQty: true,
                     printAutoBgt: true, printRoughV2: true, printVendorCost: true, printFinalCost: true,
                     embAutoBgt: true, embRoughV2: true, embVendorCost: true, embFinalCost: true,
                     washingAutoBgt: true, washingRoughV2: true, washingVendorCost: true, washingFinalCost: true,
+                    vaddPrintJson: true, vaddEmpJson: true,
                     pkgCostType: true, boppNetPrice: true, ctnNetPrice: true, barcodeNetPrice: true,
                     kimbleNetPrice: true, taftaNetPrice: true, threadNetPrice: true,
                     mcDescription: true,
@@ -2415,6 +2437,8 @@ export class ApproverController {
                         }
                     } else if (field === 'weight') {
                         value = ApproverController.extractNumericWeight(value);
+                    } else if (VADD_JSON_FIELDS.has(field)) {
+                        value = parseVaddJson(value);
                     } else if (value === '') {
                         // Convert empty strings to null for optional text fields
                         // Actually extractionResultFlat fields are mostly nullable strings, so '' might be okay or null preference.
@@ -2776,6 +2800,8 @@ export class ApproverController {
                         return res.status(400).json({ error: 'Vendor Code is required and must be exactly 6 digits.' });
                     }
                     value = normalizeVendorCode(value);
+                } else if (VADD_JSON_FIELDS.has(field)) {
+                    value = parseVaddJson(value);
                 } else if (value === '') {
                     value = null;
                 }
@@ -2801,6 +2827,7 @@ export class ApproverController {
                     mrp: true,
                     isGeneric: true,
                     ...Object.fromEntries(FLAT_TO_RFC.map((m) => [m.flat, true])),
+                    vaddPrintJson: true, vaddEmpJson: true,
                     ...Object.fromEntries(ARTICLE_DESCRIPTION_SOURCE_FIELDS.map((f) => [f, true])),
                 } as any,
             });
@@ -2892,8 +2919,11 @@ export class ApproverController {
                 // articleDescription is auto-rebuilt from other fields — not a user label change
                 if (field === 'articleDescription') continue;
                 const oldVal = (existingItem as any)[field];
-                const oldStr = oldVal == null ? null : String(oldVal);
-                const newStr = newVal == null ? null : String(newVal);
+                // V. ADD JSON columns: log the JSON text (DbNull → null)
+                const asText = (v: unknown) =>
+                    v == null || v === Prisma.DbNull ? null : VADD_JSON_FIELDS.has(field) ? JSON.stringify(v) : String(v);
+                const oldStr = asText(oldVal);
+                const newStr = asText(newVal);
                 if (oldStr === newStr) continue;
                 auditEntries.push({
                     modificationGroupId: modGroupId,
@@ -3285,6 +3315,7 @@ export class ApproverController {
                     stopperAutoBgt: true, stopperRoughV2: true, stopperVdrCost: true, stopperFinalCost: true,
                     tagAutoBgt: true, tagRoughV2: true, tagVdrCost: true, tagFinalCost: true,
                     tasselsAutoBgt: true, tasselsRoughV2: true, tasselsVdrCost: true, tasselsFinalCost: true,
+                    mBtnRate: true, mBtnQty: true, dcRate: true, dcQty: true, zipRate: true, zipQty: true, patchRate: true, patchQty: true, hTrfRate: true, hTrfQty: true, elasticRate: true, elasticQty: true, fusingRate: true, fusingQty: true, badgeRate: true, badgeQty: true, rivetRate: true, rivetQty: true, tapeRate: true, tapeQty: true, otherRate: true, otherQty: true, adjusterRate: true, adjusterQty: true, brotchRate: true, brotchQty: true, buckleRate: true, buckleQty: true, eyeletsRate: true, eyeletsQty: true, hangingDRingRate: true, hangingDRingQty: true, hookRate: true, hookQty: true, labelRate: true, labelQty: true, laceRate: true, laceQty: true, pockettingFabricRate: true, pockettingFabricQty: true, pockettingReadymadeRate: true, pockettingReadymadeQty: true, santaRate: true, santaQty: true, stopperRate: true, stopperQty: true, tagRate: true, tagQty: true, tasselsRate: true, tasselsQty: true,
                     printAutoBgt: true, printRoughV2: true, printVendorCost: true, printFinalCost: true,
                     embAutoBgt: true, embRoughV2: true, embVendorCost: true, embFinalCost: true,
                     washingAutoBgt: true, washingRoughV2: true, washingVendorCost: true, washingFinalCost: true,
@@ -4122,6 +4153,8 @@ export class ApproverController {
             const newRecord = await prisma.extractionResultFlat.create({
                 data: {
                     ...rest,
+                    vaddPrintJson: rest.vaddPrintJson ?? Prisma.DbNull,
+                    vaddEmpJson: rest.vaddEmpJson ?? Prisma.DbNull,
                     id: newId,
                     jobId: newJob.id,
                     imageUncPath: null,
@@ -5693,6 +5726,7 @@ export class ApproverController {
             stopperAutoBgt: null, stopperRoughV2: null, stopperVdrCost: null, stopperFinalCost: null,
             tagAutoBgt: null, tagRoughV2: null, tagVdrCost: null, tagFinalCost: null,
             tasselsAutoBgt: null, tasselsRoughV2: null, tasselsVdrCost: null, tasselsFinalCost: null,
+            mBtnRate: null, mBtnQty: null, dcRate: null, dcQty: null, zipRate: null, zipQty: null, patchRate: null, patchQty: null, hTrfRate: null, hTrfQty: null, elasticRate: null, elasticQty: null, fusingRate: null, fusingQty: null, badgeRate: null, badgeQty: null, rivetRate: null, rivetQty: null, tapeRate: null, tapeQty: null, otherRate: null, otherQty: null, adjusterRate: null, adjusterQty: null, brotchRate: null, brotchQty: null, buckleRate: null, buckleQty: null, eyeletsRate: null, eyeletsQty: null, hangingDRingRate: null, hangingDRingQty: null, hookRate: null, hookQty: null, labelRate: null, labelQty: null, laceRate: null, laceQty: null, pockettingFabricRate: null, pockettingFabricQty: null, pockettingReadymadeRate: null, pockettingReadymadeQty: null, santaRate: null, santaQty: null, stopperRate: null, stopperQty: null, tagRate: null, tagQty: null, tasselsRate: null, tasselsQty: null,
             printAutoBgt: null, printRoughV2: null, printVendorCost: null, printFinalCost: null,
             embAutoBgt: null, embRoughV2: null, embVendorCost: null, embFinalCost: null,
             washingAutoBgt: null, washingRoughV2: null, washingVendorCost: null, washingFinalCost: null,
@@ -6673,6 +6707,7 @@ export class ApproverController {
                 stopperAutoBgt: true, stopperRoughV2: true, stopperVdrCost: true, stopperFinalCost: true,
                 tagAutoBgt: true, tagRoughV2: true, tagVdrCost: true, tagFinalCost: true,
                 tasselsAutoBgt: true, tasselsRoughV2: true, tasselsVdrCost: true, tasselsFinalCost: true,
+                mBtnRate: true, mBtnQty: true, dcRate: true, dcQty: true, zipRate: true, zipQty: true, patchRate: true, patchQty: true, hTrfRate: true, hTrfQty: true, elasticRate: true, elasticQty: true, fusingRate: true, fusingQty: true, badgeRate: true, badgeQty: true, rivetRate: true, rivetQty: true, tapeRate: true, tapeQty: true, otherRate: true, otherQty: true, adjusterRate: true, adjusterQty: true, brotchRate: true, brotchQty: true, buckleRate: true, buckleQty: true, eyeletsRate: true, eyeletsQty: true, hangingDRingRate: true, hangingDRingQty: true, hookRate: true, hookQty: true, labelRate: true, labelQty: true, laceRate: true, laceQty: true, pockettingFabricRate: true, pockettingFabricQty: true, pockettingReadymadeRate: true, pockettingReadymadeQty: true, santaRate: true, santaQty: true, stopperRate: true, stopperQty: true, tagRate: true, tagQty: true, tasselsRate: true, tasselsQty: true,
                 printAutoBgt: true, printRoughV2: true, printVendorCost: true, printFinalCost: true,
                 embAutoBgt: true, embRoughV2: true, embVendorCost: true, embFinalCost: true,
                 washingAutoBgt: true, washingRoughV2: true, washingVendorCost: true, washingFinalCost: true,

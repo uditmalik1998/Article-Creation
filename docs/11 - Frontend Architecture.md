@@ -290,3 +290,4 @@ Step 2 of the same page (`currentStep === 'extraction'`). Extraction logic uncha
 - **Table**: `AttributeTable layout="frozen"` — stays horizontal; frozen Image column (checkbox, thumbnail, file name, size) + frozen Design Number column (`left-[250px]`, must match `FROZEN_IMAGE_WIDTH`), then slate Status pill, then the other attributes. Empty required cells outlined orange. No Summary strip. Sticky header (`DataTable` sticky header raised to z-30 so frozen cells slide under it). Fabric extraction keeps the default layout.
 - **Sticky dark action bar** (bottom): ← Setup, counts (+ % while extracting), Start over, Export results, Go home (when complete), Start batch — disabled with the reason in its label ("fill 2 design numbers first" / "pick a sub-division first").
 
+- Shared empty state (`ui-tw/empty.tsx`, used ~20 places incl. Grid Values / Size Master "Pick a major category…"): halo + icon switched from coral `primary` to slate (2026-10-19).

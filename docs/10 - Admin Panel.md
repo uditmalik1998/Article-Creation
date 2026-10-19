@@ -202,3 +202,17 @@ Replaced the side-by-side department columns with:
 - Why deletes are limited: backend `deleteCategory` also deletes that category's `extraction_jobs`, and deleting a sub-department removes its categories — so categories are deactivated (`isActive`) instead of deleted, and only empty departments / sub-departments can be deleted.
 - Uses the existing admin endpoints (`/departments`, `/sub-departments`, `/categories`); no backend change. The unused `onCategorySelect` prop was dropped.
 
+### Hierarchy › Size Master tab — `features/admin/components/SizeMasterEditor.tsx` (2026-10-19, design "Option A · two panes")
+
+Replaced the flat list + modal with two panes (stack on narrow screens):
+- **Left:** search (major category name or an exact size, e.g. "3XL"), division chips (All / KIDS / LADIES / MENS), categories grouped under "DIVISION · SUB-DIVISION" headers, each showing its size range ("S – 3XL") and count. Opens on the first category. No match → "Add sizes for <CODE>".
+- **Right:** "DIVISION › SUB-DIVISION" + category; **Sizes · N** / **History** tabs; Add box (Enter works, duplicates warned); sizes as chips in **real size order** (`compareSizes`: letter scale XS→7XL with 2XL/3XL aliases, kids ages by months with Y = 12, then numbers 28→40, then text); **Quick add** — sizes sibling categories in the same sub-division use that this one lacks; inline amber reason bar (Enter confirms, Esc cancels) instead of a second dialog.
+- Backend `GET /api/admin/size-master/categories` now also returns `division`, `subDivision` and `sizes[]` per category (same `majorCategory` / `count`).
+- Fix: `POST /size-master/add` now copies `division` and `sub_division` (as well as `mc_code`) from the category's existing rows, so new sizes are no longer saved without them.
+- Data source: `maj_cat_sizes` (rows with `status = ACT`), grouped per `major_category` with `MAX(division)` / `MAX(sub_division)`. The React Query key is `['size-master-categories', 'v2']` with a 30 s staleTime, so an older cached response without division can't linger. Categories with no division are grouped under "Unassigned".
+
+### Hierarchy Management page frame — `features/admin/pages/HierarchyManagement.tsx` (2026-10-19, design "Option A · ink header")
+
+- One dark slate header (`bg-slate-800`) holds "ADMIN PANEL", the title, subtitle and an outlined **Export JSON** button; the Grid Values / Size Master / Hierarchy tabs sit on its bottom edge as underline tabs (active = white text + `slate-400` 3px line, same as the article dashboard division tabs).
+- The active tab's white card attaches directly under the header (no separate header card, no ui-tw `Tabs`). Each tab's help line comes from the `TABS` array; only the active editor is mounted.
+- Canvas: https://claude.ai/artifact/GxFmi1YhVJ8Bf3J7BzPYjJ (A ink header · B one card · C left rail · D tiles · E compact toolbar).

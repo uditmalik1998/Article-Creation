@@ -13,7 +13,7 @@ interface EmptyProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'>
 /**
  * Branded empty state.
  *
- * Renders the icon inside a soft coral-tinted halo (concentric rings of
+ * Renders the icon inside a soft slate-tinted halo, matching the ink/slate theme (concentric rings of
  * decreasing opacity) so empty states feel intentional rather than blank.
  * Title uses display font; description uses body font, muted.
  *
@@ -44,13 +44,13 @@ export const Empty: React.FC<EmptyProps> = ({
     >
       <div className={cn('relative flex items-center justify-center', haloOuter)}>
         {/* outer ring — almost invisible */}
-        <span className={cn('absolute inline-block rounded-full bg-primary/8', haloOuter)} />
+        <span className={cn('absolute inline-block rounded-full bg-slate-500/8 dark:bg-slate-400/10', haloOuter)} />
         {/* mid ring */}
-        <span className={cn('absolute inline-block rounded-full bg-primary/12', haloMid)} />
+        <span className={cn('absolute inline-block rounded-full bg-slate-500/12 dark:bg-slate-400/15', haloMid)} />
         {/* inner ring */}
-        <span className={cn('absolute inline-block rounded-full bg-primary/18', haloInner)} />
+        <span className={cn('absolute inline-block rounded-full bg-slate-500/20 dark:bg-slate-400/25', haloInner)} />
         {/* icon */}
-        <span className="relative z-10 flex items-center justify-center text-primary">
+        <span className="relative z-10 flex items-center justify-center text-slate-700 dark:text-slate-200">
           {icon ?? <Inbox className={isCompact ? 'h-5 w-5' : 'h-7 w-7'} strokeWidth={1.75} />}
         </span>
       </div>
