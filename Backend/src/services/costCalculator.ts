@@ -67,7 +67,7 @@ const PRICING = {
 export function calculateCost(
   inputTokens: number,
   outputTokens: number,
-  model: string = process.env.GEMINI_MODEL || 'gemini-2.5-pro'
+  model: string = process.env.GEMINI_MODEL || 'gemini-2.5-flash'
 ): CostCalculation {
   const pricing = PRICING[model as keyof typeof PRICING] || PRICING['gemini-2.5-pro'];
   
@@ -109,7 +109,7 @@ export function calculateCumulativeCost(
   let totalCost = 0;
   
   for (const extraction of extractions) {
-    const model = extraction.model || process.env.GEMINI_MODEL || 'gemini-2.5-pro';
+    const model = extraction.model || process.env.GEMINI_MODEL || 'gemini-2.5-flash';
     const calculation = calculateCost(extraction.inputTokens, extraction.outputTokens, model);
     
     totalInputTokens += calculation.inputTokens;

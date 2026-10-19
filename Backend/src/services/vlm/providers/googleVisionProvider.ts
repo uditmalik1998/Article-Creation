@@ -55,7 +55,7 @@ export class GoogleVisionProvider implements VLMProvider {
 
   constructor(config?: Partial<GoogleVisionConfig>) {
     this.config = {
-      model: process.env.GEMINI_MODEL || 'gemini-2.5-pro',
+      model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
       maxTokens: 65536,  // Gemini 2.5-pro max — effectively unlimited
       temperature: 0.0,
       timeout: 300000,
@@ -84,13 +84,16 @@ export class GoogleVisionProvider implements VLMProvider {
       const imageData = await this.resolveImageToBase64(request.image);
       const prompt = this.buildPrompt(request);
       let response: Awaited<ReturnType<typeof this.callGeminiVision>> | null = null;
-      for (let attempt = 1; attempt <= 3; attempt++) {
+      // Retry at most once, and only on a timeout or a 5xx server error.
+      const MAX_ATTEMPTS = 2;
+      for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
         try {
           response = await this.callGeminiVision(imageData, prompt);
           break;
         } catch (err: any) {
-          console.warn(`Gemini extraction attempt ${attempt}/3 failed: ${err?.message}`);
-          if (attempt < 3) await new Promise(r => setTimeout(r, 1000 * attempt));
+          const retryable = this.isRetryableGeminiError(err);
+          console.warn(`Gemini extraction attempt ${attempt}/${MAX_ATTEMPTS} failed${retryable ? '' : ' (not retried)'}: ${err?.message}`);
+          if (attempt < MAX_ATTEMPTS && retryable) await new Promise(r => setTimeout(r, 1000));
           else throw err;
         }
       }
@@ -123,6 +126,15 @@ export class GoogleVisionProvider implements VLMProvider {
       console.error(`❌ [Google Vision] Extraction failed:`, error instanceof Error ? error.message : 'Unknown error');
       throw new Error(`Google Vision extraction failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
+  }
+
+  /** Timeout (our own wrapper) or a 5xx from the Gemini API — everything else (4xx, bad input) fails at once. */
+  private isRetryableGeminiError(err: any): boolean {
+    const msg = String(err?.message ?? '');
+    if (/timeout/i.test(msg)) return true;
+    const status = Number(err?.status ?? err?.response?.status);
+    if (status >= 500 && status < 600) return true;
+    return /\[5\d\d\b/.test(msg); // SDK messages look like "[503 Service Unavailable] ..."
   }
 
   /**
