@@ -1,5 +1,5 @@
 /**
- * Pool B Uploader — Admin page.
+ * Pool B Uploader — Admin page ("job console" layout).
  *
  * Upload a Matnr × characteristic-value Excel (the Deepak "ART" template),
  * PREVIEW what will be written WITHOUT touching SAP, then COMMIT to patch each
@@ -8,23 +8,28 @@
  * Small files (≤ batchSize rows): synchronous — results appear immediately.
  * Large files (> batchSize rows): queued async job — page polls for progress
  * and shows batch-by-batch status until the job completes.
+ *
+ * Both paths end in the same console: a dark progress panel plus a
+ * "Needs attention" table built from the per-article results (NIC / Locked /
+ * Error), downloadable as .xlsx.
  */
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   Upload as UploadIcon,
   FileSpreadsheet,
   ShieldAlert,
-  CheckCircle2,
-  XCircle,
   Loader2,
   Download,
   Clock,
-  List,
+  AlertTriangle,
+  CheckCircle2,
+  Copy,
+  X,
 } from 'lucide-react';
-import { Button } from '../../../shared/components/ui-tw';
 import { message } from '../../../lib/message';
 import { APP_CONFIG } from '../../../constants/app/config';
+import { cn } from '@/lib/utils';
 
 const TEMPLATE_HEADERS = [
   'Matnr', 'M_FAB_DIV', 'M_YARN', 'M_FAB_MAIN_MVGR_1', 'M_FAB_MAIN_MVGR_2', 'M_WEAVE_01',
@@ -54,6 +59,16 @@ interface PreviewData {
   sample: { matnr: string; attrs: number; preview: string }[];
 }
 
+interface ItemResult {
+  matnr: string;
+  ok: boolean;
+  matkl?: string;
+  writtenCount: number;
+  nicCount: number;
+  lockedCount: number;
+  errorMessage?: string;
+}
+
 interface SyncReport {
   queued: false;
   env: string;
@@ -65,15 +80,7 @@ interface SyncReport {
   totalNic: number;
   totalLocked: number;
   durationMs: number;
-  results: {
-    matnr: string;
-    ok: boolean;
-    matkl?: string;
-    writtenCount: number;
-    nicCount: number;
-    lockedCount: number;
-    errorMessage?: string;
-  }[];
+  results: ItemResult[];
 }
 
 interface JobBatch {
@@ -88,6 +95,7 @@ interface JobBatch {
   startedAt: string | null;
   completedAt: string | null;
   errorMessage: string | null;
+  results: ItemResult[] | null;
 }
 
 interface JobStatus {
@@ -106,137 +114,328 @@ interface JobStatus {
   batches: JobBatch[];
 }
 
-// ─── Status helpers ───────────────────────────────────────────────────────────
+type IssueKind = 'NIC' | 'Locked' | 'Error';
+
+interface Issue extends ItemResult {
+  kinds: IssueKind[];
+  problem: string;
+  fix: string;
+}
+
+/** What the console shows — the same shape for a sync report and an async job. */
+interface ConsoleRun {
+  env: string;
+  test: boolean;
+  status: 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'PARTIAL' | 'FAILED';
+  total: number;
+  ok: number;
+  failed: number;
+  startedAt: string | null;
+  completedAt: string | null;
+  durationMs: number | null;
+  jobId: string | null;
+  batchSize: number | null;
+  batches: JobBatch[];
+  results: ItemResult[];
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const JOB_TERMINAL = new Set(['COMPLETED', 'PARTIAL', 'FAILED']);
 const POLL_INTERVAL_MS = 3000;
 
-const batchStatusColor: Record<string, string> = {
-  QUEUED: 'text-muted-foreground',
-  PROCESSING: 'text-blue-600',
-  COMPLETED: 'text-emerald-600',
-  FAILED: 'text-red-600',
-};
-
-const jobStatusBadge: Record<string, string> = {
-  QUEUED: 'bg-slate-100 text-slate-600',
-  PROCESSING: 'bg-blue-100 text-blue-700',
-  COMPLETED: 'bg-emerald-100 text-emerald-700',
-  PARTIAL: 'bg-amber-100 text-amber-700',
-  FAILED: 'bg-red-100 text-red-700',
-};
+function formatDuration(ms: number): string {
+  if (ms < 60000) return `${Math.max(0, Math.round(ms / 1000))}s`;
+  return `${Math.floor(ms / 60000)}m ${Math.round((ms % 60000) / 1000)}s`;
+}
 
 function elapsed(start: string | null, end: string | null): string {
   if (!start) return '—';
-  const ms = new Date(end ?? new Date()).getTime() - new Date(start).getTime();
-  return ms < 60000 ? `${Math.round(ms / 1000)}s` : `${Math.round(ms / 60000)}m ${Math.round((ms % 60000) / 1000)}s`;
+  return formatDuration(new Date(end ?? new Date()).getTime() - new Date(start).getTime());
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-function Stat({ label, value, tone }: { label: string; value: React.ReactNode; tone?: 'green' | 'red' }) {
-  const color = tone === 'green' ? 'text-emerald-600' : tone === 'red' ? 'text-red-600' : 'text-foreground';
-  return (
-    <div className="rounded border bg-background p-2">
-      <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
-      <div className={`text-lg font-semibold ${color}`}>{value}</div>
-    </div>
-  );
+function clockTime(ts: string | null): string {
+  if (!ts) return '';
+  return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-function JobProgressPanel({ job, polling }: { job: JobStatus; polling: boolean }) {
-  const doneBatches = job.batches.filter((b) => b.status === 'COMPLETED' || b.status === 'FAILED').length;
-  const pct = job.totalBatches > 0 ? Math.round((doneBatches / job.totalBatches) * 100) : 0;
+function toIssue(r: ItemResult): Issue | null {
+  const kinds: IssueKind[] = [];
+  if (!r.ok) kinds.push('Error');
+  if (r.nicCount > 0) kinds.push('NIC');
+  if (r.lockedCount > 0) kinds.push('Locked');
+  if (kinds.length === 0) return null;
+
+  if (!r.ok) {
+    return {
+      ...r,
+      kinds,
+      problem: r.errorMessage || 'SAP rejected the article',
+      fix: /not found|does not exist/i.test(r.errorMessage ?? '')
+        ? 'Check the article number'
+        : 'Fix the cause, then re-upload this article',
+    };
+  }
+  if (r.nicCount > 0) {
+    return {
+      ...r,
+      kinds,
+      problem: `${r.nicCount} characteristic${r.nicCount !== 1 ? 's' : ''} not on the class`,
+      fix: `Run Pool A for ${r.matkl || 'this class'}, then re-upload`,
+    };
+  }
+  return {
+    ...r,
+    kinds,
+    problem: `${r.lockedCount} locked field${r.lockedCount !== 1 ? 's' : ''} ignored`,
+    fix: 'No action — locked fields are not changed',
+  };
+}
+
+const KIND_STYLE: Record<IssueKind, string> = {
+  Error: 'bg-red-100 text-red-700',
+  NIC: 'bg-amber-100 text-amber-800',
+  Locked: 'bg-slate-200 text-slate-800',
+};
+
+// ─── Console (progress panel) ────────────────────────────────────────────────
+
+function statusPill(run: ConsoleRun, doneBatches: number) {
+  if (run.status === 'QUEUED') return { label: 'Queued', cls: 'bg-slate-600' };
+  if (run.status === 'PROCESSING') {
+    const label = run.batches.length > 0
+      ? `${run.test ? 'Validating' : 'Writing'} · batch ${Math.min(doneBatches + 1, run.batches.length)} of ${run.batches.length}`
+      : run.test ? 'Validating' : 'Writing';
+    return { label, cls: 'bg-blue-700' };
+  }
+  if (run.status === 'COMPLETED') return { label: 'Done', cls: 'bg-emerald-700' };
+  if (run.status === 'PARTIAL') return { label: 'Done with failures', cls: 'bg-amber-700' };
+  return { label: 'Failed', cls: 'bg-red-700' };
+}
+
+function ConsolePanel({ run, polling }: { run: ConsoleRun; polling: boolean }) {
+  const doneBatches = run.batches.filter((b) => b.status === 'COMPLETED' || b.status === 'FAILED').length;
+  const processed = run.ok + run.failed;
+  const pct = run.total > 0 ? Math.round((processed / run.total) * 100) : 0;
+  const okPct = run.total > 0 ? (run.ok / run.total) * 100 : 0;
+  const failPct = run.total > 0 ? (run.failed / run.total) * 100 : 0;
+  const waiting = Math.max(0, run.total - processed);
+  const pill = statusPill(run, doneBatches);
+  const duration = run.durationMs != null ? formatDuration(run.durationMs) : elapsed(run.startedAt, run.completedAt);
+
+  const copyJobId = () => {
+    if (!run.jobId) return;
+    navigator.clipboard?.writeText(run.jobId).then(
+      () => message.success('Job ID copied'),
+      () => message.error('Could not copy'),
+    );
+  };
 
   return (
-    <div className="mt-4 rounded-lg border bg-card p-4">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="font-semibold flex items-center gap-2">
-          <List className="h-4 w-4" />
-          Async Job — {job.env.toUpperCase()} {job.test && <span className="text-amber-600">(test mode)</span>}
-        </h2>
-        <div className="flex items-center gap-2">
-          {polling && <Loader2 className="h-4 w-4 animate-spin text-blue-500" />}
-          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${jobStatusBadge[job.status] ?? ''}`}>
-            {job.status}
+    <section className="flex flex-col gap-5 rounded-2xl bg-slate-800 p-5 text-white sm:p-6" aria-live="polite">
+      <div className="flex flex-wrap items-center gap-3">
+        <span className={cn('inline-flex h-7 items-center gap-2 rounded-full px-3 text-xs font-semibold', pill.cls)}>
+          {polling ? <Loader2 className="h-3 w-3 animate-spin" /> : <span className="h-2 w-2 rounded-full bg-white" />}
+          {pill.label}
+        </span>
+        <span className="text-sm text-slate-300">
+          {run.env.toUpperCase()} · {run.test ? 'test run (nothing saved)' : 'live write'}
+          {run.startedAt && ` · started ${clockTime(run.startedAt)}`} · {duration}
+          {JOB_TERMINAL.has(run.status) ? ' total' : ' elapsed'}
+        </span>
+        {run.jobId && (
+          <button
+            type="button"
+            onClick={copyJobId}
+            className="ml-auto inline-flex h-10 items-center gap-2 rounded-lg border border-slate-600 px-3 text-[13px] font-medium hover:bg-slate-700"
+          >
+            <Copy className="h-3.5 w-3.5" /> Copy job ID
+          </button>
+        )}
+      </div>
+
+      <div className="flex flex-wrap items-end gap-6">
+        <div className="flex flex-col">
+          <span className="text-5xl font-semibold leading-none">{pct}%</span>
+          <span className="mt-1 text-[13px] text-slate-300">
+            {processed.toLocaleString()} of {run.total.toLocaleString()} articles done
           </span>
+        </div>
+        <div className="flex min-w-[260px] flex-1 flex-col gap-2">
+          <div
+            role="progressbar"
+            aria-valuenow={pct}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Run progress"
+            className="flex h-3 overflow-hidden rounded-full bg-slate-700"
+          >
+            <span className="bg-emerald-400 transition-all duration-500" style={{ width: `${okPct}%` }} />
+            <span className="bg-red-400 transition-all duration-500" style={{ width: `${failPct}%` }} />
+          </div>
+          <div className="flex flex-wrap gap-4 text-[13px] text-slate-300">
+            <span><strong className="text-white">{run.ok.toLocaleString()}</strong> ok</span>
+            <span><strong className="text-red-300">{run.failed.toLocaleString()}</strong> failed</span>
+            {waiting > 0 && <span><strong className="text-white">{waiting.toLocaleString()}</strong> waiting</span>}
+          </div>
         </div>
       </div>
 
-      {/* Summary stats */}
-      <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4 mb-3">
-        <Stat label="Total records" value={job.totalRows} />
-        <Stat label="Batches" value={`${doneBatches} / ${job.totalBatches}`} />
-        <Stat label="Records OK" value={job.successRows} tone={job.successRows > 0 ? 'green' : undefined} />
-        <Stat label="Records failed" value={job.failedRows} tone={job.failedRows > 0 ? 'red' : undefined} />
-      </div>
+      {run.batches.length > 0 && (
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+          {run.batches.map((b) => {
+            const done = b.status === 'COMPLETED' || b.status === 'FAILED';
+            const label = b.status === 'COMPLETED' ? 'Done' : b.status === 'FAILED' ? 'Failed' : b.status === 'PROCESSING' ? (run.test ? 'Validating' : 'Writing') : 'Queued';
+            return (
+              <div
+                key={b.id}
+                className={cn(
+                  'flex flex-col gap-1.5 rounded-xl border bg-slate-700/60 p-3.5',
+                  b.status === 'PROCESSING' ? 'border-blue-500' : b.status === 'FAILED' ? 'border-red-400' : 'border-slate-600',
+                )}
+              >
+                <div className="flex justify-between text-[13px]">
+                  <span className="font-semibold">Batch {b.batchIndex + 1}</span>
+                  <span
+                    className={cn(
+                      'font-semibold',
+                      b.status === 'COMPLETED' && 'text-emerald-300',
+                      b.status === 'FAILED' && 'text-red-300',
+                      b.status === 'PROCESSING' && 'text-blue-300',
+                      b.status === 'QUEUED' && 'text-slate-300',
+                    )}
+                  >
+                    {label}
+                  </span>
+                </div>
+                <span className="text-xs text-slate-300">
+                  Rows {(b.startRow + 1).toLocaleString()}–{(b.endRow + 1).toLocaleString()} · {elapsed(b.startedAt, b.completedAt)}
+                </span>
+                <div className="h-1.5 overflow-hidden rounded-full bg-slate-600">
+                  {done ? (
+                    <span className="flex h-full">
+                      <span className="bg-emerald-400" style={{ width: `${(b.successCount / Math.max(1, b.rowCount)) * 100}%` }} />
+                      <span className="bg-red-400" style={{ width: `${(b.failedCount / Math.max(1, b.rowCount)) * 100}%` }} />
+                    </span>
+                  ) : b.status === 'PROCESSING' ? (
+                    <span className="block h-full w-1/3 animate-pulse bg-blue-400" />
+                  ) : null}
+                </div>
+                <span className="text-xs text-slate-300">
+                  {done
+                    ? `${b.successCount} ok · ${b.failedCount} failed`
+                    : `${b.rowCount} ${b.status === 'PROCESSING' ? 'in progress' : 'waiting'}`}
+                </span>
+                {b.errorMessage && <span className="text-xs text-red-300">{b.errorMessage}</span>}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
+}
 
-      {/* Progress bar */}
-      <div className="h-2 w-full rounded-full bg-muted overflow-hidden mb-3">
-        <div
-          className="h-2 rounded-full bg-emerald-500 transition-all duration-500"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-      <p className="text-xs text-muted-foreground mb-3">
-        {pct}% complete · {job.batchSize} records/batch · elapsed {elapsed(job.startedAt, job.completedAt)}
-      </p>
+// ─── Needs attention table ───────────────────────────────────────────────────
 
-      {/* Batch table */}
-      <div className="max-h-72 overflow-auto rounded border">
-        <table className="w-full text-left text-xs">
-          <thead className="sticky top-0 bg-muted">
+function AttentionTable({ issues, running, onDownload }: { issues: Issue[]; running: boolean; onDownload: () => void }) {
+  const [filter, setFilter] = useState<'All' | IssueKind>('All');
+  const counts = useMemo(
+    () => ({
+      NIC: issues.filter((i) => i.kinds.includes('NIC')).length,
+      Locked: issues.filter((i) => i.kinds.includes('Locked')).length,
+      Error: issues.filter((i) => i.kinds.includes('Error')).length,
+    }),
+    [issues],
+  );
+  const shown = filter === 'All' ? issues : issues.filter((i) => i.kinds.includes(filter));
+  const tabs: ('All' | IssueKind)[] = ['All', 'NIC', 'Locked', 'Error'];
+
+  if (issues.length === 0) {
+    return (
+      <section className="flex items-center gap-3 rounded-2xl border border-border bg-card px-5 py-4 text-sm">
+        {running ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            No problems so far. Articles that need attention show here as each batch finishes.
+          </>
+        ) : (
+          <>
+            <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+            Every article went through with no NIC, locked or failed values.
+          </>
+        )}
+      </section>
+    );
+  }
+
+  return (
+    <section className="overflow-hidden rounded-2xl border border-border bg-card">
+      <div className="flex flex-wrap items-center gap-3 border-b border-border px-4 py-3.5 sm:px-5">
+        <h2 className="text-base font-semibold">Needs attention · {issues.length.toLocaleString()}</h2>
+        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filter problems">
+          {tabs.map((t) => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => setFilter(t)}
+              aria-pressed={filter === t}
+              className={cn(
+                'h-9 rounded-lg px-3 text-xs font-medium transition-colors',
+                filter === t ? 'bg-slate-800 text-white' : 'border border-border bg-card hover:bg-slate-100',
+              )}
+            >
+              {t === 'All' ? 'All' : `${t} · ${counts[t]}`}
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={onDownload}
+          className="ml-auto inline-flex h-10 items-center gap-2 rounded-lg border border-border bg-card px-3.5 text-[13px] font-medium hover:bg-slate-100"
+        >
+          <Download className="h-4 w-4" /> Download (.xlsx)
+        </button>
+      </div>
+      <div className="max-h-[480px] overflow-auto">
+        <table className="w-full min-w-[760px] border-collapse text-[13px]">
+          <thead className="sticky top-0 bg-muted text-left text-xs uppercase tracking-wider text-muted-foreground">
             <tr>
-              <th className="px-2 py-1 font-medium">Batch</th>
-              <th className="px-2 py-1 font-medium">Rows</th>
-              <th className="px-2 py-1 font-medium">Status</th>
-              <th className="px-2 py-1 font-medium">OK</th>
-              <th className="px-2 py-1 font-medium">Failed</th>
-              <th className="px-2 py-1 font-medium">Time</th>
+              <th className="px-4 py-2.5 font-semibold sm:px-5">Article</th>
+              <th className="px-3 py-2.5 font-semibold">MC</th>
+              <th className="px-3 py-2.5 font-semibold">Written</th>
+              <th className="px-3 py-2.5 font-semibold">Problem</th>
+              <th className="px-4 py-2.5 font-semibold sm:px-5">What to do</th>
             </tr>
           </thead>
           <tbody>
-            {job.batches.map((b) => (
-              <tr key={b.id} className="border-t">
-                <td className="px-2 py-1 font-mono">#{b.batchIndex + 1}</td>
-                <td className="px-2 py-1">{b.startRow + 1}–{b.endRow + 1}</td>
-                <td className={`px-2 py-1 font-medium ${batchStatusColor[b.status] ?? ''}`}>
-                  {b.status === 'PROCESSING' && <Loader2 className="inline h-3 w-3 animate-spin mr-1" />}
-                  {b.status}
+            {shown.map((i) => (
+              <tr key={i.matnr} className="border-t border-slate-100">
+                <td className="px-4 py-2.5 font-mono font-medium sm:px-5">{i.matnr}</td>
+                <td className="px-3 py-2.5 font-mono text-muted-foreground">{i.matkl || '—'}</td>
+                <td className="px-3 py-2.5">{i.writtenCount}</td>
+                <td className="px-3 py-2.5">
+                  <span className="flex flex-wrap items-center gap-1.5">
+                    {i.kinds.map((k) => (
+                      <span key={k} className={cn('rounded-md px-2 py-0.5 text-[11px] font-semibold', KIND_STYLE[k])}>
+                        {k}
+                      </span>
+                    ))}
+                    <span className="text-muted-foreground">{i.problem}</span>
+                  </span>
                 </td>
-                <td className="px-2 py-1">{b.status === 'QUEUED' ? '—' : b.successCount}</td>
-                <td className={`px-2 py-1 ${b.failedCount > 0 ? 'text-red-600' : ''}`}>
-                  {b.status === 'QUEUED' ? '—' : b.failedCount}
-                </td>
-                <td className="px-2 py-1 text-muted-foreground">{elapsed(b.startedAt, b.completedAt)}</td>
+                <td className="px-4 py-2.5 sm:px-5">{i.fix}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-
-      {/* Error messages */}
-      {job.batches.some((b) => b.errorMessage) && (
-        <div className="mt-2 space-y-1">
-          {job.batches.filter((b) => b.errorMessage).map((b) => (
-            <p key={b.id} className="text-xs text-red-600">
-              Batch #{b.batchIndex + 1}: {b.errorMessage}
-            </p>
-          ))}
-        </div>
+      {counts.NIC > 0 && (
+        <p className="border-t border-border px-4 py-3 text-xs text-muted-foreground sm:px-5">
+          NIC = the characteristic is not assigned to the article's class. Run Pool A (KSML Uploader) for those classes first.
+        </p>
       )}
-
-      {/* Final status message */}
-      {JOB_TERMINAL.has(job.status) && (
-        <div className="mt-3 flex items-center gap-1 text-sm">
-          {job.status === 'COMPLETED'
-            ? <><CheckCircle2 className="h-4 w-4 text-emerald-600" /> All {job.totalRows} records processed successfully.</>
-            : job.status === 'PARTIAL'
-              ? <><XCircle className="h-4 w-4 text-amber-500" /> {job.failedRows} record(s) failed across some batches.</>
-              : <><XCircle className="h-4 w-4 text-red-600" /> Job failed — see batch errors above.</>}
-        </div>
-      )}
-    </div>
+    </section>
   );
 }
 
@@ -252,7 +451,11 @@ export default function PoolBUploaderPage() {
   const [testMode, setTestMode] = useState(true);
   const [loading, setLoading] = useState(false);
   const [committing, setCommitting] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [confirmText, setConfirmText] = useState('');
+  const [dragOver, setDragOver] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const token = () => localStorage.getItem('authToken');
 
@@ -261,7 +464,6 @@ export default function PoolBUploaderPage() {
     setPolling(false);
   }, []);
 
-  // Clean up polling on unmount
   useEffect(() => () => stopPolling(), [stopPolling]);
 
   const startPolling = useCallback((jobId: string) => {
@@ -276,18 +478,25 @@ export default function PoolBUploaderPage() {
         setJobStatus(json as JobStatus);
         if (JOB_TERMINAL.has(json.status)) {
           stopPolling();
-          if (json.status === 'COMPLETED') message.success(`All ${json.totalRows} records written successfully`);
+          if (json.status === 'COMPLETED') message.success(`All ${json.totalRows} records processed`);
           else if (json.status === 'PARTIAL') message.warning(`Done with ${json.failedRows} failed record(s)`);
-          else message.error('Job failed — check batch errors');
+          else message.error('Job failed — check the batches');
         }
       } catch { stopPolling(); }
     };
-    poll(); // immediate first poll
+    poll();
     pollRef.current = setInterval(poll, POLL_INTERVAL_MS);
   }, [stopPolling]);
 
-  const reset = () => { setPreview(null); setReport(null); setJobStatus(null); stopPolling(); };
-  const onPickFile = (f: File | null) => { setFile(f); reset(); };
+  const resetRun = () => { setReport(null); setJobStatus(null); stopPolling(); setConfirming(false); setConfirmText(''); };
+
+  const onPickFile = (f: File | null) => {
+    if (f && !/\.xlsx?$/i.test(f.name)) { message.warning('Choose an .xlsx or .xls file'); return; }
+    setFile(f); setPreview(null); resetRun();
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const startOver = () => onPickFile(null);
 
   const downloadTemplate = useCallback(async () => {
     try {
@@ -309,12 +518,11 @@ export default function PoolBUploaderPage() {
     }
   }, []);
 
-  const doPreview = useCallback(async () => {
-    if (!file) { message.warning('Choose an Excel file first'); return; }
-    setLoading(true); setReport(null); setJobStatus(null); stopPolling();
+  const doPreview = useCallback(async (f: File) => {
+    setLoading(true); resetRun();
     try {
       const fd = new FormData();
-      fd.append('file', file);
+      fd.append('file', f);
       const res = await fetch(`${APP_CONFIG.api.baseURL}/poolb/preview`, {
         method: 'POST', headers: { Authorization: `Bearer ${token()}` }, body: fd,
       });
@@ -322,34 +530,27 @@ export default function PoolBUploaderPage() {
       if (!res.ok || !json.success) throw new Error(json.error || 'Preview failed');
       setPreview(json as PreviewData);
       if (json.defaultEnv === 'qa' || json.defaultEnv === 'prod') setEnv(json.defaultEnv);
-      const queueNote = json.willQueue ? ` · will be split into batches of ${json.batchSize}` : '';
-      message.success(`Parsed ${json.matnrCount} articles · ${json.totalValueCells} values${queueNote}`);
     } catch (e) {
+      setPreview(null);
       message.error(e instanceof Error ? e.message : 'Preview failed');
     } finally { setLoading(false); }
-  }, [file, stopPolling]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stopPolling]);
+
+  // Preview runs as soon as a file is chosen — it never calls SAP.
+  useEffect(() => {
+    if (file) doPreview(file);
+  }, [file, doPreview]);
+
+  const isLiveProd = env === 'prod' && !testMode;
 
   const doCommit = useCallback(async () => {
     if (!file || !preview) return;
     const envU = env.toUpperCase();
-    const verb = testMode ? 'VALIDATE (SAP test mode)' : 'WRITE values';
-    const batchNote = preview.willQueue
-      ? `\n\nFile will be split into ${Math.ceil(preview.matnrCount / (preview.batchSize || 500))} batches of ${preview.batchSize}. Processing runs in the background.`
-      : '';
-    const ok = window.confirm(
-      `You are about to ${verb} on ${envU}:\n\n` +
-      `• ${preview.matnrCount} articles\n• ${preview.totalValueCells} attribute values` +
-      batchNote + '\n\n' +
-      (testMode ? 'Test mode makes NO permanent changes.' : `⚠️ This performs LIVE writes to SAP (${envU}).`) +
-      '\n\nContinue?',
-    );
-    if (!ok) return;
-
-    setCommitting(true); setReport(null); setJobStatus(null); stopPolling();
-    const loadingMsg = preview.willQueue
-      ? `Queuing ${preview.matnrCount} records across ${Math.ceil(preview.matnrCount / (preview.batchSize || 500))} batches…`
-      : `${testMode ? 'Validating' : 'Writing'} to SAP (${envU})… this can take several minutes`;
-    const loadingId = message.loading(loadingMsg);
+    setCommitting(true); setConfirming(false); setConfirmText(''); setReport(null); setJobStatus(null); stopPolling();
+    const loadingId = preview.willQueue
+      ? undefined
+      : message.loading(`${testMode ? 'Validating' : 'Writing'} on ${envU}… this can take several minutes`);
     try {
       const fd = new FormData();
       fd.append('file', file);
@@ -359,198 +560,385 @@ export default function PoolBUploaderPage() {
         method: 'POST', headers: { Authorization: `Bearer ${token()}` }, body: fd,
       });
       const json = await res.json();
-      message.dismiss(loadingId);
+      if (loadingId !== undefined) message.dismiss(loadingId);
       if (!res.ok || !json.success) throw new Error(json.error || 'Commit failed');
 
       if (json.queued) {
-        // Large file: async job — start polling
-        message.info(`Job queued (${json.totalBatches} batches). Tracking progress below.`);
+        setJobStatus({
+          id: json.jobId,
+          status: 'QUEUED',
+          env,
+          test: testMode,
+          totalRows: json.totalRows,
+          totalBatches: json.totalBatches,
+          batchSize: json.batchSize,
+          successRows: 0,
+          failedRows: 0,
+          createdAt: new Date().toISOString(),
+          startedAt: null,
+          completedAt: null,
+          batches: [],
+        });
         startPolling(json.jobId);
       } else {
-        // Small file: sync result
         setReport(json as SyncReport);
         if (json.failed > 0) message.warning(`Done with ${json.failed} article(s) failed`);
-        else message.success(`Done — ${json.totalWritten} values written across ${json.ok} articles`);
+        else message.success(`Done — ${json.totalWritten} values across ${json.ok} articles`);
       }
     } catch (e) {
-      message.dismiss(loadingId);
+      if (loadingId !== undefined) message.dismiss(loadingId);
       message.error(e instanceof Error ? e.message : 'Commit failed');
     } finally { setCommitting(false); }
   }, [file, preview, env, testMode, startPolling, stopPolling]);
 
-  const failedRows = report?.results.filter((r) => !r.ok) ?? [];
+  // ── Console data (sync report or async job, one shape) ──────────────────
+
+  const run: ConsoleRun | null = useMemo(() => {
+    if (jobStatus) {
+      return {
+        env: jobStatus.env,
+        test: jobStatus.test,
+        status: jobStatus.status,
+        total: jobStatus.totalRows,
+        ok: jobStatus.successRows,
+        failed: jobStatus.failedRows,
+        startedAt: jobStatus.startedAt ?? jobStatus.createdAt,
+        completedAt: jobStatus.completedAt,
+        durationMs: null,
+        jobId: jobStatus.id,
+        batchSize: jobStatus.batchSize,
+        batches: jobStatus.batches,
+        results: jobStatus.batches.flatMap((b) => (Array.isArray(b.results) ? b.results : [])),
+      };
+    }
+    if (report) {
+      return {
+        env: report.env,
+        test: report.test,
+        status: report.failed === 0 ? 'COMPLETED' : report.ok === 0 ? 'FAILED' : 'PARTIAL',
+        total: report.matnrs,
+        ok: report.ok,
+        failed: report.failed,
+        startedAt: null,
+        completedAt: null,
+        durationMs: report.durationMs,
+        jobId: null,
+        batchSize: null,
+        batches: [],
+        results: report.results,
+      };
+    }
+    return null;
+  }, [jobStatus, report]);
+
+  const issues = useMemo(
+    () => (run ? run.results.map(toIssue).filter((i): i is Issue => i !== null) : []),
+    [run],
+  );
+
+  const downloadIssues = useCallback(async () => {
+    if (issues.length === 0) return;
+    try {
+      const { utils, writeFile } = await import('xlsx');
+      const ws = utils.json_to_sheet(
+        issues.map((i) => ({
+          Article: i.matnr,
+          MC: i.matkl ?? '',
+          Status: i.ok ? 'OK' : 'FAILED',
+          'Values written': i.writtenCount,
+          NIC: i.nicCount,
+          Locked: i.lockedCount,
+          Problem: i.problem,
+          'What to do': i.fix,
+        })),
+      );
+      const wb = utils.book_new();
+      utils.book_append_sheet(wb, ws, 'Needs attention');
+      writeFile(wb, `poolb-needs-attention-${new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-')}.xlsx`);
+    } catch {
+      message.error('Download failed');
+    }
+  }, [issues]);
+
+  const running = !!run && !JOB_TERMINAL.has(run.status);
+  const batchCount = preview ? Math.ceil(preview.matnrCount / (preview.batchSize || 500)) : 0;
+  const actionLabel = `${testMode ? 'Validate' : 'Write'} ${preview?.totalValueCells.toLocaleString() ?? ''} values on ${env.toUpperCase()}`;
+
+  // ── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <div className="mx-auto max-w-4xl p-6">
-      <div className="mb-6">
-        <h1 className="flex items-center gap-2 text-2xl font-semibold">
-          <UploadIcon className="h-6 w-6 text-[#FF6F61]" /> Pool B — Article Value Uploader
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Upload a <b>Matnr × characteristic-value</b> Excel (first column = article number, other columns =
-          SAP characteristics like <code>M_FAB_DIV</code>). Each article's values are written into SAP (AUSP).
-          Files over 500 records are automatically batched and processed in the background.
-        </p>
-      </div>
-
-      {/* Step 1 — File */}
-      <div className="rounded-lg border bg-card p-4">
-        <label className="flex cursor-pointer items-center gap-3">
-          <span className="inline-flex items-center gap-2 rounded-md border border-dashed px-4 py-2 text-sm hover:bg-muted">
-            <FileSpreadsheet className="h-4 w-4" /> Choose Excel (.xlsx / .xls)
-          </span>
-          <input type="file" accept=".xlsx,.xls" className="hidden" onChange={(e) => onPickFile(e.target.files?.[0] ?? null)} />
-          {file && <span className="text-sm text-muted-foreground">{file.name}</span>}
-        </label>
-        <div className="mt-3 flex items-center gap-2">
-          <Button onClick={doPreview} disabled={!file || loading}>
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileSpreadsheet className="h-4 w-4" />}
-            Preview
-          </Button>
-          <Button variant="outline" onClick={downloadTemplate}>
-            <Download className="h-4 w-4" />
-            Download Template
-          </Button>
+    <div className="mx-auto flex max-w-[1280px] flex-col gap-5 p-4 sm:p-6">
+      {/* Header */}
+      <header className="flex flex-wrap items-center gap-3">
+        <div className="mr-auto space-y-1">
+          <h1 className="text-2xl font-bold sm:text-3xl">Pool B — Article values</h1>
+          <p className="text-sm text-muted-foreground">
+            Write characteristic values onto articles in SAP (AUSP). Run Pool A first so every characteristic is on the class.
+          </p>
         </div>
-      </div>
-
-      {/* Step 2 — Preview */}
-      {preview && (
-        <div className="mt-4 rounded-lg border bg-card p-4">
-          <h2 className="mb-2 font-semibold">Preview (no SAP calls made)</h2>
-          <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-            <Stat label="Articles" value={preview.matnrCount} />
-            <Stat label="Attr columns" value={preview.attributeColumns.length} />
-            <Stat label="Values to write" value={preview.totalValueCells} />
-            <Stat label="Skipped" value={preview.skipped} />
-          </div>
-          {preview.willQueue && (
-            <div className="mt-2 flex items-center gap-1.5 rounded-md bg-blue-50 border border-blue-200 px-3 py-2 text-xs text-blue-700">
-              <Clock className="h-3.5 w-3.5 shrink-0" />
-              <span>
-                <b>{preview.matnrCount} records</b> will be split into{' '}
-                <b>{Math.ceil(preview.matnrCount / preview.batchSize)} batches</b> of{' '}
-                {preview.batchSize} and processed in the background. You can track progress on this page.
-              </span>
-            </div>
-          )}
-          <div className="mt-3 text-xs text-muted-foreground">
-            Article column: <b>{preview.matnrColumn}</b>
-          </div>
-          <div className="mt-1 text-xs text-muted-foreground">
-            Characteristics: {preview.attributeColumns.slice(0, 12).join(', ')}
-            {preview.attributeColumns.length > 12 && ` … +${preview.attributeColumns.length - 12} more`}
-          </div>
-          {preview.warnings.length > 0 && (
-            <ul className="mt-2 list-inside list-disc text-xs text-amber-600">
-              {preview.warnings.map((w, i) => <li key={i}>{w}</li>)}
-            </ul>
-          )}
-
-          {preview.sample.length > 0 && (
-            <div className="mt-3 max-h-48 overflow-auto rounded border">
-              <table className="w-full text-left text-xs">
-                <thead className="sticky top-0 bg-muted">
-                  <tr><th className="px-2 py-1">Article</th><th className="px-2 py-1"># attrs</th><th className="px-2 py-1">Preview</th></tr>
-                </thead>
-                <tbody>
-                  {preview.sample.map((p, i) => (
-                    <tr key={i} className="border-t">
-                      <td className="px-2 py-1 font-mono">{p.matnr}</td>
-                      <td className="px-2 py-1">{p.attrs}</td>
-                      <td className="px-2 py-1 font-mono text-[10px]">{p.preview}…</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* Step 3 — Commit controls */}
-          <div className="mt-4 rounded-md border border-amber-300 bg-amber-50 p-3">
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center gap-2 text-sm">
-                <span className="font-medium">Environment:</span>
-                <select
-                  value={env}
-                  onChange={(e) => setEnv(e.target.value as 'qa' | 'prod')}
-                  className="rounded border px-2 py-1 text-sm"
-                >
-                  <option value="qa">QA</option>
-                  <option value="prod">PROD</option>
-                </select>
-              </div>
-              <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" checked={testMode} onChange={(e) => setTestMode(e.target.checked)} />
-                SAP test mode (validate, no permanent write)
-              </label>
-            </div>
-            {env === 'prod' && !testMode && (
-              <p className="mt-2 flex items-center gap-1 text-xs font-semibold text-red-600">
-                <ShieldAlert className="h-3.5 w-3.5" /> LIVE PROD write — this commits attribute values to SAP.
-              </p>
-            )}
-            <Button
-              onClick={doCommit}
-              disabled={committing || preview.matnrCount === 0}
-              className="mt-3 bg-[#FF6F61] hover:bg-[#ff5b4d]"
+        {file && (
+          <div className="flex h-11 items-center gap-2.5 rounded-lg border border-border bg-card pl-3.5 pr-1.5 text-[13px]">
+            <FileSpreadsheet className="h-4 w-4 text-emerald-700" />
+            <span className="max-w-[220px] truncate font-medium" title={file.name}>{file.name}</span>
+            <button
+              type="button"
+              onClick={startOver}
+              disabled={running}
+              className="h-8 rounded-md bg-slate-100 px-2.5 text-xs font-medium hover:bg-slate-200 disabled:opacity-50"
             >
-              {committing ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadIcon className="h-4 w-4" />}
-              {preview.willQueue ? 'Queue job on ' : (testMode ? 'Validate on ' : 'Write to ')} {env.toUpperCase()}
-            </Button>
+              New upload
+            </button>
           </div>
+        )}
+        <button
+          type="button"
+          onClick={downloadTemplate}
+          className="inline-flex h-11 items-center gap-2 rounded-lg border border-border bg-card px-3.5 text-sm font-medium hover:bg-slate-100"
+        >
+          <Download className="h-4 w-4" /> Template
+        </button>
+      </header>
+
+      {/* Run console */}
+      {run && (
+        <>
+          <ConsolePanel run={run} polling={polling} />
+          <AttentionTable issues={issues} running={running} onDownload={downloadIssues} />
+        </>
+      )}
+
+      {/* Upload */}
+      {!file && (
+        <label
+          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={(e) => { e.preventDefault(); setDragOver(false); onPickFile(e.dataTransfer.files?.[0] ?? null); }}
+          className={cn(
+            'flex min-h-[220px] cursor-pointer flex-col items-center justify-center gap-2.5 rounded-2xl border-2 border-dashed p-6 text-center transition-colors focus-within:border-slate-800',
+            dragOver ? 'border-slate-800 bg-slate-50' : 'border-slate-300 bg-card hover:border-slate-500',
+          )}
+        >
+          <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-800 text-white">
+            <UploadIcon className="h-6 w-6" />
+          </span>
+          <span className="text-base font-semibold">Drop the Excel here, or browse</span>
+          <span className="text-[13px] text-muted-foreground">
+            .xlsx or .xls · first column Matnr, then one column per characteristic (M_FAB_DIV, M_WASH…). Type BLANK to clear a value.
+          </span>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".xlsx,.xls"
+            className="sr-only"
+            onChange={(e) => onPickFile(e.target.files?.[0] ?? null)}
+          />
+        </label>
+      )}
+
+      {file && loading && (
+        <div className="flex items-center gap-3 rounded-2xl border border-border bg-card px-5 py-6 text-sm">
+          <Loader2 className="h-4 w-4 animate-spin" /> Reading {file.name}…
         </div>
       )}
 
-      {/* Step 4a — Async job progress */}
-      {jobStatus && <JobProgressPanel job={jobStatus} polling={polling} />}
+      {/* Review + run settings (hidden once a run starts) */}
+      {preview && !run && !loading && (
+        <section className="overflow-hidden rounded-2xl border border-border bg-card">
+          <div className="flex flex-col gap-4 p-4 sm:p-5">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h2 className="text-lg font-semibold">Ready to run</h2>
+              <span className="text-[13px] text-muted-foreground">Nothing has been sent to SAP yet.</span>
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {[
+                { k: 'Articles', v: preview.matnrCount.toLocaleString() },
+                { k: 'Characteristics', v: preview.attributeColumns.length.toLocaleString() },
+                { k: 'Values to write', v: preview.totalValueCells.toLocaleString() },
+                { k: 'Rows skipped', v: preview.skipped.toLocaleString(), warn: preview.skipped > 0 },
+              ].map((s) => (
+                <div key={s.k} className="flex flex-col gap-0.5 rounded-xl bg-muted/60 px-4 py-3">
+                  <span className="text-xs text-muted-foreground">{s.k}</span>
+                  <span className={cn('text-2xl font-semibold', s.warn && 'text-amber-800')}>{s.v}</span>
+                </div>
+              ))}
+            </div>
 
-      {/* Step 4b — Sync result */}
-      {report && (
-        <div className="mt-4 rounded-lg border bg-card p-4">
-          <h2 className="mb-2 font-semibold">
-            Result — {report.env.toUpperCase()} {report.test && <span className="text-amber-600">(test mode)</span>}
-          </h2>
-          <div className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-            <Stat label="Articles OK" value={report.ok} tone="green" />
-            <Stat label="Articles failed" value={report.failed} tone={report.failed ? 'red' : undefined} />
-            <Stat label="Values written" value={report.totalWritten} tone="green" />
-            <Stat label="NIC / Locked" value={`${report.totalNic} / ${report.totalLocked}`} />
+            {preview.warnings.length > 0 && (
+              <div className="flex flex-col gap-1 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] text-amber-900">
+                <span className="flex items-center gap-1.5 font-semibold">
+                  <AlertTriangle className="h-4 w-4" /> Check before running
+                </span>
+                {preview.warnings.map((w, i) => <span key={i}>• {w}</span>)}
+              </div>
+            )}
+
+            {preview.willQueue && (
+              <div className="flex items-center gap-2.5 rounded-xl bg-slate-100 px-4 py-2.5 text-[13px]">
+                <Clock className="h-4 w-4 shrink-0" />
+                {preview.matnrCount.toLocaleString()} articles is over the {preview.batchSize} limit, so this runs in the background as {batchCount} batches.
+              </div>
+            )}
+
+            <div className="text-xs text-muted-foreground">
+              Article column <span className="font-mono text-foreground">{preview.matnrColumn}</span> · characteristics{' '}
+              <span className="font-mono">
+                {preview.attributeColumns.slice(0, 12).join(', ')}
+                {preview.attributeColumns.length > 12 && ` … +${preview.attributeColumns.length - 12} more`}
+              </span>
+            </div>
           </div>
-          <p className="mt-2 text-xs text-muted-foreground">
-            {report.matnrs} articles · {Math.round(report.durationMs / 1000)}s.
-            {report.totalNic > 0 && ' NIC = characteristic not assigned to the class (run Pool A first).'}
-          </p>
 
-          {failedRows.length > 0 && (
-            <div className="mt-3 max-h-64 overflow-auto rounded border border-red-200">
-              <table className="w-full text-left text-xs">
-                <thead className="sticky top-0 bg-red-50">
+          {preview.sample.length > 0 && (
+            <div className="max-h-64 overflow-auto border-t border-border">
+              <table className="w-full min-w-[600px] border-collapse text-[13px]">
+                <thead className="sticky top-0 bg-muted text-left text-xs uppercase tracking-wider text-muted-foreground">
                   <tr>
-                    <th className="px-2 py-1">Article</th>
-                    <th className="px-2 py-1">Written</th>
-                    <th className="px-2 py-1">NIC</th>
-                    <th className="px-2 py-1">Reason</th>
+                    <th className="px-4 py-2.5 font-semibold sm:px-5">Article</th>
+                    <th className="px-3 py-2.5 font-semibold">Values</th>
+                    <th className="px-4 py-2.5 font-semibold sm:px-5">Sample (first {preview.sample.length})</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {failedRows.map((r, i) => (
-                    <tr key={i} className="border-t">
-                      <td className="px-2 py-1 font-mono">{r.matnr}</td>
-                      <td className="px-2 py-1">{r.writtenCount}</td>
-                      <td className="px-2 py-1">{r.nicCount}</td>
-                      <td className="px-2 py-1">{r.errorMessage}</td>
+                  {preview.sample.map((p, i) => (
+                    <tr key={i} className="border-t border-slate-100">
+                      <td className="px-4 py-2 font-mono font-medium sm:px-5">{p.matnr}</td>
+                      <td className="px-3 py-2">{p.attrs}</td>
+                      <td className="px-4 py-2 font-mono text-xs text-muted-foreground sm:px-5">{p.preview}…</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           )}
-          <div className="mt-2 flex items-center gap-1 text-sm">
-            {report.failed === 0
-              ? <><CheckCircle2 className="h-4 w-4 text-emerald-600" /> All articles processed successfully.</>
-              : <><XCircle className="h-4 w-4 text-red-600" /> {report.failed} article(s) failed — see above.</>}
+
+          {/* Run bar */}
+          <div className="flex flex-col gap-3 border-t border-border bg-muted/30 p-4 sm:p-5">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex rounded-lg bg-slate-100 p-0.5" role="radiogroup" aria-label="SAP system">
+                {(['qa', 'prod'] as const).map((e) => (
+                  <button
+                    key={e}
+                    type="button"
+                    role="radio"
+                    aria-checked={env === e}
+                    onClick={() => { setEnv(e); setConfirming(false); setConfirmText(''); }}
+                    className={cn(
+                      'h-10 rounded-md px-4 text-[13px] font-semibold transition-colors',
+                      env === e ? (e === 'prod' ? 'bg-red-700 text-white' : 'bg-slate-800 text-white') : 'hover:bg-slate-200',
+                    )}
+                  >
+                    {e.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+              <div className="flex rounded-lg bg-slate-100 p-0.5" role="radiogroup" aria-label="Mode">
+                {[
+                  { v: true, label: 'Test run (no save)' },
+                  { v: false, label: 'Live write' },
+                ].map((m) => (
+                  <button
+                    key={String(m.v)}
+                    type="button"
+                    role="radio"
+                    aria-checked={testMode === m.v}
+                    onClick={() => { setTestMode(m.v); setConfirming(false); setConfirmText(''); }}
+                    className={cn(
+                      'h-10 rounded-md px-4 text-[13px] font-medium transition-colors',
+                      testMode === m.v ? 'bg-slate-800 text-white' : 'hover:bg-slate-200',
+                    )}
+                  >
+                    {m.label}
+                  </button>
+                ))}
+              </div>
+              <span className="text-[13px] text-muted-foreground">
+                {testMode ? 'SAP validates every value but saves nothing.' : 'Values are saved in SAP.'}
+              </span>
+              {!confirming && (
+                <button
+                  type="button"
+                  onClick={() => setConfirming(true)}
+                  disabled={committing || preview.matnrCount === 0}
+                  className={cn(
+                    'ml-auto inline-flex h-11 items-center gap-2 rounded-lg px-5 text-sm font-semibold text-white disabled:opacity-50',
+                    isLiveProd ? 'bg-red-700 hover:bg-red-800' : 'bg-slate-800 hover:bg-slate-700',
+                  )}
+                >
+                  {committing ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadIcon className="h-4 w-4" />}
+                  {actionLabel}
+                </button>
+              )}
+            </div>
+
+            {confirming && (
+              <div
+                className={cn(
+                  'flex flex-col gap-3 rounded-xl border-2 bg-card p-4',
+                  isLiveProd ? 'border-red-600' : 'border-slate-800',
+                )}
+              >
+                <div className="flex items-start gap-3">
+                  {isLiveProd ? <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-red-700" /> : <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />}
+                  <div className="text-sm">
+                    <p className={cn('font-semibold', isLiveProd && 'text-red-800')}>
+                      {testMode ? `Test run on ${env.toUpperCase()}` : `Live write to ${env.toUpperCase()}`}
+                    </p>
+                    <p>
+                      {preview.totalValueCells.toLocaleString()} values on {preview.matnrCount.toLocaleString()} articles
+                      {preview.willQueue && ` in ${batchCount} background batches`}.{' '}
+                      {testMode ? 'Nothing is saved.' : "This can't be undone from here."}
+                    </p>
+                  </div>
+                </div>
+                {isLiveProd && (
+                  <label className="flex flex-col gap-1.5 text-[13px] text-muted-foreground">
+                    <span>Type <strong className="font-mono text-foreground">PROD</strong> to confirm</span>
+                    <input
+                      autoFocus
+                      value={confirmText}
+                      onChange={(e) => setConfirmText(e.target.value)}
+                      className="h-11 max-w-xs rounded-lg border border-border bg-card px-3 font-mono text-[15px] text-foreground outline-none focus:border-red-600"
+                    />
+                  </label>
+                )}
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={doCommit}
+                    disabled={committing || (isLiveProd && confirmText.trim().toUpperCase() !== 'PROD')}
+                    className={cn(
+                      'inline-flex h-11 items-center gap-2 rounded-lg px-5 text-sm font-semibold text-white disabled:opacity-50',
+                      isLiveProd ? 'bg-red-700 hover:bg-red-800' : 'bg-slate-800 hover:bg-slate-700',
+                    )}
+                  >
+                    {committing && <Loader2 className="h-4 w-4 animate-spin" />}
+                    {preview.willQueue ? 'Start background job' : actionLabel}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setConfirming(false); setConfirmText(''); }}
+                    className="inline-flex h-11 items-center gap-1.5 rounded-lg border border-border bg-card px-4 text-sm font-medium hover:bg-slate-100"
+                  >
+                    <X className="h-4 w-4" /> Cancel
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
+        </section>
+      )}
+
+      {/* After a finished run: offer another pass on the same file */}
+      {run && !running && preview && (
+        <div className="flex flex-wrap items-center gap-3 text-[13px] text-muted-foreground">
+          <span>Same file, different settings?</span>
+          <button
+            type="button"
+            onClick={resetRun}
+            className="h-10 rounded-lg border border-border bg-card px-3.5 font-medium text-foreground hover:bg-slate-100"
+          >
+            Run again
+          </button>
         </div>
       )}
     </div>

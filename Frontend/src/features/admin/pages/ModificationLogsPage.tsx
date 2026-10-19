@@ -1,46 +1,41 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import { Search, Download, ChevronRight, X } from 'lucide-react';
+import { Search, Download, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, X, ArrowRight } from 'lucide-react';
 import {
-  Badge,
   Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  DataTable,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
   Input,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   Spinner,
-  Tag,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  type DataTableColumn,
 } from '@/shared/components/ui-tw';
+import { cn } from '@/lib/utils';
 import { message } from '@/lib/message';
 import {
   getModifyLogs,
-  getModifyLogsByGroup,
+  getModifyLogGroups,
   type ModifyLog,
+  type ModifyLogGroup,
   type ModifyLogsParams,
 } from '../../../services/adminApi';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 20;
+
+type DatePreset = 'all' | 'today' | '7d' | '30d' | 'custom';
+
+const DATE_PRESETS: { key: DatePreset; label: string }[] = [
+  { key: 'all', label: 'All time' },
+  { key: 'today', label: 'Today' },
+  { key: '7d', label: '7 days' },
+  { key: '30d', label: '30 days' },
+  { key: 'custom', label: 'Custom' },
+];
+
+// Short tokens in camelCase field keys that read better upper-cased.
+const ABBREVIATIONS = new Set(['bgt', 'pr', 'val', 'dc', 'sam', 'v2', 'mrp', 'sap', 'gm', 'fg']);
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -48,126 +43,341 @@ function formatTs(ts: string): string {
   return dayjs(ts).format('YYYY-MM-DD HH:mm:ss');
 }
 
-function SapStatusBadge({ status }: { status: string }) {
-  const isSuccess = status === 'SUCCESS';
-  return (
-    <Badge
-      className={
-        isSuccess
-          ? 'bg-green-100 text-green-700 border-green-200'
-          : 'bg-red-100 text-red-700 border-red-200'
-      }
-    >
-      {status}
-    </Badge>
-  );
+function formatWhen(ts: string): string {
+  const d = dayjs(ts);
+  const time = d.format('HH:mm:ss');
+  if (d.isSame(dayjs(), 'day')) return `Today, ${time}`;
+  if (d.isSame(dayjs().subtract(1, 'day'), 'day')) return `Yesterday, ${time}`;
+  return d.format('DD MMM YYYY, HH:mm:ss');
 }
 
-// ─── Filter state type ────────────────────────────────────────────────────────
+/** SAP characteristics are stored as M_* codes; everything else is a costing / form field. */
+function isSapAttribute(label: string): boolean {
+  return /^M_/.test(label);
+}
+
+function readableLabel(label: string): string {
+  if (isSapAttribute(label)) {
+    const words = label.slice(2).toLowerCase().split('_').filter(Boolean);
+    const text = words.join(' ');
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  }
+  const words = label
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .split(' ')
+    .map((w) => (ABBREVIATIONS.has(w.toLowerCase()) ? w.toUpperCase() : w.toLowerCase()));
+  const text = words.join(' ');
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  return (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+}
+
+function titleCase(name: string): string {
+  return name.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function presetRange(preset: DatePreset): { dateFrom: string; dateTo: string } {
+  const today = dayjs().format('YYYY-MM-DD');
+  switch (preset) {
+    case 'today':
+      return { dateFrom: today, dateTo: today };
+    case '7d':
+      return { dateFrom: dayjs().subtract(6, 'day').format('YYYY-MM-DD'), dateTo: today };
+    case '30d':
+      return { dateFrom: dayjs().subtract(29, 'day').format('YYYY-MM-DD'), dateTo: today };
+    default:
+      return { dateFrom: '', dateTo: '' };
+  }
+}
+
+// ─── Filter state ─────────────────────────────────────────────────────────────
 
 interface FilterState {
-  search: string;
   articleNumber: string;
   labelName: string;
-  modifiedByName: string;
-  modifiedByEmail: string;
+  modifiedBy: string;
   sapStatus: string;
   dateFrom: string;
   dateTo: string;
 }
 
 const EMPTY_FILTERS: FilterState = {
-  search: '',
   articleNumber: '',
   labelName: '',
-  modifiedByName: '',
-  modifiedByEmail: '',
+  modifiedBy: '',
   sapStatus: '',
   dateFrom: '',
   dateTo: '',
 };
 
-// ─── Detail Dialog ─────────────────────────────────────────────────────────────
+// ─── Facet button (popover with one text field) ──────────────────────────────
 
-interface DetailDialogProps {
-  groupId: string | null;
-  onClose: () => void;
+interface TextFacetProps {
+  label: string;
+  value: string;
+  placeholder: string;
+  onApply: (value: string) => void;
 }
 
-function DetailDialog({ groupId, onClose }: DetailDialogProps) {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['modify-logs-group', groupId],
-    queryFn: () => getModifyLogsByGroup(groupId!),
-    enabled: !!groupId,
-  });
+function TextFacet({ label, value, placeholder, onApply }: TextFacetProps) {
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState(value);
 
-  const logs = data?.data ?? [];
+  useEffect(() => {
+    if (open) setDraft(value);
+  }, [open, value]);
+
+  const apply = () => {
+    onApply(draft.trim());
+    setOpen(false);
+  };
 
   return (
-    <Dialog open={!!groupId} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-hidden flex flex-col">
-        <DialogHeader>
-          <DialogTitle>Modification Group Details</DialogTitle>
-          {groupId && (
-            <p className="text-xs text-muted-foreground font-mono break-all">{groupId}</p>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className={cn(
+            'flex h-11 items-center gap-1.5 rounded-lg border px-3 text-sm transition-colors',
+            value
+              ? 'border-slate-800 bg-slate-800 text-white'
+              : 'border-border bg-card text-foreground hover:bg-slate-100',
           )}
-        </DialogHeader>
-
-        <div className="flex-1 overflow-auto mt-2">
-          {isLoading && (
-            <div className="flex items-center justify-center py-10">
-              <Spinner size="md" />
-            </div>
+        >
+          <span className={value ? 'text-slate-300' : 'text-muted-foreground'}>{label}</span>
+          <span className="max-w-[140px] truncate font-semibold">{value || 'Any'}</span>
+          <ChevronDown className="h-3.5 w-3.5" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-72 space-y-3">
+        <label className="block text-xs font-medium text-muted-foreground">{label}</label>
+        <Input
+          autoFocus
+          placeholder={placeholder}
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') apply();
+          }}
+        />
+        <div className="flex justify-end gap-2">
+          {value && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                onApply('');
+                setOpen(false);
+              }}
+            >
+              Clear
+            </Button>
           )}
-          {isError && (
-            <p className="text-center text-red-500 py-6 text-sm">Failed to load group details.</p>
-          )}
-          {!isLoading && !isError && logs.length === 0 && (
-            <p className="text-center text-muted-foreground py-6 text-sm">No records found.</p>
-          )}
-          {!isLoading && logs.length > 0 && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Label</TableHead>
-                  <TableHead>Old Value</TableHead>
-                  <TableHead>New Value</TableHead>
-                  <TableHead>SAP Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {logs.map((log) => (
-                  <TableRow key={log.id}>
-                    <TableCell>
-                      <Tag className="font-mono text-xs">{log.labelName}</Tag>
-                    </TableCell>
-                    <TableCell>
-                      {/* Old value */}
-                      {log.oldValue ? (
-                        <span className="text-red-600 text-sm font-medium">{log.oldValue}</span>
-                      ) : (
-                        <span className="text-muted-foreground italic text-sm">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {/* New value */}
-                      {log.newValue ? (
-                        <span className="text-green-600 text-sm font-medium">{log.newValue}</span>
-                      ) : (
-                        <span className="text-muted-foreground italic text-sm">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <SapStatusBadge status={log.sapStatus} />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+          <Button size="sm" className="bg-slate-800 text-white hover:bg-slate-700" onClick={apply}>
+            Apply
+          </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function SapFacet({ value, onApply }: { value: string; onApply: (value: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const options = [
+    { key: '', label: 'All' },
+    { key: 'SUCCESS', label: 'Synced' },
+    { key: 'FAILED', label: 'Failed' },
+  ];
+  const current = options.find((o) => o.key === value) ?? options[0];
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className={cn(
+            'flex h-11 items-center gap-1.5 rounded-lg border px-3 text-sm transition-colors',
+            value
+              ? 'border-slate-800 bg-slate-800 text-white'
+              : 'border-border bg-card text-foreground hover:bg-slate-100',
+          )}
+        >
+          <span className={value ? 'text-slate-300' : 'text-muted-foreground'}>SAP</span>
+          <span className="font-semibold">{current.label}</span>
+          <ChevronDown className="h-3.5 w-3.5" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-44 p-1">
+        {options.map((o) => (
+          <button
+            key={o.key || 'all'}
+            type="button"
+            onClick={() => {
+              onApply(o.key);
+              setOpen(false);
+            }}
+            className={cn(
+              'flex h-9 w-full items-center rounded-md px-3 text-left text-sm',
+              o.key === value ? 'bg-slate-800 text-white' : 'hover:bg-slate-100',
+            )}
+          >
+            {o.label}
+          </button>
+        ))}
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+// ─── Save card ────────────────────────────────────────────────────────────────
+
+function ChangeRow({ log }: { log: ModifyLog }) {
+  const failed = log.sapStatus !== 'SUCCESS';
+  return (
+    <div className="grid grid-cols-[minmax(0,170px)_minmax(0,1fr)] items-center gap-3 border-t border-slate-100 py-2.5">
+      <div className="flex min-w-0 flex-col">
+        <span className="truncate text-[13px] font-medium" title={readableLabel(log.labelName)}>
+          {readableLabel(log.labelName)}
+        </span>
+        <span className="truncate font-mono text-[11px] text-muted-foreground" title={log.labelName}>
+          {log.labelName}
+        </span>
+      </div>
+      <div className="flex flex-wrap items-center gap-2 font-mono text-[13px]">
+        {log.oldValue ? (
+          <span className="break-all text-rose-800 line-through">{log.oldValue}</span>
+        ) : (
+          <span className="italic text-muted-foreground">empty</span>
+        )}
+        <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+        {log.newValue ? (
+          <span className="break-all rounded bg-green-50 px-1.5 py-px font-medium text-green-800">{log.newValue}</span>
+        ) : (
+          <span className="italic text-muted-foreground">cleared</span>
+        )}
+        {failed && (
+          <span className="ml-auto rounded bg-red-100 px-1.5 py-px font-sans text-[11px] font-semibold text-red-700">
+            {log.sapStatus}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ChangeColumn({ title, rows }: { title: string; rows: ModifyLog[] }) {
+  return (
+    <div className="flex min-w-0 flex-col">
+      <div className="flex justify-between pb-2 pt-2.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <span>{title}</span>
+        <span>{rows.length}</span>
+      </div>
+      {rows.map((r) => (
+        <ChangeRow key={r.id} log={r} />
+      ))}
+    </div>
+  );
+}
+
+function SaveCard({
+  group,
+  expanded,
+  onToggle,
+}: {
+  group: ModifyLogGroup;
+  expanded: boolean;
+  onToggle: () => void;
+}) {
+  const sapRows = group.rows.filter((r) => isSapAttribute(r.labelName));
+  const otherRows = group.rows.filter((r) => !isSapAttribute(r.labelName));
+  const failed = group.failedCount > 0;
+  const previewLabels = group.rows.slice(0, 3).map((r) => r.labelName);
+  const extra = group.rows.length - previewLabels.length;
+
+  return (
+    <article
+      className={cn(
+        'overflow-hidden rounded-xl border bg-card transition-colors',
+        expanded ? 'border-slate-800' : 'border-border',
+      )}
+    >
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={expanded}
+        className="flex w-full flex-wrap items-center gap-4 px-4 py-4 text-left hover:bg-slate-50 sm:px-5"
+      >
+        <span
+          aria-hidden="true"
+          className={cn(
+            'flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold',
+            expanded ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-800',
+          )}
+        >
+          {initials(group.modifiedByName)}
+        </span>
+        <span className="flex min-w-0 flex-[1_1_220px] flex-col gap-0.5">
+          <span className="flex flex-wrap items-baseline gap-2.5">
+            <span className="font-mono text-[15px] font-medium">{group.articleNumber}</span>
+            <span className="text-[13px] text-muted-foreground">
+              {group.fieldCount} field{group.fieldCount !== 1 ? 's' : ''} changed
+            </span>
+          </span>
+          <span className="truncate text-[13px] text-muted-foreground">
+            {titleCase(group.modifiedByName)} · {group.modifiedByEmail}
+          </span>
+        </span>
+        {!expanded && (
+          <span className="hidden flex-[1_1_240px] flex-wrap gap-1.5 md:flex">
+            {previewLabels.map((l, i) => (
+              <span key={`${l}-${i}`} className="rounded-md bg-slate-100 px-2 py-0.5 font-mono text-[11px]">
+                {l}
+              </span>
+            ))}
+            {extra > 0 && (
+              <span className="rounded-md bg-slate-100 px-2 py-0.5 font-mono text-[11px]">+{extra}</span>
+            )}
+          </span>
+        )}
+        <span className="text-[13px] text-muted-foreground" title={formatTs(group.modifiedAt)}>
+          {formatWhen(group.modifiedAt)}
+        </span>
+        <span
+          className={cn(
+            'inline-flex h-7 items-center rounded-full px-2.5 text-xs font-semibold',
+            failed ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-800',
+          )}
+        >
+          {failed ? `${group.failedCount} failed` : `${group.fieldCount} / ${group.fieldCount} synced`}
+        </span>
+        <span
+          aria-hidden="true"
+          className={cn(
+            'flex h-10 w-10 items-center justify-center rounded-lg',
+            expanded ? 'bg-slate-100' : '',
+          )}
+        >
+          {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </span>
+      </button>
+
+      {expanded && (
+        <div className="border-t border-slate-100 px-4 pb-4 sm:px-5">
+          <div className="grid gap-x-8 gap-y-2 lg:grid-cols-2">
+            {sapRows.length > 0 && <ChangeColumn title="SAP attributes" rows={sapRows} />}
+            {otherRows.length > 0 && <ChangeColumn title="Costing & other fields" rows={otherRows} />}
+          </div>
+          <p className="mt-3 break-all font-mono text-[11px] text-muted-foreground">
+            Group {group.modificationGroupId}
+          </p>
+        </div>
+      )}
+    </article>
   );
 }
 
@@ -175,64 +385,86 @@ function DetailDialog({ groupId, onClose }: DetailDialogProps) {
 
 export default function ModificationLogsPage() {
   const [page, setPage] = useState(1);
-  const [appliedFilters, setAppliedFilters] = useState<FilterState>(EMPTY_FILTERS);
-  const [draftFilters, setDraftFilters] = useState<FilterState>(EMPTY_FILTERS);
-  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+  const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS);
+  const [searchDraft, setSearchDraft] = useState('');
+  const [search, setSearch] = useState('');
+  const [preset, setPreset] = useState<DatePreset>('all');
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [isExporting, setIsExporting] = useState(false);
+
+  // Live search, debounced.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setSearch(searchDraft.trim());
+      setPage(1);
+    }, 350);
+    return () => clearTimeout(t);
+  }, [searchDraft]);
+
+  const setFilter = useCallback((field: keyof FilterState, value: string) => {
+    setFilters((prev) => ({ ...prev, [field]: value }));
+    setPage(1);
+  }, []);
+
+  const choosePreset = useCallback((p: DatePreset) => {
+    setPreset(p);
+    if (p !== 'custom') {
+      const range = presetRange(p);
+      setFilters((prev) => ({ ...prev, ...range }));
+      setPage(1);
+    }
+  }, []);
+
+  const clearAll = useCallback(() => {
+    setFilters(EMPTY_FILTERS);
+    setSearchDraft('');
+    setSearch('');
+    setPreset('all');
+    setPage(1);
+  }, []);
 
   // ── Query ──────────────────────────────────────────────────────────────────
 
-  const queryParams: ModifyLogsParams = {
-    page,
-    limit: PAGE_SIZE,
-    ...(appliedFilters.search && { search: appliedFilters.search }),
-    ...(appliedFilters.articleNumber && { articleNumber: appliedFilters.articleNumber }),
-    ...(appliedFilters.labelName && { labelName: appliedFilters.labelName }),
-    ...(appliedFilters.modifiedByName && { modifiedByName: appliedFilters.modifiedByName }),
-    ...(appliedFilters.modifiedByEmail && { modifiedByEmail: appliedFilters.modifiedByEmail }),
-    ...(appliedFilters.sapStatus && { sapStatus: appliedFilters.sapStatus }),
-    ...(appliedFilters.dateFrom && { dateFrom: appliedFilters.dateFrom }),
-    ...(appliedFilters.dateTo && { dateTo: appliedFilters.dateTo }),
-  };
+  // The person facet matches either name or email.
+  const queryParams: ModifyLogsParams = useMemo(
+    () => ({
+      ...(search && { search }),
+      ...(filters.articleNumber && { articleNumber: filters.articleNumber }),
+      ...(filters.labelName && { labelName: filters.labelName }),
+      ...(filters.modifiedBy &&
+        (filters.modifiedBy.includes('@')
+          ? { modifiedByEmail: filters.modifiedBy }
+          : { modifiedByName: filters.modifiedBy })),
+      ...(filters.sapStatus && { sapStatus: filters.sapStatus }),
+      ...(filters.dateFrom && { dateFrom: filters.dateFrom }),
+      ...(filters.dateTo && { dateTo: filters.dateTo }),
+    }),
+    [search, filters],
+  );
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: [
-      'modify-logs',
-      page,
-      appliedFilters.search ?? '',
-      appliedFilters.articleNumber ?? '',
-      appliedFilters.labelName ?? '',
-      appliedFilters.modifiedByName ?? '',
-      appliedFilters.modifiedByEmail ?? '',
-      appliedFilters.sapStatus ?? '',
-      appliedFilters.dateFrom ?? '',
-      appliedFilters.dateTo ?? '',
-    ],
-    queryFn: () => getModifyLogs(queryParams),
+  const { data, isLoading, isFetching, isError } = useQuery({
+    queryKey: ['modify-log-groups', page, queryParams],
+    queryFn: () => getModifyLogGroups({ ...queryParams, page, limit: PAGE_SIZE }),
     placeholderData: keepPreviousData,
   });
 
-  const logs = data?.data ?? [];
-  const total = data?.total ?? 0;
+  const groups = data?.data ?? [];
+  const totalSaves = data?.total ?? 0;
+  const totalPages = data?.totalPages ?? 1;
 
-  // ── Filter handlers ────────────────────────────────────────────────────────
+  // Open the newest save when a fresh result set arrives.
+  const firstGroupId = groups[0]?.modificationGroupId;
+  useEffect(() => {
+    setExpanded(firstGroupId ? new Set([firstGroupId]) : new Set());
+  }, [firstGroupId]);
 
-  const handleDraftChange = useCallback(
-    (field: keyof FilterState, value: string) => {
-      setDraftFilters((prev) => ({ ...prev, [field]: value }));
-    },
-    [],
-  );
-
-  const handleApply = useCallback(() => {
-    setPage(1);
-    setAppliedFilters(draftFilters);
-  }, [draftFilters]);
-
-  const handleReset = useCallback(() => {
-    setPage(1);
-    setDraftFilters(EMPTY_FILTERS);
-    setAppliedFilters(EMPTY_FILTERS);
+  const toggle = useCallback((id: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   }, []);
 
   // ── Export ─────────────────────────────────────────────────────────────────
@@ -240,12 +472,7 @@ export default function ModificationLogsPage() {
   const handleExport = useCallback(async () => {
     setIsExporting(true);
     try {
-      const exportParams: ModifyLogsParams = {
-        ...queryParams,
-        page: 1,
-        limit: 10000,
-      };
-      const result = await getModifyLogs(exportParams);
+      const result = await getModifyLogs({ ...queryParams, page: 1, limit: 10000 });
       const rows = result.data;
 
       if (rows.length === 0) {
@@ -286,284 +513,232 @@ export default function ModificationLogsPage() {
     }
   }, [queryParams]);
 
-  // ── Table columns ──────────────────────────────────────────────────────────
+  // ── Active filter chips ────────────────────────────────────────────────────
 
-  const columns: DataTableColumn<ModifyLog>[] = [
-    {
-      title: 'Time',
-      key: 'modifiedAt',
-      width: 160,
-      render: (_v, record) => (
-        <span className="text-xs text-muted-foreground whitespace-nowrap">
-          {formatTs(record.modifiedAt)}
-        </span>
-      ),
-    },
-    {
-      title: 'Article No.',
-      key: 'articleNumber',
-      width: 130,
-      render: (_v, record) => (
-        <span className="font-mono text-xs font-semibold">{record.articleNumber}</span>
-      ),
-    },
-    {
-      title: 'Label',
-      key: 'labelName',
-      width: 160,
-      render: (_v, record) => (
-        <Tag className="font-mono text-xs">{record.labelName}</Tag>
-      ),
-    },
-    {
-      title: 'Old Value',
-      key: 'oldValue',
-      render: (_v, record) =>
-        record.oldValue ? (
-          <span className="text-red-600 text-sm break-all">{record.oldValue}</span>
-        ) : (
-          <span className="text-muted-foreground text-sm italic">—</span>
-        ),
-    },
-    {
-      title: 'New Value',
-      key: 'newValue',
-      render: (_v, record) =>
-        record.newValue ? (
-          <span className="text-green-600 text-sm break-all">{record.newValue}</span>
-        ) : (
-          <span className="text-muted-foreground text-sm italic">—</span>
-        ),
-    },
-    {
-      title: 'Modified By',
-      key: 'modifiedBy',
-      width: 180,
-      render: (_v, record) => (
-        <div className="flex flex-col gap-0.5">
-          <span className="text-sm font-medium leading-tight">{record.modifiedByName}</span>
-          <span className="text-xs text-muted-foreground">{record.modifiedByEmail}</span>
-        </div>
-      ),
-    },
-    {
-      title: 'SAP Status',
-      key: 'sapStatus',
-      width: 110,
-      align: 'center',
-      render: (_v, record) => <SapStatusBadge status={record.sapStatus} />,
-    },
-    {
-      title: '',
-      key: 'action',
-      width: 48,
-      align: 'center',
-      render: (_v, record) => (
-        <Button
-          size="sm"
-          variant="ghost"
-          className="h-7 w-7 p-0"
-          onClick={() => setSelectedGroupId(record.modificationGroupId)}
-          title="View group details"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      ),
-    },
-  ];
+  const chips: { key: string; label: string; clear: () => void }[] = [];
+  if (search) chips.push({ key: 'search', label: `“${search}”`, clear: () => setSearchDraft('') });
+  if (filters.articleNumber)
+    chips.push({ key: 'article', label: `Article ${filters.articleNumber}`, clear: () => setFilter('articleNumber', '') });
+  if (filters.labelName)
+    chips.push({ key: 'label', label: `Field ${filters.labelName}`, clear: () => setFilter('labelName', '') });
+  if (filters.modifiedBy)
+    chips.push({ key: 'person', label: filters.modifiedBy, clear: () => setFilter('modifiedBy', '') });
+  if (filters.sapStatus)
+    chips.push({
+      key: 'sap',
+      label: filters.sapStatus === 'FAILED' ? 'SAP failed' : 'SAP synced',
+      clear: () => setFilter('sapStatus', ''),
+    });
+  if (filters.dateFrom || filters.dateTo) {
+    const presetLabel = DATE_PRESETS.find((p) => p.key === preset)?.label;
+    chips.push({
+      key: 'date',
+      label:
+        preset !== 'custom' && presetLabel
+          ? presetLabel
+          : `${filters.dateFrom || '…'} → ${filters.dateTo || '…'}`,
+      clear: () => choosePreset('all'),
+    });
+  }
 
   // ── Render ────────────────────────────────────────────────────────────────
 
-  const hasActiveFilters = Object.values(appliedFilters).some(Boolean);
-
   return (
-    <div className="p-6 space-y-4">
+    <div className="mx-auto flex max-w-[1280px] flex-col gap-5 p-4 sm:p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Modification Logs</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Audit trail of all article field modifications
-          </p>
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold sm:text-3xl">Modification Logs</h1>
+          <p className="text-sm text-muted-foreground">Every saved change to an article, grouped by save.</p>
         </div>
-        <Button
-          variant="outline"
-          onClick={handleExport}
-          disabled={isExporting || isLoading}
-          className="flex items-center gap-2"
-        >
-          {isExporting ? (
-            <Spinner size="sm" />
-          ) : (
-            <Download className="h-4 w-4" />
-          )}
-          Export Excel
-        </Button>
-      </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex rounded-lg border border-border bg-card p-0.5" role="group" aria-label="Date range">
+            {DATE_PRESETS.map((p) => (
+              <button
+                key={p.key}
+                type="button"
+                onClick={() => choosePreset(p.key)}
+                aria-pressed={preset === p.key}
+                className={cn(
+                  'h-9 rounded-md px-3 text-[13px] font-medium transition-colors',
+                  preset === p.key ? 'bg-slate-800 text-white' : 'text-foreground hover:bg-slate-100',
+                )}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+          <Button
+            variant="outline"
+            onClick={handleExport}
+            disabled={isExporting || isLoading}
+            className="h-11 gap-2"
+          >
+            {isExporting ? <Spinner size="sm" /> : <Download className="h-4 w-4" />}
+            Export Excel
+          </Button>
+        </div>
+      </header>
 
       {/* Filters */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Filters</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {/* Global search */}
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-            <Input
-              className="pl-9"
-              placeholder="Search article, label, value, user…"
-              value={draftFilters.search}
-              onChange={(e) => handleDraftChange('search', e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') handleApply(); }}
+      <section aria-label="Filters" className="flex flex-col gap-3 rounded-xl border border-border bg-card p-3.5">
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="flex h-11 min-w-0 flex-[999_1_320px] items-center gap-2.5 rounded-lg border border-border bg-muted/40 px-3.5 focus-within:border-slate-800">
+            <Search className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+            <input
+              aria-label="Search"
+              placeholder="Search article no., field, value or person"
+              value={searchDraft}
+              onChange={(e) => setSearchDraft(e.target.value)}
+              className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
             />
-          </div>
+            {isFetching && !isLoading && <Spinner size="sm" />}
+          </label>
+          <TextFacet
+            label="Article"
+            value={filters.articleNumber}
+            placeholder="e.g. 1115122913"
+            onApply={(v) => setFilter('articleNumber', v)}
+          />
+          <TextFacet
+            label="Field"
+            value={filters.labelName}
+            placeholder="e.g. M_WASH or autoBgt"
+            onApply={(v) => setFilter('labelName', v)}
+          />
+          <TextFacet
+            label="Person"
+            value={filters.modifiedBy}
+            placeholder="Name or email"
+            onApply={(v) => setFilter('modifiedBy', v)}
+          />
+          <SapFacet value={filters.sapStatus} onApply={(v) => setFilter('sapStatus', v)} />
+        </div>
 
-          {/* Row 1 */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                Article Number
-              </label>
-              <Input
-                placeholder="e.g. 12345"
-                value={draftFilters.articleNumber}
-                onChange={(e) => handleDraftChange('articleNumber', e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleApply(); }}
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                Label
-              </label>
-              <Input
-                placeholder="e.g. M_FAB_DIV"
-                value={draftFilters.labelName}
-                onChange={(e) => handleDraftChange('labelName', e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleApply(); }}
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                User Name
-              </label>
-              <Input
-                placeholder="Name…"
-                value={draftFilters.modifiedByName}
-                onChange={(e) => handleDraftChange('modifiedByName', e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleApply(); }}
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                User Email
-              </label>
-              <Input
-                placeholder="email@example.com"
-                value={draftFilters.modifiedByEmail}
-                onChange={(e) => handleDraftChange('modifiedByEmail', e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleApply(); }}
-              />
-            </div>
-          </div>
-
-          {/* Row 2 */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                SAP Status
-              </label>
-              <Select
-                value={draftFilters.sapStatus || '__ALL__'}
-                onValueChange={(v) => handleDraftChange('sapStatus', v === '__ALL__' ? '' : v)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="All statuses" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__ALL__">All</SelectItem>
-                  <SelectItem value="SUCCESS">SUCCESS</SelectItem>
-                  <SelectItem value="FAILED">FAILED</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                Date From
-              </label>
+        {preset === 'custom' && (
+          <div className="flex flex-wrap items-end gap-3">
+            <label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">
+              From
               <Input
                 type="date"
-                value={draftFilters.dateFrom}
-                onChange={(e) => handleDraftChange('dateFrom', e.target.value)}
+                value={filters.dateFrom}
+                onChange={(e) => setFilter('dateFrom', e.target.value)}
+                className="w-44"
               />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                Date To
-              </label>
+            </label>
+            <label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">
+              To
               <Input
                 type="date"
-                value={draftFilters.dateTo}
-                onChange={(e) => handleDraftChange('dateTo', e.target.value)}
+                value={filters.dateTo}
+                onChange={(e) => setFilter('dateTo', e.target.value)}
+                className="w-44"
               />
-            </div>
-            <div className="flex items-end gap-2">
-              <Button onClick={handleApply} className="flex-1">
-                Apply Filters
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleReset}
-                title="Reset filters"
-                className="shrink-0"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+            </label>
           </div>
+        )}
 
-          {/* Active filter indicator */}
-          {hasActiveFilters && (
-            <p className="text-xs text-muted-foreground">
-              Filters applied — showing {total.toLocaleString()} matching record
-              {total !== 1 ? 's' : ''}
-            </p>
-          )}
-        </CardContent>
-      </Card>
+        {chips.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 text-[13px]">
+            <span className="text-muted-foreground">Active:</span>
+            {chips.map((c) => (
+              <span
+                key={c.key}
+                className="inline-flex h-7 items-center gap-1.5 rounded-full bg-slate-800 pl-2.5 pr-1 text-white"
+              >
+                {c.label}
+                <button
+                  type="button"
+                  onClick={c.clear}
+                  aria-label={`Remove ${c.label}`}
+                  className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 hover:bg-white/30"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            ))}
+            <button type="button" onClick={clearAll} className="ml-1 font-medium underline-offset-2 hover:underline">
+              Clear all
+            </button>
+          </div>
+        )}
+      </section>
 
-      {/* Table */}
-      <Card>
-        <CardContent className="p-0">
-          {isError ? (
-            <div className="py-10 text-center text-red-500 text-sm">
-              Failed to load modification logs. Please try again.
-            </div>
-          ) : (
-            <DataTable<ModifyLog>
-              columns={columns}
-              dataSource={logs}
-              loading={isLoading}
-              rowKey="id"
-              size="small"
-              scroll={{ x: 1100 }}
-              pagination={{
-                current: page,
-                pageSize: PAGE_SIZE,
-                total,
-                onChange: (p) => setPage(p),
-              }}
-              locale={{ emptyText: 'No modification logs found.' }}
+      {/* Summary */}
+      {data && (
+        <div className="flex flex-wrap items-center justify-between gap-2 text-[13px] text-muted-foreground">
+          <span>
+            <strong className="text-foreground">
+              {totalSaves.toLocaleString()} save{totalSaves !== 1 ? 's' : ''}
+            </strong>{' '}
+            · {data.totalChanges.toLocaleString()} field change{data.totalChanges !== 1 ? 's' : ''}
+            {data.failedChanges > 0 && (
+              <>
+                {' '}
+                · <strong className="text-red-700">{data.failedChanges.toLocaleString()} failed in SAP</strong>
+              </>
+            )}
+          </span>
+          <span>Newest first</span>
+        </div>
+      )}
+
+      {/* Saves */}
+      {isError ? (
+        <div className="rounded-xl border border-border bg-card py-10 text-center text-sm text-red-600">
+          Failed to load modification logs. Please try again.
+        </div>
+      ) : isLoading ? (
+        <div className="flex justify-center py-16">
+          <Spinner size="md" />
+        </div>
+      ) : groups.length === 0 ? (
+        <div className="rounded-xl border border-border bg-card py-14 text-center text-sm text-muted-foreground">
+          No modifications match these filters.
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2.5">
+          {groups.map((g) => (
+            <SaveCard
+              key={g.modificationGroupId}
+              group={g}
+              expanded={expanded.has(g.modificationGroupId)}
+              onToggle={() => toggle(g.modificationGroupId)}
             />
-          )}
-        </CardContent>
-      </Card>
+          ))}
+        </div>
+      )}
 
-      {/* Detail Dialog */}
-      <DetailDialog
-        groupId={selectedGroupId}
-        onClose={() => setSelectedGroupId(null)}
-      />
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <nav aria-label="Pagination" className="flex items-center justify-between gap-3 text-[13px] text-muted-foreground">
+          <span>
+            Page {page} of {totalPages}
+          </span>
+          <div className="flex gap-1.5">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 w-9 p-0"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              aria-label="Previous page"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 w-9 p-0"
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              aria-label="Next page"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </nav>
+      )}
     </div>
   );
 }
