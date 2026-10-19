@@ -10,6 +10,8 @@ import {
     setProblems,
     parseSetMcMasterRows,
     fillSetMcDefaults,
+    setMcForArticle,
+    SET_PARTS_USE_SET_MC,
     type SetMcRow,
 } from '../src/services/setMcMasterService';
 
@@ -55,6 +57,13 @@ test('resolveSetMc: parent -> set MC, part -> its S- MC in the parent set, norma
     assert.deepEqual(resolveSetMc(IDX, 'PARENT', 'L_N_SUIT', null), {
         error: 'L_N_SUIT is not an active set category in the Set MC Master.',
     });
+});
+
+test('setMcForArticle: a set part keeps its normal MC (parts do not use S- MCs)', async () => {
+    assert.equal(SET_PARTS_USE_SET_MC, false);
+    // Returns before any DB lookup, so the part's normal MC from the payload stays.
+    assert.equal(await setMcForArticle({ comboRole: 'CHILD', majorCategory: 'L_KURTI_FS', comboParentId: 'x' }), null);
+    assert.equal(await setMcForArticle({ comboRole: 'NONE', majorCategory: 'L_KURTI_FS' }), null);
 });
 
 test('setProblems lists every part that cannot be created, and a missing HSN', () => {

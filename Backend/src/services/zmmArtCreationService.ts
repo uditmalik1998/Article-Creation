@@ -425,9 +425,9 @@ async function buildRfcPayload(
         if (mcRow?.hsnCode) payload['HSN_CODE'] = mcRow.hsnCode;
     }
 
-    // Set articles go to SAP under their S- MC from the Set MC Master: the parent
-    // under its set MC, a part under its S- MC within its set. A set article with
-    // no S- MC is never sent with a normal MC.
+    // The set (parent) goes to SAP under its S- MC from the Set MC Master and is
+    // never sent with a normal MC. Its parts keep the normal MC derived above
+    // (setMcForArticle returns null for them — see SET_PARTS_USE_SET_MC).
     const setMc = await setMcForArticle(item);
     if (setMc && 'error' in setMc) throw new SetMcMissingError(setMc.error);
     if (setMc) {

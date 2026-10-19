@@ -4,7 +4,7 @@ import { parseNumericValue } from '../utils/mrpCalculator';
 import { mvgrMappingService } from './mvgrMappingService';
 import { buildArticleDescription, buildReferenceArticleDescription } from '../utils/articleDescriptionBuilder';
 import { getExcludedDescriptionFields } from '../utils/categoryFieldVisibility';
-import { getSegmentByCategoryAndMrp } from '../utils/segmentRangeMapper';
+import { getSegmentFromMaster } from './segmentMasterService';
 import { normalizeVendorCode } from '../utils/vendorCode';
 import { upsert360ArticleFlatRow } from '../utils/mirror360Flat';
 
@@ -260,7 +260,7 @@ export class FlatteningService {
             // Auto-populated business fields
             year: String(new Date().getFullYear()),
             season: getCurrentSeasonCode(),
-            segment: mappedMcCode ? (getSegmentByCategoryAndMrp(rawMajorCategory, finalMrp) ?? null) : null,
+            segment: mappedMcCode ? ((await getSegmentFromMaster(rawMajorCategory, finalMrp)) ?? null) : null,
             articleDescription: buildArticleDescription({
                 yarn1:          resultsMap.get('yarn_01'),
                 weave:          resultsMap.get('weave'),

@@ -2278,6 +2278,8 @@ const ArticleCard = React.memo(
       return (
         <div
           key={field}
+          data-field-label={typeof label === 'string' ? label : undefined}
+          data-item-id={item.id}
           className={isFgCard ? 'border-b border-slate-100 last:border-b-0' : 'border-b border-border last:border-b-0'}
           style={{ cursor: canEdit ? 'pointer' : 'default' }}
           onClick={() => {
@@ -2449,6 +2451,8 @@ const ArticleCard = React.memo(
       return (
         <div
           key={attr.field}
+          data-field-label={attr.label}
+          data-item-id={item.id}
           className="group flex items-center gap-1.5 rounded px-1 py-0.5 transition-colors hover:bg-muted/40"
           style={{
             cursor: attrLocked ? 'default' : 'pointer',
@@ -4420,6 +4424,8 @@ const ArticleCard = React.memo(
                         return (
                           <div
                             key={bom.field}
+                            data-field-label={bom.label}
+                            data-item-id={item.id}
                             className="flex items-center gap-1.5 rounded px-1 py-0.5 transition-colors hover:bg-muted/40"
                             style={{
                               cursor: bom.editable && !bomLocked ? 'pointer' : 'default',
