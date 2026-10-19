@@ -275,3 +275,15 @@ All GM articles in `gm_article_data` are `source = SRM`, so the GM page renders 
 - Generic: after `ZMM_ART_CRT_V3` succeeds, `submitGmArticles` copies `gm_article_data.image_url` to `<gm_article_number>.<ext>` with the watermark label (article no, PPT no, vendor, div, sub-div, maj cat, design no, MC code, HSN, season, rate, MRP, approver name) and saves the new URL. Upload failure is appended to `sap_sync_message`.
 - Colours: `syncGmVariantsToSap` (auto after submit, and Retry Variants — which is what a colour added on the Created page goes through) copies each SAP-created variant's image to `<generic no without leading zeros>-<COLOR>.<ext>` (no watermark, one upload per colour) and updates `image_url`. Variants already synced whose image isn't in the bucket yet are caught too. `GMAddColorModal` lost its `source` prop — it always writes `gm_variants_article_data`. The `gm_variants_article_data` table is unchanged.
 
+### FG Articles dashboard header — `approver/pages/ApproverDashboard.tsx` (2026-10-19, design "Option C · two rows")
+
+The single dark strip with up to 7 outlined buttons became two rows (same handlers, nothing removed):
+1. **Title row** (ink #1e293b): page title + "division · sub-division · N articles"; the division tabs (All divisions · Mens · Ladies · Kids) sit on their own line below, on the left (as before). No "Updated … ago" text (removed 2026-10-19 at the user's request).
+2. **Action row** (white; light slate when cards are ticked):
+   - Left: "N selected · Clear · Export selected · Reject selected" (Reject only on the New page), or a hint "Tick cards to export (or reject) them together".
+   - Right: **Refresh** button (spins while loading), then the **Download** group — "All N" on every page; on Created: All · With variants · Rough costing · Precise costing (each shows a spinner while exporting).
+- Coral avatar dot replaced with slate.
+
+#### Shared header component (2026-10-19)
+The two-row header now lives in `shared/components/articles/ArticleListHeader.tsx` and is used by **FG Articles** (`ApproverDashboard`), **Fabric Article** (`FabricArticleDashboard`), **Fabric › FG New Articles** (`FGNewArticleDashboard`, was a purple gradient — now the same ink) and **GM Article** (`GMArticleDashboard`). Props: title, scope, totalCount, divisionTabs, selection (count / clear / export selected / optional reject), loading + onRefresh, downloads[]. Reject only on the FG New page; Created pages get "All · With variants" (FG Created also Rough / Precise costing). Body Article dashboard not changed.
+- 2026-10-19: `DivisionTabs` (ArticleFilters.tsx, used on all dashboards) — coral 3px underline replaced by a grey (slate-400) 3px full-width line under the active tab; inactive tabs slate-300, hover shows a slate-600 line.

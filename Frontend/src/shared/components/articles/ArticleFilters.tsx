@@ -48,9 +48,13 @@ export function DivisionTabs({ value, onChange, options }: {
             role="tab"
             aria-selected={active}
             onClick={() => onChange(t.value)}
+            // Grey (slate) underline under the active tab, in the header's palette (no coral).
             className={cn(
-              'h-9 border-b-[3px] px-3 text-[13px] transition-colors',
-              active ? 'border-[#FF6F61] font-semibold text-white' : 'border-transparent text-white/70 hover:text-white',
+              'relative h-9 px-3 text-[13px] transition-colors',
+              "after:absolute after:inset-x-0 after:bottom-0 after:h-[3px] after:transition-colors after:content-['']",
+              active
+                ? 'font-semibold text-white after:bg-slate-400'
+                : 'text-slate-300 after:bg-transparent hover:text-white hover:after:bg-slate-600',
             )}
           >
             {t.label}
