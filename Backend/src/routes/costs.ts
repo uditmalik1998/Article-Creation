@@ -95,7 +95,7 @@ router.get('/images', async (req: Request, res: Response) => {
       outputTokens: r.outputTokens || 0,
       totalTokens: (r.inputTokens || 0) + (r.outputTokens || 0),
       cost: Number(r.apiCost || 0),
-      modelName: r.aiModel || process.env.GEMINI_MODEL || 'gemini-2.5-pro',
+      modelName: r.aiModel || process.env.GEMINI_MODEL || 'gemini-2.5-flash',
       extractionTimeMs: r.processingTimeMs || 0,
       timestamp: r.createdAt
     }));
@@ -139,7 +139,7 @@ router.get('/image/:imageId', async (req: Request, res: Response) => {
       outputTokens: flatResult.outputTokens || 0,
       totalTokens: (flatResult.inputTokens || 0) + (flatResult.outputTokens || 0),
       cost: Number(flatResult.apiCost || 0),
-      modelName: flatResult.aiModel || process.env.GEMINI_MODEL || 'gemini-2.5-pro',
+      modelName: flatResult.aiModel || process.env.GEMINI_MODEL || 'gemini-2.5-flash',
       extractionTimeMs: flatResult.processingTimeMs || 0,
       timestamp: flatResult.createdAt
     };

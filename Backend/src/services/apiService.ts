@@ -13,7 +13,7 @@ export class ApiService extends BaseApiService {
     console.log('🖼️ Image format:', formattedImage.substring(0, 50) + '...');
 
     const requestPayload: OpenAIRequest = {
-      model: process.env.GEMINI_MODEL || 'gemini-2.5-pro',
+      model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
       messages: [
         {
           role: 'user',
@@ -57,7 +57,7 @@ export class ApiService extends BaseApiService {
     return {
       content: choice.message.content,
       tokensUsed: apiData.usage.total_tokens,
-      modelUsed: (process.env.GEMINI_MODEL || 'gemini-2.5-pro') as ModelType,
+      modelUsed: (process.env.GEMINI_MODEL || 'gemini-2.5-flash') as ModelType,
       inputTokens: apiData.usage.prompt_tokens,
       outputTokens: apiData.usage.completion_tokens
     };
