@@ -81,8 +81,8 @@ export default function HierarchyManagement() {
 
               <TabsContent value="grid-values" className="m-0 px-6 py-4">
                 <p className="mb-3 text-sm text-muted-foreground">
-                  Browse the allowed grid values by <strong>group → attribute → major category</strong>.
-                  Click a major category to view, add, or delete the values for that attribute.
+                  Pick an <strong>attribute</strong>, then a <strong>major category</strong>, and edit its allowed values on
+                  the right. Every add or remove asks for a reason.
                 </p>
                 <GridValuesEditor />
               </TabsContent>
@@ -98,8 +98,8 @@ export default function HierarchyManagement() {
 
               <TabsContent value="hierarchy" className="m-0 px-6 py-4">
                 <p className="mb-3 text-sm text-muted-foreground">
-                  Browse departments, sub-departments, and categories.
-                  Use the <strong>pencil</strong> icon to rename and <strong>trash</strong> to delete.
+                  Pick a <strong>department</strong> tab, then a <strong>sub-department</strong> card to see and edit its
+                  categories. Use the <strong>pencil</strong> to rename.
                 </p>
                 <HierarchyTreeEditor />
               </TabsContent>

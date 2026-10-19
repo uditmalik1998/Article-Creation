@@ -1,10 +1,15 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import dayjs from 'dayjs';
-import { RotateCw, Download, Sparkles, Search, ChevronDown } from 'lucide-react';
+import { RotateCw, Download, Sparkles, Search, ChevronDown, XCircle } from 'lucide-react';
 import type { Dayjs } from 'dayjs';
 import {
   Button,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
   Input,
   Popover,
   PopoverContent,
@@ -644,6 +649,32 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
     });
   }, [items]);
 
+  // ─── Reject selected (New articles) ──────────────────────────────────────────
+  const [rejectConfirmOpen, setRejectConfirmOpen] = useState(false);
+  const [rejecting, setRejecting] = useState(false);
+  const handleRejectSelected = useCallback(async () => {
+    const ids = [...selectedIds];
+    if (ids.length === 0) return;
+    setRejecting(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/reject`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ ids }),
+      });
+      const data = await r.json().catch(() => null);
+      if (!r.ok) throw new Error(data?.error || 'Rejection failed');
+      message.success(`Rejected ${data?.count ?? ids.length} article${ids.length !== 1 ? 's' : ''}`);
+      setRejectConfirmOpen(false);
+      fetchItems(currentPage); // also clears the selection
+    } catch (e) {
+      message.error(e instanceof Error ? e.message : 'Rejection failed');
+    } finally {
+      setRejecting(false);
+    }
+  }, [selectedIds, fetchItems, currentPage]);
+
   const handleExportSelected = useCallback(async () => {
     const rows = items.filter((i) => selectedIds.has(i.id));
     if (rows.length === 0) {
@@ -779,6 +810,12 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
                     className="h-7 border-white/30 bg-white/10 px-2.5 text-[12px] text-white hover:bg-white/20 hover:text-white">
                     <Download /> Export Selected
                   </Button>
+                  {pathType === 'new' && (
+                    <Button size="sm" variant="destructive" onClick={() => setRejectConfirmOpen(true)} disabled={rejecting}
+                      className="h-7 px-2.5 text-[12px]">
+                      <XCircle /> Reject Selected
+                    </Button>
+                  )}
                   <Button size="sm" variant="ghost" onClick={() => setSelectedIds(new Set())}
                     className="h-7 px-2.5 text-[12px] text-white hover:bg-white/20 hover:text-white">
                     Clear
@@ -1067,6 +1104,20 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
         </>
       )}
 
+      <Dialog open={rejectConfirmOpen} onOpenChange={(o) => { if (!rejecting) setRejectConfirmOpen(o); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Reject selected articles</DialogTitle></DialogHeader>
+          <p className="m-0 text-[13px] text-slate-600">
+            Reject {selectedIds.size} selected article{selectedIds.size !== 1 ? 's' : ''}? They move to Rejected, along with their variants.
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRejectConfirmOpen(false)} disabled={rejecting}>Cancel</Button>
+            <Button variant="destructive" onClick={handleRejectSelected} disabled={rejecting}>
+              {rejecting ? 'Rejecting…' : `Reject ${selectedIds.size}`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -18,7 +18,8 @@ import { APP_CONFIG } from '../../../constants/app/config';
 // values local and save only on the Save button: the current tab's spec fields,
 // costs and, for multi-tab cards, config.tabField. On load the saved tab opens
 // with its DB values; any other tab is empty. Other-block rows save their costs
-// (if listed in costFields); their spec cells are UI-only.
+// (if listed in costFields) only when ticked — unticked rows save empty; their
+// spec cells are UI-only.
 
 type AttrValue = { shortForm: string; fullForm?: string | null };
 export type CostingGridAttr = { field: string; label: string; values: AttrValue[] };
@@ -304,6 +305,23 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
   // Other-block master fill: tabs already handled, and the fetched master (one call per mount).
   const otherFilledTabsRef = useRef<Set<string>>(new Set());
   const otherMasterRef = useRef<Record<string, { bt1: string; bt2: string }> | null>(null);
+  // Other-block rows ticked per tab (tab-save mode). Only ticked rows are saved; the
+  // rest save as empty. On load the rows with saved values in the DB start ticked.
+  const [checked, setChecked] = useState<Record<string, Set<string>>>({});
+  const checkable = tabSave && !!other;
+  const isChecked = (row: string) => !!checked[tab]?.has(row);
+  const setRowChecked = (row: string, on: boolean) => {
+    setChecked((prev) => {
+      const next = new Set(prev[tab] ?? []);
+      if (on) next.add(row); else next.delete(row);
+      return { ...prev, [tab]: next };
+    });
+    setDirty(true);
+  };
+  const setAllChecked = (on: boolean) => {
+    setChecked((prev) => ({ ...prev, [tab]: new Set(on ? other?.rows ?? [] : []) }));
+    setDirty(true);
+  };
 
   const setTabVal = (t: string, row: string, col: Col, v: string) =>
     setLocal((prev) => ({ ...prev, [t]: { ...prev[t], [row]: { ...prev[t]?.[row], [col]: v } } }));
@@ -431,6 +449,10 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
         };
       }
       setLocal({ [t]: rows });
+      if (other) {
+        const saved = other.rows.filter((row) => (['auto', 'rough', 'vdr', 'fin'] as Col[]).some((c) => rows[row]?.[c]));
+        setChecked({ [t]: new Set(saved) });
+      }
 
       // Other-block rows on the opened tab: hit the master only if some row's AUTO-BGT is
       // null in the DB, and fill just those rows. Other tabs are filled when first opened.
@@ -477,6 +499,8 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
   const setLocalVal = (row: string, col: Col, v: string) => {
     setTabVal(tab, row, col, v);
     setDirty(true);
+    // Typing a value into an unticked other-block row ticks it.
+    if (checkable && v && other!.rows.includes(row) && !isChecked(row)) setRowChecked(row, true);
   };
 
   const cellVal = (row: string, col: Col): string => {
@@ -494,10 +518,12 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
       }
     }
     for (const [row, f] of Object.entries(costFields!)) {
-      updates[f.autoBgt] = localVal(row, 'auto') || null;
-      updates[f.rough] = localVal(row, 'rough') || null;
-      updates[f.vdr] = localVal(row, 'vdr') || null;
-      updates[f.fin] = localVal(row, 'fin') || null;
+      // Unticked other-block rows are saved empty.
+      const skip = checkable && other!.rows.includes(row) && !isChecked(row);
+      updates[f.autoBgt] = skip ? null : localVal(row, 'auto') || null;
+      updates[f.rough] = skip ? null : localVal(row, 'rough') || null;
+      updates[f.vdr] = skip ? null : localVal(row, 'vdr') || null;
+      updates[f.fin] = skip ? null : localVal(row, 'fin') || null;
     }
     onSaveTab!(updates);
     setSavedTab(tab);
@@ -532,15 +558,29 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
   const filledCount = (rows: readonly string[]) =>
     rows.filter((r) => (['type', 'style', 'c3', 'rough', 'vdr', 'fin'] as Col[]).some((c) => cellVal(r, c))).length;
 
-  const renderRow = (row: string, last: boolean) => {
+  const renderRow = (row: string, last: boolean, withCheck = false) => {
     // DESC is auto-built: STYLE-TYPE (e.g. KUNDI_BTN-26L)
     const desc = [cellVal(row, 'style'), cellVal(row, 'type')].filter((p) => p && !/^-+$/.test(p)).join('-');
     const tabIdx = tabs.indexOf(tab);
     const autoBgtVal = localVal(row, 'auto');
     const bgtLoading = autoBgtLoading[row];
+    const off = withCheck && !isChecked(row);
     return (
-      <div key={row} className={cn(GRID, 'items-center', !last && 'border-b border-slate-100')}>
-        <div className="px-2.5 py-1.5 text-[11.5px] font-semibold text-slate-800">{row}</div>
+      <div key={row} className={cn(GRID, 'items-center', !last && 'border-b border-slate-100', off && 'opacity-60')}>
+        {withCheck ? (
+          <label className="flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-[11.5px] font-semibold text-slate-800">
+            <input
+              type="checkbox"
+              checked={!off}
+              disabled={locked}
+              onChange={(e) => setRowChecked(row, e.target.checked)}
+              className="h-3.5 w-3.5 shrink-0 cursor-pointer accent-slate-800 disabled:cursor-default"
+            />
+            <span className="truncate">{row}</span>
+          </label>
+        ) : (
+          <div className="px-2.5 py-1.5 text-[11.5px] font-semibold text-slate-800">{row}</div>
+        )}
         <div className="px-1 py-1.5">{renderSpecCell(row, 'type')}</div>
         <div className="px-1 py-1.5">{renderSpecCell(row, 'style')}</div>
         <div className="px-1 py-1.5">{renderSpecCell(row, 'c3')}</div>
@@ -704,29 +744,46 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
           {/* Other block — collapsed by default */}
           {other && (
             <div className="mx-2 mb-2 overflow-hidden rounded-lg border border-slate-200">
-              <button
-                type="button"
-                aria-expanded={otherOpen}
-                onClick={() => setOtherOpen((o) => !o)}
-                className="flex h-10 w-full items-center justify-between bg-slate-50 px-3 text-left hover:bg-slate-100"
-              >
-                <span className="flex items-center gap-2 text-[11px] font-bold tracking-wider text-slate-700">
-                  <ChevronRight className={cn('h-3.5 w-3.5 transition-transform', otherOpen && 'rotate-90')} />
-                  {other.label}
-                  <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10.5px] font-medium tracking-normal text-slate-600">
-                    {filledCount(other.rows)} / {other.rows.length} filled
+              <div className="flex h-10 items-center bg-slate-50 hover:bg-slate-100">
+                <button
+                  type="button"
+                  aria-expanded={otherOpen}
+                  onClick={() => setOtherOpen((o) => !o)}
+                  className="flex h-full min-w-0 flex-1 items-center justify-between gap-3 px-3 text-left"
+                >
+                  <span className="flex items-center gap-2 text-[11px] font-bold tracking-wider text-slate-700">
+                    <ChevronRight className={cn('h-3.5 w-3.5 transition-transform', otherOpen && 'rotate-90')} />
+                    {other.label}
+                    <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10.5px] font-medium tracking-normal text-slate-600">
+                      {checkable
+                        ? `${other.rows.filter(isChecked).length} / ${other.rows.length} selected`
+                        : `${filledCount(other.rows)} / ${other.rows.length} filled`}
+                    </span>
                   </span>
-                </span>
-                <span className="hidden text-[11px] text-slate-500 sm:inline">
-                  {otherOpen ? 'Click to collapse' : other.rows.join(' · ')}
-                </span>
-              </button>
+                  <span className="hidden truncate text-[11px] text-slate-500 sm:inline">
+                    {otherOpen ? 'Click to collapse' : other.rows.join(' · ')}
+                  </span>
+                </button>
+                {checkable && (() => {
+                  const all = other.rows.every(isChecked);
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => setAllChecked(!all)}
+                      disabled={locked}
+                      className="mr-2 h-7 shrink-0 rounded-md border border-slate-300 bg-white px-2.5 text-[11px] font-semibold text-slate-800 hover:border-slate-400 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {all ? 'Clear all' : 'Select all'}
+                    </button>
+                  );
+                })()}
+              </div>
               {otherOpen && (
                 <div className="overflow-x-auto bg-white px-1.5 pb-1">
                   <div className="min-w-[1000px]">
                     {other.rows.map((r, i) => (
                       <div key={r} className={cn(i > 0 && 'border-t border-slate-100')}>
-                        {renderRow(r, true)}
+                        {renderRow(r, true, checkable)}
                       </div>
                     ))}
                   </div>
