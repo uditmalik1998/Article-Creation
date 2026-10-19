@@ -396,6 +396,11 @@ router.get('/major-category-details/status',   h(adminController.getMcdStatus));
 router.get('/major-category-details/template', h(adminController.downloadMcdTemplate));
 router.get('/major-category-details/download', h(adminController.downloadMcdData));
 router.post('/major-category-details/upload',  excelUpload.single('file'), h(adminController.uploadMcd));
+// Admin › Hierarchy tab (row-level add / edit / activate-deactivate)
+router.get('/major-category-details/rows',     h(adminController.getMcdRows));
+router.post('/major-category-details',         h(adminController.createMcdRow));
+router.put('/major-category-details/rename',   h(adminController.renameMcdGroup));
+router.put('/major-category-details/:id',      h(adminController.updateMcdRow));
 
 router.get('/value-addition-accessories-cost/status',   h(adminController.getVaacStatus));
 router.get('/value-addition-accessories-cost/lookup',   h(adminController.lookupVaacTotalValue));

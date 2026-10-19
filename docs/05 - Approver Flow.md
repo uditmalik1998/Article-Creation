@@ -149,6 +149,8 @@ One component, configured per group (`BTRIM_CONFIG`, `VADD_CONFIG`), used for FG
 
 **V. ADD (VA PRCS):** single table, no tabs. Columns: V. ADD | TYPE | STYLE | PLACEMENT | DESC | AUTO-BGT | ROUGH-V2 | VDR COST | FINAL COST. Rows: PRINT (`printType`/`printStyle`/`printPlacement`), EMB (`embroidery` M_EMB_TYPE / `embroideryType` M_EMBROIDERY_STYLE / `embPlacement`), WASHING (TYPE→`wash`). `valueAddProcessCost` renders as a normal row under the table.
 
+**V. ADD repeat rows (2026-10-19, design "Option B"):** `VADD_CONFIG.repeatable = ['PRINT', 'EMB']`. Each of those rows gets a ×N badge and a dashed **+ Add PRINT / + Add EMB** button under its group; clicking adds PRINT-1, PRINT-2… (numbers only go up, so removing PRINT-1 keeps PRINT-2). Copies use the base row's dropdown values and each has an × to remove it. Copies are **UI-only**: not sent to SAP and not saved to the DB (Save ignores them); they are lost on reload. Canvas: https://claude.ai/artifact/FPx3LDs4EtR7yTVnTYnKAy
+
 #### B TRIM (VA ACC)
 
 FG articles render the VA ACC group as a full-width table (design "Option B"), not the numbered attribute list:
@@ -287,3 +289,9 @@ The single dark strip with up to 7 outlined buttons became two rows (same handle
 #### Shared header component (2026-10-19)
 The two-row header now lives in `shared/components/articles/ArticleListHeader.tsx` and is used by **FG Articles** (`ApproverDashboard`), **Fabric Article** (`FabricArticleDashboard`), **Fabric › FG New Articles** (`FGNewArticleDashboard`, was a purple gradient — now the same ink) and **GM Article** (`GMArticleDashboard`). Props: title, scope, totalCount, divisionTabs, selection (count / clear / export selected / optional reject), loading + onRefresh, downloads[]. Reject only on the FG New page; Created pages get "All · With variants" (FG Created also Rough / Precise costing). Body Article dashboard not changed.
 - 2026-10-19: `DivisionTabs` (ArticleFilters.tsx, used on all dashboards) — coral 3px underline replaced by a grey (slate-400) 3px full-width line under the active tab; inactive tabs slate-300, hover shows a slate-600 line.
+
+- 2026-10-19: V. ADD repeat rows (Add PRINT / Add EMB) now take the lowest free number — delete PRINT-1 and add again gives PRINT-1, not PRINT-2 (`addRepeat` in CostingGridCard.tsx).
+
+- 2026-10-19: V. ADD extra PRINT / EMB rows are saved. New jsonb columns on `extraction_results_flat`: `vadd_print_json` (PRINT-1, PRINT-2…) and `vadd_emp_json` (EMB-1…), each an array of `{ no, type, style, placement, autoBgt, roughV2, vdrCost, finalCost }`. Saved with the card's Save button (sent as a JSON string, parsed by `parseVaddJson` in ApproverController; empty → NULL), loaded back on open. App only — not in FLAT_TO_RFC, never sent to SAP. Excluded from history_fg_article; modify_log stores the JSON text. Copied when an article is duplicated (copy / kids duplication).
+
+- 2026-10-19: V. ADD only — AUTO-BGT is a typed input (`editableAutoBgt` in VADD_CONFIG); saved with Save like the other costs. B TRIM keeps AUTO-BGT read-only (master / RATE × QTY).

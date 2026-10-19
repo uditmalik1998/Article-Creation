@@ -294,6 +294,8 @@ export async function duplicateForKidsDivision(flatId: string): Promise<void> {
         const kidsId = randomUUID();
         const kidsData = {
           ...rest,
+          vaddPrintJson: rest.vaddPrintJson ?? Prisma.DbNull,
+          vaddEmpJson: rest.vaddEmpJson ?? Prisma.DbNull,
           id: kidsId,
           jobId: newJob.id,
           imageUrl: newImageUrl,
