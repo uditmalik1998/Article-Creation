@@ -183,3 +183,22 @@ ts-node scripts/sync-mandatory-grid.ts
 #   --db-only     Only update DB, skip JSON
 #   --dry-run     Print changes without writing
 ```
+
+### Hierarchy › Grid Values tab — `features/admin/components/GridValuesEditor.tsx` (2026-10-19, design "Option A · three-pane browser")
+
+Replaced the nested accordions + values modal with three panes (stacks on narrow screens), same `/api/admin/grid-values/*` endpoints and query keys:
+1. **Attributes** — search box; attributes listed under their group (Construction & Fabric, Body & Construction, …). Opens on the first attribute.
+2. **Major categories** for the picked attribute, with value counts and search. If the search matches nothing, "Add values for <CODE>" opens an empty category (same as the old "Add" link).
+3. **Values** for the picked attribute × major category — Add box (Enter works; duplicates warned), values as removable chips; **History** tab (ADDED / REMOVED, reason, who, when IST).
+- The reason prompt is now an inline amber bar in pane 3 (Enter confirms, Esc cancels) instead of a second dialog; still required for every add/remove and saved to the audit log. The chip being removed shows struck-through while the bar is open.
+- Slate selection states; no coral.
+
+### Hierarchy › Hierarchy tab — `features/admin/components/HierarchyTreeEditor.tsx` (2026-10-19, design "Option C · department tabs + sub-department cards")
+
+Replaced the side-by-side department columns with:
+- **Department tabs** (name + category count) and an inline **+ Department**; a search box scoped to the selected department (sub-department names/codes and category names/codes).
+- Department line: rename (pencil), "N sub-departments · N categories", **+ Sub-department** (name + optional code; code defaults to NAME_UPPER_SNAKE), and **Delete department only when it has no sub-departments**.
+- **Sub-department cards** (name, code, category count, size bar relative to the biggest card). Clicking a card opens a side panel: rename the sub-department, list its categories (rename in place, **Deactivate / Activate** with confirm, "inactive" tag), **Add category** (name + optional code), and **Delete sub-department only when it is empty**.
+- Why deletes are limited: backend `deleteCategory` also deletes that category's `extraction_jobs`, and deleting a sub-department removes its categories — so categories are deactivated (`isActive`) instead of deleted, and only empty departments / sub-departments can be deleted.
+- Uses the existing admin endpoints (`/departments`, `/sub-departments`, `/categories`); no backend change. The unused `onCategorySelect` prop was dropped.
+

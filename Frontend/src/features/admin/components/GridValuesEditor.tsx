@@ -1,36 +1,21 @@
 /**
  * GridValuesEditor
- * Admin "Grid Values" tab. Browse the allowed grid values by:
- *   Group (Construction & Fabric, …) → Attribute (M_FAB_DIV, …) → Major Category
- * Clicking a major category opens a modal listing every allowed value for that
- * (attribute, major category) pair, with delete buttons and an add input.
+ * Admin "Grid Values" tab — three-pane browser (design "Option A"):
+ *   1 · Groups + attributes (Construction & Fabric → M_FAB_DIV, …)
+ *   2 · Major categories for the picked attribute, with value counts
+ *   3 · Allowed values for the picked (attribute, major category): add / remove
+ *       as chips, plus a History view.
+ * Every add or remove needs a reason, asked inline in pane 3 and saved to the
+ * audit log.
  *
  * Data: maj_cat_grid_values, via /api/admin/grid-values/*.
  */
-import { useState } from 'react';
-import { ChevronDown, Plus, Trash2, Search, Loader2, FolderTree, History, ArrowDownCircle, XCircle } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { ArrowDownCircle, History, Loader2, Plus, Search, X, XCircle } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-  Badge,
-  Button,
-  Dialog,
-  DialogContent,
-  DialogTitleBar,
-  DialogBody,
-  DialogFooter,
-  DialogTitle,
-  DialogDescription,
-  Empty,
-  Input,
-  Textarea,
-  ScrollArea,
-  Spinner,
-} from '@/shared/components/ui-tw';
+import { Button, Empty, Input } from '@/shared/components/ui-tw';
 import { message } from '@/lib/message';
+import { cn } from '@/lib/utils';
 import {
   getGridValueAttributes,
   getGridValueCategories,
@@ -40,21 +25,7 @@ import {
   deleteGridValue,
 } from '../../../services/adminApi';
 
-// Group colours — mirror the New Articles attribute card palette.
-const GROUP_STYLE: Record<string, { bg: string; border: string; text: string }> = {
-  FAB: { bg: '#fff7ed', border: '#fb923c', text: '#9a3412' },
-  BODY: { bg: '#ecfdf5', border: '#34d399', text: '#065f46' },
-  'VA ACC.': { bg: '#fef9c3', border: '#facc15', text: '#854d0e' },
-  'VA PRCS': { bg: '#fff1f2', border: '#fb7185', text: '#9f1239' },
-  BUSINESS: { bg: '#f1f5f9', border: '#64748b', text: '#1e293b' },
-};
-
-interface ModalTarget {
-  attribute: string;
-  majorCategory: string;
-}
-
-// Pending edit that needs a remark before it commits.
+// Pending edit that needs a reason before it commits.
 type PendingAction =
   | { kind: 'add'; value: string }
   | { kind: 'delete'; id: number; value: string }
@@ -66,47 +37,127 @@ const fmtDate = (iso: string) => {
   } catch { return iso; }
 };
 
-// ─── Values modal ─────────────────────────────────────────────────────────────
-const ValuesModal: React.FC<{ target: ModalTarget; onClose: () => void }> = ({ target, onClose }) => {
+const paneSearch = (value: string, onChange: (v: string) => void, placeholder: string) => (
+  <label className="flex h-9 items-center gap-2 rounded-[9px] border border-slate-300 bg-white px-2.5 text-slate-500 focus-within:border-slate-800">
+    <Search className="h-3.5 w-3.5 shrink-0" />
+    <input
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      aria-label={placeholder}
+      className="min-w-0 flex-1 bg-transparent text-[12.5px] text-slate-900 outline-none"
+    />
+    {value && (
+      <button type="button" aria-label="Clear" onClick={() => onChange('')} className="text-slate-400 hover:text-slate-700">
+        <X className="h-3.5 w-3.5" />
+      </button>
+    )}
+  </label>
+);
+
+const rowBtn = (active: boolean) =>
+  cn(
+    'flex h-[34px] w-full items-center justify-between gap-2 rounded-lg px-2.5 text-left transition-colors',
+    active ? 'bg-slate-800 text-white' : 'text-slate-900 hover:bg-slate-100',
+  );
+
+// ─── Main editor ──────────────────────────────────────────────────────────────
+export const GridValuesEditor: React.FC = () => {
   const qc = useQueryClient();
-  const { attribute, majorCategory } = target;
+  const [attrSearch, setAttrSearch] = useState('');
+  const [mcSearch, setMcSearch] = useState('');
+  const [attribute, setAttribute] = useState<string | null>(null);
+  const [majorCategory, setMajorCategory] = useState<string | null>(null);
   const [tab, setTab] = useState<'values' | 'history'>('values');
   const [newValue, setNewValue] = useState('');
   const [pending, setPending] = useState<PendingAction>(null);
   const [remarks, setRemarks] = useState('');
   const [busy, setBusy] = useState(false);
 
-  const { data: values, isLoading } = useQuery({
+  const { data: groups, isLoading: groupsLoading } = useQuery({
+    queryKey: ['grid-attributes'],
+    queryFn: getGridValueAttributes,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: cats, isLoading: catsLoading } = useQuery({
+    queryKey: ['grid-categories', attribute],
+    queryFn: () => getGridValueCategories(attribute!),
+    enabled: !!attribute,
+  });
+
+  const { data: values, isLoading: valuesLoading } = useQuery({
     queryKey: ['grid-values', attribute, majorCategory],
-    queryFn: () => getGridValues(attribute, majorCategory),
+    queryFn: () => getGridValues(attribute!, majorCategory!),
+    enabled: !!attribute && !!majorCategory,
   });
 
   const { data: audit, isLoading: auditLoading } = useQuery({
     queryKey: ['grid-audit', attribute, majorCategory],
-    queryFn: () => getGridValueAudit(attribute, majorCategory),
-    enabled: tab === 'history',
+    queryFn: () => getGridValueAudit(attribute!, majorCategory!),
+    enabled: !!attribute && !!majorCategory && tab === 'history',
   });
 
-  const refresh = () => {
-    qc.invalidateQueries({ queryKey: ['grid-values', attribute, majorCategory] });
-    qc.invalidateQueries({ queryKey: ['grid-categories', attribute] });    // value counts change
-    qc.invalidateQueries({ queryKey: ['grid-audit', attribute, majorCategory] });
+  // Open on the first attribute so the screen is never empty.
+  useEffect(() => {
+    if (!attribute && groups && groups[0]?.attributes[0]) setAttribute(groups[0].attributes[0].gridKey);
+  }, [groups, attribute]);
+
+  const groupOf = useMemo(() => {
+    const m = new Map<string, string>();
+    (groups ?? []).forEach((g) => g.attributes.forEach((a) => m.set(a.gridKey, g.label)));
+    return m;
+  }, [groups]);
+
+  const attrLower = attrSearch.trim().toLowerCase();
+  const visibleGroups = (groups ?? [])
+    .map((g) => ({
+      ...g,
+      attributes: g.attributes.filter(
+        (a) => !attrLower || a.gridKey.toLowerCase().includes(attrLower) || a.label.toLowerCase().includes(attrLower),
+      ),
+    }))
+    .filter((g) => g.attributes.length > 0);
+
+  const mcLower = mcSearch.trim().toLowerCase();
+  const visibleCats = (cats ?? []).filter((c) => !mcLower || c.majorCategory.toLowerCase().includes(mcLower));
+  const newMcCandidate = mcSearch.trim().toUpperCase();
+
+  const resetEdit = () => {
+    setPending(null);
+    setRemarks('');
+    setNewValue('');
+  };
+
+  const pickAttribute = (key: string) => {
+    if (key === attribute) return;
+    setAttribute(key);
+    setMajorCategory(null);
+    setMcSearch('');
+    setTab('values');
+    resetEdit();
+  };
+
+  const pickMajorCategory = (mc: string) => {
+    setMajorCategory(mc);
+    setTab('values');
+    resetEdit();
   };
 
   const startAdd = () => {
     const v = newValue.trim();
     if (!v) return;
+    if ((values ?? []).some((x) => x.value.toUpperCase() === v.toUpperCase())) {
+      message.warning(`"${v}" is already allowed`);
+      return;
+    }
     setRemarks('');
     setPending({ kind: 'add', value: v });
-  };
-  const startDelete = (id: number, value: string) => {
-    setRemarks('');
-    setPending({ kind: 'delete', id, value });
   };
 
   const confirm = async () => {
     const r = remarks.trim();
-    if (!r || !pending) return;
+    if (!r || !pending || !attribute || !majorCategory) return;
     setBusy(true);
     try {
       if (pending.kind === 'add') {
@@ -115,9 +166,11 @@ const ValuesModal: React.FC<{ target: ModalTarget; onClose: () => void }> = ({ t
         message.success(`Added "${pending.value}"`);
       } else {
         await deleteGridValue(pending.id, r);
-        message.success(`Deleted "${pending.value}"`);
+        message.success(`Removed "${pending.value}"`);
       }
-      refresh();
+      qc.invalidateQueries({ queryKey: ['grid-values', attribute, majorCategory] });
+      qc.invalidateQueries({ queryKey: ['grid-categories', attribute] }); // value counts change
+      qc.invalidateQueries({ queryKey: ['grid-audit', attribute, majorCategory] });
       setPending(null);
       setRemarks('');
     } catch (err: any) {
@@ -127,326 +180,260 @@ const ValuesModal: React.FC<{ target: ModalTarget; onClose: () => void }> = ({ t
     }
   };
 
-  const TabBtn: React.FC<{ id: 'values' | 'history'; children: React.ReactNode }> = ({ id, children }) => (
-    <button
-      type="button"
-      onClick={() => setTab(id)}
-      className={
-        'rounded-md px-3 py-1 text-[12px] font-medium transition-colors ' +
-        (tab === id ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted')
-      }
-    >
-      {children}
-    </button>
-  );
+  const valueCount = values?.length ?? 0;
 
   return (
-    <>
-      <Dialog open onOpenChange={(o) => !o && onClose()}>
-        <DialogContent className="max-w-lg gap-0 p-0">
-          <DialogTitleBar>
-            <DialogTitle className="font-mono text-white">{attribute}</DialogTitle>
-            <DialogDescription className="text-white/75">
-              Allowed values for <strong className="text-white/90">{majorCategory}</strong>
-            </DialogDescription>
-          </DialogTitleBar>
-          <DialogBody className="space-y-3">
-            {/* Tabs */}
-            <div className="flex items-center gap-1 rounded-lg bg-muted/40 p-1">
-              <TabBtn id="values">Values</TabBtn>
-              <TabBtn id="history">
-                <span className="inline-flex items-center gap-1"><History className="h-3.5 w-3.5" /> History</span>
-              </TabBtn>
+    <div className="grid h-[70vh] min-h-[520px] grid-cols-1 overflow-hidden rounded-[14px] border border-slate-200 bg-white md:grid-cols-[260px_280px_minmax(0,1fr)] dark:border-slate-800 dark:bg-slate-950">
+      {/* ── Pane 1 · groups + attributes ── */}
+      <nav aria-label="Attributes" className="flex min-h-0 flex-col border-b border-slate-200 md:border-b-0 md:border-r dark:border-slate-800">
+        <div className="border-b border-slate-100 p-3 dark:border-slate-800">{paneSearch(attrSearch, setAttrSearch, 'Find attribute')}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-2 py-1.5">
+          {groupsLoading && (
+            <div className="flex items-center gap-2 px-2 py-3 text-xs text-slate-500">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading attributes…
+            </div>
+          )}
+          {visibleGroups.map((g) => (
+            <div key={g.group} className="mb-1.5">
+              <div className="flex justify-between px-2 pb-1 pt-2 text-[10.5px] font-bold uppercase tracking-[0.08em] text-slate-600">
+                <span>{g.label}</span>
+                <span>{g.attributes.length}</span>
+              </div>
+              {g.attributes.map((a) => (
+                <button
+                  key={a.gridKey}
+                  type="button"
+                  onClick={() => pickAttribute(a.gridKey)}
+                  title={a.label !== a.gridKey ? a.label : undefined}
+                  className={rowBtn(a.gridKey === attribute)}
+                >
+                  <span className="truncate font-mono text-xs">{a.gridKey}</span>
+                </button>
+              ))}
+            </div>
+          ))}
+          {!groupsLoading && visibleGroups.length === 0 && (
+            <div className="px-2 py-4 text-xs text-slate-500">
+              {attrLower ? `No attributes match “${attrSearch.trim()}”.` : 'No grouped attributes found.'}
+            </div>
+          )}
+        </div>
+      </nav>
+
+      {/* ── Pane 2 · major categories ── */}
+      <section aria-label="Major categories" className="flex min-h-0 flex-col border-b border-slate-200 bg-slate-50/40 md:border-b-0 md:border-r dark:border-slate-800">
+        <div className="flex flex-col gap-2 border-b border-slate-100 p-3 dark:border-slate-800">
+          <div className="flex items-baseline justify-between gap-2 text-xs">
+            <b className="truncate font-mono text-slate-900 dark:text-slate-50">{attribute ?? '—'}</b>
+            {attribute && !catsLoading && <span className="shrink-0 text-slate-600">{cats?.length ?? 0} major categories</span>}
+          </div>
+          {paneSearch(mcSearch, setMcSearch, 'Find major category')}
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-2 py-1.5">
+          {!attribute ? (
+            <div className="px-2 py-4 text-xs text-slate-500">Pick an attribute on the left.</div>
+          ) : catsLoading ? (
+            <div className="flex items-center gap-2 px-2 py-3 text-xs text-slate-500">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading major categories…
+            </div>
+          ) : visibleCats.length === 0 ? (
+            <div className="px-2 py-3">
+              <div className="text-xs text-slate-500">
+                {mcLower ? `No major categories match “${mcSearch.trim()}”.` : 'No major categories with grid data.'}
+              </div>
+              {mcLower && newMcCandidate && (
+                <button
+                  type="button"
+                  onClick={() => pickMajorCategory(newMcCandidate)}
+                  className="mt-2 inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-800 hover:border-slate-800"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add values for <span className="font-mono">{newMcCandidate}</span>
+                </button>
+              )}
+            </div>
+          ) : (
+            visibleCats.map((c) => {
+              const active = c.majorCategory === majorCategory;
+              return (
+                <button key={c.majorCategory} type="button" onClick={() => pickMajorCategory(c.majorCategory)} className={rowBtn(active)}>
+                  <span className="truncate font-mono text-xs">{c.majorCategory}</span>
+                  <span
+                    className={cn(
+                      'shrink-0 rounded-full px-1.5 text-[11px] font-semibold',
+                      active ? 'bg-slate-600 text-white' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+                    )}
+                  >
+                    {c.count}
+                  </span>
+                </button>
+              );
+            })
+          )}
+        </div>
+      </section>
+
+      {/* ── Pane 3 · values ── */}
+      <section aria-label="Allowed values" className="flex min-h-0 flex-col">
+        {!attribute || !majorCategory ? (
+          <div className="flex flex-1 items-center justify-center p-6">
+            <Empty description={attribute ? 'Pick a major category to see its allowed values.' : 'Pick an attribute to start.'} />
+          </div>
+        ) : (
+          <>
+            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800">
+              <div className="min-w-0">
+                <div className="truncate text-[11px] font-bold uppercase tracking-[0.07em] text-slate-600">
+                  {attribute} · {groupOf.get(attribute) ?? ''}
+                </div>
+                <h2 className="m-0 mt-0.5 truncate font-mono text-[19px] font-semibold text-slate-900 dark:text-slate-50">{majorCategory}</h2>
+              </div>
+              <div role="tablist" aria-label="View" className="flex rounded-[9px] bg-slate-100 p-[3px] dark:bg-slate-800">
+                {(['values', 'history'] as const).map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    role="tab"
+                    aria-selected={tab === t}
+                    onClick={() => setTab(t)}
+                    className={cn(
+                      'flex h-[30px] items-center gap-1 rounded-[7px] px-3 text-xs font-semibold',
+                      tab === t ? 'bg-slate-800 text-white' : 'text-slate-700 hover:text-slate-950 dark:text-slate-300',
+                    )}
+                  >
+                    {t === 'values' ? `Values · ${valueCount}` : (<><History className="h-3.5 w-3.5" /> History</>)}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {tab === 'values' ? (
-              <>
-                {/* Add row */}
+              <div className="flex min-h-0 flex-1 flex-col gap-3.5 px-5 py-4">
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Add a new value…"
+                    placeholder="Add a value…"
                     value={newValue}
                     onChange={(e) => setNewValue(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); startAdd(); } }}
-                    className="h-9"
+                    disabled={busy || !!pending}
+                    className="h-10 font-mono"
                   />
-                  <Button onClick={startAdd} disabled={busy || !newValue.trim()}>
+                  <Button
+                    onClick={startAdd}
+                    disabled={busy || !!pending || !newValue.trim()}
+                    className="h-10 bg-slate-800 px-4 font-semibold text-white hover:bg-slate-900"
+                  >
                     <Plus className="h-4 w-4" /> Add
                   </Button>
                 </div>
 
-                <Spinner spinning={isLoading}>
-                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                    {(values?.length ?? 0)} value{(values?.length ?? 0) !== 1 ? 's' : ''}
-                  </div>
-                  <ScrollArea className="max-h-[46vh]">
-                    <div className="flex flex-col gap-1.5 pr-2">
-                      {(values ?? []).map((v) => (
-                        <div
-                          key={v.id}
-                          className="flex items-center justify-between gap-2 rounded-md border border-border bg-muted/30 px-3 py-1.5"
-                        >
-                          <span className="truncate text-[13px]" title={v.value}>{v.value}</span>
-                          <button
-                            type="button"
-                            onClick={() => startDelete(v.id, v.value)}
-                            disabled={busy}
-                            aria-label={`Delete ${v.value}`}
-                            className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      ))}
-                      {!isLoading && (values?.length ?? 0) === 0 && (
-                        <Empty description="No values yet — add the first one above." className="my-6" />
-                      )}
+                <div className="min-h-0 flex-1 overflow-y-auto">
+                  {valuesLoading ? (
+                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading values…
                     </div>
-                  </ScrollArea>
-                </Spinner>
-              </>
+                  ) : valueCount === 0 ? (
+                    <Empty description="No values yet — add the first one above." className="my-6" />
+                  ) : (
+                    <div className="flex flex-wrap content-start gap-2">
+                      {(values ?? []).map((v) => {
+                        const removing = pending?.kind === 'delete' && pending.id === v.id;
+                        return (
+                          <span
+                            key={v.id}
+                            className={cn(
+                              'flex h-8 items-center gap-1 rounded-lg border pl-3 pr-1 font-mono text-[12.5px]',
+                              removing
+                                ? 'border-red-300 bg-red-50 text-red-800 line-through'
+                                : 'border-slate-300 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50',
+                            )}
+                            title={v.value}
+                          >
+                            <span className="max-w-[240px] truncate">{v.value}</span>
+                            <button
+                              type="button"
+                              onClick={() => { setRemarks(''); setPending({ kind: 'delete', id: v.id, value: v.value }); }}
+                              disabled={busy || !!pending}
+                              aria-label={`Remove ${v.value}`}
+                              className="flex h-6 w-6 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-40"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* Inline reason bar — required before any add/remove commits */}
+                {pending && (
+                  <div className="flex flex-col gap-2 rounded-[10px] border border-amber-200 bg-amber-50 px-3 py-2.5 dark:border-amber-900 dark:bg-amber-950/40">
+                    <span className="text-[12.5px] text-slate-900 dark:text-slate-100">
+                      <b>{pending.kind === 'add' ? 'Add' : 'Remove'} “{pending.value}”</b>{' '}
+                      {pending.kind === 'add' ? 'to' : 'from'} <span className="font-mono">{attribute}</span> /{' '}
+                      <span className="font-mono">{majorCategory}</span> — a reason is required and saved to history.
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      <input
+                        autoFocus
+                        value={remarks}
+                        onChange={(e) => setRemarks(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); confirm(); } if (e.key === 'Escape') setPending(null); }}
+                        placeholder="Reason (saved to history)"
+                        aria-label="Reason"
+                        className="h-9 min-w-[200px] flex-1 rounded-lg border border-slate-300 bg-white px-2.5 text-[12.5px] outline-none focus:border-slate-800"
+                      />
+                      <Button variant="outline" onClick={() => { setPending(null); setRemarks(''); }} disabled={busy} className="h-9 border-slate-300">
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={confirm}
+                        disabled={busy || !remarks.trim()}
+                        className={cn(
+                          'h-9 font-semibold text-white',
+                          pending.kind === 'delete' ? 'bg-red-700 hover:bg-red-800' : 'bg-slate-800 hover:bg-slate-900',
+                        )}
+                      >
+                        {busy && <Loader2 className="h-4 w-4 animate-spin" />}
+                        {pending.kind === 'delete' ? 'Remove' : 'Add'}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
-              /* History tab */
-              <Spinner spinning={auditLoading}>
-                <ScrollArea className="max-h-[52vh]">
-                  <div className="flex flex-col gap-2 pr-2">
+              /* History */
+              <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
+                {auditLoading ? (
+                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading history…
+                  </div>
+                ) : (audit?.length ?? 0) === 0 ? (
+                  <Empty description="No changes recorded yet for this attribute / category." className="my-6" />
+                ) : (
+                  <div className="flex flex-col gap-2">
                     {(audit ?? []).map((a) => (
-                      <div key={a.id} className="rounded-md border border-border bg-muted/20 px-3 py-2">
+                      <div key={a.id} className="rounded-lg border border-slate-200 px-3 py-2 dark:border-slate-800">
                         <div className="flex items-center gap-2">
                           {a.action === 'ADD'
-                            ? <ArrowDownCircle className="h-4 w-4 text-emerald-600" />
-                            : <XCircle className="h-4 w-4 text-rose-600" />}
-                          <Badge variant={a.action === 'ADD' ? 'success' : 'destructive'} className="text-[10px]">
-                            {a.action}
-                          </Badge>
+                            ? <ArrowDownCircle className="h-4 w-4 text-slate-700" />
+                            : <XCircle className="h-4 w-4 text-red-700" />}
+                          <span className={cn('text-[11px] font-bold', a.action === 'ADD' ? 'text-slate-700' : 'text-red-700')}>
+                            {a.action === 'ADD' ? 'ADDED' : 'REMOVED'}
+                          </span>
                           <span className="font-mono text-[13px] font-semibold">{a.value}</span>
                         </div>
-                        {a.remarks && <div className="mt-1 text-[12px] text-foreground">“{a.remarks}”</div>}
-                        <div className="mt-1 text-[11px] text-muted-foreground">{a.by} · {fmtDate(a.at)}</div>
+                        {a.remarks && <div className="mt-1 text-xs text-slate-800 dark:text-slate-200">“{a.remarks}”</div>}
+                        <div className="mt-1 text-[11px] text-slate-500">{a.by} · {fmtDate(a.at)}</div>
                       </div>
                     ))}
-                    {!auditLoading && (audit?.length ?? 0) === 0 && (
-                      <Empty description="No changes recorded yet for this attribute / category." className="my-6" />
-                    )}
                   </div>
-                </ScrollArea>
-              </Spinner>
+                )}
+              </div>
             )}
-          </DialogBody>
-        </DialogContent>
-      </Dialog>
-
-      {/* Remarks prompt — required before any add/delete commits */}
-      <Dialog open={!!pending} onOpenChange={(o) => { if (!o && !busy) { setPending(null); setRemarks(''); } }}>
-        <DialogContent className="max-w-md">
-          <DialogHeaderRemark pending={pending} attribute={attribute} majorCategory={majorCategory} />
-          <Textarea
-            autoFocus
-            placeholder="Reason for this change (required)…"
-            value={remarks}
-            onChange={(e) => setRemarks(e.target.value)}
-            rows={3}
-          />
-          <DialogFooter>
-            <Button variant="outline" onClick={() => { setPending(null); setRemarks(''); }} disabled={busy}>
-              Cancel
-            </Button>
-            <Button
-              onClick={confirm}
-              disabled={busy || !remarks.trim()}
-              variant={pending?.kind === 'delete' ? 'destructive' : 'default'}
-            >
-              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              {pending?.kind === 'delete' ? 'Delete' : 'Add'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
-  );
-};
-
-// Small header for the remarks prompt (kept separate to read cleanly).
-const DialogHeaderRemark: React.FC<{ pending: PendingAction; attribute: string; majorCategory: string }> = ({ pending, attribute, majorCategory }) => {
-  if (!pending) return null;
-  const verb = pending.kind === 'add' ? 'Add' : 'Delete';
-  return (
-    <div className="space-y-1">
-      <DialogTitle className="text-base">{verb} value</DialogTitle>
-      <DialogDescription>
-        {verb} <strong className="font-mono text-foreground">{pending.value}</strong>{' '}
-        {pending.kind === 'add' ? 'to' : 'from'}{' '}
-        <span className="font-mono">{attribute}</span> / <span className="font-mono">{majorCategory}</span>.
-        A remark is required and will be saved to the audit log.
-      </DialogDescription>
-    </div>
-  );
-};
-
-// ─── Category list (lazy, per attribute) ──────────────────────────────────────
-const CategoryList: React.FC<{
-  attribute: string;
-  filter: string;
-  onPick: (majorCategory: string) => void;
-}> = ({ attribute, filter, onPick }) => {
-  const { data: cats, isLoading } = useQuery({
-    queryKey: ['grid-categories', attribute],
-    queryFn: () => getGridValueCategories(attribute),
-  });
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground">
-        <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading categories…
-      </div>
-    );
-  }
-
-  const lower = filter.trim().toLowerCase();
-  const filtered = lower
-    ? (cats ?? []).filter((c) => c.majorCategory.toLowerCase().includes(lower))
-    : (cats ?? []);
-
-  if (filtered.length === 0) {
-    const candidate = filter.trim().toUpperCase();
-    return (
-      <div className="px-3 py-2">
-        <div className="text-xs text-muted-foreground">
-          {lower ? `No major categories match “${filter.trim()}”.` : 'No major categories with grid data.'}
-        </div>
-        {lower && candidate && (
-          <button
-            type="button"
-            onClick={() => onPick(candidate)}
-            className="mt-2 inline-flex items-center gap-1 rounded-md border border-primary/40 bg-primary/5 px-2.5 py-1 text-[12px] font-medium text-primary transition-colors hover:bg-primary/10"
-          >
-            <Plus className="h-3.5 w-3.5" /> Add <span className="font-mono">“{candidate}”</span>
-          </button>
+          </>
         )}
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col">
-      {filtered.map((c) => (
-        <button
-          key={c.majorCategory}
-          type="button"
-          onClick={() => onPick(c.majorCategory)}
-          className="flex items-center justify-between gap-2 px-3 py-1.5 text-left text-[13px] transition-colors hover:bg-primary/5"
-        >
-          <span className="truncate font-mono">{c.majorCategory}</span>
-          <Badge variant="secondary" className="shrink-0 text-[10px]">{c.count}</Badge>
-        </button>
-      ))}
-    </div>
-  );
-};
-
-// ─── Main editor ──────────────────────────────────────────────────────────────
-export const GridValuesEditor: React.FC = () => {
-  const [search, setSearch] = useState('');
-  const [openGroup, setOpenGroup] = useState<string | undefined>(undefined);
-  const [openAttr, setOpenAttr] = useState<string | undefined>(undefined);
-  const [modal, setModal] = useState<ModalTarget | null>(null);
-
-  const { data: groups, isLoading } = useQuery({
-    queryKey: ['grid-attributes'],
-    queryFn: getGridValueAttributes,
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const lower = search.trim().toLowerCase();
-  const matchAttr = (gridKey: string, label: string) =>
-    !lower || gridKey.toLowerCase().includes(lower) || label.toLowerCase().includes(lower);
-
-  return (
-    <div className="rounded-lg border border-border bg-background">
-      {/* Search */}
-      <div className="border-b border-border p-3">
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Filter attributes / major categories…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            allowClear
-            onClear={() => setSearch('')}
-            className="h-9 pl-8"
-          />
-        </div>
-      </div>
-
-      <Spinner spinning={isLoading}>
-        <div className="max-h-[70vh] overflow-y-auto p-2">
-          {/* Level 1 — Groups */}
-          <Accordion type="single" collapsible value={openGroup} onValueChange={setOpenGroup}>
-            {(groups ?? []).map((g) => {
-              const style = GROUP_STYLE[g.group] ?? { bg: '#f8fafc', border: '#cbd5e1', text: '#334155' };
-              // Keep the currently-open attribute visible even when the search term
-              // targets a major-category code — so the same box filters its categories.
-              const attrs = g.attributes.filter((a) => matchAttr(a.gridKey, a.label) || a.gridKey === openAttr);
-              // When searching, hide groups with no matching attribute (unless this group is open).
-              if (lower && attrs.length === 0 && g.group !== openGroup) return null;
-              return (
-                <AccordionItem
-                  key={g.group}
-                  value={g.group}
-                  className="mb-2 overflow-hidden rounded-md border"
-                  style={{ borderColor: style.border, background: style.bg }}
-                >
-                  <AccordionTrigger className="px-3 hover:no-underline">
-                    <div className="flex items-center gap-2">
-                      <FolderTree className="h-4 w-4" style={{ color: style.text }} />
-                      <strong className="text-[13px]" style={{ color: style.text }}>{g.label}</strong>
-                      <Badge style={{ background: style.text }}>{g.attributes.length}</Badge>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="bg-background/50 px-2 pb-2">
-                    {/* Level 2 — Attributes */}
-                    <Accordion type="single" collapsible value={openAttr} onValueChange={setOpenAttr}>
-                      {attrs.map((a) => (
-                        <AccordionItem
-                          key={a.gridKey}
-                          value={a.gridKey}
-                          className="overflow-hidden border-b border-border last:border-b-0"
-                        >
-                          <AccordionTrigger className="px-2 py-2 hover:no-underline">
-                            <div className="flex items-center gap-2">
-                              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-                              <span className="font-mono text-[12px]">{a.gridKey}</span>
-                              {a.label !== a.gridKey && (
-                                <span className="text-[11px] text-muted-foreground">· {a.label}</span>
-                              )}
-                            </div>
-                          </AccordionTrigger>
-                          <AccordionContent className="pb-1">
-                            {/* Level 3 — Major categories (lazy) */}
-                            {openAttr === a.gridKey && (
-                              <CategoryList
-                                attribute={a.gridKey}
-                                filter={search}
-                                onPick={(majorCategory) => setModal({ attribute: a.gridKey, majorCategory })}
-                              />
-                            )}
-                          </AccordionContent>
-                        </AccordionItem>
-                      ))}
-                    </Accordion>
-                  </AccordionContent>
-                </AccordionItem>
-              );
-            })}
-          </Accordion>
-
-          {!isLoading && (groups ?? []).length === 0 && (
-            <Empty description="No grouped attributes found." className="my-10" />
-          )}
-        </div>
-      </Spinner>
-
-      {modal && <ValuesModal target={modal} onClose={() => setModal(null)} />}
+      </section>
     </div>
   );
 };

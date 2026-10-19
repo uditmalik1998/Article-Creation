@@ -1,45 +1,29 @@
 /**
  * HierarchyTreeEditor
- * Department cards layout. Clicking a category fires onCategorySelect
- * so the parent can navigate to the Attribute Mapping tab.
+ * Admin › Hierarchy tab (design "Option C · department tabs + sub-department cards"):
+ *   • one tab per department (+ add department)
+ *   • the department's sub-departments as cards (code, category count, size bar)
+ *   • clicking a card opens a side panel listing its categories, with rename,
+ *     deactivate / activate and add.
+ *
+ * Deletes are deliberately limited: the backend's category delete also wipes
+ * that category's extraction jobs, so categories are deactivated instead, and
+ * departments / sub-departments can only be deleted once they are empty.
  */
-import { useState, useMemo } from 'react';
-import {
-  Plus,
-  Pencil,
-  Check,
-  X,
-  Folder,
-  Tag as TagIcon,
-  LayoutGrid,
-  ChevronRight,
-} from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Check, Pencil, Plus, Search, X } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-  Alert,
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  Empty,
-  Input,
-  Separator,
-  Spinner,
-  Tag,
-  Tooltip,
-} from '@/shared/components/ui-tw';
+import { Alert, Button, Empty, Popconfirm, Spinner, Tooltip } from '@/shared/components/ui-tw';
 import { message } from '@/lib/message';
+import { cn } from '@/lib/utils';
 import {
   getHierarchyTree,
   createDepartment,
   updateDepartment,
+  deleteDepartment,
   createSubDepartment,
   updateSubDepartment,
+  deleteSubDepartment,
   createCategory,
   updateCategory,
 } from '../../../services/adminApi';
@@ -52,295 +36,144 @@ export interface SelectedCategory {
   departmentName: string;
 }
 
-// ─── NodeTitle ────────────────────────────────────────────────────────────────
+const toCode = (name: string) => name.trim().toUpperCase().replace(/\s+/g, '_');
 
-interface NodeTitleProps {
-  nodeId: number;
-  nodeType: 'dept' | 'subdept' | 'category';
+// ─── InlineName — click the pencil to rename in place ─────────────────────────
+const InlineName: React.FC<{
   label: string;
-  isActive?: boolean;
-  onSaved: () => void;
-}
-
-const NodeTitle: React.FC<NodeTitleProps> = ({ nodeId, nodeType, label, isActive = true, onSaved }) => {
-  const qc = useQueryClient();
+  onSave: (name: string) => Promise<void>;
+  className?: string;
+}> = ({ label, onSave, className }) => {
   const [editing, setEditing] = useState(false);
-  const [editVal, setEditVal] = useState(label);
+  const [val, setVal] = useState(label);
+  const [busy, setBusy] = useState(false);
 
-  const invalidate = () => {
-    qc.invalidateQueries({ queryKey: ['hierarchy-tree'] });
-    qc.invalidateQueries({ queryKey: ['hierarchy-stats'] });
-    onSaved();
-  };
+  useEffect(() => { if (!editing) setVal(label); }, [label, editing]);
 
-  const saveName = async () => {
-    if (!editVal.trim() || editVal.trim() === label) {
-      setEditing(false);
-      return;
-    }
+  const save = async () => {
+    const next = val.trim();
+    if (!next || next === label) { setEditing(false); return; }
+    setBusy(true);
     try {
-      if (nodeType === 'dept') await updateDepartment(nodeId, { name: editVal.trim() });
-      else if (nodeType === 'subdept') await updateSubDepartment(nodeId, { name: editVal.trim() });
-      else await updateCategory(nodeId, { name: editVal.trim() });
-      message.success('Renamed');
-      invalidate();
-    } catch {
-      message.error('Save failed');
+      await onSave(next);
+      setEditing(false);
+    } finally {
+      setBusy(false);
     }
-    setEditing(false);
-  };
-
-
-  const iconMap = {
-    dept: <Folder className="h-4 w-4 shrink-0 text-amber-500" />,
-    subdept: <LayoutGrid className="h-4 w-4 shrink-0 text-sky-500" />,
-    category: <TagIcon className="h-4 w-4 shrink-0 text-emerald-500" />,
   };
 
   if (editing) {
     return (
-      <span className="inline-flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-        {iconMap[nodeType]}
-        <Input
-          value={editVal}
-          onChange={(e) => setEditVal(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && saveName()}
+      <span className="flex min-w-0 flex-1 items-center gap-1">
+        <input
           autoFocus
-          className="h-7 w-[150px] text-xs"
+          value={val}
+          onChange={(e) => setVal(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') save(); if (e.key === 'Escape') setEditing(false); }}
+          aria-label="New name"
+          className="h-8 min-w-0 flex-1 rounded-md border border-slate-300 px-2 text-[13px] outline-none focus:border-slate-800"
         />
-        <Button size="sm" onClick={saveName}>
-          <Check />
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => {
-            setEditing(false);
-            setEditVal(label);
-          }}
-        >
-          <X />
-        </Button>
+        <button type="button" aria-label="Save name" onClick={save} disabled={busy} className="flex h-8 w-8 items-center justify-center rounded-md bg-slate-800 text-white hover:bg-slate-900">
+          <Check className="h-3.5 w-3.5" />
+        </button>
+        <button type="button" aria-label="Cancel rename" onClick={() => setEditing(false)} className="flex h-8 w-8 items-center justify-center rounded-md border border-slate-300 text-slate-700 hover:border-slate-800">
+          <X className="h-3.5 w-3.5" />
+        </button>
       </span>
     );
   }
-
   return (
-    <span className="hierarchy-node-row inline-flex min-w-0 items-center gap-1.5">
-      {iconMap[nodeType]}
-      <span
-        className="truncate"
-        style={{
-          opacity: isActive ? 1 : 0.45,
-          fontSize: nodeType === 'category' ? 12 : 13,
-        }}
-      >
-        {label}
-      </span>
-      {!isActive && (
-        <Tag className="shrink-0 text-[10px]">inactive</Tag>
-      )}
-      <span className="node-actions inline-flex" onClick={(e) => e.stopPropagation()}>
-        <Tooltip title="Rename">
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setEditing(true)}>
-            <Pencil />
-          </Button>
-        </Tooltip>
-      </span>
+    <span className={cn('group flex min-w-0 items-center gap-1', className)}>
+      <span className="truncate">{label}</span>
+      <Tooltip title="Rename">
+        <button
+          type="button"
+          aria-label={`Rename ${label}`}
+          onClick={(e) => { e.stopPropagation(); setEditing(true); }}
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-500 opacity-60 hover:bg-slate-100 hover:text-slate-900 group-hover:opacity-100"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+        </button>
+      </Tooltip>
     </span>
   );
 };
 
-// ─── AddNode ──────────────────────────────────────────────────────────────────
-
-interface AddNodeProps {
-  nodeType: 'dept' | 'subdept' | 'category';
-  parentId?: number;
-  onSaved: () => void;
-  placeholder: string;
-}
-
-const AddNode: React.FC<AddNodeProps> = ({ nodeType, parentId, onSaved, placeholder }) => {
+// ─── InlineAdd — "+ label" button that turns into name (+ code) inputs ────────
+const InlineAdd: React.FC<{
+  label: string;
+  withCode?: boolean;
+  onAdd: (name: string, code: string) => Promise<void>;
+  className?: string;
+}> = ({ label, withCode, onAdd, className }) => {
   const [open, setOpen] = useState(false);
-  const [val, setVal] = useState('');
-  const [loading, setLoading] = useState(false);
-  const qc = useQueryClient();
+  const [name, setName] = useState('');
+  const [code, setCode] = useState('');
+  const [busy, setBusy] = useState(false);
 
+  const close = () => { setOpen(false); setName(''); setCode(''); };
   const save = async () => {
-    if (!val.trim()) return;
-    setLoading(true);
+    if (!name.trim()) return;
+    setBusy(true);
     try {
-      const code = val.trim().toUpperCase().replace(/\s+/g, '_');
-      if (nodeType === 'dept') {
-        await createDepartment({ code, name: val.trim(), displayOrder: 99 });
-      } else if (nodeType === 'subdept') {
-        await createSubDepartment({ departmentId: parentId!, code, name: val.trim(), displayOrder: 99 });
-      } else {
-        await createCategory({ subDepartmentId: parentId!, code, name: val.trim(), displayOrder: 99 });
-      }
-      message.success('Added');
-      qc.invalidateQueries({ queryKey: ['hierarchy-tree'] });
-      qc.invalidateQueries({ queryKey: ['hierarchy-stats'] });
-      onSaved();
-      setVal('');
-      setOpen(false);
-    } catch (e: any) {
-      message.error(e?.response?.data?.error || 'Create failed');
+      await onAdd(name.trim(), code.trim() ? code.trim().toUpperCase() : toCode(name));
+      close();
+    } finally {
+      setBusy(false);
     }
-    setLoading(false);
   };
 
   if (!open) {
     return (
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={(e) => {
-          e.stopPropagation();
-          setOpen(true);
-        }}
-        className="mt-1 w-full border-dashed"
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className={cn(
+          'flex h-9 items-center justify-center gap-1.5 rounded-[9px] border border-dashed border-slate-400 bg-white px-3 text-[12.5px] font-semibold text-slate-800 hover:border-slate-800',
+          className,
+        )}
       >
-        <Plus />
-        {placeholder}
-      </Button>
+        <Plus className="h-3.5 w-3.5" /> {label}
+      </button>
     );
   }
-
   return (
-    <span className="mt-1 flex w-full items-center gap-1" onClick={(e) => e.stopPropagation()}>
-      <Input
-        placeholder="Name…"
-        value={val}
-        onChange={(e) => setVal(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && save()}
+    <div className={cn('flex flex-col gap-1.5 rounded-[10px] border border-slate-800 bg-white p-2', className)}>
+      <input
         autoFocus
-        className="h-7 flex-1 text-xs"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        onKeyDown={(e) => { if (e.key === 'Enter') save(); if (e.key === 'Escape') close(); }}
+        placeholder="Name"
+        aria-label="Name"
+        className="h-8 rounded-md border border-slate-300 px-2 text-[13px] outline-none focus:border-slate-800"
       />
-      <Button size="sm" onClick={save} disabled={loading}>
-        <Check />
-      </Button>
-      <Button size="sm" variant="outline" onClick={() => setOpen(false)}>
-        <X />
-      </Button>
-    </span>
-  );
-};
-
-// ─── DeptCard ─────────────────────────────────────────────────────────────────
-
-interface DeptCardProps {
-  dept: any;
-  refetch: () => void;
-  onCategorySelect?: (cat: SelectedCategory) => void;
-}
-
-const DeptCard: React.FC<DeptCardProps> = ({ dept, refetch, onCategorySelect }) => {
-  const catCount = (dept.subDepartments ?? []).reduce(
-    (acc: number, sub: any) => acc + (sub.categories ?? []).length,
-    0,
-  );
-  const subDepartments = dept.subDepartments ?? [];
-
-  return (
-    <Card className="w-[340px] min-w-[300px] shrink-0">
-      <CardHeader className="flex flex-row items-center justify-between border-b border-border bg-amber-50 p-3">
-        <NodeTitle nodeId={dept.id} nodeType="dept" label={dept.name} onSaved={refetch} />
-        <Badge variant="info">{catCount} categories</Badge>
-      </CardHeader>
-      <CardContent className="p-3">
-        {subDepartments.length === 0 ? (
-          <Empty description="No sub-departments yet" className="py-2" />
-        ) : (
-          <Accordion
-            type="multiple"
-            defaultValue={subDepartments.map((s: any) => String(s.id))}
-            className="space-y-1"
-          >
-            {subDepartments.map((sub: any) => {
-              const cats = sub.categories ?? [];
-              return (
-                <AccordionItem key={sub.id} value={String(sub.id)} className="border-0">
-                  <AccordionTrigger className="py-2 hover:no-underline">
-                    <span className="flex w-full items-center gap-2">
-                      <NodeTitle nodeId={sub.id} nodeType="subdept" label={sub.name} onSaved={refetch} />
-                      <Badge variant="secondary" className="ml-auto shrink-0">
-                        {cats.length}
-                      </Badge>
-                    </span>
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    {cats.length === 0 && (
-                      <p className="block py-1 text-xs text-muted-foreground">No categories yet</p>
-                    )}
-                    {cats.map((cat: any) => {
-                      const enabledCount = (cat.attributes ?? []).filter((a: any) => a.isEnabled).length;
-                      const totalAttrs = (cat.attributes ?? []).length;
-                      return (
-                        <div
-                          key={cat.id}
-                          className="cat-row flex items-center rounded border-b border-border/50 px-2 py-1.5 transition-colors"
-                          onClick={() =>
-                            onCategorySelect?.({
-                              id: cat.id,
-                              name: cat.name,
-                              code: cat.code,
-                              garmentType: cat.garmentType ?? 'UPPER',
-                              departmentName: dept.name,
-                            })
-                          }
-                        >
-                          <div className="min-w-0 flex-1">
-                            <NodeTitle
-                              nodeId={cat.id}
-                              nodeType="category"
-                              label={`${cat.name} (${cat.code})`}
-                              isActive={cat.isActive !== false}
-                              onSaved={refetch}
-                            />
-                          </div>
-                          {onCategorySelect && (
-                            <Tooltip title="Manage attributes">
-                              <span className="ml-2 flex shrink-0 items-center gap-1">
-                                {totalAttrs > 0 && (
-                                  <Badge
-                                    variant={enabledCount > 0 ? 'success' : 'secondary'}
-                                    className="m-0 text-[10px]"
-                                  >
-                                    {enabledCount}/{totalAttrs}
-                                  </Badge>
-                                )}
-                                <ChevronRight className="cat-arrow h-3 w-3 text-muted-foreground" />
-                              </span>
-                            </Tooltip>
-                          )}
-                        </div>
-                      );
-                    })}
-                    <div className="pt-1.5">
-                      <AddNode nodeType="category" parentId={sub.id} onSaved={refetch} placeholder="Add category" />
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              );
-            })}
-          </Accordion>
-        )}
-        <Separator className="my-2 border-dashed" />
-        <AddNode nodeType="subdept" parentId={dept.id} onSaved={refetch} placeholder="Add sub-department" />
-      </CardContent>
-    </Card>
+      {withCode && (
+        <input
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') save(); if (e.key === 'Escape') close(); }}
+          placeholder={name.trim() ? `Code (default ${toCode(name)})` : 'Code (optional)'}
+          aria-label="Code"
+          className="h-8 rounded-md border border-slate-300 px-2 font-mono text-[12px] outline-none focus:border-slate-800"
+        />
+      )}
+      <div className="flex justify-end gap-1.5">
+        <Button variant="outline" size="sm" onClick={close} className="h-8 border-slate-300">Cancel</Button>
+        <Button size="sm" onClick={save} disabled={busy || !name.trim()} className="h-8 bg-slate-800 text-white hover:bg-slate-900">
+          Add
+        </Button>
+      </div>
+    </div>
   );
 };
 
 // ─── HierarchyTreeEditor ──────────────────────────────────────────────────────
-
-interface HierarchyTreeEditorProps {
-  onCategorySelect?: (cat: SelectedCategory) => void;
-}
-
-export const HierarchyTreeEditor: React.FC<HierarchyTreeEditorProps> = ({ onCategorySelect }) => {
-  const [searchText, setSearchText] = useState('');
+export const HierarchyTreeEditor: React.FC = () => {
+  const qc = useQueryClient();
+  const [deptId, setDeptId] = useState<number | null>(null);
+  const [subId, setSubId] = useState<number | null>(null);
+  const [search, setSearch] = useState('');
 
   const { data: hierarchyData, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['hierarchy-tree'],
@@ -348,88 +181,252 @@ export const HierarchyTreeEditor: React.FC<HierarchyTreeEditorProps> = ({ onCate
     retry: 1,
   });
 
-  const filteredDepts = useMemo((): any[] => {
-    const all: any[] = Array.isArray(hierarchyData) ? hierarchyData : [];
-    if (!searchText.trim()) return all;
-    const lower = searchText.toLowerCase();
-    return all.reduce((acc: any[], dept: any) => {
-      const deptMatch = dept.name.toLowerCase().includes(lower);
-      const filteredSubs = (dept.subDepartments ?? []).reduce((sAcc: any[], sub: any) => {
-        const subMatch = sub.name.toLowerCase().includes(lower);
-        const filteredCats = (sub.categories ?? []).filter(
-          (cat: any) =>
-            cat.name.toLowerCase().includes(lower) || cat.code.toLowerCase().includes(lower),
-        );
-        if (deptMatch || subMatch || filteredCats.length > 0) {
-          sAcc.push({ ...sub, categories: deptMatch || subMatch ? sub.categories : filteredCats });
-        }
-        return sAcc;
-      }, []);
-      if (deptMatch || filteredSubs.length > 0) {
-        acc.push({ ...dept, subDepartments: deptMatch ? dept.subDepartments : filteredSubs });
-      }
-      return acc;
-    }, []);
-  }, [hierarchyData, searchText]);
+  const depts: any[] = useMemo(() => (Array.isArray(hierarchyData) ? hierarchyData : []), [hierarchyData]);
+  const catCount = (d: any) => (d.subDepartments ?? []).reduce((n: number, s: any) => n + (s.categories ?? []).length, 0);
+
+  // Keep a valid department selected.
+  useEffect(() => {
+    if (depts.length === 0) return;
+    if (deptId == null || !depts.some((d) => d.id === deptId)) setDeptId(depts[0].id);
+  }, [depts, deptId]);
+
+  const dept = depts.find((d) => d.id === deptId) ?? null;
+  const subs: any[] = dept?.subDepartments ?? [];
+  const sub = subs.find((s) => s.id === subId) ?? null;
+  const maxCats = Math.max(1, ...subs.map((s) => (s.categories ?? []).length));
+
+  const lower = search.trim().toLowerCase();
+  const catMatches = (c: any) => c.name.toLowerCase().includes(lower) || String(c.code).toLowerCase().includes(lower);
+  const visibleSubs = lower
+    ? subs.filter((s) => s.name.toLowerCase().includes(lower) || String(s.code ?? '').toLowerCase().includes(lower) || (s.categories ?? []).some(catMatches))
+    : subs;
+  const subNameMatches = !!sub && (sub.name.toLowerCase().includes(lower) || String(sub.code ?? '').toLowerCase().includes(lower));
+  const visibleCats: any[] = sub ? (lower && !subNameMatches ? (sub.categories ?? []).filter(catMatches) : sub.categories ?? []) : [];
+
+  const refresh = () => {
+    qc.invalidateQueries({ queryKey: ['hierarchy-tree'] });
+    qc.invalidateQueries({ queryKey: ['hierarchy-stats'] });
+  };
+  const run = async (fn: () => Promise<unknown>, ok: string) => {
+    try {
+      await fn();
+      message.success(ok);
+      refresh();
+    } catch (e: any) {
+      message.error(e?.response?.data?.error || 'Action failed');
+      throw e;
+    }
+  };
+
+  const pickDept = (id: number) => { setDeptId(id); setSubId(null); setSearch(''); };
 
   return (
-    <div>
-      <Input
-        placeholder="Search departments, sub-departments, categories or codes…"
-        value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
-        allowClear
-        onClear={() => setSearchText('')}
-        className="mb-4 max-w-[420px]"
-      />
-
+    <div className="flex flex-col gap-3.5">
       {isError && (
         <Alert
           type="error"
           showIcon
           message="Failed to load hierarchy"
           description={(error as any)?.message || 'Check that the backend is running and you are logged in as Admin.'}
-          className="mb-4"
         >
-          <Button size="sm" onClick={() => refetch()}>
-            Retry
-          </Button>
+          <Button size="sm" onClick={() => refetch()}>Retry</Button>
         </Alert>
       )}
 
-      <Spinner spinning={isLoading}>
-        <div className="flex flex-wrap items-start gap-4">
-          {filteredDepts.map((dept: any) => (
-            <DeptCard
-              key={dept.id}
-              dept={dept}
-              refetch={refetch}
-              onCategorySelect={onCategorySelect}
-            />
-          ))}
-
-          {!searchText && !isError && (
-            <div className="flex min-h-[80px] w-[340px] min-w-[300px] items-center justify-center rounded-lg border-2 border-dashed border-border p-3">
-              <AddNode nodeType="dept" onSaved={refetch} placeholder="Add department" />
-            </div>
-          )}
-
-          {filteredDepts.length === 0 && !isLoading && !isError && (
-            <Empty
-              description={searchText ? `No results for "${searchText}"` : 'No departments yet'}
-              className="mx-auto my-10"
-            />
-          )}
+      {/* Department tabs + search */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div role="tablist" aria-label="Departments" className="flex flex-wrap items-center gap-1.5">
+          {depts.map((d) => {
+            const on = d.id === deptId;
+            return (
+              <button
+                key={d.id}
+                type="button"
+                role="tab"
+                aria-selected={on}
+                onClick={() => pickDept(d.id)}
+                className={cn(
+                  'h-10 rounded-[10px] border px-4 text-[13.5px] font-bold transition-colors',
+                  on ? 'border-slate-800 bg-slate-800 text-white' : 'border-slate-300 bg-white text-slate-800 hover:border-slate-800',
+                )}
+              >
+                {d.name} <span className="font-medium opacity-70">{catCount(d)}</span>
+              </button>
+            );
+          })}
+          <InlineAdd
+            label="Department"
+            onAdd={(name, code) => run(() => createDepartment({ code, name, displayOrder: 99 }), 'Department added')}
+            className="h-10"
+          />
         </div>
-      </Spinner>
+        {dept && (
+          <label className="flex h-[38px] w-[280px] items-center gap-2 rounded-[9px] border border-slate-300 bg-white px-2.5 text-slate-500 focus-within:border-slate-800">
+            <Search className="h-3.5 w-3.5 shrink-0" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={`Search in ${dept.name}`}
+              aria-label={`Search in ${dept.name}`}
+              className="min-w-0 flex-1 bg-transparent text-[12.5px] text-slate-900 outline-none"
+            />
+            {search && (
+              <button type="button" aria-label="Clear search" onClick={() => setSearch('')} className="text-slate-400 hover:text-slate-700">
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </label>
+        )}
+      </div>
 
-      <style>{`
-        .hierarchy-node-row .node-actions { opacity: 0; transition: opacity 0.15s; }
-        .hierarchy-node-row:hover .node-actions { opacity: 1; }
-        .cat-row { cursor: pointer; }
-        .cat-row:hover { background: #f0f7ff; }
-        .cat-row:hover .cat-arrow { color: #1890ff; }
-      `}</style>
+      <Spinner spinning={isLoading}>
+        {!dept ? (
+          !isLoading && !isError && <Empty description="No departments yet — add one above." className="my-10" />
+        ) : (
+          <>
+            {/* Department summary + actions */}
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-2 text-[13px] text-slate-600">
+                <InlineName
+                  label={dept.name}
+                  className="text-[15px] font-bold text-slate-900"
+                  onSave={(name) => run(() => updateDepartment(dept.id, { name }), 'Department renamed')}
+                />
+                <span>· {subs.length} sub-departments · {catCount(dept)} categories — click a card to see and edit its categories.</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {subs.length === 0 ? (
+                  <Popconfirm
+                    title={`Delete ${dept.name}?`}
+                    description="This department is empty. This cannot be undone."
+                    onConfirm={() => run(() => deleteDepartment(dept.id), 'Department deleted').then(() => setDeptId(null)).catch(() => {})}
+                    okText="Delete"
+                  >
+                    <Button variant="outline" size="sm" className="h-9 border-red-200 text-red-700 hover:bg-red-50">Delete department</Button>
+                  </Popconfirm>
+                ) : null}
+                <InlineAdd
+                  label="Sub-department"
+                  withCode
+                  onAdd={(name, code) => run(() => createSubDepartment({ departmentId: dept.id, code, name, displayOrder: 99 }), 'Sub-department added')}
+                />
+              </div>
+            </div>
+
+            <div className={cn('grid items-start gap-3.5', sub ? 'lg:grid-cols-[minmax(0,1fr)_340px]' : 'grid-cols-1')}>
+              {/* Sub-department cards */}
+              <div className="grid grid-cols-1 content-start gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
+                {visibleSubs.map((s) => {
+                  const n = (s.categories ?? []).length;
+                  const on = s.id === subId;
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => setSubId(on ? null : s.id)}
+                      aria-pressed={on}
+                      className={cn(
+                        'flex flex-col gap-3 rounded-xl border p-3 text-left transition-colors',
+                        on ? 'border-[1.5px] border-slate-800 bg-slate-100' : 'border-slate-200 bg-white hover:border-slate-400',
+                      )}
+                    >
+                      <span className="flex items-start justify-between gap-2">
+                        <b className="text-[13px] text-slate-900">{s.name}</b>
+                        <span className="shrink-0 font-mono text-[10.5px] text-slate-600">{s.code}</span>
+                      </span>
+                      <span className="flex items-center gap-2 text-[11.5px] text-slate-700">
+                        <span className="h-[5px] flex-1 overflow-hidden rounded-full bg-slate-200">
+                          <span className="block h-full bg-slate-800" style={{ width: `${Math.round((n / maxCats) * 100)}%` }} />
+                        </span>
+                        {n}
+                      </span>
+                    </button>
+                  );
+                })}
+                {visibleSubs.length === 0 && (
+                  <div className="col-span-full py-8 text-center text-xs text-slate-500">
+                    {lower ? `Nothing in ${dept.name} matches “${search.trim()}”.` : 'No sub-departments yet — add one above.'}
+                  </div>
+                )}
+              </div>
+
+              {/* Side panel — the selected sub-department's categories */}
+              {sub && (
+                <aside aria-label={sub.name} className="flex max-h-[70vh] flex-col overflow-hidden rounded-[14px] border border-slate-300 bg-white lg:sticky lg:top-4">
+                  <div className="flex items-start justify-between gap-2 border-b border-slate-100 px-4 py-3.5">
+                    <div className="min-w-0">
+                      <InlineName
+                        label={sub.name}
+                        className="text-[15px] font-bold text-slate-900"
+                        onSave={(name) => run(() => updateSubDepartment(sub.id, { name }), 'Sub-department renamed')}
+                      />
+                      <div className="font-mono text-[11.5px] text-slate-600">
+                        {sub.code} · {(sub.categories ?? []).length} categories
+                      </div>
+                    </div>
+                    <button type="button" aria-label="Close" onClick={() => setSubId(null)} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-700 hover:bg-slate-200">
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  <div className="min-h-0 flex-1 overflow-y-auto px-2.5 py-1.5">
+                    {visibleCats.map((c) => {
+                      const active = c.isActive !== false;
+                      return (
+                        <div key={c.id} className="flex min-h-[38px] items-center gap-1 border-b border-slate-100 px-1.5 last:border-b-0">
+                          <div className="min-w-0 flex-1">
+                            <InlineName
+                              label={c.name}
+                              className={cn('text-[12.5px]', active ? 'text-slate-900' : 'text-slate-400')}
+                              onSave={(name) => run(() => updateCategory(c.id, { name }), 'Category renamed')}
+                            />
+                            {c.code !== c.name && <div className="truncate font-mono text-[10.5px] text-slate-500">{c.code}</div>}
+                          </div>
+                          {!active && <span className="shrink-0 rounded-full bg-slate-100 px-2 text-[10px] font-semibold text-slate-600">inactive</span>}
+                          <Popconfirm
+                            title={active ? `Deactivate ${c.name}?` : `Activate ${c.name}?`}
+                            description={active ? 'It stays in the hierarchy but is hidden from pickers. You can activate it again.' : 'It becomes available again.'}
+                            onConfirm={() => run(() => updateCategory(c.id, { isActive: !active } as any), active ? 'Category deactivated' : 'Category activated').catch(() => {})}
+                            okText={active ? 'Deactivate' : 'Activate'}
+                          >
+                            <button type="button" className="h-7 shrink-0 rounded-md px-2 text-[11.5px] font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+                              {active ? 'Deactivate' : 'Activate'}
+                            </button>
+                          </Popconfirm>
+                        </div>
+                      );
+                    })}
+                    {visibleCats.length === 0 && (
+                      <div className="px-2 py-6 text-center text-xs text-slate-500">
+                        {lower ? `No categories match “${search.trim()}”.` : 'No categories yet.'}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col gap-2 border-t border-slate-100 p-3">
+                    <InlineAdd
+                      label="Add category"
+                      withCode
+                      onAdd={(name, code) => run(() => createCategory({ subDepartmentId: sub.id, code, name, displayOrder: 99 }), 'Category added')}
+                      className="w-full"
+                    />
+                    {(sub.categories ?? []).length === 0 && (
+                      <Popconfirm
+                        title={`Delete ${sub.name}?`}
+                        description="This sub-department is empty. This cannot be undone."
+                        onConfirm={() => run(() => deleteSubDepartment(sub.id), 'Sub-department deleted').then(() => setSubId(null)).catch(() => {})}
+                        okText="Delete"
+                      >
+                        <Button variant="outline" size="sm" className="h-9 w-full border-red-200 text-red-700 hover:bg-red-50">Delete sub-department</Button>
+                      </Popconfirm>
+                    )}
+                  </div>
+                </aside>
+              )}
+            </div>
+          </>
+        )}
+      </Spinner>
     </div>
   );
 };
