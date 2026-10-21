@@ -251,6 +251,8 @@ const PAGE_SIZE = 50;
 
 // DB field name → SAP characteristic name for every field visible in the Modify form.
 const MODIFY_FIELDS: { field: string; sapName: string }[] = [
+  // Vendor code on an existing article (admin only — locked for everyone else)
+  { field: 'vendorCode',        sapName: 'EXTWG' },
   // FAB
   { field: 'fabDiv',             sapName: 'M_FAB_DIV' },
   { field: 'yarn1',              sapName: 'M_YARN' },
@@ -973,8 +975,9 @@ export default function ArticleDetailPage({
       const data = await r.json();
       if (!r.ok) {
         if (data.fabricArticleNumber && item) {
+          // Backend already wrote the number back to the FG row (like Create Body Article)
           updateItemInList({ id: item.id, fabricArticleNumber: String(data.fabricArticleNumber) } as any);
-          toast.warning(data.error || 'Fabric article already exists — number filled.', { id: tid, duration: 8000 });
+          toast.success(`Fabric Article already exists: ${data.fabricArticleNumber} — auto-filled`, { id: tid, duration: 6000 });
         } else {
           toast.error(data.error || 'Failed to create fabric article', { id: tid, duration: 8000 });
         }

@@ -843,16 +843,39 @@ const ArticleCard = React.memo(
     }, [imgModalOpen]);
 
     const prevItemRef = React.useRef<ApproverItem>(item);
+    // Set when Create Body / Create Fabric Article is clicked: the next number the
+    // server returns for that field is adopted even if it equals the old one.
+    const awaitingLinkRef = React.useRef<Set<string>>(new Set());
     const pendingChangesRef = React.useRef(pendingChanges);
     pendingChangesRef.current = pendingChanges;
     React.useEffect(() => {
       const prev = prevItemRef.current;
       prevItemRef.current = item;
       if (prev === item) return;
+      // Linked article numbers the server fills in itself (Create Body / Fabric Article,
+      // or "already exists" auto-fill). Editing a BODY / FAB attribute stages them as
+      // null, so a newly arrived number must replace that staged null — otherwise the
+      // card stays empty and "Modify" would wipe the number again.
+      const arrived: Record<string, string> = {};
+      for (const k of ['bodyArticle', 'fabricArticleNumber']) {
+        const now = String((item as any)[k] ?? '').trim();
+        const before = String((prev as any)[k] ?? '').trim();
+        if (now && (now !== before || awaitingLinkRef.current.has(k))) {
+          arrived[k] = now;
+          awaitingLinkRef.current.delete(k);
+        }
+      }
+      if (Object.keys(arrived).length > 0) {
+        setPendingChanges((p) => {
+          const hit = Object.keys(arrived).filter((k) => k in p);
+          return hit.length ? { ...p, ...Object.fromEntries(hit.map((k) => [k, arrived[k]])) } : p;
+        });
+      }
       setLocalValues((local) => {
         const next: Record<string, string | null> = {};
         const staged = pendingChangesRef.current;
         for (const [k, v] of Object.entries(local)) {
+          if (k in arrived) { next[k] = arrived[k]; continue; }
           // Always keep keys that the user has staged — they haven't been saved yet
           if (k in staged) { next[k] = v; continue; }
           const itemVal = (item as any)[k] ?? null;
@@ -1836,8 +1859,18 @@ const ArticleCard = React.memo(
     // Created-article identity/price fields are LOCKED even in modify mode — they
     // are fixed at creation time and must never be edited afterward (so they can
     // neither reach SAP nor change the local DB). The user cannot open these fields.
+    // Exception: ADMIN users may change the vendor (EXTWG in SAP) — picking a vendor
+    // name sets both code and name from the vendor master.
+    const isAdminUser = useMemo(() => {
+      try {
+        return JSON.parse(localStorage.getItem('user') || '{}')?.role === 'ADMIN';
+      } catch {
+        return false;
+      }
+    }, []);
     const MODIFY_LOCKED_FIELDS = new Set<string>([
-      'vendorCode', 'vendorName', 'mrp', 'rate', 'colour',
+      ...(isAdminUser ? [] : ['vendorCode', 'vendorName']),
+      'mrp', 'rate', 'colour',
       'designNumber', 'division', 'subDivision', 'majorCategory', 'segment',
     ]);
     // Body & Construction fields are read-only in FG article context — values
@@ -2482,7 +2515,9 @@ const ArticleCard = React.memo(
                   }}
                   onBlur={(e) => {
                     const val = (e.target as HTMLInputElement).value;
-                    if (val) handleSave('vendorName', val);
+                    // Modify mode: the vendor must be picked from the list (code + name
+                    // from the vendor master) — a typed name alone is not kept.
+                    if (val && !isModifyMode) handleSave('vendorName', val);
                     else setEditingField(null);
                     setVendorOptions([]);
                     setVendorQuery('');
@@ -4164,6 +4199,7 @@ const ArticleCard = React.memo(
                                           }
 
                                           // Non-modify mode: use the standard parent flow (modal in parent)
+                                          awaitingLinkRef.current.add('fabricArticleNumber');
                                           onCreateFabricArticle(mergedItem);
                                         }}
                                         className={CARD_ACTION_BTN}
@@ -4583,6 +4619,7 @@ const ArticleCard = React.memo(
                                         onClick={() => {
                                           // Merge unsaved localValues so backend gets current attribute values,
                                           // not the stale DB values (important on Created page before Modify is clicked).
+                                          awaitingLinkRef.current.add('bodyArticle');
                                           onCreateBodyArticle({ ...item, ...localValues } as typeof item);
                                         }}
                                         className={CARD_ACTION_BTN}
@@ -5335,7 +5372,7 @@ const ArticleCard = React.memo(
                     if (!r.ok) {
                       if (data.fabricArticleNumber) {
                         handleSave('fabricArticleNumber', String(data.fabricArticleNumber));
-                        message.warning(data.error || 'Fabric article already exists — number filled.');
+                        message.success(`Fabric Article already exists: ${data.fabricArticleNumber} — auto-filled. Click Modify to save.`);
                       } else {
                         message.error(data.error || 'Failed to create fabric article');
                       }
