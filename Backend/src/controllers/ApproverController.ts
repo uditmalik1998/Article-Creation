@@ -23,6 +23,7 @@ import { hasVendorCode, isValidVendorCode, normalizeVendorCode } from '../utils/
 import { mirror360FlatUpdate } from '../utils/mirror360Flat';
 import { getSetMcIndex, setProblems, SET_PARTS_USE_SET_MC, normalMcForCategory } from '../services/setMcMasterService';
 import { linkComboGroupForRow, recomputeComboParent, syncSetsFromRaw, COMBO_PARENT_DERIVED_FIELDS, groupSetParts } from '../services/comboLinkService';
+import { linkSetPart, retryPendingSetLinks } from '../services/setLinkService';
 
 // Fields a client is allowed to update / modify on an article. Shared by
 // updateItem (PUT) and modifyItem (SAP patch-bulk). Anything not in this list
@@ -2067,37 +2068,11 @@ export class ApproverController {
 
             track(addRow([null, 'Detailed 360 Degree Format'], { bold: true, from: 2, to: 2 }));
 
-            for (const a of fgArticles) {
-                track(blank());
-                track(blank());
-
-                // Article header
-                const role = setLabel(a);
-                track(addRow(['FG-MAJ', 'FG-ARTICLE', 'ART DESC', 'VDR_NM', ...(role ? ['SET'] : [])], { fill: DARK_BLUE, bold: true, white: true, from: 1, to: role ? 5 : 4 }));
-                track(addRow([a.majorCategory || '', a.sapArticleId || a.articleNumber || '', a.articleDescription || '', a.vendorName || '', ...(role ? [role] : [])]));
-                track(blank());
-
-                // Cost summary — values point at the material table's total row,
-                // which sits 5 rows below the summary value row.
-                track(addRow(['MRP', 'AUTO -V2', 'ROUGH-V2', 'VDR PR PC COST', 'FINAL'], { fill: AMBER, bold: true, from: 1, to: 5 }));
-                const sumValRow = nextRow;
-                const totRow = sumValRow + 4;
-                const sv = ws.addRow([
-                    num(a.mrp),
-                    { formula: `K${totRow}` }, { formula: `L${totRow}` }, { formula: `M${totRow}` }, { formula: `N${totRow}` },
-                ]);
-                for (let c = 1; c <= 5; c++) sv.getCell(c).numFmt = '0.00';
-                track(sv.number);
-                sv.commit();
-
-                track(blank());
-                track(addRow([null, null, null, null, null, null, null, null, null, null, 'COST'], { bold: true, from: 11, to: 11 }));
-                track(addRow(MAT_HDR, { fill: DARK_BLUE, bold: true, white: true }));
-
-                // B TRIM / PKG. COST / VAL. ADD. / BODY rows with no cost value at all
-                // (AUTO-BGT, ROUGH-V2, VDR, FINAL all empty) are left out. Decide the
-                // rows first so the TOTAL row's ranges can be predicted.
-                const hasCost = (...v: any[]) => v.some((x) => x != null);
+            // B TRIM / PKG. COST / VAL. ADD. / BODY rows with no cost value at all
+            // (AUTO-BGT, ROUGH-V2, VDR, FINAL all empty) are left out. Decided up
+            // front so every row of an article's block (and its height) is known.
+            const hasCost = (...v: any[]) => v.some((x) => x != null);
+            const materialPlan = (a: any) => {
                 const btrimKeep = BTRIM_ROWS
                     .map(([name, key]) => ({ name, k: key ? num(a[`${key}AutoBgt`]) : null, l: key ? num(a[`${key}RoughV2`]) : null }))
                     .filter((r) => hasCost(r.k, r.l));
@@ -2110,6 +2085,76 @@ export class ApproverController {
                 const bodyKeep = BODY_ROWS
                     .map(([name, key]) => ({ name, k: num(a[`${key}BgtPrVal`]), l: num(a[`${key}ActPrVal`]) }))
                     .filter((r) => hasCost(r.k, r.l));
+                return { btrimKeep, pkgKeep, vaddKeep, bodyKeep };
+            };
+            // Rows one article's block takes. Full block: 2 blank, header, values, blank,
+            // summary header, summary values (7), blank, COST, table header, TOTAL, blank,
+            // FAB (6), then each non-empty section as blank + its rows. A set parent whose
+            // parts are in the export is only the first 7 rows: its summary adds up the parts.
+            const SUMMARY_OFFSET = 6; // summary value row, counted from the block's first row
+            const blockHeight = (a: any, compact: boolean): number => {
+                if (compact) return 7;
+                const pl = materialPlan(a);
+                let h = 13;
+                for (const n of [pl.btrimKeep.length, pl.pkgKeep.length, pl.vaddKeep.length]) if (n > 0) h += 1 + n;
+                if (pl.bodyKeep.length > 0) h += 2 + pl.bodyKeep.length;
+                return h;
+            };
+            const partsInExport = (parentId: string) =>
+                fgArticles.filter((x) => x.comboRole === 'CHILD' && x.comboParentId === parentId);
+
+            for (const a of fgArticles) {
+                const parts = a.comboRole === 'PARENT' ? partsInExport(a.id) : [];
+                const compact = parts.length > 0;
+                const blockStart = nextRow;
+                track(blank());
+                track(blank());
+
+                // Article header
+                const role = setLabel(a);
+                track(addRow(['FG-MAJ', 'FG-ARTICLE', 'ART DESC', 'VDR_NM', ...(role ? ['SET'] : [])], { fill: DARK_BLUE, bold: true, white: true, from: 1, to: role ? 5 : 4 }));
+                track(addRow([a.majorCategory || '', a.sapArticleId || a.articleNumber || '', a.articleDescription || '', a.vendorName || '', ...(role ? [role] : [])]));
+                track(blank());
+
+                track(addRow(['MRP', 'AUTO -V2', 'ROUGH-V2', 'VDR PR PC COST', 'FINAL'], { fill: AMBER, bold: true, from: 1, to: 5 }));
+                const sumValRow = nextRow;
+                const totRow = sumValRow + 4;
+
+                if (compact) {
+                    // Whole set: no material table of its own. AUTO-V2 / ROUGH-V2 / VDR /
+                    // FINAL = the sum of its parts' summary rows, which follow this block
+                    // (groupSetParts puts them right after it).
+                    const partRows: number[] = [];
+                    let at = blockStart + blockHeight(a, true);
+                    for (const p of parts) {
+                        partRows.push(at + SUMMARY_OFFSET);
+                        at += blockHeight(p, false);
+                    }
+                    const sumOf = (col: string) => ({ formula: partRows.map((r) => `${col}${r}`).join('+') });
+                    const sv = ws.addRow([num(a.mrp), sumOf('B'), sumOf('C'), sumOf('D'), sumOf('E')]);
+                    for (let c = 1; c <= 5; c++) sv.getCell(c).numFmt = '0.00';
+                    for (let c = 2; c <= 5; c++) sv.getCell(c).fill = fill(LT_GREEN);
+                    track(sv.number);
+                    sv.commit();
+                    if (sumValRow !== blockStart + SUMMARY_OFFSET) console.warn('[preciseCostingExport] set summary drift', sumValRow, blockStart);
+                    continue;
+                }
+
+                // Cost summary — values point at the material table's total row,
+                // which sits 5 rows below the summary value row.
+                const sv = ws.addRow([
+                    num(a.mrp),
+                    { formula: `K${totRow}` }, { formula: `L${totRow}` }, { formula: `M${totRow}` }, { formula: `N${totRow}` },
+                ]);
+                for (let c = 1; c <= 5; c++) sv.getCell(c).numFmt = '0.00';
+                track(sv.number);
+                sv.commit();
+
+                track(blank());
+                track(addRow([null, null, null, null, null, null, null, null, null, null, 'COST'], { bold: true, from: 11, to: 11 }));
+                track(addRow(MAT_HDR, { fill: DARK_BLUE, bold: true, white: true }));
+
+                const { btrimKeep, pkgKeep, vaddKeep, bodyKeep } = materialPlan(a);
                 const hasBody = bodyKeep.length > 0;
 
                 // Total row — rows are predicted: FAB starts 2 rows after it, then
@@ -2194,6 +2239,10 @@ export class ApproverController {
                     for (const r of bodyKeep) {
                         matRow({ type: 'BODY', mc: r.name, k: r.k, l: r.l }, { fill: PURPLE });
                     }
+                }
+                // A set parent's summary points at its parts' rows by this height.
+                if (nextRow !== blockStart + blockHeight(a, false)) {
+                    console.warn('[preciseCostingExport] block height drift', a.id, nextRow - blockStart, blockHeight(a, false));
                 }
             }
 
@@ -2976,7 +3025,8 @@ export class ApproverController {
     // ─── Combo/Set articles (Kurti Set, Baba Suit, ...) ──────────────────────────
     // SRM sends each piece (Baba Suit, Top, Lower) as its own row; comboLinkService
     // links them by presentation + design number. Children are real articles
-    // with their own major category and are created in SAP first; the parent's
+    // with their own major category, created in SAP after the parent (their old
+    // article / BISMT is set to the parent's number, setLinkService); the parent's
     // costs are the sum of its children and its attributes mirror the Top child
     // (recomputeComboParent). Submitting goes through approveItems on the parent.
 
@@ -3075,9 +3125,9 @@ export class ApproverController {
             const userId = req.user?.id;
 
             // Combo/set articles are submitted as a whole: a selected child maps to
-            // its parent, and a parent brings all its children along. Children are
-            // created in SAP first; runApprovalSyncTick holds the parent until every
-            // child is SYNCED.
+            // its parent, and a parent brings all its children along. The parent is
+            // created in SAP first; runApprovalSyncTick holds each child until its
+            // parent is SYNCED, then links the child to it (setLinkService).
             const ids: string[] = [...requestedIds];
             {
                 const comboRows = await prisma.extractionResultFlat.findMany({
@@ -3396,6 +3446,14 @@ export class ApproverController {
                 console.log(`[APPROVE] Wrote article numbers back to ${rawArticleWritebacks.length} raw_articles row(s)`);
             }
 
+            // Set parts just created: write the set parent's article number into the
+            // part's old article (BISMT) in SAP, one part at a time. A failure is kept on
+            // the part and retried by the sync tick; it never undoes the part's creation.
+            for (const r of finalizedSyncResults) {
+                if (!r.success || !r.sapArticleNumber || approvedItemById.get(r.id)?.comboRole !== 'CHILD') continue;
+                await linkSetPart(r.id).catch((err: any) => console.error(`[SetLink] ${r.id}:`, err?.message));
+            }
+
             // Mirror approval + SAP sync outcome to 360article.article_360_flat
             void Promise.all(finalizedSyncResults.map((syncResult: any) => {
                 const approvedItem = approvedItemById.get(syncResult.id);
@@ -3549,8 +3607,37 @@ export class ApproverController {
                     data: { approvalStatus: ApprovalStatus.PENDING, sapSyncStatus: SapSyncStatus.NOT_SYNCED },
                 });
 
+                // Set: a failed parent sends its parts back too — they wait for it in the
+                // queue and would never be created without it.
+                const failedParents = await prisma.extractionResultFlat.findMany({
+                    where: { id: { in: failedIds }, comboRole: 'PARENT' },
+                    select: { id: true },
+                });
+                for (const p of failedParents) {
+                    const waiting = await prisma.extractionResultFlat.findMany({
+                        where: { comboParentId: p.id, comboRole: 'CHILD', approvalStatus: 'APPROVED', sapSyncStatus: SapSyncStatus.PENDING },
+                        select: { id: true },
+                    });
+                    if (waiting.length === 0) continue;
+                    const waitingIds = waiting.map((w) => w.id);
+                    await prisma.extractionResultFlat.updateMany({
+                        where: { id: { in: waitingIds } },
+                        data: {
+                            approvalStatus: ApprovalStatus.PENDING,
+                            sapSyncStatus: SapSyncStatus.FAILED,
+                            sapSyncMessage: 'The set (parent) article failed in SAP — fix it and re-submit the set.',
+                        },
+                    });
+                    await prisma.fgVariantArticleData.updateMany({
+                        where: { genericArticleId: { in: waitingIds }, approvalStatus: 'APPROVED', sapSyncStatus: SapSyncStatus.PENDING },
+                        data: { approvalStatus: ApprovalStatus.PENDING, sapSyncStatus: SapSyncStatus.NOT_SYNCED },
+                    });
+                }
+
                 // Combo/set: a failed child sends its (still queued) parent back too,
                 // so the whole set returns to New Articles and is re-submitted together.
+                // (The parent is created first now, so this only applies to a parent that
+                // is still waiting; a created parent stays and only the part is re-submitted.)
                 const failedChildren = await prisma.extractionResultFlat.findMany({
                     where: { id: { in: failedIds }, comboRole: 'CHILD', comboParentId: { not: null } },
                     select: { comboParentId: true, majorCategory: true },
@@ -3703,12 +3790,14 @@ export class ApproverController {
                       AND e.approval_status::text = 'APPROVED'
                       AND e.sap_sync_status::text = 'PENDING'
                       AND (e.sap_lock_until IS NULL OR e.sap_lock_until < NOW())
-                      -- Combo/set parent waits until all its children exist in SAP.
+                      -- Set part waits until its set parent exists in SAP: the part's old
+                      -- article (BISMT) is set to the parent's number right after it is
+                      -- created (setLinkService).
                       AND NOT EXISTS (
-                          SELECT 1 FROM public.extraction_results_flat c
-                          WHERE c.combo_parent_id = e.id
-                            AND c.combo_role::text = 'CHILD'
-                            AND c.sap_sync_status::text <> 'SYNCED'
+                          SELECT 1 FROM public.extraction_results_flat p
+                          WHERE e.combo_role::text = 'CHILD'
+                            AND p.id = e.combo_parent_id
+                            AND (p.sap_sync_status::text <> 'SYNCED' OR p.sap_article_id IS NULL)
                       )
                     ORDER BY e.approved_at ASC
                     LIMIT ${batchSize}
@@ -3716,6 +3805,8 @@ export class ApproverController {
                 )
                 RETURNING id
             `;
+            // Set parts created earlier whose old-article link failed or never ran.
+            await retryPendingSetLinks().catch((err: any) => console.error('[SetLink] retry error:', err?.message));
             if (claimed.length === 0) return { processed: 0, synced: 0, failed: 0 };
             const ids = claimed.map((c) => c.id);
 

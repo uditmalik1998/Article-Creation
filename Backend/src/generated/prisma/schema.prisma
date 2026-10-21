@@ -541,8 +541,8 @@ model ExtractionResultFlat {
   variantWeight    String? @map("variant_weight") @db.VarChar(50)
 
   // Combo/Set articles (e.g. Kurti Set, Baba Suit) — a parent article
-  // assembled from multiple child pieces. Pieces are created in SAP first,
-  // then the parent; only the parent gets colour x size variants.
+  // assembled from multiple child pieces. The parent is created in SAP first,
+  // then each piece, whose old article (MARA-BISMT) is set to the parent's number.
   comboRole       ComboRole              @default(NONE) @map("combo_role")
   comboParentId   String?                @map("combo_parent_id")
   comboParent     ExtractionResultFlat?  @relation("ComboChildren", fields: [comboParentId], references: [id], onDelete: Cascade)
@@ -554,6 +554,14 @@ model ExtractionResultFlat {
   setGroupId String? @map("set_group_id") @db.VarChar(64)
   setRole    String? @map("set_role") @db.VarChar(20)
   setName    String? @map("set_name") @db.VarChar(200)
+
+  // Set part only: SAP old article (MARA-BISMT) = the set parent's article number,
+  // written by Z_ART_PATCH_RFC_V69 after the part is created (setLinkService).
+  // NULL = not tried yet, LINKED = done, FAILED = retried by the approval sync tick.
+  setLinkStatus   String?   @map("set_link_status") @db.VarChar(20)
+  setLinkMessage  String?   @map("set_link_message")
+  setLinkAttempts Int       @default(0) @map("set_link_attempts")
+  setLinkedAt     DateTime? @map("set_linked_at") @db.Timestamptz(6)
 
   // SAP Sync (Placeholder)
   sapSyncStatus  SapSyncStatus @default(NOT_SYNCED) @map("sap_sync_status")

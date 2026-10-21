@@ -16153,6 +16153,7 @@ export namespace Prisma {
     mrp: Decimal | null
     approvedBy: number | null
     comboChildOrder: number | null
+    setLinkAttempts: number | null
   }
 
   export type ExtractionResultFlatSumAggregateOutputType = {
@@ -16363,6 +16364,7 @@ export namespace Prisma {
     mrp: Decimal | null
     approvedBy: number | null
     comboChildOrder: number | null
+    setLinkAttempts: number | null
   }
 
   export type ExtractionResultFlatMinAggregateOutputType = {
@@ -16695,6 +16697,10 @@ export namespace Prisma {
     setGroupId: string | null
     setRole: string | null
     setName: string | null
+    setLinkStatus: string | null
+    setLinkMessage: string | null
+    setLinkAttempts: number | null
+    setLinkedAt: Date | null
     sapSyncStatus: $Enums.SapSyncStatus | null
     sapArticleId: string | null
     sapSyncMessage: string | null
@@ -17032,6 +17038,10 @@ export namespace Prisma {
     setGroupId: string | null
     setRole: string | null
     setName: string | null
+    setLinkStatus: string | null
+    setLinkMessage: string | null
+    setLinkAttempts: number | null
+    setLinkedAt: Date | null
     sapSyncStatus: $Enums.SapSyncStatus | null
     sapArticleId: string | null
     sapSyncMessage: string | null
@@ -17371,6 +17381,10 @@ export namespace Prisma {
     setGroupId: number
     setRole: number
     setName: number
+    setLinkStatus: number
+    setLinkMessage: number
+    setLinkAttempts: number
+    setLinkedAt: number
     sapSyncStatus: number
     sapArticleId: number
     sapSyncMessage: number
@@ -17589,6 +17603,7 @@ export namespace Prisma {
     mrp?: true
     approvedBy?: true
     comboChildOrder?: true
+    setLinkAttempts?: true
   }
 
   export type ExtractionResultFlatSumAggregateInputType = {
@@ -17799,6 +17814,7 @@ export namespace Prisma {
     mrp?: true
     approvedBy?: true
     comboChildOrder?: true
+    setLinkAttempts?: true
   }
 
   export type ExtractionResultFlatMinAggregateInputType = {
@@ -18131,6 +18147,10 @@ export namespace Prisma {
     setGroupId?: true
     setRole?: true
     setName?: true
+    setLinkStatus?: true
+    setLinkMessage?: true
+    setLinkAttempts?: true
+    setLinkedAt?: true
     sapSyncStatus?: true
     sapArticleId?: true
     sapSyncMessage?: true
@@ -18468,6 +18488,10 @@ export namespace Prisma {
     setGroupId?: true
     setRole?: true
     setName?: true
+    setLinkStatus?: true
+    setLinkMessage?: true
+    setLinkAttempts?: true
+    setLinkedAt?: true
     sapSyncStatus?: true
     sapArticleId?: true
     sapSyncMessage?: true
@@ -18807,6 +18831,10 @@ export namespace Prisma {
     setGroupId?: true
     setRole?: true
     setName?: true
+    setLinkStatus?: true
+    setLinkMessage?: true
+    setLinkAttempts?: true
+    setLinkedAt?: true
     sapSyncStatus?: true
     sapArticleId?: true
     sapSyncMessage?: true
@@ -19234,6 +19262,10 @@ export namespace Prisma {
     setGroupId: string | null
     setRole: string | null
     setName: string | null
+    setLinkStatus: string | null
+    setLinkMessage: string | null
+    setLinkAttempts: number
+    setLinkedAt: Date | null
     sapSyncStatus: $Enums.SapSyncStatus
     sapArticleId: string | null
     sapSyncMessage: string | null
@@ -19593,6 +19625,10 @@ export namespace Prisma {
     setGroupId?: boolean
     setRole?: boolean
     setName?: boolean
+    setLinkStatus?: boolean
+    setLinkMessage?: boolean
+    setLinkAttempts?: boolean
+    setLinkedAt?: boolean
     sapSyncStatus?: boolean
     sapArticleId?: boolean
     sapSyncMessage?: boolean
@@ -19939,6 +19975,10 @@ export namespace Prisma {
     setGroupId?: boolean
     setRole?: boolean
     setName?: boolean
+    setLinkStatus?: boolean
+    setLinkMessage?: boolean
+    setLinkAttempts?: boolean
+    setLinkedAt?: boolean
     sapSyncStatus?: boolean
     sapArticleId?: boolean
     sapSyncMessage?: boolean
@@ -20282,6 +20322,10 @@ export namespace Prisma {
     setGroupId?: boolean
     setRole?: boolean
     setName?: boolean
+    setLinkStatus?: boolean
+    setLinkMessage?: boolean
+    setLinkAttempts?: boolean
+    setLinkedAt?: boolean
     sapSyncStatus?: boolean
     sapArticleId?: boolean
     sapSyncMessage?: boolean
@@ -20625,6 +20669,10 @@ export namespace Prisma {
     setGroupId?: boolean
     setRole?: boolean
     setName?: boolean
+    setLinkStatus?: boolean
+    setLinkMessage?: boolean
+    setLinkAttempts?: boolean
+    setLinkedAt?: boolean
     sapSyncStatus?: boolean
     sapArticleId?: boolean
     sapSyncMessage?: boolean
@@ -20633,7 +20681,7 @@ export namespace Prisma {
     imageExtractionRawData?: boolean
   }
 
-  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "oldImageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "bTrimType" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "elasticAutoBgt" | "elasticRoughV2" | "elasticVdrCost" | "elasticFinalCost" | "fusingAutoBgt" | "fusingRoughV2" | "fusingVdrCost" | "fusingFinalCost" | "badgeAutoBgt" | "badgeRoughV2" | "badgeVdrCost" | "badgeFinalCost" | "rivetAutoBgt" | "rivetRoughV2" | "rivetVdrCost" | "rivetFinalCost" | "tapeAutoBgt" | "tapeRoughV2" | "tapeVdrCost" | "tapeFinalCost" | "otherAutoBgt" | "otherRoughV2" | "otherVdrCost" | "otherFinalCost" | "adjusterAutoBgt" | "adjusterRoughV2" | "adjusterVdrCost" | "adjusterFinalCost" | "brotchAutoBgt" | "brotchRoughV2" | "brotchVdrCost" | "brotchFinalCost" | "buckleAutoBgt" | "buckleRoughV2" | "buckleVdrCost" | "buckleFinalCost" | "eyeletsAutoBgt" | "eyeletsRoughV2" | "eyeletsVdrCost" | "eyeletsFinalCost" | "hangingDRingAutoBgt" | "hangingDRingRoughV2" | "hangingDRingVdrCost" | "hangingDRingFinalCost" | "hookAutoBgt" | "hookRoughV2" | "hookVdrCost" | "hookFinalCost" | "labelAutoBgt" | "labelRoughV2" | "labelVdrCost" | "labelFinalCost" | "laceAutoBgt" | "laceRoughV2" | "laceVdrCost" | "laceFinalCost" | "pockettingFabricAutoBgt" | "pockettingFabricRoughV2" | "pockettingFabricVdrCost" | "pockettingFabricFinalCost" | "pockettingReadymadeAutoBgt" | "pockettingReadymadeRoughV2" | "pockettingReadymadeVdrCost" | "pockettingReadymadeFinalCost" | "santaAutoBgt" | "santaRoughV2" | "santaVdrCost" | "santaFinalCost" | "stopperAutoBgt" | "stopperRoughV2" | "stopperVdrCost" | "stopperFinalCost" | "tagAutoBgt" | "tagRoughV2" | "tagVdrCost" | "tagFinalCost" | "tasselsAutoBgt" | "tasselsRoughV2" | "tasselsVdrCost" | "tasselsFinalCost" | "mBtnRate" | "mBtnQty" | "dcRate" | "dcQty" | "zipRate" | "zipQty" | "patchRate" | "patchQty" | "hTrfRate" | "hTrfQty" | "elasticRate" | "elasticQty" | "fusingRate" | "fusingQty" | "badgeRate" | "badgeQty" | "rivetRate" | "rivetQty" | "tapeRate" | "tapeQty" | "otherRate" | "otherQty" | "adjusterRate" | "adjusterQty" | "brotchRate" | "brotchQty" | "buckleRate" | "buckleQty" | "eyeletsRate" | "eyeletsQty" | "hangingDRingRate" | "hangingDRingQty" | "hookRate" | "hookQty" | "labelRate" | "labelQty" | "laceRate" | "laceQty" | "pockettingFabricRate" | "pockettingFabricQty" | "pockettingReadymadeRate" | "pockettingReadymadeQty" | "santaRate" | "santaQty" | "stopperRate" | "stopperQty" | "tagRate" | "tagQty" | "tasselsRate" | "tasselsQty" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "vaddPrintJson" | "vaddEmpJson" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
+  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "oldImageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "bTrimType" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "elasticAutoBgt" | "elasticRoughV2" | "elasticVdrCost" | "elasticFinalCost" | "fusingAutoBgt" | "fusingRoughV2" | "fusingVdrCost" | "fusingFinalCost" | "badgeAutoBgt" | "badgeRoughV2" | "badgeVdrCost" | "badgeFinalCost" | "rivetAutoBgt" | "rivetRoughV2" | "rivetVdrCost" | "rivetFinalCost" | "tapeAutoBgt" | "tapeRoughV2" | "tapeVdrCost" | "tapeFinalCost" | "otherAutoBgt" | "otherRoughV2" | "otherVdrCost" | "otherFinalCost" | "adjusterAutoBgt" | "adjusterRoughV2" | "adjusterVdrCost" | "adjusterFinalCost" | "brotchAutoBgt" | "brotchRoughV2" | "brotchVdrCost" | "brotchFinalCost" | "buckleAutoBgt" | "buckleRoughV2" | "buckleVdrCost" | "buckleFinalCost" | "eyeletsAutoBgt" | "eyeletsRoughV2" | "eyeletsVdrCost" | "eyeletsFinalCost" | "hangingDRingAutoBgt" | "hangingDRingRoughV2" | "hangingDRingVdrCost" | "hangingDRingFinalCost" | "hookAutoBgt" | "hookRoughV2" | "hookVdrCost" | "hookFinalCost" | "labelAutoBgt" | "labelRoughV2" | "labelVdrCost" | "labelFinalCost" | "laceAutoBgt" | "laceRoughV2" | "laceVdrCost" | "laceFinalCost" | "pockettingFabricAutoBgt" | "pockettingFabricRoughV2" | "pockettingFabricVdrCost" | "pockettingFabricFinalCost" | "pockettingReadymadeAutoBgt" | "pockettingReadymadeRoughV2" | "pockettingReadymadeVdrCost" | "pockettingReadymadeFinalCost" | "santaAutoBgt" | "santaRoughV2" | "santaVdrCost" | "santaFinalCost" | "stopperAutoBgt" | "stopperRoughV2" | "stopperVdrCost" | "stopperFinalCost" | "tagAutoBgt" | "tagRoughV2" | "tagVdrCost" | "tagFinalCost" | "tasselsAutoBgt" | "tasselsRoughV2" | "tasselsVdrCost" | "tasselsFinalCost" | "mBtnRate" | "mBtnQty" | "dcRate" | "dcQty" | "zipRate" | "zipQty" | "patchRate" | "patchQty" | "hTrfRate" | "hTrfQty" | "elasticRate" | "elasticQty" | "fusingRate" | "fusingQty" | "badgeRate" | "badgeQty" | "rivetRate" | "rivetQty" | "tapeRate" | "tapeQty" | "otherRate" | "otherQty" | "adjusterRate" | "adjusterQty" | "brotchRate" | "brotchQty" | "buckleRate" | "buckleQty" | "eyeletsRate" | "eyeletsQty" | "hangingDRingRate" | "hangingDRingQty" | "hookRate" | "hookQty" | "labelRate" | "labelQty" | "laceRate" | "laceQty" | "pockettingFabricRate" | "pockettingFabricQty" | "pockettingReadymadeRate" | "pockettingReadymadeQty" | "santaRate" | "santaQty" | "stopperRate" | "stopperQty" | "tagRate" | "tagQty" | "tasselsRate" | "tasselsQty" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "vaddPrintJson" | "vaddEmpJson" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "setLinkStatus" | "setLinkMessage" | "setLinkAttempts" | "setLinkedAt" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
   export type ExtractionResultFlatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     comboParent?: boolean | ExtractionResultFlat$comboParentArgs<ExtArgs>
@@ -20994,6 +21042,10 @@ export namespace Prisma {
       setGroupId: string | null
       setRole: string | null
       setName: string | null
+      setLinkStatus: string | null
+      setLinkMessage: string | null
+      setLinkAttempts: number
+      setLinkedAt: Date | null
       sapSyncStatus: $Enums.SapSyncStatus
       sapArticleId: string | null
       sapSyncMessage: string | null
@@ -21759,6 +21811,10 @@ export namespace Prisma {
     readonly setGroupId: FieldRef<"ExtractionResultFlat", 'String'>
     readonly setRole: FieldRef<"ExtractionResultFlat", 'String'>
     readonly setName: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly setLinkStatus: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly setLinkMessage: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly setLinkAttempts: FieldRef<"ExtractionResultFlat", 'Int'>
+    readonly setLinkedAt: FieldRef<"ExtractionResultFlat", 'DateTime'>
     readonly sapSyncStatus: FieldRef<"ExtractionResultFlat", 'SapSyncStatus'>
     readonly sapArticleId: FieldRef<"ExtractionResultFlat", 'String'>
     readonly sapSyncMessage: FieldRef<"ExtractionResultFlat", 'String'>
@@ -93114,6 +93170,10 @@ export namespace Prisma {
     setGroupId: 'setGroupId',
     setRole: 'setRole',
     setName: 'setName',
+    setLinkStatus: 'setLinkStatus',
+    setLinkMessage: 'setLinkMessage',
+    setLinkAttempts: 'setLinkAttempts',
+    setLinkedAt: 'setLinkedAt',
     sapSyncStatus: 'sapSyncStatus',
     sapArticleId: 'sapArticleId',
     sapSyncMessage: 'sapSyncMessage',
@@ -94802,6 +94862,8 @@ export namespace Prisma {
     setGroupId: 'setGroupId',
     setRole: 'setRole',
     setName: 'setName',
+    setLinkStatus: 'setLinkStatus',
+    setLinkMessage: 'setLinkMessage',
     sapArticleId: 'sapArticleId',
     sapSyncMessage: 'sapSyncMessage',
     srmOriginalDesignNumber: 'srmOriginalDesignNumber',
@@ -97236,6 +97298,10 @@ export namespace Prisma {
     setGroupId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     setRole?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     setName?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    setLinkStatus?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    setLinkMessage?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    setLinkAttempts?: IntFilter<"ExtractionResultFlat"> | number
+    setLinkedAt?: DateTimeNullableFilter<"ExtractionResultFlat"> | Date | string | null
     sapSyncStatus?: EnumSapSyncStatusFilter<"ExtractionResultFlat"> | $Enums.SapSyncStatus
     sapArticleId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     sapSyncMessage?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -97581,6 +97647,10 @@ export namespace Prisma {
     setGroupId?: SortOrderInput | SortOrder
     setRole?: SortOrderInput | SortOrder
     setName?: SortOrderInput | SortOrder
+    setLinkStatus?: SortOrderInput | SortOrder
+    setLinkMessage?: SortOrderInput | SortOrder
+    setLinkAttempts?: SortOrder
+    setLinkedAt?: SortOrderInput | SortOrder
     sapSyncStatus?: SortOrder
     sapArticleId?: SortOrderInput | SortOrder
     sapSyncMessage?: SortOrderInput | SortOrder
@@ -97930,6 +98000,10 @@ export namespace Prisma {
     setGroupId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     setRole?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     setName?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    setLinkStatus?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    setLinkMessage?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    setLinkAttempts?: IntFilter<"ExtractionResultFlat"> | number
+    setLinkedAt?: DateTimeNullableFilter<"ExtractionResultFlat"> | Date | string | null
     sapSyncStatus?: EnumSapSyncStatusFilter<"ExtractionResultFlat"> | $Enums.SapSyncStatus
     sapArticleId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     sapSyncMessage?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -98275,6 +98349,10 @@ export namespace Prisma {
     setGroupId?: SortOrderInput | SortOrder
     setRole?: SortOrderInput | SortOrder
     setName?: SortOrderInput | SortOrder
+    setLinkStatus?: SortOrderInput | SortOrder
+    setLinkMessage?: SortOrderInput | SortOrder
+    setLinkAttempts?: SortOrder
+    setLinkedAt?: SortOrderInput | SortOrder
     sapSyncStatus?: SortOrder
     sapArticleId?: SortOrderInput | SortOrder
     sapSyncMessage?: SortOrderInput | SortOrder
@@ -98623,6 +98701,10 @@ export namespace Prisma {
     setGroupId?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     setRole?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     setName?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    setLinkStatus?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    setLinkMessage?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    setLinkAttempts?: IntWithAggregatesFilter<"ExtractionResultFlat"> | number
+    setLinkedAt?: DateTimeNullableWithAggregatesFilter<"ExtractionResultFlat"> | Date | string | null
     sapSyncStatus?: EnumSapSyncStatusWithAggregatesFilter<"ExtractionResultFlat"> | $Enums.SapSyncStatus
     sapArticleId?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     sapSyncMessage?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
@@ -107054,6 +107136,10 @@ export namespace Prisma {
     setGroupId?: string | null
     setRole?: string | null
     setName?: string | null
+    setLinkStatus?: string | null
+    setLinkMessage?: string | null
+    setLinkAttempts?: number
+    setLinkedAt?: Date | string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -107399,6 +107485,10 @@ export namespace Prisma {
     setGroupId?: string | null
     setRole?: string | null
     setName?: string | null
+    setLinkStatus?: string | null
+    setLinkMessage?: string | null
+    setLinkAttempts?: number
+    setLinkedAt?: Date | string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -107738,6 +107828,10 @@ export namespace Prisma {
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
     setName?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkAttempts?: IntFieldUpdateOperationsInput | number
+    setLinkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -108083,6 +108177,10 @@ export namespace Prisma {
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
     setName?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkAttempts?: IntFieldUpdateOperationsInput | number
+    setLinkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -108425,6 +108523,10 @@ export namespace Prisma {
     setGroupId?: string | null
     setRole?: string | null
     setName?: string | null
+    setLinkStatus?: string | null
+    setLinkMessage?: string | null
+    setLinkAttempts?: number
+    setLinkedAt?: Date | string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -108762,6 +108864,10 @@ export namespace Prisma {
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
     setName?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkAttempts?: IntFieldUpdateOperationsInput | number
+    setLinkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -109102,6 +109208,10 @@ export namespace Prisma {
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
     setName?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkAttempts?: IntFieldUpdateOperationsInput | number
+    setLinkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -119296,6 +119406,10 @@ export namespace Prisma {
     setGroupId?: SortOrder
     setRole?: SortOrder
     setName?: SortOrder
+    setLinkStatus?: SortOrder
+    setLinkMessage?: SortOrder
+    setLinkAttempts?: SortOrder
+    setLinkedAt?: SortOrder
     sapSyncStatus?: SortOrder
     sapArticleId?: SortOrder
     sapSyncMessage?: SortOrder
@@ -119512,6 +119626,7 @@ export namespace Prisma {
     mrp?: SortOrder
     approvedBy?: SortOrder
     comboChildOrder?: SortOrder
+    setLinkAttempts?: SortOrder
   }
 
   export type ExtractionResultFlatMaxOrderByAggregateInput = {
@@ -119844,6 +119959,10 @@ export namespace Prisma {
     setGroupId?: SortOrder
     setRole?: SortOrder
     setName?: SortOrder
+    setLinkStatus?: SortOrder
+    setLinkMessage?: SortOrder
+    setLinkAttempts?: SortOrder
+    setLinkedAt?: SortOrder
     sapSyncStatus?: SortOrder
     sapArticleId?: SortOrder
     sapSyncMessage?: SortOrder
@@ -120181,6 +120300,10 @@ export namespace Prisma {
     setGroupId?: SortOrder
     setRole?: SortOrder
     setName?: SortOrder
+    setLinkStatus?: SortOrder
+    setLinkMessage?: SortOrder
+    setLinkAttempts?: SortOrder
+    setLinkedAt?: SortOrder
     sapSyncStatus?: SortOrder
     sapArticleId?: SortOrder
     sapSyncMessage?: SortOrder
@@ -120396,6 +120519,7 @@ export namespace Prisma {
     mrp?: SortOrder
     approvedBy?: SortOrder
     comboChildOrder?: SortOrder
+    setLinkAttempts?: SortOrder
   }
 
   export type EnumApprovalStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -129027,6 +129151,10 @@ export namespace Prisma {
     setGroupId?: string | null
     setRole?: string | null
     setName?: string | null
+    setLinkStatus?: string | null
+    setLinkMessage?: string | null
+    setLinkAttempts?: number
+    setLinkedAt?: Date | string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -129370,6 +129498,10 @@ export namespace Prisma {
     setGroupId?: string | null
     setRole?: string | null
     setName?: string | null
+    setLinkStatus?: string | null
+    setLinkMessage?: string | null
+    setLinkAttempts?: number
+    setLinkedAt?: Date | string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -129817,6 +129949,10 @@ export namespace Prisma {
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
     setName?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkAttempts?: IntFieldUpdateOperationsInput | number
+    setLinkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -130160,6 +130296,10 @@ export namespace Prisma {
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
     setName?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkAttempts?: IntFieldUpdateOperationsInput | number
+    setLinkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -130539,6 +130679,10 @@ export namespace Prisma {
     setGroupId?: string | null
     setRole?: string | null
     setName?: string | null
+    setLinkStatus?: string | null
+    setLinkMessage?: string | null
+    setLinkAttempts?: number
+    setLinkedAt?: Date | string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -130883,6 +131027,10 @@ export namespace Prisma {
     setGroupId?: string | null
     setRole?: string | null
     setName?: string | null
+    setLinkStatus?: string | null
+    setLinkMessage?: string | null
+    setLinkAttempts?: number
+    setLinkedAt?: Date | string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -131226,6 +131374,10 @@ export namespace Prisma {
     setGroupId?: string | null
     setRole?: string | null
     setName?: string | null
+    setLinkStatus?: string | null
+    setLinkMessage?: string | null
+    setLinkAttempts?: number
+    setLinkedAt?: Date | string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -131569,6 +131721,10 @@ export namespace Prisma {
     setGroupId?: string | null
     setRole?: string | null
     setName?: string | null
+    setLinkStatus?: string | null
+    setLinkMessage?: string | null
+    setLinkAttempts?: number
+    setLinkedAt?: Date | string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -132064,6 +132220,10 @@ export namespace Prisma {
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
     setName?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkAttempts?: IntFieldUpdateOperationsInput | number
+    setLinkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -132408,6 +132568,10 @@ export namespace Prisma {
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
     setName?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkAttempts?: IntFieldUpdateOperationsInput | number
+    setLinkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -132768,6 +132932,10 @@ export namespace Prisma {
     setGroupId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     setRole?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     setName?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    setLinkStatus?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    setLinkMessage?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    setLinkAttempts?: IntFilter<"ExtractionResultFlat"> | number
+    setLinkedAt?: DateTimeNullableFilter<"ExtractionResultFlat"> | Date | string | null
     sapSyncStatus?: EnumSapSyncStatusFilter<"ExtractionResultFlat"> | $Enums.SapSyncStatus
     sapArticleId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     sapSyncMessage?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -133328,6 +133496,10 @@ export namespace Prisma {
     setGroupId?: string | null
     setRole?: string | null
     setName?: string | null
+    setLinkStatus?: string | null
+    setLinkMessage?: string | null
+    setLinkAttempts?: number
+    setLinkedAt?: Date | string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -133671,6 +133843,10 @@ export namespace Prisma {
     setGroupId?: string | null
     setRole?: string | null
     setName?: string | null
+    setLinkStatus?: string | null
+    setLinkMessage?: string | null
+    setLinkAttempts?: number
+    setLinkedAt?: Date | string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -135540,6 +135716,10 @@ export namespace Prisma {
     setGroupId?: string | null
     setRole?: string | null
     setName?: string | null
+    setLinkStatus?: string | null
+    setLinkMessage?: string | null
+    setLinkAttempts?: number
+    setLinkedAt?: Date | string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -135884,6 +136064,10 @@ export namespace Prisma {
     setGroupId?: string | null
     setRole?: string | null
     setName?: string | null
+    setLinkStatus?: string | null
+    setLinkMessage?: string | null
+    setLinkAttempts?: number
+    setLinkedAt?: Date | string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -136275,6 +136459,10 @@ export namespace Prisma {
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
     setName?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkAttempts?: IntFieldUpdateOperationsInput | number
+    setLinkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -136619,6 +136807,10 @@ export namespace Prisma {
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
     setName?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkAttempts?: IntFieldUpdateOperationsInput | number
+    setLinkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -137579,6 +137771,10 @@ export namespace Prisma {
     setGroupId?: string | null
     setRole?: string | null
     setName?: string | null
+    setLinkStatus?: string | null
+    setLinkMessage?: string | null
+    setLinkAttempts?: number
+    setLinkedAt?: Date | string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -137926,6 +138122,10 @@ export namespace Prisma {
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
     setName?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkAttempts?: IntFieldUpdateOperationsInput | number
+    setLinkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138269,6 +138469,10 @@ export namespace Prisma {
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
     setName?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkAttempts?: IntFieldUpdateOperationsInput | number
+    setLinkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138610,6 +138814,10 @@ export namespace Prisma {
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
     setName?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkAttempts?: IntFieldUpdateOperationsInput | number
+    setLinkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -139017,6 +139225,10 @@ export namespace Prisma {
     setGroupId?: string | null
     setRole?: string | null
     setName?: string | null
+    setLinkStatus?: string | null
+    setLinkMessage?: string | null
+    setLinkAttempts?: number
+    setLinkedAt?: Date | string | null
     sapSyncStatus?: $Enums.SapSyncStatus
     sapArticleId?: string | null
     sapSyncMessage?: string | null
@@ -139469,6 +139681,10 @@ export namespace Prisma {
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
     setName?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkAttempts?: IntFieldUpdateOperationsInput | number
+    setLinkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -139812,6 +140028,10 @@ export namespace Prisma {
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
     setName?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkAttempts?: IntFieldUpdateOperationsInput | number
+    setLinkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
@@ -140153,6 +140373,10 @@ export namespace Prisma {
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
     setName?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    setLinkAttempts?: IntFieldUpdateOperationsInput | number
+    setLinkedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     sapSyncStatus?: EnumSapSyncStatusFieldUpdateOperationsInput | $Enums.SapSyncStatus
     sapArticleId?: NullableStringFieldUpdateOperationsInput | string | null
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
