@@ -16,6 +16,7 @@
     "test:set-mc": "node --require ts-node/register/transpile-only --test tests/setMcMasterService.test.ts",
     "test:combo-fields": "node --require ts-node/register/transpile-only --test tests/comboFieldsExist.test.ts",
     "test:set-export": "node --require ts-node/register/transpile-only --test tests/groupSetParts.test.ts",
+    "test:set-link": "node --require ts-node/register/transpile-only --test tests/setLinkService.test.ts",
     "clean": "rm -rf dist",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
