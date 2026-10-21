@@ -2062,5 +2062,299 @@
     "mc code": "117160201",
     "division": "MENS",
     "sub division": "MW"
+  },
+  {
+    "mc des": "S-JB_B_SUIT_SL",
+    "mc code": "131830101",
+    "division": "KIDS",
+    "sub division": "KB-SETS"
+  },
+  {
+    "mc des": "S-JB_B_SUIT_ST_HS",
+    "mc code": "131840101",
+    "division": "KIDS",
+    "sub division": "KB-SETS"
+  },
+  {
+    "mc des": "S-JB_H_B_SUIT_FS",
+    "mc code": "131850101",
+    "division": "KIDS",
+    "sub division": "KB-SETS"
+  },
+  {
+    "mc des": "S-JB_H_B_SUIT_HS",
+    "mc code": "131860101",
+    "division": "KIDS",
+    "sub division": "KB-SETS"
+  },
+  {
+    "mc des": "S-JB_KURTA_ST",
+    "mc code": "131870101",
+    "division": "KIDS",
+    "sub division": "KB-SETS"
+  },
+  {
+    "mc des": "S-JB_SUIT",
+    "mc code": "131880101",
+    "division": "KIDS",
+    "sub division": "KB-SETS"
+  },
+  {
+    "mc des": "S-JB_T_B_SUIT_FS",
+    "mc code": "131890101",
+    "division": "KIDS",
+    "sub division": "KB-SETS"
+  },
+  {
+    "mc des": "S-JB_T_B_SUIT_HS",
+    "mc code": "131900101",
+    "division": "KIDS",
+    "sub division": "KB-SETS"
+  },
+  {
+    "mc des": "S-YB_H_B_SUIT_HS",
+    "mc code": "131910101",
+    "division": "KIDS",
+    "sub division": "KB-SETS"
+  },
+  {
+    "mc des": "S-YB_KURTA_ST",
+    "mc code": "131920101",
+    "division": "KIDS",
+    "sub division": "KB-SETS"
+  },
+  {
+    "mc des": "S-YB_SUIT",
+    "mc code": "131930101",
+    "division": "KIDS",
+    "sub division": "KB-SETS"
+  },
+  {
+    "mc des": "S-JBW_B_SUIT",
+    "mc code": "132330101",
+    "division": "KIDS",
+    "sub division": "KBW-U"
+  },
+  {
+    "mc des": "S-JBW_T_SUIT",
+    "mc code": "132340101",
+    "division": "KIDS",
+    "sub division": "KBW-U"
+  },
+  {
+    "mc des": "S-YBW_T_SUIT",
+    "mc code": "132350101",
+    "division": "KIDS",
+    "sub division": "KBW-U"
+  },
+  {
+    "mc des": "S-JG_H_HOT_PANT_ST",
+    "mc code": "133950101",
+    "division": "KIDS",
+    "sub division": "KG-U"
+  },
+  {
+    "mc des": "S-JG_H_SKRT_TOP_ST",
+    "mc code": "133960101",
+    "division": "KIDS",
+    "sub division": "KG-U"
+  },
+  {
+    "mc des": "S-JG_H_ST",
+    "mc code": "133970101",
+    "division": "KIDS",
+    "sub division": "KG-U"
+  },
+  {
+    "mc des": "S-JG_ST_FS",
+    "mc code": "133980101",
+    "division": "KIDS",
+    "sub division": "KG-U"
+  },
+  {
+    "mc des": "S-JG_T_HOT_PANT_ST",
+    "mc code": "133990101",
+    "division": "KIDS",
+    "sub division": "KG-U"
+  },
+  {
+    "mc des": "S-JG_T_SKRT_TOP_ST",
+    "mc code": "134000101",
+    "division": "KIDS",
+    "sub division": "KG-U"
+  },
+  {
+    "mc des": "S-JG_T_ST",
+    "mc code": "134330101",
+    "division": "KIDS",
+    "sub division": "KG-U"
+  },
+  {
+    "mc des": "S-YG_ST",
+    "mc code": "134340101",
+    "division": "KIDS",
+    "sub division": "KG-U"
+  },
+  {
+    "mc des": "S-YG_ST_FS",
+    "mc code": "134350101",
+    "division": "KIDS",
+    "sub division": "KG-U"
+  },
+  {
+    "mc des": "S-JGW_ST",
+    "mc code": "134360101",
+    "division": "KIDS",
+    "sub division": "KGW-U"
+  },
+  {
+    "mc des": "S-IG_ST_FS",
+    "mc code": "135660101",
+    "division": "KIDS",
+    "sub division": "KI"
+  },
+  {
+    "mc des": "S-IB_B_SUIT_FS",
+    "mc code": "135670101",
+    "division": "KIDS",
+    "sub division": "KI"
+  },
+  {
+    "mc des": "S-IB_DNGR_SUIT_FS",
+    "mc code": "135680101",
+    "division": "KIDS",
+    "sub division": "KI"
+  },
+  {
+    "mc des": "S-IB_H_B_SUIT_HS",
+    "mc code": "135690101",
+    "division": "KIDS",
+    "sub division": "KI"
+  },
+  {
+    "mc des": "S-IB_H_DNGR_SUIT",
+    "mc code": "135700101",
+    "division": "KIDS",
+    "sub division": "KI"
+  },
+  {
+    "mc des": "S-IB_ROMPER_SUIT",
+    "mc code": "135710101",
+    "division": "KIDS",
+    "sub division": "KI"
+  },
+  {
+    "mc des": "S-IB_T_DNGR_SUIT",
+    "mc code": "135720101",
+    "division": "KIDS",
+    "sub division": "KI"
+  },
+  {
+    "mc des": "S-IG_DNGR_SUIT",
+    "mc code": "135730101",
+    "division": "KIDS",
+    "sub division": "KI"
+  },
+  {
+    "mc des": "S-IG_HOT_PANT_ST",
+    "mc code": "135740101",
+    "division": "KIDS",
+    "sub division": "KI"
+  },
+  {
+    "mc des": "S-IG_ST",
+    "mc code": "135750101",
+    "division": "KIDS",
+    "sub division": "KI"
+  },
+  {
+    "mc des": "S-KI_B_SUIT_SL",
+    "mc code": "135760101",
+    "division": "KIDS",
+    "sub division": "KI"
+  },
+  {
+    "mc des": "S-KI_B_SUIT_ST_HS",
+    "mc code": "135770101",
+    "division": "KIDS",
+    "sub division": "KI"
+  },
+  {
+    "mc des": "S-KI_SKRT_TOP_ST",
+    "mc code": "135780101",
+    "division": "KIDS",
+    "sub division": "KI"
+  },
+  {
+    "mc des": "S-IBW_B_SUIT",
+    "mc code": "136220101",
+    "division": "KIDS",
+    "sub division": "KIW"
+  },
+  {
+    "mc des": "S-IBW_PLFL_B_SUIT",
+    "mc code": "136230101",
+    "division": "KIDS",
+    "sub division": "KIW"
+  },
+  {
+    "mc des": "S-KIW_GIFT_ST",
+    "mc code": "136240101",
+    "division": "KIDS",
+    "sub division": "KIW"
+  },
+  {
+    "mc des": "S-KIW_ST",
+    "mc code": "136250101",
+    "division": "KIDS",
+    "sub division": "KIW"
+  },
+  {
+    "mc des": "S-L_CO-ORD_SET",
+    "mc code": "121270101",
+    "division": "LADIES",
+    "sub division": "LU"
+  },
+  {
+    "mc des": "S-L_KURTI_ST",
+    "mc code": "123100101",
+    "division": "LADIES",
+    "sub division": "LK&L"
+  },
+  {
+    "mc des": "S-L_N_SUIT",
+    "mc code": "124120101",
+    "division": "LADIES",
+    "sub division": "LN&L"
+  },
+  {
+    "mc des": "S-LW_CO_ORD_SET",
+    "mc code": "126330101",
+    "division": "LADIES",
+    "sub division": "LW"
+  },
+  {
+    "mc des": "S-LW_KURTI_ST",
+    "mc code": "126340101",
+    "division": "LADIES",
+    "sub division": "LW"
+  },
+  {
+    "mc des": "S-LW_NIGHT_SUIT",
+    "mc code": "126350101",
+    "division": "LADIES",
+    "sub division": "LW"
+  },
+  {
+    "mc des": "S-M_SUIT",
+    "mc code": "115070101",
+    "division": "MENS",
+    "sub division": "MO"
+  },
+  {
+    "mc des": "S-MW_TRACK_SUIT",
+    "mc code": "117240101",
+    "division": "MENS",
+    "sub division": "MW"
   }
 ]

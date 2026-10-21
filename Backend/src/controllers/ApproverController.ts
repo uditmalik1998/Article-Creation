@@ -22,7 +22,7 @@ import { syncGenericToVariants, addColorVariants, getSizesForMajCat, isSizeAllow
 import { hasVendorCode, isValidVendorCode, normalizeVendorCode } from '../utils/vendorCode';
 import { mirror360FlatUpdate } from '../utils/mirror360Flat';
 import { getSetMcIndex, setProblems, SET_PARTS_USE_SET_MC, normalMcForCategory } from '../services/setMcMasterService';
-import { linkComboGroupForRow, recomputeComboParent, syncSetsFromRaw, COMBO_PARENT_DERIVED_FIELDS } from '../services/comboLinkService';
+import { linkComboGroupForRow, recomputeComboParent, syncSetsFromRaw, COMBO_PARENT_DERIVED_FIELDS, groupSetParts } from '../services/comboLinkService';
 
 // Fields a client is allowed to update / modify on an article. Shared by
 // updateItem (PUT) and modifyItem (SAP patch-bulk). Anything not in this list
@@ -1236,10 +1236,12 @@ export class ApproverController {
         }
 
         // ?ids=a,b,c — only the cards selected on the page (Rough / Precise Costing).
+        // A set card is its parent; its parts are not cards, so a selected parent
+        // brings its parts along.
         const ids = String(req.query.ids || '').split(',').map((s) => s.trim()).filter(Boolean);
         if (ids.length > 0) {
             where.AND = where.AND || [];
-            where.AND.push({ id: { in: ids } });
+            where.AND.push({ OR: [{ id: { in: ids } }, { comboRole: 'CHILD', comboParentId: { in: ids } }] });
         }
 
         // Text search — pushed into AND so it never overrides path/status filters
@@ -1910,6 +1912,8 @@ export class ApproverController {
                 where,
                 orderBy: { approvedAt: { sort: 'desc', nulls: 'last' } },
                 select: {
+                    id: true,
+                    comboRole: true, comboParentId: true, comboChildOrder: true,
                     sapArticleId: true,
                     articleNumber: true,
                     articleDescription: true,
@@ -1963,6 +1967,12 @@ export class ApproverController {
             console.error('[preciseCostingExport] DB error', err);
             return res.status(500).json({ error: 'Failed to generate precise costing report' });
         }
+        fgArticles = groupSetParts(fgArticles);
+        const parentArticleNo = new Map(fgArticles.filter((a) => a.comboRole === 'PARENT').map((a) => [a.id, a.sapArticleId || a.articleNumber || '']));
+        const setLabel = (a: any): string =>
+            a.comboRole === 'PARENT' ? 'WHOLE SET'
+                : a.comboRole === 'CHILD' ? `PART ${a.comboChildOrder ?? ''} OF SET ${parentArticleNo.get(a.comboParentId) ?? ''}`.replace(/\s+/g, ' ').trim()
+                    : '';
 
         // Phase 2 — stream Excel row-by-row (each row is flushed immediately, no full-workbook buffer)
         try {
@@ -2061,8 +2071,9 @@ export class ApproverController {
                 track(blank());
 
                 // Article header
-                track(addRow(['FG-MAJ', 'FG-ARTICLE', 'ART DESC', 'VDR_NM'], { fill: DARK_BLUE, bold: true, white: true, from: 1, to: 4 }));
-                track(addRow([a.majorCategory || '', a.sapArticleId || a.articleNumber || '', a.articleDescription || '', a.vendorName || '']));
+                const role = setLabel(a);
+                track(addRow(['FG-MAJ', 'FG-ARTICLE', 'ART DESC', 'VDR_NM', ...(role ? ['SET'] : [])], { fill: DARK_BLUE, bold: true, white: true, from: 1, to: role ? 5 : 4 }));
+                track(addRow([a.majorCategory || '', a.sapArticleId || a.articleNumber || '', a.articleDescription || '', a.vendorName || '', ...(role ? [role] : [])]));
                 track(blank());
 
                 // Cost summary — values point at the material table's total row,

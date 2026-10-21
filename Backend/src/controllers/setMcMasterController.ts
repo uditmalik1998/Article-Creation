@@ -75,14 +75,15 @@ export const getSetMcMasterStatus = async (_req: Request, res: Response): Promis
 export const downloadSetMcMasterTemplate = async (_req: Request, res: Response): Promise<void> => {
     try {
         const wb = buildWorkbook([
-            ['JB_B_SUIT_SL', 'PARENT', '', '', '131830101', 'S-JB_B_SUIT_SL', 'KIDS', '', '', 'ACT'],
-            ['JB_B_SUIT_SL', 'PART', 'UPPER', 'JB_TEES_SL', '131830102', 'S-JB_TEES_SL', 'KIDS', '', '', 'ACT'],
-            ['JB_B_SUIT_SL', 'PART', 'LOWER', 'JB_H_BERMUDA', '131830103', 'S-JB_H_BERMUDA', 'KIDS', '', '', 'ACT'],
+            ['S-JB_B_SUIT_SL', 'PARENT', '', '', '131830101', 'S-JB_B_SUIT_SL', 'KIDS', '', '', 'ACT'],
+            ['S-JB_B_SUIT_SL', 'PART', 'UPPER', 'JB_TEES_SL', '131830102', 'S-JB_TEES_SL', 'KIDS', '', '', 'ACT'],
+            ['S-JB_B_SUIT_SL', 'PART', 'LOWER', 'JB_H_BERMUDA', '131830103', 'S-JB_H_BERMUDA', 'KIDS', '', '', 'ACT'],
         ]);
         const ws = wb.getWorksheet(SHEET);
         ws.addRow([]);
         const note = ws.addRow([
-            'NOTE: headers in row 3, data from row 5. ROW_TYPE = PARENT (the set) or PART. PART_MAJ_CAT = the normal category the part is saved under. ' +
+            'NOTE: headers in row 3, data from row 5. SET_MAJ_CAT = the S- set category (only S- categories get the set flow). ' +
+            'ROW_TYPE = PARENT (the set) or PART. PART_MAJ_CAT = the normal category the part is saved under. ' +
             'Blank SUB_DIV / HSN_CODE are filled from the normal category. STATUS = ACT or INACT. Upload replaces the whole table.',
         ]);
         ws.mergeCells(`A${note.number}:J${note.number}`);

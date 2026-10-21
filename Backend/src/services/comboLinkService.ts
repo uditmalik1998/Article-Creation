@@ -47,6 +47,30 @@ export const COMBO_MIRRORED_FIELDS = [
 /** Fields a user may not edit directly on a PARENT — they're derived from the children. */
 export const COMBO_PARENT_DERIVED_FIELDS = new Set<string>([...COMBO_SUMMED_FIELDS, ...COMBO_MIRRORED_FIELDS, 'segment', 'articleDescription']);
 
+type SetOrderRow = { id: string; comboRole?: string | null; comboParentId?: string | null; comboChildOrder?: number | null };
+
+/**
+ * Export order: each set's parent followed by its parts (by child order); every
+ * other row keeps its place. A part whose parent is not in the list stays where it was.
+ */
+export function groupSetParts<T extends SetOrderRow>(rows: T[]): T[] {
+    const present = new Set(rows.filter((r) => r.comboRole === 'PARENT').map((r) => r.id));
+    const partsOf = new Map<string, T[]>();
+    for (const r of rows) {
+        if (r.comboRole === 'CHILD' && r.comboParentId && present.has(r.comboParentId)) {
+            partsOf.set(r.comboParentId, [...(partsOf.get(r.comboParentId) ?? []), r]);
+        }
+    }
+    const out: T[] = [];
+    for (const r of rows) {
+        if (r.comboRole === 'CHILD' && r.comboParentId && present.has(r.comboParentId)) continue;
+        out.push(r);
+        const parts = partsOf.get(r.id);
+        if (parts) out.push(...[...parts].sort((a, b) => (a.comboChildOrder ?? 0) - (b.comboChildOrder ?? 0)));
+    }
+    return out;
+}
+
 const sumDecimal = (values: (Prisma.Decimal | number | null)[]): number | null => {
     const nums = values.map((v) => (v == null ? null : Number(v))).filter((n): n is number => n != null && !Number.isNaN(n));
     if (nums.length === 0) return null;

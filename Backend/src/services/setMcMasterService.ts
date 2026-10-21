@@ -2,13 +2,15 @@
  * Set MC master (table set_mc_master) — the SAP "S-" merchandise categories of
  * set articles (MDM file "SET MC FINAL.xlsx", sheet BM-H (2), 14-Oct-2026).
  *
- * - A major category is a SET category when it has an ACT PARENT row.
+ * - Only the "S-" copy of a category is a set (S-JB_B_SUIT_SL); the plain
+ *   category (JB_B_SUIT_SL) keeps the normal one-photo, one-article flow.
+ *   A major category is a SET category when it has an ACT PARENT row.
  * - The set's parent is created in SAP under the PARENT row's MC
- *   (e.g. JB_B_SUIT_SL -> 131830101 S-JB_B_SUIT_SL).
- * - Each part is created under the S- MC of its own category WITHIN its set
- *   (e.g. JB_TEES_SL in JB_B_SUIT_SL -> 131830102 S-JB_TEES_SL). The same part
- *   name has a different code in each set, so a part is looked up by
- *   (set category, part category), never by name alone.
+ *   (e.g. S-JB_B_SUIT_SL -> 131830101).
+ * - Each part keeps its normal category (JB_TEES_SL) and is created under the
+ *   S- MC of that category WITHIN its set (JB_TEES_SL in S-JB_B_SUIT_SL ->
+ *   131830102 S-JB_TEES_SL). The same part name has a different code in each
+ *   set, so a part is looked up by (set category, part category), never by name alone.
  * - A part category without an ACT PART row in its set cannot be created.
  */
 import { prismaClient as prisma } from '../utils/prisma';
@@ -147,6 +149,8 @@ export function parseSetMcMasterRows(input: { rowNo: number; cells: string[] }[]
         const before = errors.length;
 
         if (!setMajCat) errors.push(`Row ${rowNo}: SET_MAJ_CAT is required.`);
+        else if (!setMajCat.startsWith('S-')) errors.push(`Row ${rowNo}: SET_MAJ_CAT "${setMajCat}" must be the S- set category (S-${setMajCat}); the plain category keeps the normal flow.`);
+        if (partMajCat?.startsWith('S-')) errors.push(`Row ${rowNo}: PART_MAJ_CAT "${partMajCat}" must be the part's normal category (${partMajCat.slice(2)}), not the S- one.`);
         if (rowType !== 'PARENT' && rowType !== 'PART') errors.push(`Row ${rowNo}: ROW_TYPE must be PARENT or PART (got "${typeRaw}").`);
         if (!/^\d{9}$/.test(code)) errors.push(`Row ${rowNo}: S_MC_CODE "${code}" must be 9 digits.`);
         if (!des.startsWith('S-')) errors.push(`Row ${rowNo}: S_MC_DES "${des}" must start with "S-".`);
