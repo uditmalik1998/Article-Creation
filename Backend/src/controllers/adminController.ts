@@ -1111,15 +1111,6 @@ export const getAllExtractions = async (req: Request, res: Response): Promise<vo
             }
           },
           user: { select: { id: true, name: true, email: true, role: true } },
-          results: {
-            select: {
-              id: true,
-              rawValue: true,
-              finalValue: true,
-              confidence: true,
-              attribute: { select: { key: true, label: true } }
-            }
-          }
         }
       }),
       prisma.extractionJob.count()
@@ -3617,12 +3608,20 @@ export const getGridValueCategories = async (req: Request, res: Response): Promi
       res.status(400).json({ success: false, error: 'attribute query param is required' });
       return;
     }
+    // Major categories come from major_category_details (active rows); the count is
+    // how many grid values each has for this attribute (0 = none yet).
     const rows = await prisma.$queryRaw<{ major_category: string; n: bigint }[]>`
-      SELECT major_category, COUNT(*)::bigint AS n
-      FROM maj_cat_grid_values
-      WHERE attribute_name = ${attribute}
-      GROUP BY major_category
-      ORDER BY major_category
+      SELECT m.maj_cat AS major_category, COUNT(g.id)::bigint AS n
+      FROM (
+        SELECT DISTINCT TRIM(maj_cat) AS maj_cat
+        FROM major_category_details
+        WHERE mc_status = 'ACT' AND maj_cat IS NOT NULL AND TRIM(maj_cat) <> ''
+      ) m
+      LEFT JOIN maj_cat_grid_values g
+        ON UPPER(TRIM(g.major_category)) = UPPER(m.maj_cat)
+       AND g.attribute_name = ${attribute}
+      GROUP BY m.maj_cat
+      ORDER BY m.maj_cat
     `;
     res.json({
       success: true,
@@ -3826,17 +3825,31 @@ async function writeSizeAudit(
   }
 }
 
-/** GET /api/admin/size-master/categories — major categories with active sizes (+ count). */
+/** GET /api/admin/size-master/categories — major categories with active sizes
+ *  (+ count, division, sub-division and the size list for previews / suggestions). */
 export const getSizeMasterCategories = async (_req: Request, res: Response): Promise<void> => {
   try {
-    const rows = await prisma.$queryRaw<{ major_category: string; n: bigint }[]>`
-      SELECT major_category, COUNT(*)::bigint AS n
+    const rows = await prisma.$queryRaw<{ major_category: string; n: bigint; division: string | null; sub_division: string | null; sizes: string[] | null }[]>`
+      SELECT major_category,
+             COUNT(*)::bigint AS n,
+             MAX(division) AS division,
+             MAX(sub_division) AS sub_division,
+             ARRAY_AGG(size ORDER BY id) FILTER (WHERE size IS NOT NULL AND TRIM(size) <> '') AS sizes
       FROM maj_cat_sizes
       WHERE UPPER(TRIM(status)) = 'ACT'
       GROUP BY major_category
       ORDER BY major_category
     `;
-    res.json({ success: true, data: rows.map((r) => ({ majorCategory: r.major_category, count: Number(r.n) })) });
+    res.json({
+      success: true,
+      data: rows.map((r) => ({
+        majorCategory: r.major_category,
+        count: Number(r.n),
+        division: r.division ?? null,
+        subDivision: r.sub_division ?? null,
+        sizes: r.sizes ?? [],
+      })),
+    });
   } catch (error: any) {
     console.error('[SizeMaster] categories error:', error);
     res.status(500).json({ success: false, error: error.message });
@@ -3880,10 +3893,14 @@ export const addSizeMasterSize = async (req: Request, res: Response): Promise<vo
       res.status(400).json({ success: false, error: 'A remark/reason is required to add a size.' });
       return;
     }
+    // Copy mc_code / division / sub_division from the category's existing rows so a
+    // new size stays grouped with its siblings.
     const inserted = await prisma.$executeRaw`
-      INSERT INTO maj_cat_sizes (major_category, size, status, mc_code, created_at)
+      INSERT INTO maj_cat_sizes (major_category, size, status, mc_code, division, sub_division, created_at)
       SELECT ${majorCategory}, ${size}, 'ACT',
              (SELECT mc_code FROM maj_cat_sizes WHERE UPPER(TRIM(major_category)) = ${majorCategory.toUpperCase()} AND mc_code IS NOT NULL LIMIT 1),
+             (SELECT division FROM maj_cat_sizes WHERE UPPER(TRIM(major_category)) = ${majorCategory.toUpperCase()} AND division IS NOT NULL LIMIT 1),
+             (SELECT sub_division FROM maj_cat_sizes WHERE UPPER(TRIM(major_category)) = ${majorCategory.toUpperCase()} AND sub_division IS NOT NULL LIMIT 1),
              NOW()
       WHERE NOT EXISTS (
         SELECT 1 FROM maj_cat_sizes
@@ -4699,31 +4716,16 @@ export const uploadHierarchyExcel = async (req: Request, res: Response): Promise
 // MODIFY LOGS
 // ═══════════════════════════════════════════════════════
 
-export async function getModifyLogs(req: Request, res: Response) {
-    const {
-        page,
-        limit,
-        articleNumber,
-        labelName,
-        modifiedByName,
-        modifiedByEmail,
-        sapStatus,
-        dateFrom,
-        dateTo,
-        search,
-    } = req.query as Record<string, string | undefined>;
-
-    const pageNum  = Math.max(1, parseInt(page  ?? '1',  10) || 1);
-    const limitNum = Math.min(200, Math.max(1, parseInt(limit ?? '50', 10) || 50));
-    const skip     = (pageNum - 1) * limitNum;
-
+function buildModifyLogsWhere(q: Record<string, string | undefined>): object {
+    const { articleNumber, labelName, modifiedByName, modifiedByEmail, sapStatus, dateFrom, dateTo, search } = q;
     const andConditions: object[] = [];
 
-    if (articleNumber) andConditions.push({ articleNumber: { contains: articleNumber, mode: 'insensitive' } });
-    if (labelName)       andConditions.push({ labelName:      { contains: labelName,      mode: 'insensitive' } });
+    if (articleNumber)   andConditions.push({ articleNumber:   { contains: articleNumber,   mode: 'insensitive' } });
+    if (labelName)       andConditions.push({ labelName:       { contains: labelName,       mode: 'insensitive' } });
     if (modifiedByName)  andConditions.push({ modifiedByName:  { contains: modifiedByName,  mode: 'insensitive' } });
     if (modifiedByEmail) andConditions.push({ modifiedByEmail: { contains: modifiedByEmail, mode: 'insensitive' } });
-    if (sapStatus)       andConditions.push({ sapStatus });
+    if (sapStatus === 'FAILED') andConditions.push({ NOT: { sapStatus: 'SUCCESS' } });
+    else if (sapStatus)         andConditions.push({ sapStatus });
 
     if (dateFrom || dateTo) {
         const dateFilter: Record<string, Date> = {};
@@ -4739,17 +4741,94 @@ export async function getModifyLogs(req: Request, res: Response) {
     if (search) {
         andConditions.push({
             OR: [
-                { articleNumber:  { contains: search, mode: 'insensitive' } },
-                { labelName:      { contains: search, mode: 'insensitive' } },
-                { oldValue:       { contains: search, mode: 'insensitive' } },
-                { newValue:       { contains: search, mode: 'insensitive' } },
-                { modifiedByName: { contains: search, mode: 'insensitive' } },
-                { modifiedByEmail:{ contains: search, mode: 'insensitive' } },
+                { articleNumber:   { contains: search, mode: 'insensitive' } },
+                { labelName:       { contains: search, mode: 'insensitive' } },
+                { oldValue:        { contains: search, mode: 'insensitive' } },
+                { newValue:        { contains: search, mode: 'insensitive' } },
+                { modifiedByName:  { contains: search, mode: 'insensitive' } },
+                { modifiedByEmail: { contains: search, mode: 'insensitive' } },
             ],
         });
     }
 
-    const where = andConditions.length > 0 ? { AND: andConditions } : {};
+    return andConditions.length > 0 ? { AND: andConditions } : {};
+}
+
+/**
+ * GET /api/admin/modify-logs/groups — one entry per save (modificationGroupId), newest first.
+ * A save is listed when any of its rows match the filters; `rows` holds the WHOLE save.
+ */
+export async function getModifyLogGroups(req: Request, res: Response) {
+    const q = req.query as Record<string, string | undefined>;
+    const pageNum  = Math.max(1, parseInt(q.page  ?? '1',  10) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(q.limit ?? '20', 10) || 20));
+    const where = buildModifyLogsWhere(q) as any;
+
+    const [allGroups, pageGroups, totalChanges, failedChanges] = await withPrismaRetry(() =>
+        Promise.all([
+            prisma.modifyLog.groupBy({ by: ['modificationGroupId'], where }),
+            prisma.modifyLog.groupBy({
+                by: ['modificationGroupId'],
+                where,
+                _max: { modifiedAt: true },
+                orderBy: { _max: { modifiedAt: 'desc' } },
+                skip: (pageNum - 1) * limitNum,
+                take: limitNum,
+            }),
+            prisma.modifyLog.count({ where }),
+            prisma.modifyLog.count({ where: { AND: [where, { NOT: { sapStatus: 'SUCCESS' } }] } }),
+        ])
+    );
+
+    const ids = pageGroups.map((g) => g.modificationGroupId);
+    const rows = ids.length
+        ? await withPrismaRetry(() =>
+            prisma.modifyLog.findMany({
+                where: { modificationGroupId: { in: ids } },
+                orderBy: { id: 'asc' },
+            })
+        )
+        : [];
+
+    const byGroup = new Map<string, typeof rows>();
+    for (const r of rows) {
+        const list = byGroup.get(r.modificationGroupId) ?? [];
+        list.push(r);
+        byGroup.set(r.modificationGroupId, list);
+    }
+
+    const data = ids.map((id) => {
+        const groupRows = byGroup.get(id) ?? [];
+        const first = groupRows[0];
+        return {
+            modificationGroupId: id,
+            articleNumber: first?.articleNumber ?? '',
+            modifiedByName: first?.modifiedByName ?? '',
+            modifiedByEmail: first?.modifiedByEmail ?? '',
+            modifiedAt: (pageGroups.find((g) => g.modificationGroupId === id)?._max.modifiedAt ?? first?.modifiedAt) as Date,
+            fieldCount: groupRows.length,
+            failedCount: groupRows.filter((r) => r.sapStatus !== 'SUCCESS').length,
+            rows: groupRows,
+        };
+    });
+
+    return res.json({
+        data,
+        total: allGroups.length,
+        totalChanges,
+        failedChanges,
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(allGroups.length / limitNum),
+    });
+}
+
+export async function getModifyLogs(req: Request, res: Response) {
+    const q = req.query as Record<string, string | undefined>;
+    const pageNum  = Math.max(1, parseInt(q.page  ?? '1',  10) || 1);
+    const limitNum = Math.min(10000, Math.max(1, parseInt(q.limit ?? '50', 10) || 50));
+    const skip     = (pageNum - 1) * limitNum;
+    const where    = buildModifyLogsWhere(q) as any;
 
     const [total, logs] = await withPrismaRetry(() =>
         prisma.$transaction([
@@ -9956,6 +10035,110 @@ export const uploadMcd = async (req: Request, res: Response): Promise<void> => {
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }
+};
+
+// ── Admin › Hierarchy tab: division → sub-division → major category rows ──────
+// Row-level add / edit / activate-deactivate on major_category_details
+// (mc_status 'ACT' = active, 'IN' = inactive). No deletes.
+
+const MCD_SELECT = {
+  id: true, seg: true, div: true, subDiv: true, majCat: true,
+  mcCode: true, mcDes: true, hsnCode: true, mcStatus: true,
+} as const;
+
+const mcdText = (v: unknown, upper = true): string | null => {
+  if (v === undefined || v === null) return null;
+  const s = String(v).trim();
+  if (!s) return null;
+  return upper ? s.toUpperCase() : s;
+};
+
+// GET /api/admin/major-category-details/rows
+export const getMcdRows = async (_req: Request, res: Response): Promise<void> => {
+  const rows = await prisma.majorCategoryDetails.findMany({
+    select: MCD_SELECT,
+    orderBy: [{ div: 'asc' }, { subDiv: 'asc' }, { majCat: 'asc' }],
+  });
+  res.json({ success: true, data: rows });
+};
+
+// POST /api/admin/major-category-details — body: { div, subDiv, majCat, mcCode?, mcDes?, hsnCode?, seg? }
+export const createMcdRow = async (req: Request, res: Response): Promise<void> => {
+  const div = mcdText(req.body?.div);
+  const subDiv = mcdText(req.body?.subDiv);
+  const majCat = mcdText(req.body?.majCat);
+  if (!div || !subDiv || !majCat) {
+    res.status(400).json({ success: false, error: 'Division, sub-division and major category are required' });
+    return;
+  }
+  const exists = await prisma.majorCategoryDetails.findFirst({
+    where: {
+      div: { equals: div, mode: 'insensitive' },
+      subDiv: { equals: subDiv, mode: 'insensitive' },
+      majCat: { equals: majCat, mode: 'insensitive' },
+    },
+    select: { id: true },
+  });
+  if (exists) {
+    res.status(409).json({ success: false, error: `${majCat} already exists in ${div} / ${subDiv}` });
+    return;
+  }
+  const row = await prisma.majorCategoryDetails.create({
+    data: {
+      div, subDiv, majCat,
+      seg: mcdText(req.body?.seg),
+      mcCode: mcdText(req.body?.mcCode),
+      mcDes: mcdText(req.body?.mcDes) ?? majCat,
+      hsnCode: mcdText(req.body?.hsnCode),
+      mcStatus: 'ACT',
+    },
+    select: MCD_SELECT,
+  });
+  res.status(201).json({ success: true, data: row });
+};
+
+// PUT /api/admin/major-category-details/:id — any of { seg, majCat, mcCode, mcDes, hsnCode, mcStatus }
+export const updateMcdRow = async (req: Request, res: Response): Promise<void> => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) { res.status(400).json({ success: false, error: 'Invalid id' }); return; }
+  const data: Record<string, string | null> = {};
+  for (const key of ['seg', 'majCat', 'mcCode', 'mcDes', 'hsnCode'] as const) {
+    if (key in (req.body ?? {})) data[key] = mcdText(req.body[key]);
+  }
+  if ('mcStatus' in (req.body ?? {})) {
+    const st = mcdText(req.body.mcStatus);
+    if (st !== 'ACT' && st !== 'IN') { res.status(400).json({ success: false, error: "mcStatus must be 'ACT' or 'IN'" }); return; }
+    data.mcStatus = st;
+  }
+  if ('majCat' in data && !data.majCat) { res.status(400).json({ success: false, error: 'Major category cannot be empty' }); return; }
+  if (Object.keys(data).length === 0) { res.status(400).json({ success: false, error: 'Nothing to update' }); return; }
+  try {
+    const row = await prisma.majorCategoryDetails.update({ where: { id }, data, select: MCD_SELECT });
+    res.json({ success: true, data: row });
+  } catch {
+    res.status(404).json({ success: false, error: 'Row not found' });
+  }
+};
+
+// PUT /api/admin/major-category-details/rename — { level: 'div' | 'subDiv', from, to, div? }
+// Renames a division (all its rows) or a sub-division within a division.
+export const renameMcdGroup = async (req: Request, res: Response): Promise<void> => {
+  const { level } = req.body ?? {};
+  const from = mcdText(req.body?.from);
+  const to = mcdText(req.body?.to);
+  if ((level !== 'div' && level !== 'subDiv') || !from || !to) {
+    res.status(400).json({ success: false, error: "level ('div' | 'subDiv'), from and to are required" });
+    return;
+  }
+  let count = 0;
+  if (level === 'div') {
+    ({ count } = await prisma.majorCategoryDetails.updateMany({ where: { div: from }, data: { div: to } }));
+  } else {
+    const div = mcdText(req.body?.div);
+    if (!div) { res.status(400).json({ success: false, error: 'div is required to rename a sub-division' }); return; }
+    ({ count } = await prisma.majorCategoryDetails.updateMany({ where: { div, subDiv: from }, data: { subDiv: to } }));
+  }
+  res.json({ success: true, data: { updated: count } });
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════

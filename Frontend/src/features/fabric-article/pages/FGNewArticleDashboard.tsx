@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import dayjs from 'dayjs';
-import { RotateCw, Download, Sparkles, Search, ChevronDown } from 'lucide-react';
+import { Search, ChevronDown } from 'lucide-react';
 import type { Dayjs } from 'dayjs';
 import {
   Button,
@@ -21,6 +21,7 @@ import type { ApproverItem } from '../components/FabricArticleTable';
 import { ArticleSpecCard } from '@/shared/components/articles/ArticleSpecCard';
 import { ArticleCardGrid, ARTICLE_CARD_GRID_CLASS, GroupByControl, useArticleGroupBy } from '@/shared/components/articles/ArticleCardGrid';
 import { DatePresetFilter, DivisionTabs, divisionOption, ResetFiltersButton, SapSyncChips } from '@/shared/components/articles/ArticleFilters';
+import { ArticleListHeader } from '@/shared/components/articles/ArticleListHeader';
 import { APP_CONFIG } from '../../../constants/app/config';
 import { SIMPLIFIED_HIERARCHY } from '../../extraction/components/SimplifiedCategorySelector';
 import { getMcCodeByMajorCategory } from '../../../data/majorCategoryMcCodeMap';
@@ -408,63 +409,29 @@ export default function FGNewArticleDashboard({ pathType = 'new' }: FGNewArticle
     <div className="flex flex-col">
       <div className="sticky top-0 z-30 mb-2 -mx-1 px-1 pt-1">
         <div className="overflow-hidden rounded-xl border border-white/60 bg-white/85 shadow-[var(--shadow-md)] backdrop-blur">
-          <div
-            className="flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 text-white"
-            style={{ background: 'linear-gradient(90deg, #3b1f5e 0%, #6b35b0 100%)' }}
-          >
-            <div className="flex min-w-0 items-center gap-2.5">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-400/90">
-                <Sparkles className="h-3.5 w-3.5 text-white" />
-              </div>
-              <div className="min-w-0">
-                <div className="font-display truncate text-[13px] font-semibold leading-tight tracking-tight">
-                  {pageTitle}
-                </div>
-                {user?.division && (
-                  <div className="truncate text-[10px] font-medium text-white/65">
-                    {formatDivisionLabel(user.division)}{user.subDivision ? ` · ${user.subDivision}` : ''}
-                  </div>
-                )}
-              </div>
-              {totalCount > 0 && (
-                <span className="rounded-md bg-white/10 px-2 py-0.5 text-[11px] font-semibold tabular-nums">
-                  {totalCount} articles
-                </span>
-              )}
-            </div>
-            <div className="flex shrink-0 flex-wrap items-center justify-end gap-1">
-              {selectedIds.size > 0 && (
-                <>
-                  <span className="rounded-md bg-violet-400/90 px-2 py-0.5 text-[11px] font-semibold tabular-nums">
-                    {selectedIds.size} selected
-                  </span>
-                  <Button size="sm" variant="outline" onClick={handleExportSelected}
-                    className="h-7 border-white/30 bg-white/10 px-2.5 text-[12px] text-white hover:bg-white/20 hover:text-white">
-                    <Download /> Export Selected
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => setSelectedIds(new Set())}
-                    className="h-7 px-2.5 text-[12px] text-white hover:bg-white/20 hover:text-white">
-                    Clear
-                  </Button>
-                </>
-              )}
-              <Button size="sm" variant="outline" onClick={() => fetchItems(currentPage)}
-                className="h-7 border-white/30 bg-white/10 px-2.5 text-[12px] text-white hover:bg-white/20 hover:text-white">
-                <RotateCw /> Refresh
-              </Button>
-              <Button size="sm" variant="outline" onClick={handleExportAll} disabled={exportingAll}
-                className="h-7 border-white/30 bg-white/10 px-2.5 text-[12px] text-white hover:bg-white/20 hover:text-white disabled:opacity-50">
-                <Download /> Export ({totalCount})
-              </Button>
-            </div>
-            {(showDivisionFilter || isUnscoped) && (
-              <DivisionTabs
-                value={divisionFilter}
-                onChange={(v) => { setDivisionFilter(v); setSubDivisionFilter('ALL'); }}
-                options={isUnscoped ? ['MEN', 'LADIES', 'KIDS'].map(divisionOption) : userAssignedDivisions.map(divisionOption)}
-              />
-            )}
-          </div>
+          {/* Header (design "Option C · two rows") — shared with the other article dashboards */}
+          <ArticleListHeader
+            title={pageTitle}
+            scope={user?.division ? [formatDivisionLabel(user.division), user.subDivision].filter(Boolean).join(' · ') : null}
+            totalCount={totalCount}
+            divisionTabs={
+              (showDivisionFilter || isUnscoped) ? (
+                <DivisionTabs
+                  value={divisionFilter}
+                  onChange={(v) => { setDivisionFilter(v); setSubDivisionFilter('ALL'); }}
+                  options={isUnscoped ? ['MEN', 'LADIES', 'KIDS'].map(divisionOption) : userAssignedDivisions.map(divisionOption)}
+                />
+              ) : null
+            }
+            selectedCount={selectedIds.size}
+            onClearSelection={() => setSelectedIds(new Set())}
+            onExportSelected={handleExportSelected}
+            loading={loading}
+            onRefresh={() => fetchItems(currentPage)}
+            downloads={[
+              { key: 'all', label: `All ${totalCount.toLocaleString('en-IN')}`, onClick: handleExportAll, busy: exportingAll, show: true },
+            ].filter((d) => d.show)}
+          />
 
           {/* Filter row */}
           <div className="border-t border-border/60 bg-gradient-to-b from-slate-50/40 to-transparent px-3 py-2">

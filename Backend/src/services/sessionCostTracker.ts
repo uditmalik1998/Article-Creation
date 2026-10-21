@@ -77,7 +77,7 @@ class SessionCostTracker {
     imageName: string,
     inputTokens: number,
     outputTokens: number,
-    model: string = process.env.GEMINI_MODEL || 'gemini-2.5-pro',
+    model: string = process.env.GEMINI_MODEL || 'gemini-2.5-flash',
     imageUrl?: string,
     extractionTimeMs?: number
   ): ImageExtractionCost {

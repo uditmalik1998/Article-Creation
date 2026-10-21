@@ -354,3 +354,19 @@
 .border-b      { border-bottom-width: 1.5px !important; }
 .border-l      { border-left-width: 1.5px !important; }
 .border-r      { border-right-width: 1.5px !important; }
+
+/* "Go to field" from the missing-fields dialog: a short coral pulse on the row. */
+@keyframes field-jump-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 transparent; }
+  20%, 60% { box-shadow: 0 0 0 2px var(--color-primary); }
+}
+.field-jump-highlight {
+  border-radius: 4px;
+  animation: field-jump-pulse 1.3s ease-in-out 2;
+}
+@media (prefers-reduced-motion: reduce) {
+  .field-jump-highlight {
+    animation: none;
+    box-shadow: 0 0 0 2px var(--color-primary);
+  }
+}

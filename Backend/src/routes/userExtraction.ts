@@ -291,20 +291,6 @@ router.get('/history', async (req, res) => {
               }
             }
           },
-          results: {
-            select: {
-              id: true,
-              rawValue: true,
-              finalValue: true,
-              confidence: true,
-              attribute: {
-                select: {
-                  key: true,
-                  label: true
-                }
-              }
-            }
-          }
         }
       }),
       prisma.extractionJob.count({

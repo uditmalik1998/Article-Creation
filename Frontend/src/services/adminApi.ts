@@ -361,6 +361,44 @@ export const getHierarchyTree = async (): Promise<Department[]> => {
   return data.data.departments;
 };
 
+// ─── Major category details (Admin › Hierarchy tab) ───────────────────────────
+// Rows of major_category_details: division → sub-division → major category.
+
+export interface McdRow {
+  id: number;
+  seg: string | null;
+  div: string | null;
+  subDiv: string | null;
+  majCat: string | null;
+  mcCode: string | null;
+  mcDes: string | null;
+  hsnCode: string | null;
+  /** 'ACT' = active, 'IN' = inactive */
+  mcStatus: string | null;
+}
+
+export type McdRowInput = Partial<Omit<McdRow, 'id'>>;
+
+export const getMcdRows = async (): Promise<McdRow[]> => {
+  const { data } = await adminApi.get<ApiResponse<McdRow[]>>('/major-category-details/rows');
+  return data.data;
+};
+
+export const createMcdRow = async (row: McdRowInput): Promise<McdRow> => {
+  const { data } = await adminApi.post<ApiResponse<McdRow>>('/major-category-details', row);
+  return data.data;
+};
+
+export const updateMcdRow = async (id: number, row: McdRowInput): Promise<McdRow> => {
+  const { data } = await adminApi.put<ApiResponse<McdRow>>(`/major-category-details/${id}`, row);
+  return data.data;
+};
+
+export const renameMcdGroup = async (body: { level: 'div' | 'subDiv'; from: string; to: string; div?: string }) => {
+  const { data } = await adminApi.put<ApiResponse<{ updated: number }>>('/major-category-details/rename', body);
+  return data.data;
+};
+
 export interface LightweightCategory {
   id: number;
   name: string;
@@ -455,7 +493,14 @@ export const getGridValueAudit = async (attribute: string, majorCategory: string
 // ═══════════════════════════════════════════════════════
 // SIZE MASTER EDITOR (maj_cat_sizes)
 // ═══════════════════════════════════════════════════════
-export interface SizeMasterCategory { majorCategory: string; count: number }
+export interface SizeMasterCategory {
+  majorCategory: string;
+  count: number;
+  division?: string | null;
+  subDivision?: string | null;
+  /** Active sizes (insertion order) — for range previews and quick-add suggestions. */
+  sizes?: string[];
+}
 export interface SizeMasterItem { id: number; size: string }
 export interface SizeMasterAuditEntry {
   id: number;
@@ -604,6 +649,37 @@ export async function getModifyLogs(params: ModifyLogsParams = {}): Promise<Modi
     if (v !== undefined && v !== null && v !== '') query.set(k, String(v));
   });
   const res = await adminApi.get<ModifyLogsResponse>(`/modify-logs?${query.toString()}`);
+  return res.data;
+}
+
+export interface ModifyLogGroup {
+  modificationGroupId: string;
+  articleNumber: string;
+  modifiedByName: string;
+  modifiedByEmail: string;
+  modifiedAt: string;
+  fieldCount: number;
+  failedCount: number;
+  rows: ModifyLog[];
+}
+
+export interface ModifyLogGroupsResponse {
+  data: ModifyLogGroup[];
+  total: number;
+  totalChanges: number;
+  failedChanges: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+/** One entry per save (modification group), newest first; each carries all of its rows. */
+export async function getModifyLogGroups(params: ModifyLogsParams = {}): Promise<ModifyLogGroupsResponse> {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== '') query.set(k, String(v));
+  });
+  const res = await adminApi.get<ModifyLogGroupsResponse>(`/modify-logs/groups?${query.toString()}`);
   return res.data;
 }
 

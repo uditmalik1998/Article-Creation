@@ -19,29 +19,20 @@ async function initializeCostTracking() {
     const existingCount = await prisma.extractionJob.count();
     console.log(`📊 Found ${existingCount} existing extraction jobs`);
 
-    // Step 2: Clear all extraction results
-    if (existingCount > 0) {
-      console.log('🗑️ Clearing all extraction results...');
-      await prisma.extractionResult.deleteMany({});
-      console.log('✅ Extraction results cleared');
-    }
-
-    // Step 3: Clear all extraction jobs
+    // Step 2: Clear all extraction jobs
     if (existingCount > 0) {
       console.log('🗑️ Clearing all extraction jobs...');
       await prisma.extractionJob.deleteMany({});
       console.log('✅ Extraction jobs cleared');
     }
 
-    // Step 4: Log the clean state
+    // Step 3: Log the clean state
     const remainingJobs = await prisma.extractionJob.count();
-    const remainingResults = await prisma.extractionResult.count();
-    
+
     console.log('\n📈 System Status After Initialization:');
     console.log(`  - Extraction Jobs: ${remainingJobs}`);
-    console.log(`  - Extraction Results: ${remainingResults}`);
 
-    // Step 5: Verify database integrity
+    // Step 4: Verify database integrity
     const categories = await prisma.category.count();
     const users = await prisma.user.count();
     

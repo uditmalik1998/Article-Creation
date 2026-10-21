@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ChevronDown, ChevronRight, ChevronUp, Save, Search, X } from 'lucide-react';
+import { ChevronDown, ChevronRight, ChevronUp, Plus, Save, Search, X } from 'lucide-react';
 import { Input, Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui-tw';
 import { cn } from '@/lib/utils';
 import { APP_CONFIG } from '../../../constants/app/config';
@@ -18,13 +18,15 @@ import { APP_CONFIG } from '../../../constants/app/config';
 // values local and save only on the Save button: the current tab's spec fields,
 // costs and, for multi-tab cards, config.tabField. On load the saved tab opens
 // with its DB values; any other tab is empty. Other-block rows save their costs
-// (if listed in costFields); their spec cells are UI-only.
+// (if listed in costFields) only when ticked — unticked rows save empty; their
+// spec cells are UI-only. V. ADD repeat copies (PRINT-1, EMB-1…) save to their
+// JSON columns (config.repeatJsonFields) on the same Save — never to SAP.
 
 type AttrValue = { shortForm: string; fullForm?: string | null };
 export type CostingGridAttr = { field: string; label: string; values: AttrValue[] };
 
 type SpecCol = 'type' | 'style' | 'c3';
-type Col = SpecCol | 'auto' | 'rough' | 'vdr' | 'fin';
+type Col = SpecCol | 'rate' | 'qty' | 'auto' | 'rough' | 'vdr' | 'fin';
 type RowState = Partial<Record<Col, string>>;
 
 export interface CostingGridConfig {
@@ -50,9 +52,58 @@ export interface CostingGridConfig {
   otherMasterAttr?: string;
   /** row → spec columns shown read-only (no attribute or DB field behind them). */
   readOnlySpec?: Record<string, SpecCol[]>;
+  /**
+   * B TRIM: RATE + QTY spec columns after DESC (saved as <prefix>Rate / <prefix>Qty,
+   * prefix taken from the costFields autoBgt name). Master values land in RATE,
+   * and AUTO-BGT = ROUGH-V2 = RATE × QTY.
+   */
+  rateQty?: boolean;
+  /**
+   * V. ADD: fixed rows the user can repeat (PRINT → PRINT-1, PRINT-2…). Each group
+   * ends in an "Add <ROW>" button; copies use the base row's dropdown values.
+   * Copies never go to SAP; with repeatJsonFields they save on the Save button.
+   */
+  repeatable?: readonly string[];
+  /**
+   * Repeat row → JSON column holding its copies (app only, not SAP), saved as
+   * [{ no, type, style, placement, autoBgt, roughV2, vdrCost, finalCost }].
+   */
+  repeatJsonFields?: Record<string, string>;
+  /** AUTO-BGT is a typed input (V. ADD) instead of read-only text filled from the master. */
+  editableAutoBgt?: boolean;
 }
 
+/** One saved repeat copy (e.g. PRINT-2) in a repeatJsonFields column. */
+type RepeatCopyJson = {
+  no: number;
+  type: string | null;
+  style: string | null;
+  placement: string | null;
+  autoBgt: string | null;
+  roughV2: string | null;
+  vdrCost: string | null;
+  finalCost: string | null;
+};
+
 type CostFieldSet = { autoBgt: string; rough: string; vdr: string; fin: string };
+
+// mBtnAutoBgt → mBtnRate / mBtnQty
+const rateField = (f: CostFieldSet) => f.autoBgt.replace(/AutoBgt$/, 'Rate');
+const qtyField = (f: CostFieldSet) => f.autoBgt.replace(/AutoBgt$/, 'Qty');
+
+/** RATE × QTY as a plain decimal string, or '' when either is missing. */
+const rateTimesQty = (rate: string, qty: string): string => {
+  const r = parseFloat(rate);
+  const q = parseFloat(qty);
+  if (!rate.trim() || !qty.trim() || Number.isNaN(r) || Number.isNaN(q)) return '';
+  return String(Math.round(r * q * 10000) / 10000);
+};
+
+// row → field prefix, e.g. HOOK → hookAutoBgt / hookRoughV2 / hookVdrCost / hookFinalCost
+const otherAccCostFields = (prefixes: Record<string, string>): Record<string, CostFieldSet> =>
+  Object.fromEntries(Object.entries(prefixes).map(([row, p]) => [
+    row, { autoBgt: `${p}AutoBgt`, rough: `${p}RoughV2`, vdr: `${p}VdrCost`, fin: `${p}FinalCost` },
+  ]));
 
 export const BTRIM_CONFIG: CostingGridConfig = {
   title: 'B TRIM',
@@ -60,7 +111,14 @@ export const BTRIM_CONFIG: CostingGridConfig = {
   c3Label: 'CLR',
   tabs: ['BT-01', 'BT-02'],
   fixedRows: ['M_BTN', 'DC', 'ZIP', 'PATCH', 'H-TRF'],
-  other: { label: 'OTHER ACC', rows: ['ELASTIC', 'FUSING', 'BADGE', 'RIVET', 'TAPE', 'OTHER'] },
+  other: {
+    label: 'OTHER ACC',
+    rows: [
+      'ADJUSTER', 'BADGE', 'BROTCH', 'BUCKLE', 'ELASTIC', 'EYELETS', 'FUSING', 'HANGING D-RING',
+      'HOOK', 'LABEL', 'LACE', 'POCKETTING FABRIC', 'POCKETTING READYMADE', 'RIVET', 'SANTA',
+      'STOPPER', 'TAG', 'TAPE', 'TASSELS', 'OTHER',
+    ],
+  },
   otherMasterAttr: 'OTHER BASIC TRIM',
   // M_BTN_TYPE values (POLY_BTN, KUNDI_BTN…) are button styles, so they sit
   // in the STYLE column; the button size (e.g. 26L) is TYPE.
@@ -71,7 +129,8 @@ export const BTRIM_CONFIG: CostingGridConfig = {
     PATCH: { type: 'patches', style: 'patchesType' },     // M_PATCHE_TYPE, M_PATCH_STYLE
     'H-TRF': { type: 'htrfType', style: 'htrfStyle' },    // M_HTRF_TYPE, M_HTRF_STYLE
   },
-  grid: 'grid grid-cols-[150px_110px_minmax(0,1.3fr)_90px_minmax(0,1.5fr)_88px_92px_92px_100px]',
+  grid: 'grid grid-cols-[170px_110px_minmax(0,1.3fr)_90px_minmax(0,1.2fr)_88px_64px_88px_92px_92px_100px]',
+  rateQty: true,
   tabField: 'bTrimType',
   costFields: {
     M_BTN:   { autoBgt: 'mBtnAutoBgt',  rough: 'mBtnRoughV2',  vdr: 'mBtnVdrCost',  fin: 'mBtnFinalCost' },
@@ -85,6 +144,12 @@ export const BTRIM_CONFIG: CostingGridConfig = {
     RIVET:   { autoBgt: 'rivetAutoBgt',   rough: 'rivetRoughV2',   vdr: 'rivetVdrCost',   fin: 'rivetFinalCost' },
     TAPE:    { autoBgt: 'tapeAutoBgt',    rough: 'tapeRoughV2',    vdr: 'tapeVdrCost',    fin: 'tapeFinalCost' },
     OTHER:   { autoBgt: 'otherAutoBgt',   rough: 'otherRoughV2',   vdr: 'otherVdrCost',   fin: 'otherFinalCost' },
+    ...otherAccCostFields({
+      ADJUSTER: 'adjuster', BROTCH: 'brotch', BUCKLE: 'buckle', EYELETS: 'eyelets',
+      'HANGING D-RING': 'hangingDRing', HOOK: 'hook', LABEL: 'label', LACE: 'lace',
+      'POCKETTING FABRIC': 'pockettingFabric', 'POCKETTING READYMADE': 'pockettingReadymade',
+      SANTA: 'santa', STOPPER: 'stopper', TAG: 'tag', TASSELS: 'tassels',
+    }),
   },
 };
 
@@ -100,6 +165,9 @@ export const VADD_CONFIG: CostingGridConfig = {
     WASHING: { type: 'wash' },                                                // M_WASH
   },
   readOnlySpec: { WASHING: ['style', 'c3'] },
+  repeatable: ['PRINT', 'EMB'],
+  repeatJsonFields: { PRINT: 'vaddPrintJson', EMB: 'vaddEmpJson' },
+  editableAutoBgt: true,
   grid: 'grid grid-cols-[150px_130px_minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.4fr)_88px_92px_92px_100px]',
   costFields: {
     PRINT:   { autoBgt: 'printAutoBgt',   rough: 'printRoughV2',   vdr: 'printVendorCost',   fin: 'printFinalCost' },
@@ -285,17 +353,81 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
   // Other-block master fill: tabs already handled, and the fetched master (one call per mount).
   const otherFilledTabsRef = useRef<Set<string>>(new Set());
   const otherMasterRef = useRef<Record<string, { bt1: string; bt2: string }> | null>(null);
+  // Other-block rows ticked per tab (tab-save mode). Only ticked rows are saved; the
+  // rest save as empty. On load the rows with saved values in the DB start ticked.
+  const [checked, setChecked] = useState<Record<string, Set<string>>>({});
+  // Repeat rows (config.repeatable): base row → its copies' names (PRINT-1, PRINT-2…).
+  // A new copy takes the lowest free number, so deleting PRINT-1 and adding again gives
+  // PRINT-1 (not PRINT-2); remaining copies keep their names.
+  const [repeats, setRepeats] = useState<Record<string, string[]>>({});
+  const baseOf = (row: string) =>
+    Object.keys(repeats).find((b) => repeats[b].includes(row)) ?? row;
+  const isRepeatCopy = (row: string) => baseOf(row) !== row;
+  const addRepeat = (base: string) => {
+    setRepeats((prev) => {
+      const copies = prev[base] ?? [];
+      let n = 1;
+      while (copies.includes(`${base}-${n}`)) n++;
+      const next = [...copies, `${base}-${n}`].sort(
+        (a, b) => Number(a.slice(base.length + 1)) - Number(b.slice(base.length + 1)),
+      );
+      return { ...prev, [base]: next };
+    });
+    setDirty(true);
+  };
+  const removeRepeat = (base: string, row: string) => {
+    setDirty(true);
+    setRepeats((prev) => ({ ...prev, [base]: (prev[base] ?? []).filter((r) => r !== row) }));
+    setLocal((prev) =>
+      Object.fromEntries(Object.entries(prev).map(([t, rows]) => {
+        const { [row]: _gone, ...rest } = rows;
+        return [t, rest];
+      })),
+    );
+  };
+  const checkable = tabSave && !!other;
+  const isChecked = (row: string) => !!checked[tab]?.has(row);
+  const setRowChecked = (row: string, on: boolean) => {
+    setChecked((prev) => {
+      const next = new Set(prev[tab] ?? []);
+      if (on) next.add(row); else next.delete(row);
+      return { ...prev, [tab]: next };
+    });
+    setDirty(true);
+  };
+  const setAllChecked = (on: boolean) => {
+    setChecked((prev) => ({ ...prev, [tab]: new Set(on ? other?.rows ?? [] : []) }));
+    setDirty(true);
+  };
 
   const setTabVal = (t: string, row: string, col: Col, v: string) =>
     setLocal((prev) => ({ ...prev, [t]: { ...prev[t], [row]: { ...prev[t]?.[row], [col]: v } } }));
 
-  // basic_trim_master result → the picked tab's AUTO-BGT (and ROUGH-V2).
+  // A master value (basic_trim_master bt_1 / bt_2) for one row on tab `t`.
+  // rateQty cards: it goes to RATE (QTY defaults to 1) and AUTO-BGT = RATE × QTY;
+  // otherwise it is AUTO-BGT directly. ROUGH-V2 gets the same value — always, or
+  // only when it is still empty.
+  const applyMasterValue = (t: string, row: string, v: string, current: RowState | undefined, rough: 'always' | 'ifEmpty' | 'never') => {
+    let cost = v;
+    if (config.rateQty) {
+      const qty = current?.qty || '1';
+      setTabVal(t, row, 'rate', v);
+      if (!current?.qty) setTabVal(t, row, 'qty', qty);
+      cost = rateTimesQty(v, qty);
+    }
+    setTabVal(t, row, 'auto', cost);
+    if (rough === 'always' || (rough === 'ifEmpty' && !current?.rough)) setTabVal(t, row, 'rough', cost);
+  };
+
+  // basic_trim_master result → the picked tab's RATE / AUTO-BGT (and ROUGH-V2).
   const applyLookup = (row: string, r: { bt1: string; bt2: string }, tabIdx: number, withRough: boolean) => {
     const t = tabs[tabIdx];
     const v = tabIdx === 0 ? r.bt1 : r.bt2;
-    setTabVal(t, row, 'auto', v);
-    if (withRough) setTabVal(t, row, 'rough', v);
+    applyMasterValue(t, row, v, local[t]?.[row], withRough ? 'always' : 'never');
   };
+
+  // A row still needs its master value: no saved RATE (rateQty cards) / AUTO-BGT.
+  const needsMaster = (s: RowState | undefined) => (config.rateQty ? !s?.rate : !s?.auto);
 
   // basic_trim_master lookup by attribute_name + type value → { bt1, bt2 } or null.
   const fetchBasicTrim = async (row: string, attributeName: string, value: string) => {
@@ -334,7 +466,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
   };
 
   // Fills other-block rows on tab `tb` from config.otherMasterAttr (row name = type):
-  // AUTO-BGT always for the given rows, ROUGH-V2 only where empty. Returns true if anything was set.
+  // RATE / AUTO-BGT for the given rows, ROUGH-V2 only where empty. Returns true if anything was set.
   const fillOtherFromMaster = async (
     tb: string,
     rowsToFill: string[],
@@ -350,8 +482,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
       const m = master[row.toUpperCase()];
       const v = m ? (idx === 0 ? m.bt1 : m.bt2) : '';
       if (!v) continue;
-      setTabVal(tb, row, 'auto', v);
-      if (!current(row)?.rough) setTabVal(tb, row, 'rough', v);
+      applyMasterValue(tb, row, v, current(row), 'ifEmpty');
       filled = true;
     }
     return filled;
@@ -363,7 +494,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
     setTab(tb);
     if (!tabSave || !other || !config.otherMasterAttr || otherFilledTabsRef.current.has(tb)) return;
     otherFilledTabsRef.current.add(tb);
-    const missing = other.rows.filter((row) => !local[tb]?.[row]?.auto);
+    const missing = other.rows.filter((row) => needsMaster(local[tb]?.[row]));
     if (missing.length > 0) void fillOtherFromMaster(tb, missing, (row) => local[tb]?.[row]);
   };
 
@@ -405,25 +536,55 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
       for (const [row, f] of Object.entries(costFields!)) {
         rows[row] = {
           ...rows[row],
+          ...(config.rateQty ? { rate: num(rec[rateField(f)]), qty: num(rec[qtyField(f)]) } : {}),
           auto: num(rec[f.autoBgt]),
           rough: num(rec[f.rough]),
           vdr: num(rec[f.vdr]),
           fin: num(rec[f.fin]),
         };
       }
+      // Saved repeat copies (PRINT-1, EMB-2…) from their JSON columns.
+      const savedRepeats: Record<string, string[]> = {};
+      for (const [base, field] of Object.entries(config.repeatJsonFields ?? {})) {
+        let list: unknown = rec[field];
+        if (typeof list === 'string') { try { list = JSON.parse(list); } catch { list = null; } }
+        if (!Array.isArray(list)) continue;
+        const names: string[] = [];
+        for (const c of list as Partial<RepeatCopyJson>[]) {
+          const no = Number(c?.no);
+          if (!Number.isInteger(no) || no < 1) continue;
+          const name = `${base}-${no}`;
+          if (names.includes(name)) continue;
+          names.push(name);
+          rows[name] = {
+            type: str(c.type), style: str(c.style), c3: str(c.placement),
+            auto: num(c.autoBgt), rough: num(c.roughV2), vdr: num(c.vdrCost), fin: num(c.finalCost),
+          };
+        }
+        if (names.length > 0) {
+          savedRepeats[base] = names.sort((a, b) => Number(a.slice(base.length + 1)) - Number(b.slice(base.length + 1)));
+        }
+      }
+      setRepeats(savedRepeats);
       setLocal({ [t]: rows });
+      if (other) {
+        const saved = other.rows.filter((row) =>
+          (['rate', 'qty', 'auto', 'rough', 'vdr', 'fin'] as Col[]).some((c) => rows[row]?.[c]));
+        setChecked({ [t]: new Set(saved) });
+      }
 
-      // Other-block rows on the opened tab: hit the master only if some row's AUTO-BGT is
-      // null in the DB, and fill just those rows. Other tabs are filled when first opened.
+      // Other-block rows on the opened tab: hit the master only if some row's RATE
+      // (AUTO-BGT without rateQty) is null in the DB, and fill just those rows.
+      // Other tabs are filled when first opened.
       otherFilledTabsRef.current.add(t);
       if (other && config.otherMasterAttr) {
-        const missing = other.rows.filter((row) => !rows[row]?.auto);
+        const missing = other.rows.filter((row) => needsMaster(rows[row]));
         if (missing.length > 0 && (await fillOtherFromMaster(t, missing, (row) => rows[row]))) setDirty(true);
         if (cancelled) return;
       }
 
       for (const row of Object.keys(costFields!)) {
-        if (rows[row].auto && rows[row].rough) continue;
+        if (config.rateQty ? rows[row].rate : rows[row].auto && rows[row].rough) continue;
         const lookupCol = (Object.keys(BASIC_TRIM_LOOKUP[row] ?? {}) as SpecCol[])[0];
         const btAttr = lookupCol ? BASIC_TRIM_LOOKUP[row]![lookupCol] : undefined;
         const spec = lookupCol ? rows[row][lookupCol] ?? '' : '';
@@ -433,8 +594,11 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
         if (!r || cancelled) continue;
         const v = tIdx === 0 ? r.bt1 : r.bt2;
         if (!v) continue;
-        if (!rows[row].auto) setTabVal(t, row, 'auto', v);
-        if (!rows[row].rough) setTabVal(t, row, 'rough', v);
+        if (config.rateQty) applyMasterValue(t, row, v, rows[row], 'ifEmpty');
+        else {
+          if (!rows[row].auto) setTabVal(t, row, 'auto', v);
+          if (!rows[row].rough) setTabVal(t, row, 'rough', v);
+        }
         setDirty(true);
       }
     })();
@@ -448,16 +612,27 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
   // options) — only if that attr is configured for this article's major category.
   const boundAttr = (row: string, col: Col): CostingGridAttr | null => {
     if (col !== 'type' && col !== 'style' && col !== 'c3') return null;
-    const field = cellMap[row]?.[col];
+    const field = cellMap[baseOf(row)]?.[col];
     return field ? attrByField.get(field) ?? null : null;
   };
   // Immediate-save mode only: the first tab reads/writes the SAP field directly.
-  const savesToSap = (row: string, col: Col) => !tabSave && tab === tabs[0] && !!boundAttr(row, col);
+  const savesToSap = (row: string, col: Col) =>
+    !tabSave && tab === tabs[0] && !isRepeatCopy(row) && !!boundAttr(row, col);
 
   const localVal = (row: string, col: Col) => local[tab]?.[row]?.[col] ?? '';
   const setLocalVal = (row: string, col: Col, v: string) => {
     setTabVal(tab, row, col, v);
     setDirty(true);
+    // Typing a value into an unticked other-block row ticks it.
+    if (checkable && v && other!.rows.includes(row) && !isChecked(row)) setRowChecked(row, true);
+  };
+
+  // RATE / QTY edits recompute AUTO-BGT and ROUGH-V2 = RATE × QTY.
+  const setRateQty = (row: string, col: 'rate' | 'qty', v: string) => {
+    setLocalVal(row, col, v);
+    const cost = rateTimesQty(col === 'rate' ? v : localVal(row, 'rate'), col === 'qty' ? v : localVal(row, 'qty'));
+    setTabVal(tab, row, 'auto', cost);
+    setTabVal(tab, row, 'rough', cost);
   };
 
   const cellVal = (row: string, col: Col): string => {
@@ -475,10 +650,31 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
       }
     }
     for (const [row, f] of Object.entries(costFields!)) {
-      updates[f.autoBgt] = localVal(row, 'auto') || null;
-      updates[f.rough] = localVal(row, 'rough') || null;
-      updates[f.vdr] = localVal(row, 'vdr') || null;
-      updates[f.fin] = localVal(row, 'fin') || null;
+      // Unticked other-block rows are saved empty.
+      const skip = checkable && other!.rows.includes(row) && !isChecked(row);
+      if (config.rateQty) {
+        updates[rateField(f)] = skip ? null : localVal(row, 'rate') || null;
+        updates[qtyField(f)] = skip ? null : localVal(row, 'qty') || null;
+      }
+      updates[f.autoBgt] = skip ? null : localVal(row, 'auto') || null;
+      updates[f.rough] = skip ? null : localVal(row, 'rough') || null;
+      updates[f.vdr] = skip ? null : localVal(row, 'vdr') || null;
+      updates[f.fin] = skip ? null : localVal(row, 'fin') || null;
+    }
+    // Repeat copies → their JSON column (sent as a JSON string; empty list clears it).
+    for (const [base, field] of Object.entries(config.repeatJsonFields ?? {})) {
+      const val = (row: string, col: Col) => localVal(row, col).trim() || null;
+      const list: RepeatCopyJson[] = (repeats[base] ?? []).map((row) => ({
+        no: Number(row.slice(base.length + 1)),
+        type: val(row, 'type'),
+        style: val(row, 'style'),
+        placement: val(row, 'c3'),
+        autoBgt: val(row, 'auto'),
+        roughV2: val(row, 'rough'),
+        vdrCost: val(row, 'vdr'),
+        finalCost: val(row, 'fin'),
+      }));
+      updates[field] = list.length > 0 ? JSON.stringify(list) : null;
     }
     onSaveTab!(updates);
     setSavedTab(tab);
@@ -504,7 +700,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
       );
     }
     // Cells with no spec storage (other-block rows, config.readOnlySpec) are read-only.
-    const readOnly = locked || !!other?.rows.includes(row) || !!config.readOnlySpec?.[row]?.includes(col);
+    const readOnly = locked || !!other?.rows.includes(row) || !!config.readOnlySpec?.[baseOf(row)]?.includes(col);
     return (
       <TextCell value={localVal(row, col)} disabled={readOnly} placeholder="Enter" onChange={(v) => setLocalVal(row, col, v)} />
     );
@@ -513,30 +709,82 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
   const filledCount = (rows: readonly string[]) =>
     rows.filter((r) => (['type', 'style', 'c3', 'rough', 'vdr', 'fin'] as Col[]).some((c) => cellVal(r, c))).length;
 
-  const renderRow = (row: string, last: boolean) => {
+  const renderRow = (row: string, last: boolean, withCheck = false) => {
     // DESC is auto-built: STYLE-TYPE (e.g. KUNDI_BTN-26L)
     const desc = [cellVal(row, 'style'), cellVal(row, 'type')].filter((p) => p && !/^-+$/.test(p)).join('-');
     const tabIdx = tabs.indexOf(tab);
     const autoBgtVal = localVal(row, 'auto');
     const bgtLoading = autoBgtLoading[row];
+    const off = withCheck && !isChecked(row);
     return (
-      <div key={row} className={cn(GRID, 'items-center', !last && 'border-b border-slate-100')}>
-        <div className="px-2.5 py-1.5 text-[11.5px] font-semibold text-slate-800">{row}</div>
+      <div key={row} className={cn(GRID, 'items-center', !last && 'border-b border-slate-100', off && 'opacity-60')}>
+        {withCheck ? (
+          <label className="flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-[11.5px] font-semibold text-slate-800">
+            <input
+              type="checkbox"
+              checked={!off}
+              disabled={locked}
+              onChange={(e) => setRowChecked(row, e.target.checked)}
+              className="h-3.5 w-3.5 shrink-0 cursor-pointer accent-slate-800 disabled:cursor-default"
+            />
+            <span className="truncate">{row}</span>
+          </label>
+        ) : isRepeatCopy(row) ? (
+          <div className="flex items-center justify-between gap-1 py-1.5 pl-2.5 pr-1 text-[11.5px] font-semibold text-slate-700">
+            <span className="truncate">{row}</span>
+            {!locked && (
+              <button
+                type="button"
+                onClick={() => removeRepeat(baseOf(row), row)}
+                aria-label={`Remove ${row}`}
+                title={`Remove ${row}`}
+                className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-700"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+        ) : config.repeatable?.includes(row) ? (
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 text-[11.5px] font-semibold text-slate-800">
+            <span className="truncate">{row}</span>
+            <span className="rounded-full bg-slate-200 px-1.5 py-px text-[10px] font-bold text-slate-700" title={`${1 + (repeats[row]?.length ?? 0)} ${row} row(s)`}>
+              ×{1 + (repeats[row]?.length ?? 0)}
+            </span>
+          </div>
+        ) : (
+          <div className="px-2.5 py-1.5 text-[11.5px] font-semibold text-slate-800">{row}</div>
+        )}
         <div className="px-1 py-1.5">{renderSpecCell(row, 'type')}</div>
         <div className="px-1 py-1.5">{renderSpecCell(row, 'style')}</div>
         <div className="px-1 py-1.5">{renderSpecCell(row, 'c3')}</div>
         <div className={cn('truncate px-2.5 py-1.5 font-mono text-[11px]', desc ? 'text-slate-900' : 'text-slate-400')}>
           {desc || '—'}
         </div>
-        <div
-          className={cn(
-            'px-2.5 py-1.5 text-right font-mono text-[11px]',
-            bgtLoading ? 'text-slate-300' : autoBgtVal ? 'font-semibold text-slate-900' : 'text-slate-400',
-          )}
-          title={autoBgtVal ? `AUTO-BGT (BT-${tabIdx + 1})` : 'Auto budget — select a spec value'}
-        >
-          {bgtLoading ? '…' : autoBgtVal || '—'}
-        </div>
+        {config.rateQty && (
+          <>
+            <div className="px-1 py-1.5">
+              <TextCell value={localVal(row, 'rate')} disabled={locked} numeric placeholder="0.00" onChange={(v) => setRateQty(row, 'rate', v)} />
+            </div>
+            <div className="px-1 py-1.5">
+              <TextCell value={localVal(row, 'qty')} disabled={locked} numeric placeholder="1" onChange={(v) => setRateQty(row, 'qty', v)} />
+            </div>
+          </>
+        )}
+        {config.editableAutoBgt ? (
+          <div className="px-1 py-1.5">
+            <TextCell value={autoBgtVal} disabled={locked || !!bgtLoading} numeric placeholder="0.00" onChange={(v) => setLocalVal(row, 'auto', v)} />
+          </div>
+        ) : (
+          <div
+            className={cn(
+              'px-2.5 py-1.5 text-right font-mono text-[11px]',
+              bgtLoading ? 'text-slate-300' : autoBgtVal ? 'font-semibold text-slate-900' : 'text-slate-400',
+            )}
+            title={autoBgtVal ? `AUTO-BGT (BT-${tabIdx + 1})` : 'Auto budget — select a spec value'}
+          >
+            {bgtLoading ? '…' : autoBgtVal || '—'}
+          </div>
+        )}
         <div className="px-1 py-1.5">
           <TextCell value={localVal(row, 'rough')} disabled={locked} numeric placeholder="0.00" onChange={(v) => setLocalVal(row, 'rough', v)} />
         </div>
@@ -654,14 +902,14 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
       {!collapsed && (
         <>
           <div className="overflow-x-auto px-1.5 pb-2 pt-1">
-            <div className="min-w-[1000px]">
+            <div className={config.rateQty ? 'min-w-[1150px]' : 'min-w-[1000px]'}>
               {/* Column groups */}
               <div className={cn(GRID, 'pt-1.5')}>
                 <div className="flex h-6 items-center px-2.5 text-[9.5px] font-bold tracking-[0.1em] text-slate-500">ITEM</div>
-                <div className="col-[2/6] mx-0.5 flex h-6 items-center rounded-t-md bg-slate-100 px-2.5 text-[9.5px] font-bold tracking-[0.1em] text-slate-700">
+                <div className={cn(config.rateQty ? 'col-[2/8]' : 'col-[2/6]', 'mx-0.5 flex h-6 items-center rounded-t-md bg-slate-100 px-2.5 text-[9.5px] font-bold tracking-[0.1em] text-slate-700')}>
                   SPECIFICATION
                 </div>
-                <div className="col-[6/10] mx-0.5 flex h-6 items-center rounded-t-md bg-slate-800 px-2.5 text-[9.5px] font-bold tracking-[0.1em] text-slate-50">
+                <div className={cn(config.rateQty ? 'col-[8/12]' : 'col-[6/10]', 'mx-0.5 flex h-6 items-center rounded-t-md bg-slate-800 px-2.5 text-[9.5px] font-bold tracking-[0.1em] text-slate-50')}>
                   COSTING
                 </div>
               </div>
@@ -673,41 +921,90 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
                 <div className="px-2.5 py-2">
                   DESC <span className="ml-1 font-medium tracking-normal text-slate-400">auto</span>
                 </div>
+                {config.rateQty && (
+                  <>
+                    <div className="px-2.5 py-2 text-right">RATE</div>
+                    <div className="px-2.5 py-2 text-right">QTY</div>
+                  </>
+                )}
                 <div className="px-2.5 py-2 text-right">AUTO-BGT</div>
                 <div className="px-2.5 py-2 text-right">ROUGH-V2</div>
                 <div className="px-2.5 py-2 text-right">VDR COST</div>
                 <div className="px-2.5 py-2 text-right">FINAL COST</div>
               </div>
-              {fixedRows.map((r, i) => renderRow(r, i === fixedRows.length - 1))}
+              {fixedRows.map((r, i) => {
+                const lastRow = i === fixedRows.length - 1;
+                if (!config.repeatable?.includes(r)) return renderRow(r, lastRow);
+                // Repeat group: base row, its copies, then "Add <ROW>" and a band before the next row.
+                const copies = repeats[r] ?? [];
+                return (
+                  <div key={r}>
+                    {renderRow(r, false)}
+                    {copies.map((c) => (
+                      <div key={c} className="bg-slate-50/60">{renderRow(c, false)}</div>
+                    ))}
+                    {!locked && (
+                      <div className="px-2.5 py-1.5">
+                        <button
+                          type="button"
+                          onClick={() => addRepeat(r)}
+                          className="inline-flex h-7 items-center gap-1.5 rounded-md border border-dashed border-slate-400 bg-white px-3 text-[11px] font-semibold text-slate-800 hover:border-slate-600 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-700"
+                        >
+                          <Plus className="h-3.5 w-3.5" />
+                          Add {r}
+                        </button>
+                      </div>
+                    )}
+                    {!lastRow && <div className="h-1.5 bg-slate-100" />}
+                  </div>
+                );
+              })}
             </div>
           </div>
 
           {/* Other block — collapsed by default */}
           {other && (
             <div className="mx-2 mb-2 overflow-hidden rounded-lg border border-slate-200">
-              <button
-                type="button"
-                aria-expanded={otherOpen}
-                onClick={() => setOtherOpen((o) => !o)}
-                className="flex h-10 w-full items-center justify-between bg-slate-50 px-3 text-left hover:bg-slate-100"
-              >
-                <span className="flex items-center gap-2 text-[11px] font-bold tracking-wider text-slate-700">
-                  <ChevronRight className={cn('h-3.5 w-3.5 transition-transform', otherOpen && 'rotate-90')} />
-                  {other.label}
-                  <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10.5px] font-medium tracking-normal text-slate-600">
-                    {filledCount(other.rows)} / {other.rows.length} filled
+              <div className="flex h-10 items-center bg-slate-50 hover:bg-slate-100">
+                <button
+                  type="button"
+                  aria-expanded={otherOpen}
+                  onClick={() => setOtherOpen((o) => !o)}
+                  className="flex h-full min-w-0 flex-1 items-center justify-between gap-3 px-3 text-left"
+                >
+                  <span className="flex items-center gap-2 text-[11px] font-bold tracking-wider text-slate-700">
+                    <ChevronRight className={cn('h-3.5 w-3.5 transition-transform', otherOpen && 'rotate-90')} />
+                    {other.label}
+                    <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10.5px] font-medium tracking-normal text-slate-600">
+                      {checkable
+                        ? `${other.rows.filter(isChecked).length} / ${other.rows.length} selected`
+                        : `${filledCount(other.rows)} / ${other.rows.length} filled`}
+                    </span>
                   </span>
-                </span>
-                <span className="hidden text-[11px] text-slate-500 sm:inline">
-                  {otherOpen ? 'Click to collapse' : other.rows.join(' · ')}
-                </span>
-              </button>
+                  <span className="hidden truncate text-[11px] text-slate-500 sm:inline">
+                    {otherOpen ? 'Click to collapse' : other.rows.join(' · ')}
+                  </span>
+                </button>
+                {checkable && (() => {
+                  const all = other.rows.every(isChecked);
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => setAllChecked(!all)}
+                      disabled={locked}
+                      className="mr-2 h-7 shrink-0 rounded-md border border-slate-300 bg-white px-2.5 text-[11px] font-semibold text-slate-800 hover:border-slate-400 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {all ? 'Clear all' : 'Select all'}
+                    </button>
+                  );
+                })()}
+              </div>
               {otherOpen && (
                 <div className="overflow-x-auto bg-white px-1.5 pb-1">
-                  <div className="min-w-[1000px]">
+                  <div className={config.rateQty ? 'min-w-[1150px]' : 'min-w-[1000px]'}>
                     {other.rows.map((r, i) => (
                       <div key={r} className={cn(i > 0 && 'border-t border-slate-100')}>
-                        {renderRow(r, true)}
+                        {renderRow(r, true, checkable)}
                       </div>
                     ))}
                   </div>

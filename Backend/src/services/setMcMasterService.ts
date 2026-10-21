@@ -242,9 +242,32 @@ export async function getSetMcIndex(): Promise<SetMcIndex> {
 }
 
 /** The S- MC for one article row (looks up the parent's category for a part). */
+/**
+ * Whether set PARTS go to SAP under their S- MC. Off (17-Oct-2026): only the set
+ * (parent) uses its S- MC; each part is created under its normal major category's
+ * MC. SAP PROD could not assign an article number under the part S- MCs
+ * ("No entry in key field MATNR", e.g. 123100103 S-L_KURTI_FS), and the team
+ * decided parts keep their normal maj cat (L_KURTI_FS 123040101). The master
+ * still decides which parts a set may have (setProblems).
+ */
+export const SET_PARTS_USE_SET_MC = false;
+
+/** MC code + HSN of a normal major category (major_category_details, ACT row). */
+export async function normalMcForCategory(majorCategory: string | null | undefined): Promise<{ mcCode: string; hsnCode: string | null } | null> {
+    const mcDes = (majorCategory ?? '').trim();
+    if (!mcDes) return null;
+    const row = await prisma.majorCategoryDetails.findFirst({
+        where: { mcDes: { equals: mcDes, mode: 'insensitive' }, mcStatus: 'ACT' },
+        select: { mcCode: true, hsnCode: true },
+    });
+    return row?.mcCode ? { mcCode: row.mcCode, hsnCode: row.hsnCode ?? null } : null;
+}
+
 export async function setMcForArticle(item: Record<string, unknown>): Promise<SetMc | null | { error: string }> {
     const role = typeof item.comboRole === 'string' ? item.comboRole : null;
     if (role !== 'PARENT' && role !== 'CHILD') return null;
+    // A part keeps its normal MC (see SET_PARTS_USE_SET_MC).
+    if (role === 'CHILD' && !SET_PARTS_USE_SET_MC) return null;
     let parentCategory: string | null = null;
     if (role === 'CHILD' && typeof item.comboParentId === 'string') {
         const parent = await prisma.extractionResultFlat.findUnique({

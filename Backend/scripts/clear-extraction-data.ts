@@ -7,15 +7,11 @@ async function clearExtractionData() {
         console.log('🗑️  Starting data cleanup...\n');
 
         // Delete in correct order due to foreign key constraints
-        console.log('1. Deleting extraction results...');
-        const deletedResults = await prisma.extractionResult.deleteMany({});
-        console.log(`   ✅ Deleted ${deletedResults.count} extraction results`);
-
-        console.log('2. Deleting flat extraction results...');
+        console.log('1. Deleting flat extraction results...');
         const deletedFlat = await prisma.extractionResultFlat.deleteMany({});
         console.log(`   ✅ Deleted ${deletedFlat.count} flat extraction results`);
 
-        console.log('3. Deleting extraction jobs...');
+        console.log('2. Deleting extraction jobs...');
         const deletedJobs = await prisma.extractionJob.deleteMany({});
         console.log(`   ✅ Deleted ${deletedJobs.count} extraction jobs`);
 
@@ -27,7 +23,6 @@ async function clearExtractionData() {
 
         console.log('\nWhat was deleted:');
         console.log('  ✗ All extraction jobs');
-        console.log('  ✗ All extraction results');
         console.log('  ✗ All flat extraction results');
 
     } catch (error) {

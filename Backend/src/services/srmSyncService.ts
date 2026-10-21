@@ -23,7 +23,7 @@
 
 import { prismaClient as prisma } from '../utils/prisma';
 import { getHsnCodeByMcCode, getMcCodeByMajorCategory } from '../utils/mcCodeMapper';
-import { getSegmentByCategoryAndMrp } from '../utils/segmentRangeMapper';
+import { getSegmentFromMaster } from './segmentMasterService';
 import { buildArticleDescription } from '../utils/articleDescriptionBuilder';
 import { getExcludedDescriptionFields } from '../utils/categoryFieldVisibility';
 import { mirror360FlatUpdate } from '../utils/mirror360Flat';
@@ -689,7 +689,7 @@ async function insertRow(row: SrmRow, rawArticleId?: string): Promise<{ id: stri
   const mcCode     = getMcCodeByMajorCategory(row.major_category) || null;
   const hsnTaxCode = mcCode ? (getHsnCodeByMcCode(mcCode) || null) : null;
   const rate       = row.price > 0 ? row.price : null;
-  const segment    = getSegmentByCategoryAndMrp(row.major_category, rate ? rate as any : null) || null;
+  const segment    = (await getSegmentFromMaster(row.major_category, rate ? rate as any : null)) || null;
 
   // no_of_colors is intentionally NOT mapped into impAtrbt2 — leave it null
   // (impAtrbt2 / IMP ATBT is filled manually by the approver later).

@@ -1,435 +1,480 @@
 /**
  * HierarchyTreeEditor
- * Department cards layout. Clicking a category fires onCategorySelect
- * so the parent can navigate to the Attribute Mapping tab.
+ * Admin › Hierarchy tab, backed by major_category_details:
+ *   • one tab per division (div)
+ *   • the division's sub-divisions (sub_div) as cards (active / total major categories)
+ *   • clicking a card opens a side panel listing its major categories (maj_cat) with
+ *     MC code, MC description, HSN and segment — edit, activate / deactivate
+ *     (mc_status ACT / IN) and add. Divisions and sub-divisions can be renamed.
+ * No deletes: a major category is deactivated instead.
  */
-import { useState, useMemo } from 'react';
-import {
-  Plus,
-  Pencil,
-  Check,
-  X,
-  Folder,
-  Tag as TagIcon,
-  LayoutGrid,
-  ChevronRight,
-} from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Check, Pencil, Plus, Search, X } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-  Alert,
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  Empty,
-  Input,
-  Separator,
-  Spinner,
-  Tag,
-  Tooltip,
-} from '@/shared/components/ui-tw';
+import { Alert, Button, Empty, Popconfirm, Spinner, Tooltip } from '@/shared/components/ui-tw';
 import { message } from '@/lib/message';
+import { cn } from '@/lib/utils';
 import {
-  getHierarchyTree,
-  createDepartment,
-  updateDepartment,
-  createSubDepartment,
-  updateSubDepartment,
-  createCategory,
-  updateCategory,
+  getMcdRows,
+  createMcdRow,
+  updateMcdRow,
+  renameMcdGroup,
+  type McdRow,
+  type McdRowInput,
 } from '../../../services/adminApi';
 
-export interface SelectedCategory {
-  id: number;
-  name: string;
-  code: string;
-  garmentType: string;
-  departmentName: string;
-}
+const isActive = (r: McdRow) => (r.mcStatus ?? '').toUpperCase() !== 'IN';
 
-// ─── NodeTitle ────────────────────────────────────────────────────────────────
-
-interface NodeTitleProps {
-  nodeId: number;
-  nodeType: 'dept' | 'subdept' | 'category';
+// ─── InlineName — click the pencil to rename in place ─────────────────────────
+const InlineName: React.FC<{
   label: string;
-  isActive?: boolean;
-  onSaved: () => void;
-}
-
-const NodeTitle: React.FC<NodeTitleProps> = ({ nodeId, nodeType, label, isActive = true, onSaved }) => {
-  const qc = useQueryClient();
+  onSave: (name: string) => Promise<void>;
+  className?: string;
+}> = ({ label, onSave, className }) => {
   const [editing, setEditing] = useState(false);
-  const [editVal, setEditVal] = useState(label);
+  const [val, setVal] = useState(label);
+  const [busy, setBusy] = useState(false);
 
-  const invalidate = () => {
-    qc.invalidateQueries({ queryKey: ['hierarchy-tree'] });
-    qc.invalidateQueries({ queryKey: ['hierarchy-stats'] });
-    onSaved();
-  };
+  useEffect(() => { if (!editing) setVal(label); }, [label, editing]);
 
-  const saveName = async () => {
-    if (!editVal.trim() || editVal.trim() === label) {
-      setEditing(false);
-      return;
-    }
+  const save = async () => {
+    const next = val.trim().toUpperCase();
+    if (!next || next === label) { setEditing(false); return; }
+    setBusy(true);
     try {
-      if (nodeType === 'dept') await updateDepartment(nodeId, { name: editVal.trim() });
-      else if (nodeType === 'subdept') await updateSubDepartment(nodeId, { name: editVal.trim() });
-      else await updateCategory(nodeId, { name: editVal.trim() });
-      message.success('Renamed');
-      invalidate();
-    } catch {
-      message.error('Save failed');
+      await onSave(next);
+      setEditing(false);
+    } finally {
+      setBusy(false);
     }
-    setEditing(false);
-  };
-
-
-  const iconMap = {
-    dept: <Folder className="h-4 w-4 shrink-0 text-amber-500" />,
-    subdept: <LayoutGrid className="h-4 w-4 shrink-0 text-sky-500" />,
-    category: <TagIcon className="h-4 w-4 shrink-0 text-emerald-500" />,
   };
 
   if (editing) {
     return (
-      <span className="inline-flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-        {iconMap[nodeType]}
-        <Input
-          value={editVal}
-          onChange={(e) => setEditVal(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && saveName()}
+      <span className="flex min-w-0 flex-1 items-center gap-1">
+        <input
           autoFocus
-          className="h-7 w-[150px] text-xs"
+          value={val}
+          onChange={(e) => setVal(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') save(); if (e.key === 'Escape') setEditing(false); }}
+          aria-label="New name"
+          className="h-8 min-w-0 flex-1 rounded-md border border-slate-300 px-2 text-[13px] uppercase outline-none focus:border-slate-800"
         />
-        <Button size="sm" onClick={saveName}>
-          <Check />
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => {
-            setEditing(false);
-            setEditVal(label);
-          }}
-        >
-          <X />
-        </Button>
+        <button type="button" aria-label="Save name" onClick={save} disabled={busy} className="flex h-8 w-8 items-center justify-center rounded-md bg-slate-800 text-white hover:bg-slate-900">
+          <Check className="h-3.5 w-3.5" />
+        </button>
+        <button type="button" aria-label="Cancel rename" onClick={() => setEditing(false)} className="flex h-8 w-8 items-center justify-center rounded-md border border-slate-300 text-slate-700 hover:border-slate-800">
+          <X className="h-3.5 w-3.5" />
+        </button>
       </span>
     );
   }
-
   return (
-    <span className="hierarchy-node-row inline-flex min-w-0 items-center gap-1.5">
-      {iconMap[nodeType]}
-      <span
-        className="truncate"
-        style={{
-          opacity: isActive ? 1 : 0.45,
-          fontSize: nodeType === 'category' ? 12 : 13,
-        }}
-      >
-        {label}
-      </span>
-      {!isActive && (
-        <Tag className="shrink-0 text-[10px]">inactive</Tag>
-      )}
-      <span className="node-actions inline-flex" onClick={(e) => e.stopPropagation()}>
-        <Tooltip title="Rename">
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setEditing(true)}>
-            <Pencil />
-          </Button>
-        </Tooltip>
-      </span>
+    <span className={cn('group flex min-w-0 items-center gap-1', className)}>
+      <span className="truncate">{label}</span>
+      <Tooltip title="Rename">
+        <button
+          type="button"
+          aria-label={`Rename ${label}`}
+          onClick={(e) => { e.stopPropagation(); setEditing(true); }}
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-500 opacity-60 hover:bg-slate-100 hover:text-slate-900 group-hover:opacity-100"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+        </button>
+      </Tooltip>
     </span>
   );
 };
 
-// ─── AddNode ──────────────────────────────────────────────────────────────────
+// ─── McdForm — fields of one major_category_details row ───────────────────────
+type FieldKey = 'div' | 'subDiv' | 'majCat' | 'mcCode' | 'mcDes' | 'hsnCode' | 'seg';
+const FIELD_LABEL: Record<FieldKey, string> = {
+  div: 'Division',
+  subDiv: 'Sub-division',
+  majCat: 'Major category',
+  mcCode: 'MC code',
+  mcDes: 'MC description',
+  hsnCode: 'HSN code',
+  seg: 'Segment',
+};
 
-interface AddNodeProps {
-  nodeType: 'dept' | 'subdept' | 'category';
-  parentId?: number;
-  onSaved: () => void;
-  placeholder: string;
-}
+const McdForm: React.FC<{
+  fields: FieldKey[];
+  /** Fields that must be filled before saving. */
+  required: FieldKey[];
+  initial?: McdRowInput;
+  submitLabel: string;
+  onSubmit: (values: McdRowInput) => Promise<void>;
+  onCancel: () => void;
+}> = ({ fields, required, initial, submitLabel, onSubmit, onCancel }) => {
+  const [vals, setVals] = useState<Record<string, string>>(
+    () => Object.fromEntries(fields.map((f) => [f, String(initial?.[f] ?? '')])),
+  );
+  const [busy, setBusy] = useState(false);
+  const ready = required.every((f) => vals[f]?.trim());
 
-const AddNode: React.FC<AddNodeProps> = ({ nodeType, parentId, onSaved, placeholder }) => {
-  const [open, setOpen] = useState(false);
-  const [val, setVal] = useState('');
-  const [loading, setLoading] = useState(false);
-  const qc = useQueryClient();
-
-  const save = async () => {
-    if (!val.trim()) return;
-    setLoading(true);
+  const submit = async () => {
+    if (!ready) return;
+    setBusy(true);
     try {
-      const code = val.trim().toUpperCase().replace(/\s+/g, '_');
-      if (nodeType === 'dept') {
-        await createDepartment({ code, name: val.trim(), displayOrder: 99 });
-      } else if (nodeType === 'subdept') {
-        await createSubDepartment({ departmentId: parentId!, code, name: val.trim(), displayOrder: 99 });
-      } else {
-        await createCategory({ subDepartmentId: parentId!, code, name: val.trim(), displayOrder: 99 });
-      }
-      message.success('Added');
-      qc.invalidateQueries({ queryKey: ['hierarchy-tree'] });
-      qc.invalidateQueries({ queryKey: ['hierarchy-stats'] });
-      onSaved();
-      setVal('');
-      setOpen(false);
-    } catch (e: any) {
-      message.error(e?.response?.data?.error || 'Create failed');
+      await onSubmit(Object.fromEntries(fields.map((f) => [f, vals[f].trim() || null])) as McdRowInput);
+    } catch {
+      /* error already shown */
+    } finally {
+      setBusy(false);
     }
-    setLoading(false);
   };
 
-  if (!open) {
-    return (
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={(e) => {
-          e.stopPropagation();
-          setOpen(true);
-        }}
-        className="mt-1 w-full border-dashed"
-      >
-        <Plus />
-        {placeholder}
-      </Button>
-    );
-  }
-
   return (
-    <span className="mt-1 flex w-full items-center gap-1" onClick={(e) => e.stopPropagation()}>
-      <Input
-        placeholder="Name…"
-        value={val}
-        onChange={(e) => setVal(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && save()}
-        autoFocus
-        className="h-7 flex-1 text-xs"
-      />
-      <Button size="sm" onClick={save} disabled={loading}>
-        <Check />
-      </Button>
-      <Button size="sm" variant="outline" onClick={() => setOpen(false)}>
-        <X />
-      </Button>
-    </span>
+    <div className="flex flex-col gap-1.5 rounded-[10px] border border-slate-800 bg-white p-2">
+      {fields.map((f, i) => (
+        <input
+          key={f}
+          autoFocus={i === 0}
+          value={vals[f]}
+          onChange={(e) => setVals((p) => ({ ...p, [f]: e.target.value }))}
+          onKeyDown={(e) => { if (e.key === 'Enter') submit(); if (e.key === 'Escape') onCancel(); }}
+          placeholder={`${FIELD_LABEL[f]}${required.includes(f) ? '' : ' (optional)'}`}
+          aria-label={FIELD_LABEL[f]}
+          className={cn(
+            'h-8 rounded-md border border-slate-300 px-2 text-[12.5px] uppercase outline-none focus:border-slate-800',
+            (f === 'mcCode' || f === 'hsnCode') && 'font-mono',
+          )}
+        />
+      ))}
+      <div className="flex justify-end gap-1.5">
+        <Button variant="outline" size="sm" onClick={onCancel} className="h-8 border-slate-300">Cancel</Button>
+        <Button size="sm" onClick={submit} disabled={busy || !ready} className="h-8 bg-slate-800 text-white hover:bg-slate-900">
+          {submitLabel}
+        </Button>
+      </div>
+    </div>
   );
 };
 
-// ─── DeptCard ─────────────────────────────────────────────────────────────────
-
-interface DeptCardProps {
-  dept: any;
-  refetch: () => void;
-  onCategorySelect?: (cat: SelectedCategory) => void;
-}
-
-const DeptCard: React.FC<DeptCardProps> = ({ dept, refetch, onCategorySelect }) => {
-  const catCount = (dept.subDepartments ?? []).reduce(
-    (acc: number, sub: any) => acc + (sub.categories ?? []).length,
-    0,
-  );
-  const subDepartments = dept.subDepartments ?? [];
-
+// "+ label" button that opens an McdForm in place.
+const AddButton: React.FC<{
+  label: string;
+  className?: string;
+  form: (close: () => void) => React.ReactNode;
+}> = ({ label, className, form }) => {
+  const [open, setOpen] = useState(false);
+  if (open) return <div className={className}>{form(() => setOpen(false))}</div>;
   return (
-    <Card className="w-[340px] min-w-[300px] shrink-0">
-      <CardHeader className="flex flex-row items-center justify-between border-b border-border bg-amber-50 p-3">
-        <NodeTitle nodeId={dept.id} nodeType="dept" label={dept.name} onSaved={refetch} />
-        <Badge variant="info">{catCount} categories</Badge>
-      </CardHeader>
-      <CardContent className="p-3">
-        {subDepartments.length === 0 ? (
-          <Empty description="No sub-departments yet" className="py-2" />
-        ) : (
-          <Accordion
-            type="multiple"
-            defaultValue={subDepartments.map((s: any) => String(s.id))}
-            className="space-y-1"
-          >
-            {subDepartments.map((sub: any) => {
-              const cats = sub.categories ?? [];
-              return (
-                <AccordionItem key={sub.id} value={String(sub.id)} className="border-0">
-                  <AccordionTrigger className="py-2 hover:no-underline">
-                    <span className="flex w-full items-center gap-2">
-                      <NodeTitle nodeId={sub.id} nodeType="subdept" label={sub.name} onSaved={refetch} />
-                      <Badge variant="secondary" className="ml-auto shrink-0">
-                        {cats.length}
-                      </Badge>
-                    </span>
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    {cats.length === 0 && (
-                      <p className="block py-1 text-xs text-muted-foreground">No categories yet</p>
-                    )}
-                    {cats.map((cat: any) => {
-                      const enabledCount = (cat.attributes ?? []).filter((a: any) => a.isEnabled).length;
-                      const totalAttrs = (cat.attributes ?? []).length;
-                      return (
-                        <div
-                          key={cat.id}
-                          className="cat-row flex items-center rounded border-b border-border/50 px-2 py-1.5 transition-colors"
-                          onClick={() =>
-                            onCategorySelect?.({
-                              id: cat.id,
-                              name: cat.name,
-                              code: cat.code,
-                              garmentType: cat.garmentType ?? 'UPPER',
-                              departmentName: dept.name,
-                            })
-                          }
-                        >
-                          <div className="min-w-0 flex-1">
-                            <NodeTitle
-                              nodeId={cat.id}
-                              nodeType="category"
-                              label={`${cat.name} (${cat.code})`}
-                              isActive={cat.isActive !== false}
-                              onSaved={refetch}
-                            />
-                          </div>
-                          {onCategorySelect && (
-                            <Tooltip title="Manage attributes">
-                              <span className="ml-2 flex shrink-0 items-center gap-1">
-                                {totalAttrs > 0 && (
-                                  <Badge
-                                    variant={enabledCount > 0 ? 'success' : 'secondary'}
-                                    className="m-0 text-[10px]"
-                                  >
-                                    {enabledCount}/{totalAttrs}
-                                  </Badge>
-                                )}
-                                <ChevronRight className="cat-arrow h-3 w-3 text-muted-foreground" />
-                              </span>
-                            </Tooltip>
-                          )}
-                        </div>
-                      );
-                    })}
-                    <div className="pt-1.5">
-                      <AddNode nodeType="category" parentId={sub.id} onSaved={refetch} placeholder="Add category" />
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              );
-            })}
-          </Accordion>
-        )}
-        <Separator className="my-2 border-dashed" />
-        <AddNode nodeType="subdept" parentId={dept.id} onSaved={refetch} placeholder="Add sub-department" />
-      </CardContent>
-    </Card>
+    <button
+      type="button"
+      onClick={() => setOpen(true)}
+      className={cn(
+        'flex h-9 items-center justify-center gap-1.5 rounded-[9px] border border-dashed border-slate-400 bg-white px-3 text-[12.5px] font-semibold text-slate-800 hover:border-slate-800',
+        className,
+      )}
+    >
+      <Plus className="h-3.5 w-3.5" /> {label}
+    </button>
   );
 };
 
 // ─── HierarchyTreeEditor ──────────────────────────────────────────────────────
+export const HierarchyTreeEditor: React.FC = () => {
+  const qc = useQueryClient();
+  const [div, setDiv] = useState<string | null>(null);
+  const [subDiv, setSubDiv] = useState<string | null>(null);
+  const [editId, setEditId] = useState<number | null>(null);
+  const [search, setSearch] = useState('');
 
-interface HierarchyTreeEditorProps {
-  onCategorySelect?: (cat: SelectedCategory) => void;
-}
-
-export const HierarchyTreeEditor: React.FC<HierarchyTreeEditorProps> = ({ onCategorySelect }) => {
-  const [searchText, setSearchText] = useState('');
-
-  const { data: hierarchyData, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ['hierarchy-tree'],
-    queryFn: getHierarchyTree,
+  const { data, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ['major-category-details-rows'],
+    queryFn: getMcdRows,
     retry: 1,
   });
+  const rows: McdRow[] = useMemo(() => (Array.isArray(data) ? data : []), [data]);
 
-  const filteredDepts = useMemo((): any[] => {
-    const all: any[] = Array.isArray(hierarchyData) ? hierarchyData : [];
-    if (!searchText.trim()) return all;
-    const lower = searchText.toLowerCase();
-    return all.reduce((acc: any[], dept: any) => {
-      const deptMatch = dept.name.toLowerCase().includes(lower);
-      const filteredSubs = (dept.subDepartments ?? []).reduce((sAcc: any[], sub: any) => {
-        const subMatch = sub.name.toLowerCase().includes(lower);
-        const filteredCats = (sub.categories ?? []).filter(
-          (cat: any) =>
-            cat.name.toLowerCase().includes(lower) || cat.code.toLowerCase().includes(lower),
-        );
-        if (deptMatch || subMatch || filteredCats.length > 0) {
-          sAcc.push({ ...sub, categories: deptMatch || subMatch ? sub.categories : filteredCats });
-        }
-        return sAcc;
-      }, []);
-      if (deptMatch || filteredSubs.length > 0) {
-        acc.push({ ...dept, subDepartments: deptMatch ? dept.subDepartments : filteredSubs });
-      }
-      return acc;
-    }, []);
-  }, [hierarchyData, searchText]);
+  // div → subDiv → rows
+  const tree = useMemo(() => {
+    const m = new Map<string, Map<string, McdRow[]>>();
+    for (const r of rows) {
+      const d = r.div || '—';
+      const s = r.subDiv || '—';
+      if (!m.has(d)) m.set(d, new Map());
+      const subs = m.get(d)!;
+      if (!subs.has(s)) subs.set(s, []);
+      subs.get(s)!.push(r);
+    }
+    return m;
+  }, [rows]);
+  const divs = [...tree.keys()].sort();
+
+  // Keep a valid division selected.
+  useEffect(() => {
+    if (divs.length === 0) return;
+    if (div == null || !tree.has(div)) setDiv(divs[0]);
+  }, [divs, div, tree]);
+
+  const subsMap = div ? tree.get(div) ?? new Map<string, McdRow[]>() : new Map<string, McdRow[]>();
+  const subNames = [...subsMap.keys()].sort();
+  const divRows = subNames.flatMap((s) => subsMap.get(s) ?? []);
+  const subRows = subDiv ? subsMap.get(subDiv) ?? null : null;
+  const maxCats = Math.max(1, ...subNames.map((s) => subsMap.get(s)!.length));
+
+  const lower = search.trim().toLowerCase();
+  const rowMatches = (r: McdRow) =>
+    [r.majCat, r.mcCode, r.mcDes, r.hsnCode].some((v) => (v ?? '').toLowerCase().includes(lower));
+  const visibleSubs = lower
+    ? subNames.filter((s) => s.toLowerCase().includes(lower) || subsMap.get(s)!.some(rowMatches))
+    : subNames;
+  const subNameMatches = !!subDiv && subDiv.toLowerCase().includes(lower);
+  const visibleRows = subRows ? (lower && !subNameMatches ? subRows.filter(rowMatches) : subRows) : [];
+
+  const refresh = () => qc.invalidateQueries({ queryKey: ['major-category-details-rows'] });
+  const run = async (fn: () => Promise<unknown>, ok: string) => {
+    try {
+      await fn();
+      message.success(ok);
+      refresh();
+    } catch (e: any) {
+      message.error(e?.response?.data?.error || 'Action failed');
+      throw e;
+    }
+  };
+
+  const pickDiv = (d: string) => { setDiv(d); setSubDiv(null); setEditId(null); setSearch(''); };
 
   return (
-    <div>
-      <Input
-        placeholder="Search departments, sub-departments, categories or codes…"
-        value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
-        allowClear
-        onClear={() => setSearchText('')}
-        className="mb-4 max-w-[420px]"
-      />
-
+    <div className="flex flex-col gap-3.5">
       {isError && (
         <Alert
           type="error"
           showIcon
-          message="Failed to load hierarchy"
+          message="Failed to load major category details"
           description={(error as any)?.message || 'Check that the backend is running and you are logged in as Admin.'}
-          className="mb-4"
         >
-          <Button size="sm" onClick={() => refetch()}>
-            Retry
-          </Button>
+          <Button size="sm" onClick={() => refetch()}>Retry</Button>
         </Alert>
       )}
 
-      <Spinner spinning={isLoading}>
-        <div className="flex flex-wrap items-start gap-4">
-          {filteredDepts.map((dept: any) => (
-            <DeptCard
-              key={dept.id}
-              dept={dept}
-              refetch={refetch}
-              onCategorySelect={onCategorySelect}
-            />
-          ))}
-
-          {!searchText && !isError && (
-            <div className="flex min-h-[80px] w-[340px] min-w-[300px] items-center justify-center rounded-lg border-2 border-dashed border-border p-3">
-              <AddNode nodeType="dept" onSaved={refetch} placeholder="Add department" />
-            </div>
-          )}
-
-          {filteredDepts.length === 0 && !isLoading && !isError && (
-            <Empty
-              description={searchText ? `No results for "${searchText}"` : 'No departments yet'}
-              className="mx-auto my-10"
-            />
-          )}
+      {/* Division tabs + search */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div role="tablist" aria-label="Divisions" className="flex flex-wrap items-start gap-1.5">
+          {divs.map((d) => {
+            const on = d === div;
+            const n = [...(tree.get(d)?.values() ?? [])].reduce((acc, list) => acc + list.length, 0);
+            return (
+              <button
+                key={d}
+                type="button"
+                role="tab"
+                aria-selected={on}
+                onClick={() => pickDiv(d)}
+                className={cn(
+                  'h-10 rounded-[10px] border px-4 text-[13.5px] font-bold transition-colors',
+                  on ? 'border-slate-800 bg-slate-800 text-white' : 'border-slate-300 bg-white text-slate-800 hover:border-slate-800',
+                )}
+              >
+                {d} <span className="font-medium opacity-70">{n}</span>
+              </button>
+            );
+          })}
+          <AddButton
+            label="Division"
+            className="h-10 w-[260px]"
+            form={(close) => (
+              <McdForm
+                fields={['div', 'subDiv', 'majCat', 'mcCode', 'hsnCode']}
+                required={['div', 'subDiv', 'majCat']}
+                submitLabel="Add division"
+                onCancel={close}
+                onSubmit={(v) => run(() => createMcdRow(v), 'Division added').then(() => { close(); setDiv(String(v.div).toUpperCase()); })}
+              />
+            )}
+          />
         </div>
-      </Spinner>
+        {div && (
+          <label className="flex h-[38px] w-[280px] items-center gap-2 rounded-[9px] border border-slate-300 bg-white px-2.5 text-slate-500 focus-within:border-slate-800">
+            <Search className="h-3.5 w-3.5 shrink-0" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={`Search in ${div}`}
+              aria-label={`Search in ${div}`}
+              className="min-w-0 flex-1 bg-transparent text-[12.5px] text-slate-900 outline-none"
+            />
+            {search && (
+              <button type="button" aria-label="Clear search" onClick={() => setSearch('')} className="text-slate-400 hover:text-slate-700">
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </label>
+        )}
+      </div>
 
-      <style>{`
-        .hierarchy-node-row .node-actions { opacity: 0; transition: opacity 0.15s; }
-        .hierarchy-node-row:hover .node-actions { opacity: 1; }
-        .cat-row { cursor: pointer; }
-        .cat-row:hover { background: #f0f7ff; }
-        .cat-row:hover .cat-arrow { color: #1890ff; }
-      `}</style>
+      <Spinner spinning={isLoading}>
+        {!div ? (
+          !isLoading && !isError && <Empty description="No major categories yet — add a division above." className="my-10" />
+        ) : (
+          <>
+            {/* Division summary + actions */}
+            <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-2 text-[13px] text-slate-600">
+                <InlineName
+                  label={div}
+                  className="text-[15px] font-bold text-slate-900"
+                  onSave={(to) => run(() => renameMcdGroup({ level: 'div', from: div, to }), 'Division renamed').then(() => setDiv(to))}
+                />
+                <span>
+                  · {subNames.length} sub-divisions · {divRows.length} major categories ({divRows.filter(isActive).length} active) — click a card to see and edit them.
+                </span>
+              </div>
+              <AddButton
+                label="Sub-division"
+                className="w-[260px]"
+                form={(close) => (
+                  <McdForm
+                    fields={['subDiv', 'majCat', 'mcCode', 'hsnCode']}
+                    required={['subDiv', 'majCat']}
+                    submitLabel="Add sub-division"
+                    onCancel={close}
+                    onSubmit={(v) => run(() => createMcdRow({ ...v, div }), 'Sub-division added').then(() => { close(); setSubDiv(String(v.subDiv).toUpperCase()); })}
+                  />
+                )}
+              />
+            </div>
+
+            <div className={cn('grid items-start gap-3.5', subRows ? 'lg:grid-cols-[minmax(0,1fr)_400px]' : 'grid-cols-1')}>
+              {/* Sub-division cards */}
+              <div className="grid grid-cols-1 content-start gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
+                {visibleSubs.map((s) => {
+                  const list = subsMap.get(s)!;
+                  const n = list.length;
+                  const act = list.filter(isActive).length;
+                  const on = s === subDiv;
+                  return (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => { setSubDiv(on ? null : s); setEditId(null); }}
+                      aria-pressed={on}
+                      className={cn(
+                        'flex flex-col gap-3 rounded-xl border p-3 text-left transition-colors',
+                        on ? 'border-[1.5px] border-slate-800 bg-slate-100' : 'border-slate-200 bg-white hover:border-slate-400',
+                      )}
+                    >
+                      <span className="flex items-start justify-between gap-2">
+                        <b className="text-[13px] text-slate-900">{s}</b>
+                        {act < n && <span className="shrink-0 text-[10.5px] text-slate-500">{n - act} inactive</span>}
+                      </span>
+                      <span className="flex items-center gap-2 text-[11.5px] text-slate-700">
+                        <span className="h-[5px] flex-1 overflow-hidden rounded-full bg-slate-200">
+                          <span className="block h-full bg-slate-800" style={{ width: `${Math.round((n / maxCats) * 100)}%` }} />
+                        </span>
+                        {n}
+                      </span>
+                    </button>
+                  );
+                })}
+                {visibleSubs.length === 0 && (
+                  <div className="col-span-full py-8 text-center text-xs text-slate-500">
+                    {lower ? `Nothing in ${div} matches “${search.trim()}”.` : 'No sub-divisions yet — add one above.'}
+                  </div>
+                )}
+              </div>
+
+              {/* Side panel — the selected sub-division's major categories */}
+              {subDiv && subRows && (
+                <aside aria-label={subDiv} className="flex max-h-[75vh] flex-col overflow-hidden rounded-[14px] border border-slate-300 bg-white lg:sticky lg:top-4">
+                  <div className="flex items-start justify-between gap-2 border-b border-slate-100 px-4 py-3.5">
+                    <div className="min-w-0">
+                      <InlineName
+                        label={subDiv}
+                        className="text-[15px] font-bold text-slate-900"
+                        onSave={(to) => run(() => renameMcdGroup({ level: 'subDiv', div, from: subDiv, to }), 'Sub-division renamed').then(() => setSubDiv(to))}
+                      />
+                      <div className="text-[11.5px] text-slate-600">
+                        {div} · {subRows.length} major categories
+                      </div>
+                    </div>
+                    <button type="button" aria-label="Close" onClick={() => { setSubDiv(null); setEditId(null); }} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-700 hover:bg-slate-200">
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  <div className="min-h-0 flex-1 overflow-y-auto px-2.5 py-1.5">
+                    {visibleRows.map((r) => {
+                      const active = isActive(r);
+                      if (editId === r.id) {
+                        return (
+                          <div key={r.id} className="py-1.5">
+                            <McdForm
+                              fields={['majCat', 'mcCode', 'mcDes', 'hsnCode', 'seg']}
+                              required={['majCat']}
+                              initial={r}
+                              submitLabel="Save"
+                              onCancel={() => setEditId(null)}
+                              onSubmit={(v) => run(() => updateMcdRow(r.id, v), 'Major category updated').then(() => setEditId(null))}
+                            />
+                          </div>
+                        );
+                      }
+                      return (
+                        <div key={r.id} className="flex min-h-[44px] items-center gap-1 border-b border-slate-100 px-1.5 py-1 last:border-b-0">
+                          <div className="min-w-0 flex-1">
+                            <div className={cn('truncate text-[12.5px] font-medium', active ? 'text-slate-900' : 'text-slate-400')}>{r.majCat}</div>
+                            <div className="truncate font-mono text-[10.5px] text-slate-500">
+                              {[r.mcCode && `MC ${r.mcCode}`, r.hsnCode && `HSN ${r.hsnCode}`, r.seg].filter(Boolean).join(' · ') || '—'}
+                            </div>
+                            {r.mcDes && r.mcDes !== r.majCat && <div className="truncate text-[10.5px] text-slate-500">{r.mcDes}</div>}
+                          </div>
+                          {!active && <span className="shrink-0 rounded-full bg-slate-100 px-2 text-[10px] font-semibold text-slate-600">inactive</span>}
+                          <Tooltip title="Edit">
+                            <button
+                              type="button"
+                              aria-label={`Edit ${r.majCat}`}
+                              onClick={() => setEditId(r.id)}
+                              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                            </button>
+                          </Tooltip>
+                          <Popconfirm
+                            title={active ? `Deactivate ${r.majCat}?` : `Activate ${r.majCat}?`}
+                            description={active ? "Sets MC status to 'IN'. You can activate it again." : "Sets MC status to 'ACT'."}
+                            onConfirm={() => run(() => updateMcdRow(r.id, { mcStatus: active ? 'IN' : 'ACT' }), active ? 'Major category deactivated' : 'Major category activated').catch(() => {})}
+                            okText={active ? 'Deactivate' : 'Activate'}
+                          >
+                            <button type="button" className="h-7 shrink-0 rounded-md px-2 text-[11.5px] font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+                              {active ? 'Deactivate' : 'Activate'}
+                            </button>
+                          </Popconfirm>
+                        </div>
+                      );
+                    })}
+                    {visibleRows.length === 0 && (
+                      <div className="px-2 py-6 text-center text-xs text-slate-500">
+                        {lower ? `No major categories match “${search.trim()}”.` : 'No major categories yet.'}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="border-t border-slate-100 p-3">
+                    <AddButton
+                      label="Add major category"
+                      className="w-full"
+                      form={(close) => (
+                        <McdForm
+                          fields={['majCat', 'mcCode', 'mcDes', 'hsnCode', 'seg']}
+                          required={['majCat']}
+                          submitLabel="Add"
+                          onCancel={close}
+                          onSubmit={(v) => run(() => createMcdRow({ ...v, div, subDiv }), 'Major category added').then(close)}
+                        />
+                      )}
+                    />
+                  </div>
+                </aside>
+              )}
+            </div>
+          </>
+        )}
+      </Spinner>
     </div>
   );
 };

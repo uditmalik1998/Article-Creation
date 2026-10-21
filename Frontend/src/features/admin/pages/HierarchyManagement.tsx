@@ -2,27 +2,60 @@
  * Hierarchy Management Page
  * Tab 1: Grid Values
  * Tab 2: Size Master
- * Tab 3: Hierarchy — browse dept/sub-dept/category structure
+ * Tab 3: Hierarchy — division / sub-division / major category (major_category_details)
+ *
+ * Layout (design "Option A · ink header"): one dark slate header holding the title, Export JSON and the
+ * underline tabs; the active tab's card attaches directly under it.
  */
-import { useState } from 'react';
-import { Network, Download, ListTree, Ruler } from 'lucide-react';
-import {
-  Button,
-  Card,
-  CardContent,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/shared/components/ui-tw';
+import { useState, type ReactNode } from 'react';
+import { Network, Download, ListTree, Ruler, type LucideIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { HierarchyTreeEditor } from '../components/HierarchyTreeEditor';
 import { GridValuesEditor } from '../components/GridValuesEditor';
 import { SizeMasterEditor } from '../components/SizeMasterEditor';
 
 type TabType = 'grid-values' | 'size-master' | 'hierarchy';
 
+const TABS: { key: TabType; label: string; icon: LucideIcon; help: ReactNode }[] = [
+  {
+    key: 'grid-values',
+    label: 'Grid Values',
+    icon: ListTree,
+    help: (
+      <>
+        Pick an <strong>attribute</strong>, then a <strong>major category</strong>, and edit its allowed values on
+        the right. Every add or remove asks for a reason.
+      </>
+    ),
+  },
+  {
+    key: 'size-master',
+    label: 'Size Master',
+    icon: Ruler,
+    help: (
+      <>
+        Pick a <strong>major category</strong> on the left and edit its sizes on the right — every add or remove
+        needs a reason and is recorded with your name in the history.
+      </>
+    ),
+  },
+  {
+    key: 'hierarchy',
+    label: 'Hierarchy',
+    icon: Network,
+    help: (
+      <>
+        From <strong>major_category_details</strong>: pick a <strong>division</strong> tab, then a{' '}
+        <strong>sub-division</strong> card to see and edit its major categories (MC code, HSN, status). Use the{' '}
+        <strong>pencil</strong> to rename or edit.
+      </>
+    ),
+  },
+];
+
 export default function HierarchyManagement() {
   const [activeTab, setActiveTab] = useState<TabType>('grid-values');
+  const active = TABS.find((t) => t.key === activeTab) ?? TABS[0];
 
   const handleExport = async () => {
     try {
@@ -43,69 +76,66 @@ export default function HierarchyManagement() {
     <div className="page-scroll-enabled min-h-screen">
       <div className="p-6">
         <div className="mx-auto max-w-[1600px]">
-          {/* Header */}
-          <Card className="mb-6 glass card-3d rounded-2xl border border-white/60 overflow-hidden">
-            <CardContent className="flex items-center justify-between p-6">
+          {/* Ink header: title + export + underline tabs */}
+          <header className="rounded-t-2xl bg-slate-800 px-6 pt-5 text-white">
+            <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <h1 className="m-0 text-2xl font-semibold">Hierarchy Management</h1>
-                <p className="text-sm text-muted-foreground">
-                  Manage departments, categories &amp; extraction attributes — changes reflect in the app within 5 minutes
+                <span className="text-[11px] font-semibold tracking-[0.08em] text-slate-400">ADMIN PANEL</span>
+                <h1 className="m-0 mt-0.5 text-2xl font-semibold">Hierarchy Management</h1>
+                <p className="mt-1 text-sm text-slate-300">
+                  Departments, categories &amp; extraction attributes — changes reflect in the app within 5 minutes
                 </p>
               </div>
-              <Button onClick={handleExport}>
-                <Download />
+              <button
+                type="button"
+                onClick={handleExport}
+                className="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-600 px-3.5 text-sm font-semibold text-white transition-colors hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+              >
+                <Download className="h-4 w-4" />
                 Export JSON
-              </Button>
-            </CardContent>
-          </Card>
+              </button>
+            </div>
 
-          {/* Tabs */}
-          <Card className="glass rounded-2xl border border-white/60 overflow-hidden">
-            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabType)} className="w-full">
-              <div className="border-b border-border px-6">
-                <TabsList className="bg-transparent">
-                  <TabsTrigger value="grid-values">
-                    <ListTree className="mr-1 h-4 w-4" />
-                    Grid Values
-                  </TabsTrigger>
-                  <TabsTrigger value="size-master">
-                    <Ruler className="mr-1 h-4 w-4" />
-                    Size Master
-                  </TabsTrigger>
-                  <TabsTrigger value="hierarchy">
-                    <Network className="mr-1 h-4 w-4" />
-                    Hierarchy
-                  </TabsTrigger>
-                </TabsList>
-              </div>
+            <nav role="tablist" aria-label="Hierarchy sections" className="mt-4 flex gap-6 overflow-x-auto">
+              {TABS.map(({ key, label, icon: Icon }) => {
+                const on = key === activeTab;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    role="tab"
+                    id={`hier-tab-${key}`}
+                    aria-selected={on}
+                    aria-controls={`hier-panel-${key}`}
+                    onClick={() => setActiveTab(key)}
+                    className={cn(
+                      'relative inline-flex h-11 shrink-0 items-center gap-2 px-1 text-[13.5px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400',
+                      "after:absolute after:inset-x-0 after:bottom-0 after:h-[3px] after:content-['']",
+                      on
+                        ? 'font-semibold text-white after:bg-slate-400'
+                        : 'text-slate-300 after:bg-transparent hover:text-white hover:after:bg-slate-600',
+                    )}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {label}
+                  </button>
+                );
+              })}
+            </nav>
+          </header>
 
-              <TabsContent value="grid-values" className="m-0 px-6 py-4">
-                <p className="mb-3 text-sm text-muted-foreground">
-                  Browse the allowed grid values by <strong>group → attribute → major category</strong>.
-                  Click a major category to view, add, or delete the values for that attribute.
-                </p>
-                <GridValuesEditor />
-              </TabsContent>
-
-              <TabsContent value="size-master" className="m-0 px-6 py-4">
-                <p className="mb-3 text-sm text-muted-foreground">
-                  Browse the active <strong>sizes per major category</strong> from the size master.
-                  Click a major category to view, add, or remove its sizes — every change needs a
-                  remark and is recorded with your name in the audit log.
-                </p>
-                <SizeMasterEditor />
-              </TabsContent>
-
-              <TabsContent value="hierarchy" className="m-0 px-6 py-4">
-                <p className="mb-3 text-sm text-muted-foreground">
-                  Browse departments, sub-departments, and categories.
-                  Use the <strong>pencil</strong> icon to rename and <strong>trash</strong> to delete.
-                </p>
-                <HierarchyTreeEditor />
-              </TabsContent>
-
-            </Tabs>
-          </Card>
+          {/* Active tab — attached to the header */}
+          <section
+            role="tabpanel"
+            id={`hier-panel-${active.key}`}
+            aria-labelledby={`hier-tab-${active.key}`}
+            className="rounded-b-2xl border border-t-0 border-slate-200 bg-white px-6 pb-6 pt-4 dark:border-slate-700 dark:bg-slate-900"
+          >
+            <p className="mb-3 text-sm text-muted-foreground">{active.help}</p>
+            {activeTab === 'grid-values' && <GridValuesEditor />}
+            {activeTab === 'size-master' && <SizeMasterEditor />}
+            {activeTab === 'hierarchy' && <HierarchyTreeEditor />}
+          </section>
         </div>
       </div>
     </div>
