@@ -2799,6 +2799,21 @@ export class ApproverController {
                 return res.status(400).json({ error: 'changes object is required' });
             }
 
+            // Vendor change (EXTWG): admin only, and the code must be in the vendor master.
+            if (changes.vendorCode != null && String(changes.vendorCode).trim() !== '') {
+                if (String(req.user?.role || '') !== 'ADMIN') {
+                    return res.status(403).json({ error: 'Only an admin can change the vendor of a created article.' });
+                }
+                if (!isValidVendorCode(changes.vendorCode)) {
+                    return res.status(400).json({ error: 'Vendor Code must be exactly 6 digits.' });
+                }
+                const code = normalizeVendorCode(changes.vendorCode) ?? '';
+                const vendor = await prisma.masterVendorDetail.findUnique({ where: { vendorCode: code }, select: { vendorCode: true } });
+                if (!vendor) {
+                    return res.status(400).json({ error: `Vendor code ${code} was not found in the vendor master.` });
+                }
+            }
+
             // Build SAP key → value map (mirrors modifyItem logic)
             const attrMap: Record<string, string | null | undefined> = {};
             for (const [field, value] of Object.entries(changes)) {
@@ -2834,8 +2849,11 @@ export class ApproverController {
             // Created-article identity/price fields are LOCKED — they are set at
             // creation time and must never change on modify (neither in SAP nor in
             // the local DB). Silently ignore any attempt to edit them.
+            // Exception: ADMIN users may change the vendor code (sent to SAP as
+            // EXTWG); the vendor name then follows from the vendor master.
+            const isAdmin = String(req.user?.role || '') === 'ADMIN';
             const MODIFY_LOCKED_FIELDS = new Set<string>([
-                'vendorCode',    // VENDOR
+                ...(isAdmin ? [] : ['vendorCode', 'vendorName']), // EXTWG — admin only
                 'mrp',           // MRP
                 'rate',          // cost / PURCH_PRICE
                 'colour',        // colour
@@ -2868,6 +2886,10 @@ export class ApproverController {
                 }
                 data[field] = value;
             }
+
+            // Vendor name always follows the vendor code (from the vendor master) —
+            // never accepted on its own.
+            delete data.vendorName;
 
             if (Object.keys(data).length === 0) {
                 return res.status(400).json({ error: 'No valid fields to modify' });
@@ -2917,6 +2939,28 @@ export class ApproverController {
                 return res.status(400).json({ error: 'This article has no SAP article number yet, so it cannot be modified in SAP.' });
             }
 
+            // Admin vendor change: the code must exist in the vendor master; its name
+            // is saved with it. Unchanged codes are dropped from the update.
+            let vendorCodeChanged = false;
+            if (data.vendorCode !== undefined) {
+                if (data.vendorCode === normalizeVendorCode((existingItem as any).vendorCode)) {
+                    delete data.vendorCode;
+                } else {
+                    const vendor = await prisma.masterVendorDetail.findUnique({
+                        where: { vendorCode: data.vendorCode },
+                        select: { vendorName: true },
+                    });
+                    if (!vendor?.vendorName) {
+                        return res.status(400).json({ error: `Vendor code ${data.vendorCode} was not found in the vendor master.` });
+                    }
+                    data.vendorName = vendor.vendorName;
+                    vendorCodeChanged = true;
+                }
+                if (Object.keys(data).length === 0) {
+                    return res.status(400).json({ error: 'No valid fields to modify' });
+                }
+            }
+
             // ── National Grid validation: reject if any submitted attribute value is not in grid ──
             {
                 // Map camelCase data keys → SAP attribute names for grid lookup
@@ -2944,6 +2988,8 @@ export class ApproverController {
                 for (const k of ['HSN_CODE', 'SUB_DIV', 'MC_CD', 'SEASON', 'PRICE_BAND_CATEGORY', 'PURCH_PRICE', 'NET_WEIGHT', 'VENDOR', 'MRP', 'DSG_NO', 'ARTICLE_DES1']) {
                     delete (sapChanges as any)[k];
                 }
+                // Vendor code on an existing article is the EXTWG attribute in SAP.
+                if (vendorCodeChanged) sapChanges.EXTWG = String(data.vendorCode);
 
                 // ── Call SAP FIRST. Only persist locally on success. ──
                 const result = await patchArticleAttributes(matnr, sapChanges);
@@ -6964,6 +7010,14 @@ export class ApproverController {
                 select: { id: true, fabricArticleNumber: true },
             });
             if (existingByDesc) {
+                // Same as Create Body Article: auto-fill the existing number on the FG row so the
+                // card shows it. Modify mode (skipFlatUpdate) stages it in the UI instead.
+                if (!skipFlatUpdate && existingByDesc.fabricArticleNumber) {
+                    await prisma.extractionResultFlat.update({
+                        where: { id: item.id },
+                        data: { fabricArticleNumber: existingByDesc.fabricArticleNumber },
+                    }).catch(() => {});
+                }
                 return res.status(409).json({
                     error: `Fabric Article already created for this description. Fabric Article No: ${existingByDesc.fabricArticleNumber}`,
                     fabricArticleNumber: existingByDesc.fabricArticleNumber,
