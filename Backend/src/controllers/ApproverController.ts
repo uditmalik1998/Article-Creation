@@ -2066,37 +2066,11 @@ export class ApproverController {
 
             track(addRow([null, 'Detailed 360 Degree Format'], { bold: true, from: 2, to: 2 }));
 
-            for (const a of fgArticles) {
-                track(blank());
-                track(blank());
-
-                // Article header
-                const role = setLabel(a);
-                track(addRow(['FG-MAJ', 'FG-ARTICLE', 'ART DESC', 'VDR_NM', ...(role ? ['SET'] : [])], { fill: DARK_BLUE, bold: true, white: true, from: 1, to: role ? 5 : 4 }));
-                track(addRow([a.majorCategory || '', a.sapArticleId || a.articleNumber || '', a.articleDescription || '', a.vendorName || '', ...(role ? [role] : [])]));
-                track(blank());
-
-                // Cost summary — values point at the material table's total row,
-                // which sits 5 rows below the summary value row.
-                track(addRow(['MRP', 'AUTO -V2', 'ROUGH-V2', 'VDR PR PC COST', 'FINAL'], { fill: AMBER, bold: true, from: 1, to: 5 }));
-                const sumValRow = nextRow;
-                const totRow = sumValRow + 4;
-                const sv = ws.addRow([
-                    num(a.mrp),
-                    { formula: `K${totRow}` }, { formula: `L${totRow}` }, { formula: `M${totRow}` }, { formula: `N${totRow}` },
-                ]);
-                for (let c = 1; c <= 5; c++) sv.getCell(c).numFmt = '0.00';
-                track(sv.number);
-                sv.commit();
-
-                track(blank());
-                track(addRow([null, null, null, null, null, null, null, null, null, null, 'COST'], { bold: true, from: 11, to: 11 }));
-                track(addRow(MAT_HDR, { fill: DARK_BLUE, bold: true, white: true }));
-
-                // B TRIM / PKG. COST / VAL. ADD. / BODY rows with no cost value at all
-                // (AUTO-BGT, ROUGH-V2, VDR, FINAL all empty) are left out. Decide the
-                // rows first so the TOTAL row's ranges can be predicted.
-                const hasCost = (...v: any[]) => v.some((x) => x != null);
+            // B TRIM / PKG. COST / VAL. ADD. / BODY rows with no cost value at all
+            // (AUTO-BGT, ROUGH-V2, VDR, FINAL all empty) are left out. Decided up
+            // front so every row of an article's block (and its height) is known.
+            const hasCost = (...v: any[]) => v.some((x) => x != null);
+            const materialPlan = (a: any) => {
                 const btrimKeep = BTRIM_ROWS
                     .map(([name, key]) => ({ name, k: key ? num(a[`${key}AutoBgt`]) : null, l: key ? num(a[`${key}RoughV2`]) : null }))
                     .filter((r) => hasCost(r.k, r.l));
@@ -2109,6 +2083,76 @@ export class ApproverController {
                 const bodyKeep = BODY_ROWS
                     .map(([name, key]) => ({ name, k: num(a[`${key}BgtPrVal`]), l: num(a[`${key}ActPrVal`]) }))
                     .filter((r) => hasCost(r.k, r.l));
+                return { btrimKeep, pkgKeep, vaddKeep, bodyKeep };
+            };
+            // Rows one article's block takes. Full block: 2 blank, header, values, blank,
+            // summary header, summary values (7), blank, COST, table header, TOTAL, blank,
+            // FAB (6), then each non-empty section as blank + its rows. A set parent whose
+            // parts are in the export is only the first 7 rows: its summary adds up the parts.
+            const SUMMARY_OFFSET = 6; // summary value row, counted from the block's first row
+            const blockHeight = (a: any, compact: boolean): number => {
+                if (compact) return 7;
+                const pl = materialPlan(a);
+                let h = 13;
+                for (const n of [pl.btrimKeep.length, pl.pkgKeep.length, pl.vaddKeep.length]) if (n > 0) h += 1 + n;
+                if (pl.bodyKeep.length > 0) h += 2 + pl.bodyKeep.length;
+                return h;
+            };
+            const partsInExport = (parentId: string) =>
+                fgArticles.filter((x) => x.comboRole === 'CHILD' && x.comboParentId === parentId);
+
+            for (const a of fgArticles) {
+                const parts = a.comboRole === 'PARENT' ? partsInExport(a.id) : [];
+                const compact = parts.length > 0;
+                const blockStart = nextRow;
+                track(blank());
+                track(blank());
+
+                // Article header
+                const role = setLabel(a);
+                track(addRow(['FG-MAJ', 'FG-ARTICLE', 'ART DESC', 'VDR_NM', ...(role ? ['SET'] : [])], { fill: DARK_BLUE, bold: true, white: true, from: 1, to: role ? 5 : 4 }));
+                track(addRow([a.majorCategory || '', a.sapArticleId || a.articleNumber || '', a.articleDescription || '', a.vendorName || '', ...(role ? [role] : [])]));
+                track(blank());
+
+                track(addRow(['MRP', 'AUTO -V2', 'ROUGH-V2', 'VDR PR PC COST', 'FINAL'], { fill: AMBER, bold: true, from: 1, to: 5 }));
+                const sumValRow = nextRow;
+                const totRow = sumValRow + 4;
+
+                if (compact) {
+                    // Whole set: no material table of its own. AUTO-V2 / ROUGH-V2 / VDR /
+                    // FINAL = the sum of its parts' summary rows, which follow this block
+                    // (groupSetParts puts them right after it).
+                    const partRows: number[] = [];
+                    let at = blockStart + blockHeight(a, true);
+                    for (const p of parts) {
+                        partRows.push(at + SUMMARY_OFFSET);
+                        at += blockHeight(p, false);
+                    }
+                    const sumOf = (col: string) => ({ formula: partRows.map((r) => `${col}${r}`).join('+') });
+                    const sv = ws.addRow([num(a.mrp), sumOf('B'), sumOf('C'), sumOf('D'), sumOf('E')]);
+                    for (let c = 1; c <= 5; c++) sv.getCell(c).numFmt = '0.00';
+                    for (let c = 2; c <= 5; c++) sv.getCell(c).fill = fill(LT_GREEN);
+                    track(sv.number);
+                    sv.commit();
+                    if (sumValRow !== blockStart + SUMMARY_OFFSET) console.warn('[preciseCostingExport] set summary drift', sumValRow, blockStart);
+                    continue;
+                }
+
+                // Cost summary — values point at the material table's total row,
+                // which sits 5 rows below the summary value row.
+                const sv = ws.addRow([
+                    num(a.mrp),
+                    { formula: `K${totRow}` }, { formula: `L${totRow}` }, { formula: `M${totRow}` }, { formula: `N${totRow}` },
+                ]);
+                for (let c = 1; c <= 5; c++) sv.getCell(c).numFmt = '0.00';
+                track(sv.number);
+                sv.commit();
+
+                track(blank());
+                track(addRow([null, null, null, null, null, null, null, null, null, null, 'COST'], { bold: true, from: 11, to: 11 }));
+                track(addRow(MAT_HDR, { fill: DARK_BLUE, bold: true, white: true }));
+
+                const { btrimKeep, pkgKeep, vaddKeep, bodyKeep } = materialPlan(a);
                 const hasBody = bodyKeep.length > 0;
 
                 // Total row — rows are predicted: FAB starts 2 rows after it, then
@@ -2193,6 +2237,10 @@ export class ApproverController {
                     for (const r of bodyKeep) {
                         matRow({ type: 'BODY', mc: r.name, k: r.k, l: r.l }, { fill: PURPLE });
                     }
+                }
+                // A set parent's summary points at its parts' rows by this height.
+                if (nextRow !== blockStart + blockHeight(a, false)) {
+                    console.warn('[preciseCostingExport] block height drift', a.id, nextRow - blockStart, blockHeight(a, false));
                 }
             }
 
