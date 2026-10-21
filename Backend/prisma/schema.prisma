@@ -194,6 +194,7 @@ model ExtractionResultFlat {
   jobId                       String?       @unique @map("job_id")
   imageName                   String?       @map("image_name") @db.VarChar(255)
   imageUrl                    String?       @map("image_url")
+  oldImageUrl                 String?       @map("old_image_url")
   articleNumber               String?       @map("article_number") @db.VarChar(100)
   extractionStatus            String?       @map("extraction_status") @db.VarChar(50)
   aiModel                     String?       @map("ai_model") @db.VarChar(100)

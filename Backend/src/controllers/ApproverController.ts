@@ -920,6 +920,7 @@ export class ApproverController {
                     id: true,
                     imageName: true,
                     imageUrl: true,
+                    oldImageUrl: true,
                     imageUncPath: true,
                     articleNumber: true,
                     division: true,
@@ -2251,7 +2252,7 @@ export class ApproverController {
             const item = await prisma.extractionResultFlat.findUnique({
                 where: { id },
                 select: {
-                    id: true, imageName: true, imageUrl: true, imageUncPath: true,
+                    id: true, imageName: true, imageUrl: true, oldImageUrl: true, imageUncPath: true,
                     articleNumber: true, division: true, subDivision: true, majorCategory: true,
                     vendorName: true, vendorCode: true, designNumber: true, pptNumber: true,
                     referenceArticleNumber: true, referenceArticleDescription: true,
@@ -4372,6 +4373,78 @@ export class ApproverController {
             console.error('[BomGrid] getBomArtNumbers error:', err);
             return res.status(500).json({ success: false, error: 'Failed to load BOM art numbers' });
         }
+    }
+
+    // ── FG Created tab: replace image (vendors starting "V2 S") ──────────────
+    // Live image = `<article>.jpg` in the approved (article-master) bucket and
+    // image_url; the image it replaced is kept as `<article>_OLD.jpg` and
+    // old_image_url. Only the FIRST replace writes _OLD, so it always stays the
+    // photo the article was created with.
+    static readonly IMAGE_REPLACE_VENDOR_PREFIX = 'V2 S';
+
+    static canReplaceImage(vendorName: string | null | undefined): boolean {
+        return String(vendorName ?? '').trim().toUpperCase().startsWith(ApproverController.IMAGE_REPLACE_VENDOR_PREFIX);
+    }
+
+    static async replaceImage(req: Request, res: Response) {
+        const file = (req as any).file as { buffer: Buffer; mimetype: string } | undefined;
+        if (!file?.buffer?.length) return res.status(400).json({ error: 'No image file provided' });
+        const record = await prisma.extractionResultFlat.findUnique({
+            where: { id: req.params.id },
+            include: { approver: { select: { name: true } } },
+        });
+        if (!record) return res.status(404).json({ error: 'Article not found' });
+        if (record.approvalStatus !== 'APPROVED' || record.sapSyncStatus !== 'SYNCED') {
+            return res.status(409).json({ error: 'Only created articles can change their image' });
+        }
+        if (!ApproverController.canReplaceImage(record.vendorName)) {
+            return res.status(403).json({ error: `Image replace is only allowed for vendors starting with "${ApproverController.IMAGE_REPLACE_VENDOR_PREFIX}"` });
+        }
+        const key = record.imageUrl ? storageService.approvedKeyFromAnyUrl(record.imageUrl) : null;
+        if (!key) return res.status(409).json({ error: 'This article has no stored image to replace' });
+        if ((await storageService.approvedObjectVersion(key)) === null) {
+            return res.status(409).json({ error: `Current image ${key} was not found in storage` });
+        }
+
+        const labelData: WatermarkLabel = {
+            article_number: String(record.articleNumber ?? key.replace(/\.[^.]+$/, '')),
+            presentation_no: record.pptNumber ?? null,
+            vendor_code: record.vendorCode ?? null,
+            vendor_name: record.vendorName ?? null,
+            division: record.division ?? null,
+            sub_division: record.subDivision ?? null,
+            major_category: record.majorCategory ?? null,
+            design_number: record.designNumber ?? null,
+            mc_code: record.mcCode ?? null,
+            hsn_tax_code: record.hsnTaxCode ?? null,
+            fabric: record.macroMvgr ?? null,
+            season: record.season ?? null,
+            year: record.year ?? null,
+            rate: record.rate != null ? Number(record.rate) : null,
+            mrp: record.mrp != null ? Number(record.mrp) : null,
+            approved_by: record.approver?.name ?? null,
+        };
+
+        let oldCreated = false;
+        try {
+            ({ oldCreated } = await storageService.replaceApprovedImage(key, file.buffer, labelData));
+        } catch (err: any) {
+            console.error(`[replaceImage] ${key}:`, err?.message);
+            return res.status(500).json({ error: 'Failed to replace image' });
+        }
+
+        // image_url gets a ?v= stamp so every page (and the r2.dev CDN) shows the new file.
+        const oldKey = storageService.oldKeyFor(key);
+        const now = Date.now();
+        const imageUrl = await storageService.approvedViewUrl(key, now, record.imageUrl);
+        const oldImageUrl = oldCreated || !record.oldImageUrl
+            ? (await storageService.approvedViewUrl(oldKey, now, record.imageUrl)).split('?v=')[0]
+            : record.oldImageUrl;
+        await prisma.extractionResultFlat.update({ where: { id: record.id }, data: { imageUrl, oldImageUrl } });
+        ApproverController.itemsCache.clear();
+        ApproverController.countCache.clear();
+        console.log(`[replaceImage] ${key} replaced by ${(req as any).user?.email ?? 'unknown'}${oldCreated ? ' (previous kept as _OLD)' : ''}`);
+        return res.json({ imageUrl, oldImageUrl });
     }
 
     // Refresh image URL for a flat record — fixes expired signed URLs
