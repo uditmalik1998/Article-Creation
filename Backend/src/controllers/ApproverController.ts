@@ -23,6 +23,7 @@ import { hasVendorCode, isValidVendorCode, normalizeVendorCode } from '../utils/
 import { mirror360FlatUpdate } from '../utils/mirror360Flat';
 import { getSetMcIndex, setProblems, SET_PARTS_USE_SET_MC, normalMcForCategory } from '../services/setMcMasterService';
 import { linkComboGroupForRow, recomputeComboParent, syncSetsFromRaw, COMBO_PARENT_DERIVED_FIELDS, groupSetParts } from '../services/comboLinkService';
+import { linkSetPart, retryPendingSetLinks } from '../services/setLinkService';
 
 // Fields a client is allowed to update / modify on an article. Shared by
 // updateItem (PUT) and modifyItem (SAP patch-bulk). Anything not in this list
@@ -3024,7 +3025,8 @@ export class ApproverController {
     // ─── Combo/Set articles (Kurti Set, Baba Suit, ...) ──────────────────────────
     // SRM sends each piece (Baba Suit, Top, Lower) as its own row; comboLinkService
     // links them by presentation + design number. Children are real articles
-    // with their own major category and are created in SAP first; the parent's
+    // with their own major category, created in SAP after the parent (their old
+    // article / BISMT is set to the parent's number, setLinkService); the parent's
     // costs are the sum of its children and its attributes mirror the Top child
     // (recomputeComboParent). Submitting goes through approveItems on the parent.
 
@@ -3123,9 +3125,9 @@ export class ApproverController {
             const userId = req.user?.id;
 
             // Combo/set articles are submitted as a whole: a selected child maps to
-            // its parent, and a parent brings all its children along. Children are
-            // created in SAP first; runApprovalSyncTick holds the parent until every
-            // child is SYNCED.
+            // its parent, and a parent brings all its children along. The parent is
+            // created in SAP first; runApprovalSyncTick holds each child until its
+            // parent is SYNCED, then links the child to it (setLinkService).
             const ids: string[] = [...requestedIds];
             {
                 const comboRows = await prisma.extractionResultFlat.findMany({
@@ -3444,6 +3446,14 @@ export class ApproverController {
                 console.log(`[APPROVE] Wrote article numbers back to ${rawArticleWritebacks.length} raw_articles row(s)`);
             }
 
+            // Set parts just created: write the set parent's article number into the
+            // part's old article (BISMT) in SAP, one part at a time. A failure is kept on
+            // the part and retried by the sync tick; it never undoes the part's creation.
+            for (const r of finalizedSyncResults) {
+                if (!r.success || !r.sapArticleNumber || approvedItemById.get(r.id)?.comboRole !== 'CHILD') continue;
+                await linkSetPart(r.id).catch((err: any) => console.error(`[SetLink] ${r.id}:`, err?.message));
+            }
+
             // Mirror approval + SAP sync outcome to 360article.article_360_flat
             void Promise.all(finalizedSyncResults.map((syncResult: any) => {
                 const approvedItem = approvedItemById.get(syncResult.id);
@@ -3597,8 +3607,37 @@ export class ApproverController {
                     data: { approvalStatus: ApprovalStatus.PENDING, sapSyncStatus: SapSyncStatus.NOT_SYNCED },
                 });
 
+                // Set: a failed parent sends its parts back too — they wait for it in the
+                // queue and would never be created without it.
+                const failedParents = await prisma.extractionResultFlat.findMany({
+                    where: { id: { in: failedIds }, comboRole: 'PARENT' },
+                    select: { id: true },
+                });
+                for (const p of failedParents) {
+                    const waiting = await prisma.extractionResultFlat.findMany({
+                        where: { comboParentId: p.id, comboRole: 'CHILD', approvalStatus: 'APPROVED', sapSyncStatus: SapSyncStatus.PENDING },
+                        select: { id: true },
+                    });
+                    if (waiting.length === 0) continue;
+                    const waitingIds = waiting.map((w) => w.id);
+                    await prisma.extractionResultFlat.updateMany({
+                        where: { id: { in: waitingIds } },
+                        data: {
+                            approvalStatus: ApprovalStatus.PENDING,
+                            sapSyncStatus: SapSyncStatus.FAILED,
+                            sapSyncMessage: 'The set (parent) article failed in SAP — fix it and re-submit the set.',
+                        },
+                    });
+                    await prisma.fgVariantArticleData.updateMany({
+                        where: { genericArticleId: { in: waitingIds }, approvalStatus: 'APPROVED', sapSyncStatus: SapSyncStatus.PENDING },
+                        data: { approvalStatus: ApprovalStatus.PENDING, sapSyncStatus: SapSyncStatus.NOT_SYNCED },
+                    });
+                }
+
                 // Combo/set: a failed child sends its (still queued) parent back too,
                 // so the whole set returns to New Articles and is re-submitted together.
+                // (The parent is created first now, so this only applies to a parent that
+                // is still waiting; a created parent stays and only the part is re-submitted.)
                 const failedChildren = await prisma.extractionResultFlat.findMany({
                     where: { id: { in: failedIds }, comboRole: 'CHILD', comboParentId: { not: null } },
                     select: { comboParentId: true, majorCategory: true },
@@ -3751,12 +3790,14 @@ export class ApproverController {
                       AND e.approval_status::text = 'APPROVED'
                       AND e.sap_sync_status::text = 'PENDING'
                       AND (e.sap_lock_until IS NULL OR e.sap_lock_until < NOW())
-                      -- Combo/set parent waits until all its children exist in SAP.
+                      -- Set part waits until its set parent exists in SAP: the part's old
+                      -- article (BISMT) is set to the parent's number right after it is
+                      -- created (setLinkService).
                       AND NOT EXISTS (
-                          SELECT 1 FROM public.extraction_results_flat c
-                          WHERE c.combo_parent_id = e.id
-                            AND c.combo_role::text = 'CHILD'
-                            AND c.sap_sync_status::text <> 'SYNCED'
+                          SELECT 1 FROM public.extraction_results_flat p
+                          WHERE e.combo_role::text = 'CHILD'
+                            AND p.id = e.combo_parent_id
+                            AND (p.sap_sync_status::text <> 'SYNCED' OR p.sap_article_id IS NULL)
                       )
                     ORDER BY e.approved_at ASC
                     LIMIT ${batchSize}
@@ -3764,6 +3805,8 @@ export class ApproverController {
                 )
                 RETURNING id
             `;
+            // Set parts created earlier whose old-article link failed or never ran.
+            await retryPendingSetLinks().catch((err: any) => console.error('[SetLink] retry error:', err?.message));
             if (claimed.length === 0) return { processed: 0, synced: 0, failed: 0 };
             const ids = claimed.map((c) => c.id);
 

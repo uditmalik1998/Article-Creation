@@ -59,7 +59,7 @@ type ProxyResponse = {
   rawText: string;
 };
 
-const callProxy = async (bapiname: string, body: Record<string, unknown>, env: string = SAP_ENV): Promise<ProxyResponse> => {
+export const callProxy = async (bapiname: string, body: Record<string, unknown>, env: string = SAP_ENV): Promise<ProxyResponse> => {
   const url = `${SAP_RFC_PROXY_URL.replace(/\/$/, '')}/api/rfc/proxy?env=${env}`;
   const payload = JSON.stringify({ bapiname, ...body });
   const res = await fetch(url, {
@@ -128,7 +128,7 @@ type PlanRow = { atnam: string; value: string; status: string; route?: string; m
 // Newer FM versions (V69+) return EV_JSON already parsed as an object.
 // Unwrap either form so callers see the inner object. Falls back to the raw body if
 // there's no EV_JSON (older/other response shapes).
-const unwrapBody = (body: any): any => {
+export const unwrapBody = (body: any): any => {
   if (!body) return body;
   if (typeof body.EV_JSON === 'string') {
     try {
