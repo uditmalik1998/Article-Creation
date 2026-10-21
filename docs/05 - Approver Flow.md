@@ -234,6 +234,20 @@ FG Article tab pages only (`!allowGroups` in `ApproverArticleList.tsx`); GM/Fabr
 - Info rows: label/value grid; AI confidence as a dark pill; levels coloured slate (High) / orange (Medium) / red (Low).
 - Reference & Vendor fields: label stacked above a full-width value (mono for major category and descriptions), "Click to fill" in grey italics, required-empty in orange. Editing behaviour (`renderHeaderField`) unchanged.
 
+#### Article Image replace + new/old switch (2026-10-21, design "Option A · arrows on the photo", BUILT)
+
+Canvas: https://claude.ai/artifact/3abCij85Q1w2wo2g5EThEx (5 directions; A picked, OLD tag is the same dark style as NEW).
+
+- **Where:** FG Article **Created** tab only (`pathType === 'created' && !allowGroups && !readOnly`) **and** the vendor name starts with `V2 S` (trimmed, any case). Every other tab and vendor sees the unchanged card. The backend applies the same gate (`ApproverController.canReplaceImage`) plus `approvalStatus=APPROVED && sapSyncStatus=SYNCED`.
+- **Storage (Cloudflare R2, approved `article-master` bucket):** the live image is `<article>.jpg` and the replaced one is `<article>_OLD.jpg`. The **first** replace copies the current file to `_OLD`. Later replaces only overwrite `<article>.jpg`, so `_OLD` always stays the original creation photo (user's choice). The upload is normalised to JPEG with sharp (EXIF rotate, q90), then gets the same watermark label as the approval flow (`applyWatermarkOrPassthrough`).
+- **DB:** new column `extraction_results_flat.old_image_url` (TEXT, `prisma/add_old_image_url.sql`, applied 2026-10-21; Prisma `oldImageUrl`). After a replace, `image_url` = `<r2.dev>/<article>.jpg?v=<ts>`. The `?v=` stamp beats the CDN cache. `old_image_url` = `<r2.dev>/<article>_OLD.jpg`. `getItems` and `getById` (detail page `/approver/created/:id`, used on hard refresh) return `oldImageUrl`. The arrows show only when `old_image_url` is set.
+- **API:** `POST /api/approver/items/:id/replace-image` (`requireModifyRights`, multipart `image`, JPG/PNG/WebP ≤15 MB) → `{ imageUrl, oldImageUrl }`. Storage helpers: `approvedKeyFromAnyUrl`, `oldKeyFor`, `approvedObjectVersion`, `approvedViewUrl`, `replaceApprovedImage`.
+- **UI (`ApproverArticleList.tsx`, FG left rail):**
+  - The header pill reads `1 / 1`, `New · 1 / 2` or `Old · 2 / 2`. The **Replace** button sits in the ink header.
+  - With an old image: a NEW/OLD tag (both dark slate), ‹ › arrows on the photo, two dots, and a caption with the file name plus "current" or "original".
+  - The zoom modal shows whichever image is being viewed.
+  - Replace turns the image area into a drop/browse zone with a preview, a note naming both file names, an XHR progress bar, and Cancel / Upload & replace.
+- Not verified live: the write path (R2 copy + put) wasn't run against real images. Read paths were checked on real data (1,388 V2 S created articles).
 ### CMP COST card — `features/approver/components/CmpCostCard.tsx` (2026-10-14, design "Option A · full matrix")
 
 FG Article tab pages only (`!allowGroups && !isBodyArticle`). No tab of its own: it shows whenever the **BODY** tab is selected, full width, after the PKG COST slot and before ROUGH CONSUMPTION (`showCmpCard`). Collapsible with key `CMP` (follows Collapse All).
