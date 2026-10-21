@@ -20,6 +20,9 @@ import {
   RotateCw,
   Search,
   X,
+  Upload,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import {
   Autocomplete,
@@ -1720,6 +1723,19 @@ const ArticleCard = React.memo(
     const [refreshedUrl, setRefreshedUrl] = useState<string | null>(null);
     const refreshAttempted = React.useRef(false);
 
+    // FG Created tab, vendors starting "V2 S": replace the image (backend keeps the
+    // first one as <article>_OLD.jpg / old_image_url) and arrow between new and old.
+    const canReplaceImage =
+      pathType === 'created' && !allowGroups && !readOnly && String(item.vendorName ?? '').trim().toUpperCase().startsWith('V2 S');
+    const [imgView, setImgView] = useState<'new' | 'old'>('new');
+    const [oldImgFailed, setOldImgFailed] = useState(false);
+    const [localOldImageUrl, setLocalOldImageUrl] = useState<string | null>(null);
+    const [replaceOpen, setReplaceOpen] = useState(false);
+    const [replaceFile, setReplaceFile] = useState<File | null>(null);
+    const [replacePreview, setReplacePreview] = useState<string | null>(null);
+    const [replaceProgress, setReplaceProgress] = useState<number | null>(null);
+    const [replaceDragOver, setReplaceDragOver] = useState(false);
+
     // color_master colors for the BOM Colour dropdown (fetched once, cached).
     const [masterColors, setMasterColors] = useState<{ code: string; name: string }[]>(_masterColorsCache ?? []);
     useEffect(() => {
@@ -1875,6 +1891,93 @@ const ArticleCard = React.memo(
         /* ignore */
       }
     }, [item.id]);
+
+    const oldImgSrc = canReplaceImage ? localOldImageUrl || item.oldImageUrl || null : null;
+    const oldImgUrl = oldImgSrc ? getImageUrl(oldImgSrc) : null;
+    const hasOldImage = !!oldImgUrl;
+    const viewingOldImg = imgView === 'old' && hasOldImage;
+    const shownImgUrl = viewingOldImg ? (oldImgFailed ? null : oldImgUrl) : imgUrl;
+    const fileNameFromUrl = (u: string | null | undefined) => {
+      if (!u) return '';
+      try {
+        return decodeURIComponent(new URL(u, window.location.origin).pathname.split('/').pop() || '');
+      } catch {
+        return '';
+      }
+    };
+    const newImgName = item.imageName || fileNameFromUrl(imgSrc);
+    const oldImgName = fileNameFromUrl(oldImgSrc);
+    const imgStem = (fileNameFromUrl(imgSrc) || 'article.jpg').replace(/\.[^.]+$/, '');
+
+    const clearReplace = () => {
+      setReplaceFile(null);
+      setReplacePreview((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return null;
+      });
+    };
+    const pickReplaceFile = (f: File | null | undefined) => {
+      if (!f) return;
+      if (!/^image\/(jpeg|jpg|png|webp)$/.test(f.type)) {
+        message.error('Use a JPG, PNG or WebP image');
+        return;
+      }
+      if (f.size > 15 * 1024 * 1024) {
+        message.error('Image must be 15 MB or smaller');
+        return;
+      }
+      setReplaceFile(f);
+      setReplacePreview((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return URL.createObjectURL(f);
+      });
+    };
+    const cancelReplace = () => {
+      if (replaceProgress !== null) return;
+      setReplaceOpen(false);
+      clearReplace();
+    };
+    const submitReplace = () => {
+      if (!replaceFile || replaceProgress !== null) return;
+      const form = new FormData();
+      form.append('image', replaceFile);
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', `${APP_CONFIG.api.baseURL}/approver/items/${item.id}/replace-image`);
+      const token = localStorage.getItem('authToken');
+      if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+      // Upload is ~90% of the wait; the rest is the R2 copy + watermark.
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) setReplaceProgress(Math.round((e.loaded / e.total) * 90));
+      };
+      xhr.onload = () => {
+        let body: { imageUrl?: string; oldImageUrl?: string | null; error?: string } | null = null;
+        try {
+          body = JSON.parse(xhr.responseText);
+        } catch {
+          /* non-JSON error page */
+        }
+        setReplaceProgress(null);
+        if (xhr.status >= 200 && xhr.status < 300 && body?.imageUrl) {
+          refreshAttempted.current = false;
+          setFailedImg(false);
+          setRefreshedUrl(body.imageUrl);
+          setLocalOldImageUrl(body.oldImageUrl ?? null);
+          setOldImgFailed(false);
+          setImgView('new');
+          setReplaceOpen(false);
+          clearReplace();
+          message.success('Image replaced');
+        } else {
+          message.error(body?.error || 'Failed to replace image');
+        }
+      };
+      xhr.onerror = () => {
+        setReplaceProgress(null);
+        message.error('Upload failed. Check your connection and try again.');
+      };
+      setReplaceProgress(0);
+      xhr.send(form);
+    };
 
     const calcMrpFromRate = (rate: number): number => Math.ceil((rate * 1.47) / 50) * 50;
 
@@ -3028,37 +3131,166 @@ const ArticleCard = React.memo(
                   <div className="overflow-hidden rounded-xl border border-slate-300 bg-white">
                     {renderInkCardHeader('Article Image', {
                       right: (
-                        <span className="rounded-full bg-slate-700 px-2 py-0.5 text-[10.5px] font-semibold">1 / 1</span>
+                        <span className="flex items-center gap-1.5">
+                          <span className="rounded-full bg-slate-700 px-2 py-0.5 text-[10.5px] font-semibold">
+                            {replaceOpen ? 'Replacing' : hasOldImage ? (viewingOldImg ? 'Old · 2 / 2' : 'New · 1 / 2') : '1 / 1'}
+                          </span>
+                          {canReplaceImage && !replaceOpen && (
+                            <button
+                              type="button"
+                              onClick={() => setReplaceOpen(true)}
+                              className="flex h-7 items-center gap-1 rounded-md border border-slate-500 px-2 text-[11px] font-semibold text-white hover:bg-slate-700"
+                            >
+                              <Upload className="h-3.5 w-3.5" />
+                              Replace
+                            </button>
+                          )}
+                        </span>
                       ),
                     })}
                     <div className="flex flex-col gap-2 p-3">
-                      <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-slate-100">
-                        {imgUrl ? (
-                          <>
-                            <img
-                              src={imgUrl}
-                              alt=""
-                              className="block h-full w-full cursor-zoom-in object-contain p-2"
-                              onError={handleImgError}
-                              onClick={() => setImgModalOpen(true)}
+                      {replaceOpen ? (
+                        <>
+                          <label
+                            onDragOver={(e) => {
+                              e.preventDefault();
+                              setReplaceDragOver(true);
+                            }}
+                            onDragLeave={() => setReplaceDragOver(false)}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              setReplaceDragOver(false);
+                              if (replaceProgress === null) pickReplaceFile(e.dataTransfer.files?.[0]);
+                            }}
+                            className={cn(
+                              'relative flex aspect-square w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-4 text-center',
+                              replaceDragOver ? 'border-slate-800 bg-slate-100' : 'border-slate-400 bg-slate-50 hover:bg-slate-100',
+                            )}
+                          >
+                            <input
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp"
+                              className="sr-only"
+                              disabled={replaceProgress !== null}
+                              onChange={(e) => {
+                                pickReplaceFile(e.target.files?.[0]);
+                                e.target.value = '';
+                              }}
                             />
-                            <button
-                              type="button"
-                              onClick={() => setImgModalOpen(true)}
-                              aria-label="Expand image"
-                              className="absolute bottom-2.5 right-2.5 flex h-9 w-9 items-center justify-center rounded-lg bg-slate-900/75 text-white hover:bg-slate-900"
+                            {replacePreview ? (
+                              <>
+                                <img src={replacePreview} alt="" className="h-40 w-40 rounded-md object-contain shadow" />
+                                <span className="max-w-full truncate text-xs font-semibold text-slate-900">
+                                  {replaceFile?.name} · {((replaceFile?.size ?? 0) / 1024 / 1024).toFixed(1)} MB
+                                </span>
+                                <span className="text-xs text-slate-600 underline">Choose another file</span>
+                              </>
+                            ) : (
+                              <>
+                                <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-800 text-white">
+                                  <Upload className="h-5 w-5" />
+                                </span>
+                                <span className="text-sm font-semibold text-slate-900">Drop the new photo or browse</span>
+                                <span className="text-xs text-slate-600">JPG, PNG or WebP · up to 15 MB</span>
+                              </>
+                            )}
+                          </label>
+                          <p className="m-0 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs leading-relaxed text-slate-700">
+                            Saved with the watermark as <span className="font-mono font-semibold">{imgStem}.jpg</span>.{' '}
+                            {hasOldImage ? 'The original stays as ' : 'Today’s image is kept as '}
+                            <span className="font-mono font-semibold">{imgStem}_OLD.jpg</span>.
+                          </p>
+                          {replaceProgress !== null && (
+                            <div
+                              className="h-1.5 overflow-hidden rounded-full bg-slate-200"
+                              role="progressbar"
+                              aria-label="Upload progress"
+                              aria-valuenow={replaceProgress}
+                              aria-valuemin={0}
+                              aria-valuemax={100}
                             >
-                              <Maximize2 className="h-4 w-4" />
-                            </button>
-                          </>
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-xs text-slate-500">No image</div>
-                        )}
-                      </div>
-                      {item.imageName && (
-                        <span className="truncate font-mono text-[11px] text-slate-600" title={item.imageName}>
-                          {item.imageName}
-                        </span>
+                              <span className="block h-1.5 bg-slate-900 transition-[width]" style={{ width: `${Math.max(replaceProgress, 4)}%` }} />
+                            </div>
+                          )}
+                          <div className="flex gap-2">
+                            <Button variant="outline" className="flex-1" onClick={cancelReplace} disabled={replaceProgress !== null}>
+                              Cancel
+                            </Button>
+                            <Button
+                              className="flex-1 bg-slate-900 text-white hover:bg-slate-800"
+                              onClick={submitReplace}
+                              disabled={!replaceFile || replaceProgress !== null}
+                            >
+                              <Upload className="h-4 w-4" />
+                              {replaceProgress !== null ? 'Uploading…' : 'Upload & replace'}
+                            </Button>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-slate-100">
+                            {shownImgUrl ? (
+                              <>
+                                <img
+                                  src={shownImgUrl}
+                                  alt=""
+                                  className="block h-full w-full cursor-zoom-in object-contain p-2"
+                                  onError={viewingOldImg ? () => setOldImgFailed(true) : handleImgError}
+                                  onClick={() => setImgModalOpen(true)}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setImgModalOpen(true)}
+                                  aria-label="Expand image"
+                                  className="absolute bottom-2.5 right-2.5 flex h-9 w-9 items-center justify-center rounded-lg bg-slate-900/75 text-white hover:bg-slate-900"
+                                >
+                                  <Maximize2 className="h-4 w-4" />
+                                </button>
+                              </>
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-xs text-slate-500">
+                                {viewingOldImg ? 'Old image unavailable' : 'No image'}
+                              </div>
+                            )}
+                            {hasOldImage && (
+                              <>
+                                <span className="absolute left-2.5 top-2.5 rounded-md bg-slate-900 px-2.5 py-1 text-[10.5px] font-bold tracking-[0.06em] text-white">
+                                  {viewingOldImg ? 'OLD' : 'NEW'}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => setImgView('new')}
+                                  disabled={!viewingOldImg}
+                                  aria-label="Show new image"
+                                  className="absolute left-2.5 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow hover:bg-white disabled:pointer-events-none disabled:opacity-0"
+                                >
+                                  <ChevronLeft className="h-5 w-5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setImgView('old')}
+                                  disabled={viewingOldImg}
+                                  aria-label="Show old image"
+                                  className="absolute right-2.5 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow hover:bg-white disabled:pointer-events-none disabled:opacity-0"
+                                >
+                                  <ChevronRight className="h-5 w-5" />
+                                </button>
+                              </>
+                            )}
+                          </div>
+                          {hasOldImage && (
+                            <div className="flex justify-center gap-1.5" aria-hidden="true">
+                              <span className={cn('h-1.5 rounded-full', viewingOldImg ? 'w-1.5 bg-slate-300' : 'w-4 bg-slate-900')} />
+                              <span className={cn('h-1.5 rounded-full', viewingOldImg ? 'w-4 bg-slate-900' : 'w-1.5 bg-slate-300')} />
+                            </div>
+                          )}
+                          {(viewingOldImg ? oldImgName : newImgName) && (
+                            <span className="truncate font-mono text-[11px] text-slate-600" title={viewingOldImg ? oldImgName : newImgName}>
+                              {viewingOldImg ? oldImgName : newImgName}
+                              {hasOldImage && (viewingOldImg ? ' · original' : ' · current')}
+                            </span>
+                          )}
+                        </>
                       )}
                     </div>
                   </div>
@@ -4954,7 +5186,7 @@ const ArticleCard = React.memo(
               } as React.CSSProperties}
             >
               <img
-                src={imgUrl || ''}
+                src={shownImgUrl || ''}
                 alt={item.imageName || 'preview'}
                 draggable={false}
                 onLoad={(e) => {

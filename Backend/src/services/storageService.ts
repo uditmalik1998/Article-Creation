@@ -1,11 +1,12 @@
 
-import { S3Client, PutObjectCommand, GetObjectCommand, CopyObjectCommand, ListObjectsV2Command, DeleteObjectsCommand, type ListObjectsV2CommandOutput } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand, CopyObjectCommand, HeadObjectCommand, ListObjectsV2Command, DeleteObjectsCommand, type ListObjectsV2CommandOutput } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomUUID } from 'crypto';
 import { NodeHttpHandler } from '@smithy/node-http-handler';
 import https from 'https';
 import { runPythonWatermark } from '../utils/runPythonWatermark';
+import sharp from 'sharp';
 
 /**
  * Optional payload of SRM/article fields to stamp on the image. Every field is
@@ -550,6 +551,84 @@ export class StorageService {
             console.error('❌ Approved image upload failed:', error);
             throw new Error('Failed to upload approved image to storage');
         }
+    }
+
+    // ── Created-article image replace (FG Created tab) ──────────────────────
+    // The live image is `<article>.jpg` in the approved bucket; the one it
+    // replaces is kept as `<article>_OLD.jpg`. Only the FIRST replace writes
+    // _OLD, so _OLD always stays the photo the article was created with.
+
+    /** Approved-bucket key for a stored image URL (public base, r2.dev or signed URL). */
+    approvedKeyFromAnyUrl(url: string): string | null {
+        const viaBase = this.extractApprovedKeyFromUrl(url);
+        if (viaBase) return viaBase.split('?')[0];
+        try {
+            let key = decodeURIComponent(new URL(url).pathname.replace(/^\/+/, ''));
+            if (this.approvedBucket && key.startsWith(this.approvedBucket + '/')) key = key.slice(this.approvedBucket.length + 1);
+            return key || null;
+        } catch {
+            return null;
+        }
+    }
+
+    oldKeyFor(key: string): string {
+        const dot = key.lastIndexOf('.');
+        return dot > 0 ? `${key.slice(0, dot)}_OLD${key.slice(dot)}` : `${key}_OLD`;
+    }
+
+    /** Last-modified time of an approved-bucket object, or null when it doesn't exist. */
+    async approvedObjectVersion(key: string): Promise<number | null> {
+        try {
+            const head = await this.approvedS3Client.send(new HeadObjectCommand({ Bucket: this.approvedBucket, Key: key }));
+            return head.LastModified ? head.LastModified.getTime() : Date.now();
+        } catch (err: any) {
+            if (err?.$metadata?.httpStatusCode === 404 || err?.name === 'NotFound' || err?.Code === 'NoSuchKey') return null;
+            throw err;
+        }
+    }
+
+    /**
+     * Browser-loadable URL for an approved-bucket key, cache-busted by `version`.
+     * A public r2.dev stored URL is reused as the base (that's how created images
+     * are stored today); otherwise the configured public base, else a signed URL.
+     */
+    async approvedViewUrl(key: string, version: number, storedUrl?: string | null): Promise<string> {
+        try {
+            const u = new URL(String(storedUrl || ''));
+            if (u.hostname.startsWith('pub-') && u.hostname.endsWith('.r2.dev')) {
+                return `${u.origin}/${key.split('/').map(encodeURIComponent).join('/')}?v=${version}`;
+            }
+        } catch { /* not a URL — fall through */ }
+        const pub = this.getApprovedPublicUrl(key);
+        if (pub) return `${pub}?v=${version}`;
+        return this.getApprovedSignedUrl(key, 3600);
+    }
+
+    async replaceApprovedImage(key: string, upload: Buffer, labelData: WatermarkLabel): Promise<{ oldCreated: boolean }> {
+        const oldKey = this.oldKeyFor(key);
+        let oldCreated = false;
+        if ((await this.approvedObjectVersion(oldKey)) === null) {
+            await this.approvedS3Client.send(new CopyObjectCommand({
+                Bucket: this.approvedBucket,
+                Key: oldKey,
+                CopySource: `${this.approvedBucket}/${encodeURIComponent(key)}`,
+            }));
+            oldCreated = true;
+        }
+        // Normalise to JPEG (honours EXIF rotation) so `<article>.jpg` really is a JPEG,
+        // then stamp the same article label the approval flow puts on.
+        const jpeg = await sharp(upload).rotate().jpeg({ quality: 90 }).toBuffer();
+        const safeArticleNumber = this.sanitizeArticleNumber(labelData.article_number || key);
+        const stamped = await this.applyWatermarkOrPassthrough(jpeg, labelData, safeArticleNumber);
+        await this.approvedS3Client.send(new PutObjectCommand({
+            Bucket: this.approvedBucket,
+            Key: key,
+            Body: stamped.buffer,
+            ContentType: 'image/jpeg',
+            CacheControl: 'no-cache',
+            Metadata: { 'article-number': safeArticleNumber, 'replaced-at': new Date().toISOString() },
+        }));
+        return { oldCreated };
     }
 
     /**

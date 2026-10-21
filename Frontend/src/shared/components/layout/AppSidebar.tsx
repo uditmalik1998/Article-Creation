@@ -188,9 +188,9 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
       section: 'ARTICLES',
       children: [
         { key: '/approver', Icon: FileText, label: 'New articles' },
-        { key: '/approver/old-articles', Icon: History, label: 'Old articles' },
-        { key: '/approver/rejected', Icon: XCircle, label: 'Rejected' },
         { key: '/approver/created', Icon: CheckCircle2, label: 'Created' },
+        { key: '/approver/rejected', Icon: XCircle, label: 'Rejected' },
+        { key: '/approver/old-articles', Icon: History, label: 'Old articles' },
       ],
     });
   }
@@ -213,8 +213,8 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
       section: 'ARTICLES',
       children: [
         { key: '/fabric-article', Icon: FileText, label: 'New articles' },
-        { key: '/fabric-article/rejected', Icon: XCircle, label: 'Rejected' },
         { key: '/fabric-article/created', Icon: CheckCircle2, label: 'Created' },
+        { key: '/fabric-article/rejected', Icon: XCircle, label: 'Rejected' },
         { key: '/fabric-article/fg-new', Icon: FileText, label: 'FG New Articles' },
         { key: '/fabric-article/fg-created', Icon: CheckCircle2, label: 'FG Created' },
       ],
@@ -265,8 +265,8 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
       section: 'ARTICLES',
       children: [
         { key: '/gm-article', Icon: FileText, label: 'New articles' },
-        { key: '/gm-article/rejected', Icon: XCircle, label: 'Rejected' },
         { key: '/gm-article/created', Icon: CheckCircle2, label: 'Created' },
+        { key: '/gm-article/rejected', Icon: XCircle, label: 'Rejected' },
       ],
     });
   }

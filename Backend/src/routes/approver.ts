@@ -80,6 +80,9 @@ router.post('/reject', requireApprovalRights, h(ApproverController.rejectItems))
 // Refresh image URL (fixes expired signed URLs)
 router.get('/image/:id', h(ApproverController.getImageUrl));
 
+// FG Created tab, vendors starting "V2 S": replace the image (keeps the first one as <article>_OLD)
+router.post('/items/:id/replace-image', requireModifyRights, imageUpload.single('image'), h(ApproverController.replaceImage));
+
 // Variant routes
 router.get('/items/:id/variants', h(ApproverController.getVariants));
 router.post('/items/:id/add-color', h(ApproverController.addColor));
