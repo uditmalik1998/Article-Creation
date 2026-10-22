@@ -509,7 +509,7 @@ curl -X POST "https://hgdftqswlvkspzjtlrll.supabase.co/rest/v1/rpc/is_size_allow
 - `map.json` — SAP attribute name map
 - `master-attributes.json` — canonical attribute list
 - `excelmap.json` — Excel column → DB field map
-- `categories.json`, `MajorCategory.json` — MC catalog
+- `Backend/src/data/mc-code-list-major-category.json` (+ Frontend copy) — MC catalog, edited directly
 
 ### Earlier handover bundle
 

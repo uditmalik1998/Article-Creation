@@ -283,7 +283,7 @@ async function updateDb(mandatoryMap: Map<string, Set<string>>): Promise<void> {
     }
 
     console.log(`✓ DB: ${updated} isRequired flags updated`);
-    if (skippedMissingCat > 0)  console.log(`  ⚠ ${skippedMissingCat} Excel categories not found in DB (run import-major-categories first)`);
+    if (skippedMissingCat > 0)  console.log(`  ⚠ ${skippedMissingCat} Excel categories not found in the categories table`);
     if (skippedMissingAttr > 0) console.log(`  ⚠ ${skippedMissingAttr} SAP codes have no matching MasterAttribute in DB`);
     if (skippedMissingRow > 0)  console.log(`  ⚠ ${skippedMissingRow} mandatory attributes have no CategoryAttribute row (they are not linked to the category yet)`);
   } finally {
