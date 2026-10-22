@@ -9,6 +9,17 @@ import {
 } from '@/shared/components/ui-tw';
 import { cn } from '@/lib/utils';
 import { useDragToPan } from '@/shared/hooks/ui/useDragToPan';
+import { APP_CONFIG } from '@/shared/constants/app/config';
+
+/**
+ * Small WebP of the photo for the card (the originals are ~4 MB, 12 MP — 50 of
+ * them hang scrolling). The backend makes and caches it; the zoom view still
+ * shows the original. Non-https URLs (relative/local) are used as-is.
+ */
+function cardThumbUrl(url: string): string {
+  if (!/^https:\/\//i.test(url)) return url;
+  return `${APP_CONFIG.api.baseURL}/images/thumb?w=320&url=${encodeURIComponent(url)}`;
+}
 
 /**
  * The fields the card reads. Every article dashboard's row type (FG, Fabric,
@@ -93,6 +104,8 @@ function ArticleSpecCardComponent<T extends ArticleCardItem>({
   const statusKey = String(item.approvalStatus ?? 'PENDING');
   const statusClass = STATUS_STYLES[statusKey];
   const [imgFailed, setImgFailed] = useState(false);
+  // Thumbnail first; if the backend can't make one, fall back to the original once.
+  const [thumbFailed, setThumbFailed] = useState(false);
   const [imgModalOpen, setImgModalOpen] = useState(false);
 
   const cost = toAmount(item.rate);
@@ -137,12 +150,12 @@ function ArticleSpecCardComponent<T extends ArticleCardItem>({
               className="group/img relative block aspect-[3/4] w-full cursor-zoom-in overflow-hidden rounded-lg border border-border bg-muted"
             >
               <img
-                src={item.imageUrl}
+                src={thumbFailed ? item.imageUrl : cardThumbUrl(item.imageUrl)}
                 alt=""
                 loading="lazy"
                 decoding="async"
                 className="h-full w-full object-cover transition-transform duration-200 group-hover/img:scale-[1.03]"
-                onError={() => setImgFailed(true)}
+                onError={() => (thumbFailed ? setImgFailed(true) : setThumbFailed(true))}
               />
               <span className="absolute bottom-1.5 right-1.5 flex h-7 w-7 items-center justify-center rounded-md bg-white/90 text-slate-800 opacity-80 shadow-sm transition-opacity group-hover/img:opacity-100">
                 <ZoomIn className="h-3.5 w-3.5" />

@@ -9,6 +9,5 @@ const BODY_ALLOW_GROUPS = ['BODY'];
 export const BodyArticleList: React.FC<ApproverArticleListProps> = ({
   hideGroups: _hideGroups,
   fabHierarchy: _fabHierarchy,
-  forceStaticGroups: _forceStaticGroups,
   ...rest
 }) => <ApproverArticleList {...rest} allowGroups={BODY_ALLOW_GROUPS} hideCreateBody />;

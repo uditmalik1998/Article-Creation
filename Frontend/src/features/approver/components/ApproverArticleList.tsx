@@ -65,7 +65,6 @@ const COSTING_GRID_CONFIGS: Record<string, { config: typeof BTRIM_CONFIG; fields
 };
 import {
   SCHEMA_KEY_TO_EXCEL_ATTR,
-  SCHEMA_KEY_TO_DB_FIELD,
   SAP_NAME_TO_SCHEMA_KEY,
   normalizeMajorCategory,
 } from '../../../data/majCatAttributeMap';
@@ -74,8 +73,6 @@ import {
   preloadAttributeValues,
   getCachedValues,
   isValuesCached,
-  preloadAttributeGroups,
-  getCachedAttributeGroups,
   preloadCategoryAttributes,
   getCachedCategoryAttributes,
   invalidateValuesCache,
@@ -97,9 +94,6 @@ import { variantCreatingIds } from '../../fabric-article/variantCreationState';
 
 // Alias so the combobox trigger can use a distinct name from the plain icon
 const ChevronDownIcon = ChevronDown;
-
-// Module-level BOM cache (shared across card instances)
-const bomCache = new Map<string, Promise<Record<string, Record<string, string>>>>();
 
 // Module-level national grid cache — body article dropdown values from national_grid_master
 type NationalGridValues = Record<string, { code: string; fullForm: string }[]>;
@@ -169,47 +163,11 @@ const fetchSegmentRangesFor = async (mc: string): Promise<SegmentRange[]> => {
   return [];
 };
 
-const vaacCache = new Map<string, number | null>();
-const fetchVaacTotalValue = async (majorCategory: string): Promise<number | null> => {
-  const key = (majorCategory || '').trim().toUpperCase();
-  if (!key) return null;
-  if (vaacCache.has(key)) return vaacCache.get(key)!;
-  try {
-    const token = localStorage.getItem('authToken');
-    const r = await fetch(
-      `${APP_CONFIG.api.baseURL}/approver/value-addition-accessories-cost/lookup?majorCategory=${encodeURIComponent(majorCategory)}`,
-      { headers: token ? { Authorization: `Bearer ${token}` } : {} },
-    );
-    if (r.ok) {
-      const json = await r.json();
-      const val = json.data?.totalValue ?? null;
-      vaacCache.set(key, val); // only cache on success so HTTP errors are retried
-      return val;
-    }
-    // HTTP error (403/404/500) — don't cache, allow retry on next render
-  } catch { /* network error — don't cache, allow retry */ }
-  return null;
-};
-
 const computeSegmentFromMrp = (mrp: string | null | undefined, ranges: SegmentRange[]): string | null => {
   const m = parseFloat(String(mrp ?? ''));
   if (isNaN(m) || ranges.length === 0) return null;
   const match = ranges.find((r) => m >= r.min && m <= r.max);
   return match ? match.segment_type : null;
-};
-
-const fetchBomMap = (category: string): Promise<Record<string, Record<string, string>>> => {
-  const existing = bomCache.get(category);
-  if (existing) return existing;
-  const token = localStorage.getItem('authToken');
-  const p = fetch(`${APP_CONFIG.api.baseURL}/approver/bom-art-numbers/${encodeURIComponent(category)}`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  })
-    .then((r) => r.json())
-    .then((res) => (res?.data as Record<string, Record<string, string>>) ?? {})
-    .catch(() => ({}));
-  bomCache.set(category, p);
-  return p;
 };
 
 const f = (schemaKey: string) => SCHEMA_KEY_TO_EXCEL_ATTR[schemaKey] ?? schemaKey;
@@ -407,32 +365,6 @@ const ColorSelect: React.FC<{
   );
 };
 
-const GROUP_COLORS: Record<string, string> = {
-  FAB: '#e6f4ff',
-  BODY: '#f6ffed',
-  'VA ACC.': '#fff7e6',
-  'VA PRCS': '#fff0f6',
-  BUSINESS: '#f9f0ff',
-};
-const GROUP_ORDER = ['FAB', 'BODY', 'VA ACC.', 'VA PRCS', 'BUSINESS'];
-
-// Construction & Fabric (FAB): these attributes must appear first, in this
-// exact order, regardless of the order the backend returns them in. Everything
-// else in the group keeps its existing relative order below them.
-//   fab_div          → M_FAB_DIV
-//   yarn_01          → M_YARN
-//   main_mvgr        → M_FAB_MAIN_MVGR_1
-//   fabric_main_mvgr → M_FAB_MAIN_MVGR_2
-const FAB_PRIORITY_KEYS = ['fab_div', 'yarn_01', 'main_mvgr', 'fabric_main_mvgr'];
-// Canonical BODY & CONSTRUCTION field order — enforced in buildCardGroups so
-// every user session sees fields in the same sequence regardless of DB displayOrder.
-const BODY_PRIORITY_KEYS = [
-  'collar', 'collar_style', 'neck_details', 'neck', 'placket',
-  'father_belt', 'child_belt', 'sleeve', 'sleeve_fold', 'set',
-  'bottom_fold', 'no_of_pocket', 'pocket_type', 'extra_pocket',
-  'fit', 'body_style', 'length',
-];
-
 // FG OTH GRID-1 card: BUSINESS attrs shown under Rate/MRP/Colours in this order
 // (M_AGE_GROUP → M_IMP_ATBT → ARTICLE FASHION TYPE → SEGMENT), rest after.
 const OTH_GRID_1_ORDER = ['age_group', 'imp_atrbt2', 'article_fashion_type', 'segment'];
@@ -469,68 +401,6 @@ const GROUP_HEADER_STYLE: Record<string, { bg: string; fg: string; border: strin
 };
 
 type CardGroup = typeof ATTRIBUTE_GROUPS[number];
-
-// Lookup map: schemaKey → mandatory flag from ATTRIBUTE_GROUPS static config
-const STATIC_MANDATORY_KEYS = new Map<string, boolean>(
-  ATTRIBUTE_GROUPS.flatMap((g) => g.fields.filter((f) => f.mandatory).map((f) => [f.schemaKey, true] as [string, boolean]))
-);
-
-function buildCardGroups(entries: { key: string; type: string; group: string }[]): CardGroup[] {
-  const map = new Map<string, CardGroup['fields']>();
-  for (const e of entries) {
-    if (BOM_ONLY_SCHEMA_KEYS.has(e.key)) continue; // belongs to BOM, not attribute groups
-    if (HIDDEN_CARD_SCHEMA_KEYS.has(e.key)) continue; // hidden from card (e.g. shade, weight)
-    const dbField = SCHEMA_KEY_TO_DB_FIELD[e.key];
-    if (!dbField) continue;
-    if (!map.has(e.group)) map.set(e.group, []);
-    const mandatory = STATIC_MANDATORY_KEYS.get(e.key) ? true : undefined;
-    map.get(e.group)!.push({ field: dbField, schemaKey: e.key, freeText: e.type === 'TEXT' ? true : undefined, mandatory });
-  }
-  const built = GROUP_ORDER.filter((g) => map.has(g)).map((g) => {
-    let fields = map.get(g)!;
-    if (g === 'FAB' || g === 'FABRIC') {
-      // Pin the priority keys to the top in FAB_PRIORITY_KEYS order; all other
-      // fields keep their existing relative order (Array.sort is stable).
-      const rank = (k: string) => {
-        const i = FAB_PRIORITY_KEYS.indexOf(k);
-        return i === -1 ? FAB_PRIORITY_KEYS.length : i;
-      };
-      fields = [...fields].sort((a, b) => rank(a.schemaKey) - rank(b.schemaKey));
-    }
-    if (g === 'BODY') {
-      // Enforce canonical BODY field order so every user sees the same sequence
-      // regardless of DB displayOrder (which can be non-deterministic when tied).
-      const rank = (k: string) => {
-        const i = BODY_PRIORITY_KEYS.indexOf(k);
-        return i === -1 ? BODY_PRIORITY_KEYS.length : i;
-      };
-      fields = [...fields].sort((a, b) => rank(a.schemaKey) - rank(b.schemaKey));
-    }
-    return {
-      group: g,
-      color: GROUP_COLORS[g] || '#f0f0f0',
-      fields,
-    };
-  });
-
-  if (built.length > 0) {
-    // Merge static freeText fields from ATTRIBUTE_GROUPS that the dynamic
-    // attribute data doesn't carry (e.g. fab_weight alias for M_FAB_WEIGHT).
-    for (const staticGroup of ATTRIBUTE_GROUPS) {
-      const builtGroup = built.find((g) => g.group === staticGroup.group);
-      for (const sf of staticGroup.fields) {
-        if (builtGroup && builtGroup.fields.some((f) => f.field === sf.field && f.schemaKey === sf.schemaKey)) continue;
-        if (builtGroup) {
-          builtGroup.fields.push(sf);
-        } else {
-          built.push({ group: staticGroup.group, color: staticGroup.color, fields: [sf] });
-        }
-      }
-    }
-    return built;
-  }
-  return ATTRIBUTE_GROUPS;
-}
 
 export interface ApproverArticleListProps {
   items: ApproverItem[];
@@ -1635,15 +1505,6 @@ const ArticleCard = React.memo(
     const [vendorSearching, setVendorSearching] = useState(false);
     const vendorDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const [attrArticleNums, setAttrArticleNums] = useState<Record<string, string>>(() => {
-      try {
-        return JSON.parse((item as any).attrArticleNums || '{}');
-      } catch {
-        return {};
-      }
-    });
-    const [bomMap, setBomMap] = useState<Record<string, Record<string, string>>>({});
-
     useEffect(() => {
       if (!item.division) return;
       if (isValuesCached(item.division) && getCachedValues(item.division, 'impAtrbt2') === null) {
@@ -1664,22 +1525,6 @@ const ArticleCard = React.memo(
         .then(() => setCatConfigReady(true))
         .catch(() => setCatConfigReady(true));
     }, [effectiveMajCat]);
-
-    // Auto-fill VALUE ADD ACC. COST from the VAAC table on initial load (only if empty).
-    // Only runs for PENDING articles — approved/rejected articles already have their value locked.
-    useEffect(() => {
-      if (!effectiveMajCat) return;
-      if (item.approvalStatus !== 'PENDING') return;
-      const current = (item as any).valueAddCost ?? localValues['valueAddCost'];
-      if (current != null && String(current).trim() !== '') return; // already has a value — skip
-      fetchVaacTotalValue(effectiveMajCat).then((val) => {
-        if (val == null) return;
-        const strVal = String(val);
-        setLocalValues((prev) => ({ ...prev, valueAddCost: strVal }));
-        onSave({ ...item, valueAddCost: strVal } as ApproverItem, { valueAddCost: strVal } as Record<string, unknown>);
-      });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []); // intentionally run only on mount
 
     // Preload the major-category grid (dropdown values) for THIS article's
     // category only — not the entire grid. Re-runs if the category changes.
@@ -1708,39 +1553,6 @@ const ArticleCard = React.memo(
         .then(() => setMandatoryGridReady(true))
         .catch(() => setMandatoryGridReady(true));
     }, [effectiveMajCat]);
-
-    useEffect(() => {
-      if (!effectiveMajCat) return;
-      let cancelled = false;
-      fetchBomMap(effectiveMajCat).then((data) => {
-        if (!cancelled) setBomMap(data);
-      });
-      return () => {
-        cancelled = true;
-      };
-    }, [effectiveMajCat]);
-
-    const getArtNum = useCallback(
-      (schemaKey: string, field: string, currentValue: string | null): string => {
-        const excelAttrName = SCHEMA_KEY_TO_EXCEL_ATTR[schemaKey];
-        if (excelAttrName && currentValue && bomMap[excelAttrName]?.[currentValue]) {
-          return bomMap[excelAttrName][currentValue];
-        }
-        return attrArticleNums[field] || '';
-      },
-      [bomMap, attrArticleNums],
-    );
-
-    const saveAttrArticleNum = (field: string, val: string) => {
-      const updated = { ...attrArticleNums, [field]: val };
-      setAttrArticleNums(updated);
-      const attrUpdates = { attrArticleNums: JSON.stringify(updated) };
-      if (isModifyMode) {
-        setPendingChanges((prev) => ({ ...prev, ...attrUpdates }));
-        return;
-      }
-      onSave({ ...item, ...attrUpdates } as any, attrUpdates);
-    };
 
     const [failedImg, setFailedImg] = useState(false);
     const [refreshedUrl, setRefreshedUrl] = useState<string | null>(null);
@@ -2183,16 +1995,6 @@ const ArticleCard = React.memo(
             onSave({ ...item, segment: seg } as ApproverItem, { segment: seg } as Record<string, unknown>);
           }
         });
-        // Async: fetch VAAC total value for the new major category — skip if user chose Precise
-        const effectiveCostType = localValues['valueAddAccCostType'] ?? (item as any).valueAddAccCostType ?? 'Rough';
-        if (effectiveCostType !== 'Precise') {
-          fetchVaacTotalValue(value).then((val) => {
-            if (val == null) return;
-            const strVal = String(val);
-            setLocalValues((prev) => ({ ...prev, valueAddCost: strVal }));
-            onSave({ ...item, valueAddCost: strVal } as ApproverItem, { valueAddCost: strVal } as Record<string, unknown>);
-          });
-        }
         // Clear body/fabric article number and description only — attributes remain unchanged
         updates['bodyArticle'] = '';
         updates['bodyArticleDescription'] = '';
@@ -5424,24 +5226,9 @@ export const ApproverArticleList: React.FC<ApproverArticleListProps> = ({
   attributeMajorCategory,
   serverPagination,
 }) => {
-  const [cardGroups, setCardGroups] = useState<CardGroup[]>(() => {
-    const cached = getCachedAttributeGroups();
-    return cached && cached.length > 0 ? buildCardGroups(cached) : ATTRIBUTE_GROUPS;
-  });
-
-  useEffect(() => {
-    preloadAttributeGroups()
-      .then((entries) => {
-        if (entries.length > 0) setCardGroups(buildCardGroups(entries));
-      })
-      .catch(() => {
-        /* keep hardcoded fallback */
-      });
-  }, []);
-
   const visibleCardGroups = allowGroups
-    ? cardGroups.filter((g) => allowGroups.includes(g.group))
-    : cardGroups;
+    ? ATTRIBUTE_GROUPS.filter((g) => allowGroups.includes(g.group))
+    : ATTRIBUTE_GROUPS;
 
   const handleToggleSelect = useCallback(
     (id: string) => {

@@ -116,45 +116,6 @@ export function buildUiLabelToDbFieldMap(): Record<string, string> {
   return Object.fromEntries(fieldsCache.map((f) => [f.uiLabel, f.dbField]));
 }
 
-// ─── Attribute Groups (for dynamic article card layout) ───────────────────────
-
-export interface AttributeGroupEntry {
-  key: string;
-  type: 'TEXT' | 'SELECT' | 'NUMBER';
-  group: string;
-}
-
-let attributeGroupsCache: AttributeGroupEntry[] | null = null;
-let attributeGroupsPromise: Promise<AttributeGroupEntry[]> | null = null;
-
-export async function preloadAttributeGroups(): Promise<AttributeGroupEntry[]> {
-  if (attributeGroupsCache) return attributeGroupsCache;
-  if (attributeGroupsPromise) return attributeGroupsPromise;
-
-  const baseURL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://localhost:5001/api' : '/api');
-  const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-
-  attributeGroupsPromise = fetch(`${baseURL}/admin/attributes`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  })
-    .then(r => r.ok ? r.json() : null)
-    .then(json => {
-      const attrs: AttributeGroupEntry[] = (json?.data ?? [])
-        .filter((a: any) => a.group && a.isActive)
-        .map((a: any) => ({ key: a.key, type: a.type, group: a.group }));
-      attributeGroupsCache = attrs;
-      return attrs;
-    })
-    .catch(() => [] as AttributeGroupEntry[])
-    .finally(() => { attributeGroupsPromise = null; });
-
-  return attributeGroupsPromise;
-}
-
-export function getCachedAttributeGroups(): AttributeGroupEntry[] | null {
-  return attributeGroupsCache;
-}
-
 // ─── Per-category enabled/required attribute config ───────────────────────────
 
 export interface CategoryAttrConfig {
