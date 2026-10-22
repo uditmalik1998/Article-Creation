@@ -1,6 +1,6 @@
 import majCatMandatory from './archived/maj-cat-mandatory.json';
 import { MAJOR_CATEGORY_ALLOWED_VALUES } from './majorCategoryMap';
-import { getCachedValues, getCachedCategoryAttributes, getMajCatGridEntry } from '../services/articleConfigService';
+import { getCachedValues, getCachedCategoryAttributes, getMajCatGridEntry, isMandatoryGridFieldActive } from '../services/articleConfigService';
 
 /**
  * Maps frontend schema keys to Excel CHILD_MAJ_CAT attribute names.
@@ -367,6 +367,20 @@ export function getMajCatAllowedValues(
     result.unshift({ shortForm: '-', fullForm: '-' });
   }
   return result;
+}
+
+/**
+ * Schema keys that are mandatory for a major category according to the
+ * mandatory grid (Admin › Mandatory Grid) — the same source the article cards
+ * use. The grid must already be loaded with preloadMandatoryGridFor().
+ */
+export function getMandatoryGridKeys(majorCategory: string): Set<string> {
+  const keys = new Set<string>();
+  if (!majorCategory) return keys;
+  for (const [sapKey, schemaKey] of Object.entries(SAP_NAME_TO_SCHEMA_KEY)) {
+    if (isMandatoryGridFieldActive(majorCategory, sapKey) === true) keys.add(schemaKey);
+  }
+  return keys;
 }
 
 /**
