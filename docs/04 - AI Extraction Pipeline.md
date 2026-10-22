@@ -158,21 +158,7 @@ After raw AI output, values are matched to `AttributeAllowedValue` master list:
 
 ## Queue Management
 
-**File**: `Backend/src/services/queueManagementService.ts`
-
-| Setting | Value |
-|---------|-------|
-| Max concurrent jobs | 4 |
-| TPM limit | 40,000 tokens/minute |
-| Max retries | 3 |
-| Priority: high | weight 10 |
-| Priority: normal | weight 5 |
-| Priority: low | weight 1 |
-| Poll interval | 2 seconds |
-
-If TPM budget exceeded → job queued, estimated wait time returned to caller.
-
----
+The old `queueManagementService.ts` (in-memory priority queue) was never wired into the server and was deleted on 2026-10-22.
 
 ## Cost Tracking
 

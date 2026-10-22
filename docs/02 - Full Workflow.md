@@ -39,7 +39,7 @@ flowchart TD
     end
 
     subgraph VARIANTS["🔀 VARIANT CREATION"]
-        SIZE[Size Variants\nfrom variant-sizes-mapping.xlsx]
+        SIZE[Size Variants\nfrom maj_cat_sizes]
         COLOR[Color Variants\nmanual Add Color]
         KIDS[Kids Duplication\nauto for KIDS division]
     end
