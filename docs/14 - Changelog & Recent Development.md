@@ -112,3 +112,7 @@
 Upstream `main` keeps re-committing junk that should be gitignored — `Backend/src/generated/prisma/query-engine-windows.exe.tmp*` binaries and a `.claude/worktrees/agent-*` gitlink. Drop these on each merge.
 
 #v2kart #article-creation #changelog
+
+- 2026-10-22: FG Articles pages no longer call `/approver/value-addition-accessories-cost/lookup` (removed VAAC auto-fill of VALUE ADD ACC. COST in ApproverArticleList.tsx). Backend route and Admin VAAC upload left in place.
+- 2026-10-22: Removed unused `/approver/bom-art-numbers/:majCat` (route, controller, majCatGridMap loader) and its dead fetch/state in FG, GM and Fabric article lists. `Backend/src/data/majCatGridMap.json` is now unreferenced.
+- 2026-10-22: FG/GM/Fabric article lists no longer call `GET /admin/attributes` (attribute-group card layout feature removed). Cards always use the hardcoded `ATTRIBUTE_GROUPS`; removed `preloadAttributeGroups`, `buildCardGroups`, `forceStaticGroups` prop. The endpoint itself stays (Admin attribute screens use it).

@@ -80,7 +80,6 @@ flowchart TD
 | GET | `/items/:id/variants` | `getVariants` | Size/color variants for generic |
 | POST | `/items/:id/add-color` | `addColor` | Add color variant |
 | POST | `/items/:id/sync-color` | `syncColorToVariants` | Push color to all variants |
-| GET | `/bom-art-numbers/:majCat` | `getBomArtNumbers` | BOM article # lookup |
 | POST | `/backfill-descriptions` | `backfillDescriptions` | Admin: fix article descriptions |
 
 ---
