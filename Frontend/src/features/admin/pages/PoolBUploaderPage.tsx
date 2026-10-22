@@ -66,6 +66,9 @@ interface ItemResult {
   writtenCount: number;
   nicCount: number;
   lockedCount: number;
+  /** Characteristic names SAP refused as not-on-class / locked (newer backends only). */
+  nicAttrs?: string[];
+  lockedAttrs?: string[];
   errorMessage?: string;
 }
 
@@ -159,14 +162,25 @@ function clockTime(ts: string | null): string {
   return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
+/** "M_A, M_B, M_C +2 more" — keeps the Problem cell short. */
+function nameList(names: string[] | undefined, max = 4): string {
+  if (!names || names.length === 0) return '';
+  return names.slice(0, max).join(', ') + (names.length > max ? ` +${names.length - max} more` : '');
+}
+
 function toIssue(r: ItemResult): Issue | null {
   const kinds: IssueKind[] = [];
-  if (!r.ok) kinds.push('Error');
+  // A failed article whose only problem is characteristics missing from its
+  // class (SAP's "not in any class KSML" atomic-fail) is NIC, not a generic
+  // error — the fix is Pool A, not the article.
+  const nicOnlyFailure = !r.ok && r.nicCount > 0;
+  if (!r.ok && !nicOnlyFailure) kinds.push('Error');
   if (r.nicCount > 0) kinds.push('NIC');
   if (r.lockedCount > 0) kinds.push('Locked');
   if (kinds.length === 0) return null;
 
-  if (!r.ok) {
+  const pool = `Run Pool A to add ${r.nicCount !== 1 ? 'them' : 'it'} to class ${r.matkl || '(this MC)'}, then re-upload`;
+  if (!r.ok && !nicOnlyFailure) {
     return {
       ...r,
       kinds,
@@ -177,17 +191,21 @@ function toIssue(r: ItemResult): Issue | null {
     };
   }
   if (r.nicCount > 0) {
+    const names = nameList(r.nicAttrs);
     return {
       ...r,
       kinds,
-      problem: `${r.nicCount} characteristic${r.nicCount !== 1 ? 's' : ''} not on the class`,
-      fix: `Run Pool A for ${r.matkl || 'this class'}, then re-upload`,
+      problem:
+        `Not on the class${names ? `: ${names}` : ` (${r.nicCount} characteristic${r.nicCount !== 1 ? 's' : ''})`}` +
+        (r.ok ? '' : ' — SAP saved nothing for this article'),
+      fix: pool,
     };
   }
+  const locked = nameList(r.lockedAttrs);
   return {
     ...r,
     kinds,
-    problem: `${r.lockedCount} locked field${r.lockedCount !== 1 ? 's' : ''} ignored`,
+    problem: `Locked, ignored${locked ? `: ${locked}` : ` (${r.lockedCount} field${r.lockedCount !== 1 ? 's' : ''})`}`,
     fix: 'No action — locked fields are not changed',
   };
 }
@@ -644,10 +662,12 @@ export default function PoolBUploaderPage() {
         issues.map((i) => ({
           Article: i.matnr,
           MC: i.matkl ?? '',
-          Status: i.ok ? 'OK' : 'FAILED',
+          Status: i.ok ? 'OK' : i.kinds.includes('Error') ? 'FAILED' : 'NOT SAVED (NIC)',
           'Values written': i.writtenCount,
           NIC: i.nicCount,
+          'Not on class': (i.nicAttrs ?? []).join(', '),
           Locked: i.lockedCount,
+          'Locked fields': (i.lockedAttrs ?? []).join(', '),
           Problem: i.problem,
           'What to do': i.fix,
         })),
