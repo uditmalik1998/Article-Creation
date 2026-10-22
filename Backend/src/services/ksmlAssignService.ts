@@ -161,6 +161,37 @@ export async function parseKsmlExcel(buffer: Buffer): Promise<ParseResult> {
   };
 }
 
+// ── Pre-flight: is the FM on this system? ───────────────────────────────────
+export const KSML_FM = 'Z_CLS_ADD_CHAR_BAPI';
+
+/**
+ * Ask the chosen SAP system whether Z_CLS_ADD_CHAR_BAPI exists (read-only
+ * RFC_GET_FUNCTION_INTERFACE). Without it every pair would fail with
+ * FU_NOT_FOUND, so the commit stops before sending anything.
+ * Returns `available: null` when the check itself could not run — the commit
+ * then goes ahead as before rather than blocking on a proxy hiccup.
+ */
+export async function checkKsmlFmAvailable(env: string): Promise<{ available: boolean | null; detail: string }> {
+  const url = `${SAP_RFC_PROXY_URL.replace(/\/$/, '')}/api/rfc/proxy?env=${env}`;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-RFC-Key': SAP_RFC_KEY, 'User-Agent': SAP_RFC_USER_AGENT },
+      body: JSON.stringify({ bapiname: 'RFC_GET_FUNCTION_INTERFACE', FUNCNAME: KSML_FM }),
+      signal: AbortSignal.timeout(30_000),
+    });
+    const text = await res.text();
+    let body: any;
+    try { body = JSON.parse(text); } catch { body = undefined; }
+    if (Array.isArray(body?.PARAMS)) return { available: true, detail: '' };
+    const msg = String(body?.EX_RETURN?.MESSAGE ?? text ?? '');
+    if (/FU_NOT_FOUND/i.test(msg)) return { available: false, detail: msg };
+    return { available: null, detail: msg.slice(0, 200) };
+  } catch (e: any) {
+    return { available: null, detail: String(e?.message || e) };
+  }
+}
+
 // ── SAP call ────────────────────────────────────────────────────────────────
 async function callAddCharBapi(
   env: string,

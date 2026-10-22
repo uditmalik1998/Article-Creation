@@ -26,6 +26,10 @@ export type AttributePushResult = {
   writtenCount: number;
   nicCount: number;
   lockedCount: number;
+  /** Characteristics SAP refused because they are not on the article's class (NIC). */
+  nicAttrs?: string[];
+  /** Characteristics SAP refused because they are locked. */
+  lockedAttrs?: string[];
   errorMessage?: string;
   planLog?: Array<{ atnam: string; value: string; status: string; route?: string }>;
 };
@@ -212,17 +216,22 @@ const buildChangesString = (item: Record<string, unknown>): { changes: string; c
   return { changes: parts.join('|'), count: parts.length };
 };
 
+// A row whose message says the characteristic is missing from the class
+// (e.g. "attr in CABN but not in any class KSML") is NIC too, even when the FM
+// gives it a different status — the fix is the same: run Pool A (KSML).
+const NOT_IN_CLASS_RE = /not in (any )?class|ksml/i;
+
 const tallyPlan = (plan: PlanRow[]) => {
   let writtenCount = 0;
-  let nicCount = 0;
-  let lockedCount = 0;
+  const nicAttrs: string[] = [];
+  const lockedAttrs: string[] = [];
   for (const row of plan) {
     const s = row.status.toUpperCase();
     if (s === 'APPLIED' || s === 'PLANNED' || s === 'OK') writtenCount++;
-    else if (s === 'NIC') nicCount++;
-    else if (s === 'LOCKED' || s === 'REJECT') lockedCount++;
+    else if (s === 'NIC' || NOT_IN_CLASS_RE.test(String(row.msg ?? ''))) nicAttrs.push(row.atnam);
+    else if (s === 'LOCKED' || s === 'REJECT') lockedAttrs.push(row.atnam);
   }
-  return { writtenCount, nicCount, lockedCount };
+  return { writtenCount, nicCount: nicAttrs.length, lockedCount: lockedAttrs.length, nicAttrs, lockedAttrs };
 };
 
 export const isAttributePushEnabled = (): boolean => SAP_ATTRIBUTE_PUSH_ENABLED;
@@ -404,6 +413,8 @@ export const pushRawAttributesToSap = async (
       result.writtenCount = tally.writtenCount;
       result.nicCount = tally.nicCount;
       result.lockedCount = tally.lockedCount;
+      result.nicAttrs = tally.nicAttrs;
+      result.lockedAttrs = tally.lockedAttrs;
       return result;
     }
 
@@ -417,11 +428,14 @@ export const pushRawAttributesToSap = async (
         .join('|');
       const second = await callV64(matnr, filtered, testMode, env);
       result.planLog = second.plan;
+      const firstTally = tallyPlan(first.plan);
       const tally = tallyPlan(second.plan);
       result.ok = second.ok;
       result.writtenCount = tally.writtenCount;
-      result.nicCount = (first.plan.length - planned.length) + tally.nicCount;
-      result.lockedCount = tally.lockedCount;
+      result.nicAttrs = [...firstTally.nicAttrs, ...tally.nicAttrs];
+      result.lockedAttrs = [...firstTally.lockedAttrs, ...tally.lockedAttrs];
+      result.nicCount = result.nicAttrs.length;
+      result.lockedCount = result.lockedAttrs.length;
       if (!second.ok) {
         const msgs = second.plan.map((p) => p.msg).filter(Boolean).join('; ');
         result.errorMessage = `patch retry ok:false (${tally.writtenCount} written, ${tally.nicCount} nic)` + (msgs ? ` | ${msgs}` : '');
@@ -432,6 +446,8 @@ export const pushRawAttributesToSap = async (
     const tally = tallyPlan(first.plan);
     result.nicCount = tally.nicCount;
     result.lockedCount = tally.lockedCount;
+    result.nicAttrs = tally.nicAttrs;
+    result.lockedAttrs = tally.lockedAttrs;
     // Empty/unrecognised plan → surface the raw SAP response so we can see WHY
     // (e.g. FM not found on this env, or a different response shape).
     let rawSnippet = '';

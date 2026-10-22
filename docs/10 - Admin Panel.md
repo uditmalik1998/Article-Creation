@@ -246,3 +246,25 @@ The "On this page" side box (`JumpNav`) is to move into the dark header. Canvas:
 
 - **Hierarchy Excel card removed**: its state, handlers and types in `Admin.tsx`, the routes `GET /admin/hierarchy/excel-status` and `POST /admin/hierarchy/upload-excel`, and the "HIERARCHY EXCEL UPLOAD" block in `adminController.ts`. The `departments` / `sub_departments` / `categories` tables are kept; extraction still reads them. Hierarchy is managed in the Admin › Hierarchy tab (`major_category_details`).
 - The **Broader Menu** card moved into the Costs group, renamed **"Costs and Broader Menu"** (3 datasets). The "Hierarchy & menus" group is gone. The Master data count is now 21.
+
+### KSML Uploader (Pool A) — Pool B layout (2026-10-22, built)
+
+`KsmlUploaderPage.tsx` was rewritten to match the Pool B "job console" page. Frontend only; the `/ksml/preview` and `/ksml/commit` APIs are unchanged.
+- **Header:** "Pool A — KSML class characteristics", a file chip with New upload, and a Template button (`class`, `characteristic`).
+- **Upload:** a drag/drop dropzone; preview runs automatically when a file is picked.
+- **Ready to run card:** Classes / Pairs / Rows read / Rows skipped, warnings, the detected columns and a sample table.
+- **Run bar:** QA/PROD and Test/Live switches with an inline confirm (live PROD needs PROD typed). This replaces `window.confirm`.
+- **Console:** a dark panel. While the synchronous commit runs it shows an elapsed timer and an indeterminate bar. When done it shows a big "on their class" count and an added / already / failed bar.
+- **Needs attention:** a table of failed pairs (Class, Characteristic, SUBRC, SAP message, What to do), downloadable as .xlsx. Then "Run again".
+- Checked in a mocked local test page.
+
+### Pool B / KSML — clearer NIC results + KSML function pre-check (2026-10-22)
+
+- **Pool B:**
+  - `sapAttributePushService.tallyPlan` now counts a plan row whose message says "not in (any) class / KSML" as NIC, even when its status is not `NIC`. Example message: `attr in CABN but not in any class KSML`.
+  - Results carry `nicAttrs` and `lockedAttrs` (characteristic names), passed through by `poolBPatchService` and `poolBJobService`.
+  - The page labels an article that failed only for NIC as **NIC**, not Error. Its Problem cell lists the names ("Not on the class: M_FAB_DIV, M_WASH — SAP saved nothing for this article"), and What to do says "Run Pool A to add them to class <MC>, then re-upload".
+  - The .xlsx download gains "Not on class" and "Locked fields" columns.
+  - The retry path no longer counts LOCKED rows as NIC.
+- **KSML:** `POST /ksml/commit` first calls `checkKsmlFmAvailable(env)`, a read-only `RFC_GET_FUNCTION_INTERFACE` on `Z_CLS_ADD_CHAR_BAPI`. If SAP says FU_NOT_FOUND, it returns 409 `FM_NOT_FOUND` ("ask BASIS to import S4DK926264") and sends nothing. The page shows this as a red box in the run bar. An inconclusive check lets the run go ahead.
+- SAP status: on 2026-10-22 the function was first missing on QA and PROD, then present on both later the same day (the transport was imported).

@@ -46,6 +46,8 @@ export interface PoolBItemResult {
   writtenCount: number;
   nicCount: number;
   lockedCount: number;
+  nicAttrs?: string[];
+  lockedAttrs?: string[];
   errorMessage?: string;
 }
 
@@ -176,6 +178,8 @@ export async function runPoolBPatch(
       writtenCount: res.writtenCount,
       nicCount: res.nicCount,
       lockedCount: res.lockedCount,
+      nicAttrs: res.nicAttrs ?? [],
+      lockedAttrs: res.lockedAttrs ?? [],
       errorMessage: res.errorMessage,
     };
   });

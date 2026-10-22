@@ -10,7 +10,7 @@
  */
 
 import { Request, Response } from 'express';
-import { parseKsmlExcel, runKsmlAssignment } from '../services/ksmlAssignService';
+import { parseKsmlExcel, runKsmlAssignment, checkKsmlFmAvailable, KSML_FM } from '../services/ksmlAssignService';
 
 export class KsmlController {
   /** Parse the uploaded Excel and return a summary. Never calls SAP. */
@@ -46,6 +46,19 @@ export class KsmlController {
       if (parsed.pairs.length === 0) {
         return res.status(400).json({ success: false, error: 'No valid (class, characteristic) pairs to push.' });
       }
+
+      // Stop early if the assignment FM isn't on the chosen system (it was
+      // transported to DEV first; QA/PROD need STMS import of S4DK926264).
+      const fm = await checkKsmlFmAvailable(env);
+      if (fm.available === false) {
+        return res.status(409).json({
+          success: false,
+          code: 'FM_NOT_FOUND',
+          error: `${KSML_FM} is not available on ${env.toUpperCase()}, so nothing was sent. ` +
+            `Ask BASIS to import transport S4DK926264 on ${env.toUpperCase()}, then run again.`,
+        });
+      }
+      if (fm.available === null) console.warn(`[KSML] FM pre-check inconclusive on ${env}: ${fm.detail}`);
 
       console.log(`[KSML] commit env=${env} test=${test} classes=${parsed.classes} pairs=${parsed.pairs.length}`);
       const report = await runKsmlAssignment(parsed.pairs, env, { test, classConc });

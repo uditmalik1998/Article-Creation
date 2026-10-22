@@ -198,6 +198,8 @@ async function processJobInBackground(
             writtenCount: res.writtenCount,
             nicCount: res.nicCount,
             lockedCount: res.lockedCount,
+            nicAttrs: res.nicAttrs ?? [],
+            lockedAttrs: res.lockedAttrs ?? [],
             errorMessage: res.errorMessage,
           };
         });
