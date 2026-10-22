@@ -38,7 +38,7 @@ import { SIMPLIFIED_HIERARCHY } from '../../extraction/components/SimplifiedCate
 import { getMcCodeByMajorCategory } from '../../../data/majorCategoryMcCodeMap';
 import {
   getMajCatAllowedValues,
-  getMajCatMandatoryKeys,
+  getMandatoryGridKeys,
   normalizeMajorCategory,
   SAP_NAME_TO_SCHEMA_KEY,
   SCHEMA_KEY_TO_DB_FIELD,
@@ -928,7 +928,7 @@ export default function ArticleDetailPage({
   const attributesTab = (() => {
     const division = editingItem?.division || '';
     const majorCat = normalizeMajorCategory(editingItem?.majorCategory || '', division);
-    const mandatoryKeys = getMajCatMandatoryKeys(majorCat);
+    const mandatoryKeys = getMandatoryGridKeys(majorCat);
     const visibleFields = ATTRIBUTE_FIELDS.filter(f => {
       if (!majorCat) return true;
       const cur = editingItem?.[f.formName as keyof typeof editingItem];

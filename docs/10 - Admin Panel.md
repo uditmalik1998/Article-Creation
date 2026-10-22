@@ -146,8 +146,8 @@ Building blocks in `features/admin/components/DashboardParts.tsx`:
   (stacked progress bar + counts, View data, the original run Popconfirm), plus the SRM fetch tool
   (by date / by PPT number) at the bottom.
 - **Vendor sync** — one compact row (records, last sync, source, View data, refresh, Sync now Popconfirm).
-- **Master data** — 18 `MasterDataCard`s in collapsible `MasterGroup`s: Attributes & grids (7), GM (2),
-  Fabric & body (4), Costs (3), Hierarchy & menus (2). Each card shows status (Uploaded / Not uploaded /
+- **Master data** — 18 `MasterDataCard`s in collapsible `MasterGroup`s: FG Attributes & Grid (7; renamed 2026-10-22, cards "FG Major Category Grid Values" and "FG Major Category Details"), GM (2),
+  Fabric & body (4), Costs and Broader Menu (3; was Costs + Hierarchy & menus until 2026-10-22, Hierarchy Excel removed). Each card shows status (Uploaded / Not uploaded /
   Unknown), rows, last upload, and Upload / View / Download / Template / refresh. **Upload** expands the card
   (full width) to show its original status details + upload panel; it stays expanded while that upload runs
   (Hierarchy also while a preview awaits confirmation). Upload logic per card is unchanged.
@@ -230,3 +230,19 @@ Replaced the flat list + modal with two panes (stack on narrow screens):
 - Flow: drop/browse Excel → preview runs automatically (no SAP call) → "Ready to run" card (counts, warnings, batch note, sample) with QA/PROD and Test/Live segmented controls → inline confirm (replaces `window.confirm`; live PROD requires typing PROD) → console.
 - Console is the same for sync reports and async jobs: dark slate panel with status pill, % and ok/failed/waiting bar, one tile per batch; below it **Needs attention** built from per-article results (`results` JSON on `pool_b_batches`, or the sync report): NIC / Locked / Error tags, MC, what-to-do text, filter chips, .xlsx download. A running batch's articles only appear once that batch finishes.
 - No backend change. Canvas with all 5 options: https://claude.ai/artifact/U2AAwYLJxHF9BPKwSpugRa
+
+### Admin Dashboard header — section links (2026-10-22, Option B built)
+
+The "On this page" side box (`JumpNav`) is to move into the dark header. Canvas: https://claude.ai/artifact/M2wWzqr7nVYHueF75dh9qo
+- A: tabs row
+- B: one-row segmented
+- C: sticky status bar
+- D: stat tiles
+- E: chips
+
+**Option B built.** `JumpNav` in `DashboardParts.tsx` is now a segmented control for the dark header: a white pill for the current section and count badges. In `Admin.tsx` it sits between the "Admin Dashboard" title and the buttons. The subtitle and the left "On this page" box are removed, so the content is full width. Checked in a local test page; not checked signed in.
+
+### Master data — Hierarchy Excel removed, Broader Menu moved (2026-10-22)
+
+- **Hierarchy Excel card removed**: its state, handlers and types in `Admin.tsx`, the routes `GET /admin/hierarchy/excel-status` and `POST /admin/hierarchy/upload-excel`, and the "HIERARCHY EXCEL UPLOAD" block in `adminController.ts`. The `departments` / `sub_departments` / `categories` tables are kept; extraction still reads them. Hierarchy is managed in the Admin › Hierarchy tab (`major_category_details`).
+- The **Broader Menu** card moved into the Costs group, renamed **"Costs and Broader Menu"** (3 datasets). The "Hierarchy & menus" group is gone. The Master data count is now 21.

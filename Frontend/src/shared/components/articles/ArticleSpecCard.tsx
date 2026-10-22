@@ -1,7 +1,6 @@
 import { memo, useState, useCallback, useEffect } from 'react';
-import { ImageOff, Minus, Plus, RotateCw, ZoomIn } from 'lucide-react';
+import { ImageOff, Minus, Plus, RotateCw, Scan, Shirt, X, ZoomIn } from 'lucide-react';
 import {
-  Button,
   Dialog,
   DialogContent,
   DialogHeader,
@@ -295,6 +294,12 @@ function Stat({ label, value, className, labelClassName, valueClassName }: {
   );
 }
 
+/**
+ * Card photo viewer — design "Option B": ink header, a fixed 3:4 frame that shows a
+ * shimmer skeleton while the full-size original (~4 MB) loads, and a floating zoom
+ * toolbar under the photo. The frame is sized before the photo arrives, so the
+ * dialog never opens as an empty strip and doesn't jump when the image lands.
+ */
 function ImagePreviewDialog({ src, title, onClose }: { src: string; title: string; onClose: () => void }) {
   const [imgZoom, setImgZoom] = useState(1);
   const [imgRotation, setImgRotation] = useState(0);
@@ -303,6 +308,9 @@ function ImagePreviewDialog({ src, title, onClose }: { src: string; title: strin
   // <img> is sized with actual width/height instead, letting the browser's own
   // overflow/scroll math account for the true zoomed size.
   const [naturalSize, setNaturalSize] = useState<{ w: number; h: number } | null>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0); // bumps the <img> key on "Try again"
+  const loading = !naturalSize && !loadFailed;
 
   const resetImageView = useCallback(() => {
     setImgZoom(1);
@@ -319,18 +327,20 @@ function ImagePreviewDialog({ src, title, onClose }: { src: string; title: strin
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  // Base (100%-zoom) display size, fit to an 85vw/75vh box, then scaled by the
+  // Base (100%-zoom) display size, fit to an 85vw / ~70vh box, then scaled by the
   // zoom factor. Rotation at 90/270° swaps width and height so the post-rotation
   // footprint is what gets laid out. `frame*` is the viewing window (stays put as
   // you zoom); `box*` is the image itself, which overflows and becomes scrollable.
+  // Until the photo loads, the frame is a 3:4 portrait box (article photos are
+  // portrait), so the loaded photo usually lands at exactly the same size.
+  const maxW = viewportSize.w * 0.85 - VIEWER_PADDING * 2;
+  const maxH = viewportSize.h * 0.7 - VIEWER_PADDING * 2;
   const isSideways = imgRotation === 90 || imgRotation === 270;
-  let frameWidth: number | undefined;
-  let frameHeight: number | undefined;
+  let frameWidth: number;
+  let frameHeight: number;
   let boxWidth: number | undefined;
   let boxHeight: number | undefined;
   if (naturalSize) {
-    const maxW = viewportSize.w * 0.85 - VIEWER_PADDING * 2;
-    const maxH = viewportSize.h * 0.75 - VIEWER_PADDING * 2;
     const fitScale = Math.min(1, maxW / naturalSize.w, maxH / naturalSize.h);
     const baseW = naturalSize.w * fitScale;
     const baseH = naturalSize.h * fitScale;
@@ -338,82 +348,126 @@ function ImagePreviewDialog({ src, title, onClose }: { src: string; title: strin
     frameHeight = isSideways ? baseW : baseH;
     boxWidth = frameWidth * imgZoom;
     boxHeight = frameHeight * imgZoom;
+  } else {
+    frameWidth = Math.min(maxW, maxH * 0.75);
+    frameHeight = frameWidth / 0.75;
   }
+
+  const zoomBtn =
+    'flex h-9 w-9 items-center justify-center rounded-[10px] border border-slate-300 bg-white text-slate-900 transition-colors hover:bg-slate-100 disabled:pointer-events-none disabled:opacity-40 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700';
 
   return (
     <Dialog open onOpenChange={(o) => { if (!o) onClose(); }}>
-      <DialogContent className="w-auto max-w-[92vw] p-0">
-        <DialogHeader className="flex flex-row items-center justify-between border-b border-border px-4 py-2">
-          <DialogTitle className="truncate text-sm">{title}</DialogTitle>
-          <div className="mr-8 flex items-center gap-1">
-            <Button size="icon" variant="outline" className="h-7 w-7" aria-label="Zoom out"
-              onClick={() => setImgZoom((z) => Math.max(0.25, Number((z - 0.25).toFixed(2))))}
-              disabled={imgZoom <= 0.25}>
-              <Minus />
-            </Button>
-            <span className="w-12 text-center text-xs tabular-nums text-muted-foreground">{Math.round(imgZoom * 100)}%</span>
-            <Button size="icon" variant="outline" className="h-7 w-7" aria-label="Zoom in"
-              onClick={() => setImgZoom((z) => Math.min(4, Number((z + 0.25).toFixed(2))))}
-              disabled={imgZoom >= 4}>
-              <Plus />
-            </Button>
-            <Button size="icon" variant="outline" className="ml-1 h-7 w-7" aria-label="Rotate 90°"
-              onClick={() => setImgRotation((r) => (r + 90) % 360)}>
-              <RotateCw />
-            </Button>
-            <Button size="sm" variant="ghost" className="ml-1 h-7 px-2 text-xs"
-              onClick={resetImageView} disabled={imgZoom === 1 && imgRotation === 0}>
-              Reset
-            </Button>
-          </div>
+      <DialogContent showClose={false} className="w-auto max-w-[92vw] gap-0 overflow-hidden rounded-2xl border-0 bg-slate-50 p-0 dark:bg-slate-900">
+        <DialogHeader className="flex flex-row items-center gap-3 space-y-0 bg-slate-800 px-4 py-3 text-white">
+          <DialogTitle className="mr-auto min-w-0 truncate text-[12px] font-bold uppercase tracking-[0.07em] text-white">
+            Article image · <span className="normal-case tracking-normal">{title}</span>
+          </DialogTitle>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/10 text-white hover:bg-white/20"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </DialogHeader>
-        <div
-          ref={panRef}
-          onMouseDown={onPanMouseDown}
-          className={cn('flex overflow-auto p-4', imgZoom > 1 && (isDragging ? 'cursor-grabbing' : 'cursor-grab'))}
-          // Fixed to the image's 100%-zoom footprint so the dialog stays the same
-          // size at every zoom level. "safe center" keeps every edge reachable by
-          // scroll once the zoomed image overflows.
-          style={{
-            width: frameWidth ? frameWidth + VIEWER_PADDING * 2 : undefined,
-            height: frameHeight ? frameHeight + VIEWER_PADDING * 2 : undefined,
-            maxWidth: '85vw',
-            maxHeight: '80vh',
-            alignItems: 'safe center',
-            justifyContent: 'safe center',
-          } as React.CSSProperties}
-        >
-          <img
-            src={src}
-            alt={title}
-            draggable={false}
-            onLoad={(e) => {
-              const t = e.currentTarget;
-              setNaturalSize({ w: t.naturalWidth, h: t.naturalHeight });
-            }}
-            className="block shrink-0 transition-[width,height,transform] duration-200 will-change-transform"
-            style={
-              boxWidth && boxHeight
-                ? {
-                    width: boxWidth,
-                    height: boxHeight,
-                    // Preflight's `img { max-width: 100% }` would cap the zoomed
-                    // width and distort the box, so lift it here.
-                    maxWidth: 'none',
-                    maxHeight: 'none',
-                    objectFit: 'contain',
-                    transform: `rotate(${imgRotation}deg)`,
-                    transformOrigin: 'center',
-                  }
-                : {
-                    maxWidth: '85vw',
-                    maxHeight: '75vh',
-                    objectFit: 'contain',
-                    transform: `scale(${imgZoom}) rotate(${imgRotation}deg)`,
-                    transformOrigin: 'center',
-                  }
-            }
-          />
+
+        <div className="flex flex-col items-center gap-3.5 p-4">
+          <div
+            ref={panRef}
+            onMouseDown={onPanMouseDown}
+            className={cn(
+              'relative flex overflow-auto rounded-xl bg-white dark:bg-slate-950',
+              imgZoom > 1 && (isDragging ? 'cursor-grabbing' : 'cursor-grab'),
+            )}
+            // Fixed to the image's 100%-zoom footprint so the dialog stays the same
+            // size at every zoom level. "safe center" keeps every edge reachable by
+            // scroll once the zoomed image overflows.
+            style={{ width: frameWidth, height: frameHeight, alignItems: 'safe center', justifyContent: 'safe center' } as React.CSSProperties}
+          >
+            {loading && (
+              <div
+                role="status"
+                className="absolute inset-0 flex animate-pulse flex-col items-center justify-center gap-2.5 bg-gradient-to-br from-slate-200 via-slate-100 to-slate-200 text-slate-500 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800"
+              >
+                <Shirt className="h-11 w-11 text-slate-400" strokeWidth={1.6} />
+                <span className="text-[13px] font-semibold text-slate-600 dark:text-slate-300">Loading photo…</span>
+                <span className="text-xs">Full-size original</span>
+              </div>
+            )}
+            {loadFailed && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2.5 p-6 text-center">
+                <ImageOff className="h-10 w-10 text-slate-400" strokeWidth={1.6} />
+                <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">Couldn’t load the photo</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLoadFailed(false);
+                    setAttempt((a) => a + 1);
+                  }}
+                  className="mt-1 h-9 rounded-lg bg-slate-900 px-4 text-[13px] font-semibold text-white hover:bg-slate-800"
+                >
+                  Try again
+                </button>
+              </div>
+            )}
+            {!loadFailed && (
+              <img
+                key={attempt}
+                src={src}
+                alt={title}
+                draggable={false}
+                onLoad={(e) => {
+                  const t = e.currentTarget;
+                  setNaturalSize({ w: t.naturalWidth, h: t.naturalHeight });
+                }}
+                onError={() => setLoadFailed(true)}
+                className={cn(
+                  'block shrink-0 transition-[width,height,transform,opacity] duration-200 will-change-transform',
+                  loading ? 'pointer-events-none absolute opacity-0' : 'opacity-100',
+                )}
+                style={
+                  boxWidth && boxHeight
+                    ? {
+                        width: boxWidth,
+                        height: boxHeight,
+                        // Preflight's `img { max-width: 100% }` would cap the zoomed
+                        // width and distort the box, so lift it here.
+                        maxWidth: 'none',
+                        maxHeight: 'none',
+                        objectFit: 'contain',
+                        transform: `rotate(${imgRotation}deg)`,
+                        transformOrigin: 'center',
+                      }
+                    : { width: 1, height: 1 }
+                }
+              />
+            )}
+          </div>
+
+          <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1.5 shadow-[0_6px_18px_rgba(15,23,42,0.12)] dark:border-slate-700 dark:bg-slate-800">
+            <button type="button" className={zoomBtn} aria-label="Zoom out" disabled={loading || loadFailed || imgZoom <= 0.25}
+              onClick={() => setImgZoom((z) => Math.max(0.25, Number((z - 0.25).toFixed(2))))}>
+              <Minus className="h-4 w-4" />
+            </button>
+            <span className={cn('w-12 text-center text-[13px] font-semibold tabular-nums', loading || loadFailed ? 'text-slate-400' : 'text-slate-900 dark:text-slate-100')}>
+              {Math.round(imgZoom * 100)}%
+            </span>
+            <button type="button" className={zoomBtn} aria-label="Zoom in" disabled={loading || loadFailed || imgZoom >= 4}
+              onClick={() => setImgZoom((z) => Math.min(4, Number((z + 0.25).toFixed(2))))}>
+              <Plus className="h-4 w-4" />
+            </button>
+            <span className="mx-1 h-5 w-px bg-slate-200 dark:bg-slate-600" aria-hidden="true" />
+            <button type="button" className={zoomBtn} aria-label="Fit to frame (reset)" title="Reset"
+              disabled={loading || loadFailed || (imgZoom === 1 && imgRotation === 0)} onClick={resetImageView}>
+              <Scan className="h-4 w-4" />
+            </button>
+            <button type="button" className={zoomBtn} aria-label="Rotate 90°" disabled={loading || loadFailed}
+              onClick={() => setImgRotation((r) => (r + 90) % 360)}>
+              <RotateCw className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

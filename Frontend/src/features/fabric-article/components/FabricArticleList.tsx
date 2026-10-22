@@ -57,8 +57,6 @@ import {
   preloadAttributeValues,
   getCachedValues,
   isValuesCached,
-  preloadCategoryAttributes,
-  getCachedCategoryAttributes,
   invalidateValuesCache,
   preloadMajCatGridFor,
   isMajCatGridLoadedFor,
@@ -443,7 +441,6 @@ const ArticleCard = React.memo(
     }, [segmentRanges]);
 
     const [cacheReady, setCacheReady] = useState(false);
-    const [catConfigReady, setCatConfigReady] = useState(false);
     // Tracks when the major-category grid JSON (for THIS article's category) has loaded
     const [gridReady, setGridReady] = useState(() => isMajCatGridLoadedFor(effectiveMajCat));
     // Tracks when the mandatory grid (for THIS article's category) has loaded
@@ -597,7 +594,7 @@ const ArticleCard = React.memo(
 
       return { visibleAttrs: visible, mandatoryKeys: mandatory };
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [effectiveMajCat, cacheReady, catConfigReady, gridReady, mandatoryGridReady, attributeFields, localValues, fabricGrid, fabricGridReady]);
+    }, [effectiveMajCat, cacheReady, gridReady, mandatoryGridReady, attributeFields, localValues, fabricGrid, fabricGridReady]);
 
     const [editingField, setEditingField] = useState<string | null>(null);
 
@@ -616,17 +613,6 @@ const ArticleCard = React.memo(
         .then(() => setCacheReady(true))
         .catch(() => setCacheReady(true));
     }, [item.division]);
-
-    useEffect(() => {
-      if (!effectiveMajCat) return;
-      if (getCachedCategoryAttributes(effectiveMajCat)) {
-        setCatConfigReady(true);
-        return;
-      }
-      preloadCategoryAttributes(effectiveMajCat)
-        .then(() => setCatConfigReady(true))
-        .catch(() => setCatConfigReady(true));
-    }, [effectiveMajCat]);
 
     // Fetch fabric attribute grid values (M_FAB_DIV, M_YARN, etc.) from fabric_maj_cat_grid_values
     useEffect(() => {

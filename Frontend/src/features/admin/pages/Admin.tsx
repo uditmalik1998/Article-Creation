@@ -210,22 +210,8 @@ interface GmMctMeta {
   familyCodesCount?: number;
 }
 
-interface HierarchyExcelStatus {
-  departments: number;
-  subDepartments: number;
-  categories: number;
-}
-interface HierarchyUploadResult {
-  departments: { new: number; updated: number; total: number };
-  subDepartments: { new: number; updated: number; total: number };
-  categories: { new: number; updated: number; total: number };
-  skippedRows: number;
-  dryRun: boolean;
-  preview?: { divisions: string[]; subDivisions: string[]; majorCategories: string[] };
-}
-
-/** Master-data upload cards on this page (Attributes 7, GM 3, Fabric & body 5, Precise 3, Costs 2, Hierarchy & menus 2). */
-const MASTER_DATA_COUNT = 22;
+/** Master-data upload cards on this page (Attributes 7, GM 3, Fabric & body 5, Precise 3, Costs and Broader Menu 3). */
+const MASTER_DATA_COUNT = 21;
 
 interface PipelineStatusData {
   PENDING: number;
@@ -439,16 +425,6 @@ export default function Admin() {
   const [gmGridJobPhase, setGmGridJobPhase] = useState<string>('');
   const gmGridFileRef = useRef<HTMLInputElement | null>(null);
   const gmGridPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  // Hierarchy Excel Upload (two-step)
-  const [hierarchyExcelStatus, setHierarchyExcelStatus] = useState<HierarchyExcelStatus | null>(null);
-  const [hierarchyExcelStatusLoading, setHierarchyExcelStatusLoading] = useState(false);
-  const [hierarchyExcelUploading, setHierarchyExcelUploading] = useState(false);
-  const [hierarchyExcelProgress, setHierarchyExcelProgress] = useState<number>(0);
-  const [hierarchyPreview, setHierarchyPreview] = useState<HierarchyUploadResult | null>(null);
-  const [hierarchyResult, setHierarchyResult] = useState<HierarchyUploadResult | null>(null);
-  const [hierarchyPendingFile, setHierarchyPendingFile] = useState<File | null>(null);
-  const hierarchyFileRef = useRef<HTMLInputElement | null>(null);
 
   // ─────────────────────────────── Vendor ───────────────────────────────
   const loadVendorStatus = useCallback(async () => {
@@ -2491,90 +2467,6 @@ export default function Admin() {
     }
   };
 
-  // ─────────────────────────────── Hierarchy Excel ───────────────────────────────
-  const loadHierarchyExcelStatus = useCallback(async () => {
-    setHierarchyExcelStatusLoading(true);
-    try {
-      const token = localStorage.getItem('authToken');
-      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/hierarchy/excel-status`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to load hierarchy status');
-      setHierarchyExcelStatus(data.data);
-    } catch (err: any) {
-      message.error(err?.message || 'Failed to load hierarchy status');
-    } finally {
-      setHierarchyExcelStatusLoading(false);
-    }
-  }, []);
-
-  const handleHierarchyPreview = async (file: File) => {
-    setHierarchyExcelUploading(true);
-    setHierarchyExcelProgress(0);
-    setHierarchyPreview(null);
-    setHierarchyResult(null);
-    setHierarchyPendingFile(file);
-    try {
-      const token = localStorage.getItem('authToken');
-      const formData = new FormData();
-      formData.append('file', file);
-      const progressInterval = setInterval(() => {
-        setHierarchyExcelProgress((prev) => Math.min(prev + 8, 85));
-      }, 300);
-      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/hierarchy/upload-excel?dryRun=true`, {
-        method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        body: formData,
-      });
-      clearInterval(progressInterval);
-      setHierarchyExcelProgress(100);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Preview failed');
-      setHierarchyPreview(data.data);
-    } catch (err: any) {
-      message.error(err?.message || 'Preview failed');
-      setHierarchyPendingFile(null);
-    } finally {
-      setHierarchyExcelUploading(false);
-      setTimeout(() => setHierarchyExcelProgress(0), 1000);
-      if (hierarchyFileRef.current) hierarchyFileRef.current.value = '';
-    }
-  };
-
-  const handleHierarchyConfirm = async () => {
-    if (!hierarchyPendingFile) return;
-    setHierarchyExcelUploading(true);
-    setHierarchyExcelProgress(0);
-    try {
-      const token = localStorage.getItem('authToken');
-      const formData = new FormData();
-      formData.append('file', hierarchyPendingFile);
-      const progressInterval = setInterval(() => {
-        setHierarchyExcelProgress((prev) => Math.min(prev + 2, 90));
-      }, 600);
-      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/hierarchy/upload-excel`, {
-        method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        body: formData,
-      });
-      clearInterval(progressInterval);
-      setHierarchyExcelProgress(100);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Import failed');
-      setHierarchyResult(data.data);
-      setHierarchyPreview(null);
-      setHierarchyPendingFile(null);
-      message.success(data.message);
-      await loadHierarchyExcelStatus();
-    } catch (err: any) {
-      message.error(err?.message || 'Import failed');
-    } finally {
-      setHierarchyExcelUploading(false);
-      setTimeout(() => setHierarchyExcelProgress(0), 1500);
-    }
-  };
-
   // ─────────────────────────────── Boot ───────────────────────────────
   useEffect(() => {
     loadData();
@@ -2593,7 +2485,6 @@ export default function Admin() {
     loadBasicAccessoriesStatus();
     loadCmpCostMasterStatus();
     loadNationalGridStatus();
-    loadHierarchyExcelStatus();
     loadPipelineStatus();
     loadFabricRawStatus();
     loadGmRawStatus();
@@ -2602,7 +2493,7 @@ export default function Admin() {
     loadBasicTrimMasterStatus();
     loadPreciseFabricArticleStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadSetMcMasterStatus, loadGmSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadBasicAccessoriesStatus, loadCmpCostMasterStatus, loadNationalGridStatus, loadHierarchyExcelStatus, loadPipelineStatus, loadFabricRawStatus, loadGmRawStatus, loadBodyFabConsStatus, loadPreciseBodyArticleStatus, loadBasicTrimMasterStatus, loadPreciseFabricArticleStatus]);
+  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadSetMcMasterStatus, loadGmSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadBasicAccessoriesStatus, loadCmpCostMasterStatus, loadNationalGridStatus, loadPipelineStatus, loadFabricRawStatus, loadGmRawStatus, loadBodyFabConsStatus, loadPreciseBodyArticleStatus, loadBasicTrimMasterStatus, loadPreciseFabricArticleStatus]);
 
   const loadData = async () => {
     setLoading(true);
@@ -2696,11 +2587,17 @@ export default function Admin() {
   return (
     <div className="page-scroll-enabled p-3">
       {/* ─── Header ─── */}
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-slate-800 px-6 py-4 text-white shadow-lg">
-        <div>
-          <h1 className="m-0 text-xl font-bold text-white">Admin Dashboard</h1>
-          <p className="m-0 mt-0.5 text-xs text-white/70">System health, sync status &amp; master data</p>
-        </div>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-slate-800 px-6 py-4 text-white shadow-lg">
+        <h1 className="m-0 text-xl font-bold text-white">Admin Dashboard</h1>
+        {/* Section links (design option B) — replaces the old "On this page" side box. */}
+        <JumpNav
+          items={[
+            { id: 'pipelines', label: 'Pipelines', count: 3 },
+            { id: 'vendor', label: 'Vendor sync' },
+            { id: 'masters', label: 'Master data', count: MASTER_DATA_COUNT },
+            { id: 'analytics', label: 'Analytics' },
+          ]}
+        />
         <div className="flex flex-wrap gap-2">
           <Button
             onClick={() => navigate('/admin/expense-change-requests')}
@@ -2727,15 +2624,7 @@ export default function Admin() {
       </div>
 
       <Spinner spinning={loading}>
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-          <JumpNav
-            items={[
-              { id: 'pipelines', label: 'Pipelines', count: 3 },
-              { id: 'vendor', label: 'Vendor sync' },
-              { id: 'masters', label: 'Master data', count: MASTER_DATA_COUNT },
-              { id: 'analytics', label: 'Analytics' },
-            ]}
-          />
+        <div className="flex flex-col gap-4">
           <div className="flex min-w-0 flex-1 flex-col gap-5">
         <section id="pipelines" className="scroll-mt-3 overflow-hidden rounded-xl border border-border bg-card">
           <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3">
@@ -3045,9 +2934,9 @@ export default function Admin() {
 
         <section id="masters" className="scroll-mt-3 flex flex-col gap-3">
           <SectionHeading title="Master data uploads" meta={`${MASTER_DATA_COUNT} datasets`} />
-          <MasterGroup title="Attributes & grids" count={7} notUploaded={((majCatGridMeta ? (majCatGridMeta.totalRows ?? majCatGridMeta.totalValues ?? 0) : null) === 0 ? 1 : 0) + ((sizeMasterMeta ? (sizeMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((colorMasterMeta ? (colorMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((mandatoryGridMeta ? (mandatoryGridMeta.totalRows ?? 0) : null) === 0 ? 1 : 0) + ((mcdTotal ? mcdTotal.total : null) === 0 ? 1 : 0) + ((nationalGridTotal) === 0 ? 1 : 0) + ((segmentMasterMeta ? (segmentMasterMeta.total ?? 0) : null) === 0 ? 1 : 0)}>
+          <MasterGroup title="FG Attributes & Grid" count={7} notUploaded={((majCatGridMeta ? (majCatGridMeta.totalRows ?? majCatGridMeta.totalValues ?? 0) : null) === 0 ? 1 : 0) + ((sizeMasterMeta ? (sizeMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((colorMasterMeta ? (colorMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((mandatoryGridMeta ? (mandatoryGridMeta.totalRows ?? 0) : null) === 0 ? 1 : 0) + ((mcdTotal ? mcdTotal.total : null) === 0 ? 1 : 0) + ((nationalGridTotal) === 0 ? 1 : 0) + ((segmentMasterMeta ? (segmentMasterMeta.total ?? 0) : null) === 0 ? 1 : 0)}>
             <MasterDataCard
-              title="Major Category Grid"
+              title="FG Major Category Grid Values"
               description="Dropdown Values"
               rows={majCatGridMeta ? (majCatGridMeta.totalRows ?? majCatGridMeta.totalValues ?? 0) : null}
               lastUpload={majCatGridMeta?.uploadedAt ?? null}
@@ -3521,7 +3410,7 @@ export default function Admin() {
               }
             />
             <MasterDataCard
-              title="Major Category Details"
+              title="FG Major Category Details"
               rows={mcdTotal ? mcdTotal.total : null}
               loading={mcdStatusLoading}
               busy={mcdUploading}
@@ -4793,7 +4682,7 @@ export default function Admin() {
               }
             />
           </MasterGroup>
-          <MasterGroup title="Costs" count={2} notUploaded={((vaacTotal ? vaacTotal.total : null) === 0 ? 1 : 0) + ((basicAccessoriesMeta ? (basicAccessoriesMeta.total ?? 0) : null) === 0 ? 1 : 0)}>
+          <MasterGroup title="Costs and Broader Menu" count={3} notUploaded={((vaacTotal ? vaacTotal.total : null) === 0 ? 1 : 0) + ((basicAccessoriesMeta ? (basicAccessoriesMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((broaderMenuMeta ? (broaderMenuMeta.total ?? 0) : null) === 0 ? 1 : 0)}>
             <MasterDataCard
               title="Value Addition Accessories Cost"
               rows={vaacTotal ? vaacTotal.total : null}
@@ -4965,170 +4854,6 @@ export default function Admin() {
                           Click to upload <strong>.xlsx</strong> file
                         </p>
                         <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
-                      </button>
-                    )}
-                  </div>
-
-                </>
-              }
-            />
-          </MasterGroup>
-          <MasterGroup title="Hierarchy & menus" count={2} notUploaded={((hierarchyExcelStatus ? hierarchyExcelStatus.categories : null) === 0 ? 1 : 0) + ((broaderMenuMeta ? (broaderMenuMeta.total ?? 0) : null) === 0 ? 1 : 0)}>
-            <MasterDataCard
-              title="Hierarchy Excel"
-              description="Division / Sub-Division / Major Category"
-              rows={hierarchyExcelStatus ? hierarchyExcelStatus.categories : null}
-              rowsLabel="Major categories"
-              loading={hierarchyExcelStatusLoading}
-              busy={hierarchyExcelUploading || !!hierarchyPreview}
-              onView={() => navigate('/admin/expense/hierarchy')}
-              onRefresh={loadHierarchyExcelStatus}
-              details={
-                <>
-                  {hierarchyExcelStatus ? (
-                    <Descriptions bordered>
-                      <Descriptions.Item label="Divisions (Departments)">
-                        <Badge variant="info">{hierarchyExcelStatus.departments}</Badge>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Sub-Divisions">
-                        <Badge variant="secondary">{hierarchyExcelStatus.subDepartments}</Badge>
-                      </Descriptions.Item>
-                      <Descriptions.Item label="Major Categories">
-                        <Badge variant="success">{hierarchyExcelStatus.categories}</Badge>
-                      </Descriptions.Item>
-                    </Descriptions>
-                  ) : (
-                    <Alert
-                      type="info"
-                      showIcon
-                      message="Upload Mandatory Grid Excel to sync hierarchy"
-                      description="Reads DIV, SUB-DIV, MAJOR_CATEGORY columns and upserts into departments, sub_departments, categories tables. Safe to re-upload — existing records are updated, nothing is deleted."
-                    />
-                  )}
-
-                  {hierarchyResult && (
-                    <Alert
-                      type="success"
-                      showIcon
-                      className="mt-3"
-                      message="Import Complete"
-                      description={
-                        <div className="mt-1 flex flex-wrap gap-4">
-                          <div>
-                            <strong>Departments:</strong>{' '}
-                            <Badge variant="success">+{hierarchyResult.departments.new} new</Badge>{' '}
-                            <Badge variant="info">~{hierarchyResult.departments.updated} updated</Badge>
-                          </div>
-                          <div>
-                            <strong>Sub-Divisions:</strong>{' '}
-                            <Badge variant="success">+{hierarchyResult.subDepartments.new} new</Badge>{' '}
-                            <Badge variant="info">~{hierarchyResult.subDepartments.updated} updated</Badge>
-                          </div>
-                          <div>
-                            <strong>Major Categories:</strong>{' '}
-                            <Badge variant="success">+{hierarchyResult.categories.new} new</Badge>{' '}
-                            <Badge variant="info">~{hierarchyResult.categories.updated} updated</Badge>
-                          </div>
-                          {hierarchyResult.skippedRows > 0 && (
-                            <Badge variant="warning">{hierarchyResult.skippedRows} rows skipped (empty cells)</Badge>
-                          )}
-                        </div>
-                      }
-                    />
-                  )}
-
-                </>
-              }
-              upload={
-                <>
-                  <div className="rounded-md border border-border p-4">
-                    <div className="mb-1 font-semibold">Upload Hierarchy Excel</div>
-                    <div className="mb-3 text-xs text-muted-foreground">
-                      Upload <strong>MANDATORY GRID DATA.xlsx</strong> — columns A (DIV), B (SUB-DIV), C (MAJOR_CATEGORY). Data starts from row 6. Sub-division codes are auto-normalized (e.g. <code>KGU</code> → <code>KG-U</code>).
-                    </div>
-
-                    <input
-                      ref={hierarchyFileRef}
-                      type="file"
-                      accept=".xlsx,.xls"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleHierarchyPreview(file);
-                      }}
-                    />
-
-                    {hierarchyExcelUploading ? (
-                      <div>
-                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
-                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
-                          {hierarchyPreview ? 'Importing to database...' : 'Reading Excel file...'}
-                        </div>
-                        <Progress value={hierarchyExcelProgress} />
-                      </div>
-                    ) : hierarchyPreview ? (
-                      <div>
-                        <Alert
-                          type="info"
-                          showIcon
-                          className="mb-3"
-                          message="Preview — confirm to import"
-                          description={
-                            <div className="mt-1">
-                              <div className="mb-2 flex flex-wrap items-center gap-2">
-                                <span>
-                                  <strong>Divisions:</strong> <Badge variant="info">{hierarchyPreview.departments.total}</Badge>
-                                </span>
-                                <span>
-                                  <strong>Sub-Divisions:</strong> <Badge variant="secondary">{hierarchyPreview.subDepartments.total}</Badge>
-                                </span>
-                                <span>
-                                  <strong>Major Categories:</strong> <Badge variant="success">{hierarchyPreview.categories.total}</Badge>
-                                </span>
-                                {hierarchyPreview.skippedRows > 0 && (
-                                  <Badge variant="warning">{hierarchyPreview.skippedRows} rows skipped</Badge>
-                                )}
-                              </div>
-                              {hierarchyPreview.preview && (
-                                <div className="text-xs text-muted-foreground">
-                                  <div>
-                                    <strong>Divisions found:</strong> {hierarchyPreview.preview.divisions.join(', ')}
-                                  </div>
-                                  <div className="mt-1">
-                                    <strong>Sub-Divisions:</strong> {hierarchyPreview.preview.subDivisions.join(', ')}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          }
-                        />
-                        <div className="flex gap-2">
-                          <Button onClick={handleHierarchyConfirm} className="flex-1">
-                            <CheckCircle2 />
-                            Confirm Import
-                          </Button>
-                          <Button
-                            variant="outline"
-                            onClick={() => {
-                              setHierarchyPreview(null);
-                              setHierarchyPendingFile(null);
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => hierarchyFileRef.current?.click()}
-                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-emerald-500 hover:bg-emerald-50/40"
-                      >
-                        <Inbox className="mb-2 h-8 w-8 text-emerald-600" />
-                        <p className="text-[13px]">
-                          Click to upload <strong>.xlsx</strong> file
-                        </p>
-                        <p className="text-[11px] text-muted-foreground">Previews before importing. Only Excel files. Max 50 MB.</p>
                       </button>
                     )}
                   </div>

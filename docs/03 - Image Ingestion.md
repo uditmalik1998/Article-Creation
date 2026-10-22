@@ -130,3 +130,20 @@ pptNumber, imageUrl, designNumber, division, subDivision, majorCategory, vendorC
 | Trigger | Automated (folder poll) | Manual (user) | Manual/cron |
 | Auth | API Key | JWT | API Key |
 | Dedup key | `imageUncPath` | None | `pptNumber + designNumber` |
+
+### Major category dropdown — Option A built (2026-10-22)
+
+Extraction › FG Article setup row. The current Popover panel renders narrower than its field, and the list is plain names. 5 directions: https://claude.ai/artifact/Rg15A7xDyCmHBXA3Tp5zkb
+- A: same look as Sub-division, with MC codes and keyboard
+- B: grouped by IB_/JB_/YB_
+- C: garment × prefix grid
+- D: type in the field, recents first
+- E: tap chips under the row
+
+The Sub-division dropdown stays as is. **Option A built** in `SimplifiedExtractionPage.tsx`:
+- The panel matches the field width. The fix was `w-[var(--radix-popover-trigger-width)]`; the old `w-[--…]` didn't apply.
+- The open trigger gets a slate ring and an up chevron.
+- Search sits inside the panel and matches the name or the MC code, with an "N of M" count.
+- Rows show the MC code from `getMcCodeByMajorCategory`. The selected row is bold with a slate fill and a check.
+- Keyboard: ↑ ↓ / Enter / Esc. The hint footer was removed at the user's request (2026-10-22). The listbox has proper roles.
+- Not checked in a signed-in browser.
