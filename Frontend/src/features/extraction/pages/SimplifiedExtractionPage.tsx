@@ -7,7 +7,7 @@
  * 2. Start batch extraction and review the validated results
  */
 import { useState, useCallback, useEffect, useMemo, type ReactNode } from 'react';
-import { Eraser, Download, Check, Bot, ChevronDown, Search } from 'lucide-react';
+import { Eraser, Download, Check, Bot, ChevronDown, ChevronUp, Search } from 'lucide-react';
 import {
   Button,
   Dialog,
@@ -32,7 +32,7 @@ import { AttributeTable } from '../components/AttributeTable';
 import ExportManager from '../components/ExportManager';
 import { useImageExtraction } from '../../../shared/hooks/extraction/useImageExtraction';
 import type { SchemaItem } from '../../../shared/types/extraction/ExtractionTypes';
-import { MAJOR_CATEGORY_ALLOWED_VALUES } from '../../../data/majorCategoryMcCodeMap';
+import { MAJOR_CATEGORY_ALLOWED_VALUES, getMcCodeByMajorCategory } from '../../../data/majorCategoryMcCodeMap';
 import { getMajCatAllowedValues, getMajCatMandatoryKeys } from '../../../data/majCatAttributeMap';
 import { preloadAttributeValues } from '../../../services/articleConfigService';
 
@@ -231,6 +231,7 @@ const SimplifiedExtractionPage = () => {
   const [hierarchyLoading, setHierarchyLoading] = useState(false);
   const [majCatOpen, setMajCatOpen] = useState(false);
   const [majCatSearch, setMajCatSearch] = useState('');
+  const [majCatActive, setMajCatActive] = useState(0); // keyboard-highlighted row in the filtered list
 
   useEffect(() => {
     const division = selectedCategory?.department;
@@ -308,6 +309,14 @@ const SimplifiedExtractionPage = () => {
     () => majorCategoriesForSubDiv(selectedSubDivision),
     [majorCategoriesForSubDiv, selectedSubDivision],
   );
+  // Major category search matches the name or its MC code.
+  const majCatFiltered = useMemo(() => {
+    const q = majCatSearch.trim().toLowerCase();
+    if (!q) return majorCategoryOptions;
+    return majorCategoryOptions.filter(
+      (mc) => mc.toLowerCase().includes(q) || (getMcCodeByMajorCategory(mc) ?? '').includes(q),
+    );
+  }, [majCatSearch, majorCategoryOptions]);
   // Major Category is required whenever the sub-division has any to pick from.
   const isSetupComplete =
     !!selectedCategory?.department &&
@@ -520,6 +529,11 @@ const SimplifiedExtractionPage = () => {
     setCurrentStep('setup');
   };
 
+  const pickMajorCategory = (mc: string) => {
+    setSelectedMajorCategory(mc);
+    setMajCatOpen(false);
+    setMajCatSearch('');
+  };
   const fieldLabel = 'text-[12px] font-semibold tracking-[0.06em] text-slate-600 dark:text-slate-400';
   const fieldTrigger =
     'h-11 w-full rounded-[10px] border-slate-300 bg-white text-[14.5px] font-semibold text-slate-900 focus:ring-slate-800 data-[state=open]:border-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50';
@@ -647,21 +661,26 @@ const SimplifiedExtractionPage = () => {
                     </div>
                     <div className="flex flex-col gap-1.5">
                       <span className={fieldLabel}>3 · MAJOR CATEGORY</span>
+                      {/* Design "Option A": same look as the Sub-division list — full field width,
+                          search inside, MC code per row, slate selected state, ↑ ↓ Enter Esc (no hint bar). */}
                       <Popover
                         open={majCatOpen}
                         onOpenChange={(o) => {
                           setMajCatOpen(o);
                           if (!o) setMajCatSearch('');
+                          else setMajCatActive(Math.max(0, majorCategoryOptions.indexOf(selectedMajorCategory ?? '')));
                         }}
                       >
                         <PopoverTrigger asChild>
                           <button
                             type="button"
                             aria-label="Major category"
+                            aria-haspopup="listbox"
                             disabled={majorCategoryOptions.length === 0}
                             className={cn(
                               fieldTrigger,
                               'flex items-center justify-between border px-3 text-left outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50',
+                              majCatOpen && 'border-slate-800 ring-[3px] ring-slate-800/15',
                             )}
                           >
                             <span className={cn('truncate', !selectedMajorCategory && 'font-normal text-muted-foreground')}>
@@ -672,48 +691,84 @@ const SimplifiedExtractionPage = () => {
                                   ? 'None for this sub-division'
                                   : 'Select major category')}
                             </span>
-                            <ChevronDown className="ml-2 h-4 w-4 shrink-0 text-muted-foreground" />
+                            {majCatOpen ? (
+                              <ChevronUp className="ml-2 h-4 w-4 shrink-0 text-slate-800 dark:text-slate-200" />
+                            ) : (
+                              <ChevronDown className="ml-2 h-4 w-4 shrink-0 text-muted-foreground" />
+                            )}
                           </button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
-                          <div className="flex items-center border-b px-3 py-2">
-                            <Search className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
+                        <PopoverContent
+                          className="w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-xl border-slate-200 p-0 shadow-xl dark:border-slate-700"
+                          align="start"
+                          sideOffset={6}
+                        >
+                          <div className="flex h-12 items-center gap-2.5 border-b border-slate-200 px-3.5 dark:border-slate-700">
+                            <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
                             <input
                               autoFocus
                               value={majCatSearch}
-                              onChange={(e) => setMajCatSearch(e.target.value)}
-                              placeholder="Search major category…"
+                              onChange={(e) => {
+                                setMajCatSearch(e.target.value);
+                                setMajCatActive(0);
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'ArrowDown') {
+                                  e.preventDefault();
+                                  setMajCatActive((i) => Math.min(i + 1, majCatFiltered.length - 1));
+                                } else if (e.key === 'ArrowUp') {
+                                  e.preventDefault();
+                                  setMajCatActive((i) => Math.max(i - 1, 0));
+                                } else if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  const mc = majCatFiltered[majCatActive];
+                                  if (mc) pickMajorCategory(mc);
+                                }
+                              }}
+                              placeholder="Search major category or MC code"
+                              aria-label="Search major category"
+                              aria-controls="majcat-listbox"
+                              aria-activedescendant={majCatFiltered[majCatActive] ? `majcat-opt-${majCatActive}` : undefined}
                               className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
                             />
+                            <span className="text-xs tabular-nums text-muted-foreground">
+                              {majCatSearch.trim() ? `${majCatFiltered.length} of ${majorCategoryOptions.length}` : majorCategoryOptions.length}
+                            </span>
                           </div>
-                          <div className="max-h-60 overflow-y-auto py-1">
-                            {(() => {
-                              const q = majCatSearch.trim().toLowerCase();
-                              const filtered = q
-                                ? majorCategoryOptions.filter((mc) => mc.toLowerCase().includes(q))
-                                : majorCategoryOptions;
-                              if (filtered.length === 0) {
-                                return <div className="px-3 py-2 text-sm text-muted-foreground">No categories found</div>;
-                              }
-                              return filtered.map((mc) => (
-                                <button
-                                  key={mc}
-                                  type="button"
-                                  onClick={() => {
-                                    setSelectedMajorCategory(mc);
-                                    setMajCatOpen(false);
-                                    setMajCatSearch('');
-                                  }}
-                                  className={cn(
-                                    'flex w-full items-center justify-between px-3 py-1.5 text-left text-sm hover:bg-slate-100 dark:hover:bg-slate-800',
-                                    selectedMajorCategory === mc && 'bg-slate-100 font-medium dark:bg-slate-800',
-                                  )}
-                                >
-                                  <span className="truncate">{mc}</span>
-                                  {selectedMajorCategory === mc && <Check className="ml-2 h-3.5 w-3.5 shrink-0" />}
-                                </button>
-                              ));
-                            })()}
+                          <div id="majcat-listbox" role="listbox" aria-label="Major categories" className="max-h-[420px] overflow-y-auto p-1.5">
+                            {majCatFiltered.length === 0 ? (
+                              <div className="px-3 py-3 text-sm text-muted-foreground">No categories match “{majCatSearch.trim()}”</div>
+                            ) : (
+                              majCatFiltered.map((mc, i) => {
+                                const selected = selectedMajorCategory === mc;
+                                const code = getMcCodeByMajorCategory(mc);
+                                return (
+                                  <button
+                                    key={mc}
+                                    id={`majcat-opt-${i}`}
+                                    type="button"
+                                    role="option"
+                                    aria-selected={selected}
+                                    ref={i === majCatActive ? (el) => el?.scrollIntoView({ block: 'nearest' }) : undefined}
+                                    onMouseMove={() => setMajCatActive(i)}
+                                    onClick={() => pickMajorCategory(mc)}
+                                    className={cn(
+                                      'flex min-h-10 w-full items-center gap-2.5 rounded-lg px-3 text-left text-sm text-slate-900 dark:text-slate-100',
+                                      (i === majCatActive || selected) && 'bg-slate-100 dark:bg-slate-800',
+                                      selected ? 'font-bold' : 'font-medium',
+                                    )}
+                                  >
+                                    <span className="truncate">{mc}</span>
+                                    <span className="ml-auto shrink-0 font-mono text-xs font-medium text-slate-500 dark:text-slate-400">{code ?? ''}</span>
+                                    {selected ? (
+                                      <Check className="h-4 w-4 shrink-0 text-slate-800 dark:text-slate-200" />
+                                    ) : (
+                                      <span className="w-4 shrink-0" />
+                                    )}
+                                  </button>
+                                );
+                              })
+                            )}
                           </div>
                         </PopoverContent>
                       </Popover>

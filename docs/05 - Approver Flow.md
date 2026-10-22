@@ -312,3 +312,19 @@ The two-row header now lives in `shared/components/articles/ArticleListHeader.ts
 
 - 2026-10-21: Created page (modify mode) — Create Body / Create Fabric Article now fills BODY ARTICLE NO. / FAB ARTICLE NO. Cause: editing a BODY/FAB attribute stages `bodyArticle` / `fabricArticleNumber` = null in localValues + pendingChanges, and the item-sync effect kept staged keys, so the number the server wrote (incl. 409 "already exists" auto-fill) never showed and Modify would have saved null. Fix in ApproverArticleList item-sync effect: a newly arrived number (or any number after the user clicked Create, via awaitingLinkRef) replaces the staged null in both localValues and pendingChanges.
 - 2026-10-21: Create Fabric Article "already exists" (409) now behaves like Create Body Article: backend writes the existing fabric number to extraction_results_flat.fabric_article_number (skipped in modify mode / skipFlatUpdate, where the card stages it for Modify); toast "Fabric Article already exists: N — auto-filled". FAB ARTICLE NO. also covered by the staged-null fix (fabricArticleNumber).
+
+### Card photo popup — Option B built (2026-10-22)
+
+On the dashboard cards, opening a photo shows an empty white strip until the ~4 MB original loads (the card itself shows the WebP thumbnail). Design options: https://claude.ai/artifact/9LjAhatMhe6xFQFcm6dgha
+- A: blur-up from the thumbnail
+- B: 3:4 skeleton + floating toolbar
+- C: dark lightbox with MB ring
+- D: details side panel
+- E: grows from the card, with an error state
+
+**Option B built** in `shared/components/articles/ArticleSpecCard.tsx` (`ImagePreviewDialog`). It is shared, so it applies to the FG, FG New, Fabric, Body and GM dashboards.
+- Ink header "ARTICLE IMAGE · <title>" with its own close button (`showClose={false}`).
+- The frame is sized before load: a 3:4 portrait box fit to 85vw × 70vh. It shows a shimmer skeleton, a shirt icon and "Loading photo…" while the hidden `<img>` loads. After load the frame takes the photo's real ratio, so landscape photos resize once.
+- A failed load shows "Couldn't load the photo" with Try again (remounts the img).
+- The floating toolbar under the photo has − % +, Fit/reset and Rotate, all disabled while loading.
+- Checked in a local test page against a real r2.dev original (~4 s load).

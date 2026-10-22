@@ -275,14 +275,6 @@ router.post('/size-master/add', h(adminController.addSizeMasterSize));
 router.post('/size-master/delete', h(adminController.deleteSizeMasterSize));
 
 // ═══════════════════════════════════════════════════════
-// HIERARCHY EXCEL UPLOAD (ADMIN)
-// Upserts Department / SubDepartment / Category from
-// DIV / SUB-DIV / MAJOR_CATEGORY columns of the Mandatory Grid Excel.
-// ═══════════════════════════════════════════════════════
-router.get('/hierarchy/excel-status', h(adminController.getHierarchyExcelStatus));
-router.post('/hierarchy/upload-excel', excelUpload.single('file'), mut, h(adminController.uploadHierarchyExcel));
-
-// ═══════════════════════════════════════════════════════
 // MODIFY LOGS (ADMIN)
 // ═══════════════════════════════════════════════════════
 // ORDER MATTERS: group/:groupId must come before plain :id would interfere
