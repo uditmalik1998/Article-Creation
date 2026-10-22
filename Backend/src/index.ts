@@ -16,6 +16,7 @@ import adminRoutes from './routes/admin';
 import expenseRoutes from './routes/expense';
 import authRoutes from './routes/auth';
 import userExtractionRoutes from './routes/userExtraction';
+import imagesRoutes from './routes/images';
 import simplifiedExtractionRoutes from './routes/simplifiedExtraction'; // NEW: Simplified workflow
 import userFeedbackRoutes from './routes/userFeedback'; // NEW: User feedback/correction tracking
 import costRoutes from './routes/costs'; // NEW: Cost tracking routes
@@ -174,6 +175,7 @@ app.use('/api/', (req, res, next) => {
   if (req.path.startsWith('/approver/')) return next();
   if (req.path.startsWith('/article-config/')) return next();
   if (req.path.startsWith('/srm-hook/')) return next(); // uses own API key auth + background processing
+  if (req.path.startsWith('/images/')) return next(); // card thumbnails — up to 50 per page load
   return limiter(req, res, next);
 });
 
@@ -253,6 +255,7 @@ if (process.env.NODE_ENV === 'development') {
 // PUBLIC ROUTES (No authentication required)
 // ═══════════════════════════════════════════════════════
 app.use('/api/auth', authRoutes); // Login, verify token
+app.use('/api/images', imagesRoutes); // Card thumbnails (public: <img> can't send a token)
 
 // ═══════════════════════════════════════════════════════
 // SRM WEBHOOK ROUTES (API-key secured, no JWT)

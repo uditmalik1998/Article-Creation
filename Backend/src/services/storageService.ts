@@ -654,6 +654,31 @@ export class StorageService {
         }
     }
 
+    /** Cached card thumbnail from the main bucket, or null when it hasn't been made yet. */
+    async getThumbnail(key: string): Promise<Buffer | null> {
+        try {
+            const res = await this.s3Client.send(new GetObjectCommand({ Bucket: this.bucket, Key: key }));
+            const chunks: Uint8Array[] = [];
+            for await (const chunk of res.Body as AsyncIterable<Uint8Array>) chunks.push(chunk);
+            return Buffer.concat(chunks);
+        } catch (error: any) {
+            const code = String(error?.Code || error?.code || error?.name || '').toLowerCase();
+            const status = Number(error?.$metadata?.httpStatusCode || 0);
+            if (code === 'nosuchkey' || code === 'notfound' || status === 404) return null;
+            throw error;
+        }
+    }
+
+    async putThumbnail(key: string, buffer: Buffer, contentType: string): Promise<void> {
+        await this.s3Client.send(new PutObjectCommand({
+            Bucket: this.bucket,
+            Key: key,
+            Body: buffer,
+            ContentType: contentType,
+            CacheControl: 'public, max-age=31536000, immutable',
+        }));
+    }
+
     /**
      * Upload a generated model image to the model-images bucket at the given key
      * (e.g. "1110097922-BLACK/front.jpg"). Returns the public URL when a public
