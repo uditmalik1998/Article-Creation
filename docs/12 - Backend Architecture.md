@@ -53,7 +53,6 @@ flowchart TD
 
     EXTR[EnhancedExtractionController] --> VLM[vlm/vlmService\nClaude, GPT-4o, FashionCLIP]
     EXTR --> FLAT[flatteningService\nNormalize + persist]
-    EXTR --> QUEUE[queueManagementService\nmaxConcurrent=4]
     EXTR --> COST[sessionCostTracker]
     EXTR --> MIRROR[mirror360Flat\nfire-and-forget]
 
