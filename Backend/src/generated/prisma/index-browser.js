@@ -645,24 +645,6 @@ exports.Prisma.UserScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.AuditLogScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  action: 'action',
-  resource: 'resource',
-  resourceId: 'resourceId',
-  method: 'method',
-  path: 'path',
-  statusCode: 'statusCode',
-  ip: 'ip',
-  userAgent: 'userAgent',
-  requestBody: 'requestBody',
-  responseBody: 'responseBody',
-  duration: 'duration',
-  errorMessage: 'errorMessage',
-  timestamp: 'timestamp'
-};
-
 exports.Prisma.ApiKeyScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -2099,17 +2081,6 @@ exports.Prisma.UserOrderByRelevanceFieldEnum = {
   businessDivision: 'businessDivision'
 };
 
-exports.Prisma.AuditLogOrderByRelevanceFieldEnum = {
-  action: 'action',
-  resource: 'resource',
-  resourceId: 'resourceId',
-  method: 'method',
-  path: 'path',
-  ip: 'ip',
-  userAgent: 'userAgent',
-  errorMessage: 'errorMessage'
-};
-
 exports.Prisma.ApiKeyOrderByRelevanceFieldEnum = {
   name: 'name',
   key: 'key'
@@ -3056,7 +3027,6 @@ exports.Prisma.ModelName = {
   MvgrLookup: 'MvgrLookup',
   MasterVendorDetail: 'MasterVendorDetail',
   User: 'User',
-  AuditLog: 'AuditLog',
   ApiKey: 'ApiKey',
   ChangeHistory: 'ChangeHistory',
   CostSummary: 'CostSummary',

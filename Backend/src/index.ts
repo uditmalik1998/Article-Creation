@@ -30,7 +30,6 @@ import { errorHandler, notFound, requestTimeout } from './middleware/errorHandle
 import { authenticate, requireAdmin, requireUser } from './middleware/auth';
 import { authenticateJwtOrServiceKey } from './middleware/serviceApiKeyAuth';
 import { authenticateWatcher } from './middleware/watcherAuth';
-import { auditLog, flushAuditLogsOnShutdown } from './middleware/auditLogger';
 
 // Services
 import { checkApiConfiguration } from './services/baseApi';
@@ -267,12 +266,12 @@ app.use('/api/srm-hook', srmHookRoutes);
 // ═══════════════════════════════════════════════════════
 // ADMIN ROUTES (Admin role required + Audit logging)
 // ═══════════════════════════════════════════════════════
-app.use('/api/admin', authenticate, requireAdmin, auditLog, adminRoutes);
+app.use('/api/admin', authenticate, requireAdmin, adminRoutes);
 
 // ═══════════════════════════════════════════════════════
 // EXPENSE DATA ROUTES (Creator/Approver/Category-Head/PD/Admin — per-route role checks)
 // ═══════════════════════════════════════════════════════
-app.use('/api/expense', authenticate, auditLog, expenseRoutes);
+app.use('/api/expense', authenticate, expenseRoutes);
 
 // ═══════════════════════════════════════════════════════
 // TEST API ROUTES (Admin role required)
@@ -295,7 +294,7 @@ app.use('/api/poolb', authenticate, requireAdmin, poolBRoutes);
 // ═══════════════════════════════════════════════════════
 // USER ROUTES (Authentication required + Audit logging)
 // ═══════════════════════════════════════════════════════
-app.use('/api/user', authenticate, requireUser, auditLog, userExtractionRoutes);
+app.use('/api/user', authenticate, requireUser, userExtractionRoutes);
 
 // ═══════════════════════════════════════════════════════
 // USER FEEDBACK ROUTES (Track corrections & learning)
@@ -305,7 +304,7 @@ app.use('/api/user/feedback', authenticate, requireUser, userFeedbackRoutes);
 // ═══════════════════════════════════════════════════════
 // SIMPLIFIED WORKFLOW ROUTES (New workflow: Dept → Major Category → Extract)
 // ═══════════════════════════════════════════════════════
-app.use('/api/user/simplified', authenticate, requireUser, auditLog, simplifiedExtractionRoutes);
+app.use('/api/user/simplified', authenticate, requireUser, simplifiedExtractionRoutes);
 
 // ═══════════════════════════════════════════════════════
 // LEGACY ROUTES (Backward compatibility - TO BE DEPRECATED)
@@ -325,7 +324,7 @@ app.use('/api/admin/costs', authenticate, requireAdmin, costRoutes);
 // APPROVER ROUTES (Approver role required)
 // Uses custom rate limiter: 500 requests per 15 minutes (more lenient for edit-on-card)
 // ═══════════════════════════════════════════════════════
-app.use('/api/approver', authenticate, approverLimiter, auditLog, approverRoutes);
+app.use('/api/approver', authenticate, approverLimiter, approverRoutes);
 
 // ═══════════════════════════════════════════════════════
 // WATCHER ROUTES (External file-watcher service only)
@@ -587,12 +586,6 @@ app.use(errorHandler);
         process.exit(1);
       }, 8000);
       forceExit.unref();
-
-      try {
-        await flushAuditLogsOnShutdown();
-      } catch (error) {
-        console.error('❌ Failed to flush audit logs during shutdown:', error);
-      }
 
       server.close(async () => {
         try {
