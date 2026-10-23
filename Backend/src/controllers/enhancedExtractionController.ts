@@ -15,7 +15,6 @@ import { buildArticleDescription } from '../utils/articleDescriptionBuilder';
 import { getExcludedDescriptionFields } from '../utils/categoryFieldVisibility';
 import { duplicateForKidsDivision } from '../services/kidsDivisionDuplicationService';
 import { createVariantsForGeneric } from '../services/variantCreationService';
-import { mirror360FlatUpdate } from '../utils/mirror360Flat';
 import { hierarchyService } from '../services/hierarchyService';
 import { snapValueToGrid } from '../utils/gridSnap';
 
@@ -431,7 +430,6 @@ export class EnhancedExtractionController {
 
           if (Object.keys(directFill).length > 0) {
             await prisma.extractionResultFlat.update({ where: { id: flatId }, data: directFill });
-            void mirror360FlatUpdate(flatId, directFill);
           }
         }
       } catch (flatError) {
@@ -484,7 +482,6 @@ export class EnhancedExtractionController {
             where: { id: flatId },
             data: overrides,
           });
-          void mirror360FlatUpdate(flatId, overrides);
 
           // ── Step 4: Segment + Article Description (need the updated row values) ──
           const updatedRow = await prisma.extractionResultFlat.findUnique({
@@ -522,7 +519,6 @@ export class EnhancedExtractionController {
                 where: { id: flatId },
                 data: derivedStep2,
               });
-              void mirror360FlatUpdate(flatId, derivedStep2);
             }
           }
         } catch (overrideError) {

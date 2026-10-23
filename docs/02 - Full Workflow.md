@@ -115,7 +115,6 @@ Three ways images enter the system:
 
 - One `ExtractionResultFlat` row created per image/article
 - Auto-derives: `mcCode`, `hsnTaxCode`, `segment`, `articleDescription`, `season`
-- Mirrors to `360article.article_360_flat` (analytics) — fire-and-forget, never blocks
 - Startup backfills run at every backend start to repair missing derived fields
 
 ---

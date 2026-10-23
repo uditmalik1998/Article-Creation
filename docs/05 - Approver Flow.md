@@ -177,7 +177,6 @@ sequenceDiagram
     UI->>UI: Optimistic update (show new value)
     UI->>API: PUT {field: newValue}
     API->>DB: prisma.update()
-    API->>DB: mirror360FlatUpdate() [fire-and-forget]
     API-->>UI: {updated record}
     UI->>UI: Sync state from server response
     UI->>UI: Clear stale localValues cache

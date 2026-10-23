@@ -7,7 +7,6 @@
  */
 import { randomUUID } from 'crypto';
 import { prismaClient as prisma } from '../utils/prisma';
-import { mirror360FlatUpdate } from '../utils/mirror360Flat';
 
 /**
  * Active sizes for a major category, read from the `maj_cat_sizes` table
@@ -228,9 +227,6 @@ export async function syncGenericToVariants(genericId: string, updatedData: Reco
         data: fgSyncData,
       }).catch((e: any) => console.error(`[VariantSync] fg_variant sync failed for generic=${genericId}:`, e?.message));
     }
-
-    // Mirror sync to 360article (fire-and-forget)
-    void Promise.all(variantIds.map(v => mirror360FlatUpdate(v.id, syncData)));
 
   } catch (err: any) {
     // Log but do not rethrow — variant sync failure must not crash the main update request

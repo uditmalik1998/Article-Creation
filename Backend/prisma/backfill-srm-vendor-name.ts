@@ -13,7 +13,6 @@
  */
 
 import { PrismaClient } from '../src/generated/prisma';
-import { mirror360FlatUpdate } from '../src/utils/mirror360Flat';
 
 const prisma = new PrismaClient();
 
@@ -108,7 +107,6 @@ async function main() {
     if (Object.keys(patch).length === 0) { skipped++; continue; }
 
     await prisma.extractionResultFlat.update({ where: { id: rec.id }, data: patch });
-    void mirror360FlatUpdate(rec.id, patch);
     updated++;
 
     if (updated % 50 === 0) console.log(`  Updated ${updated}...`);

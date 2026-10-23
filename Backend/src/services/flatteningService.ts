@@ -6,7 +6,6 @@ import { buildArticleDescription, buildReferenceArticleDescription } from '../ut
 import { getExcludedDescriptionFields } from '../utils/categoryFieldVisibility';
 import { getSegmentFromMaster } from './segmentMasterService';
 import { normalizeVendorCode } from '../utils/vendorCode';
-import { upsert360ArticleFlatRow } from '../utils/mirror360Flat';
 
 function getCurrentSeasonCode(): string {
     const month = new Date().getMonth() + 1;
@@ -77,9 +76,6 @@ export class FlatteningService {
             create: flatData,
             update: flatData
         });
-
-        // Mirror to 360article.article_360_flat (fire-and-forget)
-        void upsert360ArticleFlatRow(flatRecord.id, { ...flatData, jobId });
 
         console.log(`✅ Flattened extraction job ${jobId}`);
     }
@@ -283,153 +279,6 @@ export class FlatteningService {
             articleType: resultsMap.get('article_type') || resultsMap.get('articletype') || null,
             fabVdr: resultsMap.get('fab_vdr') || null,
         };
-    }
-
-    /**
-     * Upsert a row into 360article.article_360_flat, mirroring the public flat table.
-     * Uses raw SQL because the Prisma client is not yet regenerated for the 360article schema.
-     */
-    private async upsertTo360ArticleFlat(d: any): Promise<void> {
-        const str = (v: unknown) => (v == null ? null : String(v));
-        const num = (v: unknown) => (v == null ? null : Number(v));
-
-        await prisma.$executeRawUnsafe(`
-            INSERT INTO "360article"."article_360_flat" (
-                id, job_id,
-                image_name, image_url,
-                division, sub_division, major_category,
-                design_number, vendor_name, vendor_code,
-                reference_article_number, reference_article_description,
-                article_number, sap_article_id, mc_code,
-                rate, mrp, imp_atrbt_2,
-                macro_mvgr, yarn_1, main_mvgr, fabric_main_mvgr,
-                weave, m_fab2, composition,
-                f_count, f_construction, lycra, finish, gsm,
-                f_ounce, f_width,
-                collar, collar_style, neck, neck_details, placket,
-                father_belt, sleeve, sleeve_fold, bottom_fold,
-                no_of_pocket, pocket_type, extra_pocket,
-                fit, body_style, length,
-                drawcord, dc_shape, button, btn_colour,
-                zipper, zip_colour, patches, patches_type,
-                print_type, print_style, print_placement,
-                embroidery, embroidery_type, wash,
-                extraction_status, approval_status, sap_sync_status,
-                user_id, user_name, user_email,
-                created_at, updated_at
-            ) VALUES (
-                gen_random_uuid()::text, $1,
-                $2, $3,
-                $4, $5, $6,
-                $7, $8, $9,
-                $10, $11,
-                $12, $13, $14,
-                $15, $16, $17,
-                $18, $19, $20, $21,
-                $22, $23, $24,
-                $25, $26, $27, $28, $29,
-                $30, $31,
-                $32, $33, $34, $35, $36,
-                $37, $38, $39, $40,
-                $41, $42, $43,
-                $44, $45, $46,
-                $47, $48, $49, $50,
-                $51, $52, $53, $54,
-                $55, $56, $57,
-                $58, $59, $60,
-                $61, $62, $63,
-                $64, $65, $66,
-                now(), now()
-            )
-            ON CONFLICT (job_id) DO UPDATE SET
-                image_name                    = EXCLUDED.image_name,
-                image_url                     = EXCLUDED.image_url,
-                division                      = EXCLUDED.division,
-                sub_division                  = EXCLUDED.sub_division,
-                major_category                = EXCLUDED.major_category,
-                design_number                 = EXCLUDED.design_number,
-                vendor_name                   = EXCLUDED.vendor_name,
-                vendor_code                   = EXCLUDED.vendor_code,
-                reference_article_number      = EXCLUDED.reference_article_number,
-                reference_article_description = EXCLUDED.reference_article_description,
-                article_number                = EXCLUDED.article_number,
-                mc_code                       = EXCLUDED.mc_code,
-                rate                          = EXCLUDED.rate,
-                mrp                           = EXCLUDED.mrp,
-                macro_mvgr                    = EXCLUDED.macro_mvgr,
-                yarn_1                        = EXCLUDED.yarn_1,
-                main_mvgr                     = EXCLUDED.main_mvgr,
-                fabric_main_mvgr              = EXCLUDED.fabric_main_mvgr,
-                weave                         = EXCLUDED.weave,
-                m_fab2                        = EXCLUDED.m_fab2,
-                composition                   = EXCLUDED.composition,
-                lycra                         = EXCLUDED.lycra,
-                finish                        = EXCLUDED.finish,
-                gsm                           = EXCLUDED.gsm,
-                collar                        = EXCLUDED.collar,
-                neck                          = EXCLUDED.neck,
-                neck_details                  = EXCLUDED.neck_details,
-                placket                       = EXCLUDED.placket,
-                father_belt                   = EXCLUDED.father_belt,
-                sleeve                        = EXCLUDED.sleeve,
-                bottom_fold                   = EXCLUDED.bottom_fold,
-                pocket_type                   = EXCLUDED.pocket_type,
-                fit                           = EXCLUDED.fit,
-                body_style                    = EXCLUDED.body_style,
-                length                        = EXCLUDED.length,
-                drawcord                      = EXCLUDED.drawcord,
-                button                        = EXCLUDED.button,
-                zipper                        = EXCLUDED.zipper,
-                zip_colour                    = EXCLUDED.zip_colour,
-                patches                       = EXCLUDED.patches,
-                patches_type                  = EXCLUDED.patches_type,
-                print_type                    = EXCLUDED.print_type,
-                print_style                   = EXCLUDED.print_style,
-                print_placement               = EXCLUDED.print_placement,
-                embroidery                    = EXCLUDED.embroidery,
-                embroidery_type               = EXCLUDED.embroidery_type,
-                wash                          = EXCLUDED.wash,
-                extraction_status             = EXCLUDED.extraction_status,
-                user_id                       = EXCLUDED.user_id,
-                user_name                     = EXCLUDED.user_name,
-                user_email                    = EXCLUDED.user_email,
-                updated_at                    = now()
-        `,
-            // $1–$14: identity + header
-            str(d.jobId),
-            str(d.imageName), str(d.imageUrl),
-            str(d.division), str(d.subDivision), str(d.majorCategory),
-            str(d.designNumber), str(d.vendorName), str(d.vendorCode),
-            str(d.referenceArticleNumber), str(d.referenceArticleDescription),
-            str(d.articleNumber), str(d.sapArticleId ?? null), str(d.mcCode),
-            // $15–$17: BOM
-            num(d.rate), num(d.mrp), null,          // imp_atrbt_2 — filled manually
-            // $18–$24: FAB part 1
-            str(d.macroMvgr), str(d.yarn1), str(d.mainMvgr), str(d.fabricMainMvgr),
-            str(d.weave), str(d.mFab2), str(d.composition),
-            // $25–$31: FAB part 2 (new fields null until manually set)
-            null, null,                              // f_count, f_construction
-            str(d.lycra), str(d.finish), str(d.gsm),
-            null, null,                              // f_ounce, f_width
-            // $32–$40: BODY part 1
-            str(d.collar), null,                     // collar, collar_style
-            str(d.neck), str(d.neckDetails), str(d.placket),
-            str(d.fatherBelt), str(d.sleeve), null, str(d.bottomFold), // sleeve_fold null
-            // $41–$46: BODY part 2
-            null, str(d.pocketType), null,           // no_of_pocket, extra_pocket
-            str(d.fit), str(d.pattern), str(d.length),
-            // $47–$54: VA ACC
-            str(d.drawcord), null,                   // dc_shape null
-            str(d.button), null,                     // btn_colour null
-            str(d.zipper), str(d.zipColour), str(d.patches), str(d.patchesType),
-            // $55–$60: VA PRCS
-            str(d.printType), str(d.printStyle), str(d.printPlacement),
-            str(d.embroidery), str(d.embroideryType), str(d.wash),
-            // $61–$66: status + audit
-            str(d.extractionStatus), 'PENDING', 'NOT_SYNCED',
-            d.userId ?? null, str(d.userName), str(d.userEmail ?? null),
-            // created_at/updated_at via now()
-        );
     }
 
 }

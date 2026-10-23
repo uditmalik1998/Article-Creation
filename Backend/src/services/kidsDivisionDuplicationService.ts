@@ -17,7 +17,6 @@ import { randomUUID } from 'crypto';
 import { prismaClient as prisma } from '../utils/prisma';
 import { Prisma } from '../generated/prisma';
 import { storageService } from './storageService';
-import { upsert360ArticleFlatRow } from '../utils/mirror360Flat';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -310,9 +309,6 @@ export async function duplicateForKidsDivision(flatId: string): Promise<void> {
         };
 
         await prisma.extractionResultFlat.create({ data: kidsData });
-
-        // Mirror to 360article (fire-and-forget)
-        void upsert360ArticleFlatRow(kidsId, kidsData as Record<string, unknown>);
 
         console.log(
           `[KidsDuplication] Created copy ${i + 1}/${KIDS_COPY_COUNT} (id=${kidsId}, jobId=${newJob.id})`

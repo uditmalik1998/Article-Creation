@@ -18,7 +18,6 @@ import { getExcludedDescriptionFields } from '../utils/categoryFieldVisibility';
 import { prismaClient as prisma } from '../utils/prisma';
 import { syncGenericToVariants, addColorVariants, getSizesForMajCat, isSizeAllowed } from '../services/variantCreationService';
 import { hasVendorCode, isValidVendorCode, normalizeVendorCode } from '../utils/vendorCode';
-import { mirror360FlatUpdate } from '../utils/mirror360Flat';
 import { getSetMcIndex, setProblems, SET_PARTS_USE_SET_MC, normalMcForCategory } from '../services/setMcMasterService';
 import { linkComboGroupForRow, recomputeComboParent, syncSetsFromRaw, COMBO_PARENT_DERIVED_FIELDS, groupSetParts } from '../services/comboLinkService';
 import { linkSetPart, retryPendingSetLinks } from '../services/setLinkService';
@@ -2744,9 +2743,6 @@ export class ApproverController {
                 if (isComboParent) updated = (await prisma.extractionResultFlat.findUnique({ where: { id } }))!;
             }
 
-            // Mirror to 360article.article_360_flat (fire-and-forget)
-            void mirror360FlatUpdate(id, data).catch((err: any) => console.error('[mirror360] update failed:', err?.message));
-
             // Record per-field history (fire-and-forget)
             void ApproverController.recordFgArticleHistory(id, req.user, data, oldRow)
                 .catch((err: any) => console.error('[fgArticleHistory] record failed:', err?.message));
@@ -3050,9 +3046,6 @@ export class ApproverController {
             }
 
             const updated = await prisma.extractionResultFlat.update({ where: { id }, data });
-
-            // Mirror to 360article.article_360_flat (fire-and-forget)
-            void mirror360FlatUpdate(id, data).catch((err: any) => console.error('[mirror360] modify update failed:', err?.message));
 
             // Keep variants in sync for generic articles (fire-and-forget)
             if ((existingItem as any).isGeneric) {
@@ -3498,19 +3491,6 @@ export class ApproverController {
                 await linkSetPart(r.id).catch((err: any) => console.error(`[SetLink] ${r.id}:`, err?.message));
             }
 
-            // Mirror approval + SAP sync outcome to 360article.article_360_flat
-            void Promise.all(finalizedSyncResults.map((syncResult: any) => {
-                const approvedItem = approvedItemById.get(syncResult.id);
-                return mirror360FlatUpdate(syncResult.id, {
-                    approvalStatus:  'APPROVED',
-                    sapSyncStatus:   syncResult.success ? 'SYNCED' : 'FAILED',
-                    sapSyncMessage:  syncResult.message ?? null,
-                    sapArticleId:    syncResult.sapArticleNumber ?? null,
-                    articleNumber:   syncResult.sapArticleNumber ?? approvedItem?.articleNumber ?? null,
-                    imageUrl:        syncResult.approvedImageUrl ?? approvedItem?.imageUrl ?? null,
-                });
-            })).catch((err: any) => console.error('[mirror360] approval mirror failed:', err?.message));
-
             // Fetch all variants for successfully synced generics before Phase 2,
             // so we can upload their images immediately alongside the generic.
             // Combines variants from both extraction_results_flat and fg_variants_article_data.
@@ -3932,11 +3912,6 @@ export class ApproverController {
                 }
             });
 
-            // Mirror rejection to 360article (fire-and-forget)
-            void Promise.all(ids.map((rid: string) =>
-                mirror360FlatUpdate(rid, { approvalStatus: 'REJECTED', sapSyncStatus: 'NOT_SYNCED' })
-            )).catch((err: any) => console.error('[mirror360] rejection mirror failed:', err?.message));
-
             // Auto-reject all variants of rejected generic articles
             const rejectedIds = ids;
             const variantsToReject = await prisma.fgVariantArticleData.findMany({
@@ -3953,11 +3928,6 @@ export class ApproverController {
                     approvedAt: new Date(),
                 },
             });
-
-            // Mirror variant rejections to 360article (fire-and-forget)
-            void Promise.all(variantsToReject.map(v =>
-                mirror360FlatUpdate(v.id, { approvalStatus: 'REJECTED', sapSyncStatus: 'NOT_SYNCED' })
-            )).catch((err: any) => console.error('[mirror360] variant rejection mirror failed:', err?.message));
 
             return res.json({
                 message: 'Items rejected',
