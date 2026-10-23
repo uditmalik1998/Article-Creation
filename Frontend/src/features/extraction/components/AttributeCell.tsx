@@ -17,7 +17,6 @@ interface AttributeCellProps {
   attribute?: AttributeDetail | null;
   schemaItem: SchemaItem;
   onChange: (value: string | number | null, aiPredicted?: string) => void;
-  onAddToSchema?: (value: string) => void;
   disabled?: boolean;
   onSaveAndNext?: () => void;
   autoFocus?: boolean;
@@ -28,27 +27,10 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ?
 
 const normalizeText = (value: string | number | null | undefined): string => String(value ?? '').trim();
 
-const persistNewValueToBackend = async (attributeKey: string, value: string) => {
-  try {
-    const token = localStorage.getItem('authToken');
-    await fetch(`${API_BASE_URL}/user/attributes/by-key/${encodeURIComponent(attributeKey)}/values`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      body: JSON.stringify({ shortForm: value, fullForm: value }),
-    });
-  } catch {
-    /* non-critical */
-  }
-};
-
 export const AttributeCell: React.FC<AttributeCellProps> = ({
   attribute,
   schemaItem,
   onChange,
-  onAddToSchema,
   disabled = false,
   onSaveAndNext,
   autoFocus,
@@ -137,27 +119,9 @@ export const AttributeCell: React.FC<AttributeCellProps> = ({
       onChange(normalizedEffectiveValue, isCorrection ? String(aiPredictedValue) : undefined);
       setIsEditing(false);
 
-      if (
-        normalizedEffectiveValue !== null &&
-        normalizedEffectiveValue !== undefined &&
-        normalizedEffectiveValue !== '' &&
-        schemaItem.type === 'select' &&
-        schemaItem.allowedValues &&
-        schemaItem.allowedValues.length > 0
-      ) {
-        const strVal = String(normalizedEffectiveValue).trim().toLowerCase();
-        const exists = schemaItem.allowedValues.some(
-          (v) => (v.shortForm || '').toLowerCase() === strVal || (v.fullForm || '').toLowerCase() === strVal,
-        );
-        if (!exists) {
-          onAddToSchema?.(String(normalizedEffectiveValue).trim());
-          persistNewValueToBackend(schemaItem.key, String(normalizedEffectiveValue).trim());
-        }
-      }
-
       if (triggeredByEnter) onSaveAndNext?.();
     },
-    [editValue, onChange, onAddToSchema, attribute?.schemaValue, schemaItem, onSaveAndNext, normalizeSelectValue],
+    [editValue, onChange, attribute?.schemaValue, schemaItem, onSaveAndNext, normalizeSelectValue],
   );
 
   const handleCancelEdit = useCallback(() => {
@@ -254,7 +218,11 @@ export const AttributeCell: React.FC<AttributeCellProps> = ({
             {(schemaItem.allowedValues || []).filter((valObj) =>
               (valObj.shortForm || valObj.fullForm || '').toLowerCase().includes(selectSearch.toLowerCase()),
             ).length === 0 && (
-              <div className="px-3 py-2 text-xs text-muted-foreground">No options found</div>
+              <div className="px-3 py-2 text-xs text-muted-foreground">
+                {(schemaItem.allowedValues || []).length === 0
+                  ? 'No values in the grid for this category — add them in Admin › Grid Values.'
+                  : 'No options found'}
+              </div>
             )}
           </div>
         </PopoverContent>

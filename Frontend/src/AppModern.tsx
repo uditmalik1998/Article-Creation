@@ -12,7 +12,7 @@ import MainLayout from './shared/components/layout/MainLayout';
 import { LoginPage, RegisterPage } from './features/auth';
 
 import SimplifiedExtractionPage from './features/extraction/pages/SimplifiedExtractionPage'; // NEW: Simplified workflow
-import { DashboardPage, ProfilePage, ProductsPage } from './features/dashboard';
+import { DashboardPage, ProfilePage } from './features/dashboard';
 import { HierarchyManagement, UsersManagement, StatusDashboard } from './features/admin';
 import Admin from './features/admin/pages/Admin'; // Admin Dashboard
 import SrmFailedExtractionsPage from './features/admin/pages/SrmFailedExtractionsPage'; // SRM Failed Extractions
@@ -139,33 +139,7 @@ const ApproverRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 };
 
 
-const CreatorRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const token = localStorage.getItem('authToken');
-  const user = localStorage.getItem('user');
-
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (user) {
-    const userData = JSON.parse(user);
-    // APPROVER and CATEGORY_HEAD cannot access creator pages; SUB_DIVISION_HEAD can
-    if (userData.role === 'APPROVER' || userData.role === 'CATEGORY_HEAD') {
-      return <Navigate to="/approver" replace />;
-    }
-    if (userData.role === 'PD') {
-      return <Navigate to="/approver" replace />;
-    }
-    // PD_DESIGNER only has access to model-generation
-    if (userData.role === 'PD_DESIGNER') {
-      return <Navigate to="/model-generation" replace />;
-    }
-  }
-
-  return <>{children}</>;
-};
-
-// Extraction page — same access as CreatorRoute, but APPROVER is also allowed.
+// Extraction page — every signed-in role except CATEGORY_HEAD and PD_DESIGNER.
 const ExtractionRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const token = localStorage.getItem('authToken');
   const user  = localStorage.getItem('user');
@@ -235,16 +209,6 @@ const App: React.FC = () => {
                       <DashboardPage />
                     </MainLayout>
                   </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/products"
-                element={
-                  <CreatorRoute>
-                    <MainLayout>
-                      <ProductsPage />
-                    </MainLayout>
-                  </CreatorRoute>
                 }
               />
               <Route

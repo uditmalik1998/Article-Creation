@@ -133,12 +133,11 @@ export const useCategoryWithAttributes = (
  * Fetch all master attributes
  */
 export const useMasterAttributes = (
-  includeValues = false,
   options?: Omit<UseQueryOptions<MasterAttribute[]>, 'queryKey' | 'queryFn'>
 ) => {
   return useQuery({
-    queryKey: [...hierarchyQueryKeys.attributes(), includeValues],
-    queryFn: () => getMasterAttributes(includeValues),
+    queryKey: hierarchyQueryKeys.attributes(),
+    queryFn: () => getMasterAttributes(),
     staleTime: DEFAULT_STALE_TIME,
     ...options,
   });
@@ -260,7 +259,7 @@ export const useIsHierarchyReady = () => {
  */
 export const useHierarchyLoadingState = () => {
   const treeQuery = useHierarchyTree();
-  const attributesQuery = useMasterAttributes(true);
+  const attributesQuery = useMasterAttributes();
   
   return {
     isLoading: treeQuery.isLoading || attributesQuery.isLoading,

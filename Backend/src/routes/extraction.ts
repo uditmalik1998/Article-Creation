@@ -50,11 +50,6 @@ router.post('/extract/base64',
 // VLM Health Check Routes
 router.get('/vlm/health', vlmController.vlmHealthCheck);
 
-// NEW: Database-Driven Category-Based Extraction
-router.get('/categories/hierarchy', vlmController.getCategoryHierarchy);
-router.get('/categories/:code/schema', vlmController.getCategorySchema);
-router.get('/categories/search', vlmController.searchCategories);
-
 // Category-based extraction with database schema
 router.post('/extract/category', 
   extractionLimiter,

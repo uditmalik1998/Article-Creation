@@ -310,10 +310,8 @@ export const removeAttributeFromCategory = async (
 // MASTER ATTRIBUTES
 // ═══════════════════════════════════════════════════════
 
-export const getMasterAttributes = async (includeValues = false): Promise<MasterAttribute[]> => {
-  const { data } = await adminApi.get<ApiResponse<MasterAttribute[]>>('/attributes', {
-    params: { includeValues },
-  });
+export const getMasterAttributes = async (): Promise<MasterAttribute[]> => {
+  const { data } = await adminApi.get<ApiResponse<MasterAttribute[]>>('/attributes');
   return data.data;
 };
 
@@ -334,15 +332,6 @@ export const updateMasterAttribute = async (id: number, attribute: Partial<Maste
 
 export const deleteMasterAttribute = async (id: number): Promise<void> => {
   await adminApi.delete(`/attributes/${id}`);
-};
-
-export const addAllowedValue = async (attributeId: number, value: Partial<AllowedValue>): Promise<AllowedValue> => {
-  const { data } = await adminApi.post<ApiResponse<AllowedValue>>(`/attributes/${attributeId}/values`, value);
-  return data.data;
-};
-
-export const deleteAllowedValue = async (attributeId: number, valueId: number): Promise<void> => {
-  await adminApi.delete(`/attributes/${attributeId}/values/${valueId}`);
 };
 
 // ═══════════════════════════════════════════════════════

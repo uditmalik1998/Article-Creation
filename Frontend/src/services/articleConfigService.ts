@@ -1,9 +1,9 @@
 /**
  * articleConfigService.ts
  *
- * Fetches SAP field configs and attribute values from the backend DB.
- * Values are scoped by division (MENS | LADIES | KIDS) from the National Grid.
- * In-memory cache so components can call getCachedValues() synchronously after preload.
+ * Fetches SAP field configs and the grids (major-category, mandatory, national,
+ * GM, segment) from the backend, with in-memory caches so components can read
+ * them synchronously after a preload.
  */
 
 import axios from 'axios';
@@ -29,20 +29,9 @@ export interface SapFieldConfig {
   displayOrder: number;
 }
 
-// Normalise any division string to MENS | LADIES | KIDS
-function normaliseDivision(raw: string): string {
-  const u = raw.trim().toUpperCase();
-  if (u.startsWith('MEN')) return 'MENS';
-  if (u.startsWith('LAD') || u.startsWith('WOM')) return 'LADIES';
-  if (u.startsWith('KID') || u.startsWith('JUN') || u.startsWith('BOY') || u.startsWith('GIR')) return 'KIDS';
-  return u; // pass-through
-}
-
 // ─── Cache ────────────────────────────────────────────────────────────────────
 
-const valuesCache = new Map<string, Record<string, string[]>>();
 let fieldsCache: SapFieldConfig[] | null = null;
-const pendingLoads = new Map<string, Promise<void>>();
 
 // ─── Public API ───────────────────────────────────────────────────────────────
 
@@ -51,55 +40,6 @@ export async function preloadFieldConfigs(): Promise<SapFieldConfig[]> {
   const { data } = await api.get<{ data: SapFieldConfig[] }>('/fields');
   fieldsCache = data.data;
   return fieldsCache;
-}
-
-/**
- * Preload allowed values for a division (MENS | LADIES | KIDS).
- * Also accepts a full division name like "MENS TOPWEAR" — normalised automatically.
- * Safe to call multiple times — deduplicates in-flight requests.
- */
-export async function preloadAttributeValues(divisionOrCategory: string): Promise<void> {
-  const division = normaliseDivision(divisionOrCategory);
-  if (valuesCache.has(division)) return;
-  if (pendingLoads.has(division)) return pendingLoads.get(division)!;
-
-  const load = api
-    .get<{ data: Record<string, string[]> }>(`/values?division=${encodeURIComponent(division)}`)
-    .then(({ data }) => { valuesCache.set(division, data.data); })
-    .finally(() => pendingLoads.delete(division));
-
-  pendingLoads.set(division, load);
-  return load;
-}
-
-/**
- * Synchronous lookup — returns values from cache.
- * divisionOrCategory is normalised automatically.
- * Call preloadAttributeValues(division) first; returns null if not yet loaded.
- */
-export function getCachedValues(
-  divisionOrCategory: string,
-  dbField: string
-): string[] | null {
-  const division = normaliseDivision(divisionOrCategory);
-  const catData = valuesCache.get(division);
-  if (!catData) return null;
-  return catData[dbField] ?? null;
-}
-
-export function isValuesCached(divisionOrCategory: string): boolean {
-  return valuesCache.has(normaliseDivision(divisionOrCategory));
-}
-
-export function invalidateValuesCache(divisionOrCategory?: string): void {
-  if (divisionOrCategory) {
-    const division = normaliseDivision(divisionOrCategory);
-    valuesCache.delete(division);
-    pendingLoads.delete(division);
-  } else {
-    valuesCache.clear();
-    pendingLoads.clear();
-  }
 }
 
 export function getCachedFieldConfigs(): SapFieldConfig[] | null {
@@ -114,62 +54,6 @@ export function buildDbToSapMap(): Record<string, string> {
 export function buildUiLabelToDbFieldMap(): Record<string, string> {
   if (!fieldsCache) return {};
   return Object.fromEntries(fieldsCache.map((f) => [f.uiLabel, f.dbField]));
-}
-
-// ─── Per-category enabled/required attribute config ───────────────────────────
-
-export interface CategoryAttrConfig {
-  configured: boolean;      // false = no mappings yet, show all (fallback)
-  enabled: Set<string>;     // schema keys that are enabled
-  required: Set<string>;    // schema keys that are required
-}
-
-const CATEGORY_ATTR_TTL_MS = 3 * 60 * 1000; // 3 minutes
-const categoryAttrCache = new Map<string, { config: CategoryAttrConfig; ts: number }>();
-const categoryAttrPending = new Map<string, Promise<CategoryAttrConfig>>();
-
-export async function preloadCategoryAttributes(categoryCode: string): Promise<CategoryAttrConfig> {
-  const cached = categoryAttrCache.get(categoryCode);
-  if (cached && Date.now() - cached.ts < CATEGORY_ATTR_TTL_MS) return cached.config;
-  if (categoryAttrPending.has(categoryCode)) return categoryAttrPending.get(categoryCode)!;
-
-  const baseURL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://localhost:5001/api' : '/api');
-  const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
-
-  const p = fetch(`${baseURL}/article-config/category-attributes/${encodeURIComponent(categoryCode)}`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  })
-    .then(r => r.ok ? r.json() : null)
-    .then((json): CategoryAttrConfig => {
-      if (!json?.success) return { configured: false, enabled: new Set(), required: new Set() };
-      const result: CategoryAttrConfig = {
-        configured: json.configured,
-        enabled: new Set<string>(json.enabled ?? []),
-        required: new Set<string>(json.required ?? []),
-      };
-      categoryAttrCache.set(categoryCode, { config: result, ts: Date.now() });
-      return result;
-    })
-    .catch((): CategoryAttrConfig => ({ configured: false, enabled: new Set(), required: new Set() }))
-    .finally(() => categoryAttrPending.delete(categoryCode));
-
-  categoryAttrPending.set(categoryCode, p);
-  return p;
-}
-
-export function getCachedCategoryAttributes(categoryCode: string): CategoryAttrConfig | null {
-  const cached = categoryAttrCache.get(categoryCode);
-  if (!cached) return null;
-  if (Date.now() - cached.ts >= CATEGORY_ATTR_TTL_MS) {
-    categoryAttrCache.delete(categoryCode);
-    return null;
-  }
-  return cached.config;
-}
-
-export function invalidateCategoryAttributeCache(categoryCode?: string) {
-  if (categoryCode) categoryAttrCache.delete(categoryCode);
-  else categoryAttrCache.clear();
 }
 
 // ─── Major-Category Grid Values (from uploaded Excel) ─────────────────────────
@@ -230,6 +114,12 @@ export async function preloadMajCatGridFor(majorCategory: string): Promise<void>
 
   inflightCats.set(key, p);
   return p;
+}
+
+/** True when the loaded grid has at least one attribute for this major category. */
+export function hasMajCatGridData(majorCategory: string): boolean {
+  const catData = majCatGrid[majorCategory];
+  return !!catData && Object.keys(catData).length > 0;
 }
 
 /** True once the grid for this specific major category has been loaded. */
@@ -419,6 +309,27 @@ export function invalidateMandatoryGrid(): void {
   mandatoryGridPromise = null;
   loadedMandatoryCats.clear();
   inflightMandatoryCats.clear();
+}
+
+// ─── National Grid (from national_grid_master) ───────────────────────────────
+
+/** { M_YARN: [{ code, fullForm }], M_NECK_TYPE: [...], ... } — not category-specific. */
+export type NationalGridValues = Record<string, { code: string; fullForm: string }[]>;
+
+let nationalGridPromise: Promise<NationalGridValues> | null = null;
+
+/** Fetch the national grid once per session; a failed fetch is retried on the next call. */
+export function preloadNationalGrid(): Promise<NationalGridValues> {
+  if (!nationalGridPromise) {
+    nationalGridPromise = fetch(`${gridBaseURL()}/approver/national-grid-values`, { headers: authHeader() })
+      .then(r => (r.ok ? r.json() : null))
+      .then(json => (json?.data as NationalGridValues) ?? {})
+      .catch(() => {
+        nationalGridPromise = null;
+        return {} as NationalGridValues;
+      });
+  }
+  return nationalGridPromise;
 }
 
 // ─── GM Major Category Grid Values (from gm_major_category_grid_values) ────────

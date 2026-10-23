@@ -17,7 +17,6 @@ flowchart LR
 
     subgraph CREATOR["Creator (non-approver)"]
         DASH[/dashboard]
-        PROD[/products]
         EXT[/extraction/simplified]
         PROF[/profile]
     end
@@ -47,7 +46,7 @@ flowchart LR
 | `extraction` | `features/extraction/` | SimplifiedExtractionPage, AttributeTable, AttributeCell |
 | `admin` | `features/admin/` | AttributeManager, CategoryManager, UsersManagement, HierarchyManagement |
 | `analytics` | `features/analytics/` | CostOverview, ModelComparison, CategoryCostTable |
-| `dashboard` | `features/dashboard/` | Dashboard, Products, UploadsList, UploadDetail |
+| `dashboard` | `features/dashboard/` | Dashboard, UploadsList, UploadDetail |
 | `auth` | `features/auth/` | Login, Register |
 | `po-presentation` | `features/po-presentation/` | POPresentationPage |
 

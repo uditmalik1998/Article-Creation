@@ -188,18 +188,17 @@ let cachedEnrichSchema: Array<{ key: string; label: string; type: any; allowedVa
 
 async function getEnrichSchema() {
   if (cachedEnrichSchema) return cachedEnrichSchema;
+  // Values are not loaded here — enrichSrmRowWithVlm replaces them with the
+  // major category's grid values before calling the VLM.
   const masterAttrs = await prisma.masterAttribute.findMany({
     where: { isActive: true },
     orderBy: { displayOrder: 'asc' },
-    include: {
-      allowedValues: { where: { isActive: true }, orderBy: { displayOrder: 'asc' } }
-    }
   });
   cachedEnrichSchema = masterAttrs.map(attr => ({
     key: attr.key,
     label: attr.label || attr.key,
     type: attr.type.toLowerCase() as any,
-    allowedValues: attr.allowedValues.map((av: any) => av.shortForm),
+    allowedValues: [] as string[],
   }));
   return cachedEnrichSchema;
 }

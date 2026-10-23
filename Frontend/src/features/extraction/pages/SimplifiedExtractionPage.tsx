@@ -33,21 +33,20 @@ import ExportManager from '../components/ExportManager';
 import { useImageExtraction } from '../../../shared/hooks/extraction/useImageExtraction';
 import type { SchemaItem } from '../../../shared/types/extraction/ExtractionTypes';
 import { MAJOR_CATEGORY_ALLOWED_VALUES, getMcCodeByMajorCategory } from '../../../data/majorCategoryMcCodeMap';
-import { getMajCatAllowedValues, getMajCatMandatoryKeys } from '../../../data/majCatAttributeMap';
-import { preloadAttributeValues } from '../../../services/articleConfigService';
+import { getMajCatMandatoryKeys, SCHEMA_KEY_TO_EXCEL_ATTR } from '../../../data/majCatAttributeMap';
+import {
+  getMajCatGridEntry,
+  hasMajCatGridData,
+  isMajCatGridLoadedFor,
+  preloadMajCatGridFor,
+  preloadNationalGrid,
+  type NationalGridValues,
+} from '../../../services/articleConfigService';
 
 import './ExtractionPage.css';
 import '../../../styles/App.css';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://localhost:5001/api' : '/api');
-
-const KEY_ALIASES: Record<string, string> = {
-  neck_details: 'neck_detail',
-  colour: 'color',
-  child_belt: 'child_belt_detail',
-  lycra_non_lycra: 'lycra_non\nlycra',
-  patches_type: 'patch_type',
-};
 
 const ATTRIBUTE_VALUE_CORRECTIONS: Record<string, Record<string, string>> = {
   weave: { CH_TWL: 'CHN_TWL', CHINA_TWL: 'CHN_TWL' },
@@ -180,6 +179,26 @@ const getDivisionOptions = (): string[] => {
   }
 };
 
+/**
+ * Allowed values for one attribute. A major category with its own grid uses only
+ * that grid; the national grid is used only when the category has no grid at all.
+ * No major category picked yet → null (upload is locked until one is picked).
+ * An attribute neither grid lists gets no options — the values have to be added to
+ * the grid (Admin › Grid Values). Returns null for attributes that aren't grid-driven.
+ */
+const gridValuesFor = (
+  majorCategory: string | null,
+  schemaKey: string,
+  nationalGrid: NationalGridValues,
+): { shortForm: string; fullForm: string }[] | null => {
+  const excelAttr = SCHEMA_KEY_TO_EXCEL_ATTR[schemaKey.toLowerCase()];
+  if (!excelAttr || !majorCategory) return null;
+  if (hasMajCatGridData(majorCategory)) {
+    return (getMajCatGridEntry(majorCategory, excelAttr) ?? []).map((v) => ({ shortForm: v, fullForm: v }));
+  }
+  return (nationalGrid[excelAttr] ?? []).map((v) => ({ shortForm: v.code, fullForm: v.fullForm || v.code }));
+};
+
 type DivisionHierarchy = { subDivisions: string[]; majorCategories: { subDiv: string; majCat: string }[] };
 
 // Sub-divisions + major categories come from major_category_details (Admin › Hierarchy),
@@ -230,6 +249,41 @@ const SimplifiedExtractionPage = () => {
   const [divisionHierarchy, setDivisionHierarchy] = useState<DivisionHierarchy | null>(null);
   const [hierarchyLoading, setHierarchyLoading] = useState(false);
   const [majCatOpen, setMajCatOpen] = useState(false);
+  // Bumped once the selected major category's grid (maj_cat_grid_values) is loaded,
+  // so the attribute dropdowns rebuild from it.
+  const [majCatGridVersion, setMajCatGridVersion] = useState(0);
+  // national_grid_master: fallback dropdown values when the category grid has none.
+  const [nationalGrid, setNationalGrid] = useState<NationalGridValues>({});
+
+  // Only needed when the picked major category has no grid of its own — a category
+  // with a grid never calls national-grid-values. (Upload needs a major category.)
+  const needsNationalGrid =
+    !!selectedMajorCategory &&
+    isMajCatGridLoadedFor(selectedMajorCategory) &&
+    !hasMajCatGridData(selectedMajorCategory);
+  useEffect(() => {
+    if (!needsNationalGrid) return;
+    let cancelled = false;
+    preloadNationalGrid().then((grid) => {
+      if (!cancelled) setNationalGrid(grid);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [needsNationalGrid, majCatGridVersion]);
+
+  useEffect(() => {
+    if (!selectedMajorCategory) return;
+    let cancelled = false;
+    preloadMajCatGridFor(selectedMajorCategory)
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setMajCatGridVersion((v) => v + 1);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedMajorCategory]);
   const [majCatSearch, setMajCatSearch] = useState('');
   const [majCatActive, setMajCatActive] = useState(0); // keyboard-highlighted row in the filtered list
 
@@ -350,46 +404,12 @@ const SimplifiedExtractionPage = () => {
   };
 
   useEffect(() => {
-    const loadAllowedValues = async () => {
-      try {
-        const token = localStorage.getItem('authToken');
-        const response = await fetch(`${API_BASE_URL}/user/attributes?includeValues=true`, {
-          headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        });
-        if (!response.ok) return;
-        const payload = await response.json();
-        const attributes = payload?.data || [];
-        const allowedMap = new Map<string, any[]>(
-          attributes.map((attr: any) => [String(attr.key).toLowerCase(), attr.allowedValues || []]),
-        );
-        const schemaWithAllowed = BASE_SIMPLIFIED_SCHEMA.map((item) => {
-          const keyLower = item.key.toLowerCase();
-          if (keyLower === 'major_category') {
-            return { ...item, allowedValues: normalizeAllowedValues(item.key, MAJOR_CATEGORY_ALLOWED_VALUES) };
-          }
-          const aliasKey = KEY_ALIASES[keyLower] || keyLower;
-          const fetchedAllowed = allowedMap.get(keyLower) || allowedMap.get(aliasKey);
-          return {
-            ...item,
-            allowedValues: normalizeAllowedValues(item.key, fetchedAllowed && fetchedAllowed.length > 0 ? fetchedAllowed : item.allowedValues || []),
-          };
-        });
-        setBaseSchema(schemaWithAllowed);
-      } catch (error) {
-        console.warn('Failed to load allowed values for simplified schema', error);
-      }
-    };
-    loadAllowedValues();
-  }, []);
-
-  useEffect(() => {
     const majorCat = selectedCategory?.majorCategory;
     if (!majorCat) {
       setSimplifiedSchema(baseSchema);
       return;
     }
     const division = selectedCategory?.department || '';
-    preloadAttributeValues(division).catch(() => {});
     const mandatoryKeys = getMajCatMandatoryKeys(majorCat);
     // `majorCat` here is actually the selected Sub-Division (e.g. MW, MS-U) —
     // narrow the Major Category options to that division + sub-division so
@@ -406,26 +426,15 @@ const SimplifiedExtractionPage = () => {
           required: mandatoryKeys.has(item.key),
         };
       }
-      const majCatValues = getMajCatAllowedValues(division, item.key);
+      // Dropdown values: the selected major category's grid (maj_cat_grid_values), or the
+      // national grid (national_grid_master) when that category has no grid at all.
+      const majCatValues = gridValuesFor(selectedMajorCategory, item.key, nationalGrid);
       // design_number is always required regardless of major category config
       const isRequired = item.key === 'design_number' ? true : mandatoryKeys.has(item.key);
       return { ...item, ...(majCatValues ? { allowedValues: majCatValues } : {}), required: isRequired };
     });
     setSimplifiedSchema(filtered);
-  }, [baseSchema, selectedCategory, majorCategoriesForSubDiv]);
-
-  const handleAddToSchema = useCallback((attributeKey: string, value: string) => {
-    setSimplifiedSchema((prev) =>
-      prev.map((item) => {
-        if (item.key !== attributeKey) return item;
-        const normalizedIncoming = normalizeAllowedValues(attributeKey, [{ shortForm: value, fullForm: value }])[0];
-        if (!normalizedIncoming) return item;
-        const alreadyExists = item.allowedValues?.some((v) => (v.shortForm || '').toLowerCase() === normalizedIncoming.shortForm.toLowerCase());
-        if (alreadyExists) return item;
-        return { ...item, allowedValues: [...(item.allowedValues || []), normalizedIncoming] };
-      }),
-    );
-  }, []);
+  }, [baseSchema, selectedCategory, selectedMajorCategory, majCatGridVersion, nationalGrid, majorCategoriesForSubDiv]);
 
   const handleAttributeChange = useCallback(
     (rowId: string, attributeKey: string, value: string | number | null) => {
@@ -887,7 +896,6 @@ const SimplifiedExtractionPage = () => {
                     onDeleteRow={removeRow}
                     onImageClick={handleImageClick}
                     onReExtract={() => {}}
-                    onAddToSchema={handleAddToSchema}
                     isExtracting={isExtracting}
                   />
                 </section>

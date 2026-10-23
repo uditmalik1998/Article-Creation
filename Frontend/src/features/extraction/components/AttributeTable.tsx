@@ -28,7 +28,6 @@ interface AttributeTableProps {
   onDeleteRow: (rowId: string) => void;
   onImageClick: (imageUrl: string, imageName?: string) => void;
   onReExtract: (rowId: string, forceRefresh?: boolean) => void;
-  onAddToSchema?: (attributeKey: string, value: string) => void;
   isExtracting?: boolean;
   disableEditing?: boolean;
   /**
@@ -60,7 +59,6 @@ export const AttributeTable: React.FC<AttributeTableProps> = ({
   onDeleteRow,
   onImageClick,
   onReExtract,
-  onAddToSchema,
   disableEditing = false,
   layout = 'default',
 }) => {
@@ -267,7 +265,6 @@ export const AttributeTable: React.FC<AttributeTableProps> = ({
               attribute={cellVal}
               schemaItem={schemaItem}
               onChange={(value) => onAttributeChange(record.id, schemaItem.key, value)}
-              onAddToSchema={(value) => onAddToSchema?.(schemaItem.key, value)}
               disabled={record.status === 'Extracting' || disableEditing}
               autoFocus={focusedCellKey === cellKey}
               onAutoFocused={() => setFocusedCellKey(null)}
@@ -369,7 +366,6 @@ export const AttributeTable: React.FC<AttributeTableProps> = ({
     schema,
     extractedRows,
     onAttributeChange,
-    onAddToSchema,
     onDeleteRow,
     onImageClick,
     onReExtract,

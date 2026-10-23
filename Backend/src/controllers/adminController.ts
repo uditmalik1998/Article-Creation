@@ -54,14 +54,6 @@ const MasterAttributeSchema = z.object({
   group: z.string().max(50).optional().nullable(),
 });
 
-const AllowedValueSchema = z.object({
-  attributeId: z.number().int(),
-  shortForm: z.string().min(1).max(100),
-  fullForm: z.string().min(1).max(200),
-  displayOrder: z.number().int().default(0),
-  isActive: z.boolean().default(true),
-});
-
 const AdminCreateUserSchema = z.object({
   email: z.string().email().max(255),
   password: z.string().min(6).max(128),
@@ -747,15 +739,8 @@ export const removeAttributeFromCategory = async (req: Request, res: Response): 
 
 export const getAllMasterAttributes = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { includeValues } = req.query;
-
     const attributes = await prisma.masterAttribute.findMany({
       orderBy: { displayOrder: 'asc' },
-      include: includeValues === 'true' ? {
-        allowedValues: {
-          orderBy: { displayOrder: 'asc' },
-        },
-      } : undefined,
     });
 
     res.json({ success: true, data: attributes });
@@ -835,42 +820,6 @@ export const deleteMasterAttribute = async (req: Request, res: Response): Promis
     });
 
     res.json({ success: true, message: 'Attribute deleted successfully' });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-};
-
-export const addAllowedValue = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { id } = req.params;
-    const validated = AllowedValueSchema.omit({ attributeId: true }).parse(req.body);
-
-    const allowedValue = await prisma.attributeAllowedValue.create({
-      data: {
-        ...validated,
-        attributeId: parseInt(id),
-      },
-    });
-
-    res.status(201).json({ success: true, data: allowedValue });
-  } catch (error: any) {
-    if (error instanceof z.ZodError) {
-      res.status(400).json({ success: false, error: error.issues });
-      return;
-    }
-    res.status(500).json({ success: false, error: error.message });
-  }
-};
-
-export const deleteAllowedValue = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { valueId } = req.params;
-
-    await prisma.attributeAllowedValue.delete({
-      where: { id: parseInt(valueId) },
-    });
-
-    res.json({ success: true, message: 'Allowed value deleted successfully' });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }

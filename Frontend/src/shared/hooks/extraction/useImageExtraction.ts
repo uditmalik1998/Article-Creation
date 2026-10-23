@@ -576,7 +576,7 @@ export const useImageExtraction = () => {
             const errorPayload = await response.json().catch(() => null);
             throw new Error(errorPayload?.error || 'Failed to mark as done');
           }
-          message.success('Marked as checked. Item moved to Products and Approver queue.');
+          message.success('Marked as checked. Item moved to the Approver queue.');
         })
         .catch((error) => {
           message.error(error instanceof Error ? error.message : 'Failed to mark as done');
