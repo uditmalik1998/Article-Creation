@@ -328,3 +328,45 @@ On the dashboard cards, opening a photo shows an empty white strip until the ~4 
 - A failed load shows "Couldn't load the photo" with Try again (remounts the img).
 - The floating toolbar under the photo has − % +, Fit/reset and Rotate, all disabled while loading.
 - Checked in a local test page against a real r2.dev original (~4 s load).
+
+### FAB card — bigger attribute text, Option A built (2026-10-23)
+
+Canvas: https://claude.ai/artifact/56SzsZ1bbQcyYjKPJYBQhe. D was built first, then the user switched to **A**.
+
+In `ApproverArticleList.tsx`, `renderAttributeRow(attr, big)` takes a `big` flag, passed only for the FG FAB card (`!allowGroups && g.group === 'FAB'`). In big mode:
+- Rows are min 30 px.
+- The number is 13 px and the name 14 px.
+- The value column is 180 px, with values at 15 px in the regular font.
+- Inline inputs and dropdown triggers are 32 px / 14 px, and the chevron is 16 px.
+
+The cost rows (AUTO-BGT, ROUGH-V2, VENDOR COST, FINAL COST) use the same renderer, so they follow. The FAB footer fields (Fabric Article No. / Desc) have 12 px labels and 15 px values. **Extended to the FG BODY card** (2026-10-23): the same `big` rows and Body Article No. / Desc at 12/15 px. Other tabs (B TRIM, V. ADD, PKG COST, OTH GRID-1) and the Body/Fabric/GM pages are unchanged. Type-checks; not checked signed in.
+
+_FAB/BODY big text reduced by 1 px on 2026-10-23 at the user’s request: number 12 px, name 13 px, value 14 px, inline editors 13 px; footer labels 11 px and values 14 px. Rows stay 30 px._
+
+_2026-10-23: the FG garment-attribute grid used to switch to 3 columns at 5+ visible cards (turning on V. ADD or PKG COST), which squeezed FAB/BODY. It is now capped at 2 columns._
+
+_2026-10-23: +1 px font size on the FG B TRIM / V. ADD grids (`CostingGridCard.tsx`, all sizes except the dark title strip), CMP COST (`CmpCostCard.tsx`), the FG Rough / Precise Consumption cards (11.5→12.5 px), and OTH GRID-1. OTH GRID-1 covers the BOM rows (11→12 px, FG only) and its attribute rows via a new `plus1` flag on `renderAttributeRow`, which also applies to B TRIM extra rows. Card headers are unchanged so all titles still match. PKG COST is unchanged._
+
+_2026-10-23: PKG COST (`PkgCostCard.tsx`) also +1 px, everything except the dark title strip._
+
+### Article review page header — Option A built (2026-10-23)
+
+Canvas: https://claude.ai/artifact/7kdg8vDcbxSw6zHjXmYh94
+- A: one ink block, two lines
+- B: light, design no. as title
+- C: dark nav + identity strip with price tiles
+- D: breadcrumb + issue chip
+- E: compact sticky bar with issue split-button
+
+**Option A built.** All functions are unchanged.
+- **`ArticleDetailPage.tsx` (line 1):**
+  - The nav bar is solid `#1e293b`; the old gradient and coral are gone. When the article isn't a combo set, it sits flush with rounded top corners only.
+  - The sparkle circle is slate and the title is 14 px. The pager reads "1 of 50".
+  - History is a quiet ghost button (it was solid red), and Reject is a red-outline button on the dark bar.
+  - **Save & Submit** is now the single white button, with the issue count as an amber pill (it was coral with "⚠1").
+- **`ApproverArticleList.tsx` (line 2):** a new `joinTop` prop, passed by the detail page when the article isn't a combo set.
+  - The card has square top corners and no top border, and the identity strip is solid ink with a `border-white/10` divider, so the two bars read as one block.
+  - The PPT badge is a translucent chip with a tag icon (it was yellow).
+  - The checked tick is slate, not coral.
+  - Combo/set articles keep separate blocks, because their set tabs sit in between.
+- Type-checks and compiles. Not checked signed in.

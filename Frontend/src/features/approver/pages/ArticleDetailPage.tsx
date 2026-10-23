@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -1304,10 +1305,11 @@ export default function ArticleDetailPage({
   return (
     <div className="flex flex-col">
       {/* Sticky header */}
-      <div className="sticky top-0 z-30 mb-2 -mx-1 px-1 pt-1">
-        <div className="overflow-hidden rounded-xl border border-white/60 bg-white/85 shadow-[var(--shadow-md)] backdrop-blur">
-          <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 text-white"
-            style={{ background: 'linear-gradient(90deg, #1f2937 0%, #334155 100%)' }}>
+      {/* Design "Option A": this bar and the article card's top strip read as one ink
+          block — nav + actions here, the article's identity on the line below. */}
+      <div className={cn('sticky top-0 z-30 -mx-1 px-1 pt-1', isComboItem ? 'mb-2' : 'mb-0')}>
+        <div className={cn('overflow-hidden border border-slate-800 shadow-[var(--shadow-md)]', isComboItem ? 'rounded-xl' : 'rounded-t-xl')}>
+          <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 text-white" style={{ background: '#1e293b' }}>
             <div className="flex min-w-0 items-center gap-2.5">
               {/* Back button */}
               <Button size="sm" variant="ghost" onClick={() => navigate(buildBackUrl(), {
@@ -1316,11 +1318,11 @@ export default function ArticleDetailPage({
                 className="h-7 px-1.5 text-white hover:bg-white/15 hover:text-white">
                 <ArrowLeft className="h-4 w-4" />
               </Button>
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#FF6F61]/90">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/10">
                 <Sparkles className="h-3.5 w-3.5 text-white" />
               </div>
               <div className="min-w-0">
-                <div className="font-display truncate text-[13px] font-semibold leading-tight tracking-tight">
+                <div className="font-display truncate text-[14px] font-semibold leading-tight tracking-tight">
                   {pathType === 'old' ? 'Old Articles' : pathType === 'new' ? 'New Articles'
                     : pathType === 'rejected' ? 'Rejected Articles'
                     : pathType === 'created' ? 'Created Articles'
@@ -1334,12 +1336,12 @@ export default function ArticleDetailPage({
               </div>
               {/* Prev / Next nav */}
               {totalCount > 0 && (
-                <div className="ml-1.5 flex items-center gap-0.5 rounded-md bg-white/10 px-0.5 py-0.5">
+                <div className="ml-2 flex items-center gap-0.5 rounded-lg bg-white/10 px-1 py-0.5">
                   <Button size="sm" variant="ghost" onClick={goPrev} disabled={isFirstArticle}
                     className="h-6 px-1.5 text-white hover:bg-white/15 hover:text-white disabled:opacity-30">
                     <ChevronLeft />
                   </Button>
-                  <span className="px-0.5 text-[11px] font-semibold tabular-nums">{globalPosition} / {batchSize}</span>
+                  <span className="px-1 text-[12.5px] font-bold tabular-nums">{globalPosition} <span className="font-medium text-white/70">of</span> {batchSize}</span>
                   <Button size="sm" variant="ghost" onClick={goNext} disabled={isLastArticle}
                     className="h-6 px-1.5 text-white hover:bg-white/15 hover:text-white disabled:opacity-30">
                     <ChevronRight />
@@ -1378,10 +1380,10 @@ export default function ArticleDetailPage({
               <Tooltip title={!canApprove ? 'Only Approver, Sub-Division Head, Category Head or Admin can reject articles' : undefined}>
                 {/* span wrapper: disabled <button> swallows pointer events; span keeps hover alive */}
                 <span className="inline-block">
-                  <Button size="sm" variant="destructive"
+                  <Button size="sm" variant="outline"
                     onClick={() => { if (pendingSelectedKeys.length > 0) setConfirmDialog({ kind: 'reject', count: pendingSelectedKeys.length }); }}
                     disabled={!canApprove || pendingSelectedKeys.length === 0}
-                    className="h-7 px-2.5 text-[12px]">
+                    className="h-8 border-red-300/60 bg-transparent px-3 text-[12.5px] font-semibold text-red-300 hover:bg-red-500/15 hover:text-red-200 disabled:opacity-40">
                     <XCircle /> Reject
                   </Button>
                 </span>
@@ -1390,7 +1392,7 @@ export default function ArticleDetailPage({
                 <button
                   onClick={() => openHistory(currentItem.id)}
                   title="View change history"
-                  className="group flex h-7 items-center gap-1.5 rounded-md bg-red-500 px-2.5 text-[12px] font-medium text-white transition-colors hover:bg-red-600 active:bg-red-700"
+                  className="group flex h-8 items-center gap-1.5 rounded-md px-2.5 text-[12.5px] font-semibold text-slate-200 transition-colors hover:bg-white/10 hover:text-white"
                 >
                   <History className="h-3.5 w-3.5 transition-transform group-hover:rotate-12" />
                   <span>History</span>
@@ -1429,9 +1431,13 @@ export default function ArticleDetailPage({
                       missing fields, each of which jumps to its row. */}
                   <Button size="sm" onClick={handleApproveClick}
                     disabled={!canApprove || pendingSelectedKeys.length === 0}
-                    className="h-7 border-none bg-[#FF6F61] px-3 text-[12px] font-semibold text-white shadow-sm hover:bg-[#ff5b4d] disabled:bg-white/20 disabled:text-white/50">
+                    className="h-8 border-none bg-white px-3.5 text-[12.5px] font-bold text-slate-900 shadow-sm hover:bg-slate-100 disabled:bg-white/20 disabled:text-white/50">
                     <CheckCircle2 /> Save &amp; Submit
-                    {approveBlockedReasons.length > 0 && <span className="ml-1 text-[10px] text-amber-200">⚠ {approveBlockedReasons.length}</span>}
+                    {approveBlockedReasons.length > 0 && (
+                      <span className="ml-1 inline-flex items-center gap-0.5 rounded-full bg-amber-100 px-1.5 text-[11px] font-bold text-amber-800">
+                        ⚠ {approveBlockedReasons.length}
+                      </span>
+                    )}
                   </Button>
                 </span>
               </Tooltip>
@@ -1518,6 +1524,7 @@ export default function ArticleDetailPage({
         </div>
       ) : (
         <ApproverArticleList
+          joinTop={!isComboItem}
           items={displayedItem ? [displayedItem] : []}
           majorCategory={displayedItem?.majorCategory || ''}
           readOnly={isComboItem && !activeComboChild}

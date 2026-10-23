@@ -161,9 +161,9 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
       {!collapsed && (
         <>
           <div className="overflow-x-auto px-1.5 pb-1 pt-1">
-            <table className="w-full min-w-[860px] border-collapse text-[11.5px]">
+            <table className="w-full min-w-[860px] border-collapse text-[12.5px]">
               <thead>
-                <tr className="text-[10px] font-semibold tracking-wider text-slate-700">
+                <tr className="text-[11px] font-semibold tracking-wider text-slate-700">
                   <th rowSpan={2} className="w-[110px] border-b border-slate-300 bg-slate-100 px-2.5 py-2 text-left">
                     PROCESS
                   </th>
@@ -182,7 +182,7 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
                     </th>
                   ))}
                 </tr>
-                <tr className="text-[9.5px] font-semibold tracking-wider text-slate-600">
+                <tr className="text-[10.5px] font-semibold tracking-wider text-slate-600">
                   {STAGES.map((stage, si) =>
                     MEASURES.map((measure, mi) => (
                       <th
@@ -225,7 +225,7 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
               </tbody>
             </table>
           </div>
-          <div className="border-t border-slate-100 px-2.5 py-1.5 text-[10.5px] text-slate-500">
+          <div className="border-t border-slate-100 px-2.5 py-1.5 text-[11.5px] text-slate-500">
             Cutting has no SAM — only PR VAL. All other cells are required.
           </div>
         </>

@@ -23,6 +23,7 @@ import {
   Upload,
   ChevronLeft,
   ChevronRight,
+  Tag as TagIcon,
 } from 'lucide-react';
 import {
   Autocomplete,
@@ -426,6 +427,9 @@ export interface ApproverArticleListProps {
   allowGroups?: string[];
   /** When true, hides the "Create Body Article" button (used by BodyArticleList). */
   hideCreateBody?: boolean;
+  /** Detail page (design "Option A"): the card's top strip continues the page's ink
+   *  header as one block — square top corners, no top border, divider line. */
+  joinTop?: boolean;
   /** When true, cards are display-only (e.g. a combo/set parent derived from its pieces). */
   readOnly?: boolean;
   /** Set parent: take attribute visibility / required fields from this category (its Top part). */
@@ -464,6 +468,7 @@ const ArticleCard = React.memo(
     pathType,
     allowGroups,
     hideCreateBody,
+    joinTop,
     readOnly,
     attributeMajorCategory,
   }: {
@@ -482,6 +487,7 @@ const ArticleCard = React.memo(
     pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
     allowGroups?: string[];
     hideCreateBody?: boolean;
+    joinTop?: boolean;
     readOnly?: boolean;
     attributeMajorCategory?: string;
   }) => {
@@ -2363,7 +2369,10 @@ const ArticleCard = React.memo(
       group: string;
       isMandatory?: boolean;
       mandatory?: boolean;
-    }) => {
+    }, big = false, plus1 = false) => {
+      // plus1 = FG OTH GRID-1 / B TRIM extra rows: everything 1 px bigger than the default.
+      // big = FG FAB and BODY cards (design "Option A", -1 px): 13 px names, 14 px values, 30 px rows.
+      const valueText = big ? 'text-[14px]' : plus1 ? 'text-[12px]' : 'text-[11px]';
       _attrCounter += 1;
       const num = _attrCounter;
       const currentValue = getValue(attr.field);
@@ -2379,7 +2388,7 @@ const ArticleCard = React.memo(
           key={attr.field}
           data-field-label={attr.label}
           data-item-id={item.id}
-          className="group flex items-center gap-1.5 rounded px-1 py-0.5 transition-colors hover:bg-muted/40"
+          className={cn('group flex items-center rounded transition-colors hover:bg-muted/40', big ? 'mb-0.5 min-h-[30px] gap-2 px-2 py-1' : 'gap-1.5 px-1 py-0.5')}
           style={{
             cursor: attrLocked ? 'default' : 'pointer',
             background: isEditing
@@ -2396,23 +2405,24 @@ const ArticleCard = React.memo(
             if (!attrLocked && !isEditing) setEditingField(attr.field);
           }}
         >
-          <span className="w-4 shrink-0 text-right text-[10px] font-bold tabular-nums text-muted-foreground">{num}.</span>
+          <span className={cn('shrink-0 text-right font-bold tabular-nums text-muted-foreground', big ? 'w-6 text-[12px]' : plus1 ? 'w-4 text-[11px]' : 'w-4 text-[10px]')}>{num}.</span>
           <span
             className={cn(
-              'flex-1 truncate text-[10.5px] leading-snug',
+              'flex-1 truncate leading-snug',
+              big ? 'text-[13px]' : plus1 ? 'text-[11.5px]' : 'text-[10.5px]',
               isMandatory ? 'key-field text-foreground' : 'font-semibold text-foreground/80',
             )}
           >
             {isMandatory && <span className="mandatory-mark">*</span>}
             {attr.label}
           </span>
-          <div className="w-[110px] shrink-0">
+          <div className={cn('shrink-0', big ? 'w-[180px]' : 'w-[110px]')}>
             {attr.freeText ? (
               isEditing ? (
                 <Input
                   autoFocus
                   defaultValue={isEffectivelyEmpty ? '' : currentValue || ''}
-                  className="h-6 px-1 text-[11px]"
+                  className={big ? 'h-8 px-2 text-[13px]' : plus1 ? 'h-6 px-1 text-[12px]' : 'h-6 px-1 text-[11px]'}
                   onKeyDown={(e) =>
                     e.key === 'Enter' && handleSave(attr.field, (e.target as HTMLInputElement).value || null)
                   }
@@ -2420,7 +2430,7 @@ const ArticleCard = React.memo(
                 />
               ) : (
                 <span
-                  className="block truncate text-right text-[11px]"
+                  className={cn('block truncate text-right', valueText)}
                   style={{
                     color: isEffectivelyEmpty ? (isMandatory ? '#dc2626' : '#9ca3af') : '#111827',
                     fontStyle: isEffectivelyEmpty && !isMandatory ? 'italic' : 'normal',
@@ -2449,7 +2459,10 @@ const ArticleCard = React.memo(
                 <PopoverTrigger asChild>
                   <button
                     type="button"
-                    className="flex h-6 w-full items-center justify-between rounded border border-input bg-background px-1.5 text-[11px] hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                    className={cn(
+                      'flex w-full items-center justify-between rounded border border-input bg-background hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring',
+                      big ? 'h-8 px-2 text-[13px]' : plus1 ? 'h-6 px-1.5 text-[12px]' : 'h-6 px-1.5 text-[11px]',
+                    )}
                   >
                     <span className="truncate text-left">
                       {isEffectivelyEmpty ? 'Select' : currentValue}
@@ -2527,7 +2540,7 @@ const ArticleCard = React.memo(
               </Popover>
             ) : (
               <span
-                className="flex items-center justify-end gap-1 text-right text-[11px]"
+                className={cn('flex items-center justify-end gap-1 text-right', valueText)}
                 style={{
                   color: isEffectivelyEmpty ? (isMandatory ? '#dc2626' : '#9ca3af') : '#111827',
                   fontStyle: isEffectivelyEmpty && !isMandatory ? 'italic' : 'normal',
@@ -2537,7 +2550,7 @@ const ArticleCard = React.memo(
                 <span className="truncate">
                   {isEffectivelyEmpty ? (isMandatory ? 'Required' : '—') : currentValue}
                 </span>
-                <ChevronDown className="h-3 w-3 shrink-0 opacity-40" />
+                <ChevronDown className={cn('shrink-0 opacity-40', big ? 'h-4 w-4' : 'h-3 w-3')} />
               </span>
             )}
           </div>
@@ -2742,20 +2755,23 @@ const ArticleCard = React.memo(
       <>
         <div
           key={item.id}
-          className="animate-in flex flex-col rounded-xl border bg-white shadow-sm transition-all fade-in-50 slide-in-from-bottom-1 duration-300"
+          className={cn(
+            'animate-in flex flex-col border bg-white shadow-sm transition-all fade-in-50 slide-in-from-bottom-1 duration-300',
+            joinTop ? 'rounded-b-xl rounded-t-none border-t-0' : 'rounded-xl',
+          )}
           style={{ borderColor }}
         >
           {/* ─── TOP HEADER STRIP (slate, matches dashboard) ─── */}
           <div
-            className="flex items-center justify-between gap-3 px-4 py-2 text-white"
-            style={{ background: 'linear-gradient(90deg, #1f2937 0%, #334155 100%)' }}
+            className={cn('flex items-center justify-between gap-3 px-4 py-2.5 text-white', joinTop && 'border-t border-white/10')}
+            style={{ background: joinTop ? '#1e293b' : 'linear-gradient(90deg, #1f2937 0%, #334155 100%)' }}
           >
             <div className="flex min-w-0 flex-1 items-center gap-3">
               <Checkbox
                 checked={isSelected}
                 disabled={item.approvalStatus === 'REJECTED' && !hideCreateBody}
                 onCheckedChange={() => onToggleSelect(item.id)}
-                className="border-white/60 bg-white/10 data-[state=checked]:bg-white data-[state=checked]:text-[#FF6F61]"
+                className="border-white/60 bg-white/10 data-[state=checked]:bg-white data-[state=checked]:text-slate-900"
               />
               <Badge
                 style={{ background: status.color + 'cc', color: '#fff', borderColor: status.color }}
@@ -2905,7 +2921,10 @@ const ArticleCard = React.memo(
             </div>
             <div className="flex shrink-0 items-center gap-2">
               {item.pptNumber && (
-                <Badge className="bg-amber-300 text-amber-950">PPT: {item.pptNumber}</Badge>
+                <Badge className="gap-1.5 border border-white/15 bg-white/10 font-mono text-[12px] font-semibold text-white">
+                  <TagIcon className="h-3.5 w-3.5" />
+                  PPT {item.pptNumber}
+                </Badge>
               )}
               {isModifyMode && (
                 <Button
@@ -3370,10 +3389,10 @@ const ArticleCard = React.memo(
                   allowGroups
                     ? 'grid-cols-1'
                     : (() => {
+                        // FG: never more than 2 columns. Switching to 3 when a 5th card (V. ADD /
+                        // PKG COST) was turned on squeezed FAB and BODY to a third of the width.
                         const visibleCount = visibleGroups.length + (showBomCard ? 1 : 0) + (showPkgCard ? 1 : 0);
-                        if (visibleCount <= 1) return 'grid-cols-1';
-                        if (visibleCount <= 4) return 'grid-cols-2';
-                        return 'grid-cols-3';
+                        return visibleCount <= 1 ? 'grid-cols-1' : 'grid-cols-2';
                       })()
                 }`}>
                   {visibleGroups.map((g) => {
@@ -3398,7 +3417,7 @@ const ArticleCard = React.memo(
                           locked={isLocked}
                           extraRows={groupAttrs
                             .filter((a) => !gridCfg.fields.has(a.field) && !FG_CARD_HIDDEN_SCHEMA_KEYS.has(a.schemaKey))
-                            .map((a) => renderAttributeRow(a))}
+                            .map((a) => renderAttributeRow(a, false, true))}
                           loadSavedRecord={loadFreshItem}
                           onSaveTab={(updates) => {
                             setLocalValues((prev) => ({ ...prev, ...updates }));
@@ -3435,7 +3454,7 @@ const ArticleCard = React.memo(
                         </button>
                         {!collapsed && (
                           <div className="space-y-0 p-1">
-                            {groupMap[g.group].attrs.map((attr) => renderAttributeRow(attr))}
+                            {groupMap[g.group].attrs.map((attr) => renderAttributeRow(attr, !allowGroups && (g.group === 'FAB' || g.group === 'BODY')))}
 
                             {/* Costing Type, CMP Cost, Basic Trim Cost, CMTP Cost — Body Article only,
                                 appended after the 17 Body & Construction attribute rows. */}
@@ -3574,7 +3593,7 @@ const ArticleCard = React.memo(
                                       }}
                                     >
                                       <div className="mb-0.5 flex items-center justify-between gap-1">
-                                        <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                        <span className={cn('font-semibold uppercase tracking-wider text-muted-foreground', !allowGroups ? 'text-[11px]' : 'text-[9px]')}>
                                           {label}
                                         </span>
                                         {autoFillFn && !isLocked && (
@@ -3603,7 +3622,7 @@ const ArticleCard = React.memo(
                                         />
                                       ) : (
                                         <div
-                                          className="truncate text-[11px]"
+                                          className={cn('truncate', !allowGroups ? 'text-[14px] font-semibold' : 'text-[11px]')}
                                           style={{ color: displayVal ? '#111827' : '#9ca3af' }}
                                         >
                                           {displayVal || (isLocked ? '—' : 'Click to fill')}
@@ -3644,7 +3663,7 @@ const ArticleCard = React.memo(
                                       }}
                                     >
                                       <div className="mb-0.5 flex items-center justify-between gap-1">
-                                        <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                        <span className={cn('font-semibold uppercase tracking-wider text-muted-foreground', !allowGroups ? 'text-[11px]' : 'text-[9px]')}>
                                           FABRIC ARTICLE NO.
                                         </span>
                                       </div>
@@ -3742,7 +3761,7 @@ const ArticleCard = React.memo(
                                         </div>
                                       ) : (
                                         <div
-                                          className="truncate text-[11px]"
+                                          className={cn('truncate', !allowGroups ? 'text-[14px] font-semibold' : 'text-[11px]')}
                                           style={{
                                             color: fabNoDisplayVal ? '#111827' : '#9ca3af',
                                             fontWeight: 600,
@@ -3819,7 +3838,7 @@ const ArticleCard = React.memo(
                                           }}
                                         >
                                           <div className="mb-0.5 flex items-center justify-between gap-1">
-                                            <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                            <span className={cn('font-semibold uppercase tracking-wider text-muted-foreground', !allowGroups ? 'text-[11px]' : 'text-[9px]')}>
                                               FABRIC ARTICLE DESC
                                             </span>
                                             {!isFabDescEditing && !isLocked && (
@@ -3950,7 +3969,7 @@ const ArticleCard = React.memo(
                                             </Popover>
                                           ) : (
                                             <div
-                                              className="truncate text-[11px]"
+                                              className={cn('truncate', !allowGroups ? 'text-[14px] font-semibold' : 'text-[11px]')}
                                               style={{ color: fabDescDisplayVal ? '#111827' : '#9ca3af' }}
                                             >
                                               {fabDescDisplayVal || (isLocked ? '—' : 'Click to fill')}
@@ -4207,7 +4226,7 @@ const ArticleCard = React.memo(
                                       }}
                                     >
                                       <div className="mb-0.5 flex items-center justify-between gap-1">
-                                        <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                        <span className={cn('font-semibold uppercase tracking-wider text-muted-foreground', !allowGroups ? 'text-[11px]' : 'text-[9px]')}>
                                           BODY ARTICLE NO.
                                         </span>
                                       </div>
@@ -4293,7 +4312,7 @@ const ArticleCard = React.memo(
                                           </Popover>
                                       ) : (
                                         <div
-                                          className="truncate text-[11px]"
+                                          className={cn('truncate', !allowGroups ? 'text-[14px] font-semibold' : 'text-[11px]')}
                                           style={{ color: bodyNoDisplayVal ? '#111827' : '#9ca3af' }}
                                         >
                                           {bodyNoDisplayVal || (isLocked ? '—' : 'Click to fill')}
@@ -4315,7 +4334,7 @@ const ArticleCard = React.memo(
                                       }}
                                     >
                                       <div className="mb-0.5 flex items-center justify-between gap-1">
-                                        <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                        <span className={cn('font-semibold uppercase tracking-wider text-muted-foreground', !allowGroups ? 'text-[11px]' : 'text-[9px]')}>
                                           BODY ARTICLE DESC
                                         </span>
                                         <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
@@ -4393,7 +4412,7 @@ const ArticleCard = React.memo(
                                           </Popover>
                                       ) : (
                                         <div
-                                          className="truncate text-[11px]"
+                                          className={cn('truncate', !allowGroups ? 'text-[14px] font-semibold' : 'text-[11px]')}
                                           style={{ color: bodyDescDisplayVal ? '#111827' : '#9ca3af' }}
                                         >
                                           {bodyDescDisplayVal || (isLocked ? '—' : 'Click to fill')}
@@ -4497,7 +4516,7 @@ const ArticleCard = React.memo(
                             }}
                           >
                             <span
-                              className="flex-1 truncate text-[11px]"
+                              className={cn('flex-1 truncate', isBodyArticle ? 'text-[11px]' : 'text-[12px]')}
                               style={{
                                 color: bom.mandatory && isEmpty && !isLocked ? '#dc2626' : '#374151',
                                 fontWeight: bom.mandatory ? 600 : 400,
@@ -4514,7 +4533,7 @@ const ArticleCard = React.memo(
                                 >
                                   <PopoverAnchor asChild>
                                     <span
-                                      className="flex items-center justify-end gap-1 text-right text-[11px]"
+                                      className={cn('flex items-center justify-end gap-1 text-right', isBodyArticle ? 'text-[11px]' : 'text-[12px]')}
                                       style={{
                                         color: isEmpty ? '#9ca3af' : '#111827',
                                         fontStyle: isEmpty ? 'italic' : 'normal',
@@ -4579,7 +4598,7 @@ const ArticleCard = React.memo(
                                 >
                                   <PopoverAnchor asChild>
                                     <span
-                                      className="flex items-center justify-end gap-1 text-right text-[11px]"
+                                      className={cn('flex items-center justify-end gap-1 text-right', isBodyArticle ? 'text-[11px]' : 'text-[12px]')}
                                       style={{
                                         color: isEmpty ? '#9ca3af' : '#111827',
                                         fontStyle: isEmpty ? 'italic' : 'normal',
@@ -4636,7 +4655,7 @@ const ArticleCard = React.memo(
                                   defaultValue={val === '—' ? undefined : val}
                                   onValueChange={(v) => handleSave(bom.field, v ?? null)}
                                 >
-                                  <SelectTrigger className="h-6 w-full text-[11px]">
+                                  <SelectTrigger className={cn('h-6 w-full', isBodyArticle ? 'text-[11px]' : 'text-[12px]')}>
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -4651,7 +4670,7 @@ const ArticleCard = React.memo(
                                 <Input
                                   autoFocus
                                   defaultValue={val === '—' ? '' : val}
-                                  className="h-6 px-1 text-[11px]"
+                                  className={cn('h-6 px-1', isBodyArticle ? 'text-[11px]' : 'text-[12px]')}
                                   onKeyDown={(e) =>
                                     e.key === 'Enter' &&
                                     handleSave(bom.field, (e.target as HTMLInputElement).value || null)
@@ -4660,7 +4679,7 @@ const ArticleCard = React.memo(
                                 />
                               ) : (
                                 <span
-                                  className="block truncate text-[11px]"
+                                  className={cn('block truncate', isBodyArticle ? 'text-[11px]' : 'text-[12px]')}
                                   style={{
                                     color: bom.isMarkdown
                                       ? '#7c3aed'
@@ -4693,7 +4712,7 @@ const ArticleCard = React.memo(
                             };
                             return rank(a.schemaKey) - rank(b.schemaKey);
                           })
-                          .map((a) => renderAttributeRow(a))}
+                          .map((a) => renderAttributeRow(a, false, true))}
                     </div>
                   </div>}
 
@@ -4751,18 +4770,18 @@ const ArticleCard = React.memo(
                               className="flex cursor-pointer items-center justify-between rounded px-1.5 py-1 hover:bg-muted/40"
                               onClick={() => { if (!isEditingR) setEditingField(`rough_${field}`); }}
                             >
-                              <span className="text-[11.5px] text-slate-600">{label}</span>
+                              <span className="text-[12.5px] text-slate-600">{label}</span>
                               {isEditingR ? (
                                 <input
                                   autoFocus
                                   type="number"
-                                  className="w-24 rounded border border-border px-1 text-right text-[11.5px]"
+                                  className="w-24 rounded border border-border px-1 text-right text-[12.5px]"
                                   defaultValue={isEmpty ? '' : displayVal}
                                   onBlur={(e) => { handleSave(field, e.target.value || null); setEditingField(null); }}
                                   onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingField(null); }}
                                 />
                               ) : (
-                                <span className="text-[11.5px]" style={{ color: isEmpty ? '#9ca3af' : '#111827' }}>{displayVal}</span>
+                                <span className="text-[12.5px]" style={{ color: isEmpty ? '#9ca3af' : '#111827' }}>{displayVal}</span>
                               )}
                             </div>
                           );
@@ -4791,18 +4810,18 @@ const ArticleCard = React.memo(
                               className="flex cursor-pointer items-center justify-between rounded px-1.5 py-1 hover:bg-muted/40"
                               onClick={() => { if (!isEditingP) setEditingField(`fgprecise_${field}`); }}
                             >
-                              <span className="text-[11.5px] text-slate-600">{label}</span>
+                              <span className="text-[12.5px] text-slate-600">{label}</span>
                               {isEditingP ? (
                                 <input
                                   autoFocus
                                   type="number"
-                                  className="w-24 rounded border border-border px-1 text-right text-[11.5px]"
+                                  className="w-24 rounded border border-border px-1 text-right text-[12.5px]"
                                   defaultValue={isEmpty ? '' : displayVal}
                                   onBlur={(e) => { handleSave(field, e.target.value || null); setEditingField(null); }}
                                   onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingField(null); }}
                                 />
                               ) : (
-                                <span className="text-[11.5px]" style={{ color: isEmpty ? '#9ca3af' : '#111827' }}>{displayVal}</span>
+                                <span className="text-[12.5px]" style={{ color: isEmpty ? '#9ca3af' : '#111827' }}>{displayVal}</span>
                               )}
                             </div>
                           );
@@ -5208,6 +5227,7 @@ export const ApproverArticleList: React.FC<ApproverArticleListProps> = ({
   pathType,
   allowGroups,
   hideCreateBody,
+  joinTop,
   readOnly,
   attributeMajorCategory,
   serverPagination,
@@ -5284,6 +5304,7 @@ export const ApproverArticleList: React.FC<ApproverArticleListProps> = ({
           pathType={pathType}
           allowGroups={allowGroups}
           hideCreateBody={hideCreateBody}
+          joinTop={joinTop}
           readOnly={readOnly}
           attributeMajorCategory={attributeMajorCategory}
         />

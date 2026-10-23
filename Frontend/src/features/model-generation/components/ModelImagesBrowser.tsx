@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Check, Download, FileDown, RotateCw, Search, Store, Undo2, X } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, Download, FileDown, MoreHorizontal, RotateCw, Search, Store, Undo2, X } from 'lucide-react';
 import dayjs, { type Dayjs } from 'dayjs';
 import {
   Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
   Checkbox,
   DatePicker,
   Dialog,
   DialogContent,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   Empty,
   Input,
   Select,
@@ -22,6 +22,7 @@ import {
   Tag,
 } from '@/shared/components/ui-tw';
 import { message } from '@/lib/message';
+import { cn } from '@/lib/utils';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://localhost:5001/api' : '/api');
 
@@ -540,10 +541,19 @@ export function ModelImagesBrowser() {
     });
   };
 
+  // Article counts per status for the tab badges — over everything loaded, ignoring
+  // the status filter itself (so switching tabs doesn't change the numbers).
+  const statusCounts = useMemo(() => {
+    const all = groupByArticle(items);
+    const counts: Record<'ALL' | ReviewStatus, number> = { ALL: all.length, UNAPPROVED: 0, APPROVED: 0, REJECTED: 0, REVERTED: 0 };
+    for (const [article] of all) counts[statusOf(article)]++;
+    return counts;
+  }, [items, statusOf]);
+
   const pager = pageCount > 1 && (
-    <div className="flex flex-wrap items-center justify-center gap-1 py-2">
-      <Button type="button" size="sm" variant="outline" disabled={page <= 1} onClick={() => goToPage(page - 1)}>
-        Prev
+    <nav aria-label="Pages" className="flex flex-wrap items-center gap-1">
+      <Button type="button" size="icon" variant="outline" className="h-9 w-9" disabled={page <= 1} onClick={() => goToPage(page - 1)} aria-label="Previous page">
+        <ChevronLeft />
       </Button>
       {pageWindow(page, pageCount).map((n, i) =>
         n === '…' ? (
@@ -551,177 +561,184 @@ export function ModelImagesBrowser() {
             …
           </span>
         ) : (
-          <Button
+          <button
             key={n}
             type="button"
-            size="sm"
-            variant={n === page ? 'secondary' : 'ghost'}
-            className="h-8 min-w-8 px-2"
             onClick={() => goToPage(n)}
+            aria-current={n === page ? 'page' : undefined}
+            className={cn(
+              'h-9 min-w-9 rounded-lg px-2 text-[13px] font-semibold transition-colors',
+              n === page ? 'bg-slate-800 text-white' : 'text-foreground hover:bg-slate-100 dark:hover:bg-slate-800',
+            )}
           >
             {n}
-          </Button>
+          </button>
         )
       )}
-      <Button type="button" size="sm" variant="outline" disabled={page >= pageCount} onClick={() => goToPage(page + 1)}>
-        Next
+      <Button type="button" size="icon" variant="outline" className="h-9 w-9" disabled={page >= pageCount} onClick={() => goToPage(page + 1)} aria-label="Next page">
+        <ChevronRight />
       </Button>
-      <span className="ml-2 text-xs text-muted-foreground">
-        Page {page} of {pageCount} · showing {pageImageCount} of {shownImageCount} images
-      </span>
-    </div>
+    </nav>
   );
+
+  const dateLabel = date
+    ? date.isSame(dayjs(), 'day')
+      ? `today (${date.format('DD/MM/YYYY')})`
+      : date.format('DD/MM/YYYY')
+    : 'all dates';
 
   return (
     <div className="flex flex-col gap-4">
-      <Card className="glass rounded-2xl border border-white/60">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <CardTitle className="text-base">
-            model-images bucket
-            <span className="ml-2 text-xs font-normal text-muted-foreground">
-              {groups.length} article{groups.length !== 1 ? 's' : ''} · {shownImageCount} image
-              {shownImageCount !== 1 ? 's' : ''}
-              {cursor ? '+' : ''}
-              {pageCount > 1 && ` · page ${page}/${pageCount}`}
-              {status !== 'ALL' && ` of ${items.length}`}
-              {' · '}
-              {date
-                ? date.isSame(dayjs(), 'day')
-                  ? `today (${date.format('DD/MM/YYYY')})`
-                  : date.format('DD/MM/YYYY')
-                : 'all dates'}
-            </span>
-          </CardTitle>
-          <div className="flex flex-wrap items-center gap-2">
-            <DatePicker
-              value={date}
-              onChange={applyDate}
-              placeholder="Generated on…"
-              className="h-9 w-40"
-            />
-            <Button
-              type="button"
-              size="sm"
-              variant={date ? 'outline' : 'secondary'}
-              onClick={() => applyDate(date ? null : dayjs())}
-              title={date ? 'Show images from every date' : 'Jump back to today'}
-            >
-              {date ? 'All dates' : 'Today'}
-            </Button>
-            <Select value={status} onValueChange={(v) => { setStatus(v as 'ALL' | ReviewStatus); setPage(1); }}>
-              <SelectTrigger className="h-9 w-40">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                {STATUS_FILTERS.map((s) => (
-                  <SelectItem key={s.value} value={s.value}>
-                    {s.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && runSearch()}
-                placeholder="Filter by article number…"
-                className="h-9 w-56 pl-8"
-              />
-            </div>
-            <Button type="button" size="sm" variant="outline" onClick={runSearch}>
-              Search
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={() => void downloadList()}
-              disabled={exporting || (groups.length === 0 && !cursor)}
-              title={
-                date
-                  ? 'Export the articles listed for this date (article number + colour) as CSV'
-                  : 'Export every article in the bucket, all dates, as CSV'
-              }
-            >
-              {exporting ? <Spinner className="h-4 w-4" /> : <FileDown />}
-              {exporting ? 'Preparing…' : 'Download list'}
-            </Button>
-            <Button
-              type="button"
-              size="icon"
-              variant="ghost"
-              className="h-9 w-9"
-              onClick={() => { setSearch(''); setItems([]); setCursor(undefined); setPage(1); void load(true, '', date); }}
-              title="Reset & refresh"
-            >
-              <RotateCw className={loading ? 'animate-spin' : ''} />
-            </Button>
+      {/* Toolbar — design "Option A": status tabs with counts + one row of filters */}
+      <section className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-3 sm:p-4">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div role="tablist" aria-label="Review status" className="flex flex-wrap gap-0.5 rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
+            {STATUS_FILTERS.map((s) => {
+              const on = status === s.value;
+              return (
+                <button
+                  key={s.value}
+                  type="button"
+                  role="tab"
+                  aria-selected={on}
+                  onClick={() => { setStatus(s.value); setPage(1); }}
+                  className={cn(
+                    'inline-flex h-9 items-center gap-1.5 rounded-lg px-3 text-[13px] font-semibold transition-colors',
+                    on ? 'bg-slate-800 text-white' : 'text-foreground hover:bg-white dark:hover:bg-slate-700',
+                  )}
+                >
+                  {s.value === 'ALL' ? 'All' : s.label}
+                  <span
+                    className={cn(
+                      'rounded-full px-1.5 text-[11.5px] tabular-nums',
+                      on ? 'bg-white/20' : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200',
+                    )}
+                  >
+                    {statusCounts[s.value]}
+                    {cursor ? '+' : ''}
+                  </span>
+                </button>
+              );
+            })}
           </div>
-        </CardHeader>
+          <div className="flex-1" />
+          <DatePicker value={date} onChange={applyDate} placeholder="Generated on…" className="h-10 w-40" />
+          <Button
+            type="button"
+            variant="outline"
+            className="h-10"
+            onClick={() => applyDate(date ? null : dayjs())}
+            title={date ? 'Show images from every date' : 'Jump back to today'}
+          >
+            {date ? 'All dates' : 'Today'}
+          </Button>
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && runSearch()}
+              placeholder="Article number…"
+              aria-label="Filter by article number"
+              className="h-10 w-56 pl-9"
+            />
+          </div>
+          <Button type="button" variant="outline" className="h-10" onClick={runSearch}>
+            Search
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="h-10"
+            onClick={() => void downloadList()}
+            disabled={exporting || (groups.length === 0 && !cursor)}
+            title={
+              date
+                ? 'Export the articles listed for this date (article number + colour) as CSV'
+                : 'Export every article in the bucket, all dates, as CSV'
+            }
+          >
+            {exporting ? <Spinner className="h-4 w-4" /> : <FileDown />}
+            {exporting ? 'Preparing…' : 'Download list'}
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="outline"
+            className="h-10 w-10"
+            onClick={() => { setSearch(''); setItems([]); setCursor(undefined); setPage(1); void load(true, '', date); }}
+            title="Reset & refresh"
+            aria-label="Reset and refresh"
+          >
+            <RotateCw className={loading ? 'animate-spin' : ''} />
+          </Button>
+        </div>
         {truncated && (
-          <CardContent className="pt-0">
-            <p className="text-xs text-amber-600">
-              The bucket is larger than one date scan — some images from this date may not be listed.
-              Narrow the search by article number.
-            </p>
-          </CardContent>
+          <p className="m-0 text-xs text-amber-700">
+            The bucket is larger than one date scan — some images from this date may not be listed. Narrow the search by article number.
+          </p>
         )}
-        {groups.length > 0 && (
-          <CardContent className="flex flex-wrap items-center gap-3 border-t border-white/60 pt-3">
-            <label className="flex cursor-pointer select-none items-center gap-2 text-sm">
-              <Checkbox checked={allVisibleSelected} onCheckedChange={toggleSelectAll} />
-              Select all {pageArticles.length} on this page
-            </label>
-            {selectedList.length > 0 && (
-              <>
-                <span className="text-sm text-muted-foreground">{selectedList.length} selected</span>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Button
-                    type="button"
-                    size="sm"
-                    disabled={bulkRunning || eligible('approve').length === 0}
-                    className="bg-emerald-600 text-white hover:bg-emerald-700"
-                    onClick={() => review(eligible('approve'), 'approve')}
-                    title="Rejected articles are skipped"
-                  >
-                    {bulkRunning ? <RotateCw className="animate-spin" /> : <Check />}
-                    Approve {eligible('approve').length}
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    disabled={bulkRunning || eligible('reject').length === 0}
-                    className="border-rose-300 text-rose-700 hover:bg-rose-50"
-                    onClick={() => review(eligible('reject'), 'reject')}
-                    title="Already-rejected articles are skipped"
-                  >
-                    <X />
-                    Reject {eligible('reject').length}
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    disabled={bulkRunning || eligible('revert').length === 0}
-                    className="border-amber-300 text-amber-700 hover:bg-amber-50"
-                    onClick={() => review(eligible('revert'), 'revert')}
-                    title="Only approved articles can be reverted"
-                  >
-                    <Undo2 />
-                    Revert {eligible('revert').length}
-                  </Button>
-                  <Button type="button" size="sm" variant="ghost" onClick={() => setSelected(new Set())}>
-                    Clear
-                  </Button>
-                </div>
-              </>
-            )}
-          </CardContent>
-        )}
-      </Card>
+      </section>
+
+      {/* Selection + summary + pager */}
+      {groups.length > 0 && (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-1 text-[13px]">
+          <label className="flex cursor-pointer select-none items-center gap-2 font-semibold">
+            <Checkbox checked={allVisibleSelected} onCheckedChange={toggleSelectAll} />
+            Select all {pageArticles.length} on this page
+          </label>
+          {selectedList.length > 0 ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-muted-foreground">{selectedList.length} selected</span>
+              <Button
+                type="button"
+                size="sm"
+                disabled={bulkRunning || eligible('approve').length === 0}
+                className="bg-emerald-700 text-white hover:bg-emerald-800"
+                onClick={() => review(eligible('approve'), 'approve')}
+                title="Rejected articles are skipped"
+              >
+                {bulkRunning ? <RotateCw className="animate-spin" /> : <Check />}
+                Approve {eligible('approve').length}
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={bulkRunning || eligible('reject').length === 0}
+                className="border-rose-300 text-rose-700 hover:bg-rose-50"
+                onClick={() => review(eligible('reject'), 'reject')}
+                title="Already-rejected articles are skipped"
+              >
+                <X />
+                Reject {eligible('reject').length}
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={bulkRunning || eligible('revert').length === 0}
+                onClick={() => review(eligible('revert'), 'revert')}
+                title="Only approved articles can be reverted"
+              >
+                <Undo2 />
+                Revert {eligible('revert').length}
+              </Button>
+              <Button type="button" size="sm" variant="ghost" onClick={() => setSelected(new Set())}>
+                Clear
+              </Button>
+            </div>
+          ) : (
+            <span className="text-muted-foreground">
+              model-images bucket · {groups.length} article{groups.length !== 1 ? 's' : ''} · {shownImageCount} image
+              {shownImageCount !== 1 ? 's' : ''}
+              {cursor ? '+' : ''} · {dateLabel}
+              {pageCount > 1 && ` · showing ${pageImageCount} on page ${page} of ${pageCount}`}
+            </span>
+          )}
+          <div className="ml-auto">{pager}</div>
+        </div>
+      )}
 
       {loading && items.length === 0 && (
         <div className="py-16 text-center">
@@ -731,37 +748,33 @@ export function ModelImagesBrowser() {
       )}
 
       {loadedOnce && !loading && groups.length === 0 && (
-        <Card className="flex min-h-[300px] items-center justify-center glass rounded-2xl border border-white/60">
-          <CardContent className="pt-6">
-            <Empty
-              description={
-                <div className="flex flex-col items-center gap-2">
-                  <span className="text-muted-foreground">
-                    {date
-                      ? `No model images generated on ${date.format('DD/MM/YYYY')}${search.trim() ? ` for "${search.trim()}"` : ''}.`
-                      : 'No model images found in the bucket.'}
-                    {status !== 'ALL' && ` No article here is ${STATUS_FILTERS.find((s) => s.value === status)?.label.toLowerCase()}.`}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    {status !== 'ALL' && (
-                      <Button type="button" size="sm" variant="outline" onClick={() => setStatus('ALL')}>
-                        Show all statuses
-                      </Button>
-                    )}
-                    {date && (
-                      <Button type="button" size="sm" variant="outline" onClick={searchAllDates}>
-                        Search all dates
-                      </Button>
-                    )}
-                  </div>
+        <section className="flex min-h-[300px] items-center justify-center rounded-2xl border border-border bg-card">
+          <Empty
+            description={
+              <div className="flex flex-col items-center gap-2">
+                <span className="text-muted-foreground">
+                  {date
+                    ? `No model images generated on ${date.format('DD/MM/YYYY')}${search.trim() ? ` for "${search.trim()}"` : ''}.`
+                    : 'No model images found in the bucket.'}
+                  {status !== 'ALL' && ` No article here is ${STATUS_FILTERS.find((s) => s.value === status)?.label.toLowerCase()}.`}
+                </span>
+                <div className="flex items-center gap-2">
+                  {status !== 'ALL' && (
+                    <Button type="button" size="sm" variant="outline" onClick={() => setStatus('ALL')}>
+                      Show all statuses
+                    </Button>
+                  )}
+                  {date && (
+                    <Button type="button" size="sm" variant="outline" onClick={searchAllDates}>
+                      Search all dates
+                    </Button>
+                  )}
                 </div>
-              }
-            />
-          </CardContent>
-        </Card>
+              </div>
+            }
+          />
+        </section>
       )}
-
-      {pager}
 
       {pageGroups.map(([article, imgs]) => {
         const m = meta[article];
@@ -769,28 +782,31 @@ export function ModelImagesBrowser() {
         const isApproved = articleStatus === 'APPROVED';
         const tag = articleStatus === 'UNAPPROVED' ? null : STATUS_TAG[articleStatus];
         const busy = approving.has(article);
+        const { article: articleNo, colour } = splitArticleColour(article);
         return (
-        <Card key={article} className="glass rounded-2xl border border-white/60">
-          <CardHeader className="px-3 py-2">
-            <CardTitle className="flex flex-wrap items-center justify-between gap-2 text-sm font-normal">
+          <article key={article} className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-3 sm:p-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <Checkbox checked={selected.has(article)} onCheckedChange={() => toggleSelected(article)} aria-label={`Select ${article}`} />
               <div className="flex min-w-0 flex-col gap-1">
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    checked={selected.has(article)}
-                    onCheckedChange={() => toggleSelected(article)}
-                    aria-label={`Select ${article}`}
-                  />
-                  <span className="truncate" title={article}>{article}</span>
-                  {tag && (
-                    <Tag className={`text-[10px] ${tag.className}`}>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-mono text-[16px] font-semibold" title={article}>{articleNo}</span>
+                  {colour && (
+                    <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                      {colour}
+                    </span>
+                  )}
+                  {tag ? (
+                    <Tag className={`text-[11px] ${tag.className}`}>
                       {articleStatus === 'APPROVED' && <Check className="mr-0.5 h-3 w-3" />}
                       {articleStatus === 'REJECTED' && <X className="mr-0.5 h-3 w-3" />}
                       {articleStatus === 'REVERTED' && <Undo2 className="mr-0.5 h-3 w-3" />}
                       {tag.label}
                     </Tag>
+                  ) : (
+                    <Tag className="border-slate-200 bg-slate-50 text-[11px] text-slate-700">Waiting for review</Tag>
                   )}
                 </div>
-                <div className="flex flex-wrap gap-x-3 text-[11px] text-muted-foreground">
+                <div className="flex flex-wrap gap-x-3 text-xs text-muted-foreground">
                   {m?.generatedBy && <span>Generated by {m.generatedBy.name}</span>}
                   {isApproved && m?.approvedBy && (
                     <span>
@@ -807,11 +823,13 @@ export function ModelImagesBrowser() {
                   )}
                 </div>
               </div>
-              <div className="flex shrink-0 flex-wrap items-center gap-2">
+
+              {/* Only the actions this status allows (see CAN rules above) */}
+              <div className="ml-auto flex shrink-0 flex-wrap items-center gap-2">
                 <Button
                   type="button"
-                  size="sm"
                   variant="outline"
+                  className="h-10"
                   onClick={() => imgs.forEach((im) => downloadByKey(im.key, `${article}_${im.view}.png`))}
                 >
                   <Download />
@@ -820,40 +838,22 @@ export function ModelImagesBrowser() {
                 {canApprove(articleStatus) && (
                   <Button
                     type="button"
-                    size="sm"
                     disabled={busy}
-                    className={
-                      isApproved
-                        ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                        : 'bg-[#FF6F61] text-white hover:bg-[#ff5b4d]'
-                    }
+                    variant={isApproved ? 'outline' : 'default'}
+                    className={cn('h-10', !isApproved && 'bg-emerald-700 text-white hover:bg-emerald-800')}
                     onClick={() => review([article], 'approve')}
+                    title={isApproved ? 'Push the approved images to E-commerce again' : 'Approve and copy the images to E-commerce'}
                   >
-                    {busy ? <RotateCw className="animate-spin" /> : isApproved ? <Check /> : <Store />}
+                    {busy ? <RotateCw className="animate-spin" /> : isApproved ? <RotateCw /> : <Store />}
                     {busy ? 'Working…' : isApproved ? 'Re-approve' : 'Approve for E-commerce'}
-                  </Button>
-                )}
-                {canRevert(articleStatus) && (
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    disabled={busy}
-                    className="border-amber-300 text-amber-700 hover:bg-amber-50"
-                    onClick={() => review([article], 'revert')}
-                    title="Undo the approval and remove the E-commerce copies"
-                  >
-                    <Undo2 />
-                    Revert
                   </Button>
                 )}
                 {canReject(articleStatus) && (
                   <Button
                     type="button"
-                    size="sm"
                     variant="outline"
                     disabled={busy}
-                    className="border-rose-300 text-rose-700 hover:bg-rose-50"
+                    className="h-10 border-rose-300 text-rose-700 hover:bg-rose-50"
                     onClick={() => review([article], 'reject')}
                     title={isApproved ? 'Reject and remove the E-commerce copies' : 'Mark these images as rejected'}
                   >
@@ -861,43 +861,57 @@ export function ModelImagesBrowser() {
                     Reject
                   </Button>
                 )}
+                {canRevert(articleStatus) && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button type="button" size="icon" variant="outline" className="h-10 w-10" disabled={busy} aria-label="More actions">
+                        <MoreHorizontal />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onSelect={() => review([article], 'revert')}>
+                        <Undo2 className="mr-2 h-4 w-4" />
+                        Revert approval (remove E-commerce copies)
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-2">
-            <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.max(imgs.length, 1)}, minmax(0, 1fr))` }}>
-              {imgs.map((im) => (
-                <div key={im.key} className="flex flex-col gap-1">
-                  <img
-                    src={im.url}
-                    alt={`${article} - ${im.view}`}
-                    loading="lazy"
-                    className="aspect-[2/3] w-full cursor-pointer rounded object-cover"
-                    onClick={() => setPreview(im.url)}
-                  />
-                  <div className="flex items-center justify-between">
-                    <Tag className="border-[#FF6F61]/30 bg-[#FF6F61]/10 text-[10px] text-[#FF6F61]">
-                      {VIEW_LABELS[im.view] || im.view}
-                    </Tag>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6"
-                      onClick={() => downloadByKey(im.key, `${article}_${im.view}.png`)}
-                    >
-                      <Download />
-                    </Button>
-                  </div>
-                </div>
-              ))}
             </div>
-          </CardContent>
-        </Card>
+
+            {/* Shots — fixed-width tiles (~2 articles per screen instead of 1) */}
+            <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 168px))' }}>
+              {imgs.map((im) => {
+                const label = VIEW_LABELS[im.view] || im.view;
+                return (
+                  <figure key={im.key} className="m-0 flex flex-col gap-1.5">
+                    <div className="group relative overflow-hidden rounded-xl bg-slate-100">
+                      <img
+                        src={im.url}
+                        alt={`${article} - ${label}`}
+                        loading="lazy"
+                        className="block aspect-[2/3] w-full cursor-zoom-in object-cover"
+                        onClick={() => setPreview(im.url)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => downloadByKey(im.key, `${article}_${im.view}.png`)}
+                        aria-label={`Download ${label}`}
+                        className="absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900/70 text-white hover:bg-slate-900"
+                      >
+                        <Download className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <figcaption className="text-xs font-semibold text-slate-700 dark:text-slate-300">{label}</figcaption>
+                  </figure>
+                );
+              })}
+            </div>
+          </article>
         );
       })}
 
-      {pager}
+      {pageCount > 1 && <div className="flex justify-center py-1">{pager}</div>}
 
       {cursor && (
         <div className="flex justify-center py-2">

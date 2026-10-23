@@ -228,10 +228,10 @@ function ArticleSpecCardComponent<T extends ArticleCardItem>({
             </Field>
           </dl>
 
-          {/* Cost / MRP / Margin */}
+          {/* PR Cost / PR MRP / Margin */}
           <div className="mt-auto grid grid-cols-3 overflow-hidden rounded-lg border border-border">
-            <Stat label="Cost" value={formatRupees(cost)} />
-            <Stat label="MRP" value={formatRupees(mrp)} className="border-l border-border" />
+            <Stat label="PR COST" value={formatRupees(cost)} />
+            <Stat label="PR MRP" value={formatRupees(mrp)} className="border-l border-border" />
             {margin !== null ? (
               <Stat
                 label="Margin"

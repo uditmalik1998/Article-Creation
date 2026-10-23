@@ -291,3 +291,41 @@ Step 2 of the same page (`currentStep === 'extraction'`). Extraction logic uncha
 - **Sticky dark action bar** (bottom): ← Setup, counts (+ % while extracting), Start over, Export results, Go home (when complete), Start batch — disabled with the reason in its label ("fill 2 design numbers first" / "pick a sub-division first").
 
 - Shared empty state (`ui-tw/empty.tsx`, used ~20 places incl. Grid Values / Size Master "Pick a major category…"): halo + icon switched from coral `primary` to slate (2026-10-19).
+
+### model-images tab — Option A built (2026-10-23)
+
+Canvas: https://claude.ai/artifact/REuAXcgZzxdHqcBSBmC6Nb
+- A: one toolbar + tidy cards
+- B: review queue
+- C: gallery grid + bulk bar
+- D: dense table
+- E: contact sheet by shot type
+
+**Option A built** in `features/model-generation/components/ModelImagesBrowser.tsx`. Only the render changed; loading, meta, review and CSV logic are untouched.
+- **Toolbar:** one row with status tabs and per-status article counts (`statusCounts`, ignoring the active filter), plus the date picker, Today/All dates, article search, Download list and refresh.
+- **Summary row:** select-all, a "bucket · N articles · M images · date" line (replaced by the bulk actions while articles are selected) and the pager on the right. The pager also appears at the bottom.
+- **Article cards:** article number in mono, a colour pill (`splitArticleColour`), and a status tag ("Waiting for review" for UNAPPROVED). Actions follow the existing CAN rules:
+  - UNAPPROVED / REVERTED: Approve for E-commerce (green) + Reject.
+  - APPROVED: Re-approve (outline) + Reject + a ⋯ menu with Revert.
+  - REJECTED: Download only.
+- **Shots:** fixed 140–168 px tiles (2:3, so no cropping) with a view label and a download button on each, so about two articles fit per screen. Coral view tags are now slate.
+- Checked in a mocked local test page.
+
+### From article list tab — Option A built (2026-10-23)
+
+Canvas: https://claude.ai/artifact/RHwzfDpAMhhQ4LVhuYoArk
+- A: live line check + jobs
+- B: 3-step wizard
+- C: jobs first
+- D: one column, checked sheet
+
+**Option A built.**
+- **`ArticleListPanel.tsx`, rewritten:**
+  - Codes come from a drop/browse file (.xlsx/.csv, first column) or the paste box.
+  - Each line is checked. Locally it can be "Not an article code" (`^\d{6,}(-.+)?$`) or "Duplicate — counted once".
+  - The server dry run gives ✓ with the detected gender · colour · framing (plus "colour from a sibling photo" when a fallback is used), or "No source photo found".
+  - The confirm checkbox is gone. The button reads "Generate N articles · 5N images" and sends only the ready codes as `codesText`.
+  - Over 500 codes, nothing is pre-checked and the job skips the ones it can't resolve.
+- **Backend:** new `POST /api/model-generation/bulk/check-articles` (file or `codesText`, max 500, 8 at a time). It is read-only and runs `resolveArticleForGeneration` per code: DB + product master + R2, no Gemini.
+- **Page:** the "ARTICLE LIST SETTINGS" label is removed. Recent job rows show a readable date/time instead of the job id (the id moves to the tooltip). The empty state on this tab says "Add article codes… check… Generate".
+- Checked in a mocked test page. The real resolver was tried on sample codes and is lenient: prefix and sibling-colour fallbacks mean even an 8-digit code resolves.
