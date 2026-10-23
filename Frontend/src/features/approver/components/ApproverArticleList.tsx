@@ -1503,7 +1503,8 @@ const ArticleCard = React.memo(
     const [editingField, setEditingField] = useState<string | null>(null);
 
     // Vendor autocomplete state
-    const [vendorQuery, setVendorQuery] = useState('');
+    // null = not typed yet (show the saved name); '' = the user cleared the box.
+    const [vendorQuery, setVendorQuery] = useState<string | null>(null);
     const [vendorOptions, setVendorOptions] = useState<AutocompleteOption[]>([]);
     const [vendorSearching, setVendorSearching] = useState(false);
     const vendorDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -1831,7 +1832,7 @@ const ArticleCard = React.memo(
       return (item as any)[field] ?? null;
     };
 
-    const searchVendors = (q: string) => {
+    const searchVendors = (q: string, by: 'name' | 'code' = 'name') => {
       setVendorQuery(q);
       if (vendorDebounceRef.current) clearTimeout(vendorDebounceRef.current);
       if (!q || q.trim().length < 2) {
@@ -1843,7 +1844,7 @@ const ArticleCard = React.memo(
         try {
           const token = localStorage.getItem('authToken');
           const res = await fetch(
-            `${APP_CONFIG.api.baseURL}/approver/vendor-search?q=${encodeURIComponent(q.trim())}`,
+            `${APP_CONFIG.api.baseURL}/approver/vendor-search?q=${encodeURIComponent(q.trim())}${by === 'code' ? '&by=code' : ''}`,
             { headers: token ? { Authorization: `Bearer ${token}` } : {} },
           );
           const json = await res.json();
@@ -1854,15 +1855,36 @@ const ArticleCard = React.memo(
               value: `${v.vendorName}||${v.vendorCode}`,
               vendorCode: v.vendorCode,
               vendorName: v.vendorName,
-              label: (
-                <div className="flex justify-between gap-2">
-                  <span className="font-medium">{v.vendorName}</span>
-                  <span className="text-[11px] text-muted-foreground">
-                    {v.vendorCode}
-                    {v.vendorCity ? ` · ${v.vendorCity}` : ''}
+              // Two lines: name (typed text highlighted), then code · city.
+              label: (() => {
+                const name = String(v.vendorName ?? '');
+                const needle = q.trim().toLowerCase();
+                const at = needle ? name.toLowerCase().indexOf(needle) : -1;
+                return (
+                  <span className="flex min-w-0 flex-col gap-0.5">
+                    <span className="truncate font-semibold">
+                      {at >= 0 ? (
+                        <>
+                          {name.slice(0, at)}
+                          <mark className="rounded-sm bg-amber-100 text-slate-900">{name.slice(at, at + needle.length)}</mark>
+                          {name.slice(at + needle.length)}
+                        </>
+                      ) : (
+                        name
+                      )}
+                    </span>
+                    <span className="flex items-center gap-1.5 text-[11.5px] text-slate-500">
+                      <span className="font-mono">{v.vendorCode}</span>
+                      {v.vendorCity && (
+                        <>
+                          <span aria-hidden="true">·</span>
+                          <span className="truncate">{v.vendorCity}</span>
+                        </>
+                      )}
+                    </span>
                   </span>
-                </div>
-              ),
+                );
+              })(),
             }),
           );
           setVendorOptions(opts);
@@ -1872,6 +1894,25 @@ const ArticleCard = React.memo(
           setVendorSearching(false);
         }
       }, 300);
+    };
+
+    // Picking a vendor from either dropdown (name or code) fills both fields.
+    const pickVendor = (val: string, option: AutocompleteOption) => {
+      // option.vendorName is the clean name (no code suffix)
+      const cleanName = (option as any).vendorName || String(val ?? '').split('||')[0];
+      const updates: Record<string, string | null> = { vendorName: cleanName };
+      if ((option as any).vendorCode) updates.vendorCode = (option as any).vendorCode;
+      setLocalValues((prev) => ({ ...prev, ...updates }));
+      if (isModifyMode) {
+        setPendingChanges((prev) => ({ ...prev, ...updates }));
+      } else {
+        onSave({ ...item, ...updates } as ApproverItem, updates as Record<string, unknown>);
+      }
+      // The pick also fired onChange with the option value — drop that pending search.
+      if (vendorDebounceRef.current) clearTimeout(vendorDebounceRef.current);
+      setEditingField(null);
+      setVendorOptions([]);
+      setVendorQuery(null);
     };
 
     const handleSave = (field: string, value: string | null) => {
@@ -2218,7 +2259,7 @@ const ArticleCard = React.memo(
         >
           <div className={isFgCard ? 'flex flex-col gap-0.5 px-3 py-1.5' : 'flex items-start justify-between gap-2 px-2 py-0.5'}>
             <span
-              className={isFgCard ? 'text-[10px] font-semibold uppercase tracking-wider' : 'shrink-0 text-[9px] font-semibold uppercase tracking-wider'}
+              className={isFgCard ? 'text-[12px] font-semibold uppercase tracking-wider' : 'shrink-0 text-[9px] font-semibold uppercase tracking-wider'}
               style={{ color: showRequiredError ? (isFgCard ? '#c2410c' : '#dc2626') : isFgCard ? '#475569' : '#6b7280' }}
             >
               {label}
@@ -2236,7 +2277,7 @@ const ArticleCard = React.memo(
                   <PopoverTrigger asChild>
                     <button
                       type="button"
-                      className="flex h-7 w-full items-center justify-between rounded border border-input bg-background px-2 text-xs hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                      className={cn('flex h-7 w-full items-center justify-between rounded border border-input bg-background px-2 hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring', isFgCard ? 'text-sm' : 'text-xs')}
                     >
                       <span className="truncate text-left">{displayVal || 'Select...'}</span>
                       <ChevronDownIcon className="ml-1 h-3 w-3 shrink-0 text-muted-foreground" />
@@ -2282,31 +2323,36 @@ const ArticleCard = React.memo(
                     </div>
                   </PopoverContent>
                 </Popover>
+              ) : isEditingThis && field === 'vendorCode' ? (
+                <Autocomplete
+                  autoFocus
+                  value={vendorQuery ?? displayVal ?? ''}
+                  onChange={(q) => searchVendors(q, 'code')}
+                  options={vendorOptions}
+                  header={`${vendorOptions.length} vendor${vendorOptions.length !== 1 ? 's' : ''} · ↑ ↓ to move, Enter to pick`}
+                  placeholder="Type 2+ digits of the vendor code"
+                  notFoundContent={vendorSearching ? <span className="flex items-center gap-2"><Spinner size="sm" /> Searching vendors…</span> : null}
+                  onSelect={pickVendor}
+                  onBlur={(e) => {
+                    // A typed code (not picked) is saved as-is; handleSave checks it is 6 digits.
+                    const val = (e.target as HTMLInputElement).value.trim();
+                    if (val && val !== (displayVal ?? '')) handleSave('vendorCode', val);
+                    else setEditingField(null);
+                    setVendorOptions([]);
+                    setVendorQuery(null);
+                  }}
+                  className={isFgCard ? 'text-sm' : 'text-xs'}
+                />
               ) : isEditingThis && field === 'vendorName' ? (
                 <Autocomplete
                   autoFocus
-                  value={vendorQuery || displayVal || ''}
+                  value={vendorQuery ?? displayVal ?? ''}
                   onChange={searchVendors}
                   options={vendorOptions}
-                  notFoundContent={vendorSearching ? <Spinner size="sm" /> : null}
-                  onSelect={(val, option) => {
-                    // option.vendorName is the clean name (no code suffix)
-                    const cleanName = (option as any).vendorName || String(val ?? '').split('||')[0];
-                    const updates: Record<string, string | null> = { vendorName: cleanName };
-                    if ((option as any).vendorCode) updates.vendorCode = (option as any).vendorCode;
-                    setLocalValues((prev) => ({ ...prev, ...updates }));
-                    if (isModifyMode) {
-                      setPendingChanges((prev) => ({ ...prev, ...updates }));
-                    } else {
-                      onSave(
-                        { ...item, ...updates } as ApproverItem,
-                        updates as Record<string, unknown>,
-                      );
-                    }
-                    setEditingField(null);
-                    setVendorOptions([]);
-                    setVendorQuery('');
-                  }}
+                  header={`${vendorOptions.length} vendor${vendorOptions.length !== 1 ? 's' : ''} · ↑ ↓ to move, Enter to pick`}
+                  placeholder="Type 2+ letters of the vendor name"
+                  notFoundContent={vendorSearching ? <span className="flex items-center gap-2"><Spinner size="sm" /> Searching vendors…</span> : null}
+                  onSelect={pickVendor}
                   onBlur={(e) => {
                     const val = (e.target as HTMLInputElement).value;
                     // Modify mode: the vendor must be picked from the list (code + name
@@ -2314,15 +2360,15 @@ const ArticleCard = React.memo(
                     if (val && !isModifyMode) handleSave('vendorName', val);
                     else setEditingField(null);
                     setVendorOptions([]);
-                    setVendorQuery('');
+                    setVendorQuery(null);
                   }}
-                  className="text-xs"
+                  className={isFgCard ? 'text-sm' : 'text-xs'}
                 />
               ) : isEditingThis ? (
                 <Input
                   autoFocus
                   defaultValue={displayVal || ''}
-                  className="h-7 px-1 text-xs"
+                  className={isFgCard ? 'h-8 px-2 text-sm' : 'h-7 px-1 text-xs'}
                   onKeyDown={(e) =>
                     e.key === 'Enter' && handleSave(field, (e.target as HTMLInputElement).value || null)
                   }
@@ -2334,11 +2380,11 @@ const ArticleCard = React.memo(
                   className={`block truncate ${
                     displayVal
                       ? monoField
-                        ? 'font-mono text-[11.5px] text-slate-900'
-                        : 'text-[12.5px] font-semibold text-slate-900'
+                        ? 'font-mono text-[13.5px] text-slate-900'
+                        : 'text-[14.5px] font-semibold text-slate-900'
                       : showRequiredError
-                      ? 'text-xs font-semibold italic text-orange-700'
-                      : 'text-xs italic text-slate-500'
+                      ? 'text-sm font-semibold italic text-orange-700'
+                      : 'text-sm italic text-slate-500'
                   }`}
                 >
                   {displayVal || (showRequiredError ? 'Required' : canEdit ? 'Click to fill' : '—')}
@@ -2388,7 +2434,7 @@ const ArticleCard = React.memo(
           key={attr.field}
           data-field-label={attr.label}
           data-item-id={item.id}
-          className={cn('group flex items-center rounded transition-colors hover:bg-muted/40', big ? 'mb-0.5 min-h-[30px] gap-2 px-2 py-1' : 'gap-1.5 px-1 py-0.5')}
+          className={cn('group flex items-center rounded transition-colors hover:bg-muted/40', big ? 'mb-0.5 min-h-[26px] gap-2 px-2 py-0.5' : 'gap-1.5 px-1 py-0.5')}
           style={{
             cursor: attrLocked ? 'default' : 'pointer',
             background: isEditing
@@ -2422,7 +2468,7 @@ const ArticleCard = React.memo(
                 <Input
                   autoFocus
                   defaultValue={isEffectivelyEmpty ? '' : currentValue || ''}
-                  className={big ? 'h-8 px-2 text-[13px]' : plus1 ? 'h-6 px-1 text-[12px]' : 'h-6 px-1 text-[11px]'}
+                  className={big ? 'h-7 px-2 text-[13px]' : plus1 ? 'h-6 px-1 text-[12px]' : 'h-6 px-1 text-[11px]'}
                   onKeyDown={(e) =>
                     e.key === 'Enter' && handleSave(attr.field, (e.target as HTMLInputElement).value || null)
                   }
@@ -2461,7 +2507,7 @@ const ArticleCard = React.memo(
                     type="button"
                     className={cn(
                       'flex w-full items-center justify-between rounded border border-input bg-background hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring',
-                      big ? 'h-8 px-2 text-[13px]' : plus1 ? 'h-6 px-1.5 text-[12px]' : 'h-6 px-1.5 text-[11px]',
+                      big ? 'h-7 px-2 text-[13px]' : plus1 ? 'h-6 px-1.5 text-[12px]' : 'h-6 px-1.5 text-[11px]',
                     )}
                   >
                     <span className="truncate text-left">
@@ -3147,7 +3193,7 @@ const ArticleCard = React.memo(
                       ),
                     })}
                     {isLeftCardOpen('info') && (
-                      <dl className="m-0 grid grid-cols-[110px_minmax(0,1fr)] px-3 py-1 text-xs">
+                      <dl className="m-0 grid grid-cols-[120px_minmax(0,1fr)] px-3 py-1 text-sm">
                         {fgInfoRows.map(({ label, value }, i) => (
                           <React.Fragment key={label}>
                             <dt className={`py-1.5 text-slate-600 ${i < fgInfoRows.length - 1 ? 'border-b border-slate-100' : ''}`}>{label}</dt>

@@ -4652,26 +4652,28 @@ export class ApproverController {
     }
 
     /**
-     * GET /api/approver/vendor-search?q=<query>
-     * Returns up to 15 vendor records matching the typed name (case-insensitive).
+     * GET /api/approver/vendor-search?q=<query>[&by=code]
+     * Returns up to 15 vendor records matching the typed name (case-insensitive),
+     * or with by=code, vendors whose code starts with the typed digits.
      * Requires at least 2 characters to avoid returning the full 8k list.
      */
     static async vendorSearch(req: Request, res: Response) {
         const q = String(req.query.q ?? '').trim();
+        const byCode = req.query.by === 'code';
         if (q.length < 2) {
             return res.json({ success: true, data: [] });
         }
 
         const results = await prisma.masterVendorDetail.findMany({
-            where: {
-                vendorName: { contains: q, mode: 'insensitive' },
-            },
+            where: byCode
+                ? { vendorCode: { startsWith: q.replace(/^0+/, '') || q } }
+                : { vendorName: { contains: q, mode: 'insensitive' } },
             select: {
                 vendorCode: true,
                 vendorName: true,
                 vendorCity: true,
             },
-            orderBy: { vendorName: 'asc' },
+            orderBy: byCode ? { vendorCode: 'asc' } : { vendorName: 'asc' },
             take: 15,
         });
 

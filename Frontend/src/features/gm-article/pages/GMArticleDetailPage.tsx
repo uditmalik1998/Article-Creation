@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import {
-  CheckCircle2, XCircle, FileText, LayoutGrid, Rocket, Sparkles,
+  CheckCircle2, XCircle, FileText, LayoutGrid, Sparkles,
   ChevronLeft, ChevronRight, ArrowLeft, Loader2, RotateCw,
 } from 'lucide-react';
 import {
@@ -225,7 +225,6 @@ type ConfirmDialog =
   | { kind: 'reject'; count: number }
   | { kind: 'createFabric'; item: ApproverItem }
   | { kind: 'createBody'; item: ApproverItem }
-  | { kind: 'proceedFG'; item: ApproverItem }
   | null;
 
 type InfoDialog =
@@ -734,19 +733,6 @@ export default function ArticleDetailPage({
     } catch { message.error('Failed to create body article'); }
   };
 
-  const doProceedFG = async (item: ApproverItem) => {
-    try {
-      const token = localStorage.getItem('authToken');
-      const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/proceed-fg-article`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ ids: [item.id] }),
-      });
-      if (!r.ok) throw new Error('Request failed');
-      message.success('FG article creation initiated');
-      await refetchCurrentItem();
-    } catch { message.error('Failed to proceed with FG article creation'); }
-  };
-
   // ─── Edit modal ──────────────────────────────────────────────────────────────
 
   const handleEdit = (item: ApproverItem) => {
@@ -1156,7 +1142,6 @@ export default function ArticleDetailPage({
           onEdit={handleEdit}
           onCreateFabricArticle={item => setConfirmDialog({ kind: 'createFabric', item })}
           onCreateBodyArticle={item => setConfirmDialog({ kind: 'createBody', item })}
-          onProceedFGArticle={item => setConfirmDialog({ kind: 'proceedFG', item })}
           onDuplicate={async () => {}}
           onModify={async (row, changes) => {
             if (!changes || Object.keys(changes).length === 0) return;
@@ -1384,18 +1369,6 @@ export default function ArticleDetailPage({
               <DialogFooter>
                 <Button variant="outline" onClick={() => setConfirmDialog(null)}>Cancel</Button>
                 <Button onClick={async () => { const item = confirmDialog.item; setConfirmDialog(null); await doCreateBody(item); }}>Create Body Article</Button>
-              </DialogFooter>
-            </>
-          )}
-          {confirmDialog?.kind === 'proceedFG' && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2"><Rocket className="h-4 w-4 text-amber-500" /> Proceed for FG Article Creation</DialogTitle>
-              </DialogHeader>
-              <p className="m-0">Proceed with FG article creation for "{confirmDialog.item.articleNumber || confirmDialog.item.imageName || confirmDialog.item.id}"?</p>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setConfirmDialog(null)}>Cancel</Button>
-                <Button onClick={async () => { const item = confirmDialog.item; setConfirmDialog(null); await doProceedFG(item); }}>Proceed</Button>
               </DialogFooter>
             </>
           )}
