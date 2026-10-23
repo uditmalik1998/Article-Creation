@@ -190,7 +190,6 @@ const GMVariantTable: React.FC<GMVariantTableProps> = ({ genericId, genericRecor
         genericId={genericId}
         majorCategory={genericRecord.majorCategory || ''}
         existingPairs={existingPairs}
-        attributes={[]}
         onClose={() => setAddColorOpen(false)}
         onAdded={() => fetchVariants()}
       />

@@ -100,8 +100,6 @@ router.get('/attributes/:id', h(adminController.getMasterAttributeById));
 router.post('/attributes', mut, h(adminController.createMasterAttribute));
 router.put('/attributes/:id', mut, h(adminController.updateMasterAttribute));
 router.delete('/attributes/:id', mut, h(adminController.deleteMasterAttribute));
-router.post('/attributes/:id/values', mut, h(adminController.addAllowedValue));
-router.delete('/attributes/:id/values/:valueId', mut, h(adminController.deleteAllowedValue));
 
 // ═══════════════════════════════════════════════════════
 // HIERARCHY

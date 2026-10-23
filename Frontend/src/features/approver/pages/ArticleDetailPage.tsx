@@ -1,7 +1,6 @@
 import { cn } from '@/lib/utils';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
 import {
   CheckCircle2, XCircle, FileText, LayoutGrid, Rocket, Sparkles,
   ChevronLeft, ChevronRight, ArrowLeft, Loader2, RotateCw, History, Plus, Trash2, PackagePlus,
@@ -13,41 +12,26 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
   Input,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-  Textarea,
   Tooltip,
 } from '@/shared/components/ui-tw';
 import { message } from '@/lib/message';
 import { toast } from 'sonner';
 import { ApproverArticleList } from '../components/ApproverArticleList';
-import type { ApproverItem, MasterAttribute } from '../components/ApproverTable';
+import type { ApproverItem } from '../types';
 import { APP_CONFIG } from '../../../constants/app/config';
-import { SIMPLIFIED_HIERARCHY } from '../../extraction/components/SimplifiedCategorySelector';
 import { getMcCodeByMajorCategory } from '../../../data/majorCategoryMcCodeMap';
 import {
-  getMajCatAllowedValues,
-  getMandatoryGridKeys,
-  normalizeMajorCategory,
   SAP_NAME_TO_SCHEMA_KEY,
   SCHEMA_KEY_TO_DB_FIELD,
   SCHEMA_KEY_TO_EXCEL_ATTR,
 } from '../../../data/majCatAttributeMap';
 import {
-  preloadAttributeValues,
   preloadMandatoryGridFor,
   isMandatoryGridFieldActive,
   getMandatoryGridFieldLabel,
@@ -110,23 +94,6 @@ const formatComboCost = (v: unknown) => {
 };
 
 const inferMcCode = (majorCategory?: string | null) => getMcCodeByMajorCategory(majorCategory);
-
-const parseNumericValue = (value: unknown): number | null => {
-  if (value === null || value === undefined || value === '') return null;
-  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
-  const cleaned = String(value).replace(/[₹$€£¥,]/g, '').replace(/\s+/g, ' ').replace(/\/-$/, '').replace(/\/$/, '').replace(/-$/, '').trim();
-  const match = cleaned.match(/-?\d+(\.\d+)?/);
-  if (!match) return null;
-  const parsed = parseFloat(match[0]);
-  return Number.isNaN(parsed) ? null : parsed;
-};
-
-const calcMarkdown = (mrp: unknown, rate: unknown): string | null => {
-  const m = parseNumericValue(mrp);
-  const r = parseNumericValue(rate);
-  if (m === null || r === null || m === 0) return null;
-  return (((m - r) / m) * 100).toFixed(1) + '%';
-};
 
 // Maps schemaKey → all SAP key aliases for mandatory-grid lookups
 const SCHEMA_KEY_TO_ALL_SAP_KEYS: Record<string, string[]> = Object.entries(SAP_NAME_TO_SCHEMA_KEY).reduce(
@@ -206,47 +173,6 @@ function getMissingMandatoryFields(item: any, majorCatOverride?: string | null):
   }
   return missing;
 }
-
-const ATTRIBUTE_FIELDS: { formName: string; label: string; schemaKey: string }[] = [
-  { formName: 'macroMvgr',       label: 'Macro MVGR',        schemaKey: 'macro_mvgr' },
-  { formName: 'mainMvgr',        label: 'Main MVGR',         schemaKey: 'main_mvgr' },
-  { formName: 'yarn1',           label: 'Yarn 1',            schemaKey: 'yarn_01' },
-  { formName: 'fabricMainMvgr',  label: 'Fabric Main MVGR',  schemaKey: 'fabric_main_mvgr' },
-  { formName: 'weave',           label: 'Weave',             schemaKey: 'weave' },
-  { formName: 'mFab2',           label: 'M FAB 2',           schemaKey: 'm_fab2' },
-  { formName: 'fabDiv',          label: 'M FAB DIV',         schemaKey: 'fab_div' },
-  { formName: 'composition',     label: 'Composition',       schemaKey: 'composition' },
-  { formName: 'finish',          label: 'Finish',            schemaKey: 'finish' },
-  { formName: 'gsm',             label: 'GSM',               schemaKey: 'gsm' },
-  { formName: 'weight',          label: 'G-Weight',          schemaKey: 'weight' },
-  { formName: 'lycra',           label: 'Lycra / Non-Lycra', schemaKey: 'lycra_non_lycra' },
-  { formName: 'shade',           label: 'Shade',             schemaKey: 'shade' },
-  { formName: 'pattern',         label: 'Body Style',        schemaKey: 'body_style' },
-  { formName: 'fit',             label: 'Fit',               schemaKey: 'fit' },
-  { formName: 'wash',            label: 'Wash',              schemaKey: 'wash' },
-  { formName: 'neck',            label: 'Neck',              schemaKey: 'neck' },
-  { formName: 'neckDetails',     label: 'Neck Details',      schemaKey: 'neck_details' },
-  { formName: 'collar',          label: 'Collar',            schemaKey: 'collar' },
-  { formName: 'placket',         label: 'Placket',           schemaKey: 'placket' },
-  { formName: 'sleeve',          label: 'Sleeve',            schemaKey: 'sleeve' },
-  { formName: 'length',          label: 'Length',            schemaKey: 'length' },
-  { formName: 'bottomFold',      label: 'Bottom Fold',       schemaKey: 'bottom_fold' },
-  { formName: 'frontOpenStyle',  label: 'Front Open Style',  schemaKey: 'front_open_style' },
-  { formName: 'pocketType',      label: 'Pocket Type',       schemaKey: 'pocket_type' },
-  { formName: 'drawcord',        label: 'Drawcord',          schemaKey: 'drawcord' },
-  { formName: 'button',          label: 'Button',            schemaKey: 'button' },
-  { formName: 'zipper',          label: 'Zipper',            schemaKey: 'zipper' },
-  { formName: 'zipColour',       label: 'Zip Colour',        schemaKey: 'zip_colour' },
-  { formName: 'fatherBelt',      label: 'Father Belt',       schemaKey: 'father_belt' },
-  { formName: 'childBelt',       label: 'Child Belt',        schemaKey: 'child_belt' },
-  { formName: 'printType',       label: 'Print Type',        schemaKey: 'print_type' },
-  { formName: 'printStyle',      label: 'Print Style',       schemaKey: 'print_style' },
-  { formName: 'printPlacement',  label: 'Print Placement',   schemaKey: 'print_placement' },
-  { formName: 'patches',         label: 'Patches',           schemaKey: 'patches' },
-  { formName: 'patchesType',     label: 'Patches Type',      schemaKey: 'patches_type' },
-  { formName: 'embroidery',      label: 'Embroidery',        schemaKey: 'embroidery' },
-  { formName: 'embroideryType',  label: 'Embroidery Type',   schemaKey: 'embroidery_type' },
-];
 
 const PAGE_SIZE = 50;
 
@@ -379,7 +305,6 @@ export default function ArticleDetailPage({
   const [currentPage, setCurrentPage] = useState(navState?.currentPage ?? 1);
   const [totalCount, setTotalCount] = useState(navState?.totalCount ?? 0);
   const [loadingItem, setLoadingItem] = useState(!navState?.items?.length);
-  const [attributes, setAttributes] = useState<MasterAttribute[]>([]);
   const [user, setUser] = useState<any>(null);
 
   // Action state
@@ -402,14 +327,6 @@ export default function ArticleDetailPage({
   const [historySearch, setHistorySearch] = useState('');
   const [historyUserFilter, setHistoryUserFilter] = useState('__ALL__');
 
-  // Edit modal
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<ApproverItem | null>(null);
-  const editForm = useForm<Record<string, any>>({ defaultValues: {} });
-  const [modalMarkdown, setModalMarkdown] = useState<string | null>(null);
-  const [editActiveTab, setEditActiveTab] = useState<'core' | 'attributes' | 'business'>('core');
-  const modalDivision = editForm.watch('division');
-
   const canApprove = user?.role === 'ADMIN' || user?.role === 'APPROVER' || user?.role === 'CATEGORY_HEAD' || user?.role === 'SUB_DIVISION_HEAD' || user?.role === 'PO_COMMITTEE' || user?.role === 'PD' || (extraApproverRoles.length > 0 && extraApproverRoles.includes(user?.role));
 
   // ─── Init ───────────────────────────────────────────────────────────────────
@@ -419,11 +336,6 @@ export default function ArticleDetailPage({
     if (str) { try { setUser(JSON.parse(str)); } catch { /* skip */ } }
   }, []);
 
-  useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    fetch(`${APP_CONFIG.api.baseURL}/approver/attributes`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json()).then(data => { if (Array.isArray(data)) setAttributes(data); }).catch(() => {});
-  }, []);
 
   // Active set categories of the Set MC Master (a set's own photo before it is linked as PARENT).
   const [setCategories, setSetCategories] = useState<Set<string>>(new Set());
@@ -453,9 +365,6 @@ export default function ArticleDetailPage({
       .finally(() => setLoadingItem(false));
   }, [id]);
 
-  useEffect(() => {
-    if (editingItem?.division) preloadAttributeValues(editingItem.division).catch(() => {});
-  }, [editingItem?.division]);
 
   // Ensure the mandatory grid for every loaded article's major category is cached,
   // then bump gridVersion so the Save & Submit gate recomputes with real data.
@@ -1069,237 +978,6 @@ export default function ArticleDetailPage({
     } catch { message.error('Failed to proceed with FG article creation'); }
   };
 
-  // ─── Edit modal ──────────────────────────────────────────────────────────────
-
-  const handleEdit = (item: ApproverItem) => {
-    setEditingItem(item);
-    editForm.reset({
-      articleNumber: item.articleNumber ?? '', division: item.division ?? '',
-      subDivision: item.subDivision ?? '', majorCategory: item.majorCategory ?? '',
-      vendorName: item.vendorName ?? '', designNumber: item.designNumber ?? '',
-      pptNumber: item.pptNumber ?? '', referenceArticleNumber: item.referenceArticleNumber ?? '',
-      referenceArticleDescription: item.referenceArticleDescription ?? '',
-      rate: item.rate ?? '', size: item.size ?? '', fabricMainMvgr: item.fabricMainMvgr ?? '',
-      composition: item.composition ?? '', weave: item.weave ?? '',
-      macroMvgr: item.macroMvgr ?? '', mainMvgr: item.mainMvgr ?? '',
-      mFab2: item.mFab2 ?? '', fabDiv: item.fabDiv ?? '', gsm: item.gsm ?? '',
-      finish: item.finish ?? '', shade: item.shade ?? '', weight: item.weight ?? '',
-      lycra: item.lycra ?? '', yarn1: item.yarn1 ?? '', colour: item.colour ?? '',
-      pattern: item.pattern ?? '', fit: item.fit ?? '', neck: item.neck ?? '',
-      sleeve: item.sleeve ?? '', length: item.length ?? '', collar: item.collar ?? '',
-      placket: item.placket ?? '', bottomFold: item.bottomFold ?? '',
-      frontOpenStyle: item.frontOpenStyle ?? '', pocketType: item.pocketType ?? '',
-      drawcord: item.drawcord ?? '', button: item.button ?? '', zipper: item.zipper ?? '',
-      zipColour: item.zipColour ?? '', fatherBelt: item.fatherBelt ?? '',
-      childBelt: item.childBelt ?? '', printType: item.printType ?? '',
-      printStyle: item.printStyle ?? '', printPlacement: item.printPlacement ?? '',
-      patches: item.patches ?? '', patchesType: item.patchesType ?? '',
-      embroidery: item.embroidery ?? '', embroideryType: item.embroideryType ?? '',
-      wash: item.wash ?? '', neckDetails: item.neckDetails ?? '',
-      vendorCode: item.vendorCode ?? '', mrp: item.mrp ?? '',
-      mcCode: item.mcCode || inferMcCode(item.majorCategory) || '',
-      segment: item.segment ?? '', season: item.season ?? '',
-      hsnTaxCode: item.hsnTaxCode ?? '', articleDescription: item.articleDescription ?? '',
-      fashionGrid: item.fashionGrid ?? '', year: item.year ?? '', articleType: item.articleType ?? '',
-    });
-    setModalMarkdown(calcMarkdown(item.mrp, item.rate));
-    setEditActiveTab('core');
-    setIsEditModalOpen(true);
-  };
-
-  const handleSaveEdit = async (values: Record<string, any>) => {
-    try {
-      const token = localStorage.getItem('authToken');
-      if (values.majorCategory && (values.majorCategory !== editingItem?.majorCategory || !values.mcCode)) {
-        values.mcCode = inferMcCode(values.majorCategory) || values.mcCode;
-      }
-      const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${editingItem?.id}`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(values),
-      });
-      if (!r.ok) {
-        let msg = 'Failed to update item';
-        try { const p = await r.json(); if (p?.error) msg = p.error; } catch { /* skip */ }
-        throw new Error(msg);
-      }
-      message.success('Item updated');
-      setIsEditModalOpen(false);
-      const wasEditingChild = editingItem && editingItem.id !== currentItem?.id;
-      setEditingItem(null);
-      if (wasEditingChild) await loadComboChildren();
-      else await refetchCurrentItem();
-    } catch (err) { message.error(err instanceof Error ? err.message : 'Failed to update item'); }
-  };
-
-  const getSubDivisionOptions = (div?: string): string[] => {
-    if (!div) return [];
-    if (div.match(/LADIES|WOMEN/i)) return SIMPLIFIED_HIERARCHY['Ladies'];
-    if (div.match(/KIDS/i)) return SIMPLIFIED_HIERARCHY['Kids'];
-    if (div.match(/MEN/i)) return SIMPLIFIED_HIERARCHY['MENS'];
-    return [];
-  };
-
-  const renderTextField = (name: string, label: string) => (
-    <FormField control={editForm.control} name={name}
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>{label}</FormLabel>
-          <FormControl><Input {...field} value={field.value ?? ''} /></FormControl>
-        </FormItem>
-      )}
-    />
-  );
-
-  const coreTab = (
-    <div className="grid grid-cols-2 gap-4">
-      {renderTextField('articleNumber', 'Article Number')}
-      {renderTextField('designNumber', 'Design Number')}
-      {renderTextField('majorCategory', 'Major Category')}
-      <FormField control={editForm.control} name="division"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Division</FormLabel>
-            <FormControl>
-              <Select value={field.value || ''} onValueChange={(v) => { field.onChange(v); editForm.setValue('subDivision', ''); }}
-                disabled={(user?.role === 'APPROVER' || user?.role === 'CATEGORY_HEAD') && !!user?.division}>
-                <SelectTrigger><SelectValue placeholder="Select division" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="MEN">MENS</SelectItem>
-                  <SelectItem value="LADIES">LADIES</SelectItem>
-                  <SelectItem value="KIDS">KIDS</SelectItem>
-                </SelectContent>
-              </Select>
-            </FormControl>
-          </FormItem>
-        )}
-      />
-      <FormField control={editForm.control} name="subDivision"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Sub-Division</FormLabel>
-            <FormControl>
-              <Select value={field.value || ''} onValueChange={field.onChange}
-                disabled={user?.role === 'APPROVER' && !!user?.subDivision}>
-                <SelectTrigger><SelectValue placeholder="Select sub-division" /></SelectTrigger>
-                <SelectContent>
-                  {getSubDivisionOptions(modalDivision).map(sd => (
-                    <SelectItem key={sd} value={sd}>{sd}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormControl>
-          </FormItem>
-        )}
-      />
-      {renderTextField('vendorName', 'Vendor Name')}
-      {renderTextField('pptNumber', 'PPT Number')}
-      {renderTextField('referenceArticleNumber', 'Ref. Article #')}
-      {renderTextField('referenceArticleDescription', 'Ref. Description')}
-      <FormField control={editForm.control} name="rate"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Rate</FormLabel>
-            <FormControl>
-              <Input {...field} value={field.value ?? ''}
-                onChange={e => { field.onChange(e.target.value); setModalMarkdown(calcMarkdown(editForm.getValues('mrp'), e.target.value)); }} />
-            </FormControl>
-          </FormItem>
-        )}
-      />
-      <FormField control={editForm.control} name="mrp"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>MRP</FormLabel>
-            <FormControl>
-              <Input {...field} placeholder="e.g. 599" value={field.value ?? ''}
-                onChange={e => { field.onChange(e.target.value); setModalMarkdown(calcMarkdown(e.target.value, editForm.getValues('rate'))); }} />
-            </FormControl>
-          </FormItem>
-        )}
-      />
-      {modalMarkdown !== null && (
-        <div className="col-span-2 rounded-md border border-blue-300 bg-blue-50 px-3 py-1.5 text-[13px]">
-          <span className="text-muted-foreground">Markdown: </span>
-          <span className="font-bold text-blue-600">{modalMarkdown}</span>
-          <span className="ml-2 text-xs text-muted-foreground">(MRP − Rate) ÷ MRP × 100</span>
-        </div>
-      )}
-      {renderTextField('size', 'Size')}
-    </div>
-  );
-
-  const attributesTab = (() => {
-    const division = editingItem?.division || '';
-    const majorCat = normalizeMajorCategory(editingItem?.majorCategory || '', division);
-    const mandatoryKeys = getMandatoryGridKeys(majorCat);
-    const visibleFields = ATTRIBUTE_FIELDS.filter(f => {
-      if (!majorCat) return true;
-      const cur = editingItem?.[f.formName as keyof typeof editingItem];
-      if (cur) return true;
-      if (!mandatoryKeys.has(f.schemaKey)) return false;
-      return getMajCatAllowedValues(division, f.schemaKey) !== null;
-    });
-    if (visibleFields.length === 0) return <div className="p-6 text-center text-muted-foreground">No attributes defined for this major category.</div>;
-    return (
-      <div className="max-h-[60vh] overflow-y-auto pr-1">
-        <table className="w-full border-collapse">
-          <tbody>
-            {visibleFields.map(f => {
-              const values = division ? getMajCatAllowedValues(division, f.schemaKey) : null;
-              const isMandatory = mandatoryKeys.has(f.schemaKey);
-              return (
-                <tr key={f.formName} className="border-b border-border">
-                  <td className="w-[180px] whitespace-nowrap py-1.5 pr-3 align-middle text-[13px]"
-                    style={{ fontWeight: isMandatory ? 600 : 400, color: isMandatory ? '#1f1f1f' : '#595959' }}>
-                    {isMandatory && <span className="mr-1 text-red-500">*</span>}{f.label}
-                  </td>
-                  <td className="py-1">
-                    <FormField control={editForm.control} name={f.formName}
-                      render={({ field }) =>
-                        values ? (
-                          <Select value={field.value || ''} onValueChange={field.onChange}>
-                            <SelectTrigger className="h-8"><SelectValue placeholder="Select..." /></SelectTrigger>
-                            <SelectContent>
-                              {values.map(v => <SelectItem key={v.shortForm} value={v.shortForm}>{v.shortForm}</SelectItem>)}
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          <Input {...field} value={field.value ?? ''} placeholder="Enter value..." className="h-8" />
-                        )
-                      }
-                    />
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    );
-  })();
-
-  const businessTab = (
-    <div className="grid grid-cols-3 gap-4">
-      <div className="col-span-3"><h5 className="text-base font-semibold">Business & SAP Fields</h5></div>
-      {renderTextField('vendorCode', 'Vendor Code')}
-      {renderTextField('mcCode', 'MC Code')}
-      {renderTextField('segment', 'Segment')}
-      {renderTextField('season', 'Season')}
-      {renderTextField('hsnTaxCode', 'HSN Tax Code')}
-      {renderTextField('fashionGrid', 'Fashion Grid')}
-      {renderTextField('year', 'Year')}
-      {renderTextField('articleType', 'Article Type')}
-      <FormField control={editForm.control} name="articleDescription"
-        render={({ field }) => (
-          <FormItem className="col-span-3">
-            <FormLabel>Article Description</FormLabel>
-            <FormControl><Textarea rows={3} {...field} value={field.value ?? ''} /></FormControl>
-          </FormItem>
-        )}
-      />
-    </div>
-  );
-
   // ─── Render ──────────────────────────────────────────────────────────────────
 
   return (
@@ -1532,7 +1210,6 @@ export default function ArticleDetailPage({
           loading={false}
           selectedRowKeys={selectedRowKeys}
           onSelectionChange={setSelectedRowKeys}
-          onEdit={handleEdit}
           onCreateFabricArticle={item => {
             const missing = getMissingFabricCreationFields(item);
             if (missing.length > 0) {
@@ -1686,7 +1363,6 @@ export default function ArticleDetailPage({
               throw err instanceof Error ? err : new Error('Failed to modify');
             }
           }}
-          attributes={attributes}
           onRefresh={activeComboChild ? loadComboChildren : refetchCurrentItem}
           pathType={pathType}
           serverPagination={{ total: totalCount, current: currentPage, pageSize: PAGE_SIZE, onChange: () => {} }}
@@ -1743,31 +1419,6 @@ export default function ArticleDetailPage({
           }}
         />
       )}
-
-      {/* Edit Modal */}
-      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="max-h-[90vh] w-[1000px] max-w-[1000px] overflow-y-auto">
-          <DialogHeader><DialogTitle>Edit Article Details</DialogTitle></DialogHeader>
-          <Form {...editForm}>
-            <form onSubmit={editForm.handleSubmit(handleSaveEdit)}>
-              <Tabs value={editActiveTab} onValueChange={v => setEditActiveTab(v as typeof editActiveTab)}>
-                <TabsList>
-                  <TabsTrigger value="core">Core Details</TabsTrigger>
-                  <TabsTrigger value="attributes">Attributes</TabsTrigger>
-                  <TabsTrigger value="business">Business & SAP</TabsTrigger>
-                </TabsList>
-                <TabsContent value="core">{coreTab}</TabsContent>
-                <TabsContent value="attributes">{attributesTab}</TabsContent>
-                <TabsContent value="business">{businessTab}</TabsContent>
-              </Tabs>
-              <DialogFooter className="mt-4">
-                <Button type="button" variant="outline" onClick={() => setIsEditModalOpen(false)}>Cancel</Button>
-                <Button type="submit">Save Changes</Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
 
       {/* Confirm dialog */}
       <Dialog open={!!confirmDialog} onOpenChange={o => !o && setConfirmDialog(null)}>

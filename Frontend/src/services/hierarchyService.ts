@@ -191,9 +191,8 @@ export const getCategoryWithAttributes = async (categoryCode: string): Promise<H
 /**
  * Fetch all master attributes
  */
-export const getMasterAttributes = async (includeValues = false): Promise<MasterAttribute[]> => {
-  const params = includeValues ? { includeValues: 'true' } : {};
-  const response = await apiClient.get<{ success: boolean; data: MasterAttribute[] }>(`/attributes`, { params });
+export const getMasterAttributes = async (): Promise<MasterAttribute[]> => {
+  const response = await apiClient.get<{ success: boolean; data: MasterAttribute[] }>(`/attributes`);
   return response.data.data;
 };
 

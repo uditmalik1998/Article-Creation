@@ -1,6 +1,5 @@
 import majCatMandatory from './archived/maj-cat-mandatory.json';
 import { MAJOR_CATEGORY_ALLOWED_VALUES } from './majorCategoryMap';
-import { getCachedValues, getCachedCategoryAttributes, getMajCatGridEntry, isMandatoryGridFieldActive } from '../services/articleConfigService';
 
 /**
  * Maps frontend schema keys to Excel CHILD_MAJ_CAT attribute names.
@@ -307,93 +306,10 @@ export function normalizeMajorCategory(raw: string, division?: string | null): s
 }
 
 /**
- * Returns the allowed values (shortForm/fullForm pairs) for a given schema key
- * scoped to the selected major category.
- *
- * Priority:
- *   1. Uploaded Excel grid (from /api/admin/majcat-grid/values)
- *      — keyed by exact majorCategory code (e.g. "L_PLAZO") + Excel col-E attr name
- *   2. Division-level DB cache (global fallback)
- *   3. null → caller keeps existing values unchanged
- *
- * @param majorCategory  Short code like "L_PLAZO" or "M_TEES_HS"
- * @param schemaKey      Frontend schema key like "fab_div", "yarn_01"
- * @param division       Optional division fallback ("MENS" | "LADIES" | "KIDS")
- */
-export function getMajCatAllowedValues(
-  majorCategory: string,
-  schemaKey: string,
-  division?: string,
-): { shortForm: string; fullForm: string }[] | null {
-  const key = schemaKey.toLowerCase();
-
-  // 1. Excel grid — most specific: exact major category + Excel attribute name
-  const excelAttr = SCHEMA_KEY_TO_EXCEL_ATTR[key];
-  if (excelAttr && majorCategory) {
-    const gridVals = getMajCatGridEntry(majorCategory, excelAttr);
-    if (gridVals && gridVals.length > 0) {
-      // If the only value is '-', it means "no specific constraint — use global values
-      // but keep '-' as a valid selectable N/A option".
-      const onlyDash = gridVals.length === 1 && gridVals[0] === '-';
-      if (!onlyDash) {
-        // Specific values configured — return them directly (always include '-' if present)
-        return gridVals.map((v) => ({ shortForm: v, fullForm: v }));
-      }
-      // Fall through to global values, but remember to prepend '-'
-    }
-  }
-
-  // 2. Division-level DB fallback (global values by division)
-  const fallbackDiv = division || majorCategory;
-  const dbField = SCHEMA_KEY_TO_DB_FIELD[key];
-  if (!dbField) return null;
-
-  const values = getCachedValues(fallbackDiv, dbField);
-
-  // Check if the majcat grid has '-' for this field — if so, prepend it as N/A option
-  const hasDashInGrid = (() => {
-    if (!excelAttr || !majorCategory) return false;
-    const gridVals = getMajCatGridEntry(majorCategory, excelAttr);
-    return gridVals !== null && gridVals.includes('-');
-  })();
-
-  if (!values || values.length === 0) {
-    return hasDashInGrid ? [{ shortForm: '-', fullForm: '-' }] : null;
-  }
-
-  const result = values.map((v) => ({ shortForm: v, fullForm: v }));
-  // Prepend '-' so user can always clear/mark as N/A when the grid allows it
-  if (hasDashInGrid && !result.some(v => v.shortForm === '-')) {
-    result.unshift({ shortForm: '-', fullForm: '-' });
-  }
-  return result;
-}
-
-/**
- * Schema keys that are mandatory for a major category according to the
- * mandatory grid (Admin › Mandatory Grid) — the same source the article cards
- * use. The grid must already be loaded with preloadMandatoryGridFor().
- */
-export function getMandatoryGridKeys(majorCategory: string): Set<string> {
-  const keys = new Set<string>();
-  if (!majorCategory) return keys;
-  for (const [sapKey, schemaKey] of Object.entries(SAP_NAME_TO_SCHEMA_KEY)) {
-    if (isMandatoryGridFieldActive(majorCategory, sapKey) === true) keys.add(schemaKey);
-  }
-  return keys;
-}
-
-/**
- * Returns the set of schema keys that are mandatory for the given major category.
- * Prefers DB cache (CategoryAttribute.isRequired) if available,
- * falls back to archived JSON only when DB data hasn't been loaded yet.
+ * Returns the set of schema keys that are mandatory for the given major category,
+ * from the archived maj-cat-mandatory.json (used by the extraction page).
  */
 export function getMajCatMandatoryKeys(majorCategory: string): Set<string> {
-  // DB-first: use cached CategoryAttribute data if available
-  const dbConfig = getCachedCategoryAttributes(majorCategory);
-  if (dbConfig?.configured) return dbConfig.required;
-
-  // Fallback: archived JSON (used only before DB cache is warm)
   const sapNames = mandatoryData[majorCategory];
   if (!sapNames || sapNames.length === 0) return new Set();
 

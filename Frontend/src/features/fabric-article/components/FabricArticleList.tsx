@@ -48,7 +48,7 @@ import {
 import { message } from '@/lib/message';
 import { cn } from '@/lib/utils';
 import { CARD_THEME } from '../../approver/components/cardTheme';
-import type { ApproverItem, MasterAttribute } from './FabricArticleTable';
+import type { ApproverItem } from '../types';
 import {
   SCHEMA_KEY_TO_EXCEL_ATTR,
   SAP_NAME_TO_SCHEMA_KEY,
@@ -56,10 +56,6 @@ import {
 } from '../../../data/majCatAttributeMap';
 import { getMajorCategoriesByDivision, getMcCodeByMajorCategory } from '../../../data/majorCategoryMcCodeMap';
 import {
-  preloadAttributeValues,
-  getCachedValues,
-  isValuesCached,
-  invalidateValuesCache,
   preloadMajCatGridFor,
   isMajCatGridLoadedFor,
   getMajCatGridEntry,
@@ -270,7 +266,6 @@ export interface ApproverArticleListProps {
   loading: boolean;
   selectedRowKeys: React.Key[];
   onSelectionChange: (keys: React.Key[]) => void;
-  onEdit: (item: ApproverItem) => void;
   onSave: (item: ApproverItem, updates: Record<string, unknown>, options?: { silent?: boolean }) => void;
   onCreateFabricArticle: (item: ApproverItem) => void;
   onCreateBodyArticle: (item: ApproverItem) => void;
@@ -283,7 +278,6 @@ export interface ApproverArticleListProps {
    * support modify (new/old/rejected) simply omit it and the button is hidden.
    */
   onModify?: (item: ApproverItem, changes: Record<string, unknown>) => Promise<void>;
-  attributes: MasterAttribute[];
   onRefresh: () => void;
   pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
   /** Detail page (design "Option A"): the card's top strip continues the page's ink
@@ -328,7 +322,6 @@ const ArticleCard = React.memo(
     onProceedFGArticle,
     onDuplicate,
     onModify,
-    attributes,
     onRefresh,
     cardGroups,
     pathType,
@@ -346,7 +339,6 @@ const ArticleCard = React.memo(
     onProceedFGArticle: (item: ApproverItem) => void;
     onDuplicate: (item: ApproverItem) => Promise<void>;
     onModify?: (item: ApproverItem, changes: Record<string, unknown>) => Promise<void>;
-    attributes: MasterAttribute[];
     onRefresh: () => void;
     cardGroups: CardGroup[];
     pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
@@ -447,7 +439,6 @@ const ArticleCard = React.memo(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [segmentRanges]);
 
-    const [cacheReady, setCacheReady] = useState(false);
     // Tracks when the major-category grid JSON (for THIS article's category) has loaded
     const [gridReady, setGridReady] = useState(() => isMajCatGridLoadedFor(effectiveMajCat));
     // Tracks when the mandatory grid (for THIS article's category) has loaded
@@ -601,7 +592,7 @@ const ArticleCard = React.memo(
 
       return { visibleAttrs: visible, mandatoryKeys: mandatory };
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [effectiveMajCat, cacheReady, gridReady, mandatoryGridReady, attributeFields, localValues, fabricGrid, fabricGridReady]);
+    }, [effectiveMajCat, gridReady, mandatoryGridReady, attributeFields, localValues, fabricGrid, fabricGridReady]);
 
     const [editingField, setEditingField] = useState<string | null>(null);
 
@@ -611,16 +602,6 @@ const ArticleCard = React.memo(
     const [vendorOptions, setVendorOptions] = useState<AutocompleteOption[]>([]);
     const [vendorSearching, setVendorSearching] = useState(false);
     const vendorDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    useEffect(() => {
-      if (!item.division) return;
-      if (isValuesCached(item.division) && getCachedValues(item.division, 'impAtrbt2') === null) {
-        invalidateValuesCache(item.division);
-      }
-      preloadAttributeValues(item.division)
-        .then(() => setCacheReady(true))
-        .catch(() => setCacheReady(true));
-    }, [item.division]);
 
     // Fetch fabric attribute grid values (M_FAB_DIV, M_YARN, etc.) from fabric_maj_cat_grid_values
     useEffect(() => {
@@ -2148,14 +2129,9 @@ const ArticleCard = React.memo(
                         const val = String(getValue(bom.field) ?? '').trim() || '—';
                         const isEmpty = val === '—';
                         const dropdownOptions: string[] = bom.isDropdown
-                          ? bom.field === 'impAtrbt2'
-                            ? getMajCatGridEntry(effectiveMajCat, 'IMP ATBT') ??
-                              attributes.find((a) => a.key === 'imp_atrbt2')?.allowedValues.map((v) => v.shortForm) ??
-                              getCachedValues(item.division ?? '', 'impAtrbt2') ??
-                              []
-                            : bom.field === 'articleFashionType'
+                          ? bom.field === 'articleFashionType'
                             ? ['C']
-                            : getCachedValues(item.division ?? '', bom.field) ?? []
+                            : []
                           : [];
                         return (
                           <div
@@ -2304,7 +2280,6 @@ const ArticleCard = React.memo(
                   <FabricVariantSubTable
                     genericId={item.id}
                     genericRecord={item}
-                    attributes={attributes}
                     onRefresh={onRefresh}
                     pathType={pathType}
                   />
@@ -2440,13 +2415,11 @@ export const FabricArticleList: React.FC<ApproverArticleListProps> = ({
   loading,
   selectedRowKeys,
   onSelectionChange,
-  onEdit: _onEdit,
   onSave,
   onCreateFabricArticle,
   onCreateBodyArticle,
   onProceedFGArticle,
   onModify,
-  attributes,
   onRefresh,
   pathType,
   joinTop,
@@ -2518,7 +2491,6 @@ export const FabricArticleList: React.FC<ApproverArticleListProps> = ({
           onProceedFGArticle={onProceedFGArticle}
           onDuplicate={handleDuplicate}
           onModify={onModify}
-          attributes={attributes}
           onRefresh={onRefresh}
           cardGroups={cardGroups}
           pathType={pathType}

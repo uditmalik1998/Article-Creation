@@ -53,7 +53,7 @@ import {
 import { message } from '@/lib/message';
 import { cn } from '@/lib/utils';
 import { useDragToPan } from '@/shared/hooks/ui/useDragToPan';
-import type { ApproverItem, MasterAttribute } from './ApproverTable';
+import type { ApproverItem } from '../types';
 import CostingGridCard, { BTRIM_CONFIG, VADD_CONFIG, gridFields } from './CostingGridCard';
 import PkgCostCard from './PkgCostCard';
 import CmpCostCard, { PR_VAL_FIELD } from './CmpCostCard';
@@ -71,10 +71,6 @@ import {
 } from '../../../data/majCatAttributeMap';
 import { getMcCodeByMajorCategory } from '../../../data/majorCategoryMcCodeMap';
 import {
-  preloadAttributeValues,
-  getCachedValues,
-  isValuesCached,
-  invalidateValuesCache,
   preloadMajCatGridFor,
   isMajCatGridLoadedFor,
   getMajCatGridEntry,
@@ -407,7 +403,6 @@ export interface ApproverArticleListProps {
   loading: boolean;
   selectedRowKeys: React.Key[];
   onSelectionChange: (keys: React.Key[]) => void;
-  onEdit: (item: ApproverItem) => void;
   onSave: (item: ApproverItem, updates: Record<string, unknown>, options?: { silent?: boolean }) => void;
   onCreateFabricArticle: (item: ApproverItem) => void;
   onCreateBodyArticle: (item: ApproverItem) => void;
@@ -420,7 +415,6 @@ export interface ApproverArticleListProps {
    * support modify (new/old/rejected) simply omit it and the button is hidden.
    */
   onModify?: (item: ApproverItem, changes: Record<string, unknown>) => Promise<void>;
-  attributes: MasterAttribute[];
   onRefresh: () => void;
   pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
   /** When set, only these attribute group names are shown in article cards. */
@@ -462,7 +456,6 @@ const ArticleCard = React.memo(
     onProceedFGArticle,
     onDuplicate,
     onModify,
-    attributes,
     onRefresh,
     cardGroups,
     pathType,
@@ -481,7 +474,6 @@ const ArticleCard = React.memo(
     onProceedFGArticle: (item: ApproverItem) => void;
     onDuplicate: (item: ApproverItem, designNumber: string) => Promise<void>;
     onModify?: (item: ApproverItem, changes: Record<string, unknown>) => Promise<void>;
-    attributes: MasterAttribute[];
     onRefresh: () => void;
     cardGroups: CardGroup[];
     pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
@@ -1297,7 +1289,6 @@ const ArticleCard = React.memo(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [segmentRanges]);
 
-    const [cacheReady, setCacheReady] = useState(false);
     // Tracks when the major-category grid JSON (for THIS article's category) has loaded
     const [gridReady, setGridReady] = useState(() => isMajCatGridLoadedFor(effectiveMajCat));
     // Tracks when the mandatory grid (for THIS article's category) has loaded
@@ -1498,7 +1489,7 @@ const ArticleCard = React.memo(
 
       return { visibleAttrs: visible, mandatoryKeys: mandatory };
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [attrMajCat, cacheReady, gridReady, mandatoryGridReady, attributeFields, localValues, nationalGrid, nationalGridReady, allowGroups]);
+    }, [attrMajCat, gridReady, mandatoryGridReady, attributeFields, localValues, nationalGrid, nationalGridReady, allowGroups]);
 
     const [editingField, setEditingField] = useState<string | null>(null);
 
@@ -1508,16 +1499,6 @@ const ArticleCard = React.memo(
     const [vendorOptions, setVendorOptions] = useState<AutocompleteOption[]>([]);
     const [vendorSearching, setVendorSearching] = useState(false);
     const vendorDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    useEffect(() => {
-      if (!item.division) return;
-      if (isValuesCached(item.division) && getCachedValues(item.division, 'impAtrbt2') === null) {
-        invalidateValuesCache(item.division);
-      }
-      preloadAttributeValues(item.division)
-        .then(() => setCacheReady(true))
-        .catch(() => setCacheReady(true));
-    }, [item.division]);
 
     // Preload the major-category grid (dropdown values) for THIS article's
     // category only — not the entire grid. Re-runs if the category changes.
@@ -4536,12 +4517,7 @@ const ArticleCard = React.memo(
                         const dropdownOptions: string[] = bom.isDropdown
                           ? bom.field === 'bodyConsumptionType'
                             ? ['Rough', 'Actual']
-                            : bom.field === 'impAtrbt2'
-                            ? getMajCatGridEntry(effectiveMajCat, 'IMP ATBT') ??
-                              attributes.find((a) => a.key === 'imp_atrbt2')?.allowedValues.map((v) => v.shortForm) ??
-                              getCachedValues(item.division ?? '', 'impAtrbt2') ??
-                              []
-                            : getCachedValues(item.division ?? '', bom.field) ?? []
+                            : []
                           : [];
                         return (
                           <div
@@ -4975,7 +4951,6 @@ const ArticleCard = React.memo(
                 <VariantSubTable
                   genericId={item.id}
                   genericRecord={item}
-                  attributes={attributes}
                   onRefresh={onRefresh}
                   pathType={pathType}
                   refreshKey={variantRefreshKey}
@@ -5262,13 +5237,11 @@ export const ApproverArticleList: React.FC<ApproverArticleListProps> = ({
   loading,
   selectedRowKeys,
   onSelectionChange,
-  onEdit: _onEdit,
   onSave,
   onCreateFabricArticle,
   onCreateBodyArticle,
   onProceedFGArticle,
   onModify,
-  attributes,
   onRefresh,
   pathType,
   allowGroups,
@@ -5344,7 +5317,6 @@ export const ApproverArticleList: React.FC<ApproverArticleListProps> = ({
           onProceedFGArticle={onProceedFGArticle}
           onDuplicate={handleDuplicate}
           onModify={onModify}
-          attributes={attributes}
           onRefresh={onRefresh}
           cardGroups={visibleCardGroups}
           pathType={pathType}

@@ -17,7 +17,7 @@ import {
 } from '@/shared/components/ui-tw';
 import { message } from '@/lib/message';
 import { cn } from '@/lib/utils';
-import type { ApproverItem } from '../components/FabricArticleTable';
+import type { ApproverItem } from '../types';
 import { ArticleSpecCard } from '@/shared/components/articles/ArticleSpecCard';
 import { ArticleCardGrid, ARTICLE_CARD_GRID_CLASS, GroupByControl, useArticleGroupBy } from '@/shared/components/articles/ArticleCardGrid';
 import { DatePresetFilter, DivisionTabs, divisionOption, ResetFiltersButton, SapSyncChips } from '@/shared/components/articles/ArticleFilters';

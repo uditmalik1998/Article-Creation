@@ -117,8 +117,8 @@ This is enforced **server-side** — the UI cannot bypass it.
 
 ```
 /login, /register          → Public (no auth needed)
-/dashboard, /products      → ProtectedRoute (any authenticated user)
-/extraction/*              → CreatorRoute (blocks APPROVER/CATEGORY_HEAD)
+/dashboard                 → ProtectedRoute (any authenticated user)
+/extraction/*              → ExtractionRoute (blocks CATEGORY_HEAD, PD_DESIGNER)
 /approver/*                → ApproverRoute (APPROVER, CATEGORY_HEAD, ADMIN)
 /admin/*                   → AdminRoute (ADMIN only)
 /po-presentation           → ProtectedRoute
