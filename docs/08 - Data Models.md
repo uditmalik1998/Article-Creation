@@ -88,11 +88,7 @@ erDiagram
 | `ArticleBom` | BOM: rate, mrp, impAtrbt2 |
 | `SapFieldConfig` | UI field → SAP RFC field mapping (source of truth) |
 | `SapAttributeValue` | Dropdown values per SAP field (scoped by majorCategory) |
-| **`Article360Flat`** | **Denormalized flat table for fast query/export** |
-
-> The 360article schema is a **mirror** written fire-and-forget after every `ExtractionResultFlat` update.  
-> Code: `Backend/src/utils/mirror360Flat.ts`  
-> Purpose: powers analytics and alternate query paths without hitting the main flat table.
+| `article_360_flat` | Former write-only mirror of `ExtractionResultFlat`. Mirroring removed 2026-10-23 (nothing ever read it); table pending backup + drop. |
 
 ---
 

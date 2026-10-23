@@ -54,7 +54,6 @@ flowchart TD
     EXTR[EnhancedExtractionController] --> VLM[vlm/vlmService\nClaude, GPT-4o, FashionCLIP]
     EXTR --> FLAT[flatteningService\nNormalize + persist]
     EXTR --> COST[sessionCostTracker]
-    EXTR --> MIRROR[mirror360Flat\nfire-and-forget]
 
     SRM[srmSyncService] --> EXTRFLAT[(ExtractionResultFlat)]
 
@@ -121,7 +120,6 @@ Attribute values: 5-minute cache (`getAttributes`)
 | `getMcCodeByMajorCategory` | `utils/mcCodeMapper.ts` | majorCategory → mcCode |
 | `getHsnCodeByMcCode` | `utils/hsnMapper.ts` | mcCode → hsnTaxCode |
 | `getSegmentByCategoryAndMrp` | `utils/segmentRangeMapper.ts` | (majorCategory, mrp) → segment |
-| `mirror360FlatUpdate` | `utils/mirror360Flat.ts` | flat row → 360article upsert |
 
 ---
 

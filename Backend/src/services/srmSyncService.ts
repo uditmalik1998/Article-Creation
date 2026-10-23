@@ -26,7 +26,6 @@ import { getHsnCodeByMcCode, getMcCodeByMajorCategory } from '../utils/mcCodeMap
 import { getSegmentFromMaster } from './segmentMasterService';
 import { buildArticleDescription } from '../utils/articleDescriptionBuilder';
 import { getExcludedDescriptionFields } from '../utils/categoryFieldVisibility';
-import { mirror360FlatUpdate } from '../utils/mirror360Flat';
 import { VLMService } from './vlm/vlmService';
 import { mvgrMappingService } from './mvgrMappingService';
 import { storageService } from './storageService';
@@ -622,7 +621,6 @@ async function enrichSrmRowWithVlm(
         }
       }
 
-      void mirror360FlatUpdate(flatId, updates);
       return true;
 
     } catch (err: any) {
@@ -745,22 +743,10 @@ async function insertRow(row: SrmRow, rawArticleId?: string): Promise<{ id: stri
         where: { id: flat.id },
         data: { articleDescription: artDesc },
       });
-      void mirror360FlatUpdate(flat.id, { articleDescription: artDesc });
     }
   } catch {
     // Non-critical
   }
-
-  // Mirror to 360article schema
-  void mirror360FlatUpdate(flat.id, {
-    source: 'SRM', extractionStatus: 'SRM_IMPORT',
-    pptNumber: flat.pptNumber, designNumber: flat.designNumber,
-    vendorCode: flat.vendorCode, vendorName: flat.vendorName, division: flat.division,
-    subDivision: flat.subDivision, majorCategory: flat.majorCategory,
-    macroMvgr: flat.macroMvgr, rate: flat.rate,
-    year: flat.year, season: flat.season, mcCode: flat.mcCode,
-    hsnTaxCode: flat.hsnTaxCode, segment: flat.segment,
-  });
 
   // NOTE: Do NOT call duplicateForKidsDivision for SRM records.
   // SRM provides the exact major category from the vendor — we must trust it as-is.
@@ -779,7 +765,6 @@ async function insertRow(row: SrmRow, rawArticleId?: string): Promise<{ id: stri
         where: { id: flat.id },
         data: { imageUrl: r2Url },
       });
-      void mirror360FlatUpdate(flat.id, { imageUrl: r2Url });
     }
   }
 
@@ -866,7 +851,6 @@ export async function syncFromSrm(triggeredBy: 'CRON' | 'ADMIN' | 'WEBHOOK' = 'C
             if (r2Url) patch.imageUrl = r2Url;
           }
           await prisma.extractionResultFlat.update({ where: { id: existing.id }, data: patch });
-          void mirror360FlatUpdate(existing.id, patch);
           console.log(`[SRM Sync] Patched [${Object.keys(patch).join(', ')}] for: ${row.presentation_no} / ${row.design_number}`);
           result.inserted++;
           itemLogs.push({ runId: run.id, pptNumber: row.presentation_no, srmDesignNumber: row.design_number, flatId: existing.id, action: 'PATCHED', errorMessage: null });
@@ -1069,7 +1053,6 @@ export async function backfillSrmVlmEnrichment(): Promise<EnrichResult> {
           where: { id: rec.id },
           data: { imageUrl: r2Url },
         });
-        void mirror360FlatUpdate(rec.id, { imageUrl: r2Url });
         console.log(`[SRM Enrich Backfill] Re-mirrored SRM image to R2 for ${rec.id}`);
       } else {
         console.warn(`[SRM Enrich Backfill] Could not re-mirror image for ${rec.id} — skipping VLM`);
@@ -1215,7 +1198,6 @@ export async function syncSinglePresentation(
             where: { id: existing.id },
             data: { imageUrl: finalUrl },
           });
-          void mirror360FlatUpdate(existing.id, { imageUrl: finalUrl });
           toEnrich.push({ id: existing.id, imageUrl: finalUrl, majorCategory: presentation.major_category });
           result.inserted++;
         } else {
@@ -1376,7 +1358,6 @@ export async function processSrmWebhookBatch(
           if (r2Url) {
             imageUrl = r2Url;
             await prisma.extractionResultFlat.update({ where: { id: flatId }, data: { imageUrl: r2Url } });
-            void mirror360FlatUpdate(flatId, { imageUrl: r2Url });
             action = 'PATCHED';
           }
         }
