@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -993,13 +994,21 @@ export default function ArticleDetailPage({
 
   // ─── Render ──────────────────────────────────────────────────────────────────
 
+  // Option A header applies to Fabric articles only (Body articles reuse this page).
+  const inkHeader = ListComponent === FabricArticleList;
+
   return (
     <div className="flex flex-col">
       {/* Sticky header */}
-      <div className="sticky top-0 z-30 mb-2 -mx-1 px-1 pt-1">
-        <div className="overflow-hidden rounded-xl border border-white/60 bg-white/85 shadow-[var(--shadow-md)] backdrop-blur">
-          <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 text-white"
-            style={{ background: 'linear-gradient(90deg, #1f2937 0%, #334155 100%)' }}>
+      {/* Design "Option A" (Fabric articles only — this page also serves Body articles):
+          this bar and the article card's top strip read as one ink block. */}
+      <div className={cn('sticky top-0 z-30 -mx-1 px-1 pt-1', inkHeader ? 'mb-0' : 'mb-2')}>
+        <div className={cn(
+          'overflow-hidden shadow-[var(--shadow-md)]',
+          inkHeader ? 'rounded-t-xl border border-slate-800' : 'rounded-xl border border-white/60 bg-white/85 backdrop-blur',
+        )}>
+          <div className={cn('flex flex-wrap items-center justify-between gap-2 text-white', inkHeader ? 'px-4 py-2' : 'px-3 py-1.5')}
+            style={{ background: inkHeader ? '#1e293b' : 'linear-gradient(90deg, #1f2937 0%, #334155 100%)' }}>
             <div className="flex min-w-0 items-center gap-2.5">
               {/* Back button */}
               <Button size="sm" variant="ghost" onClick={() => navigate(buildBackUrl(), {
@@ -1008,11 +1017,11 @@ export default function ArticleDetailPage({
                 className="h-7 px-1.5 text-white hover:bg-white/15 hover:text-white">
                 <ArrowLeft className="h-4 w-4" />
               </Button>
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#FF6F61]/90">
+              <div className={cn('flex h-7 w-7 shrink-0 items-center justify-center rounded-full', inkHeader ? 'bg-white/10' : 'bg-[#FF6F61]/90')}>
                 <Sparkles className="h-3.5 w-3.5 text-white" />
               </div>
               <div className="min-w-0">
-                <div className="font-display truncate text-[13px] font-semibold leading-tight tracking-tight">
+                <div className={cn('font-display truncate font-semibold leading-tight tracking-tight', inkHeader ? 'text-[14px]' : 'text-[13px]')}>
                   {isFGMode
                     ? (pathType === 'created' ? 'FG Created Articles' : 'FG New Articles')
                     : pathType === 'old' ? 'Old Articles' : pathType === 'new' ? 'New Articles'
@@ -1033,7 +1042,11 @@ export default function ArticleDetailPage({
                     className="h-6 px-1.5 text-white hover:bg-white/15 hover:text-white disabled:opacity-30">
                     <ChevronLeft />
                   </Button>
-                  <span className="px-0.5 text-[11px] font-semibold tabular-nums">{globalPosition} / {batchSize}</span>
+                  {inkHeader ? (
+                    <span className="px-1 text-[12.5px] font-bold tabular-nums">{globalPosition} <span className="font-medium text-white/70">of</span> {batchSize}</span>
+                  ) : (
+                    <span className="px-0.5 text-[11px] font-semibold tabular-nums">{globalPosition} / {batchSize}</span>
+                  )}
                   <Button size="sm" variant="ghost" onClick={goNext} disabled={isLastArticle}
                     className="h-6 px-1.5 text-white hover:bg-white/15 hover:text-white disabled:opacity-30">
                     <ChevronRight />
@@ -1086,10 +1099,12 @@ export default function ArticleDetailPage({
               <Tooltip title={!canApprove ? 'Only Approver, Sub-Division Head, Category Head or Admin can reject articles' : undefined}>
                 {/* span wrapper: disabled <button> swallows pointer events; span keeps hover alive */}
                 <span className="inline-block">
-                  <Button size="sm" variant="destructive"
+                  <Button size="sm" variant={inkHeader ? 'outline' : 'destructive'}
                     onClick={() => { if (pendingSelectedKeys.length > 0) setConfirmDialog({ kind: 'reject', count: pendingSelectedKeys.length }); }}
                     disabled={!canApprove || pendingSelectedKeys.length === 0}
-                    className="h-7 px-2.5 text-[12px]">
+                    className={inkHeader
+                      ? 'h-8 border-red-300/60 bg-transparent px-3 text-[12.5px] font-semibold text-red-300 hover:bg-red-500/15 hover:text-red-200 disabled:opacity-40'
+                      : 'h-7 px-2.5 text-[12px]'}>
                     <XCircle /> Reject
                   </Button>
                 </span>
@@ -1124,9 +1139,17 @@ export default function ArticleDetailPage({
                 <span className="inline-block">
                   <Button size="sm" onClick={handleApproveClick}
                     disabled={!canApprove || !canSubmitBodyArticle || !canSubmitFabricArticle || pendingSelectedKeys.length === 0 || approveBlockedReasons.length > 0}
-                    className="h-7 border-none bg-[#FF6F61] px-3 text-[12px] font-semibold text-white shadow-sm hover:bg-[#ff5b4d] disabled:bg-white/20 disabled:text-white/50">
+                    className={inkHeader
+                      ? 'h-8 border-none bg-white px-3.5 text-[12.5px] font-bold text-slate-900 shadow-sm hover:bg-slate-100 disabled:bg-white/20 disabled:text-white/50'
+                      : 'h-7 border-none bg-[#FF6F61] px-3 text-[12px] font-semibold text-white shadow-sm hover:bg-[#ff5b4d] disabled:bg-white/20 disabled:text-white/50'}>
                     <CheckCircle2 /> Save &amp; Submit
-                    {approveBlockedReasons.length > 0 && <span className="ml-1 text-[10px] text-amber-200">⚠ {approveBlockedReasons.length}</span>}
+                    {approveBlockedReasons.length > 0 && (inkHeader ? (
+                      <span className="ml-1 inline-flex items-center gap-0.5 rounded-full bg-amber-100 px-1.5 text-[11px] font-bold text-amber-800">
+                        ⚠ {approveBlockedReasons.length}
+                      </span>
+                    ) : (
+                      <span className="ml-1 text-[10px] text-amber-200">⚠ {approveBlockedReasons.length}</span>
+                    ))}
                   </Button>
                 </span>
               </Tooltip>
@@ -1142,6 +1165,7 @@ export default function ArticleDetailPage({
         </div>
       ) : (
         <ListComponent
+          {...(inkHeader ? { joinTop: true } : {})}
           items={currentItem ? [currentItem] : []}
           majorCategory={currentItem?.majorCategory || ''}
           loading={false}

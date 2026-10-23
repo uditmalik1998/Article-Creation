@@ -18,6 +18,8 @@ import {
   Search,
   Wand2,
   X,
+  Tag as TagIcon,
+  Check,
 } from 'lucide-react';
 import {
   Autocomplete,
@@ -284,6 +286,9 @@ export interface ApproverArticleListProps {
   attributes: MasterAttribute[];
   onRefresh: () => void;
   pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
+  /** Detail page (design "Option A"): the card's top strip continues the page's ink
+   *  header as one block — square top corners, no top border, divider line. */
+  joinTop?: boolean;
   hideGroups?: string[];
   fabHierarchy?: {
     divisions: string[];
@@ -327,6 +332,7 @@ const ArticleCard = React.memo(
     onRefresh,
     cardGroups,
     pathType,
+    joinTop,
     hideGroups,
     isFGMode,
     fabHierarchy,
@@ -344,6 +350,7 @@ const ArticleCard = React.memo(
     onRefresh: () => void;
     cardGroups: CardGroup[];
     pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
+    joinTop?: boolean;
     hideGroups?: string[];
     isFGMode?: boolean;
     fabHierarchy?: {
@@ -599,7 +606,8 @@ const ArticleCard = React.memo(
     const [editingField, setEditingField] = useState<string | null>(null);
 
     // Vendor autocomplete state
-    const [vendorQuery, setVendorQuery] = useState('');
+    // null = not typed yet (show the saved name); '' = the user cleared the box.
+    const [vendorQuery, setVendorQuery] = useState<string | null>(null);
     const [vendorOptions, setVendorOptions] = useState<AutocompleteOption[]>([]);
     const [vendorSearching, setVendorSearching] = useState(false);
     const vendorDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -793,7 +801,7 @@ const ArticleCard = React.memo(
       return (item as any)[field] ?? null;
     };
 
-    const searchVendors = (q: string) => {
+    const searchVendors = (q: string, by: 'name' | 'code' = 'name') => {
       setVendorQuery(q);
       if (vendorDebounceRef.current) clearTimeout(vendorDebounceRef.current);
       if (!q || q.trim().length < 2) {
@@ -805,7 +813,7 @@ const ArticleCard = React.memo(
         try {
           const token = localStorage.getItem('authToken');
           const res = await fetch(
-            `${APP_CONFIG.api.baseURL}/approver/vendor-search?q=${encodeURIComponent(q.trim())}`,
+            `${APP_CONFIG.api.baseURL}/approver/vendor-search?q=${encodeURIComponent(q.trim())}${by === 'code' ? '&by=code' : ''}`,
             { headers: token ? { Authorization: `Bearer ${token}` } : {} },
           );
           const json = await res.json();
@@ -816,15 +824,36 @@ const ArticleCard = React.memo(
               value: `${v.vendorName}||${v.vendorCode}`,
               vendorCode: v.vendorCode,
               vendorName: v.vendorName,
-              label: (
-                <div className="flex justify-between gap-2">
-                  <span className="font-medium">{v.vendorName}</span>
-                  <span className="text-[11px] text-muted-foreground">
-                    {v.vendorCode}
-                    {v.vendorCity ? ` · ${v.vendorCity}` : ''}
+              // Two lines: name (typed text highlighted), then code · city.
+              label: (() => {
+                const name = String(v.vendorName ?? '');
+                const needle = q.trim().toLowerCase();
+                const at = needle ? name.toLowerCase().indexOf(needle) : -1;
+                return (
+                  <span className="flex min-w-0 flex-col gap-0.5">
+                    <span className="truncate font-semibold">
+                      {at >= 0 ? (
+                        <>
+                          {name.slice(0, at)}
+                          <mark className="rounded-sm bg-amber-100 text-slate-900">{name.slice(at, at + needle.length)}</mark>
+                          {name.slice(at + needle.length)}
+                        </>
+                      ) : (
+                        name
+                      )}
+                    </span>
+                    <span className="flex items-center gap-1.5 text-[11.5px] text-slate-500">
+                      <span className="font-mono">{v.vendorCode}</span>
+                      {v.vendorCity && (
+                        <>
+                          <span aria-hidden="true">·</span>
+                          <span className="truncate">{v.vendorCity}</span>
+                        </>
+                      )}
+                    </span>
                   </span>
-                </div>
-              ),
+                );
+              })(),
             }),
           );
           setVendorOptions(opts);
@@ -834,6 +863,25 @@ const ArticleCard = React.memo(
           setVendorSearching(false);
         }
       }, 300);
+    };
+
+    // Picking a vendor from either dropdown (name or code) fills both fields.
+    const pickVendor = (val: string, option: AutocompleteOption) => {
+      // option.vendorName is the clean name (no code suffix)
+      const cleanName = (option as any).vendorName || String(val ?? '').split('||')[0];
+      const updates: Record<string, string | null> = { vendorName: cleanName };
+      if ((option as any).vendorCode) updates.vendorCode = (option as any).vendorCode;
+      setLocalValues((prev) => ({ ...prev, ...updates }));
+      if (isModifyMode) {
+        setPendingChanges((prev) => ({ ...prev, ...updates }));
+      } else {
+        onSave({ ...item, ...updates } as ApproverItem, updates as Record<string, unknown>);
+      }
+      // The pick also fired onChange with the option value — drop that pending search.
+      if (vendorDebounceRef.current) clearTimeout(vendorDebounceRef.current);
+      setEditingField(null);
+      setVendorOptions([]);
+      setVendorQuery(null);
     };
 
     const handleSave = (field: string, value: string | null) => {
@@ -1020,7 +1068,7 @@ const ArticleCard = React.memo(
           {/* Label stacked above a full-width value (same as the FG page). */}
           <div className="flex flex-col gap-0.5 px-3 py-1.5">
             <span
-              className="text-[10px] font-semibold uppercase tracking-wider"
+              className="text-[12px] font-semibold uppercase tracking-wider"
               style={{ color: showRequiredError ? '#c2410c' : '#475569' }}
             >
               {label}
@@ -1038,7 +1086,7 @@ const ArticleCard = React.memo(
                   <PopoverTrigger asChild>
                     <button
                       type="button"
-                      className="flex h-7 w-full items-center justify-between rounded border border-input bg-background px-2 text-xs hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                      className="flex h-7 w-full items-center justify-between rounded border border-input bg-background px-2 text-sm hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
                     >
                       <span className="truncate text-left">{displayVal || 'Select...'}</span>
                       <ChevronDownIcon className="ml-1 h-3 w-3 shrink-0 text-muted-foreground" />
@@ -1097,7 +1145,7 @@ const ArticleCard = React.memo(
                   <PopoverTrigger asChild>
                     <button
                       type="button"
-                      className="flex h-7 w-full items-center justify-between rounded border border-input bg-background px-2 text-xs hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                      className="flex h-7 w-full items-center justify-between rounded border border-input bg-background px-2 text-sm hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
                     >
                       <span className="truncate text-left">{displayVal || 'Select...'}</span>
                       <ChevronDownIcon className="ml-1 h-3 w-3 shrink-0 text-muted-foreground" />
@@ -1137,45 +1185,50 @@ const ArticleCard = React.memo(
                     </div>
                   </PopoverContent>
                 </Popover>
+              ) : isEditingThis && field === 'vendorCode' ? (
+                <Autocomplete
+                  autoFocus
+                  value={vendorQuery ?? displayVal ?? ''}
+                  onChange={(q) => searchVendors(q, 'code')}
+                  options={vendorOptions}
+                  header={`${vendorOptions.length} vendor${vendorOptions.length !== 1 ? 's' : ''} · ↑ ↓ to move, Enter to pick`}
+                  placeholder="Type 2+ digits of the vendor code"
+                  notFoundContent={vendorSearching ? <span className="flex items-center gap-2"><Spinner size="sm" /> Searching vendors…</span> : null}
+                  onSelect={pickVendor}
+                  onBlur={(e) => {
+                    // A typed code (not picked) is saved as-is; handleSave checks it is 6 digits.
+                    const val = (e.target as HTMLInputElement).value.trim();
+                    if (val && val !== (displayVal ?? '')) handleSave('vendorCode', val);
+                    else setEditingField(null);
+                    setVendorOptions([]);
+                    setVendorQuery(null);
+                  }}
+                  className="text-sm"
+                />
               ) : isEditingThis && field === 'vendorName' ? (
                 <Autocomplete
                   autoFocus
-                  value={vendorQuery || displayVal || ''}
+                  value={vendorQuery ?? displayVal ?? ''}
                   onChange={searchVendors}
                   options={vendorOptions}
-                  notFoundContent={vendorSearching ? <Spinner size="sm" /> : null}
-                  onSelect={(val, option) => {
-                    // option.vendorName is the clean name (no code suffix)
-                    const cleanName = (option as any).vendorName || String(val ?? '').split('||')[0];
-                    const updates: Record<string, string | null> = { vendorName: cleanName };
-                    if ((option as any).vendorCode) updates.vendorCode = (option as any).vendorCode;
-                    setLocalValues((prev) => ({ ...prev, ...updates }));
-                    if (isModifyMode) {
-                      setPendingChanges((prev) => ({ ...prev, ...updates }));
-                    } else {
-                      onSave(
-                        { ...item, ...updates } as ApproverItem,
-                        updates as Record<string, unknown>,
-                      );
-                    }
-                    setEditingField(null);
-                    setVendorOptions([]);
-                    setVendorQuery('');
-                  }}
+                  header={`${vendorOptions.length} vendor${vendorOptions.length !== 1 ? 's' : ''} · ↑ ↓ to move, Enter to pick`}
+                  placeholder="Type 2+ letters of the vendor name"
+                  notFoundContent={vendorSearching ? <span className="flex items-center gap-2"><Spinner size="sm" /> Searching vendors…</span> : null}
+                  onSelect={pickVendor}
                   onBlur={(e) => {
                     const val = (e.target as HTMLInputElement).value;
                     if (val) handleSave('vendorName', val);
                     else setEditingField(null);
                     setVendorOptions([]);
-                    setVendorQuery('');
+                    setVendorQuery(null);
                   }}
-                  className="text-xs"
+                  className="text-sm"
                 />
               ) : isEditingThis ? (
                 <Input
                   autoFocus
                   defaultValue={displayVal || ''}
-                  className="h-7 px-1 text-xs"
+                  className="h-8 px-2 text-sm"
                   onKeyDown={(e) =>
                     e.key === 'Enter' && handleSave(field, (e.target as HTMLInputElement).value || null)
                   }
@@ -1187,11 +1240,11 @@ const ArticleCard = React.memo(
                   className={`block truncate ${
                     displayVal
                       ? field === 'majorCategory' || field === 'mcDescription'
-                        ? 'font-mono text-[11.5px] text-slate-900'
-                        : 'text-[12.5px] font-semibold text-slate-900'
+                        ? 'font-mono text-[13.5px] text-slate-900'
+                        : 'text-[14.5px] font-semibold text-slate-900'
                       : showRequiredError
-                      ? 'text-xs font-semibold italic text-orange-700'
-                      : 'text-xs italic text-slate-500'
+                      ? 'text-sm font-semibold italic text-orange-700'
+                      : 'text-sm italic text-slate-500'
                   }`}
                 >
                   {displayVal || (showRequiredError ? 'Required' : canEdit ? 'Click to fill' : '—')}
@@ -1211,7 +1264,9 @@ const ArticleCard = React.memo(
       freeText: boolean;
       group: string;
       isMandatory?: boolean;
-    }) => {
+    }, big = false) => {
+      // big = Fabric FAB card (matches the FG FAB card): 13 px names, 14 px values, 26 px rows.
+      const valueText = big ? 'text-[14px]' : 'text-[11px]';
       _attrCounter += 1;
       const num = _attrCounter;
       const currentValue = getValue(attr.field);
@@ -1225,7 +1280,7 @@ const ArticleCard = React.memo(
       return (
         <div
           key={attr.field}
-          className="group flex items-center gap-1.5 rounded px-1 py-0.5 transition-colors hover:bg-muted/40"
+          className={cn('group flex items-center rounded transition-colors hover:bg-muted/40', big ? 'mb-0.5 min-h-[26px] gap-2 px-2 py-0.5' : 'gap-1.5 px-1 py-0.5')}
           style={{
             cursor: attrLocked ? 'default' : 'pointer',
             background: isEditing
@@ -1242,23 +1297,24 @@ const ArticleCard = React.memo(
             if (!attrLocked && !isEditing) setEditingField(attr.field);
           }}
         >
-          <span className="w-4 shrink-0 text-right text-[10px] font-bold tabular-nums text-muted-foreground">{num}.</span>
+          <span className={cn('shrink-0 text-right font-bold tabular-nums text-muted-foreground', big ? 'w-6 text-[12px]' : 'w-4 text-[10px]')}>{num}.</span>
           <span
             className={cn(
-              'flex-1 truncate text-[10.5px] leading-snug',
+              'flex-1 truncate leading-snug',
+              big ? 'text-[13px]' : 'text-[10.5px]',
               isMandatory ? 'key-field text-foreground' : 'font-semibold text-foreground/80',
             )}
           >
             {isMandatory && <span className="mandatory-mark">*</span>}
             {attr.label}
           </span>
-          <div className="w-[110px] shrink-0">
+          <div className={cn('shrink-0', big ? 'w-[180px]' : 'w-[110px]')}>
             {attr.freeText ? (
               isEditing ? (
                 <Input
                   autoFocus
                   defaultValue={isEffectivelyEmpty ? '' : currentValue || ''}
-                  className="h-6 px-1 text-[11px]"
+                  className={big ? 'h-7 px-2 text-[13px]' : 'h-6 px-1 text-[11px]'}
                   onKeyDown={(e) =>
                     e.key === 'Enter' && handleSave(attr.field, (e.target as HTMLInputElement).value || null)
                   }
@@ -1266,7 +1322,7 @@ const ArticleCard = React.memo(
                 />
               ) : (
                 <span
-                  className="block truncate text-right text-[11px]"
+                  className={cn('block truncate text-right', valueText)}
                   style={{
                     color: isEffectivelyEmpty ? (isMandatory ? '#dc2626' : '#9ca3af') : '#111827',
                     fontStyle: isEffectivelyEmpty && !isMandatory ? 'italic' : 'normal',
@@ -1295,7 +1351,10 @@ const ArticleCard = React.memo(
                 <PopoverTrigger asChild>
                   <button
                     type="button"
-                    className="flex h-6 w-full items-center justify-between rounded border border-input bg-background px-1.5 text-[11px] hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                    className={cn(
+                      'flex w-full items-center justify-between rounded border border-input bg-background hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring',
+                      big ? 'h-7 px-2 text-[13px]' : 'h-6 px-1.5 text-[11px]',
+                    )}
                   >
                     <span className="truncate text-left">
                       {isEffectivelyEmpty ? 'Select' : currentValue}
@@ -1304,18 +1363,26 @@ const ArticleCard = React.memo(
                   </button>
                 </PopoverTrigger>
                 <PopoverContent
-                  className="w-48 p-0"
+                  className="w-64 overflow-hidden rounded-xl border-slate-200 p-0 shadow-xl dark:border-slate-700"
                   align="end"
+                  sideOffset={6}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="flex items-center border-b px-2 py-1.5">
-                    <Search className="mr-1.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                  {/* Dropdown (Fabric pages): titled panel, roomier search, code + full name per
+                      row, slate highlight + check on the current value; text 1 px up. */}
+                  <div className="flex items-center justify-between gap-2 border-b border-slate-100 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-900">
+                    <span className="truncate text-[12px] font-bold uppercase tracking-wide text-slate-700 dark:text-slate-200">{attr.label}</span>
+                    <span className="shrink-0 text-[11px] text-slate-500">{attr.values.length} options</span>
+                  </div>
+                  <div className="flex h-10 items-center gap-2 border-b border-slate-200 px-3 dark:border-slate-700">
+                    <Search className="h-4 w-4 shrink-0 text-slate-500" />
                     <input
                       autoFocus
                       value={attrSearch}
                       onChange={(e) => setAttrSearch(e.target.value)}
-                      placeholder="Search..."
-                      className="flex-1 bg-transparent text-[11px] outline-none placeholder:text-muted-foreground"
+                      placeholder="Search code or name…"
+                      aria-label={`Search ${attr.label}`}
+                      className="flex-1 bg-transparent text-[12.5px] outline-none placeholder:text-slate-400"
                     />
                   </div>
                   {!isEffectivelyEmpty && (
@@ -1325,13 +1392,14 @@ const ArticleCard = React.memo(
                         handleSave(attr.field, null);
                         setAttrSearch('');
                       }}
-                      className="flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left text-[11px] font-medium text-red-600 hover:bg-red-50"
+                      className="flex w-full items-center gap-2 border-b border-slate-100 px-3 py-2 text-left text-[12px] font-semibold text-red-700 hover:bg-red-50 dark:border-slate-800"
                     >
-                      <X className="h-3 w-3 shrink-0" />
+                      <X className="h-3.5 w-3.5 shrink-0" />
                       Clear selection
+                      <span className="ml-auto truncate font-mono text-[11.5px] font-medium text-slate-500">{currentValue}</span>
                     </button>
                   )}
-                  <div className="max-h-56 overflow-y-auto py-1">
+                  <div className="max-h-64 overflow-y-auto p-1.5">
                     {(() => {
                       const q = attrSearch.trim().toLowerCase();
                       const matches = attr.values.filter(
@@ -1341,39 +1409,45 @@ const ArticleCard = React.memo(
                       );
                       if (matches.length === 0) {
                         return (
-                          <div className="px-3 py-2 text-[11px] text-muted-foreground">
-                            No options found
+                          <div className="px-3 py-3 text-[12px] text-slate-500">
+                            No options match “{attrSearch.trim()}”
                           </div>
                         );
                       }
-                      return matches.map((v) => (
-                        <button
-                          key={v.shortForm}
-                          type="button"
-                          onClick={() => {
-                            handleSave(attr.field, v.shortForm);
-                            setAttrSearch('');
-                          }}
-                          className={cn(
-                            'flex w-full flex-col px-3 py-1.5 text-left text-[11px] hover:bg-accent hover:text-accent-foreground',
-                            v.shortForm === currentValue && 'bg-accent/60',
-                          )}
-                        >
-                          <span className="font-medium">{v.shortForm}</span>
-                          {v.fullForm && v.fullForm !== v.shortForm && (
-                            <span className="truncate text-[10px] text-muted-foreground">
-                              {v.fullForm}
+                      return matches.map((v) => {
+                        const selected = v.shortForm === currentValue;
+                        return (
+                          <button
+                            key={v.shortForm}
+                            type="button"
+                            onClick={() => {
+                              handleSave(attr.field, v.shortForm);
+                              setAttrSearch('');
+                            }}
+                            className={cn(
+                              'flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left transition-colors',
+                              selected ? 'bg-slate-100 dark:bg-slate-800' : 'hover:bg-slate-50 dark:hover:bg-slate-800/60',
+                            )}
+                          >
+                            <span className="flex min-w-0 flex-1 flex-col">
+                              <span className={cn('truncate text-[12.5px] text-slate-900 dark:text-slate-100', selected ? 'font-bold' : 'font-semibold')}>
+                                {v.shortForm}
+                              </span>
+                              {v.fullForm && v.fullForm !== v.shortForm && (
+                                <span className="truncate text-[11px] text-slate-500 dark:text-slate-400">{v.fullForm}</span>
+                              )}
                             </span>
-                          )}
-                        </button>
-                      ));
+                            {selected && <Check className="h-4 w-4 shrink-0 text-slate-800 dark:text-slate-200" />}
+                          </button>
+                        );
+                      });
                     })()}
                   </div>
                 </PopoverContent>
               </Popover>
             ) : (
               <span
-                className="flex items-center justify-end gap-1 text-right text-[11px]"
+                className={cn('flex items-center justify-end gap-1 text-right', valueText)}
                 style={{
                   color: isEffectivelyEmpty ? (isMandatory ? '#dc2626' : '#9ca3af') : '#111827',
                   fontStyle: isEffectivelyEmpty && !isMandatory ? 'italic' : 'normal',
@@ -1383,7 +1457,7 @@ const ArticleCard = React.memo(
                 <span className="truncate">
                   {isEffectivelyEmpty ? (isMandatory ? 'Required' : '—') : currentValue}
                 </span>
-                <ChevronDown className="h-3 w-3 shrink-0 opacity-40" />
+                <ChevronDown className={cn('shrink-0 opacity-40', big ? 'h-4 w-4' : 'h-3 w-3')} />
               </span>
             )}
           </div>
@@ -1514,20 +1588,23 @@ const ArticleCard = React.memo(
       <>
         <div
           key={item.id}
-          className="animate-in flex flex-col rounded-xl border bg-white shadow-sm transition-all fade-in-50 slide-in-from-bottom-1 duration-300"
+          className={cn(
+            'animate-in flex flex-col border bg-white shadow-sm transition-all fade-in-50 slide-in-from-bottom-1 duration-300',
+            joinTop ? 'rounded-b-xl rounded-t-none border-t-0' : 'rounded-xl',
+          )}
           style={{ borderColor }}
         >
           {/* ─── TOP HEADER STRIP (slate, matches dashboard) ─── */}
           <div
-            className="flex items-center justify-between gap-3 px-4 py-2 text-white"
-            style={{ background: 'linear-gradient(90deg, #1f2937 0%, #334155 100%)' }}
+            className={cn('flex items-center justify-between gap-3 px-4 py-2.5 text-white', joinTop && 'border-t border-white/10')}
+            style={{ background: joinTop ? '#1e293b' : 'linear-gradient(90deg, #1f2937 0%, #334155 100%)' }}
           >
             <div className="flex min-w-0 flex-1 items-center gap-3">
               <Checkbox
                 checked={isSelected}
                 disabled={item.approvalStatus === 'REJECTED'}
                 onCheckedChange={() => onToggleSelect(item.id)}
-                className="border-white/60 bg-white/10 data-[state=checked]:bg-white data-[state=checked]:text-[#FF6F61]"
+                className="border-white/60 bg-white/10 data-[state=checked]:bg-white data-[state=checked]:text-slate-900"
               />
               <Badge
                 style={{ background: status.color + 'cc', color: '#fff', borderColor: status.color }}
@@ -1726,7 +1803,10 @@ const ArticleCard = React.memo(
             </div>
             <div className="flex shrink-0 items-center gap-2">
               {item.pptNumber && (
-                <Badge className="bg-amber-300 text-amber-950">PPT: {item.pptNumber}</Badge>
+                <Badge className="gap-1.5 border border-white/15 bg-white/10 font-mono text-[12px] font-semibold text-white">
+                  <TagIcon className="h-3.5 w-3.5" />
+                  PPT {item.pptNumber}
+                </Badge>
               )}
               {isModifyMode && (
                 <Button
@@ -1818,7 +1898,7 @@ const ArticleCard = React.memo(
                   ),
                 })}
                 {isLeftCardOpen('info') && (
-                  <dl className="m-0 grid grid-cols-[110px_minmax(0,1fr)] px-3 py-1 text-xs">
+                  <dl className="m-0 grid grid-cols-[120px_minmax(0,1fr)] px-3 py-1 text-sm">
                     {infoRows.map(({ label, value }, i) => (
                       <React.Fragment key={label}>
                         <dt className={`py-1.5 text-slate-600 ${i < infoRows.length - 1 ? 'border-b border-slate-100' : ''}`}>{label}</dt>
@@ -1941,7 +2021,7 @@ const ArticleCard = React.memo(
                         </button>
                         {!collapsed && (
                           <div className="space-y-0 p-1">
-                            {groupMap[g.group].attrs.map((attr) => renderAttributeRow(attr))}
+                            {groupMap[g.group].attrs.map((attr) => renderAttributeRow(attr, g.group === 'FAB'))}
 
                             {/* FAB: fabric article number + description + button */}
                             {g.group === 'FAB' &&
@@ -1969,7 +2049,7 @@ const ArticleCard = React.memo(
                                       }}
                                     >
                                       <div className="mb-0.5 flex items-center justify-between gap-1">
-                                        <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                                           {label}
                                         </span>
                                         {autoFillFn && !isLocked && (
@@ -1990,7 +2070,7 @@ const ArticleCard = React.memo(
                                           autoFocus
                                           defaultValue={displayVal || ''}
                                           maxLength={maxLen}
-                                          className="h-6 px-1 text-[11px]"
+                                          className="h-7 px-2 text-[13px]"
                                           onKeyDown={(e) =>
                                             e.key === 'Enter' && saveVal((e.target as HTMLInputElement).value)
                                           }
@@ -1998,7 +2078,7 @@ const ArticleCard = React.memo(
                                         />
                                       ) : (
                                         <div
-                                          className="truncate text-[11px]"
+                                          className="truncate text-[14px] font-semibold"
                                           style={{ color: displayVal ? '#111827' : '#9ca3af' }}
                                         >
                                           {displayVal || (isLocked ? '—' : 'Click to fill')}
@@ -2080,7 +2160,7 @@ const ArticleCard = React.memo(
                         return (
                           <div
                             key={bom.field}
-                            className="flex items-center gap-1.5 rounded px-1 py-0.5 transition-colors hover:bg-muted/40"
+                            className="mb-0.5 flex min-h-[26px] items-center gap-2 rounded px-2 py-0.5 transition-colors hover:bg-muted/40"
                             style={{
                               cursor: bom.editable && !bomLocked ? 'pointer' : 'default',
                               background: isEditingBom
@@ -2094,7 +2174,7 @@ const ArticleCard = React.memo(
                             }}
                           >
                             <span
-                              className="flex-1 truncate text-[11px]"
+                              className="flex-1 truncate text-[13px]"
                               style={{
                                 color: bom.mandatory && isEmpty && !isLocked ? '#dc2626' : '#374151',
                                 fontWeight: bom.mandatory || (bom as any).boldLabel ? 600 : 400,
@@ -2118,7 +2198,7 @@ const ArticleCard = React.memo(
                                   onValueChange={(v) => handleSave(bom.field, v ?? null)}
                                   onOpenChange={(open) => { if (!open) setEditingField(null); }}
                                 >
-                                  <SelectTrigger className="h-6 w-full text-[11px]">
+                                  <SelectTrigger className="h-7 w-full text-[13px]">
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -2133,7 +2213,7 @@ const ArticleCard = React.memo(
                                 <Input
                                   autoFocus
                                   defaultValue={val === '—' ? '' : val}
-                                  className="h-6 px-1 text-[11px]"
+                                  className="h-7 px-2 text-[13px]"
                                   onKeyDown={(e) =>
                                     e.key === 'Enter' &&
                                     handleSave(bom.field, (e.target as HTMLInputElement).value || null)
@@ -2142,7 +2222,7 @@ const ArticleCard = React.memo(
                                 />
                               ) : (
                                 <span
-                                  className="block truncate text-[11px]"
+                                  className="block truncate text-[14px]"
                                   style={{
                                     color: bom.mandatory && isEmpty && !isLocked
                                       ? '#ea580c'
@@ -2369,6 +2449,7 @@ export const FabricArticleList: React.FC<ApproverArticleListProps> = ({
   attributes,
   onRefresh,
   pathType,
+  joinTop,
   hideGroups,
   isFGMode,
   serverPagination,
@@ -2441,6 +2522,7 @@ export const FabricArticleList: React.FC<ApproverArticleListProps> = ({
           onRefresh={onRefresh}
           cardGroups={cardGroups}
           pathType={pathType}
+          joinTop={joinTop}
           hideGroups={hideGroups}
           isFGMode={isFGMode}
           fabHierarchy={fabHierarchy}

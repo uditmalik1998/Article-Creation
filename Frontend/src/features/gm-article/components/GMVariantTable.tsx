@@ -139,13 +139,13 @@ const GMVariantTable: React.FC<GMVariantTableProps> = ({ genericId, genericRecor
   };
 
   const renderStatus = (v: GMVariantRow) => {
-    if (v.sapArticleId) return <StatusPill tone="green">Synced</StatusPill>;
+    if (v.sapArticleId) return <StatusPill large tone="green">Synced</StatusPill>;
     if (v.sapSyncStatus === 'FAILED') {
-      return <StatusPill tone="red" tooltip={v.sapSyncMessage || 'SAP returned an error'}>Failed</StatusPill>;
+      return <StatusPill large tone="red" tooltip={v.sapSyncMessage || 'SAP returned an error'}>Failed</StatusPill>;
     }
-    if (v.approvalStatus === 'REJECTED') return <StatusPill tone="red">Rejected</StatusPill>;
-    if (v.approvalStatus === 'APPROVED') return <StatusPill tone="slate">Pending SAP</StatusPill>;
-    return <StatusPill tone="amber">Pending approval</StatusPill>;
+    if (v.approvalStatus === 'REJECTED') return <StatusPill large tone="red">Rejected</StatusPill>;
+    if (v.approvalStatus === 'APPROVED') return <StatusPill large tone="slate">Pending SAP</StatusPill>;
+    return <StatusPill large tone="amber">Pending approval</StatusPill>;
   };
 
   if (loading) {
@@ -160,6 +160,7 @@ const GMVariantTable: React.FC<GMVariantTableProps> = ({ genericId, genericRecor
   return (
     <div>
       <VariantGrid<GMVariantRow>
+        large
         variants={variants}
         fallbackColor={genericRecord.colour}
         isSelectable={isPendingVariant}
@@ -172,11 +173,11 @@ const GMVariantTable: React.FC<GMVariantTableProps> = ({ genericId, genericRecor
         toolbarActions={
           <>
             {pathType === 'created' && !!genericRecord.articleNumber && retryNeededCount > 0 && (
-              <Button size="sm" variant="destructive" className="h-7 text-[12px]" disabled={retrying} onClick={handleRetryVariants}>
+              <Button size="sm" variant="destructive" className="h-7 text-[14px]" disabled={retrying} onClick={handleRetryVariants}>
                 {retrying ? 'Retrying…' : `Retry Variants to SAP (${retryNeededCount})`}
               </Button>
             )}
-            <Button size="sm" className="h-7 bg-slate-800 text-[12px] text-white hover:bg-slate-900" onClick={() => setAddColorOpen(true)}>
+            <Button size="sm" className="h-7 bg-slate-800 text-[14px] text-white hover:bg-slate-900" onClick={() => setAddColorOpen(true)}>
               <Plus />
               Add Color
             </Button>

@@ -370,3 +370,42 @@ Canvas: https://claude.ai/artifact/7kdg8vDcbxSw6zHjXmYh94
   - The checked tick is slate, not coral.
   - Combo/set articles keep separate blocks, because their set tabs sit in between.
 - Type-checks and compiles. Not checked signed in.
+
+_2026-10-23: FAB/BODY row height reduced by 3 px (min 30 → 27 px, py-0.5). Inline editors are 28 px so editing does not jump. Text sizes are unchanged._
+
+_2026-10-23: FAB/BODY rows reduced another 1 px, to min 26 px._
+
+_2026-10-23: the Option A header is ported to **Fabric article** detail pages. In `FabricArticleDetailPage.tsx`, the flag `inkHeader = ListComponent === FabricArticleList` keeps Body articles, which reuse this page, unchanged. `FabricArticleList.tsx` gets the same `joinTop` prop: solid ink strip, square top corners, translucent PPT chip, slate tick. The look covers Reject as a red outline, Save & Submit in white with an amber issue pill, and the "1 of 50" pager. Type-checks and compiles; not checked signed in._
+
+_2026-10-23: **Fabric Article pages** (`FabricArticleList.tsx`) now match the FG FAB card sizes:
+- FAB rows via a `big` flag on that file's `renderAttributeRow`: 12 px number, 13 px name, 14 px value, 180 px value column, 26 px rows, 28 px editors.
+- The Fabric Article No. / Desc footer: 11 px label, 14 px value.
+- BOM card rows (RATE, ARTICLE FASHION TYPE, SEGMENT): 13 px label, 14 px value, 26 px rows.
+- This also applies to the FG New / FG Created views that use the Fabric list. Type-checks; not checked signed in._
+
+_2026-10-23: the **Fabric pages attribute dropdown** (`FabricArticleList.tsx` `renderAttributeRow` popover) is redesigned:
+- A 256 px panel with a slate title strip showing the attribute name and option count.
+- A 40 px search box ("Search code or name…").
+- Clear selection shows the current value.
+- Rows show the code (12.5 px semibold) with the full name below (11 px).
+- The selected row is slate with a check icon; there is no accent or coral hover.
+- All text is +1 px. Type-checks; not checked signed in._
+
+### Vendor name search — improved suggestions (2026-10-23)
+
+The shared `ui-tw/autocomplete.tsx` was fixed and restyled. It is used by the FG, Fabric and GM article cards and the Admin grid panel.
+- The panel width is the input width (`var(--radix-popover-trigger-width)`, min 320 px, max 520 px). It used to span the whole page because `var()` was missing.
+- Rounded panel with a shadow, an optional `header` line and rows highlighted in slate.
+- ↑ ↓ / Enter / Esc work from the input. Clicking the input no longer closes the panel (`onInteractOutside`).
+
+The FG and Fabric vendor rows have two lines: the name with the typed text highlighted, then code · city. A "N vendors · ↑ ↓ to move, Enter to pick" header and a "Searching vendors…" state were added. Checked in a local test page.
+
+_2026-10-23 fix: clearing the Vendor Name box snapped back to the saved name (e.g. MIX VENDOR) on the last Backspace. The input value was `vendorQuery || savedName`, and an empty string is falsy. `vendorQuery` is now `string | null` (null = not typed yet), and the value is `vendorQuery ?? savedName`. Fixed in the FG, Fabric and GM lists._
+
+_2026-10-23: on **Fabric pages** the Article Information and Reference & Vendor cards are +2 px. Info rows are 14 px, with the label column widened to 120 px. Reference labels are 12 px and values 14.5 px (mono values 13.5 px). "Click to fill" / Required and the inline editors are 14 px. Card headers are unchanged. FG pages are not changed yet._
+
+_2026-10-23: the same +2 px is now on **FG pages** (`ApproverArticleList.tsx`). Article Information rows are 14 px (label column 120 px). Reference & Vendor labels are 12 px and values 14.5 px (mono 13.5 px); empty/Required text and the editors are 14 px. These apply only when `isFgCard`, so the Body/GM list views that share the renderer are unchanged._
+
+_2026-10-23: **GM article page** — every font size in `GMArticleList.tsx` is +1 px. That is 40 arbitrary sizes, plus text-xs→13 px and text-sm→15 px. It covers the identity strip, Article details (FIELD_LABEL 13 px, FIELD_INPUT 14 px), the General merchandise grid, BOM, and the colour picker. Colour variants (GMVariantTable) and the top nav bar (GMArticleDetailPage) are unchanged._
+
+_2026-10-23: GM article page font size +1 px again, so +2 px in total (FIELD_LABEL 14 px, FIELD_INPUT 15 px)._
