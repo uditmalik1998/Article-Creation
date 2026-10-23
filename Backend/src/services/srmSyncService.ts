@@ -1295,7 +1295,7 @@ export async function processSrmWebhookBatch(
   console.log(`[SRM Hook] Batch started — presentation: ${req.presentation_no} | images: ${req.images.length}`);
 
   // ── Audit trail ───────────────────────────────────────────────────────────
-  // The webhook is otherwise invisible (it's excluded from audit_logs), which is
+  // The webhook is otherwise invisible (no request log covers it), which is
   // why the 8-June duplication was hard to trace. Record a persistent run +
   // per-image item rows in the SAME tables the cron sync uses (srm_sync_runs /
   // srm_sync_run_items), with triggeredBy='WEBHOOK'. All logging is best-effort:

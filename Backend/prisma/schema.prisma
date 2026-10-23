@@ -722,33 +722,6 @@ model User {
   @@schema("public")
 }
 
-/// Audit Log: Comprehensive audit trail for all API calls
-model AuditLog {
-  id           Int      @id @default(autoincrement())
-  userId       Int?     @map("user_id")
-  action       String   @db.VarChar(50)
-  resource     String   @db.VarChar(100)
-  resourceId   String?  @map("resource_id") @db.VarChar(100)
-  method       String   @db.VarChar(10)
-  path         String   @db.VarChar(500)
-  statusCode   Int      @map("status_code")
-  ip           String   @db.VarChar(45)
-  userAgent    String?  @map("user_agent")
-  requestBody  Json?    @map("request_body")
-  responseBody Json?    @map("response_body")
-  duration     Int
-  errorMessage String?  @map("error_message")
-  timestamp    DateTime @default(now())
-
-  @@index([userId])
-  @@index([action])
-  @@index([resource])
-  @@index([timestamp])
-  @@index([statusCode])
-  @@map("audit_logs")
-  @@schema("public")
-}
-
 /// API Key: For programmatic access and integrations
 model ApiKey {
   id          Int       @id @default(autoincrement())
