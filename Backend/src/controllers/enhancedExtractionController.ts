@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { VLMService } from '../services/vlm/vlmService';
+import { vlmService } from '../services/vlm/vlmService';
 import { ImageProcessor } from '../utils/imageProcessor';
 import { cacheService } from '../services/cacheService';
 import { prismaClient as prisma } from '../utils/prisma';
@@ -18,7 +18,7 @@ import { hierarchyService } from '../services/hierarchyService';
 import { snapValueToGrid } from '../utils/gridSnap';
 
 export class EnhancedExtractionController {
-  private vlmService = new VLMService();
+  private vlmService = vlmService;
 
   private async persistExtractionJob(params: {
     image: string | null;

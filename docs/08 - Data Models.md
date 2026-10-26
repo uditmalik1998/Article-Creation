@@ -140,9 +140,6 @@ enum GarmentType {
 | File | Purpose |
 |------|---------|
 | `Backend/data/MANDATORY GRID DATA.xlsx` | Source of truth for mandatory fields per major category |
-| `Backend/src/data/Book10.json` | MVGR lookup data |
-| `Backend/src/data/Book11.json` | MVGR lookup data |
-| `Backend/src/data/FAB2.json` | FAB2 attribute values |
 | `Backend/data/segment-ranges.json` | MRP ranges per major category/segment |
 | `Backend/data/hsncode.json` | HSN tax codes by MC code |
 

@@ -12,7 +12,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { VLMService } from '../services/vlm/vlmService';
+import { vlmService } from '../services/vlm/vlmService';
 import { ImageProcessor } from '../utils/imageProcessor';
 import { getSimplifiedSchema, filterByConfidence, applyGarmentTypeRules } from '../config/simplifiedAttributes';
 import { SimplifiedPromptService } from '../services/simplifiedPromptService';
@@ -29,7 +29,7 @@ interface BaseSchemaItem {
 }
 
 export class SimplifiedExtractionController {
-  private vlmService = new VLMService();
+  private vlmService = vlmService;
   private promptService = new SimplifiedPromptService();
 
   /**

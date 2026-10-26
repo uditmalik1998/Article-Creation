@@ -1,7 +1,6 @@
 import { getMcCodeByMajorCategory, getDivisionByMajorCategory, getSubDivisionByMajorCategory, getHsnCodeByMcCode } from '../utils/mcCodeMapper';
 import { prismaClient as prisma } from '../utils/prisma';
 import { parseNumericValue } from '../utils/mrpCalculator';
-import { mvgrMappingService } from './mvgrMappingService';
 import { buildArticleDescription, buildReferenceArticleDescription } from '../utils/articleDescriptionBuilder';
 import { getExcludedDescriptionFields } from '../utils/categoryFieldVisibility';
 import { getSegmentFromMaster } from './segmentMasterService';
@@ -167,11 +166,8 @@ export class FlatteningService {
             fabricMainMvgr: resultsMap.get('fabric_main_mvgr'),
             weave: resultsMap.get('weave'),
             macroMvgr: resultsMap.get('macro_mvgr'),
-            macroMvgrFullForm: mvgrMappingService.getMacroMvgrFullForm(resultsMap.get('macro_mvgr')),
             mainMvgr: resultsMap.get('main_mvgr'),
-            mainMvgrFullForm: mvgrMappingService.getMainMvgrFullForm(resultsMap.get('main_mvgr')),
             mFab2: resultsMap.get('m_fab2'),
-            mFab2FullForm: mvgrMappingService.getWeave2FullForm(resultsMap.get('m_fab2')),
             composition: resultsMap.get('composition'),
             finish: resultsMap.get('finish'),
             gsm: resultsMap.get('gsm') || resultsMap.get('gram_per_square_meter'),

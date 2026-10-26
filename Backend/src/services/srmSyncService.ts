@@ -26,8 +26,7 @@ import { getHsnCodeByMcCode, getMcCodeByMajorCategory } from '../utils/mcCodeMap
 import { getSegmentFromMaster } from './segmentMasterService';
 import { buildArticleDescription } from '../utils/articleDescriptionBuilder';
 import { getExcludedDescriptionFields } from '../utils/categoryFieldVisibility';
-import { VLMService } from './vlm/vlmService';
-import { mvgrMappingService } from './mvgrMappingService';
+import { vlmService } from './vlm/vlmService';
 import { storageService } from './storageService';
 import { upsertRawArticleFromSrm, RAW_PIPELINE_CUTOFF } from './rawArticleExtractionService';
 import { hierarchyService } from './hierarchyService';
@@ -360,13 +359,10 @@ async function resolveCategoryId(majorCategory: string, division: string): Promi
   throw new Error('No Category found in database — cannot create ExtractionJob');
 }
 
-/**
- * VLM enrichment for SRM records that have an image URL.
- * Runs after the flat row is already created, fills in all the garment
- * attributes that SRM doesn't provide (FAB, BODY, VA ACC, PRINTING groups).
- * Never overwrites the SRM-authoritative fields.
- */
-const vlmService = new VLMService();
+// ── VLM enrichment for SRM records that have an image URL ──────────────────
+// Runs after the flat row is already created, fills in all the garment
+// attributes that SRM doesn't provide (FAB, BODY, VA ACC, PRINTING groups),
+// using the app-wide shared vlmService. Never overwrites SRM-authoritative fields.
 
 // Max VLM attempts per record: 1 initial call + 2 automatic retries
 const VLM_MAX_ATTEMPTS = 3;
@@ -504,16 +500,10 @@ async function enrichSrmRowWithVlm(
       // FAB group
       const yarn1 = get('yarn_01');       if (yarn1)  updates.yarn1  = yarn1;
       const yarn2 = get('yarn_02');       if (yarn2)  updates.yarn2  = yarn2;
-      const mainMvgr = get('main_mvgr'); if (mainMvgr) {
-        updates.mainMvgr = mainMvgr;
-        updates.mainMvgrFullForm = mvgrMappingService.getMainMvgrFullForm(mainMvgr);
-      }
+      const mainMvgr = get('main_mvgr'); if (mainMvgr) updates.mainMvgr = mainMvgr;
       const fabMain = get('fabric_main_mvgr'); if (fabMain) updates.fabricMainMvgr = fabMain;
       const weave   = get('weave');            if (weave)   updates.weave           = weave;
-      const mFab2   = get('m_fab2');           if (mFab2)   {
-        updates.mFab2 = mFab2;
-        updates.mFab2FullForm = mvgrMappingService.getWeave2FullForm(mFab2);
-      }
+      const mFab2   = get('m_fab2');           if (mFab2)   updates.mFab2           = mFab2;
       const comp    = get('composition');      if (comp)    updates.composition     = comp;
       const finish  = get('finish');           if (finish)  updates.finish          = finish;
       const gsm     = get('gsm', 'gram_per_square_meter'); if (gsm) updates.gsm   = gsm;

@@ -34,7 +34,6 @@ import { authenticateWatcher } from './middleware/watcherAuth';
 // Services
 import { checkApiConfiguration } from './services/baseApi';
 import { cacheService } from './services/cacheService';
-import { mvgrMappingService } from './services/mvgrMappingService';
 import { ApproverController } from './controllers/ApproverController';
 import { disconnectPrismaClient, isAppShuttingDown, setAppIsShuttingDown, isDbCircuitOpen } from './utils/prisma';
 import srmHookRoutes from './routes/srmHook';
@@ -412,13 +411,6 @@ app.use(errorHandler);
       console.error('   Check DATABASE_URL in Azure App Settings. App will start but all DB routes will fail.');
     }
 
-    // Initialize MVGR Mapping Service
-    await mvgrMappingService.initialize();
-    const mvgrStats = mvgrMappingService.getStats();
-    console.log(`✅ MVGR Mapping Service initialized:
-   - Macro MVGR: ${mvgrStats.macroMvgrCount} mappings
-   - Main MVGR: ${mvgrStats.mainMvgrCount} mappings
-   - Weave2: ${mvgrStats.weave2Count} mappings`);
 
     // Check API configuration on startup
     const configCheck = checkApiConfiguration();
