@@ -3,6 +3,7 @@ import multer from 'multer';
 // Rate limiting disabled - import removed
 import { EnhancedExtractionController } from '../controllers/enhancedExtractionController';
 import { validateRequest } from '../middleware/errorHandler';
+import { requireAdmin } from '../middleware/auth';
 
 const router = Router();
 const enhancedController = new EnhancedExtractionController();
@@ -53,9 +54,11 @@ router.post('/vlm/extract/advanced',
   enhancedController.extractWithAdvancedVLM
 );
 
-// Configure VLM providers (admin only - lighter rate limit)
-router.post('/vlm/configure', 
-  validateRequest, 
+// Configure VLM providers (admin only). The VLM service is shared app-wide, so a
+// change here applies to every extraction.
+router.post('/vlm/configure',
+  requireAdmin,
+  validateRequest,
   enhancedController.configureVLMProvider
 );
 

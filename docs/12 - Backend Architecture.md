@@ -58,7 +58,6 @@ flowchart TD
     SRM[srmSyncService] --> EXTRFLAT[(ExtractionResultFlat)]
 
     VLM --> PROM[promptService\nsimplifiedPromptService]
-    FLAT --> MVGR[mvgrMappingService\nBook10/11/FAB2.json]
     FLAT --> SCHEMA[schemaService\ncategory attributes]
 ```
 

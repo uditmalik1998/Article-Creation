@@ -24,9 +24,16 @@ export class VLMService {
   }
 
   private initializeProviders(): void {
-    this.providers.set('openai-gpt4v', new OpenAIVLMProvider());
-    this.providers.set('claude-sonnet', new ClaudeVLMProvider());
-    this.providers.set('google-gemini', new GoogleVisionProvider());
+    // Only Gemini is used today. OpenAI / Claude are kept but off — to switch one
+    // back on, list it in VLM_PROVIDERS, e.g. VLM_PROVIDERS=google-gemini,claude-sonnet
+    // (Claude/OpenAI then also serve as fallbacks and OpenAI as the discovery model).
+    const enabled = new Set(
+      (process.env.VLM_PROVIDERS || 'google-gemini').split(',').map((p) => p.trim()).filter(Boolean),
+    );
+    if (enabled.has('google-gemini')) this.providers.set('google-gemini', new GoogleVisionProvider());
+    if (enabled.has('claude-sonnet')) this.providers.set('claude-sonnet', new ClaudeVLMProvider());
+    if (enabled.has('openai-gpt4v')) this.providers.set('openai-gpt4v', new OpenAIVLMProvider());
+    console.log(`[VLM] Providers enabled: ${[...this.providers.keys()].join(', ') || 'none'}`);
     // Disabled providers (deprecated endpoints or unavailable):
     // this.providers.set('huggingface-llava', new HuggingFaceVLMProvider());
     // this.providers.set('ollama-llava', new OllamaVLMProvider());
@@ -34,11 +41,12 @@ export class VLMService {
   }
 
   private setupFallbackChain(): void {
+    // Disabled providers are simply skipped (not in this.providers).
     this.fallbackChain = [
       'google-gemini',
       'claude-sonnet',
       'openai-gpt4v'
-    ];
+    ].filter((id) => this.providers.has(id));
   }
 
   /**
@@ -338,3 +346,10 @@ export class VLMService {
     }
   }
 }
+
+/**
+ * One shared instance for the whole backend (controllers, SRM sync). Each
+ * VLMService builds its own OpenAI / Claude / Gemini clients, so sharing it
+ * avoids creating — and logging — them once per controller.
+ */
+export const vlmService = new VLMService();
