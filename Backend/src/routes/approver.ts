@@ -25,7 +25,6 @@ router.use(authenticate);
 router.use(requireApprover);
 
 // Get attributes for dropdowns
-router.get('/attributes', h(ApproverController.getAttributes));
 
 // Get items for dashboard
 router.get('/items', h(ApproverController.getItems));

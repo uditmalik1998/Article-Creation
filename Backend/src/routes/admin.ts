@@ -81,22 +81,17 @@ router.delete('/sub-departments/:id', mut, h(adminController.deleteSubDepartment
 // CATEGORIES
 // ═══════════════════════════════════════════════════════
 router.get('/categories', h(adminController.getAllCategories));
-router.get('/categories/:id', h(adminController.getCategoryById));
-router.get('/categories/:id/all-attributes', h(adminController.getCategoryWithAllAttributes));
-router.get('/categories/:code/attributes', h(adminController.getCategoryByCode));
 router.post('/categories', mut, h(adminController.createCategory));
 router.put('/categories/:id', mut, h(adminController.updateCategory));
 router.delete('/categories/:id', mut, h(adminController.deleteCategory));
 router.put('/categories/:id/attributes', mut, h(adminController.updateCategoryAttributes));
 router.put('/categories/:categoryId/attributes/:attributeId', mut, h(adminController.updateCategoryAttributeMapping));
-router.post('/categories/:categoryId/attributes', mut, h(adminController.addAttributeToCategory));
 router.delete('/categories/:categoryId/attributes/:attributeId', mut, h(adminController.removeAttributeFromCategory));
 
 // ═══════════════════════════════════════════════════════
 // MASTER ATTRIBUTES
 // ═══════════════════════════════════════════════════════
 router.get('/attributes', h(adminController.getAllMasterAttributes));
-router.get('/attributes/:id', h(adminController.getMasterAttributeById));
 router.post('/attributes', mut, h(adminController.createMasterAttribute));
 router.put('/attributes/:id', mut, h(adminController.updateMasterAttribute));
 router.delete('/attributes/:id', mut, h(adminController.deleteMasterAttribute));
@@ -107,7 +102,6 @@ router.delete('/attributes/:id', mut, h(adminController.deleteMasterAttribute));
 router.get('/hierarchy/tree', h(adminController.getHierarchyTree));
 router.get('/hierarchy/tree/lightweight', h(adminController.getHierarchyTreeLightweight));
 router.post('/hierarchy/tree/cache/clear', h(adminController.invalidateHierarchyCache));
-router.get('/hierarchy/export', h(adminController.exportHierarchy));
 
 // ═══════════════════════════════════════════════════════
 // GM SUB-DIVISIONS

@@ -203,48 +203,22 @@ export const useImageExtraction = () => {
         // 🔧 VALIDATION: Only enable discovery mode when explicitly set
         console.log(`🔍 Frontend Extraction - Discovery Enabled: ${discoveryEnabled}, Category: ${categoryName}, Code: ${categoryCode}, Has Metadata: ${!!metadata}`);
 
-        // Use category-based extraction only when metadata contains fields beyond
-        // designNumber/majorCategory — those alone go via the legacy path to avoid
-        // triggering a DB category lookup (e.g. 'MENS-MU' is not a category code).
-        const hasRichMetadata = metadata != null && Object.keys(metadata).some(
-          k => k !== 'designNumber' && k !== 'majorCategory' && (metadata as Record<string, unknown>)[k] != null
-        );
-        let result: EnhancedExtractionResult;
-        if (categoryCode && hasRichMetadata) {
-          console.log(`Using category-based extraction with metadata for ${categoryCode}`);
-          result = await backendApi.extractWithCategory({
-            image: base64Image,
-            categoryCode,
-            vendorName: metadata.vendorName,
-            designNumber: metadata.designNumber,
-            pptNumber: metadata.pptNumber,
-            costPrice: metadata.costPrice,
-            sellingPrice: metadata.sellingPrice,
-            notes: metadata.notes,
-            discoveryMode: discoveryEnabled === true,
-            fileName: row.originalFileName,
-            folderName
-          });
-        } else {
-          // Fall back to legacy extraction without metadata
-          // Still pass department/subDepartment parsed from categoryCode so the backend
-          // (a) finds the correct DB category and (b) can override flat fields after flattening.
-          const legacyScope = parseSelectedScope(categoryCode, categoryName);
-          console.log(`📦 Using legacy extraction without metadata`);
-          result = await backendApi.extractFromBase64({
-            image: base64Image,
-            schema,
-            categoryName: categoryName ?? "",
-            discoveryMode: discoveryEnabled === true,
-            fileName: row.originalFileName,
-            folderName,
-            ...(legacyScope.division    ? { department:     legacyScope.division    } : {}),
-            ...(legacyScope.subDivision ? { subDepartment:  legacyScope.subDivision } : {}),
-            ...(presentationsType       ? { presentationsType }                      : {}),
-            ...(metadata?.designNumber  ? { designNumber: metadata.designNumber }    : {}),
-            ...(metadata?.majorCategory ? { majorCategory: metadata.majorCategory }  : {}),
-          });
-        }
+        // Pass department/subDepartment parsed from categoryCode so the backend
+        // (a) finds the correct DB category and (b) can override flat fields after flattening.
+        const legacyScope = parseSelectedScope(categoryCode, categoryName);
+        const result: EnhancedExtractionResult = await backendApi.extractFromBase64({
+          image: base64Image,
+          schema,
+          categoryName: categoryName ?? "",
+          discoveryMode: discoveryEnabled === true,
+          fileName: row.originalFileName,
+          folderName,
+          ...(legacyScope.division    ? { department:     legacyScope.division    } : {}),
+          ...(legacyScope.subDivision ? { subDepartment:  legacyScope.subDivision } : {}),
+          ...(presentationsType       ? { presentationsType }                      : {}),
+          ...(metadata?.designNumber  ? { designNumber: metadata.designNumber }    : {}),
+          ...(metadata?.majorCategory ? { majorCategory: metadata.majorCategory }  : {}),
+        });
 
         const persistence = (result as any)?.persistence as { jobId?: string; flatId?: string | null } | undefined;
 

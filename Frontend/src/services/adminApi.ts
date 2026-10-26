@@ -246,11 +246,6 @@ export const getCategories = async (params: GetCategoriesParams = {}): Promise<P
   return data;
 };
 
-export const getCategoryById = async (id: number): Promise<Category> => {
-  const { data } = await adminApi.get<ApiResponse<Category>>(`/categories/${id}`);
-  return data.data;
-};
-
 export const createCategory = async (category: Partial<Category>): Promise<Category> => {
   const { data } = await adminApi.post<ApiResponse<Category>>('/categories', category);
   return data.data;
@@ -282,23 +277,6 @@ export const updateCategoryAttributeMapping = async (
   await adminApi.put(`/categories/${categoryId}/attributes/${attributeId}`, data);
 };
 
-export const addAttributeToCategory = async (
-  categoryId: number,
-  data: {
-    attributeId: number;
-    isEnabled?: boolean;
-    isRequired?: boolean;
-    displayOrder?: number;
-    defaultValue?: string | null;
-  }
-): Promise<CategoryAttribute> => {
-  const { data: response } = await adminApi.post<ApiResponse<CategoryAttribute>>(
-    `/categories/${categoryId}/attributes`,
-    data
-  );
-  return response.data;
-};
-
 export const removeAttributeFromCategory = async (
   categoryId: number,
   attributeId: number
@@ -312,11 +290,6 @@ export const removeAttributeFromCategory = async (
 
 export const getMasterAttributes = async (): Promise<MasterAttribute[]> => {
   const { data } = await adminApi.get<ApiResponse<MasterAttribute[]>>('/attributes');
-  return data.data;
-};
-
-export const getMasterAttributeById = async (id: number): Promise<MasterAttribute> => {
-  const { data } = await adminApi.get<ApiResponse<MasterAttribute>>(`/attributes/${id}`);
   return data.data;
 };
 
@@ -417,22 +390,6 @@ export interface LightweightDepartment {
 export const getHierarchyTreeLightweight = async (): Promise<LightweightDepartment[]> => {
   const { data } = await adminApi.get<ApiResponse<{ departments: LightweightDepartment[] }>>('/hierarchy/tree/lightweight');
   return data.data.departments;
-};
-
-/**
- * Get category with ALL master attributes (showing enabled/disabled status)
- * Used by admin matrix to show all 44 attributes with toggles
- */
-export const getCategoryWithAllAttributes = async (categoryId: number) => {
-  const { data } = await adminApi.get(`/categories/${categoryId}/all-attributes`);
-  return data.data;
-};
-
-export const exportHierarchy = async (): Promise<Blob> => {
-  const { data } = await adminApi.get('/hierarchy/export', {
-    responseType: 'blob',
-  });
-  return data;
 };
 
 // ═══════════════════════════════════════════════════════

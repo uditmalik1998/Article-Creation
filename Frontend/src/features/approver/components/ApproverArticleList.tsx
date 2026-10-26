@@ -570,6 +570,37 @@ const ArticleCard = React.memo(
     const [roughV2Loading, setRoughV2Loading] = useState(false);
     const roughV2FetchedRef = React.useRef(false);
 
+    // Automatic fills (MRP from rate, ROUGH V2 / AUTO BGT, segment, descriptions,
+    // consumption) are merged and sent as ONE silent save shortly after the last
+    // one (1.5 s), instead of one PUT per field. Flushed early if the card unmounts.
+    const latestItemRef = React.useRef(item);
+    latestItemRef.current = item;
+    const latestOnSaveRef = React.useRef(onSave);
+    latestOnSaveRef.current = onSave;
+    const autoSaveRef = React.useRef<{ updates: Record<string, unknown>; timer: ReturnType<typeof setTimeout> | null }>({
+      updates: {},
+      timer: null,
+    });
+    const flushAutoSave = useCallback(() => {
+      const pending = autoSaveRef.current;
+      if (pending.timer) clearTimeout(pending.timer);
+      pending.timer = null;
+      const updates = pending.updates;
+      pending.updates = {};
+      if (Object.keys(updates).length === 0) return;
+      latestOnSaveRef.current({ ...latestItemRef.current, ...updates } as ApproverItem, updates, { silent: true });
+    }, []);
+    const queueAutoSave = useCallback(
+      (updates: Record<string, unknown>) => {
+        const pending = autoSaveRef.current;
+        pending.updates = { ...pending.updates, ...updates };
+        if (pending.timer) clearTimeout(pending.timer);
+        pending.timer = setTimeout(flushAutoSave, 1500);
+      },
+      [flushAutoSave],
+    );
+    useEffect(() => flushAutoSave, [flushAutoSave]);
+
     // Auto-fill Rough-V2 on mount if not already set — exact match on 5 attrs
     useEffect(() => {
       const existingRoughV2 = (item as any).roughV2;
@@ -598,7 +629,7 @@ const ArticleCard = React.memo(
             if (isModifyMode) {
               setPendingChanges((prev) => ({ ...prev, roughV2: rateStr }));
             } else {
-              onSave({ ...item, roughV2: rateStr } as any, { roughV2: rateStr });
+              queueAutoSave({ roughV2: rateStr });
             }
           }
         })
@@ -628,7 +659,7 @@ const ArticleCard = React.memo(
       if (isModifyMode) {
         setPendingChanges((prev) => ({ ...prev, ...updates }));
       } else {
-        onSave({ ...item, ...updates } as any, updates);
+        queueAutoSave(updates);
       }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentVendorRate]);
@@ -743,7 +774,7 @@ const ArticleCard = React.memo(
         for (const [k, v] of Object.entries(local)) {
           if (k in arrived) { next[k] = arrived[k]; continue; }
           // Always keep keys that the user has staged — they haven't been saved yet
-          if (k in staged) { next[k] = v; continue; }
+          if (k in staged || k in autoSaveRef.current.updates) { next[k] = v; continue; }
           const itemVal = (item as any)[k] ?? null;
           const strItemVal = itemVal === null ? null : String(itemVal);
           if (strItemVal !== (v === null ? null : String(v ?? ''))) {
@@ -779,7 +810,7 @@ const ArticleCard = React.memo(
       if (!isNaN(storedMrp) && storedMrp > 0) return;
       const calculated = String(calculatedMrp);
       setLocalValues((prev) => ({ ...prev, mrp: calculated }));
-      onSave({ ...item, mrp: calculated } as ApproverItem, { mrp: calculated }, { silent: true });
+      queueAutoSave({ mrp: calculated });
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [item.id]);
 
@@ -855,7 +886,7 @@ const ArticleCard = React.memo(
           if (isModifyMode) {
             setPendingChanges((prev) => ({ ...prev, ...updates }));
           } else {
-            onSave({ ...item, ...updates } as any, updates, { silent: true });
+            queueAutoSave(updates);
           }
         })
         .catch(() => {});
@@ -888,7 +919,7 @@ const ArticleCard = React.memo(
       };
       setLocalValues((prev) => ({ ...prev, ...updates }));
       if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
-      else onSave({ ...item, ...updates } as any, updates, { silent: true });
+      else queueAutoSave(updates);
     };
 
     // `item` can be stale (the detail page restores it from navigation state on reload),
@@ -1084,7 +1115,7 @@ const ArticleCard = React.memo(
           const updates: Record<string, string> = { roughConsumptionKg: kg };
           setLocalValues((prev) => ({ ...prev, ...updates }));
           if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
-          else onSave({ ...item, ...updates } as any, updates, { silent: true });
+          else queueAutoSave(updates);
           return;
         }
       } else {
@@ -1142,7 +1173,7 @@ const ArticleCard = React.memo(
       const updates: Record<string, string> = { roughConsumptionKg: kg };
       setLocalValues((prev) => ({ ...prev, ...updates }));
       if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
-      else onSave({ ...item, ...updates } as any, updates, { silent: true });
+      else queueAutoSave(updates);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentGsm, isBodyArticle]);
 
@@ -1169,7 +1200,7 @@ const ArticleCard = React.memo(
       };
       setLocalValues((prev) => ({ ...prev, ...updates }));
       if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
-      else onSave({ ...item, ...updates } as any, updates, { silent: true });
+      else queueAutoSave(updates);
     };
 
     // fWidth effect: fetches on every genuine M_WIDTH change for precise consumption.
@@ -1198,7 +1229,7 @@ const ArticleCard = React.memo(
           const updates: Record<string, string> = { preciseConsumptionKg: kg };
           setLocalValues((prev) => ({ ...prev, ...updates }));
           if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
-          else onSave({ ...item, ...updates } as any, updates, { silent: true });
+          else queueAutoSave(updates);
           return;
         }
       } else {
@@ -1245,7 +1276,7 @@ const ArticleCard = React.memo(
       const updates: Record<string, string> = { preciseConsumptionKg: kg };
       setLocalValues((prev) => ({ ...prev, ...updates }));
       if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
-      else onSave({ ...item, ...updates } as any, updates, { silent: true });
+      else queueAutoSave(updates);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentGsm, isBodyArticle]);
     // ── END PRECISE CONSUMPTION ───────────────────────────────────────────────
@@ -1267,7 +1298,7 @@ const ArticleCard = React.memo(
           if (d.gsm == null) return;
           const updates: Record<string, string> = { gsm: String(d.gsm) };
           setLocalValues((prev) => ({ ...prev, ...updates }));
-          onSave({ ...item, ...updates } as any, updates, { silent: true });
+          queueAutoSave(updates);
         })
         .catch(() => {});
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1284,7 +1315,7 @@ const ArticleCard = React.memo(
       if (expected === current) return;
       setLocalValues((prev) => ({ ...prev, segment: expected }));
       if (!isModifyMode) {
-        onSave({ ...item, segment: expected } as ApproverItem, { segment: expected } as Record<string, unknown>, { silent: true });
+        queueAutoSave({ segment: expected });
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [segmentRanges]);
@@ -1618,7 +1649,7 @@ const ArticleCard = React.memo(
         // Persist bodyArticleDescription to DB when it was missing (null) but is now computable.
         if (newBodyDesc && !item.bodyArticleDescription) {
           setTimeout(() => {
-            onSave({ ...item } as any, { bodyArticleDescription: newBodyDesc }, { silent: true });
+            queueAutoSave({ bodyArticleDescription: newBodyDesc });
           }, 0);
         }
         // Persist fabricArticleDescription to DB whenever the computed value differs from what's
@@ -1626,7 +1657,7 @@ const ArticleCard = React.memo(
         if (newFabDesc && newFabDesc !== item.fabricArticleDescription && autoSavedFabDescRef.current !== newFabDesc) {
           autoSavedFabDescRef.current = newFabDesc;
           setTimeout(() => {
-            onSave({ ...item } as any, { fabricArticleDescription: newFabDesc }, { silent: true });
+            queueAutoSave({ fabricArticleDescription: newFabDesc });
           }, 0);
         }
         return Object.keys(updates).length > 0 ? { ...prev, ...updates } : prev;

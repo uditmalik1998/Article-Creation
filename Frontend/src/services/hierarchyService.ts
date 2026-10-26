@@ -174,21 +174,6 @@ export const getCategories = async (filters?: {
 };
 
 /**
- * Fetch a single category with its attributes
- */
-export const getCategoryWithAttributes = async (categoryCode: string): Promise<HierarchyNode | null> => {
-  try {
-    const response = await apiClient.get<{ success: boolean; data: HierarchyNode }>(`/categories/${categoryCode}/attributes`);
-    return response.data.data;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 404) {
-      return null;
-    }
-    throw error;
-  }
-};
-
-/**
  * Fetch all master attributes
  */
 export const getMasterAttributes = async (): Promise<MasterAttribute[]> => {
@@ -311,15 +296,6 @@ export const getAllCategoriesAsConfigs = async (): Promise<CategoryConfig[]> => 
   });
   
   return configs;
-};
-
-/**
- * Get category config by code (legacy format)
- */
-export const getCategoryConfigByCode = async (categoryCode: string): Promise<CategoryConfig | null> => {
-  const node = await getCategoryWithAttributes(categoryCode);
-  if (!node) return null;
-  return transformToCategoryConfig(node);
 };
 
 /**

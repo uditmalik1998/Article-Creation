@@ -318,7 +318,6 @@ export default function ArticleDetailPage({
   const [gridVersion, setGridVersion] = useState(0);
 
   // Maps itemId → number of variants missing weight (for Save & Submit gate)
-  const [variantWeightIssues, setVariantWeightIssues] = useState<Record<string, number>>({});
 
   // Article change history
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -347,6 +346,10 @@ export default function ArticleDetailPage({
       .catch(() => {});
   }, []);
 
+  // Id of an article just loaded fresh by the fetch below, so the open-refresh
+  // effect doesn't read it a second time.
+  const freshlyFetchedIdRef = useRef<string | null>(null);
+
   // Fetch by ID when opened directly (no navigation state)
   useEffect(() => {
     if (navState?.items?.length) { setLoadingItem(false); return; }
@@ -357,6 +360,7 @@ export default function ArticleDetailPage({
       .then(r => r.json())
       .then(item => {
         const withMc = { ...item, mcCode: item.mcCode || inferMcCode(item.majorCategory) };
+        freshlyFetchedIdRef.current = withMc.id ?? null;
         setItems([withMc]);
         setCurrentIndex(0);
         setTotalCount(1);
@@ -503,7 +507,9 @@ export default function ArticleDetailPage({
   // from a stale list now shows its SAP article number instead of "Creating in SAP…".
   useEffect(() => {
     if (!currentItem) return;
-    void refetchCurrentItem();
+    // Skip the refresh when this article was just fetched by id (hard refresh / direct link).
+    if (freshlyFetchedIdRef.current === currentItem.id) freshlyFetchedIdRef.current = null;
+    else void refetchCurrentItem();
     if (currentItem.approvalStatus === 'APPROVED' && currentItem.sapSyncStatus === 'PENDING') {
       pollUntilSynced(currentItem.id);
     } else {
@@ -656,32 +662,6 @@ export default function ArticleDetailPage({
     }
   }, [activeComboChild?.id, activeComboChild?.approvalStatus, currentItem?.approvalStatus]);
 
-  // Fetch variants for all pending-selected items and check for missing weight.
-  // Runs whenever the selection or items list changes.
-  useEffect(() => {
-    if (pendingSelectedKeys.length === 0) { setVariantWeightIssues({}); return; }
-    const token = localStorage.getItem('authToken');
-    const issues: Record<string, number> = {};
-    Promise.all(
-      pendingSelectedKeys.map(async (id) => {
-        try {
-          const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${id}/variants`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (!r.ok) return;
-          const data = await r.json();
-          const variantList: any[] = data.data || data;
-          if (!Array.isArray(variantList)) return;
-          const missing = variantList.filter(
-            (v) => !v.isGeneric && (v.variantWeight === null || v.variantWeight === undefined || String(v.variantWeight).trim() === ''),
-          ).length;
-          if (missing > 0) issues[String(id)] = missing;
-        } catch { /* non-blocking */ }
-      }),
-    ).then(() => setVariantWeightIssues({ ...issues }));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingSelectedKeys.join(',')]);
-
   // A set article is submitted as a whole — its pending pieces are validated too.
   const pendingComboChildren = useMemo(
     () => (isComboItem && pendingSelectedKeys.includes(currentItem?.id ?? '') ? comboChildren.filter(c => c.approvalStatus === 'PENDING') : []),
@@ -710,8 +690,6 @@ export default function ArticleDetailPage({
       }
       if (!(item.bodyArticleDescription || '').trim()) missing.push('BODY ARTICLE DESC.');
       missing.push(...getMissingMandatoryFields(item, isComboItem && item.id === currentItem?.id ? setTopCategory : null));
-      // const missingWeightCount = variantWeightIssues[item.id];
-      // if (missingWeightCount) missing.push(`VARIANT WEIGHT (${missingWeightCount} variant${missingWeightCount > 1 ? 's' : ''} missing)`);
       // Readable name: SAP / article number once it exists, else category + design
       // number (a new set article has neither SAP number nor image name).
       const label = item.sapArticleId || item.articleNumber
@@ -724,7 +702,7 @@ export default function ArticleDetailPage({
       return acc;
     }, comboBlock);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingSelectedKeys, items, gridVersion, pathType, variantWeightIssues, pendingComboChildren, comboChildren, isComboItem, setTopCategory]);
+  }, [pendingSelectedKeys, items, gridVersion, pathType, pendingComboChildren, comboChildren, isComboItem, setTopCategory]);
 
   // Jump to a missing field: open the right set tab, scroll its row into view and
   // flash it. Rows carry data-field-label / data-item-id (ApproverArticleList).

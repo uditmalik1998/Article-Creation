@@ -4,11 +4,11 @@
  * Tab 2: Size Master
  * Tab 3: Hierarchy — division / sub-division / major category (major_category_details)
  *
- * Layout (design "Option A · ink header"): one dark slate header holding the title, Export JSON and the
+ * Layout (design "Option A · ink header"): one dark slate header holding the title and the
  * underline tabs; the active tab's card attaches directly under it.
  */
 import { useState, type ReactNode } from 'react';
-import { Network, Download, ListTree, Ruler, type LucideIcon } from 'lucide-react';
+import { Network, ListTree, Ruler, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { HierarchyTreeEditor } from '../components/HierarchyTreeEditor';
 import { GridValuesEditor } from '../components/GridValuesEditor';
@@ -57,26 +57,11 @@ export default function HierarchyManagement() {
   const [activeTab, setActiveTab] = useState<TabType>('grid-values');
   const active = TABS.find((t) => t.key === activeTab) ?? TABS[0];
 
-  const handleExport = async () => {
-    try {
-      const { exportHierarchy } = await import('../../../services/adminApi');
-      const blob = await exportHierarchy();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `hierarchy-export-${new Date().toISOString().split('T')[0]}.json`;
-      a.click();
-      window.URL.revokeObjectURL(url);
-    } catch {
-      console.error('Export failed');
-    }
-  };
-
   return (
     <div className="page-scroll-enabled min-h-screen">
       <div className="p-6">
         <div className="mx-auto max-w-[1600px]">
-          {/* Ink header: title + export + underline tabs */}
+          {/* Ink header: title + underline tabs */}
           <header className="rounded-t-2xl bg-slate-800 px-6 pt-5 text-white">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
@@ -86,14 +71,6 @@ export default function HierarchyManagement() {
                   Departments, categories &amp; extraction attributes — changes reflect in the app within 5 minutes
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={handleExport}
-                className="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-600 px-3.5 text-sm font-semibold text-white transition-colors hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
-              >
-                <Download className="h-4 w-4" />
-                Export JSON
-              </button>
             </div>
 
             <nav role="tablist" aria-label="Hierarchy sections" className="mt-4 flex gap-6 overflow-x-auto">

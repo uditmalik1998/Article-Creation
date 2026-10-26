@@ -104,13 +104,6 @@ router.post('/extract/advanced',
   enhancedController.extractWithAdvancedVLM
 );
 
-// Category-based extraction with database schema
-router.post('/extract/category',
-  userExtractionLimiter,
-  validateRequest,
-  enhancedController.extractFromCategoryCode
-);
-
 // ═══════════════════════════════════════════════════════
 // CATEGORY & SCHEMA INFORMATION
 // ═══════════════════════════════════════════════════════
@@ -146,9 +139,6 @@ router.get('/major-category-hierarchy', async (req, res) => {
     return res.status(500).json({ success: false, error: error.message });
   }
 });
-
-// Get category with attributes (read-only access to admin endpoint)
-router.get('/categories/:code/attributes', adminController.getCategoryByCode);
 
 // Get all categories (read-only)
 router.get('/categories', adminController.getAllCategories);
