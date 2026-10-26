@@ -139,10 +139,7 @@ export class ApproverController {
     private static readonly STARTUP_BACKFILL_DELAY_MS = parseInt(process.env.STARTUP_BACKFILL_DELAY_MS || '15000', 10);
     private static readonly STARTUP_BACKFILLS_ENABLED = String(process.env.STARTUP_BACKFILLS_ENABLED ?? 'true').toLowerCase() !== 'false';
     private static readonly STARTUP_BACKFILLS_IN_DEV = String(process.env.STARTUP_BACKFILLS_IN_DEV ?? 'false').toLowerCase() === 'true';
-    private static readonly APPROVER_ATTRIBUTES_CACHE_TTL_MS = parseInt(process.env.APPROVER_ATTRIBUTES_CACHE_TTL_MS || '300000', 10);
     private static startupBackfillRunning = false;
-    private static attributesCache: { data: any[]; expiresAt: number } | null = null;
-    private static pendingAttributesLoad: Promise<any[]> | null = null;
     // Short-lived cache for getItems responses (8s TTL). Eliminates redundant DB hits
     // when multiple users load the same page simultaneously or filters haven't changed.
     private static readonly ITEMS_CACHE_TTL_MS = 8_000;
@@ -2253,43 +2250,6 @@ export class ApproverController {
         }
     }
 
-    // Get master attributes for dropdowns
-    static async getAttributes(req: Request, res: Response) {
-        try {
-            const cached = ApproverController.attributesCache;
-            let attributes = cached && cached.expiresAt > Date.now() ? cached.data : null;
-
-            if (!attributes) {
-                if (!ApproverController.pendingAttributesLoad) {
-                    ApproverController.pendingAttributesLoad = prisma.masterAttribute.findMany({
-                        where: { isActive: true },
-                        include: {
-                            allowedValues: {
-                                where: { isActive: true },
-                                orderBy: { displayOrder: 'asc' }
-                            }
-                        },
-                        orderBy: { displayOrder: 'asc' }
-                    }).then((rows) => {
-                        ApproverController.attributesCache = {
-                            data: rows,
-                            expiresAt: Date.now() + ApproverController.APPROVER_ATTRIBUTES_CACHE_TTL_MS
-                        };
-                        return rows;
-                    }).finally(() => {
-                        ApproverController.pendingAttributesLoad = null;
-                    });
-                }
-
-                attributes = await ApproverController.pendingAttributesLoad;
-            }
-
-            return res.json(attributes);
-        } catch (error) {
-            console.error('Error fetching attributes:', error);
-            return res.status(500).json({ error: 'Failed to fetch attributes' });
-        }
-    }
 
     // Fetch a single item by id — used by the detail page on direct URL access
     static async getById(req: Request, res: Response) {

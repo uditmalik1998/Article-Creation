@@ -50,11 +50,4 @@ router.post('/extract/base64',
 // VLM Health Check Routes
 router.get('/vlm/health', vlmController.vlmHealthCheck);
 
-// Category-based extraction with database schema
-router.post('/extract/category', 
-  extractionLimiter,
-  validateRequest, 
-  vlmController.extractFromCategoryCode
-);
-
 export default router;
