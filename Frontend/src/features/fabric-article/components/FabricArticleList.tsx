@@ -9,6 +9,8 @@ import {
   Maximize2,
   Sparkles,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
   ChevronDown,
   Shirt,
   DollarSign,
@@ -749,6 +751,16 @@ const ArticleCard = React.memo(
 
     const imgSrc = refreshedUrl || item.imageUrl;
     const imgUrl = imgSrc && !failedImg ? getImageUrl(imgSrc) : null;
+    // Front / Back photo switch (back photo only when SRM sent one).
+    const [showBackImg, setShowBackImg] = useState(false);
+    const [backImgFailed, setBackImgFailed] = useState(false);
+    useEffect(() => {
+      setShowBackImg(false);
+      setBackImgFailed(false);
+    }, [item.id]);
+    const backImgUrl = item.backImageUrl ? getImageUrl(item.backImageUrl) : null;
+    const showingBack = showBackImg && !!backImgUrl;
+    const shownImgUrl = showingBack ? (backImgFailed ? null : backImgUrl) : imgUrl;
 
     const handleImgError = useCallback(async () => {
       if (refreshAttempted.current) {
@@ -1833,17 +1845,21 @@ const ArticleCard = React.memo(
               {/* Same design as the FG page ("Option A · Ink headers") */}
               <div className="overflow-hidden rounded-xl border border-slate-300 bg-white">
                 {renderInkCardHeader('Article Image', {
-                  right: <span className="rounded-full bg-slate-700 px-2 py-0.5 text-[10.5px] font-semibold">1 / 1</span>,
+                  right: (
+                    <span className="rounded-full bg-slate-700 px-2 py-0.5 text-[10.5px] font-semibold">
+                      {backImgUrl ? `${showingBack ? 'Back · 2' : 'Front · 1'} / 2` : '1 / 1'}
+                    </span>
+                  ),
                 })}
                 <div className="flex flex-col gap-2 p-3">
                   <div className="relative h-[420px] w-full overflow-hidden rounded-lg bg-slate-100">
-                    {imgUrl ? (
+                    {shownImgUrl ? (
                       <>
                         <img
-                          src={imgUrl}
+                          src={shownImgUrl}
                           alt=""
                           className="block h-full w-full cursor-zoom-in object-contain p-2"
-                          onError={handleImgError}
+                          onError={showingBack ? () => setBackImgFailed(true) : handleImgError}
                           onClick={() => setImgModalOpen(true)}
                         />
                         <button
@@ -1856,7 +1872,34 @@ const ArticleCard = React.memo(
                         </button>
                       </>
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center text-xs text-slate-500">No image</div>
+                      <div className="flex h-full w-full items-center justify-center text-xs text-slate-500">
+                        {showingBack ? 'Back photo unavailable' : 'No image'}
+                      </div>
+                    )}
+                    {backImgUrl && (
+                      <>
+                        <span className="absolute left-2.5 top-2.5 rounded-md bg-slate-900 px-2.5 py-1 text-[10.5px] font-bold tracking-[0.06em] text-white">
+                          {showingBack ? 'BACK' : 'FRONT'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setShowBackImg(false)}
+                          disabled={!showingBack}
+                          aria-label="Show front photo"
+                          className="absolute left-2.5 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow hover:bg-white disabled:pointer-events-none disabled:opacity-0"
+                        >
+                          <ChevronLeft className="h-5 w-5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowBackImg(true)}
+                          disabled={showingBack}
+                          aria-label="Show back photo"
+                          className="absolute right-2.5 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow hover:bg-white disabled:pointer-events-none disabled:opacity-0"
+                        >
+                          <ChevronRight className="h-5 w-5" />
+                        </button>
+                      </>
                     )}
                   </div>
                   {item.imageName && (
@@ -2357,7 +2400,7 @@ const ArticleCard = React.memo(
             </DialogHeader>
             <div className="flex items-center justify-center overflow-auto p-4" style={{ maxHeight: '80vh' }}>
               <img
-                src={imgUrl || ''}
+                src={shownImgUrl || ''}
                 alt={item.imageName || 'preview'}
                 className="block transition-transform duration-200 will-change-transform"
                 style={{

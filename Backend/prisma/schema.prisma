@@ -1302,6 +1302,7 @@ model FabricRawData {
   noOfColors               Int?             @map("no_of_colors")
   price                    Decimal?         @db.Decimal(10, 2)
   imageUrl                 String?          @map("image_url")
+  backImageUrl             String?          @map("back_image_url")
   source                   String?          @db.VarChar(50)
 
   // Fabric-specific extras
@@ -1361,6 +1362,7 @@ model GmRawData {
   noOfColors               Int?             @map("no_of_colors")
   price                    Decimal?         @db.Decimal(10, 2)
   imageUrl                 String?          @map("image_url")
+  backImageUrl             String?          @map("back_image_url")
   source                   String?          @db.VarChar(50)
 
   // GM-specific extras
@@ -1728,6 +1730,7 @@ model FabricArticleData {
 
   // Media & classification
   imageUrl                 String?   @map("image_url")            @db.Text
+  backImageUrl             String?   @map("back_image_url")       @db.Text
   fabricArticleType        String?   @map("fabric_article_type")  @db.VarChar(100)
   source                   String?   @map("source")               @db.VarChar(50)
 
@@ -1895,6 +1898,7 @@ model GmArticleData {
 
   // Media & classification
   imageUrl             String?   @map("image_url")              @db.Text
+  backImageUrl         String?   @map("back_image_url")         @db.Text
   gmArticleType        String?   @map("gm_article_type")        @db.VarChar(100)
   source               String?   @map("source")                 @db.VarChar(50)
 

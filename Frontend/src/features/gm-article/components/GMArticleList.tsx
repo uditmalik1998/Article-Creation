@@ -7,6 +7,8 @@ import {
   Copy,
   Maximize2,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
   ChevronDown,
   Plus,
   Minus,
@@ -781,6 +783,16 @@ const ArticleCard = React.memo(
 
     const imgSrc = refreshedUrl || item.imageUrl;
     const imgUrl = imgSrc && !failedImg ? getImageUrl(imgSrc) : null;
+    // Front / Back photo switch (back photo only when SRM sent one).
+    const [showBackImg, setShowBackImg] = useState(false);
+    const [backImgFailed, setBackImgFailed] = useState(false);
+    useEffect(() => {
+      setShowBackImg(false);
+      setBackImgFailed(false);
+    }, [item.id]);
+    const backImgUrl = item.backImageUrl ? getImageUrl(item.backImageUrl) : null;
+    const showingBack = showBackImg && !!backImgUrl;
+    const shownImgUrl = showingBack ? (backImgFailed ? null : backImgUrl) : imgUrl;
 
     const handleImgError = useCallback(async () => {
       if (refreshAttempted.current) {
@@ -1482,21 +1494,48 @@ const ArticleCard = React.memo(
             <aside className="flex min-w-0 flex-col gap-3">
               {/* Photo */}
               <div className="group relative aspect-[5/4] w-full overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100">
-                {imgUrl ? (
+                {shownImgUrl ? (
                   <img
-                    src={imgUrl}
+                    src={shownImgUrl}
                     alt=""
                     className="block h-full w-full cursor-zoom-in object-contain p-3"
-                    onError={handleImgError}
+                    onError={showingBack ? () => setBackImgFailed(true) : handleImgError}
                     onClick={() => setImgModalOpen(true)}
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-[16px] text-muted-foreground">No Image</div>
+                  <div className="flex h-full w-full items-center justify-center text-[16px] text-muted-foreground">
+                    {showingBack ? 'Back photo unavailable' : 'No Image'}
+                  </div>
+                )}
+                {backImgUrl && (
+                  <>
+                    <span className="absolute left-2.5 top-2.5 rounded-md bg-slate-900 px-2.5 py-1 text-[10.5px] font-bold tracking-[0.06em] text-white">
+                      {showingBack ? 'BACK' : 'FRONT'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowBackImg(false)}
+                      disabled={!showingBack}
+                      aria-label="Show front photo"
+                      className="absolute left-2.5 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow hover:bg-white disabled:pointer-events-none disabled:opacity-0"
+                    >
+                      <ChevronLeft className="h-5 w-5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowBackImg(true)}
+                      disabled={showingBack}
+                      aria-label="Show back photo"
+                      className="absolute right-2.5 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow hover:bg-white disabled:pointer-events-none disabled:opacity-0"
+                    >
+                      <ChevronRight className="h-5 w-5" />
+                    </button>
+                  </>
                 )}
                 <span className="absolute bottom-2.5 left-3 rounded-md bg-white/85 px-2 py-0.5 text-[13.5px] font-medium text-slate-600">
-                  Article photo · 1 of 1
+                  {backImgUrl ? `${showingBack ? 'Back' : 'Front'} photo · ${showingBack ? 2 : 1} of 2` : 'Article photo · 1 of 1'}
                 </span>
-                {imgUrl && (
+                {shownImgUrl && (
                   <Button
                     size="icon"
                     variant="outline"
@@ -1812,7 +1851,7 @@ const ArticleCard = React.memo(
             </DialogHeader>
             <div className="flex items-center justify-center overflow-auto p-4" style={{ maxHeight: '80vh' }}>
               <img
-                src={imgUrl || ''}
+                src={shownImgUrl || ''}
                 alt={item.imageName || 'preview'}
                 className="block transition-transform duration-200 will-change-transform"
                 style={{

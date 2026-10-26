@@ -44308,6 +44308,7 @@ export namespace Prisma {
     noOfColors: number | null
     price: Decimal | null
     imageUrl: string | null
+    backImageUrl: string | null
     source: string | null
     season: string | null
     garmentWeight: Decimal | null
@@ -44342,6 +44343,7 @@ export namespace Prisma {
     noOfColors: number | null
     price: Decimal | null
     imageUrl: string | null
+    backImageUrl: string | null
     source: string | null
     season: string | null
     garmentWeight: Decimal | null
@@ -44376,6 +44378,7 @@ export namespace Prisma {
     noOfColors: number
     price: number
     imageUrl: number
+    backImageUrl: number
     source: number
     season: number
     garmentWeight: number
@@ -44429,6 +44432,7 @@ export namespace Prisma {
     noOfColors?: true
     price?: true
     imageUrl?: true
+    backImageUrl?: true
     source?: true
     season?: true
     garmentWeight?: true
@@ -44463,6 +44467,7 @@ export namespace Prisma {
     noOfColors?: true
     price?: true
     imageUrl?: true
+    backImageUrl?: true
     source?: true
     season?: true
     garmentWeight?: true
@@ -44497,6 +44502,7 @@ export namespace Prisma {
     noOfColors?: true
     price?: true
     imageUrl?: true
+    backImageUrl?: true
     source?: true
     season?: true
     garmentWeight?: true
@@ -44619,6 +44625,7 @@ export namespace Prisma {
     noOfColors: number | null
     price: Decimal | null
     imageUrl: string | null
+    backImageUrl: string | null
     source: string | null
     season: string | null
     garmentWeight: Decimal | null
@@ -44673,6 +44680,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     source?: boolean
     season?: boolean
     garmentWeight?: boolean
@@ -44708,6 +44716,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     source?: boolean
     season?: boolean
     garmentWeight?: boolean
@@ -44743,6 +44752,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     source?: boolean
     season?: boolean
     garmentWeight?: boolean
@@ -44778,6 +44788,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     source?: boolean
     season?: boolean
     garmentWeight?: boolean
@@ -44796,7 +44807,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type FabricRawDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "presentationNo" | "uniqueKey" | "vendorCode" | "vendorName" | "vendorCity" | "division" | "subDivision" | "majorCategory" | "presentationsType" | "designNumber" | "articleNumber" | "fabric" | "noOfColors" | "price" | "imageUrl" | "source" | "season" | "garmentWeight" | "availableQty" | "approvedBy" | "notes" | "status" | "retryCount" | "errorMessage" | "extractedData" | "extractedAt" | "flatId" | "lockedUntil" | "presentationReceivedDate" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricRawData"]>
+  export type FabricRawDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "presentationNo" | "uniqueKey" | "vendorCode" | "vendorName" | "vendorCity" | "division" | "subDivision" | "majorCategory" | "presentationsType" | "designNumber" | "articleNumber" | "fabric" | "noOfColors" | "price" | "imageUrl" | "backImageUrl" | "source" | "season" | "garmentWeight" | "availableQty" | "approvedBy" | "notes" | "status" | "retryCount" | "errorMessage" | "extractedData" | "extractedAt" | "flatId" | "lockedUntil" | "presentationReceivedDate" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricRawData"]>
 
   export type $FabricRawDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "FabricRawData"
@@ -44818,6 +44829,7 @@ export namespace Prisma {
       noOfColors: number | null
       price: Prisma.Decimal | null
       imageUrl: string | null
+      backImageUrl: string | null
       source: string | null
       season: string | null
       garmentWeight: Prisma.Decimal | null
@@ -45273,6 +45285,7 @@ export namespace Prisma {
     readonly noOfColors: FieldRef<"FabricRawData", 'Int'>
     readonly price: FieldRef<"FabricRawData", 'Decimal'>
     readonly imageUrl: FieldRef<"FabricRawData", 'String'>
+    readonly backImageUrl: FieldRef<"FabricRawData", 'String'>
     readonly source: FieldRef<"FabricRawData", 'String'>
     readonly season: FieldRef<"FabricRawData", 'String'>
     readonly garmentWeight: FieldRef<"FabricRawData", 'Decimal'>
@@ -45698,6 +45711,7 @@ export namespace Prisma {
     noOfColors: number | null
     price: Decimal | null
     imageUrl: string | null
+    backImageUrl: string | null
     source: string | null
     season: string | null
     garmentWeight: Decimal | null
@@ -45731,6 +45745,7 @@ export namespace Prisma {
     noOfColors: number | null
     price: Decimal | null
     imageUrl: string | null
+    backImageUrl: string | null
     source: string | null
     season: string | null
     garmentWeight: Decimal | null
@@ -45764,6 +45779,7 @@ export namespace Prisma {
     noOfColors: number
     price: number
     imageUrl: number
+    backImageUrl: number
     source: number
     season: number
     garmentWeight: number
@@ -45813,6 +45829,7 @@ export namespace Prisma {
     noOfColors?: true
     price?: true
     imageUrl?: true
+    backImageUrl?: true
     source?: true
     season?: true
     garmentWeight?: true
@@ -45846,6 +45863,7 @@ export namespace Prisma {
     noOfColors?: true
     price?: true
     imageUrl?: true
+    backImageUrl?: true
     source?: true
     season?: true
     garmentWeight?: true
@@ -45879,6 +45897,7 @@ export namespace Prisma {
     noOfColors?: true
     price?: true
     imageUrl?: true
+    backImageUrl?: true
     source?: true
     season?: true
     garmentWeight?: true
@@ -45999,6 +46018,7 @@ export namespace Prisma {
     noOfColors: number | null
     price: Decimal | null
     imageUrl: string | null
+    backImageUrl: string | null
     source: string | null
     season: string | null
     garmentWeight: Decimal | null
@@ -46051,6 +46071,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     source?: boolean
     season?: boolean
     garmentWeight?: boolean
@@ -46084,6 +46105,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     source?: boolean
     season?: boolean
     garmentWeight?: boolean
@@ -46117,6 +46139,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     source?: boolean
     season?: boolean
     garmentWeight?: boolean
@@ -46150,6 +46173,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     source?: boolean
     season?: boolean
     garmentWeight?: boolean
@@ -46166,7 +46190,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type GmRawDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "presentationNo" | "uniqueKey" | "vendorCode" | "vendorName" | "vendorCity" | "division" | "subDivision" | "majorCategory" | "presentationsType" | "designNumber" | "articleNumber" | "fabric" | "noOfColors" | "price" | "imageUrl" | "source" | "season" | "garmentWeight" | "availableQty" | "approvedBy" | "notes" | "status" | "errorMessage" | "extractedAt" | "flatId" | "lockedUntil" | "presentationReceivedDate" | "createdAt" | "updatedAt", ExtArgs["result"]["gmRawData"]>
+  export type GmRawDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "presentationNo" | "uniqueKey" | "vendorCode" | "vendorName" | "vendorCity" | "division" | "subDivision" | "majorCategory" | "presentationsType" | "designNumber" | "articleNumber" | "fabric" | "noOfColors" | "price" | "imageUrl" | "backImageUrl" | "source" | "season" | "garmentWeight" | "availableQty" | "approvedBy" | "notes" | "status" | "errorMessage" | "extractedAt" | "flatId" | "lockedUntil" | "presentationReceivedDate" | "createdAt" | "updatedAt", ExtArgs["result"]["gmRawData"]>
 
   export type $GmRawDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "GmRawData"
@@ -46188,6 +46212,7 @@ export namespace Prisma {
       noOfColors: number | null
       price: Prisma.Decimal | null
       imageUrl: string | null
+      backImageUrl: string | null
       source: string | null
       season: string | null
       garmentWeight: Prisma.Decimal | null
@@ -46641,6 +46666,7 @@ export namespace Prisma {
     readonly noOfColors: FieldRef<"GmRawData", 'Int'>
     readonly price: FieldRef<"GmRawData", 'Decimal'>
     readonly imageUrl: FieldRef<"GmRawData", 'String'>
+    readonly backImageUrl: FieldRef<"GmRawData", 'String'>
     readonly source: FieldRef<"GmRawData", 'String'>
     readonly season: FieldRef<"GmRawData", 'String'>
     readonly garmentWeight: FieldRef<"GmRawData", 'Decimal'>
@@ -58859,6 +58885,7 @@ export namespace Prisma {
     sapSyncStatus: string | null
     sapSyncMessage: string | null
     imageUrl: string | null
+    backImageUrl: string | null
     fabricArticleType: string | null
     source: string | null
     userName: string | null
@@ -58905,6 +58932,7 @@ export namespace Prisma {
     sapSyncStatus: string | null
     sapSyncMessage: string | null
     imageUrl: string | null
+    backImageUrl: string | null
     fabricArticleType: string | null
     source: string | null
     userName: string | null
@@ -58951,6 +58979,7 @@ export namespace Prisma {
     sapSyncStatus: number
     sapSyncMessage: number
     imageUrl: number
+    backImageUrl: number
     fabricArticleType: number
     source: number
     userName: number
@@ -59015,6 +59044,7 @@ export namespace Prisma {
     sapSyncStatus?: true
     sapSyncMessage?: true
     imageUrl?: true
+    backImageUrl?: true
     fabricArticleType?: true
     source?: true
     userName?: true
@@ -59061,6 +59091,7 @@ export namespace Prisma {
     sapSyncStatus?: true
     sapSyncMessage?: true
     imageUrl?: true
+    backImageUrl?: true
     fabricArticleType?: true
     source?: true
     userName?: true
@@ -59107,6 +59138,7 @@ export namespace Prisma {
     sapSyncStatus?: true
     sapSyncMessage?: true
     imageUrl?: true
+    backImageUrl?: true
     fabricArticleType?: true
     source?: true
     userName?: true
@@ -59240,6 +59272,7 @@ export namespace Prisma {
     sapSyncStatus: string
     sapSyncMessage: string | null
     imageUrl: string | null
+    backImageUrl: string | null
     fabricArticleType: string | null
     source: string | null
     userName: string | null
@@ -59305,6 +59338,7 @@ export namespace Prisma {
     sapSyncStatus?: boolean
     sapSyncMessage?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     fabricArticleType?: boolean
     source?: boolean
     userName?: boolean
@@ -59351,6 +59385,7 @@ export namespace Prisma {
     sapSyncStatus?: boolean
     sapSyncMessage?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     fabricArticleType?: boolean
     source?: boolean
     userName?: boolean
@@ -59397,6 +59432,7 @@ export namespace Prisma {
     sapSyncStatus?: boolean
     sapSyncMessage?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     fabricArticleType?: boolean
     source?: boolean
     userName?: boolean
@@ -59443,6 +59479,7 @@ export namespace Prisma {
     sapSyncStatus?: boolean
     sapSyncMessage?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     fabricArticleType?: boolean
     source?: boolean
     userName?: boolean
@@ -59450,7 +59487,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type FabricArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mFabDiv" | "mYarn" | "mFabMainMvgr1" | "mFabMainMvgr2" | "mConstruction" | "mOunz" | "mWidth" | "mWeave02" | "mCount" | "mWeave01" | "mComposition" | "mFinish" | "mGsm" | "mLycra" | "fabricArticleNumber" | "fabricArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "pptNumber" | "fabricRate" | "v2FabricRate" | "valueAddCost" | "rate" | "segment" | "articleFashionType" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "fabricArticleType" | "source" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricArticleData"]>
+  export type FabricArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mFabDiv" | "mYarn" | "mFabMainMvgr1" | "mFabMainMvgr2" | "mConstruction" | "mOunz" | "mWidth" | "mWeave02" | "mCount" | "mWeave01" | "mComposition" | "mFinish" | "mGsm" | "mLycra" | "fabricArticleNumber" | "fabricArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "pptNumber" | "fabricRate" | "v2FabricRate" | "valueAddCost" | "rate" | "segment" | "articleFashionType" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "backImageUrl" | "fabricArticleType" | "source" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricArticleData"]>
 
   export type $FabricArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "FabricArticleData"
@@ -59494,6 +59531,7 @@ export namespace Prisma {
       sapSyncStatus: string
       sapSyncMessage: string | null
       imageUrl: string | null
+      backImageUrl: string | null
       fabricArticleType: string | null
       source: string | null
       userName: string | null
@@ -59960,6 +59998,7 @@ export namespace Prisma {
     readonly sapSyncStatus: FieldRef<"FabricArticleData", 'String'>
     readonly sapSyncMessage: FieldRef<"FabricArticleData", 'String'>
     readonly imageUrl: FieldRef<"FabricArticleData", 'String'>
+    readonly backImageUrl: FieldRef<"FabricArticleData", 'String'>
     readonly fabricArticleType: FieldRef<"FabricArticleData", 'String'>
     readonly source: FieldRef<"FabricArticleData", 'String'>
     readonly userName: FieldRef<"FabricArticleData", 'String'>
@@ -61744,6 +61783,7 @@ export namespace Prisma {
     sapSyncStatus: string | null
     sapSyncMessage: string | null
     imageUrl: string | null
+    backImageUrl: string | null
     gmArticleType: string | null
     source: string | null
     userName: string | null
@@ -61852,6 +61892,7 @@ export namespace Prisma {
     sapSyncStatus: string | null
     sapSyncMessage: string | null
     imageUrl: string | null
+    backImageUrl: string | null
     gmArticleType: string | null
     source: string | null
     userName: string | null
@@ -61960,6 +62001,7 @@ export namespace Prisma {
     sapSyncStatus: number
     sapSyncMessage: number
     imageUrl: number
+    backImageUrl: number
     gmArticleType: number
     source: number
     userName: number
@@ -62082,6 +62124,7 @@ export namespace Prisma {
     sapSyncStatus?: true
     sapSyncMessage?: true
     imageUrl?: true
+    backImageUrl?: true
     gmArticleType?: true
     source?: true
     userName?: true
@@ -62190,6 +62233,7 @@ export namespace Prisma {
     sapSyncStatus?: true
     sapSyncMessage?: true
     imageUrl?: true
+    backImageUrl?: true
     gmArticleType?: true
     source?: true
     userName?: true
@@ -62298,6 +62342,7 @@ export namespace Prisma {
     sapSyncStatus?: true
     sapSyncMessage?: true
     imageUrl?: true
+    backImageUrl?: true
     gmArticleType?: true
     source?: true
     userName?: true
@@ -62493,6 +62538,7 @@ export namespace Prisma {
     sapSyncStatus: string
     sapSyncMessage: string | null
     imageUrl: string | null
+    backImageUrl: string | null
     gmArticleType: string | null
     source: string | null
     userName: string | null
@@ -62620,6 +62666,7 @@ export namespace Prisma {
     sapSyncStatus?: boolean
     sapSyncMessage?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     gmArticleType?: boolean
     source?: boolean
     userName?: boolean
@@ -62728,6 +62775,7 @@ export namespace Prisma {
     sapSyncStatus?: boolean
     sapSyncMessage?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     gmArticleType?: boolean
     source?: boolean
     userName?: boolean
@@ -62836,6 +62884,7 @@ export namespace Prisma {
     sapSyncStatus?: boolean
     sapSyncMessage?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     gmArticleType?: boolean
     source?: boolean
     userName?: boolean
@@ -62944,6 +62993,7 @@ export namespace Prisma {
     sapSyncStatus?: boolean
     sapSyncMessage?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     gmArticleType?: boolean
     source?: boolean
     userName?: boolean
@@ -62951,7 +63001,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type GmArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "gmAgeGrade" | "gmApplicator" | "gmBaseType" | "gmBatteryType" | "gmBpaFree" | "gmBpcForm" | "gmBrand" | "gmBrandType" | "gmCapacityMl" | "gmCareInstruction" | "gmCertification" | "gmClosureType" | "gmCoating" | "gmColourFamily" | "gmColourShade" | "gmCompartmentCount" | "gmComposition" | "gmCosmeticFinish" | "gmDiameterCm" | "gmDimStandard" | "gmDishwasherSafe" | "gmFoldable" | "gmFoodContactSafe" | "gmFragranceConc" | "gmFragranceFamily" | "gmFreeFrom" | "gmFwHeelHtCm" | "gmFwHeelType" | "gmFwSize" | "gmFwSole" | "gmFwToe" | "gmFwUpper" | "gmGsm" | "gmHeatRetentionHr" | "gmHeightCm" | "gmInsulationType" | "gmKeyIngredient" | "gmLeakProof" | "gmLengthCm" | "gmLicence" | "gmLidType" | "gmLifestage" | "gmLiningMaterial" | "gmManufacturer" | "gmMaterial" | "gmMaterialGroup" | "gmMaterialSecondary" | "gmMicrowaveSafe" | "gmMountType" | "gmNetContent" | "gmNetContentUom" | "gmNetWeightG" | "gmPackQty" | "gmPattern" | "gmPlayPattern" | "gmPlayerCount" | "gmPowerSource" | "gmPriceTier" | "gmPrintTheme" | "gmSeason" | "gmSellUom" | "gmSetContents" | "gmShelfLifeMonths" | "gmSkinType" | "gmSpf" | "gmSport" | "gmStrapType" | "gmSurfaceFinish" | "gmTextileFabric" | "gmThreadCount" | "gmUsageOccasion" | "gmVoltageV" | "gmWarrantyMonths" | "gmWattageW" | "gmWeave" | "gmWheelCount" | "gmWidthCm" | "gmYarn" | "gmArticleNumber" | "gmArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "pptNumber" | "rate" | "mrp" | "segment" | "articleFashionType" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "gmArticleType" | "source" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["gmArticleData"]>
+  export type GmArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "gmAgeGrade" | "gmApplicator" | "gmBaseType" | "gmBatteryType" | "gmBpaFree" | "gmBpcForm" | "gmBrand" | "gmBrandType" | "gmCapacityMl" | "gmCareInstruction" | "gmCertification" | "gmClosureType" | "gmCoating" | "gmColourFamily" | "gmColourShade" | "gmCompartmentCount" | "gmComposition" | "gmCosmeticFinish" | "gmDiameterCm" | "gmDimStandard" | "gmDishwasherSafe" | "gmFoldable" | "gmFoodContactSafe" | "gmFragranceConc" | "gmFragranceFamily" | "gmFreeFrom" | "gmFwHeelHtCm" | "gmFwHeelType" | "gmFwSize" | "gmFwSole" | "gmFwToe" | "gmFwUpper" | "gmGsm" | "gmHeatRetentionHr" | "gmHeightCm" | "gmInsulationType" | "gmKeyIngredient" | "gmLeakProof" | "gmLengthCm" | "gmLicence" | "gmLidType" | "gmLifestage" | "gmLiningMaterial" | "gmManufacturer" | "gmMaterial" | "gmMaterialGroup" | "gmMaterialSecondary" | "gmMicrowaveSafe" | "gmMountType" | "gmNetContent" | "gmNetContentUom" | "gmNetWeightG" | "gmPackQty" | "gmPattern" | "gmPlayPattern" | "gmPlayerCount" | "gmPowerSource" | "gmPriceTier" | "gmPrintTheme" | "gmSeason" | "gmSellUom" | "gmSetContents" | "gmShelfLifeMonths" | "gmSkinType" | "gmSpf" | "gmSport" | "gmStrapType" | "gmSurfaceFinish" | "gmTextileFabric" | "gmThreadCount" | "gmUsageOccasion" | "gmVoltageV" | "gmWarrantyMonths" | "gmWattageW" | "gmWeave" | "gmWheelCount" | "gmWidthCm" | "gmYarn" | "gmArticleNumber" | "gmArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "pptNumber" | "rate" | "mrp" | "segment" | "articleFashionType" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "backImageUrl" | "gmArticleType" | "source" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["gmArticleData"]>
 
   export type $GmArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "GmArticleData"
@@ -63057,6 +63107,7 @@ export namespace Prisma {
       sapSyncStatus: string
       sapSyncMessage: string | null
       imageUrl: string | null
+      backImageUrl: string | null
       gmArticleType: string | null
       source: string | null
       userName: string | null
@@ -63585,6 +63636,7 @@ export namespace Prisma {
     readonly sapSyncStatus: FieldRef<"GmArticleData", 'String'>
     readonly sapSyncMessage: FieldRef<"GmArticleData", 'String'>
     readonly imageUrl: FieldRef<"GmArticleData", 'String'>
+    readonly backImageUrl: FieldRef<"GmArticleData", 'String'>
     readonly gmArticleType: FieldRef<"GmArticleData", 'String'>
     readonly source: FieldRef<"GmArticleData", 'String'>
     readonly userName: FieldRef<"GmArticleData", 'String'>
@@ -92375,6 +92427,7 @@ export namespace Prisma {
     noOfColors: 'noOfColors',
     price: 'price',
     imageUrl: 'imageUrl',
+    backImageUrl: 'backImageUrl',
     source: 'source',
     season: 'season',
     garmentWeight: 'garmentWeight',
@@ -92413,6 +92466,7 @@ export namespace Prisma {
     noOfColors: 'noOfColors',
     price: 'price',
     imageUrl: 'imageUrl',
+    backImageUrl: 'backImageUrl',
     source: 'source',
     season: 'season',
     garmentWeight: 'garmentWeight',
@@ -92663,6 +92717,7 @@ export namespace Prisma {
     sapSyncStatus: 'sapSyncStatus',
     sapSyncMessage: 'sapSyncMessage',
     imageUrl: 'imageUrl',
+    backImageUrl: 'backImageUrl',
     fabricArticleType: 'fabricArticleType',
     source: 'source',
     userName: 'userName',
@@ -92804,6 +92859,7 @@ export namespace Prisma {
     sapSyncStatus: 'sapSyncStatus',
     sapSyncMessage: 'sapSyncMessage',
     imageUrl: 'imageUrl',
+    backImageUrl: 'backImageUrl',
     gmArticleType: 'gmArticleType',
     source: 'source',
     userName: 'userName',
@@ -93951,6 +94007,7 @@ export namespace Prisma {
     articleNumber: 'articleNumber',
     fabric: 'fabric',
     imageUrl: 'imageUrl',
+    backImageUrl: 'backImageUrl',
     source: 'source',
     season: 'season',
     approvedBy: 'approvedBy',
@@ -93977,6 +94034,7 @@ export namespace Prisma {
     articleNumber: 'articleNumber',
     fabric: 'fabric',
     imageUrl: 'imageUrl',
+    backImageUrl: 'backImageUrl',
     source: 'source',
     season: 'season',
     approvedBy: 'approvedBy',
@@ -94147,6 +94205,7 @@ export namespace Prisma {
     sapSyncStatus: 'sapSyncStatus',
     sapSyncMessage: 'sapSyncMessage',
     imageUrl: 'imageUrl',
+    backImageUrl: 'backImageUrl',
     fabricArticleType: 'fabricArticleType',
     source: 'source',
     userName: 'userName'
@@ -94277,6 +94336,7 @@ export namespace Prisma {
     sapSyncStatus: 'sapSyncStatus',
     sapSyncMessage: 'sapSyncMessage',
     imageUrl: 'imageUrl',
+    backImageUrl: 'backImageUrl',
     gmArticleType: 'gmArticleType',
     source: 'source',
     userName: 'userName'
@@ -99528,6 +99588,7 @@ export namespace Prisma {
     noOfColors?: IntNullableFilter<"FabricRawData"> | number | null
     price?: DecimalNullableFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
     imageUrl?: StringNullableFilter<"FabricRawData"> | string | null
+    backImageUrl?: StringNullableFilter<"FabricRawData"> | string | null
     source?: StringNullableFilter<"FabricRawData"> | string | null
     season?: StringNullableFilter<"FabricRawData"> | string | null
     garmentWeight?: DecimalNullableFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
@@ -99563,6 +99624,7 @@ export namespace Prisma {
     noOfColors?: SortOrderInput | SortOrder
     price?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
+    backImageUrl?: SortOrderInput | SortOrder
     source?: SortOrderInput | SortOrder
     season?: SortOrderInput | SortOrder
     garmentWeight?: SortOrderInput | SortOrder
@@ -99602,6 +99664,7 @@ export namespace Prisma {
     noOfColors?: IntNullableFilter<"FabricRawData"> | number | null
     price?: DecimalNullableFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
     imageUrl?: StringNullableFilter<"FabricRawData"> | string | null
+    backImageUrl?: StringNullableFilter<"FabricRawData"> | string | null
     source?: StringNullableFilter<"FabricRawData"> | string | null
     season?: StringNullableFilter<"FabricRawData"> | string | null
     garmentWeight?: DecimalNullableFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
@@ -99637,6 +99700,7 @@ export namespace Prisma {
     noOfColors?: SortOrderInput | SortOrder
     price?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
+    backImageUrl?: SortOrderInput | SortOrder
     source?: SortOrderInput | SortOrder
     season?: SortOrderInput | SortOrder
     garmentWeight?: SortOrderInput | SortOrder
@@ -99680,6 +99744,7 @@ export namespace Prisma {
     noOfColors?: IntNullableWithAggregatesFilter<"FabricRawData"> | number | null
     price?: DecimalNullableWithAggregatesFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
     imageUrl?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    backImageUrl?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
     source?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
     season?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
     garmentWeight?: DecimalNullableWithAggregatesFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
@@ -99718,6 +99783,7 @@ export namespace Prisma {
     noOfColors?: IntNullableFilter<"GmRawData"> | number | null
     price?: DecimalNullableFilter<"GmRawData"> | Decimal | DecimalJsLike | number | string | null
     imageUrl?: StringNullableFilter<"GmRawData"> | string | null
+    backImageUrl?: StringNullableFilter<"GmRawData"> | string | null
     source?: StringNullableFilter<"GmRawData"> | string | null
     season?: StringNullableFilter<"GmRawData"> | string | null
     garmentWeight?: DecimalNullableFilter<"GmRawData"> | Decimal | DecimalJsLike | number | string | null
@@ -99751,6 +99817,7 @@ export namespace Prisma {
     noOfColors?: SortOrderInput | SortOrder
     price?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
+    backImageUrl?: SortOrderInput | SortOrder
     source?: SortOrderInput | SortOrder
     season?: SortOrderInput | SortOrder
     garmentWeight?: SortOrderInput | SortOrder
@@ -99788,6 +99855,7 @@ export namespace Prisma {
     noOfColors?: IntNullableFilter<"GmRawData"> | number | null
     price?: DecimalNullableFilter<"GmRawData"> | Decimal | DecimalJsLike | number | string | null
     imageUrl?: StringNullableFilter<"GmRawData"> | string | null
+    backImageUrl?: StringNullableFilter<"GmRawData"> | string | null
     source?: StringNullableFilter<"GmRawData"> | string | null
     season?: StringNullableFilter<"GmRawData"> | string | null
     garmentWeight?: DecimalNullableFilter<"GmRawData"> | Decimal | DecimalJsLike | number | string | null
@@ -99821,6 +99889,7 @@ export namespace Prisma {
     noOfColors?: SortOrderInput | SortOrder
     price?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
+    backImageUrl?: SortOrderInput | SortOrder
     source?: SortOrderInput | SortOrder
     season?: SortOrderInput | SortOrder
     garmentWeight?: SortOrderInput | SortOrder
@@ -99862,6 +99931,7 @@ export namespace Prisma {
     noOfColors?: IntNullableWithAggregatesFilter<"GmRawData"> | number | null
     price?: DecimalNullableWithAggregatesFilter<"GmRawData"> | Decimal | DecimalJsLike | number | string | null
     imageUrl?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
+    backImageUrl?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
     source?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
     season?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
     garmentWeight?: DecimalNullableWithAggregatesFilter<"GmRawData"> | Decimal | DecimalJsLike | number | string | null
@@ -100896,6 +100966,7 @@ export namespace Prisma {
     sapSyncStatus?: StringFilter<"FabricArticleData"> | string
     sapSyncMessage?: StringNullableFilter<"FabricArticleData"> | string | null
     imageUrl?: StringNullableFilter<"FabricArticleData"> | string | null
+    backImageUrl?: StringNullableFilter<"FabricArticleData"> | string | null
     fabricArticleType?: StringNullableFilter<"FabricArticleData"> | string | null
     source?: StringNullableFilter<"FabricArticleData"> | string | null
     userName?: StringNullableFilter<"FabricArticleData"> | string | null
@@ -100942,6 +101013,7 @@ export namespace Prisma {
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
+    backImageUrl?: SortOrderInput | SortOrder
     fabricArticleType?: SortOrderInput | SortOrder
     source?: SortOrderInput | SortOrder
     userName?: SortOrderInput | SortOrder
@@ -100992,6 +101064,7 @@ export namespace Prisma {
     sapSyncStatus?: StringFilter<"FabricArticleData"> | string
     sapSyncMessage?: StringNullableFilter<"FabricArticleData"> | string | null
     imageUrl?: StringNullableFilter<"FabricArticleData"> | string | null
+    backImageUrl?: StringNullableFilter<"FabricArticleData"> | string | null
     fabricArticleType?: StringNullableFilter<"FabricArticleData"> | string | null
     source?: StringNullableFilter<"FabricArticleData"> | string | null
     userName?: StringNullableFilter<"FabricArticleData"> | string | null
@@ -101038,6 +101111,7 @@ export namespace Prisma {
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
+    backImageUrl?: SortOrderInput | SortOrder
     fabricArticleType?: SortOrderInput | SortOrder
     source?: SortOrderInput | SortOrder
     userName?: SortOrderInput | SortOrder
@@ -101092,6 +101166,7 @@ export namespace Prisma {
     sapSyncStatus?: StringWithAggregatesFilter<"FabricArticleData"> | string
     sapSyncMessage?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     imageUrl?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
+    backImageUrl?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     fabricArticleType?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     source?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     userName?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
@@ -101353,6 +101428,7 @@ export namespace Prisma {
     sapSyncStatus?: StringFilter<"GmArticleData"> | string
     sapSyncMessage?: StringNullableFilter<"GmArticleData"> | string | null
     imageUrl?: StringNullableFilter<"GmArticleData"> | string | null
+    backImageUrl?: StringNullableFilter<"GmArticleData"> | string | null
     gmArticleType?: StringNullableFilter<"GmArticleData"> | string | null
     source?: StringNullableFilter<"GmArticleData"> | string | null
     userName?: StringNullableFilter<"GmArticleData"> | string | null
@@ -101461,6 +101537,7 @@ export namespace Prisma {
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
+    backImageUrl?: SortOrderInput | SortOrder
     gmArticleType?: SortOrderInput | SortOrder
     source?: SortOrderInput | SortOrder
     userName?: SortOrderInput | SortOrder
@@ -101573,6 +101650,7 @@ export namespace Prisma {
     sapSyncStatus?: StringFilter<"GmArticleData"> | string
     sapSyncMessage?: StringNullableFilter<"GmArticleData"> | string | null
     imageUrl?: StringNullableFilter<"GmArticleData"> | string | null
+    backImageUrl?: StringNullableFilter<"GmArticleData"> | string | null
     gmArticleType?: StringNullableFilter<"GmArticleData"> | string | null
     source?: StringNullableFilter<"GmArticleData"> | string | null
     userName?: StringNullableFilter<"GmArticleData"> | string | null
@@ -101681,6 +101759,7 @@ export namespace Prisma {
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
+    backImageUrl?: SortOrderInput | SortOrder
     gmArticleType?: SortOrderInput | SortOrder
     source?: SortOrderInput | SortOrder
     userName?: SortOrderInput | SortOrder
@@ -101797,6 +101876,7 @@ export namespace Prisma {
     sapSyncStatus?: StringWithAggregatesFilter<"GmArticleData"> | string
     sapSyncMessage?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
     imageUrl?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    backImageUrl?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
     gmArticleType?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
     source?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
     userName?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
@@ -110323,6 +110403,7 @@ export namespace Prisma {
     noOfColors?: number | null
     price?: Decimal | DecimalJsLike | number | string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     source?: string | null
     season?: string | null
     garmentWeight?: Decimal | DecimalJsLike | number | string | null
@@ -110358,6 +110439,7 @@ export namespace Prisma {
     noOfColors?: number | null
     price?: Decimal | DecimalJsLike | number | string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     source?: string | null
     season?: string | null
     garmentWeight?: Decimal | DecimalJsLike | number | string | null
@@ -110393,6 +110475,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
     garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -110428,6 +110511,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
     garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -110463,6 +110547,7 @@ export namespace Prisma {
     noOfColors?: number | null
     price?: Decimal | DecimalJsLike | number | string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     source?: string | null
     season?: string | null
     garmentWeight?: Decimal | DecimalJsLike | number | string | null
@@ -110498,6 +110583,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
     garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -110533,6 +110619,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
     garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -110568,6 +110655,7 @@ export namespace Prisma {
     noOfColors?: number | null
     price?: Decimal | DecimalJsLike | number | string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     source?: string | null
     season?: string | null
     garmentWeight?: Decimal | DecimalJsLike | number | string | null
@@ -110601,6 +110689,7 @@ export namespace Prisma {
     noOfColors?: number | null
     price?: Decimal | DecimalJsLike | number | string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     source?: string | null
     season?: string | null
     garmentWeight?: Decimal | DecimalJsLike | number | string | null
@@ -110634,6 +110723,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
     garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -110667,6 +110757,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
     garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -110700,6 +110791,7 @@ export namespace Prisma {
     noOfColors?: number | null
     price?: Decimal | DecimalJsLike | number | string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     source?: string | null
     season?: string | null
     garmentWeight?: Decimal | DecimalJsLike | number | string | null
@@ -110733,6 +110825,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
     garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -110766,6 +110859,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
     garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -111942,6 +112036,7 @@ export namespace Prisma {
     sapSyncStatus?: string
     sapSyncMessage?: string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     fabricArticleType?: string | null
     source?: string | null
     userName?: string | null
@@ -111988,6 +112083,7 @@ export namespace Prisma {
     sapSyncStatus?: string
     sapSyncMessage?: string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     fabricArticleType?: string | null
     source?: string | null
     userName?: string | null
@@ -112034,6 +112130,7 @@ export namespace Prisma {
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleType?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -112080,6 +112177,7 @@ export namespace Prisma {
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleType?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -112126,6 +112224,7 @@ export namespace Prisma {
     sapSyncStatus?: string
     sapSyncMessage?: string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     fabricArticleType?: string | null
     source?: string | null
     userName?: string | null
@@ -112172,6 +112271,7 @@ export namespace Prisma {
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleType?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -112218,6 +112318,7 @@ export namespace Prisma {
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleType?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -112515,6 +112616,7 @@ export namespace Prisma {
     sapSyncStatus?: string
     sapSyncMessage?: string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     gmArticleType?: string | null
     source?: string | null
     userName?: string | null
@@ -112623,6 +112725,7 @@ export namespace Prisma {
     sapSyncStatus?: string
     sapSyncMessage?: string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     gmArticleType?: string | null
     source?: string | null
     userName?: string | null
@@ -112731,6 +112834,7 @@ export namespace Prisma {
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     gmArticleType?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -112839,6 +112943,7 @@ export namespace Prisma {
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     gmArticleType?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -112947,6 +113052,7 @@ export namespace Prisma {
     sapSyncStatus?: string
     sapSyncMessage?: string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     gmArticleType?: string | null
     source?: string | null
     userName?: string | null
@@ -113055,6 +113161,7 @@ export namespace Prisma {
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     gmArticleType?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -113163,6 +113270,7 @@ export namespace Prisma {
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     gmArticleType?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -120598,6 +120706,7 @@ export namespace Prisma {
     noOfColors?: SortOrder
     price?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     source?: SortOrder
     season?: SortOrder
     garmentWeight?: SortOrder
@@ -120641,6 +120750,7 @@ export namespace Prisma {
     noOfColors?: SortOrder
     price?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     source?: SortOrder
     season?: SortOrder
     garmentWeight?: SortOrder
@@ -120675,6 +120785,7 @@ export namespace Prisma {
     noOfColors?: SortOrder
     price?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     source?: SortOrder
     season?: SortOrder
     garmentWeight?: SortOrder
@@ -120723,6 +120834,7 @@ export namespace Prisma {
     noOfColors?: SortOrder
     price?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     source?: SortOrder
     season?: SortOrder
     garmentWeight?: SortOrder
@@ -120763,6 +120875,7 @@ export namespace Prisma {
     noOfColors?: SortOrder
     price?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     source?: SortOrder
     season?: SortOrder
     garmentWeight?: SortOrder
@@ -120796,6 +120909,7 @@ export namespace Prisma {
     noOfColors?: SortOrder
     price?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     source?: SortOrder
     season?: SortOrder
     garmentWeight?: SortOrder
@@ -121642,6 +121756,7 @@ export namespace Prisma {
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     fabricArticleType?: SortOrder
     source?: SortOrder
     userName?: SortOrder
@@ -121696,6 +121811,7 @@ export namespace Prisma {
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     fabricArticleType?: SortOrder
     source?: SortOrder
     userName?: SortOrder
@@ -121742,6 +121858,7 @@ export namespace Prisma {
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     fabricArticleType?: SortOrder
     source?: SortOrder
     userName?: SortOrder
@@ -122019,6 +122136,7 @@ export namespace Prisma {
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     gmArticleType?: SortOrder
     source?: SortOrder
     userName?: SortOrder
@@ -122133,6 +122251,7 @@ export namespace Prisma {
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     gmArticleType?: SortOrder
     source?: SortOrder
     userName?: SortOrder
@@ -122241,6 +122360,7 @@ export namespace Prisma {
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     gmArticleType?: SortOrder
     source?: SortOrder
     userName?: SortOrder
