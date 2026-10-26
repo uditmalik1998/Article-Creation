@@ -19,6 +19,8 @@ export interface ApproverItem {
   imageUrl: string | null;
   /** FG Created tab: the image a replace swapped out (<article>_OLD.jpg). */
   oldImageUrl?: string | null;
+  /** Back photo from SRM (front stays in imageUrl). */
+  backImageUrl?: string | null;
   articleNumber: string | null;
   division: string | null;
   subDivision: string | null;

@@ -51,6 +51,8 @@ interface SrmRow {
   no_of_colors: number;
   price: number;
   image_url?: string | null;
+  /** Back photo of the design (optional; front stays in image_url). */
+  back_image_url?: string | null;
   presentations_type?: string | null;
   /** SRM set article: shared by every photo of one set; role is PARENT | TOP | PIECE. */
   set_group_id?: string | null;
@@ -301,7 +303,7 @@ async function fetchAllRows(): Promise<SrmRow[]> {
  * `srmOriginalDesignNumber` is set ONCE on insert and never touched again, making
  * it a reliable stable key regardless of what the user changes later.
  */
-async function findExisting(presentationNo: string, srmDesignNumber: string): Promise<{ id: string; imageUrl: string | null; vendorCode: string | null; vendorName: string | null } | null> {
+async function findExisting(presentationNo: string, srmDesignNumber: string): Promise<{ id: string; imageUrl: string | null; backImageUrl: string | null; vendorCode: string | null; vendorName: string | null } | null> {
   return prisma.extractionResultFlat.findFirst({
     where: {
       pptNumber: presentationNo,
@@ -326,7 +328,24 @@ async function findExisting(presentationNo: string, srmDesignNumber: string): Pr
     // Prefer an already-enriched row (COMPLETED < SRM_IMPORT alphabetically) over
     // an un-enriched stub when both exist for the same design number.
     orderBy: { extractionStatus: 'asc' },
-    select: { id: true, imageUrl: true, vendorCode: true, vendorName: true },
+    select: { id: true, imageUrl: true, backImageUrl: true, vendorCode: true, vendorName: true },
+  });
+}
+
+/**
+ * Store SRM's back photo on a flat record, mirrored to R2 like the front photo
+ * (SRM URLs are private / short-lived). Only fills an empty back_image_url.
+ */
+export async function attachSrmBackImage(
+  flatId: string,
+  srmBackImageUrl: string | null | undefined,
+  currentBackImageUrl: string | null = null,
+): Promise<void> {
+  if (!srmBackImageUrl || currentBackImageUrl) return;
+  const r2Url = await downloadAndMirrorToR2(srmBackImageUrl);
+  await prisma.extractionResultFlat.update({
+    where: { id: flatId },
+    data: { backImageUrl: r2Url || srmBackImageUrl },
   });
 }
 
@@ -756,6 +775,7 @@ async function insertRow(row: SrmRow, rawArticleId?: string): Promise<{ id: stri
       });
     }
   }
+  await attachSrmBackImage(flat.id, row.back_image_url);
 
   return { id: flat.id, imageUrl: finalImageUrl };
 }
@@ -830,6 +850,7 @@ export async function syncFromSrm(triggeredBy: 'CRON' | 'ADMIN' | 'WEBHOOK' = 'C
         // Do NOT trigger VLM here — raw_articles extraction cron owns that.
         const patch: Record<string, any> = {};
         if (row.image_url && !existing.imageUrl) patch.imageUrl = row.image_url;
+        if (row.back_image_url && !existing.backImageUrl) patch.backImageUrl = row.back_image_url;
         const normCode = normaliseVendorCode(row.vendor_code);
         if (normCode && existing.vendorCode !== normCode) patch.vendorCode = normCode;
         if (row.vendor_name && !existing.vendorName) patch.vendorName = row.vendor_name;
@@ -838,6 +859,10 @@ export async function syncFromSrm(triggeredBy: 'CRON' | 'ADMIN' | 'WEBHOOK' = 'C
           if (patch.imageUrl) {
             const r2Url = await downloadAndMirrorToR2(patch.imageUrl);
             if (r2Url) patch.imageUrl = r2Url;
+          }
+          if (patch.backImageUrl) {
+            const r2Url = await downloadAndMirrorToR2(patch.backImageUrl);
+            if (r2Url) patch.backImageUrl = r2Url;
           }
           await prisma.extractionResultFlat.update({ where: { id: existing.id }, data: patch });
           console.log(`[SRM Sync] Patched [${Object.keys(patch).join(', ')}] for: ${row.presentation_no} / ${row.design_number}`);
@@ -1082,6 +1107,7 @@ interface SrmByRefImage {
   quantity: number | null;
   available_date: string | null;
   image_url: string | null;
+  back_image_url?: string | null;
   cost_sheet_url: string | null;
   notes: string | null;
   uploaded_at: string;
@@ -1175,10 +1201,12 @@ export async function syncSinglePresentation(
         no_of_colors:    img.no_of_colors ?? 0,
         price:           img.price ?? 0,
         image_url:       img.image_url || null,
+        back_image_url:  img.back_image_url || null,
       };
 
       const existing = await findExisting(row.presentation_no, row.design_number);
       if (existing) {
+        await attachSrmBackImage(existing.id, row.back_image_url, existing.backImageUrl);
         if (row.image_url && !existing.imageUrl) {
           // Mirror to R2 first so the stored URL is permanent
           const r2Url = await downloadAndMirrorToR2(row.image_url);
@@ -1232,6 +1260,7 @@ export async function syncSinglePresentation(
 export interface SrmWebhookImage {
   design_number: string;
   image_url?: string | null;
+  back_image_url?: string | null;
   price?: number;
   fabric?: string;
   no_of_colors?: number;
@@ -1329,6 +1358,7 @@ export async function processSrmWebhookBatch(
         no_of_colors:               img.no_of_colors ?? 0,
         price:                      img.price        ?? 0,
         image_url:                  img.image_url    || null,
+        back_image_url:             img.back_image_url || null,
       };
 
       // ── 1. Insert or locate existing DB record ──────────────────────────
@@ -1340,6 +1370,7 @@ export async function processSrmWebhookBatch(
         flatId   = existing.id;
         imageUrl = existing.imageUrl;
         action   = 'SKIPPED';
+        await attachSrmBackImage(flatId, img.back_image_url, existing.backImageUrl);
 
         // If this call now provides an image URL we didn't have before — mirror it
         if (img.image_url && !existing.imageUrl) {

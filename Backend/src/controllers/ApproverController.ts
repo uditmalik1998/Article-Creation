@@ -916,6 +916,7 @@ export class ApproverController {
                     imageName: true,
                     imageUrl: true,
                     oldImageUrl: true,
+                    backImageUrl: true,
                     imageUncPath: true,
                     articleNumber: true,
                     division: true,
@@ -2258,7 +2259,7 @@ export class ApproverController {
             const item = await prisma.extractionResultFlat.findUnique({
                 where: { id },
                 select: {
-                    id: true, imageName: true, imageUrl: true, oldImageUrl: true, imageUncPath: true,
+                    id: true, imageName: true, imageUrl: true, oldImageUrl: true, backImageUrl: true, imageUncPath: true,
                     articleNumber: true, division: true, subDivision: true, majorCategory: true,
                     vendorName: true, vendorCode: true, designNumber: true, pptNumber: true,
                     referenceArticleNumber: true, referenceArticleDescription: true,

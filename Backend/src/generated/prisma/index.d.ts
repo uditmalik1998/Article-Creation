@@ -16282,6 +16282,7 @@ export namespace Prisma {
     imageName: string | null
     imageUrl: string | null
     oldImageUrl: string | null
+    backImageUrl: string | null
     articleNumber: string | null
     extractionStatus: string | null
     aiModel: string | null
@@ -16623,6 +16624,7 @@ export namespace Prisma {
     imageName: string | null
     imageUrl: string | null
     oldImageUrl: string | null
+    backImageUrl: string | null
     articleNumber: string | null
     extractionStatus: string | null
     aiModel: string | null
@@ -16964,6 +16966,7 @@ export namespace Prisma {
     imageName: number
     imageUrl: number
     oldImageUrl: number
+    backImageUrl: number
     articleNumber: number
     extractionStatus: number
     aiModel: number
@@ -17732,6 +17735,7 @@ export namespace Prisma {
     imageName?: true
     imageUrl?: true
     oldImageUrl?: true
+    backImageUrl?: true
     articleNumber?: true
     extractionStatus?: true
     aiModel?: true
@@ -18073,6 +18077,7 @@ export namespace Prisma {
     imageName?: true
     imageUrl?: true
     oldImageUrl?: true
+    backImageUrl?: true
     articleNumber?: true
     extractionStatus?: true
     aiModel?: true
@@ -18414,6 +18419,7 @@ export namespace Prisma {
     imageName?: true
     imageUrl?: true
     oldImageUrl?: true
+    backImageUrl?: true
     articleNumber?: true
     extractionStatus?: true
     aiModel?: true
@@ -18845,6 +18851,7 @@ export namespace Prisma {
     imageName: string | null
     imageUrl: string | null
     oldImageUrl: string | null
+    backImageUrl: string | null
     articleNumber: string | null
     extractionStatus: string | null
     aiModel: string | null
@@ -19208,6 +19215,7 @@ export namespace Prisma {
     imageName?: boolean
     imageUrl?: boolean
     oldImageUrl?: boolean
+    backImageUrl?: boolean
     articleNumber?: boolean
     extractionStatus?: boolean
     aiModel?: boolean
@@ -19558,6 +19566,7 @@ export namespace Prisma {
     imageName?: boolean
     imageUrl?: boolean
     oldImageUrl?: boolean
+    backImageUrl?: boolean
     articleNumber?: boolean
     extractionStatus?: boolean
     aiModel?: boolean
@@ -19905,6 +19914,7 @@ export namespace Prisma {
     imageName?: boolean
     imageUrl?: boolean
     oldImageUrl?: boolean
+    backImageUrl?: boolean
     articleNumber?: boolean
     extractionStatus?: boolean
     aiModel?: boolean
@@ -20252,6 +20262,7 @@ export namespace Prisma {
     imageName?: boolean
     imageUrl?: boolean
     oldImageUrl?: boolean
+    backImageUrl?: boolean
     articleNumber?: boolean
     extractionStatus?: boolean
     aiModel?: boolean
@@ -20590,7 +20601,7 @@ export namespace Prisma {
     imageExtractionRawData?: boolean
   }
 
-  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "oldImageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "bTrimType" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "elasticAutoBgt" | "elasticRoughV2" | "elasticVdrCost" | "elasticFinalCost" | "fusingAutoBgt" | "fusingRoughV2" | "fusingVdrCost" | "fusingFinalCost" | "badgeAutoBgt" | "badgeRoughV2" | "badgeVdrCost" | "badgeFinalCost" | "rivetAutoBgt" | "rivetRoughV2" | "rivetVdrCost" | "rivetFinalCost" | "tapeAutoBgt" | "tapeRoughV2" | "tapeVdrCost" | "tapeFinalCost" | "otherAutoBgt" | "otherRoughV2" | "otherVdrCost" | "otherFinalCost" | "adjusterAutoBgt" | "adjusterRoughV2" | "adjusterVdrCost" | "adjusterFinalCost" | "brotchAutoBgt" | "brotchRoughV2" | "brotchVdrCost" | "brotchFinalCost" | "buckleAutoBgt" | "buckleRoughV2" | "buckleVdrCost" | "buckleFinalCost" | "eyeletsAutoBgt" | "eyeletsRoughV2" | "eyeletsVdrCost" | "eyeletsFinalCost" | "hangingDRingAutoBgt" | "hangingDRingRoughV2" | "hangingDRingVdrCost" | "hangingDRingFinalCost" | "hookAutoBgt" | "hookRoughV2" | "hookVdrCost" | "hookFinalCost" | "labelAutoBgt" | "labelRoughV2" | "labelVdrCost" | "labelFinalCost" | "laceAutoBgt" | "laceRoughV2" | "laceVdrCost" | "laceFinalCost" | "pockettingFabricAutoBgt" | "pockettingFabricRoughV2" | "pockettingFabricVdrCost" | "pockettingFabricFinalCost" | "pockettingReadymadeAutoBgt" | "pockettingReadymadeRoughV2" | "pockettingReadymadeVdrCost" | "pockettingReadymadeFinalCost" | "santaAutoBgt" | "santaRoughV2" | "santaVdrCost" | "santaFinalCost" | "stopperAutoBgt" | "stopperRoughV2" | "stopperVdrCost" | "stopperFinalCost" | "tagAutoBgt" | "tagRoughV2" | "tagVdrCost" | "tagFinalCost" | "tasselsAutoBgt" | "tasselsRoughV2" | "tasselsVdrCost" | "tasselsFinalCost" | "mBtnRate" | "mBtnQty" | "dcRate" | "dcQty" | "zipRate" | "zipQty" | "patchRate" | "patchQty" | "hTrfRate" | "hTrfQty" | "elasticRate" | "elasticQty" | "fusingRate" | "fusingQty" | "badgeRate" | "badgeQty" | "rivetRate" | "rivetQty" | "tapeRate" | "tapeQty" | "otherRate" | "otherQty" | "adjusterRate" | "adjusterQty" | "brotchRate" | "brotchQty" | "buckleRate" | "buckleQty" | "eyeletsRate" | "eyeletsQty" | "hangingDRingRate" | "hangingDRingQty" | "hookRate" | "hookQty" | "labelRate" | "labelQty" | "laceRate" | "laceQty" | "pockettingFabricRate" | "pockettingFabricQty" | "pockettingReadymadeRate" | "pockettingReadymadeQty" | "santaRate" | "santaQty" | "stopperRate" | "stopperQty" | "tagRate" | "tagQty" | "tasselsRate" | "tasselsQty" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "vaddPrintJson" | "vaddEmpJson" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "setLinkStatus" | "setLinkMessage" | "setLinkAttempts" | "setLinkedAt" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
+  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "oldImageUrl" | "backImageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "bTrimType" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "elasticAutoBgt" | "elasticRoughV2" | "elasticVdrCost" | "elasticFinalCost" | "fusingAutoBgt" | "fusingRoughV2" | "fusingVdrCost" | "fusingFinalCost" | "badgeAutoBgt" | "badgeRoughV2" | "badgeVdrCost" | "badgeFinalCost" | "rivetAutoBgt" | "rivetRoughV2" | "rivetVdrCost" | "rivetFinalCost" | "tapeAutoBgt" | "tapeRoughV2" | "tapeVdrCost" | "tapeFinalCost" | "otherAutoBgt" | "otherRoughV2" | "otherVdrCost" | "otherFinalCost" | "adjusterAutoBgt" | "adjusterRoughV2" | "adjusterVdrCost" | "adjusterFinalCost" | "brotchAutoBgt" | "brotchRoughV2" | "brotchVdrCost" | "brotchFinalCost" | "buckleAutoBgt" | "buckleRoughV2" | "buckleVdrCost" | "buckleFinalCost" | "eyeletsAutoBgt" | "eyeletsRoughV2" | "eyeletsVdrCost" | "eyeletsFinalCost" | "hangingDRingAutoBgt" | "hangingDRingRoughV2" | "hangingDRingVdrCost" | "hangingDRingFinalCost" | "hookAutoBgt" | "hookRoughV2" | "hookVdrCost" | "hookFinalCost" | "labelAutoBgt" | "labelRoughV2" | "labelVdrCost" | "labelFinalCost" | "laceAutoBgt" | "laceRoughV2" | "laceVdrCost" | "laceFinalCost" | "pockettingFabricAutoBgt" | "pockettingFabricRoughV2" | "pockettingFabricVdrCost" | "pockettingFabricFinalCost" | "pockettingReadymadeAutoBgt" | "pockettingReadymadeRoughV2" | "pockettingReadymadeVdrCost" | "pockettingReadymadeFinalCost" | "santaAutoBgt" | "santaRoughV2" | "santaVdrCost" | "santaFinalCost" | "stopperAutoBgt" | "stopperRoughV2" | "stopperVdrCost" | "stopperFinalCost" | "tagAutoBgt" | "tagRoughV2" | "tagVdrCost" | "tagFinalCost" | "tasselsAutoBgt" | "tasselsRoughV2" | "tasselsVdrCost" | "tasselsFinalCost" | "mBtnRate" | "mBtnQty" | "dcRate" | "dcQty" | "zipRate" | "zipQty" | "patchRate" | "patchQty" | "hTrfRate" | "hTrfQty" | "elasticRate" | "elasticQty" | "fusingRate" | "fusingQty" | "badgeRate" | "badgeQty" | "rivetRate" | "rivetQty" | "tapeRate" | "tapeQty" | "otherRate" | "otherQty" | "adjusterRate" | "adjusterQty" | "brotchRate" | "brotchQty" | "buckleRate" | "buckleQty" | "eyeletsRate" | "eyeletsQty" | "hangingDRingRate" | "hangingDRingQty" | "hookRate" | "hookQty" | "labelRate" | "labelQty" | "laceRate" | "laceQty" | "pockettingFabricRate" | "pockettingFabricQty" | "pockettingReadymadeRate" | "pockettingReadymadeQty" | "santaRate" | "santaQty" | "stopperRate" | "stopperQty" | "tagRate" | "tagQty" | "tasselsRate" | "tasselsQty" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "vaddPrintJson" | "vaddEmpJson" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "setLinkStatus" | "setLinkMessage" | "setLinkAttempts" | "setLinkedAt" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
   export type ExtractionResultFlatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     comboParent?: boolean | ExtractionResultFlat$comboParentArgs<ExtArgs>
@@ -20625,6 +20636,7 @@ export namespace Prisma {
       imageName: string | null
       imageUrl: string | null
       oldImageUrl: string | null
+      backImageUrl: string | null
       articleNumber: string | null
       extractionStatus: string | null
       aiModel: string | null
@@ -21394,6 +21406,7 @@ export namespace Prisma {
     readonly imageName: FieldRef<"ExtractionResultFlat", 'String'>
     readonly imageUrl: FieldRef<"ExtractionResultFlat", 'String'>
     readonly oldImageUrl: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly backImageUrl: FieldRef<"ExtractionResultFlat", 'String'>
     readonly articleNumber: FieldRef<"ExtractionResultFlat", 'String'>
     readonly extractionStatus: FieldRef<"ExtractionResultFlat", 'String'>
     readonly aiModel: FieldRef<"ExtractionResultFlat", 'String'>
@@ -42930,6 +42943,7 @@ export namespace Prisma {
     noOfColors: number | null
     price: Decimal | null
     imageUrl: string | null
+    backImageUrl: string | null
     presentationsType: string | null
     setGroupId: string | null
     setRole: string | null
@@ -42961,6 +42975,7 @@ export namespace Prisma {
     noOfColors: number | null
     price: Decimal | null
     imageUrl: string | null
+    backImageUrl: string | null
     presentationsType: string | null
     setGroupId: string | null
     setRole: string | null
@@ -42992,6 +43007,7 @@ export namespace Prisma {
     noOfColors: number
     price: number
     imageUrl: number
+    backImageUrl: number
     presentationsType: number
     setGroupId: number
     setRole: number
@@ -43038,6 +43054,7 @@ export namespace Prisma {
     noOfColors?: true
     price?: true
     imageUrl?: true
+    backImageUrl?: true
     presentationsType?: true
     setGroupId?: true
     setRole?: true
@@ -43069,6 +43086,7 @@ export namespace Prisma {
     noOfColors?: true
     price?: true
     imageUrl?: true
+    backImageUrl?: true
     presentationsType?: true
     setGroupId?: true
     setRole?: true
@@ -43100,6 +43118,7 @@ export namespace Prisma {
     noOfColors?: true
     price?: true
     imageUrl?: true
+    backImageUrl?: true
     presentationsType?: true
     setGroupId?: true
     setRole?: true
@@ -43219,6 +43238,7 @@ export namespace Prisma {
     noOfColors: number | null
     price: Decimal | null
     imageUrl: string | null
+    backImageUrl: string | null
     presentationsType: string | null
     setGroupId: string | null
     setRole: string | null
@@ -43270,6 +43290,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     presentationsType?: boolean
     setGroupId?: boolean
     setRole?: boolean
@@ -43302,6 +43323,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     presentationsType?: boolean
     setGroupId?: boolean
     setRole?: boolean
@@ -43334,6 +43356,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     presentationsType?: boolean
     setGroupId?: boolean
     setRole?: boolean
@@ -43366,6 +43389,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     presentationsType?: boolean
     setGroupId?: boolean
     setRole?: boolean
@@ -43384,7 +43408,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type RawArticleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "presentationNo" | "vendorCode" | "vendorName" | "division" | "subDivision" | "majorCategory" | "presentationReceivedDate" | "designNumber" | "fabric" | "noOfColors" | "price" | "imageUrl" | "presentationsType" | "setGroupId" | "setRole" | "setName" | "uniqueKey" | "source" | "status" | "retryCount" | "errorMessage" | "extractedData" | "extractedAt" | "flatId" | "lockedUntil" | "articleNumber" | "createdAt" | "updatedAt", ExtArgs["result"]["rawArticle"]>
+  export type RawArticleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "presentationNo" | "vendorCode" | "vendorName" | "division" | "subDivision" | "majorCategory" | "presentationReceivedDate" | "designNumber" | "fabric" | "noOfColors" | "price" | "imageUrl" | "backImageUrl" | "presentationsType" | "setGroupId" | "setRole" | "setName" | "uniqueKey" | "source" | "status" | "retryCount" | "errorMessage" | "extractedData" | "extractedAt" | "flatId" | "lockedUntil" | "articleNumber" | "createdAt" | "updatedAt", ExtArgs["result"]["rawArticle"]>
 
   export type $RawArticlePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "RawArticle"
@@ -43403,6 +43427,7 @@ export namespace Prisma {
       noOfColors: number | null
       price: Prisma.Decimal | null
       imageUrl: string | null
+      backImageUrl: string | null
       presentationsType: string | null
       setGroupId: string | null
       setRole: string | null
@@ -43855,6 +43880,7 @@ export namespace Prisma {
     readonly noOfColors: FieldRef<"RawArticle", 'Int'>
     readonly price: FieldRef<"RawArticle", 'Decimal'>
     readonly imageUrl: FieldRef<"RawArticle", 'String'>
+    readonly backImageUrl: FieldRef<"RawArticle", 'String'>
     readonly presentationsType: FieldRef<"RawArticle", 'String'>
     readonly setGroupId: FieldRef<"RawArticle", 'String'>
     readonly setRole: FieldRef<"RawArticle", 'String'>
@@ -91590,6 +91616,7 @@ export namespace Prisma {
     imageName: 'imageName',
     imageUrl: 'imageUrl',
     oldImageUrl: 'oldImageUrl',
+    backImageUrl: 'backImageUrl',
     articleNumber: 'articleNumber',
     extractionStatus: 'extractionStatus',
     aiModel: 'aiModel',
@@ -92309,6 +92336,7 @@ export namespace Prisma {
     noOfColors: 'noOfColors',
     price: 'price',
     imageUrl: 'imageUrl',
+    backImageUrl: 'backImageUrl',
     presentationsType: 'presentationsType',
     setGroupId: 'setGroupId',
     setRole: 'setRole',
@@ -93479,6 +93507,7 @@ export namespace Prisma {
     imageName: 'imageName',
     imageUrl: 'imageUrl',
     oldImageUrl: 'oldImageUrl',
+    backImageUrl: 'backImageUrl',
     articleNumber: 'articleNumber',
     extractionStatus: 'extractionStatus',
     aiModel: 'aiModel',
@@ -93892,6 +93921,7 @@ export namespace Prisma {
     designNumber: 'designNumber',
     fabric: 'fabric',
     imageUrl: 'imageUrl',
+    backImageUrl: 'backImageUrl',
     presentationsType: 'presentationsType',
     setGroupId: 'setGroupId',
     setRole: 'setRole',
@@ -95683,6 +95713,7 @@ export namespace Prisma {
     imageName?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     imageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     oldImageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    backImageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     articleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     extractionStatus?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     aiModel?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -96032,6 +96063,7 @@ export namespace Prisma {
     imageName?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
     oldImageUrl?: SortOrderInput | SortOrder
+    backImageUrl?: SortOrderInput | SortOrder
     articleNumber?: SortOrderInput | SortOrder
     extractionStatus?: SortOrderInput | SortOrder
     aiModel?: SortOrderInput | SortOrder
@@ -96386,6 +96418,7 @@ export namespace Prisma {
     imageName?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     imageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     oldImageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    backImageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     articleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     extractionStatus?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     aiModel?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -96734,6 +96767,7 @@ export namespace Prisma {
     imageName?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
     oldImageUrl?: SortOrderInput | SortOrder
+    backImageUrl?: SortOrderInput | SortOrder
     articleNumber?: SortOrderInput | SortOrder
     extractionStatus?: SortOrderInput | SortOrder
     aiModel?: SortOrderInput | SortOrder
@@ -97086,6 +97120,7 @@ export namespace Prisma {
     imageName?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     imageUrl?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     oldImageUrl?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    backImageUrl?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     articleNumber?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     extractionStatus?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     aiModel?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
@@ -99310,6 +99345,7 @@ export namespace Prisma {
     noOfColors?: IntNullableFilter<"RawArticle"> | number | null
     price?: DecimalNullableFilter<"RawArticle"> | Decimal | DecimalJsLike | number | string | null
     imageUrl?: StringNullableFilter<"RawArticle"> | string | null
+    backImageUrl?: StringNullableFilter<"RawArticle"> | string | null
     presentationsType?: StringNullableFilter<"RawArticle"> | string | null
     setGroupId?: StringNullableFilter<"RawArticle"> | string | null
     setRole?: StringNullableFilter<"RawArticle"> | string | null
@@ -99342,6 +99378,7 @@ export namespace Prisma {
     noOfColors?: SortOrderInput | SortOrder
     price?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
+    backImageUrl?: SortOrderInput | SortOrder
     presentationsType?: SortOrderInput | SortOrder
     setGroupId?: SortOrderInput | SortOrder
     setRole?: SortOrderInput | SortOrder
@@ -99379,6 +99416,7 @@ export namespace Prisma {
     noOfColors?: IntNullableFilter<"RawArticle"> | number | null
     price?: DecimalNullableFilter<"RawArticle"> | Decimal | DecimalJsLike | number | string | null
     imageUrl?: StringNullableFilter<"RawArticle"> | string | null
+    backImageUrl?: StringNullableFilter<"RawArticle"> | string | null
     presentationsType?: StringNullableFilter<"RawArticle"> | string | null
     setGroupId?: StringNullableFilter<"RawArticle"> | string | null
     setRole?: StringNullableFilter<"RawArticle"> | string | null
@@ -99410,6 +99448,7 @@ export namespace Prisma {
     noOfColors?: SortOrderInput | SortOrder
     price?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
+    backImageUrl?: SortOrderInput | SortOrder
     presentationsType?: SortOrderInput | SortOrder
     setGroupId?: SortOrderInput | SortOrder
     setRole?: SortOrderInput | SortOrder
@@ -99450,6 +99489,7 @@ export namespace Prisma {
     noOfColors?: IntNullableWithAggregatesFilter<"RawArticle"> | number | null
     price?: DecimalNullableWithAggregatesFilter<"RawArticle"> | Decimal | DecimalJsLike | number | string | null
     imageUrl?: StringNullableWithAggregatesFilter<"RawArticle"> | string | null
+    backImageUrl?: StringNullableWithAggregatesFilter<"RawArticle"> | string | null
     presentationsType?: StringNullableWithAggregatesFilter<"RawArticle"> | string | null
     setGroupId?: StringNullableWithAggregatesFilter<"RawArticle"> | string | null
     setRole?: StringNullableWithAggregatesFilter<"RawArticle"> | string | null
@@ -105418,6 +105458,7 @@ export namespace Prisma {
     imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -105765,6 +105806,7 @@ export namespace Prisma {
     imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -106110,6 +106152,7 @@ export namespace Prisma {
     imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -106457,6 +106500,7 @@ export namespace Prisma {
     imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -106803,6 +106847,7 @@ export namespace Prisma {
     imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -107146,6 +107191,7 @@ export namespace Prisma {
     imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -107488,6 +107534,7 @@ export namespace Prisma {
     imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -110042,6 +110089,7 @@ export namespace Prisma {
     noOfColors?: number | null
     price?: Decimal | DecimalJsLike | number | string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     presentationsType?: string | null
     setGroupId?: string | null
     setRole?: string | null
@@ -110074,6 +110122,7 @@ export namespace Prisma {
     noOfColors?: number | null
     price?: Decimal | DecimalJsLike | number | string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     presentationsType?: string | null
     setGroupId?: string | null
     setRole?: string | null
@@ -110106,6 +110155,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
@@ -110138,6 +110188,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
@@ -110170,6 +110221,7 @@ export namespace Prisma {
     noOfColors?: number | null
     price?: Decimal | DecimalJsLike | number | string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     presentationsType?: string | null
     setGroupId?: string | null
     setRole?: string | null
@@ -110202,6 +110254,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
@@ -110234,6 +110287,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
@@ -117563,6 +117617,7 @@ export namespace Prisma {
     imageName?: SortOrder
     imageUrl?: SortOrder
     oldImageUrl?: SortOrder
+    backImageUrl?: SortOrder
     articleNumber?: SortOrder
     extractionStatus?: SortOrder
     aiModel?: SortOrder
@@ -118118,6 +118173,7 @@ export namespace Prisma {
     imageName?: SortOrder
     imageUrl?: SortOrder
     oldImageUrl?: SortOrder
+    backImageUrl?: SortOrder
     articleNumber?: SortOrder
     extractionStatus?: SortOrder
     aiModel?: SortOrder
@@ -118459,6 +118515,7 @@ export namespace Prisma {
     imageName?: SortOrder
     imageUrl?: SortOrder
     oldImageUrl?: SortOrder
+    backImageUrl?: SortOrder
     articleNumber?: SortOrder
     extractionStatus?: SortOrder
     aiModel?: SortOrder
@@ -120413,6 +120470,7 @@ export namespace Prisma {
     noOfColors?: SortOrder
     price?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     presentationsType?: SortOrder
     setGroupId?: SortOrder
     setRole?: SortOrder
@@ -120451,6 +120509,7 @@ export namespace Prisma {
     noOfColors?: SortOrder
     price?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     presentationsType?: SortOrder
     setGroupId?: SortOrder
     setRole?: SortOrder
@@ -120482,6 +120541,7 @@ export namespace Prisma {
     noOfColors?: SortOrder
     price?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     presentationsType?: SortOrder
     setGroupId?: SortOrder
     setRole?: SortOrder
@@ -127240,6 +127300,7 @@ export namespace Prisma {
     imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -127585,6 +127646,7 @@ export namespace Prisma {
     imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -128038,6 +128100,7 @@ export namespace Prisma {
     imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -128383,6 +128446,7 @@ export namespace Prisma {
     imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -128768,6 +128832,7 @@ export namespace Prisma {
     imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -129114,6 +129179,7 @@ export namespace Prisma {
     imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -129463,6 +129529,7 @@ export namespace Prisma {
     imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -129809,6 +129876,7 @@ export namespace Prisma {
     imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -130309,6 +130377,7 @@ export namespace Prisma {
     imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -130655,6 +130724,7 @@ export namespace Prisma {
     imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -131019,6 +131089,7 @@ export namespace Prisma {
     imageName?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     imageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     oldImageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    backImageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     articleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     extractionStatus?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     aiModel?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -131585,6 +131656,7 @@ export namespace Prisma {
     imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -131931,6 +132003,7 @@ export namespace Prisma {
     imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -133805,6 +133878,7 @@ export namespace Prisma {
     imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -134151,6 +134225,7 @@ export namespace Prisma {
     imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -134548,6 +134623,7 @@ export namespace Prisma {
     imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -134894,6 +134970,7 @@ export namespace Prisma {
     imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -135859,6 +135936,7 @@ export namespace Prisma {
     imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -136211,6 +136289,7 @@ export namespace Prisma {
     imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -136557,6 +136636,7 @@ export namespace Prisma {
     imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -136902,6 +136982,7 @@ export namespace Prisma {
     imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -137313,6 +137394,7 @@ export namespace Prisma {
     imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -137770,6 +137852,7 @@ export namespace Prisma {
     imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138116,6 +138199,7 @@ export namespace Prisma {
     imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138461,6 +138545,7 @@ export namespace Prisma {
     imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
