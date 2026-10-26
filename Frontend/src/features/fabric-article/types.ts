@@ -17,6 +17,8 @@ export interface ApproverItem {
   id: string;
   imageName: string | null;
   imageUrl: string | null;
+  /** Back photo from SRM (front stays in imageUrl). */
+  backImageUrl?: string | null;
   articleNumber: string | null;
   division: string | null;
   subDivision: string | null;

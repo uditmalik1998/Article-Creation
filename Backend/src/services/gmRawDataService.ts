@@ -74,6 +74,7 @@ async function mirrorGmImageToR2(imageUrl: string): Promise<string | null> {
 async function processRow(row: {
   id: string;
   imageUrl: string | null;
+  backImageUrl: string | null;
   vendorCode: string | null;
   vendorName: string | null;
   division: string | null;
@@ -107,6 +108,15 @@ async function processRow(row: {
     }
   }
 
+  // Back photo: copied only when SRM sent one (else stays null), mirrored to R2 like
+  // the front. Display-only — it never decides COMPLETED/FAILED.
+  let finalBackImageUrl: string | null = null;
+  if (row.backImageUrl) {
+    finalBackImageUrl = row.backImageUrl.includes('r2.dev')
+      ? row.backImageUrl
+      : (await mirrorGmImageToR2(row.backImageUrl)) ?? row.backImageUrl;
+  }
+
   // Step 2: Insert into gm_article_data
   try {
     const gmArticle = await prisma.gmArticleData.create({
@@ -121,6 +131,7 @@ async function processRow(row: {
         rate:          row.price ?? null,
         source:        'SRM',
         imageUrl:      finalImageUrl,
+        backImageUrl:  finalBackImageUrl,
         gmArticleType: row.presentationsType ?? null,
         gmSeason:      row.season ?? null,
         // All other GM attribute fields left null — filled in by user later
@@ -192,7 +203,7 @@ export async function runGmRawDataProcessing(triggeredBy = 'CRON'): Promise<GmRa
     const rows = await prisma.gmRawData.findMany({
       where: { id: { in: claimedRows.map((r) => r.id) } },
       select: {
-        id: true, imageUrl: true, vendorCode: true, vendorName: true,
+        id: true, imageUrl: true, backImageUrl: true, vendorCode: true, vendorName: true,
         division: true, subDivision: true, majorCategory: true,
         designNumber: true, presentationNo: true, price: true, source: true,
         presentationsType: true, season: true,

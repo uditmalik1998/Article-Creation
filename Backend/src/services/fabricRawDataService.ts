@@ -70,6 +70,7 @@ async function mirrorFabricImageToR2(imageUrl: string): Promise<string | null> {
 async function processRow(row: {
   id: string;
   imageUrl: string | null;
+  backImageUrl: string | null;
   vendorCode: string | null;
   vendorName: string | null;
   division: string | null;
@@ -106,6 +107,15 @@ async function processRow(row: {
     }
   }
 
+  // Back photo: copied only when SRM sent one (else stays null), mirrored to R2 like
+  // the front. Display-only — it never decides COMPLETED/FAILED.
+  let finalBackImageUrl: string | null = null;
+  if (row.backImageUrl) {
+    finalBackImageUrl = row.backImageUrl.includes('r2.dev')
+      ? row.backImageUrl
+      : (await mirrorFabricImageToR2(row.backImageUrl)) ?? row.backImageUrl;
+  }
+
   // Step 2: Insert into fabric_article_data
   try {
     const fabricArticle = await prisma.fabricArticleData.create({
@@ -121,6 +131,7 @@ async function processRow(row: {
         fabricArticleType: row.presentationsType ?? null,
         source:            'SRM',
         imageUrl:          finalImageUrl,
+        backImageUrl:      finalBackImageUrl,
         // All m_* construction fields left null — filled in by user later
       },
     });
@@ -193,7 +204,7 @@ export async function runFabricRawDataProcessing(triggeredBy = 'CRON'): Promise<
     const rows = await prisma.fabricRawData.findMany({
       where: { id: { in: claimedRows.map((r: { id: string }) => r.id) } },
       select: {
-        id: true, imageUrl: true, vendorCode: true, vendorName: true,
+        id: true, imageUrl: true, backImageUrl: true, vendorCode: true, vendorName: true,
         division: true, subDivision: true, majorCategory: true,
         designNumber: true, presentationNo: true, price: true, presentationsType: true, source: true,
       },
