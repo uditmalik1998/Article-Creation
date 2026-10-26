@@ -18,7 +18,7 @@
  */
 
 import { prismaClient as prisma, isDbCircuitOpen, openDbCircuit } from '../utils/prisma';
-import { enrichSrmRowWithVlmAdmin, insertRawArticleAsFlat, type SrmRow } from './srmSyncService';
+import { enrichSrmRowWithVlmAdmin, insertRawArticleAsFlat, type SrmRow, attachSrmBackImage } from './srmSyncService';
 import { mapWithConcurrency } from '../utils/concurrency';
 import { linkComboGroup, syncSetsFromRaw } from './comboLinkService';
 
@@ -141,6 +141,7 @@ export async function runRawArticleExtraction(
               no_of_colors:               row.noOfColors    ?? 0,
               price:                      row.price != null ? Number(row.price) : 0,
               image_url:                  row.imageUrl,
+              back_image_url:             (row as any).backImageUrl ?? null,
               presentations_type:         (row as any).presentationsType ?? null,
               set_group_id:               row.setGroupId ?? null,
               set_role:                   row.setRole    ?? null,
@@ -252,7 +253,7 @@ async function processOneRow(row: {
             pptNumber:               row.presentationNo,
             ...(row.imageUrl ? { imageUrl: row.imageUrl } : {}),
           },
-          select: { id: true, imageUrl: true, majorCategory: true, srmUniqueId: true },
+          select: { id: true, imageUrl: true, backImageUrl: true, majorCategory: true, srmUniqueId: true },
         })
       : null;
 
@@ -261,6 +262,7 @@ async function processOneRow(row: {
       flatImageUrl      = existing.imageUrl ?? row.imageUrl;
       flatMajorCategory = existing.majorCategory ?? row.majorCategory;
       console.log(`[RawExtract] Found existing flat record ${flatId} for design ${row.designNumber}`);
+      await attachSrmBackImage(existing.id, (row as any).backImageUrl, existing.backImageUrl);
 
       // Backfill srm_unique_id if not already set (handles records created before this feature)
       if (!existing.srmUniqueId) {
@@ -291,6 +293,7 @@ async function processOneRow(row: {
         no_of_colors:               row.noOfColors    ?? 0,
         price:                      row.price != null ? Number(row.price) : 0,
         image_url:                  row.imageUrl,
+        back_image_url:             (row as any).backImageUrl ?? null,
         presentations_type:         (row as any).presentationsType ?? null,
         set_group_id:               row.setGroupId ?? null,
         set_role:                   row.setRole    ?? null,
@@ -435,6 +438,7 @@ export async function upsertRawArticleFromSrm(
       noOfColors:               row.no_of_colors              ?? null,
       price:                    row.price != null ? row.price : null,
       imageUrl:                 row.image_url                 ?? null,
+      backImageUrl:             row.back_image_url            ?? null,
       uniqueKey,
       source,
       status: 'PENDING',

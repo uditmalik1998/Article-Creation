@@ -1567,8 +1567,14 @@ const ArticleCard = React.memo(
     // first one as <article>_OLD.jpg / old_image_url) and arrow between new and old.
     const canReplaceImage =
       pathType === 'created' && !allowGroups && !readOnly && String(item.vendorName ?? '').trim().toUpperCase().startsWith('V2 S');
-    const [imgView, setImgView] = useState<'new' | 'old'>('new');
+    // Photo views shown with the arrows: front, then back (SRM back photo), then old (replace).
+    const [imgViewIdx, setImgViewIdx] = useState(0);
     const [oldImgFailed, setOldImgFailed] = useState(false);
+    const [backImgFailed, setBackImgFailed] = useState(false);
+    useEffect(() => {
+      setImgViewIdx(0);
+      setBackImgFailed(false);
+    }, [item.id]);
     const [localOldImageUrl, setLocalOldImageUrl] = useState<string | null>(null);
     const [replaceOpen, setReplaceOpen] = useState(false);
     const [replaceFile, setReplaceFile] = useState<File | null>(null);
@@ -1745,8 +1751,6 @@ const ArticleCard = React.memo(
     const oldImgSrc = canReplaceImage ? localOldImageUrl || item.oldImageUrl || null : null;
     const oldImgUrl = oldImgSrc ? getImageUrl(oldImgSrc) : null;
     const hasOldImage = !!oldImgUrl;
-    const viewingOldImg = imgView === 'old' && hasOldImage;
-    const shownImgUrl = viewingOldImg ? (oldImgFailed ? null : oldImgUrl) : imgUrl;
     const fileNameFromUrl = (u: string | null | undefined) => {
       if (!u) return '';
       try {
@@ -1757,6 +1761,26 @@ const ArticleCard = React.memo(
     };
     const newImgName = item.imageName || fileNameFromUrl(imgSrc);
     const oldImgName = fileNameFromUrl(oldImgSrc);
+    const backImgUrl = item.backImageUrl ? getImageUrl(item.backImageUrl) : null;
+    const imgViews: { key: 'front' | 'back' | 'old'; label: string; url: string | null; name: string; note: string }[] = [
+      {
+        key: 'front',
+        label: hasOldImage ? 'New' : 'Front',
+        url: imgUrl,
+        name: newImgName,
+        note: hasOldImage ? ' · current' : ' · front',
+      },
+      ...(backImgUrl
+        ? [{ key: 'back' as const, label: 'Back', url: backImgFailed ? null : backImgUrl, name: fileNameFromUrl(item.backImageUrl), note: ' · back' }]
+        : []),
+      ...(hasOldImage
+        ? [{ key: 'old' as const, label: 'Old', url: oldImgFailed ? null : oldImgUrl, name: oldImgName, note: ' · original' }]
+        : []),
+    ];
+    const activeImgIdx = Math.min(imgViewIdx, imgViews.length - 1);
+    const activeImgView = imgViews[activeImgIdx];
+    const viewingOldImg = activeImgView.key === 'old';
+    const shownImgUrl = activeImgView.url;
     const imgStem = (fileNameFromUrl(imgSrc) || 'article.jpg').replace(/\.[^.]+$/, '');
 
     const clearReplace = () => {
@@ -1813,7 +1837,7 @@ const ArticleCard = React.memo(
           setRefreshedUrl(body.imageUrl);
           setLocalOldImageUrl(body.oldImageUrl ?? null);
           setOldImgFailed(false);
-          setImgView('new');
+          setImgViewIdx(0);
           setReplaceOpen(false);
           clearReplace();
           message.success('Image replaced');
@@ -3033,7 +3057,11 @@ const ArticleCard = React.memo(
                       right: (
                         <span className="flex items-center gap-1.5">
                           <span className="rounded-full bg-slate-700 px-2 py-0.5 text-[10.5px] font-semibold">
-                            {replaceOpen ? 'Replacing' : hasOldImage ? (viewingOldImg ? 'Old · 2 / 2' : 'New · 1 / 2') : '1 / 1'}
+                            {replaceOpen
+                              ? 'Replacing'
+                              : imgViews.length > 1
+                              ? `${activeImgView.label} · ${activeImgIdx + 1} / ${imgViews.length}`
+                              : '1 / 1'}
                           </span>
                           {canReplaceImage && !replaceOpen && (
                             <button
@@ -3135,7 +3163,13 @@ const ArticleCard = React.memo(
                                   src={shownImgUrl}
                                   alt=""
                                   className="block h-full w-full cursor-zoom-in object-contain p-2"
-                                  onError={viewingOldImg ? () => setOldImgFailed(true) : handleImgError}
+                                  onError={
+                                    activeImgView.key === 'old'
+                                      ? () => setOldImgFailed(true)
+                                      : activeImgView.key === 'back'
+                                      ? () => setBackImgFailed(true)
+                                      : handleImgError
+                                  }
                                   onClick={() => setImgModalOpen(true)}
                                 />
                                 <button
@@ -3149,28 +3183,28 @@ const ArticleCard = React.memo(
                               </>
                             ) : (
                               <div className="flex h-full w-full items-center justify-center text-xs text-slate-500">
-                                {viewingOldImg ? 'Old image unavailable' : 'No image'}
+                                {activeImgView.key === 'front' ? 'No image' : `${activeImgView.label} image unavailable`}
                               </div>
                             )}
-                            {hasOldImage && (
+                            {imgViews.length > 1 && (
                               <>
                                 <span className="absolute left-2.5 top-2.5 rounded-md bg-slate-900 px-2.5 py-1 text-[10.5px] font-bold tracking-[0.06em] text-white">
-                                  {viewingOldImg ? 'OLD' : 'NEW'}
+                                  {activeImgView.label.toUpperCase()}
                                 </span>
                                 <button
                                   type="button"
-                                  onClick={() => setImgView('new')}
-                                  disabled={!viewingOldImg}
-                                  aria-label="Show new image"
+                                  onClick={() => setImgViewIdx(Math.max(0, activeImgIdx - 1))}
+                                  disabled={activeImgIdx === 0}
+                                  aria-label="Previous image"
                                   className="absolute left-2.5 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow hover:bg-white disabled:pointer-events-none disabled:opacity-0"
                                 >
                                   <ChevronLeft className="h-5 w-5" />
                                 </button>
                                 <button
                                   type="button"
-                                  onClick={() => setImgView('old')}
-                                  disabled={viewingOldImg}
-                                  aria-label="Show old image"
+                                  onClick={() => setImgViewIdx(Math.min(imgViews.length - 1, activeImgIdx + 1))}
+                                  disabled={activeImgIdx === imgViews.length - 1}
+                                  aria-label="Next image"
                                   className="absolute right-2.5 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow hover:bg-white disabled:pointer-events-none disabled:opacity-0"
                                 >
                                   <ChevronRight className="h-5 w-5" />
@@ -3178,16 +3212,20 @@ const ArticleCard = React.memo(
                               </>
                             )}
                           </div>
-                          {hasOldImage && (
+                          {imgViews.length > 1 && (
                             <div className="flex justify-center gap-1.5" aria-hidden="true">
-                              <span className={cn('h-1.5 rounded-full', viewingOldImg ? 'w-1.5 bg-slate-300' : 'w-4 bg-slate-900')} />
-                              <span className={cn('h-1.5 rounded-full', viewingOldImg ? 'w-4 bg-slate-900' : 'w-1.5 bg-slate-300')} />
+                              {imgViews.map((v, i) => (
+                                <span
+                                  key={v.key}
+                                  className={cn('h-1.5 rounded-full', i === activeImgIdx ? 'w-4 bg-slate-900' : 'w-1.5 bg-slate-300')}
+                                />
+                              ))}
                             </div>
                           )}
-                          {(viewingOldImg ? oldImgName : newImgName) && (
-                            <span className="truncate font-mono text-[11px] text-slate-600" title={viewingOldImg ? oldImgName : newImgName}>
-                              {viewingOldImg ? oldImgName : newImgName}
-                              {hasOldImage && (viewingOldImg ? ' · original' : ' · current')}
+                          {activeImgView.name && (
+                            <span className="truncate font-mono text-[11px] text-slate-600" title={activeImgView.name}>
+                              {activeImgView.name}
+                              {imgViews.length > 1 && activeImgView.note}
                             </span>
                           )}
                         </>
