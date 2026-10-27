@@ -7872,6 +7872,28 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
     displayColumns: ['major_category', 'sap_key'],
     defaultSort: { column: 'id', dir: 'desc' },
   },
+  'fabric-main-mvgr-mapping': {
+    kind: 'raw',
+    tableName: 'm_fabric_main_mvgr_mapping',
+    idColumn: 'id',
+    // Small master (MVGR-1 -> MVGR-2 codes), mainly re-uploaded from Excel on
+    // the Admin -> Expenses page; row add/delete kept for one-off fixes.
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['mvgr1', 'mvgr2'],
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'mvgr1', label: 'MVGR-1' },
+      { key: 'mvgr1_full_form', label: 'MVGR-1 Full Form' },
+      { key: 'mvgr2', label: 'MVGR-2' },
+      { key: 'mvgr2_full_form', label: 'MVGR-2 Full Form' },
+      { key: 'created_at', label: 'Created At', editable: false },
+      { key: 'updated_at', label: 'Updated At', editable: false },
+    ],
+    searchColumns: ['mvgr1', 'mvgr1_full_form', 'mvgr2', 'mvgr2_full_form'],
+    displayColumns: ['mvgr1', 'mvgr2'],
+    defaultSort: { column: 'id', dir: 'asc' },
+  },
   'segment-master': {
     kind: 'raw',
     tableName: 'maj_cat_segment',
@@ -10386,6 +10408,197 @@ export const uploadPreciseFabricArticleData = async (req: Request, res: Response
     res.json({ success: true, data: { inserted: inserts.length } });
   } catch (error: any) {
     console.error('[PreciseFabricArticleData] Upload error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+
+// ═══════════════════════════════════════════════════════
+// FABRIC MAIN MVGR MAPPING (m_fabric_main_mvgr_mapping) — MVGR-1 → MVGR-2
+// ═══════════════════════════════════════════════════════
+
+const MVGR_MAPPING_HEADERS = ['MVGR-1', 'MVGR-1 FULL FORM', 'MVGR-2', 'MVGR-2 FULL FORM'];
+
+const writeMvgrMappingSheet = async (res: Response, filename: string, rows: string[][]): Promise<void> => {
+  const ExcelJS = require('exceljs');
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('MVGR MAPPING');
+  const headerRow = ws.addRow(MVGR_MAPPING_HEADERS);
+  headerRow.eachCell((cell: any) => {
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+    cell.alignment = { horizontal: 'center' };
+  });
+  for (const r of rows) ws.addRow(r);
+  ws.columns = [{ width: 12 }, { width: 22 }, { width: 16 }, { width: 26 }];
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  await wb.xlsx.write(res);
+  res.end();
+};
+
+export const getFabricMainMvgrMappingStatus = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.$queryRaw<{ total: bigint; mvgr1_count: bigint; last_updated: Date | null }[]>`
+      SELECT COUNT(*)::bigint AS total,
+             COUNT(DISTINCT mvgr1)::bigint AS mvgr1_count,
+             MAX(updated_at) AS last_updated
+      FROM m_fabric_main_mvgr_mapping
+    `;
+    const r = rows[0] ?? { total: 0n, mvgr1_count: 0n, last_updated: null };
+    res.json({
+      success: true,
+      data: {
+        total: Number(r.total),
+        mvgr1Count: Number(r.mvgr1_count),
+        lastUpdated: r.last_updated ? r.last_updated.toISOString() : null,
+      },
+    });
+  } catch (error: any) {
+    console.error('[FabricMainMvgrMapping] Status error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const downloadFabricMainMvgrMappingTemplate = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    await writeMvgrMappingSheet(res, 'FABRIC_MAIN_MVGR_MAPPING_TEMPLATE.xlsx', [
+      ['DNM', 'DNM', 'DNM_CHK', 'DENIM CHECK'],
+      ['PRT', 'PRINT', 'PRT_FLRL', 'PRINT FLORAL'],
+    ]);
+  } catch (error: any) {
+    console.error('[FabricMainMvgrMapping] Template error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const exportFabricMainMvgrMapping = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.$queryRaw<{ mvgr1: string; mvgr1_full_form: string | null; mvgr2: string; mvgr2_full_form: string | null }[]>`
+      SELECT mvgr1, mvgr1_full_form, mvgr2, mvgr2_full_form
+      FROM m_fabric_main_mvgr_mapping
+      ORDER BY id
+    `;
+    await writeMvgrMappingSheet(
+      res,
+      'FABRIC_MAIN_MVGR_MAPPING_EXPORT.xlsx',
+      rows.map((r) => [r.mvgr1, r.mvgr1_full_form ?? '', r.mvgr2, r.mvgr2_full_form ?? '']),
+    );
+  } catch (error: any) {
+    console.error('[FabricMainMvgrMapping] Export error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// Accepts the template (MVGR-1, MVGR-1 FULL FORM, MVGR-2, MVGR-2 FULL FORM) and the
+// original "MVGR1 AND MVGR2 MAPPING" sheet (title rows, a label column, then
+// FAB_MAIN_MVGR-1 | FULL FORM | … | FAB-MAIN-MVGR-2 | FULL FORM). A FULL FORM column
+// belongs to the MVGR column before it; the last MVGR-n column wins. Replaces the table.
+export const uploadFabricMainMvgrMapping = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ success: false, error: 'No file uploaded. Send a .xlsx file as "file" field.' });
+      return;
+    }
+    const ExcelJS = (await import('exceljs')).default;
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(req.file.buffer as any);
+    const ws = wb.worksheets[0];
+    if (!ws) {
+      res.status(400).json({ success: false, error: 'No worksheets found in the uploaded Excel file.' });
+      return;
+    }
+    const cellStr = (row: any, c: number): string => {
+      let v = row.getCell(c).value;
+      if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
+      if (v && typeof v === 'object' && 'text' in v) v = (v as any).text;
+      return v == null ? '' : String(v).trim();
+    };
+
+    // Header row: first row (of the top 10) with an MVGR-1 and an MVGR-2 column.
+    let headerRow = 0;
+    const code: Record<1 | 2, number> = { 1: 0, 2: 0 };
+    const full: Record<1 | 2, number> = { 1: 0, 2: 0 };
+    for (let r = 1; r <= Math.min(10, ws.rowCount) && !headerRow; r++) {
+      const row = ws.getRow(r);
+      const c1 = { 1: 0, 2: 0 } as Record<1 | 2, number>;
+      const f1 = { 1: 0, 2: 0 } as Record<1 | 2, number>;
+      let last: 1 | 2 | 0 = 0;
+      for (let c = 1; c <= 15; c++) {
+        const h = cellStr(row, c).toUpperCase();
+        if (!h) continue;
+        if (h.includes('FULL')) {
+          if (last) f1[last] = c;
+          continue;
+        }
+        const m = h.match(/MVGR[\s_-]*([12])/);
+        if (m) {
+          last = m[1] === '1' ? 1 : 2;
+          c1[last] = c;
+        }
+      }
+      if (c1[1] && c1[2]) {
+        headerRow = r;
+        Object.assign(code, c1);
+        Object.assign(full, f1);
+      }
+    }
+    if (!headerRow) {
+      res.status(400).json({ success: false, error: `Header row not found. Expected columns: ${MVGR_MAPPING_HEADERS.join(', ')}.` });
+      return;
+    }
+
+    const byMvgr2 = new Map<string, { mvgr1: string; mvgr1Full: string | null; mvgr2: string; mvgr2Full: string | null }>();
+    let skipped = 0;
+    let duplicates = 0;
+    for (let r = headerRow + 1; r <= ws.rowCount; r++) {
+      const row = ws.getRow(r);
+      const mvgr1 = cellStr(row, code[1]).toUpperCase();
+      const mvgr2 = cellStr(row, code[2]).toUpperCase();
+      if (!mvgr1 && !mvgr2) continue;
+      if (!mvgr1 || !mvgr2) {
+        skipped++;
+        continue;
+      }
+      if (byMvgr2.has(mvgr2)) duplicates++;
+      byMvgr2.set(mvgr2, {
+        mvgr1,
+        mvgr1Full: (full[1] ? cellStr(row, full[1]).toUpperCase() : '') || null,
+        mvgr2,
+        mvgr2Full: (full[2] ? cellStr(row, full[2]).toUpperCase() : '') || null,
+      });
+    }
+    const rows = [...byMvgr2.values()];
+    if (rows.length === 0) {
+      res.status(400).json({ success: false, error: 'No valid rows found (each row needs MVGR-1 and MVGR-2).' });
+      return;
+    }
+
+    await prisma.$transaction([
+      prisma.$executeRaw`TRUNCATE TABLE m_fabric_main_mvgr_mapping RESTART IDENTITY`,
+      prisma.$executeRaw`
+        INSERT INTO m_fabric_main_mvgr_mapping (mvgr1, mvgr1_full_form, mvgr2, mvgr2_full_form)
+        VALUES ${Prisma.join(rows.map((r) => Prisma.sql`(${r.mvgr1}, ${r.mvgr1Full}, ${r.mvgr2}, ${r.mvgr2Full})`))}
+      `,
+    ]);
+    console.log(`[FabricMainMvgrMapping] Replaced table with ${rows.length} rows (${skipped} skipped, ${duplicates} duplicate MVGR-2)`);
+
+    const notes = [
+      skipped > 0 ? `${skipped} rows skipped (missing MVGR-1 or MVGR-2)` : '',
+      duplicates > 0 ? `${duplicates} duplicate MVGR-2 (last kept)` : '',
+    ].filter(Boolean).join(', ');
+    res.json({
+      success: true,
+      message: `MVGR mapping updated: ${rows.length} rows inserted${notes ? `; ${notes}` : ''}.`,
+      data: {
+        total: rows.length,
+        mvgr1Count: new Set(rows.map((r) => r.mvgr1)).size,
+        skipped: skipped + duplicates,
+        lastUpdated: new Date().toISOString(),
+      },
+    });
+  } catch (error: any) {
+    console.error('[FabricMainMvgrMapping] Upload error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 };

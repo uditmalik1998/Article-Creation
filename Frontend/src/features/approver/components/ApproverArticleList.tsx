@@ -286,6 +286,23 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
   },
 ];
 
+// FAB card: M_FAB_MAIN_MVGR_1 (mainMvgr) is read-only and follows M_FAB_MAIN_MVGR_2
+// (fabricMainMvgr) through m_fabric_main_mvgr_mapping. null = no mapping row.
+const mainMvgr1Cache = new Map<string, string | null>();
+const lookupMainMvgr1 = async (mvgr2: string): Promise<string | null> => {
+  const key = mvgr2.trim().toUpperCase();
+  if (mainMvgr1Cache.has(key)) return mainMvgr1Cache.get(key)!;
+  const token = localStorage.getItem('authToken');
+  const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/fabric-main-mvgr1/${encodeURIComponent(key)}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!r.ok) throw new Error('MVGR-1 lookup failed');
+  const d = await r.json();
+  const mvgr1: string | null = d?.data?.mvgr1 ?? null;
+  mainMvgr1Cache.set(key, mvgr1);
+  return mvgr1;
+};
+
 // REFERENCE ARTICLE DESC source fields, in the user-confirmed sequence.
 // These item keys span several cards (FAB / BODY / VA PRCS):
 //   M_FAB_MAIN_MVGR_2 → M_WEAVE_02 → M_BLT_TYPE → M_BLT_STYLE →
@@ -1706,6 +1723,7 @@ const ArticleCard = React.memo(
     // Body & Construction fields are read-only in FG article context — values
    const isFieldLocked = (field: string) =>
     field === 'segment' ||
+    field === 'mainMvgr' || // auto-filled from M_FAB_MAIN_MVGR_2
     isLocked ||
     (isModifyMode && MODIFY_LOCKED_FIELDS.has(field));
 
@@ -1958,7 +1976,29 @@ const ArticleCard = React.memo(
       setVendorQuery(null);
     };
 
-    const handleSave = (field: string, value: string | null) => {
+    const handleSave = (field: string, value: string | null, extra?: Record<string, string | null>) => {
+      // M_FAB_MAIN_MVGR_2 change: fetch its M_FAB_MAIN_MVGR_1 from the mapping and
+      // save both together. Cleared MVGR-2 or no mapping row → MVGR-1 cleared.
+      if (field === 'fabricMainMvgr' && extra === undefined) {
+        if (!value) {
+          handleSave(field, value, { mainMvgr: null });
+          return;
+        }
+        setLocalValues((prev) => ({ ...prev, fabricMainMvgr: value }));
+        setEditingField(null);
+        lookupMainMvgr1(value)
+          .then((mvgr1) => {
+            if (!mvgr1) {
+              message.warning(`No M_FAB_MAIN_MVGR_1 mapping for ${value} — add it in Admin › Expenses › Fabric Main MVGR Mapping.`);
+            }
+            handleSave(field, value, { mainMvgr: mvgr1 });
+          })
+          .catch(() => {
+            message.error(`Couldn't look up M_FAB_MAIN_MVGR_1 for ${value}. M_FAB_MAIN_MVGR_2 saved; MVGR-1 unchanged.`);
+            handleSave(field, value, {});
+          });
+        return;
+      }
       if (field === 'vendorCode' && value) {
         const trimmed = value.trim();
         if (!/^\d{6}$/.test(trimmed)) {
@@ -1984,7 +2024,7 @@ const ArticleCard = React.memo(
           }
         }
       }
-      const updates: Record<string, string | null> = { [field]: value };
+      const updates: Record<string, string | null> = { [field]: value, ...(extra ?? {}) };
       // Auto-compute roughConsumptionKg for FG articles when roughConsumptionMeter or gsm is edited.
       // GSM may be a range "140-160" — use midpoint. Width is fWidth (strip trailing ").
       if (!isBodyArticle && (field === 'roughConsumptionMeter' || field === 'gsm')) {
@@ -2486,6 +2526,7 @@ const ArticleCard = React.memo(
           key={attr.field}
           data-field-label={attr.label}
           data-item-id={item.id}
+          title={attr.field === 'mainMvgr' ? 'Auto-filled from M_FAB_MAIN_MVGR_2 (Fabric Main MVGR Mapping)' : undefined}
           className={cn('group flex items-center rounded transition-colors hover:bg-muted/40', big ? 'mb-0.5 min-h-[26px] gap-2 px-2 py-0.5' : 'gap-1.5 px-1 py-0.5')}
           style={{
             cursor: attrLocked ? 'default' : 'pointer',

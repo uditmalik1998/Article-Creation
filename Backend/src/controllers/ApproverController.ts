@@ -4425,6 +4425,27 @@ export class ApproverController {
 
     // GET /api/approver/sizes-for-majcat/:majCat
     // Returns active sizes array for the given major category (from maj_cat_sizes table)
+    // FAB card: M_FAB_MAIN_MVGR_1 is filled from the chosen M_FAB_MAIN_MVGR_2 via
+    // m_fabric_main_mvgr_mapping. data = null when the MVGR-2 has no mapping row.
+    static async getFabricMainMvgr1(req: Request, res: Response) {
+        try {
+            const mvgr2 = String(req.params.mvgr2 ?? '').trim().toUpperCase();
+            if (!mvgr2) return res.status(400).json({ error: 'mvgr2 is required' });
+            const rows = await prisma.$queryRaw<{ mvgr1: string; mvgr1_full_form: string | null; mvgr2_full_form: string | null }[]>`
+                SELECT mvgr1, mvgr1_full_form, mvgr2_full_form
+                FROM m_fabric_main_mvgr_mapping
+                WHERE UPPER(TRIM(mvgr2)) = ${mvgr2}
+                LIMIT 1
+            `;
+            const r = rows[0];
+            return res.json({
+                data: r ? { mvgr1: r.mvgr1, mvgr1FullForm: r.mvgr1_full_form, mvgr2, mvgr2FullForm: r.mvgr2_full_form } : null,
+            });
+        } catch (err: any) {
+            return res.status(500).json({ error: err.message });
+        }
+    }
+
     static async getSizesForMajCat(req: Request, res: Response) {
         const { majCat } = req.params;
         const sizes = await getSizesForMajCat(majCat || '');
