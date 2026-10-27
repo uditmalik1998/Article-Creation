@@ -218,6 +218,10 @@ router.get('/segment-master/status', h(adminController.getSegmentMasterStatus));
 router.get('/segment-master/template', h(adminController.downloadSegmentMasterTemplate));
 router.get('/segment-master/export', h(adminController.exportSegmentMaster));
 router.post('/segment-master/upload', excelUpload.single('file'), h(adminController.uploadSegmentMaster));
+router.get('/fabric-main-mvgr-mapping/status', h(adminController.getFabricMainMvgrMappingStatus));
+router.get('/fabric-main-mvgr-mapping/template', h(adminController.downloadFabricMainMvgrMappingTemplate));
+router.get('/fabric-main-mvgr-mapping/export', h(adminController.exportFabricMainMvgrMapping));
+router.post('/fabric-main-mvgr-mapping/upload', excelUpload.single('file'), h(adminController.uploadFabricMainMvgrMapping));
 
 // ═══════════════════════════════════════════════════════
 // BASIC ACCESSORIES (ADMIN) — basic_trim_cost_master + basic_trim_cost_component

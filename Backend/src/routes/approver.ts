@@ -161,6 +161,7 @@ router.post('/body-articles/:id/confirm', h(ApproverController.creatorConfirmBod
 
 // Sizes for a given major category (from maj_cat_sizes table)
 router.get('/sizes-for-majcat/:majCat', h(ApproverController.getSizesForMajCat));
+router.get('/fabric-main-mvgr1/:mvgr2', h(ApproverController.getFabricMainMvgr1));
 
 // Color master list for the Add Color Variants dropdown (from color_master table)
 router.get('/colors', h(ApproverController.getColorMaster));

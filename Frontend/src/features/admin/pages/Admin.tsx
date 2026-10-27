@@ -184,6 +184,13 @@ interface BasicTrimMasterMeta {
   lastUpdated?: string;
 }
 
+interface MvgrMappingMeta {
+  total?: number;
+  mvgr1Count?: number;
+  skipped?: number;
+  lastUpdated?: string;
+}
+
 interface SegmentMasterMeta {
   total?: number;
   categories?: number;
@@ -211,7 +218,7 @@ interface GmMctMeta {
 }
 
 /** Master-data upload cards on this page (Attributes 7, GM 3, Fabric & body 5, Precise 3, Costs and Broader Menu 3). */
-const MASTER_DATA_COUNT = 21;
+const MASTER_DATA_COUNT = 22;
 
 interface PipelineStatusData {
   PENDING: number;
@@ -345,6 +352,11 @@ export default function Admin() {
   const [segmentMasterUploading, setSegmentMasterUploading] = useState(false);
   const [segmentMasterProgress, setSegmentMasterProgress] = useState<number>(0);
   const segmentFileRef = useRef<HTMLInputElement | null>(null);
+  const [mvgrMappingMeta, setMvgrMappingMeta] = useState<MvgrMappingMeta | null>(null);
+  const [mvgrMappingStatusLoading, setMvgrMappingStatusLoading] = useState(false);
+  const [mvgrMappingUploading, setMvgrMappingUploading] = useState(false);
+  const [mvgrMappingProgress, setMvgrMappingProgress] = useState<number>(0);
+  const mvgrMappingFileRef = useRef<HTMLInputElement | null>(null);
 
   // Basic Accessories (basic_trim_cost_master + basic_trim_cost_component)
   const [basicAccessoriesMeta, setBasicAccessoriesMeta] = useState<BasicAccessoriesMeta | null>(null);
@@ -1716,6 +1728,69 @@ export default function Admin() {
     }
   };
 
+  // ─────────────────────────── Fabric Main MVGR Mapping ───────────────────────────
+  const loadMvgrMappingStatus = useCallback(async () => {
+    setMvgrMappingStatusLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/fabric-main-mvgr-mapping/status`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load MVGR mapping status');
+      setMvgrMappingMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to load MVGR mapping status');
+    } finally {
+      setMvgrMappingStatusLoading(false);
+    }
+  }, []);
+
+  const downloadMvgrMappingFile = (path: 'template' | 'export', filename: string) => {
+    const token = localStorage.getItem('authToken');
+    return fetch(`${APP_CONFIG.api.baseURL}/admin/fabric-main-mvgr-mapping/${path}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+      .then((r) => r.blob())
+      .then((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        a.click();
+      })
+      .catch(() => message.error(path === 'template' ? 'Failed to download template' : 'Failed to export MVGR mapping'));
+  };
+
+  const handleMvgrMappingUpload = async (file: File) => {
+    setMvgrMappingUploading(true);
+    setMvgrMappingProgress(0);
+    try {
+      const token = localStorage.getItem('authToken');
+      const formData = new FormData();
+      formData.append('file', file);
+      const progressInterval = setInterval(() => {
+        setMvgrMappingProgress((prev) => Math.min(prev + 5, 90));
+      }, 500);
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/fabric-main-mvgr-mapping/upload`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      clearInterval(progressInterval);
+      setMvgrMappingProgress(100);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      message.success(data.message);
+      setMvgrMappingMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Upload failed');
+    } finally {
+      setMvgrMappingUploading(false);
+      setTimeout(() => setMvgrMappingProgress(0), 1500);
+      if (mvgrMappingFileRef.current) mvgrMappingFileRef.current.value = '';
+    }
+  };
+
   // ─────────────────────────────── Basic Accessories ──────────────────────────────
   const loadBasicAccessoriesStatus = useCallback(async () => {
     setBasicAccessoriesStatusLoading(true);
@@ -2482,6 +2557,7 @@ export default function Admin() {
     loadBodyArticleDataStatus();
     loadBroaderMenuStatus();
     loadSegmentMasterStatus();
+    loadMvgrMappingStatus();
     loadBasicAccessoriesStatus();
     loadCmpCostMasterStatus();
     loadNationalGridStatus();
@@ -2493,7 +2569,7 @@ export default function Admin() {
     loadBasicTrimMasterStatus();
     loadPreciseFabricArticleStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadSetMcMasterStatus, loadGmSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadBasicAccessoriesStatus, loadCmpCostMasterStatus, loadNationalGridStatus, loadPipelineStatus, loadFabricRawStatus, loadGmRawStatus, loadBodyFabConsStatus, loadPreciseBodyArticleStatus, loadBasicTrimMasterStatus, loadPreciseFabricArticleStatus]);
+  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadSetMcMasterStatus, loadGmSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadMvgrMappingStatus, loadBasicAccessoriesStatus, loadCmpCostMasterStatus, loadNationalGridStatus, loadPipelineStatus, loadFabricRawStatus, loadGmRawStatus, loadBodyFabConsStatus, loadPreciseBodyArticleStatus, loadBasicTrimMasterStatus, loadPreciseFabricArticleStatus]);
 
   const loadData = async () => {
     setLoading(true);
@@ -2934,7 +3010,7 @@ export default function Admin() {
 
         <section id="masters" className="scroll-mt-3 flex flex-col gap-3">
           <SectionHeading title="Master data uploads" meta={`${MASTER_DATA_COUNT} datasets`} />
-          <MasterGroup title="FG Attributes & Grid" count={7} notUploaded={((majCatGridMeta ? (majCatGridMeta.totalRows ?? majCatGridMeta.totalValues ?? 0) : null) === 0 ? 1 : 0) + ((sizeMasterMeta ? (sizeMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((colorMasterMeta ? (colorMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((mandatoryGridMeta ? (mandatoryGridMeta.totalRows ?? 0) : null) === 0 ? 1 : 0) + ((mcdTotal ? mcdTotal.total : null) === 0 ? 1 : 0) + ((nationalGridTotal) === 0 ? 1 : 0) + ((segmentMasterMeta ? (segmentMasterMeta.total ?? 0) : null) === 0 ? 1 : 0)}>
+          <MasterGroup title="FG Attributes & Grid" count={8} notUploaded={((mvgrMappingMeta ? (mvgrMappingMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((majCatGridMeta ? (majCatGridMeta.totalRows ?? majCatGridMeta.totalValues ?? 0) : null) === 0 ? 1 : 0) + ((sizeMasterMeta ? (sizeMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((colorMasterMeta ? (colorMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((mandatoryGridMeta ? (mandatoryGridMeta.totalRows ?? 0) : null) === 0 ? 1 : 0) + ((mcdTotal ? mcdTotal.total : null) === 0 ? 1 : 0) + ((nationalGridTotal) === 0 ? 1 : 0) + ((segmentMasterMeta ? (segmentMasterMeta.total ?? 0) : null) === 0 ? 1 : 0)}>
             <MasterDataCard
               title="FG Major Category Grid Values"
               description="Dropdown Values"
@@ -3648,6 +3724,94 @@ export default function Admin() {
                     )}
                   </div>
 
+                </>
+              }
+            />
+            <MasterDataCard
+              title="Fabric Main MVGR Mapping"
+              description="MVGR-1 → MVGR-2 codes with full forms"
+              rows={mvgrMappingMeta ? (mvgrMappingMeta.total ?? 0) : null}
+              lastUpload={mvgrMappingMeta?.lastUpdated ?? null}
+              loading={mvgrMappingStatusLoading}
+              busy={mvgrMappingUploading}
+              onView={() => navigate('/admin/expense/fabric-main-mvgr-mapping')}
+              onDownload={() => downloadMvgrMappingFile('export', 'FABRIC_MAIN_MVGR_MAPPING_EXPORT.xlsx')}
+              onTemplate={() => downloadMvgrMappingFile('template', 'FABRIC_MAIN_MVGR_MAPPING_TEMPLATE.xlsx')}
+              onRefresh={loadMvgrMappingStatus}
+              details={
+                <>
+                  {mvgrMappingMeta && (mvgrMappingMeta.total ?? 0) > 0 ? (
+                    <Descriptions bordered>
+                      {mvgrMappingMeta.lastUpdated && (
+                        <Descriptions.Item label="Last Updated">
+                          {new Date(mvgrMappingMeta.lastUpdated).toLocaleString('en-IN', {
+                            timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',
+                          }) + ' IST'}
+                        </Descriptions.Item>
+                      )}
+                      <Descriptions.Item label="MVGR-1 Codes">
+                        <Badge variant="info">{(mvgrMappingMeta.mvgr1Count ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="MVGR-2 Codes (rows)">
+                        <Badge variant="success">{(mvgrMappingMeta.total ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      {(mvgrMappingMeta.skipped ?? 0) > 0 && (
+                        <Descriptions.Item label="Rows Skipped">
+                          <Badge variant="warning">{(mvgrMappingMeta.skipped ?? 0).toLocaleString()}</Badge>
+                        </Descriptions.Item>
+                      )}
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No MVGR mapping data"
+                      description="Upload the MVGR mapping Excel (columns: MVGR-1, MVGR-1 FULL FORM, MVGR-2, MVGR-2 FULL FORM)."
+                    />
+                  )}
+                </>
+              }
+              upload={
+                <>
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload Fabric Main MVGR Mapping Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Columns: <strong>MVGR-1, MVGR-1 FULL FORM, MVGR-2, MVGR-2 FULL FORM</strong> (the original "MVGR1 AND MVGR2 MAPPING" sheet works too). Each MVGR-2 is one row; a repeated MVGR-2 keeps the last. <strong className="text-destructive">Replaces entire table.</strong>
+                    </div>
+
+                    <input
+                      ref={mvgrMappingFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleMvgrMappingUpload(file);
+                      }}
+                    />
+
+                    {mvgrMappingUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Parsing Excel &amp; replacing table...
+                        </div>
+                        <Progress value={mvgrMappingProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => mvgrMappingFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
                 </>
               }
             />
