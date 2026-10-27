@@ -55,7 +55,7 @@ import { cn } from '@/lib/utils';
 import { useDragToPan } from '@/shared/hooks/ui/useDragToPan';
 import type { ApproverItem } from '../types';
 import CostingGridCard, { BTRIM_CONFIG, VADD_CONFIG, gridFields } from './CostingGridCard';
-import PkgCostCard from './PkgCostCard';
+import PkgCostCard, { PKG_RATE_FIELDS } from './PkgCostCard';
 import CmpCostCard, { PR_VAL_FIELD } from './CmpCostCard';
 import { CARD_ACTION_BTN, CARD_THEME } from './cardTheme';
 
@@ -528,8 +528,13 @@ const ArticleCard = React.memo(
         'FINISHING|ACT|PR VAL':    fmt(item.finishingActPrVal),
         'FINISHING|VENDOR|PR VAL': fmt(item.finishingVendorPrVal),
         'FINISHING|FINAL|PR VAL':  fmt(item.finishingFinalPrVal),
+        'TOTAL|BGT|PR VAL':        fmt(item.totalBgtPrVal),
+        'TOTAL|ACT|PR VAL':        fmt(item.totalActPrVal),
+        'TOTAL|VENDOR|PR VAL':     fmt(item.totalVendorPrVal),
+        'TOTAL|FINAL|PR VAL':      fmt(item.totalFinalPrVal),
       };
-    }, [item.cuttingBgtPrVal, item.cuttingActPrVal, item.cuttingVendorPrVal, item.cuttingFinalPrVal,
+    }, [item.totalBgtPrVal, item.totalActPrVal, item.totalVendorPrVal, item.totalFinalPrVal,
+        item.cuttingBgtPrVal, item.cuttingActPrVal, item.cuttingVendorPrVal, item.cuttingFinalPrVal,
         item.stitchingBgtPrVal, item.stitchingActPrVal, item.stitchingVendorPrVal, item.stitchingFinalPrVal,
         item.ironingBgtPrVal, item.ironingActPrVal, item.ironingVendorPrVal, item.ironingFinalPrVal,
         item.finishingBgtPrVal, item.finishingActPrVal, item.finishingVendorPrVal, item.finishingFinalPrVal]);
@@ -4804,6 +4809,64 @@ const ArticleCard = React.memo(
                             return rank(a.schemaKey) - rank(b.schemaKey);
                           })
                           .map((a) => renderAttributeRow(a, false, true))}
+
+                      {/* FG: cost summary under SEGMENT — read-only, from each card's saved values.
+                          BODY = the CMP COST TOTAL row (BGT / ACT / VENDOR / FINAL PR VAL);
+                          PKG COST = sum of its saved NET RATEs, in AUTO-BGT and ROUGH-V2 only. */}
+                      {!allowGroups && (() => {
+                        const COST_SOURCES: { label: string; title: string; fields: [string, string, string, string] }[] = [
+                          { label: 'FAB', title: 'FAB card: AUTO-BGT / ROUGH-V2 / VENDOR COST / FINAL COST', fields: ['autoBgt', 'roughV2', 'vendorFabricRate', 'finalCost'] },
+                          { label: 'BODY', title: 'CMP COST total: BGT / ACT / VENDOR / FINAL PR VAL', fields: ['totalBgtPrVal', 'totalActPrVal', 'totalVendorPrVal', 'totalFinalPrVal'] },
+                          { label: 'B TRIM', title: 'B TRIM card TOTAL', fields: ['bTrimTotalAutoBgt', 'bTrimTotalRoughV2', 'bTrimTotalVdrCost', 'bTrimTotalFinalCost'] },
+                          { label: 'V. ADD', title: 'V. ADD card TOTAL', fields: ['vaddTotalAutoBgt', 'vaddTotalRoughV2', 'vaddTotalVendorCost', 'vaddTotalFinalCost'] },
+                        ];
+                        const numOf = (field: string) => {
+                          const v = getFieldVal(field);
+                          const n = v == null ? NaN : Number(v);
+                          return Number.isFinite(n) ? n : null;
+                        };
+                        const fmt = (n: number | null) =>
+                          n == null ? '—' : n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        const rows = COST_SOURCES.map((s) => ({ label: s.label, title: s.title, vals: s.fields.map(numOf) }));
+                        // PKG COST: saved NET RATE total goes to AUTO-BGT and ROUGH-V2; no VDR / FINAL.
+                        const pkgRates = Object.values(PKG_RATE_FIELDS).map(numOf).filter((v): v is number => v != null);
+                        const pkgTotal = pkgRates.length ? pkgRates.reduce((a, b) => a + b, 0) : null;
+                        rows.push({ label: 'PKG COST', title: 'PKG COST: TOTAL NET RATE (saved tab)', vals: [pkgTotal, pkgTotal, null, null] });
+                        const totals = [0, 1, 2, 3].map((i) => {
+                          const vs = rows.map((r) => r.vals[i]).filter((v): v is number => v != null);
+                          return vs.length ? vs.reduce((a, b) => a + b, 0) : null;
+                        });
+                        const COLS = 'grid grid-cols-[110px_repeat(4,minmax(0,1fr))] gap-2';
+                        return (
+                          <div className="mx-1 mb-1 mt-2 overflow-hidden rounded-lg border border-slate-200" role="table" aria-label="Cost summary">
+                            <div className="border-b border-slate-200 bg-slate-50 px-2.5 py-1.5 text-[11px] font-extrabold tracking-[0.08em] text-slate-800">
+                              COST SUMMARY
+                            </div>
+                            <div role="row" className={cn(COLS, 'px-2.5 py-1.5 text-[11px] font-bold tracking-wider text-slate-500')}>
+                              <span role="columnheader">COST SOURCE</span>
+                              {['AUTO-BGT', 'ROUGH-V2', 'VDR COST', 'FINAL COST'].map((h) => (
+                                <span key={h} role="columnheader" className="text-right">{h}</span>
+                              ))}
+                            </div>
+                            {rows.map((r) => (
+                              <div key={r.label} role="row" className={cn(COLS, 'items-center border-t border-slate-100 px-2.5 py-1.5')} title={r.title}>
+                                <span role="rowheader" className="text-[13px] font-bold text-slate-900">{r.label}</span>
+                                {r.vals.map((v, i) => (
+                                  <span key={i} role="cell" className={cn('text-right font-mono text-[13px] font-semibold tabular-nums', v == null ? 'text-slate-400' : 'text-slate-900')}>
+                                    {fmt(v)}
+                                  </span>
+                                ))}
+                              </div>
+                            ))}
+                            <div role="row" className={cn(COLS, 'items-center bg-[#1e293b] px-2.5 py-2 text-white')}>
+                              <span role="rowheader" className="text-[13px] font-extrabold tracking-wider">TOTAL</span>
+                              {totals.map((v, i) => (
+                                <span key={i} role="cell" className="text-right font-mono text-[13.5px] font-extrabold tabular-nums">{fmt(v)}</span>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>}
 

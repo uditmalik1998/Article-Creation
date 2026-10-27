@@ -71,6 +71,17 @@ export interface CostingGridConfig {
   repeatJsonFields?: Record<string, string>;
   /** AUTO-BGT is a typed input (V. ADD) instead of read-only text filled from the master. */
   editableAutoBgt?: boolean;
+  /**
+   * B TRIM / V. ADD: ink TOTAL row at the bottom (sticky while scrolling) summing AUTO-BGT,
+   * ROUGH-V2, VDR COST and FINAL COST over the fixed rows (+ repeat copies) + only the ticked other rows.
+   */
+  showTotal?: boolean;
+  /**
+   * Fields the TOTAL row's ROUGH-V2 / VDR COST / FINAL COST save to (tab-save mode).
+   * Those totals are editable: a typed value overrides the sum, clearing it goes back
+   * to the sum. AUTO-BGT total is always the sum (read-only) and saved to `auto`.
+   */
+  totalFields?: { auto: string; rough: string; vdr: string; fin: string };
 }
 
 /** One saved repeat copy (e.g. PRINT-2) in a repeatJsonFields column. */
@@ -131,6 +142,8 @@ export const BTRIM_CONFIG: CostingGridConfig = {
   },
   grid: 'grid grid-cols-[170px_110px_minmax(0,1.3fr)_90px_minmax(0,1.2fr)_88px_64px_88px_92px_92px_100px]',
   rateQty: true,
+  showTotal: true,
+  totalFields: { auto: 'bTrimTotalAutoBgt', rough: 'bTrimTotalRoughV2', vdr: 'bTrimTotalVdrCost', fin: 'bTrimTotalFinalCost' },
   tabField: 'bTrimType',
   costFields: {
     M_BTN:   { autoBgt: 'mBtnAutoBgt',  rough: 'mBtnRoughV2',  vdr: 'mBtnVdrCost',  fin: 'mBtnFinalCost' },
@@ -168,6 +181,8 @@ export const VADD_CONFIG: CostingGridConfig = {
   repeatable: ['PRINT', 'EMB'],
   repeatJsonFields: { PRINT: 'vaddPrintJson', EMB: 'vaddEmpJson' },
   editableAutoBgt: true,
+  showTotal: true,
+  totalFields: { auto: 'vaddTotalAutoBgt', rough: 'vaddTotalRoughV2', vdr: 'vaddTotalVendorCost', fin: 'vaddTotalFinalCost' },
   grid: 'grid grid-cols-[150px_130px_minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.4fr)_88px_92px_92px_100px]',
   costFields: {
     PRINT:   { autoBgt: 'printAutoBgt',   rough: 'printRoughV2',   vdr: 'printVendorCost',   fin: 'printFinalCost' },
@@ -179,6 +194,25 @@ export const VADD_CONFIG: CostingGridConfig = {
 /** Item fields a config's table covers (the rest of the group renders as normal rows). */
 export const gridFields = (config: CostingGridConfig) =>
   new Set(Object.values(config.cellMap).flatMap((m) => Object.values(m) as string[]));
+
+// TOTAL row overrides live in local[tab][TOTAL_ROW]; AUTO-BGT total is always the sum.
+const TOTAL_ROW = '__TOTAL__';
+const TOTAL_EDIT_COLS = ['rough', 'vdr', 'fin'] as const;
+
+/** Sum of a column over the given rows, or null when none has a number. */
+const sumCol = (rows: string[], get: (row: string) => string): number | null => {
+  let sum = 0;
+  let any = false;
+  for (const r of rows) {
+    const v = get(r);
+    const n = Number(v);
+    if (v.trim() !== '' && Number.isFinite(n)) {
+      sum += n;
+      any = true;
+    }
+  }
+  return any ? sum : null;
+};
 
 interface CostingGridCardProps {
   config: CostingGridConfig;
@@ -566,12 +600,23 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
         }
       }
       setRepeats(savedRepeats);
-      setLocal({ [t]: rows });
-      if (other) {
-        const saved = other.rows.filter((row) =>
-          (['rate', 'qty', 'auto', 'rough', 'vdr', 'fin'] as Col[]).some((c) => rows[row]?.[c]));
-        setChecked({ [t]: new Set(saved) });
+      const savedOther = other
+        ? other.rows.filter((row) => (['rate', 'qty', 'auto', 'rough', 'vdr', 'fin'] as Col[]).some((c) => rows[row]?.[c]))
+        : [];
+      // TOTAL overrides: a saved total that differs from the saved rows' sum was typed.
+      if (config.totalFields) {
+        const summed = [...fixedRows.flatMap((r) => [r, ...(savedRepeats[r] ?? [])]), ...savedOther];
+        const totalRow: RowState = {};
+        for (const col of TOTAL_EDIT_COLS) {
+          const saved = num(rec[config.totalFields[col]]);
+          if (!saved) continue;
+          const sum = sumCol(summed, (r) => rows[r]?.[col] ?? '');
+          if (sum === null || Math.abs(Number(saved) - sum) > 0.005) totalRow[col] = saved;
+        }
+        rows[TOTAL_ROW] = totalRow;
       }
+      setLocal({ [t]: rows });
+      if (other) setChecked({ [t]: new Set(savedOther) });
 
       // Other-block rows on the opened tab: hit the master only if some row's RATE
       // (AUTO-BGT without rateQty) is null in the DB, and fill just those rows.
@@ -676,6 +721,10 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
       }));
       updates[field] = list.length > 0 ? JSON.stringify(list) : null;
     }
+    if (config.totalFields) {
+      updates[config.totalFields.auto] = sumOf('auto')?.toFixed(2) ?? null;
+      for (const col of TOTAL_EDIT_COLS) updates[config.totalFields[col]] = totalValue(col) || null;
+    }
     onSaveTab!(updates);
     setSavedTab(tab);
     setDirty(false);
@@ -708,6 +757,26 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
 
   const filledCount = (rows: readonly string[]) =>
     rows.filter((r) => (['type', 'style', 'c3', 'rough', 'vdr', 'fin'] as Col[]).some((c) => cellVal(r, c))).length;
+
+  // TOTAL row: fixed rows (and their repeat copies) + other rows — only the ticked
+  // ones when the block has checkboxes.
+  const totalRows = [
+    ...fixedRows.flatMap((r) => [r, ...(repeats[r] ?? [])]),
+    ...(other ? (checkable ? other.rows.filter(isChecked) : other.rows) : []),
+  ];
+  const sumOf = (col: Col) => sumCol(totalRows, (r) => localVal(r, col));
+  const totalOf = (col: Col) => {
+    const sum = sumOf(col);
+    return sum === null ? '—' : sum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+  // Editable TOTAL (ROUGH-V2 / VDR COST / FINAL COST): the typed override, else the sum.
+  const editableTotals = !!config.totalFields && tabSave;
+  const totalValue = (col: Col) => {
+    const override = localVal(TOTAL_ROW, col);
+    if (override.trim() !== '') return override;
+    const sum = sumOf(col);
+    return sum === null ? '' : sum.toFixed(2);
+  };
 
   const renderRow = (row: string, last: boolean, withCheck = false) => {
     // DESC is auto-built: STYLE-TYPE (e.g. KUNDI_BTN-26L)
@@ -799,7 +868,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
   };
 
   return (
-    <div className="col-span-full overflow-hidden rounded-lg border-2 bg-white shadow-[var(--shadow-sm)]" style={{ borderColor: style.border }}>
+    <div className="col-span-full overflow-clip rounded-lg border-2 bg-white shadow-[var(--shadow-sm)]" style={{ borderColor: style.border }}>
       {/* Header: title + collapse, then underline tabs (when more than one) */}
       <div className="border-b-2" style={{ background: style.bg, borderColor: style.bg }}>
         <div className="flex items-center">
@@ -1010,6 +1079,46 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {config.showTotal && (
+            <div className="sticky bottom-0 z-10 overflow-x-auto bg-[#1e293b] px-1.5 text-white" role="group" aria-label={`${config.title} total`}>
+              <div className={config.rateQty ? 'min-w-[1150px]' : 'min-w-[1000px]'}>
+                <div className={cn(GRID, 'items-center py-2')}>
+                  <div className={cn(config.rateQty ? 'col-[1/8]' : 'col-[1/6]', 'flex flex-col px-2.5')}>
+                    <span className="text-[13px] font-extrabold tracking-wider">TOTAL · {tab}</span>
+                    <span className="text-[11.5px] text-slate-300">
+                      {fixedRows.length} items
+                      {(() => {
+                        const copies = fixedRows.reduce((n, r) => n + (repeats[r]?.length ?? 0), 0);
+                        return copies > 0 ? ` + ${copies} ${copies === 1 ? 'copy' : 'copies'}` : '';
+                      })()}
+                      {other && (checkable ? ` + ${other.rows.filter(isChecked).length} selected ${other.label}` : ` + ${other.label}`)}
+                    </span>
+                  </div>
+                  {(['auto', 'rough', 'vdr', 'fin'] as Col[]).map((c) =>
+                    editableTotals && c !== 'auto' ? (
+                      <div key={c} className="px-1">
+                        <input
+                          value={totalValue(c)}
+                          disabled={locked}
+                          inputMode="decimal"
+                          placeholder="—"
+                          aria-label={`Total ${c === 'rough' ? 'ROUGH-V2' : c === 'vdr' ? 'VDR COST' : 'FINAL COST'}`}
+                          title="Sum of the rows — type to override, clear to go back to the sum"
+                          onChange={(e) => setLocalVal(TOTAL_ROW, c, e.target.value)}
+                          className="h-7 w-full rounded-md border border-slate-600 bg-slate-800 px-2 text-right font-mono text-[13.5px] font-extrabold tabular-nums text-white outline-none placeholder:text-slate-500 focus:border-slate-300 disabled:opacity-70"
+                        />
+                      </div>
+                    ) : (
+                      <div key={c} className="px-2.5 text-right font-mono text-[13.5px] font-extrabold tabular-nums">
+                        {totalOf(c)}
+                      </div>
+                    ),
+                  )}
+                </div>
+              </div>
             </div>
           )}
 

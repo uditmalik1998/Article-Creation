@@ -408,3 +408,14 @@ _2026-10-23: the same +2 px is now on **FG pages** (`ApproverArticleList.tsx`). 
 _2026-10-23: **GM article page** — every font size in `GMArticleList.tsx` is +1 px. That is 40 arbitrary sizes, plus text-xs→13 px and text-sm→15 px. It covers the identity strip, Article details (FIELD_LABEL 13 px, FIELD_INPUT 14 px), the General merchandise grid, BOM, and the colour picker. Colour variants (GMVariantTable) and the top nav bar (GMArticleDetailPage) are unchanged._
 
 _2026-10-23: GM article page font size +1 px again, so +2 px in total (FIELD_LABEL 14 px, FIELD_INPUT 15 px)._
+
+_2026-10-27: Design options for a **TOTAL** on the FG B TRIM card (AUTO-BGT, ROUGH-V2, VDR COST, FINAL COST). The total counts the 5 BT items plus only the ticked OTHER ACC rows. A: a sticky TOTAL row. B: subtotals plus a grand total. C: summary tiles in the footer. Canvas: https://claude.ai/artifact/EuTbWpfPXCT3JZirVycyBn. **Option A built:** an ink “TOTAL · BT-0x” row at the bottom of the card that sticks while you scroll. It reads “5 items + N selected OTHER ACC” and updates live from the current tab’s values; a column with no values shows “—”. Turned on by `showTotal` on `BTRIM_CONFIG` in `CostingGridCard.tsx`, so V. ADD has none. Computed on screen only, never saved. The card is `overflow-clip` so the sticky row works._
+
+_2026-10-27: Design options for a cost table in FG **OTH GRID-1**, below SEGMENT. Rows are FAB, BODY, B TRIM and V. ADD; columns are AUTO-BGT, ROUGH-V2, VDR COST and FINAL COST. A: a read-only summary with a total. B: an editable grid. C: numbered rows with chips. D: big totals with share bars. Canvas: https://claude.ai/artifact/K1gz1jWCCKWdJ6n9BWjJcR. **Option A built:** a read-only “COST SUMMARY” table under SEGMENT with an ink TOTAL row. Sources:
+- FAB = `autoBgt` / `roughV2` / `vendorFabricRate` / `finalCost`
+- BODY = CMP COST TOTAL row (`totalBgtPrVal` / `totalActPrVal` / `totalVendorPrVal` / `totalFinalPrVal`)
+- B TRIM = `bTrimTotal*`
+- V. ADD = `vaddTotal*`
+- PKG COST (added 2026-10-27) = the sum of the saved NET RATEs (`boppNetPrice` … `threadNetPrice`), shown in both AUTO-BGT and ROUGH-V2. VDR COST and FINAL COST stay empty.
+
+It shows saved values, so each row updates after its card is saved. A value that is not set shows “—”, and TOTAL adds the values that are set. Hover a row to see its source._

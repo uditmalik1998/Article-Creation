@@ -8,7 +8,8 @@ import { CARD_THEME } from './cardTheme';
 // One matrix: process rows × (BGT | ACT | VENDOR | FINAL) × (SAM | SAM VAL | PR VAL).
 // CUTTING has no SAM / SAM VAL — only PR VAL.
 // PR VAL cells are saved to extraction_results_flat only when Save is clicked;
-// SAM/SAM VAL are UI-only.
+// SAM/SAM VAL are UI-only. The TOTAL row is the sum of each stage's PR VAL; typing
+// in a TOTAL cell overrides it, clearing it goes back to the sum.
 
 const PROCESSES = ['CUTTING', 'STITCHING', 'IRONING', 'FINISHING'] as const;
 const STAGES = ['BGT', 'ACT', 'VENDOR', 'FINAL'] as const;
@@ -35,6 +36,26 @@ export const PR_VAL_FIELD: Record<string, string> = {
   'FINISHING|ACT|PR VAL':    'finishingActPrVal',
   'FINISHING|VENDOR|PR VAL': 'finishingVendorPrVal',
   'FINISHING|FINAL|PR VAL':  'finishingFinalPrVal',
+};
+
+// TOTAL row cell key → ApproverItem field.
+export const TOTAL_PR_VAL_FIELD: Record<string, string> = {
+  'TOTAL|BGT|PR VAL':    'totalBgtPrVal',
+  'TOTAL|ACT|PR VAL':    'totalActPrVal',
+  'TOTAL|VENDOR|PR VAL': 'totalVendorPrVal',
+  'TOTAL|FINAL|PR VAL':  'totalFinalPrVal',
+};
+
+const toNum = (v: string | undefined) => {
+  const n = parseFloat(String(v ?? '').trim());
+  return Number.isFinite(n) ? n : null;
+};
+const fmtNum = (n: number) => String(Number(n.toFixed(4)));
+
+// Sum of a stage's PR VAL cells, or '' when none are filled.
+const sumPrVal = (values: Record<string, string>, stage: string): string => {
+  const nums = PROCESSES.map((p) => toNum(values[cellKey(p, stage, 'PR VAL')])).filter((n): n is number => n !== null);
+  return nums.length ? fmtNum(nums.reduce((a, b) => a + b, 0)) : '';
 };
 
 const groupEdge = (stageIdx: number, measureIdx: number) =>
@@ -69,6 +90,8 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
   const style = CARD_THEME;
   const [values, setValues] = useState<Record<string, string>>({});
   const [dirty, setDirty] = useState(false);
+  // Stages whose TOTAL was typed by the user (otherwise TOTAL = live sum of PR VAL).
+  const [manualTotals, setManualTotals] = useState<Set<string>>(new Set());
 
   // Initialize from saved DB values on mount / when the article changes.
   // Only apply non-empty saved values so preset-filled cells aren't wiped when
@@ -82,6 +105,16 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
       }
       return next;
     });
+    // A saved TOTAL that differs from the saved PR VALs' sum was an override.
+    setManualTotals(
+      new Set(
+        STAGES.filter((stage) => {
+          const saved = toNum(savedPrVals[cellKey('TOTAL', stage, 'PR VAL')]);
+          const sum = toNum(sumPrVal(savedPrVals, stage));
+          return saved !== null && (sum === null || Math.abs(saved - sum) > 0.00005);
+        }),
+      ),
+    );
   }, [savedPrVals]);
 
   // Presets arrive already resolved by the parent: PR VALs saved in the DB win over master
@@ -106,13 +139,29 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
 
   const handleChange = useCallback((key: string, v: string) => {
     setValues((prev) => ({ ...prev, [key]: v }));
-    if (PR_VAL_FIELD[key]) setDirty(true);
+    if (PR_VAL_FIELD[key] || TOTAL_PR_VAL_FIELD[key]) setDirty(true);
   }, []);
+
+  // TOTAL shown for a stage: the user's override, else the live sum.
+  const totalFor = (stage: string) =>
+    manualTotals.has(stage) ? values[cellKey('TOTAL', stage, 'PR VAL')] ?? '' : sumPrVal(values, stage);
+
+  const handleTotalChange = (stage: string, v: string) => {
+    const key = cellKey('TOTAL', stage, 'PR VAL');
+    setManualTotals((prev) => {
+      const next = new Set(prev);
+      if (v.trim() === '') next.delete(stage);
+      else next.add(stage);
+      return next;
+    });
+    handleChange(key, v);
+  };
 
   const handleSave = () => {
     if (!onSave) return;
     const updates: Record<string, string | null> = {};
     for (const [key, field] of Object.entries(PR_VAL_FIELD)) updates[field] = values[key] || null;
+    for (const stage of STAGES) updates[TOTAL_PR_VAL_FIELD[cellKey('TOTAL', stage, 'PR VAL')]] = totalFor(stage) || null;
     onSave(updates);
     setDirty(false);
   };
@@ -222,11 +271,34 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
                     )}
                   </tr>
                 ))}
+                <tr className="border-t-2 border-slate-300 bg-slate-50/60">
+                  <td className="px-2.5 py-1.5 font-bold text-slate-900">TOTAL</td>
+                  {STAGES.map((stage, si) =>
+                    MEASURES.map((measure, mi) => {
+                      const key = cellKey('TOTAL', stage, measure);
+                      return (
+                        <td key={key} className={cn('px-1 py-1', groupEdge(si, mi), stage === 'FINAL' && 'bg-slate-50')}>
+                          {measure === 'PR VAL' ? (
+                            <TextCell
+                              value={totalFor(stage)}
+                              disabled={locked}
+                              numeric
+                              placeholder="—"
+                              onChange={(v) => handleTotalChange(stage, v)}
+                            />
+                          ) : (
+                            <span className="block text-center text-slate-400">—</span>
+                          )}
+                        </td>
+                      );
+                    }),
+                  )}
+                </tr>
               </tbody>
             </table>
           </div>
           <div className="border-t border-slate-100 px-2.5 py-1.5 text-[11.5px] text-slate-500">
-            Cutting has no SAM — only PR VAL. All other cells are required.
+            Cutting has no SAM — only PR VAL. All other cells are required. TOTAL = sum of PR VAL (type to override, clear to go back to the sum).
           </div>
         </>
       )}
