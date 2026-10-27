@@ -4811,6 +4811,8 @@ const ArticleCard = React.memo(
                           .map((a) => renderAttributeRow(a, false, true))}
 
                       {/* FG: cost summary under SEGMENT — read-only, from each card's saved values.
+                          FAB = the Fab card's per-unit costs on a per-piece basis, same formula as the
+                          Precise Costing export's FAB row: cost × PR PC CONS. × (100 + WST 4%) / 100;
                           BODY = the CMP COST TOTAL row (BGT / ACT / VENDOR / FINAL PR VAL);
                           PKG COST = sum of its saved NET RATEs, in AUTO-BGT and ROUGH-V2 only. */}
                       {!allowGroups && (() => {
@@ -4828,6 +4830,17 @@ const ArticleCard = React.memo(
                         const fmt = (n: number | null) =>
                           n == null ? '—' : n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                         const rows = COST_SOURCES.map((s) => ({ label: s.label, title: s.title, vals: s.fields.map(numOf) }));
+                        // FAB per piece: PR PC CONS. = first of precise kg, rough kg, precise meter, rough meter
+                        // (as in the export); no consumption → no FAB cost.
+                        const FAB_WST_PCT = 4;
+                        const fabCons = ['preciseConsumptionKg', 'roughConsumptionKg', 'preciseConsumptionMeter', 'roughConsumptionMeter']
+                          .map(numOf)
+                          .find((v): v is number => v != null) ?? null;
+                        rows[0] = {
+                          ...rows[0],
+                          title: 'FAB card cost × PR PC CONS. × (100 + 4% WST) / 100 — as in Precise Costing',
+                          vals: rows[0].vals.map((v) => (v == null || fabCons == null ? null : (v * fabCons * (100 + FAB_WST_PCT)) / 100)),
+                        };
                         // PKG COST: saved NET RATE total goes to AUTO-BGT and ROUGH-V2; no VDR / FINAL.
                         const pkgRates = Object.values(PKG_RATE_FIELDS).map(numOf).filter((v): v is number => v != null);
                         const pkgTotal = pkgRates.length ? pkgRates.reduce((a, b) => a + b, 0) : null;
