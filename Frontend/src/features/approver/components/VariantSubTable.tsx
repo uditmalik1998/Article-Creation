@@ -25,6 +25,8 @@ interface VariantSubTableProps {
   onRefresh: () => void;
   pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
   refreshKey?: number;
+  /** Major category was just changed: the server is re-creating the colour variants. */
+  rebuilding?: boolean;
 }
 
 // ── Add Color modal ───────────────────────────────────────────────────────────
@@ -375,6 +377,7 @@ const VariantSubTable: React.FC<VariantSubTableProps> = ({
   onRefresh,
   pathType,
   refreshKey,
+  rebuilding,
 }) => {
   const [variants, setVariants] = useState<ApproverItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -566,11 +569,15 @@ const VariantSubTable: React.FC<VariantSubTableProps> = ({
     return <StatusPill tone="slate">Pending SAP</StatusPill>;
   };
 
-  if (loading) {
+  if (loading || rebuilding) {
     return (
-      <div className="flex items-center justify-center gap-2 py-4">
+      <div className="flex items-center justify-center gap-2 py-4" role="status">
         <Spinner size="sm" />
-        <span className="text-sm text-muted-foreground">Loading variants…</span>
+        <span className="text-sm text-muted-foreground">
+          {rebuilding
+            ? `Re-creating colour variants with ${genericRecord.majorCategory || 'the new major category'} sizes…`
+            : 'Loading variants…'}
+        </span>
       </div>
     );
   }

@@ -189,6 +189,58 @@ export async function addColorVariants(
   return created;
 }
 
+/**
+ * Major category changed on a generic: its size variants were built from the old
+ * category's sizes, so delete them and re-create every colour (keeping its photo)
+ * with all active sizes of the new category. The caller must already have
+ * checked that no variant is in SAP and passes the new category's sizes.
+ * One read + one transaction (deleteMany + createMany), so the save stays quick.
+ */
+export async function rebuildVariantsForMajCat(
+  generic: {
+    id: string; articleNumber: string | null; division: string | null; subDivision: string | null;
+    majorCategory: string | null; vendorName: string | null; vendorCode: string | null;
+    designNumber: string | null; mrp: any; rate: any; imageUrl: string | null;
+  },
+  sizes: string[],
+): Promise<{ colors: string[]; created: number }> {
+  const old = await prisma.fgVariantArticleData.findMany({
+    where: { genericArticleId: generic.id },
+    orderBy: { createdAt: 'asc' },
+    select: { variantColor: true, imageUrl: true },
+  });
+  const imageByColor = new Map<string, string | null>();
+  for (const v of old) {
+    const color = (v.variantColor || '').trim().toUpperCase();
+    if (color && !imageByColor.has(color)) imageByColor.set(color, v.imageUrl || generic.imageUrl || null);
+  }
+  const rows = [...imageByColor].flatMap(([color, imageUrl]) =>
+    sizes.map((size) => ({
+      id: randomUUID(),
+      genericArticleId: generic.id,
+      genericArticleNumber: generic.articleNumber || null,
+      variantColor: color,
+      variantSize: size,
+      division: generic.division || null,
+      subDivision: generic.subDivision || null,
+      majorCategory: generic.majorCategory || null,
+      vendorName: generic.vendorName || null,
+      vendorCode: generic.vendorCode || null,
+      designNumber: generic.designNumber || null,
+      mrp: generic.mrp ?? null,
+      rate: generic.rate ?? null,
+      imageUrl,
+      approvalStatus: 'PENDING',
+      sapSyncStatus: 'NOT_SYNCED',
+    })),
+  );
+  await prisma.$transaction([
+    prisma.fgVariantArticleData.deleteMany({ where: { genericArticleId: generic.id } }),
+    prisma.fgVariantArticleData.createMany({ data: rows }),
+  ]);
+  return { colors: [...imageByColor.keys()], created: rows.length };
+}
+
 export async function syncGenericToVariants(genericId: string, updatedData: Record<string, any>): Promise<void> {
   try {
     // Remove variant-specific fields from sync payload
