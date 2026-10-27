@@ -15891,6 +15891,14 @@ export namespace Prisma {
     finishingActPrVal: Decimal | null
     finishingVendorPrVal: Decimal | null
     finishingFinalPrVal: Decimal | null
+    totalBgtPrVal: Decimal | null
+    totalActPrVal: Decimal | null
+    totalVendorPrVal: Decimal | null
+    totalFinalPrVal: Decimal | null
+    bTrimTotalAutoBgt: Decimal | null
+    bTrimTotalRoughV2: Decimal | null
+    bTrimTotalVdrCost: Decimal | null
+    bTrimTotalFinalCost: Decimal | null
     mBtnAutoBgt: Decimal | null
     mBtnRoughV2: Decimal | null
     mBtnVdrCost: Decimal | null
@@ -16053,6 +16061,10 @@ export namespace Prisma {
     washingRoughV2: Decimal | null
     washingVendorCost: Decimal | null
     washingFinalCost: Decimal | null
+    vaddTotalAutoBgt: Decimal | null
+    vaddTotalRoughV2: Decimal | null
+    vaddTotalVendorCost: Decimal | null
+    vaddTotalFinalCost: Decimal | null
     boppNetPrice: Decimal | null
     ctnNetPrice: Decimal | null
     barcodeNetPrice: Decimal | null
@@ -16102,6 +16114,14 @@ export namespace Prisma {
     finishingActPrVal: Decimal | null
     finishingVendorPrVal: Decimal | null
     finishingFinalPrVal: Decimal | null
+    totalBgtPrVal: Decimal | null
+    totalActPrVal: Decimal | null
+    totalVendorPrVal: Decimal | null
+    totalFinalPrVal: Decimal | null
+    bTrimTotalAutoBgt: Decimal | null
+    bTrimTotalRoughV2: Decimal | null
+    bTrimTotalVdrCost: Decimal | null
+    bTrimTotalFinalCost: Decimal | null
     mBtnAutoBgt: Decimal | null
     mBtnRoughV2: Decimal | null
     mBtnVdrCost: Decimal | null
@@ -16264,6 +16284,10 @@ export namespace Prisma {
     washingRoughV2: Decimal | null
     washingVendorCost: Decimal | null
     washingFinalCost: Decimal | null
+    vaddTotalAutoBgt: Decimal | null
+    vaddTotalRoughV2: Decimal | null
+    vaddTotalVendorCost: Decimal | null
+    vaddTotalFinalCost: Decimal | null
     boppNetPrice: Decimal | null
     ctnNetPrice: Decimal | null
     barcodeNetPrice: Decimal | null
@@ -16400,7 +16424,15 @@ export namespace Prisma {
     finishingActPrVal: Decimal | null
     finishingVendorPrVal: Decimal | null
     finishingFinalPrVal: Decimal | null
+    totalBgtPrVal: Decimal | null
+    totalActPrVal: Decimal | null
+    totalVendorPrVal: Decimal | null
+    totalFinalPrVal: Decimal | null
     bTrimType: string | null
+    bTrimTotalAutoBgt: Decimal | null
+    bTrimTotalRoughV2: Decimal | null
+    bTrimTotalVdrCost: Decimal | null
+    bTrimTotalFinalCost: Decimal | null
     mBtnAutoBgt: Decimal | null
     mBtnRoughV2: Decimal | null
     mBtnVdrCost: Decimal | null
@@ -16563,6 +16595,10 @@ export namespace Prisma {
     washingRoughV2: Decimal | null
     washingVendorCost: Decimal | null
     washingFinalCost: Decimal | null
+    vaddTotalAutoBgt: Decimal | null
+    vaddTotalRoughV2: Decimal | null
+    vaddTotalVendorCost: Decimal | null
+    vaddTotalFinalCost: Decimal | null
     pkgCostType: string | null
     boppNetPrice: Decimal | null
     ctnNetPrice: Decimal | null
@@ -16742,7 +16778,15 @@ export namespace Prisma {
     finishingActPrVal: Decimal | null
     finishingVendorPrVal: Decimal | null
     finishingFinalPrVal: Decimal | null
+    totalBgtPrVal: Decimal | null
+    totalActPrVal: Decimal | null
+    totalVendorPrVal: Decimal | null
+    totalFinalPrVal: Decimal | null
     bTrimType: string | null
+    bTrimTotalAutoBgt: Decimal | null
+    bTrimTotalRoughV2: Decimal | null
+    bTrimTotalVdrCost: Decimal | null
+    bTrimTotalFinalCost: Decimal | null
     mBtnAutoBgt: Decimal | null
     mBtnRoughV2: Decimal | null
     mBtnVdrCost: Decimal | null
@@ -16905,6 +16949,10 @@ export namespace Prisma {
     washingRoughV2: Decimal | null
     washingVendorCost: Decimal | null
     washingFinalCost: Decimal | null
+    vaddTotalAutoBgt: Decimal | null
+    vaddTotalRoughV2: Decimal | null
+    vaddTotalVendorCost: Decimal | null
+    vaddTotalFinalCost: Decimal | null
     pkgCostType: string | null
     boppNetPrice: Decimal | null
     ctnNetPrice: Decimal | null
@@ -17084,7 +17132,15 @@ export namespace Prisma {
     finishingActPrVal: number
     finishingVendorPrVal: number
     finishingFinalPrVal: number
+    totalBgtPrVal: number
+    totalActPrVal: number
+    totalVendorPrVal: number
+    totalFinalPrVal: number
     bTrimType: number
+    bTrimTotalAutoBgt: number
+    bTrimTotalRoughV2: number
+    bTrimTotalVdrCost: number
+    bTrimTotalFinalCost: number
     mBtnAutoBgt: number
     mBtnRoughV2: number
     mBtnVdrCost: number
@@ -17249,6 +17305,10 @@ export namespace Prisma {
     washingFinalCost: number
     vaddPrintJson: number
     vaddEmpJson: number
+    vaddTotalAutoBgt: number
+    vaddTotalRoughV2: number
+    vaddTotalVendorCost: number
+    vaddTotalFinalCost: number
     pkgCostType: number
     boppNetPrice: number
     ctnNetPrice: number
@@ -17344,6 +17404,14 @@ export namespace Prisma {
     finishingActPrVal?: true
     finishingVendorPrVal?: true
     finishingFinalPrVal?: true
+    totalBgtPrVal?: true
+    totalActPrVal?: true
+    totalVendorPrVal?: true
+    totalFinalPrVal?: true
+    bTrimTotalAutoBgt?: true
+    bTrimTotalRoughV2?: true
+    bTrimTotalVdrCost?: true
+    bTrimTotalFinalCost?: true
     mBtnAutoBgt?: true
     mBtnRoughV2?: true
     mBtnVdrCost?: true
@@ -17506,6 +17574,10 @@ export namespace Prisma {
     washingRoughV2?: true
     washingVendorCost?: true
     washingFinalCost?: true
+    vaddTotalAutoBgt?: true
+    vaddTotalRoughV2?: true
+    vaddTotalVendorCost?: true
+    vaddTotalFinalCost?: true
     boppNetPrice?: true
     ctnNetPrice?: true
     barcodeNetPrice?: true
@@ -17555,6 +17627,14 @@ export namespace Prisma {
     finishingActPrVal?: true
     finishingVendorPrVal?: true
     finishingFinalPrVal?: true
+    totalBgtPrVal?: true
+    totalActPrVal?: true
+    totalVendorPrVal?: true
+    totalFinalPrVal?: true
+    bTrimTotalAutoBgt?: true
+    bTrimTotalRoughV2?: true
+    bTrimTotalVdrCost?: true
+    bTrimTotalFinalCost?: true
     mBtnAutoBgt?: true
     mBtnRoughV2?: true
     mBtnVdrCost?: true
@@ -17717,6 +17797,10 @@ export namespace Prisma {
     washingRoughV2?: true
     washingVendorCost?: true
     washingFinalCost?: true
+    vaddTotalAutoBgt?: true
+    vaddTotalRoughV2?: true
+    vaddTotalVendorCost?: true
+    vaddTotalFinalCost?: true
     boppNetPrice?: true
     ctnNetPrice?: true
     barcodeNetPrice?: true
@@ -17853,7 +17937,15 @@ export namespace Prisma {
     finishingActPrVal?: true
     finishingVendorPrVal?: true
     finishingFinalPrVal?: true
+    totalBgtPrVal?: true
+    totalActPrVal?: true
+    totalVendorPrVal?: true
+    totalFinalPrVal?: true
     bTrimType?: true
+    bTrimTotalAutoBgt?: true
+    bTrimTotalRoughV2?: true
+    bTrimTotalVdrCost?: true
+    bTrimTotalFinalCost?: true
     mBtnAutoBgt?: true
     mBtnRoughV2?: true
     mBtnVdrCost?: true
@@ -18016,6 +18108,10 @@ export namespace Prisma {
     washingRoughV2?: true
     washingVendorCost?: true
     washingFinalCost?: true
+    vaddTotalAutoBgt?: true
+    vaddTotalRoughV2?: true
+    vaddTotalVendorCost?: true
+    vaddTotalFinalCost?: true
     pkgCostType?: true
     boppNetPrice?: true
     ctnNetPrice?: true
@@ -18195,7 +18291,15 @@ export namespace Prisma {
     finishingActPrVal?: true
     finishingVendorPrVal?: true
     finishingFinalPrVal?: true
+    totalBgtPrVal?: true
+    totalActPrVal?: true
+    totalVendorPrVal?: true
+    totalFinalPrVal?: true
     bTrimType?: true
+    bTrimTotalAutoBgt?: true
+    bTrimTotalRoughV2?: true
+    bTrimTotalVdrCost?: true
+    bTrimTotalFinalCost?: true
     mBtnAutoBgt?: true
     mBtnRoughV2?: true
     mBtnVdrCost?: true
@@ -18358,6 +18462,10 @@ export namespace Prisma {
     washingRoughV2?: true
     washingVendorCost?: true
     washingFinalCost?: true
+    vaddTotalAutoBgt?: true
+    vaddTotalRoughV2?: true
+    vaddTotalVendorCost?: true
+    vaddTotalFinalCost?: true
     pkgCostType?: true
     boppNetPrice?: true
     ctnNetPrice?: true
@@ -18537,7 +18645,15 @@ export namespace Prisma {
     finishingActPrVal?: true
     finishingVendorPrVal?: true
     finishingFinalPrVal?: true
+    totalBgtPrVal?: true
+    totalActPrVal?: true
+    totalVendorPrVal?: true
+    totalFinalPrVal?: true
     bTrimType?: true
+    bTrimTotalAutoBgt?: true
+    bTrimTotalRoughV2?: true
+    bTrimTotalVdrCost?: true
+    bTrimTotalFinalCost?: true
     mBtnAutoBgt?: true
     mBtnRoughV2?: true
     mBtnVdrCost?: true
@@ -18702,6 +18818,10 @@ export namespace Prisma {
     washingFinalCost?: true
     vaddPrintJson?: true
     vaddEmpJson?: true
+    vaddTotalAutoBgt?: true
+    vaddTotalRoughV2?: true
+    vaddTotalVendorCost?: true
+    vaddTotalFinalCost?: true
     pkgCostType?: true
     boppNetPrice?: true
     ctnNetPrice?: true
@@ -18969,7 +19089,15 @@ export namespace Prisma {
     finishingActPrVal: Decimal | null
     finishingVendorPrVal: Decimal | null
     finishingFinalPrVal: Decimal | null
+    totalBgtPrVal: Decimal | null
+    totalActPrVal: Decimal | null
+    totalVendorPrVal: Decimal | null
+    totalFinalPrVal: Decimal | null
     bTrimType: string | null
+    bTrimTotalAutoBgt: Decimal | null
+    bTrimTotalRoughV2: Decimal | null
+    bTrimTotalVdrCost: Decimal | null
+    bTrimTotalFinalCost: Decimal | null
     mBtnAutoBgt: Decimal | null
     mBtnRoughV2: Decimal | null
     mBtnVdrCost: Decimal | null
@@ -19134,6 +19262,10 @@ export namespace Prisma {
     washingFinalCost: Decimal | null
     vaddPrintJson: JsonValue | null
     vaddEmpJson: JsonValue | null
+    vaddTotalAutoBgt: Decimal | null
+    vaddTotalRoughV2: Decimal | null
+    vaddTotalVendorCost: Decimal | null
+    vaddTotalFinalCost: Decimal | null
     pkgCostType: string | null
     boppNetPrice: Decimal | null
     ctnNetPrice: Decimal | null
@@ -19333,7 +19465,15 @@ export namespace Prisma {
     finishingActPrVal?: boolean
     finishingVendorPrVal?: boolean
     finishingFinalPrVal?: boolean
+    totalBgtPrVal?: boolean
+    totalActPrVal?: boolean
+    totalVendorPrVal?: boolean
+    totalFinalPrVal?: boolean
     bTrimType?: boolean
+    bTrimTotalAutoBgt?: boolean
+    bTrimTotalRoughV2?: boolean
+    bTrimTotalVdrCost?: boolean
+    bTrimTotalFinalCost?: boolean
     mBtnAutoBgt?: boolean
     mBtnRoughV2?: boolean
     mBtnVdrCost?: boolean
@@ -19498,6 +19638,10 @@ export namespace Prisma {
     washingFinalCost?: boolean
     vaddPrintJson?: boolean
     vaddEmpJson?: boolean
+    vaddTotalAutoBgt?: boolean
+    vaddTotalRoughV2?: boolean
+    vaddTotalVendorCost?: boolean
+    vaddTotalFinalCost?: boolean
     pkgCostType?: boolean
     boppNetPrice?: boolean
     ctnNetPrice?: boolean
@@ -19684,7 +19828,15 @@ export namespace Prisma {
     finishingActPrVal?: boolean
     finishingVendorPrVal?: boolean
     finishingFinalPrVal?: boolean
+    totalBgtPrVal?: boolean
+    totalActPrVal?: boolean
+    totalVendorPrVal?: boolean
+    totalFinalPrVal?: boolean
     bTrimType?: boolean
+    bTrimTotalAutoBgt?: boolean
+    bTrimTotalRoughV2?: boolean
+    bTrimTotalVdrCost?: boolean
+    bTrimTotalFinalCost?: boolean
     mBtnAutoBgt?: boolean
     mBtnRoughV2?: boolean
     mBtnVdrCost?: boolean
@@ -19849,6 +20001,10 @@ export namespace Prisma {
     washingFinalCost?: boolean
     vaddPrintJson?: boolean
     vaddEmpJson?: boolean
+    vaddTotalAutoBgt?: boolean
+    vaddTotalRoughV2?: boolean
+    vaddTotalVendorCost?: boolean
+    vaddTotalFinalCost?: boolean
     pkgCostType?: boolean
     boppNetPrice?: boolean
     ctnNetPrice?: boolean
@@ -20032,7 +20188,15 @@ export namespace Prisma {
     finishingActPrVal?: boolean
     finishingVendorPrVal?: boolean
     finishingFinalPrVal?: boolean
+    totalBgtPrVal?: boolean
+    totalActPrVal?: boolean
+    totalVendorPrVal?: boolean
+    totalFinalPrVal?: boolean
     bTrimType?: boolean
+    bTrimTotalAutoBgt?: boolean
+    bTrimTotalRoughV2?: boolean
+    bTrimTotalVdrCost?: boolean
+    bTrimTotalFinalCost?: boolean
     mBtnAutoBgt?: boolean
     mBtnRoughV2?: boolean
     mBtnVdrCost?: boolean
@@ -20197,6 +20361,10 @@ export namespace Prisma {
     washingFinalCost?: boolean
     vaddPrintJson?: boolean
     vaddEmpJson?: boolean
+    vaddTotalAutoBgt?: boolean
+    vaddTotalRoughV2?: boolean
+    vaddTotalVendorCost?: boolean
+    vaddTotalFinalCost?: boolean
     pkgCostType?: boolean
     boppNetPrice?: boolean
     ctnNetPrice?: boolean
@@ -20380,7 +20548,15 @@ export namespace Prisma {
     finishingActPrVal?: boolean
     finishingVendorPrVal?: boolean
     finishingFinalPrVal?: boolean
+    totalBgtPrVal?: boolean
+    totalActPrVal?: boolean
+    totalVendorPrVal?: boolean
+    totalFinalPrVal?: boolean
     bTrimType?: boolean
+    bTrimTotalAutoBgt?: boolean
+    bTrimTotalRoughV2?: boolean
+    bTrimTotalVdrCost?: boolean
+    bTrimTotalFinalCost?: boolean
     mBtnAutoBgt?: boolean
     mBtnRoughV2?: boolean
     mBtnVdrCost?: boolean
@@ -20545,6 +20721,10 @@ export namespace Prisma {
     washingFinalCost?: boolean
     vaddPrintJson?: boolean
     vaddEmpJson?: boolean
+    vaddTotalAutoBgt?: boolean
+    vaddTotalRoughV2?: boolean
+    vaddTotalVendorCost?: boolean
+    vaddTotalFinalCost?: boolean
     pkgCostType?: boolean
     boppNetPrice?: boolean
     ctnNetPrice?: boolean
@@ -20601,7 +20781,7 @@ export namespace Prisma {
     imageExtractionRawData?: boolean
   }
 
-  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "oldImageUrl" | "backImageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "bTrimType" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "elasticAutoBgt" | "elasticRoughV2" | "elasticVdrCost" | "elasticFinalCost" | "fusingAutoBgt" | "fusingRoughV2" | "fusingVdrCost" | "fusingFinalCost" | "badgeAutoBgt" | "badgeRoughV2" | "badgeVdrCost" | "badgeFinalCost" | "rivetAutoBgt" | "rivetRoughV2" | "rivetVdrCost" | "rivetFinalCost" | "tapeAutoBgt" | "tapeRoughV2" | "tapeVdrCost" | "tapeFinalCost" | "otherAutoBgt" | "otherRoughV2" | "otherVdrCost" | "otherFinalCost" | "adjusterAutoBgt" | "adjusterRoughV2" | "adjusterVdrCost" | "adjusterFinalCost" | "brotchAutoBgt" | "brotchRoughV2" | "brotchVdrCost" | "brotchFinalCost" | "buckleAutoBgt" | "buckleRoughV2" | "buckleVdrCost" | "buckleFinalCost" | "eyeletsAutoBgt" | "eyeletsRoughV2" | "eyeletsVdrCost" | "eyeletsFinalCost" | "hangingDRingAutoBgt" | "hangingDRingRoughV2" | "hangingDRingVdrCost" | "hangingDRingFinalCost" | "hookAutoBgt" | "hookRoughV2" | "hookVdrCost" | "hookFinalCost" | "labelAutoBgt" | "labelRoughV2" | "labelVdrCost" | "labelFinalCost" | "laceAutoBgt" | "laceRoughV2" | "laceVdrCost" | "laceFinalCost" | "pockettingFabricAutoBgt" | "pockettingFabricRoughV2" | "pockettingFabricVdrCost" | "pockettingFabricFinalCost" | "pockettingReadymadeAutoBgt" | "pockettingReadymadeRoughV2" | "pockettingReadymadeVdrCost" | "pockettingReadymadeFinalCost" | "santaAutoBgt" | "santaRoughV2" | "santaVdrCost" | "santaFinalCost" | "stopperAutoBgt" | "stopperRoughV2" | "stopperVdrCost" | "stopperFinalCost" | "tagAutoBgt" | "tagRoughV2" | "tagVdrCost" | "tagFinalCost" | "tasselsAutoBgt" | "tasselsRoughV2" | "tasselsVdrCost" | "tasselsFinalCost" | "mBtnRate" | "mBtnQty" | "dcRate" | "dcQty" | "zipRate" | "zipQty" | "patchRate" | "patchQty" | "hTrfRate" | "hTrfQty" | "elasticRate" | "elasticQty" | "fusingRate" | "fusingQty" | "badgeRate" | "badgeQty" | "rivetRate" | "rivetQty" | "tapeRate" | "tapeQty" | "otherRate" | "otherQty" | "adjusterRate" | "adjusterQty" | "brotchRate" | "brotchQty" | "buckleRate" | "buckleQty" | "eyeletsRate" | "eyeletsQty" | "hangingDRingRate" | "hangingDRingQty" | "hookRate" | "hookQty" | "labelRate" | "labelQty" | "laceRate" | "laceQty" | "pockettingFabricRate" | "pockettingFabricQty" | "pockettingReadymadeRate" | "pockettingReadymadeQty" | "santaRate" | "santaQty" | "stopperRate" | "stopperQty" | "tagRate" | "tagQty" | "tasselsRate" | "tasselsQty" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "vaddPrintJson" | "vaddEmpJson" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "setLinkStatus" | "setLinkMessage" | "setLinkAttempts" | "setLinkedAt" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
+  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "oldImageUrl" | "backImageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "totalBgtPrVal" | "totalActPrVal" | "totalVendorPrVal" | "totalFinalPrVal" | "bTrimType" | "bTrimTotalAutoBgt" | "bTrimTotalRoughV2" | "bTrimTotalVdrCost" | "bTrimTotalFinalCost" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "elasticAutoBgt" | "elasticRoughV2" | "elasticVdrCost" | "elasticFinalCost" | "fusingAutoBgt" | "fusingRoughV2" | "fusingVdrCost" | "fusingFinalCost" | "badgeAutoBgt" | "badgeRoughV2" | "badgeVdrCost" | "badgeFinalCost" | "rivetAutoBgt" | "rivetRoughV2" | "rivetVdrCost" | "rivetFinalCost" | "tapeAutoBgt" | "tapeRoughV2" | "tapeVdrCost" | "tapeFinalCost" | "otherAutoBgt" | "otherRoughV2" | "otherVdrCost" | "otherFinalCost" | "adjusterAutoBgt" | "adjusterRoughV2" | "adjusterVdrCost" | "adjusterFinalCost" | "brotchAutoBgt" | "brotchRoughV2" | "brotchVdrCost" | "brotchFinalCost" | "buckleAutoBgt" | "buckleRoughV2" | "buckleVdrCost" | "buckleFinalCost" | "eyeletsAutoBgt" | "eyeletsRoughV2" | "eyeletsVdrCost" | "eyeletsFinalCost" | "hangingDRingAutoBgt" | "hangingDRingRoughV2" | "hangingDRingVdrCost" | "hangingDRingFinalCost" | "hookAutoBgt" | "hookRoughV2" | "hookVdrCost" | "hookFinalCost" | "labelAutoBgt" | "labelRoughV2" | "labelVdrCost" | "labelFinalCost" | "laceAutoBgt" | "laceRoughV2" | "laceVdrCost" | "laceFinalCost" | "pockettingFabricAutoBgt" | "pockettingFabricRoughV2" | "pockettingFabricVdrCost" | "pockettingFabricFinalCost" | "pockettingReadymadeAutoBgt" | "pockettingReadymadeRoughV2" | "pockettingReadymadeVdrCost" | "pockettingReadymadeFinalCost" | "santaAutoBgt" | "santaRoughV2" | "santaVdrCost" | "santaFinalCost" | "stopperAutoBgt" | "stopperRoughV2" | "stopperVdrCost" | "stopperFinalCost" | "tagAutoBgt" | "tagRoughV2" | "tagVdrCost" | "tagFinalCost" | "tasselsAutoBgt" | "tasselsRoughV2" | "tasselsVdrCost" | "tasselsFinalCost" | "mBtnRate" | "mBtnQty" | "dcRate" | "dcQty" | "zipRate" | "zipQty" | "patchRate" | "patchQty" | "hTrfRate" | "hTrfQty" | "elasticRate" | "elasticQty" | "fusingRate" | "fusingQty" | "badgeRate" | "badgeQty" | "rivetRate" | "rivetQty" | "tapeRate" | "tapeQty" | "otherRate" | "otherQty" | "adjusterRate" | "adjusterQty" | "brotchRate" | "brotchQty" | "buckleRate" | "buckleQty" | "eyeletsRate" | "eyeletsQty" | "hangingDRingRate" | "hangingDRingQty" | "hookRate" | "hookQty" | "labelRate" | "labelQty" | "laceRate" | "laceQty" | "pockettingFabricRate" | "pockettingFabricQty" | "pockettingReadymadeRate" | "pockettingReadymadeQty" | "santaRate" | "santaQty" | "stopperRate" | "stopperQty" | "tagRate" | "tagQty" | "tasselsRate" | "tasselsQty" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "vaddPrintJson" | "vaddEmpJson" | "vaddTotalAutoBgt" | "vaddTotalRoughV2" | "vaddTotalVendorCost" | "vaddTotalFinalCost" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "setLinkStatus" | "setLinkMessage" | "setLinkAttempts" | "setLinkedAt" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
   export type ExtractionResultFlatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     comboParent?: boolean | ExtractionResultFlat$comboParentArgs<ExtArgs>
@@ -20754,7 +20934,15 @@ export namespace Prisma {
       finishingActPrVal: Prisma.Decimal | null
       finishingVendorPrVal: Prisma.Decimal | null
       finishingFinalPrVal: Prisma.Decimal | null
+      totalBgtPrVal: Prisma.Decimal | null
+      totalActPrVal: Prisma.Decimal | null
+      totalVendorPrVal: Prisma.Decimal | null
+      totalFinalPrVal: Prisma.Decimal | null
       bTrimType: string | null
+      bTrimTotalAutoBgt: Prisma.Decimal | null
+      bTrimTotalRoughV2: Prisma.Decimal | null
+      bTrimTotalVdrCost: Prisma.Decimal | null
+      bTrimTotalFinalCost: Prisma.Decimal | null
       mBtnAutoBgt: Prisma.Decimal | null
       mBtnRoughV2: Prisma.Decimal | null
       mBtnVdrCost: Prisma.Decimal | null
@@ -20919,6 +21107,10 @@ export namespace Prisma {
       washingFinalCost: Prisma.Decimal | null
       vaddPrintJson: Prisma.JsonValue | null
       vaddEmpJson: Prisma.JsonValue | null
+      vaddTotalAutoBgt: Prisma.Decimal | null
+      vaddTotalRoughV2: Prisma.Decimal | null
+      vaddTotalVendorCost: Prisma.Decimal | null
+      vaddTotalFinalCost: Prisma.Decimal | null
       pkgCostType: string | null
       boppNetPrice: Prisma.Decimal | null
       ctnNetPrice: Prisma.Decimal | null
@@ -21524,7 +21716,15 @@ export namespace Prisma {
     readonly finishingActPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly finishingVendorPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly finishingFinalPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly totalBgtPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly totalActPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly totalVendorPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly totalFinalPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly bTrimType: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly bTrimTotalAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly bTrimTotalRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly bTrimTotalVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly bTrimTotalFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly mBtnAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly mBtnRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly mBtnVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
@@ -21689,6 +21889,10 @@ export namespace Prisma {
     readonly washingFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly vaddPrintJson: FieldRef<"ExtractionResultFlat", 'Json'>
     readonly vaddEmpJson: FieldRef<"ExtractionResultFlat", 'Json'>
+    readonly vaddTotalAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly vaddTotalRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly vaddTotalVendorCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly vaddTotalFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly pkgCostType: FieldRef<"ExtractionResultFlat", 'String'>
     readonly boppNetPrice: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly ctnNetPrice: FieldRef<"ExtractionResultFlat", 'Decimal'>
@@ -91786,7 +91990,15 @@ export namespace Prisma {
     finishingActPrVal: 'finishingActPrVal',
     finishingVendorPrVal: 'finishingVendorPrVal',
     finishingFinalPrVal: 'finishingFinalPrVal',
+    totalBgtPrVal: 'totalBgtPrVal',
+    totalActPrVal: 'totalActPrVal',
+    totalVendorPrVal: 'totalVendorPrVal',
+    totalFinalPrVal: 'totalFinalPrVal',
     bTrimType: 'bTrimType',
+    bTrimTotalAutoBgt: 'bTrimTotalAutoBgt',
+    bTrimTotalRoughV2: 'bTrimTotalRoughV2',
+    bTrimTotalVdrCost: 'bTrimTotalVdrCost',
+    bTrimTotalFinalCost: 'bTrimTotalFinalCost',
     mBtnAutoBgt: 'mBtnAutoBgt',
     mBtnRoughV2: 'mBtnRoughV2',
     mBtnVdrCost: 'mBtnVdrCost',
@@ -91951,6 +92163,10 @@ export namespace Prisma {
     washingFinalCost: 'washingFinalCost',
     vaddPrintJson: 'vaddPrintJson',
     vaddEmpJson: 'vaddEmpJson',
+    vaddTotalAutoBgt: 'vaddTotalAutoBgt',
+    vaddTotalRoughV2: 'vaddTotalRoughV2',
+    vaddTotalVendorCost: 'vaddTotalVendorCost',
+    vaddTotalFinalCost: 'vaddTotalFinalCost',
     pkgCostType: 'pkgCostType',
     boppNetPrice: 'boppNetPrice',
     ctnNetPrice: 'ctnNetPrice',
@@ -95891,7 +96107,15 @@ export namespace Prisma {
     finishingActPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bTrimType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    bTrimTotalAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -96056,6 +96280,10 @@ export namespace Prisma {
     washingFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: JsonNullableFilter<"ExtractionResultFlat">
     vaddEmpJson?: JsonNullableFilter<"ExtractionResultFlat">
+    vaddTotalAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     boppNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -96241,7 +96469,15 @@ export namespace Prisma {
     finishingActPrVal?: SortOrderInput | SortOrder
     finishingVendorPrVal?: SortOrderInput | SortOrder
     finishingFinalPrVal?: SortOrderInput | SortOrder
+    totalBgtPrVal?: SortOrderInput | SortOrder
+    totalActPrVal?: SortOrderInput | SortOrder
+    totalVendorPrVal?: SortOrderInput | SortOrder
+    totalFinalPrVal?: SortOrderInput | SortOrder
     bTrimType?: SortOrderInput | SortOrder
+    bTrimTotalAutoBgt?: SortOrderInput | SortOrder
+    bTrimTotalRoughV2?: SortOrderInput | SortOrder
+    bTrimTotalVdrCost?: SortOrderInput | SortOrder
+    bTrimTotalFinalCost?: SortOrderInput | SortOrder
     mBtnAutoBgt?: SortOrderInput | SortOrder
     mBtnRoughV2?: SortOrderInput | SortOrder
     mBtnVdrCost?: SortOrderInput | SortOrder
@@ -96406,6 +96642,10 @@ export namespace Prisma {
     washingFinalCost?: SortOrderInput | SortOrder
     vaddPrintJson?: SortOrderInput | SortOrder
     vaddEmpJson?: SortOrderInput | SortOrder
+    vaddTotalAutoBgt?: SortOrderInput | SortOrder
+    vaddTotalRoughV2?: SortOrderInput | SortOrder
+    vaddTotalVendorCost?: SortOrderInput | SortOrder
+    vaddTotalFinalCost?: SortOrderInput | SortOrder
     pkgCostType?: SortOrderInput | SortOrder
     boppNetPrice?: SortOrderInput | SortOrder
     ctnNetPrice?: SortOrderInput | SortOrder
@@ -96596,7 +96836,15 @@ export namespace Prisma {
     finishingActPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bTrimType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    bTrimTotalAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -96761,6 +97009,10 @@ export namespace Prisma {
     washingFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: JsonNullableFilter<"ExtractionResultFlat">
     vaddEmpJson?: JsonNullableFilter<"ExtractionResultFlat">
+    vaddTotalAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     boppNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -96945,7 +97197,15 @@ export namespace Prisma {
     finishingActPrVal?: SortOrderInput | SortOrder
     finishingVendorPrVal?: SortOrderInput | SortOrder
     finishingFinalPrVal?: SortOrderInput | SortOrder
+    totalBgtPrVal?: SortOrderInput | SortOrder
+    totalActPrVal?: SortOrderInput | SortOrder
+    totalVendorPrVal?: SortOrderInput | SortOrder
+    totalFinalPrVal?: SortOrderInput | SortOrder
     bTrimType?: SortOrderInput | SortOrder
+    bTrimTotalAutoBgt?: SortOrderInput | SortOrder
+    bTrimTotalRoughV2?: SortOrderInput | SortOrder
+    bTrimTotalVdrCost?: SortOrderInput | SortOrder
+    bTrimTotalFinalCost?: SortOrderInput | SortOrder
     mBtnAutoBgt?: SortOrderInput | SortOrder
     mBtnRoughV2?: SortOrderInput | SortOrder
     mBtnVdrCost?: SortOrderInput | SortOrder
@@ -97110,6 +97370,10 @@ export namespace Prisma {
     washingFinalCost?: SortOrderInput | SortOrder
     vaddPrintJson?: SortOrderInput | SortOrder
     vaddEmpJson?: SortOrderInput | SortOrder
+    vaddTotalAutoBgt?: SortOrderInput | SortOrder
+    vaddTotalRoughV2?: SortOrderInput | SortOrder
+    vaddTotalVendorCost?: SortOrderInput | SortOrder
+    vaddTotalFinalCost?: SortOrderInput | SortOrder
     pkgCostType?: SortOrderInput | SortOrder
     boppNetPrice?: SortOrderInput | SortOrder
     ctnNetPrice?: SortOrderInput | SortOrder
@@ -97298,7 +97562,15 @@ export namespace Prisma {
     finishingActPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bTrimType?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    bTrimTotalAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -97463,6 +97735,10 @@ export namespace Prisma {
     washingFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: JsonNullableWithAggregatesFilter<"ExtractionResultFlat">
     vaddEmpJson?: JsonNullableWithAggregatesFilter<"ExtractionResultFlat">
+    vaddTotalAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     boppNetPrice?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -105656,7 +105932,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -105821,6 +106105,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -106004,7 +106292,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -106169,6 +106465,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -106350,7 +106650,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -106515,6 +106823,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -106698,7 +107010,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -106863,6 +107183,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -107045,7 +107369,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -107210,6 +107542,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -107389,7 +107725,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -107554,6 +107898,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -107732,7 +108080,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -107897,6 +108253,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -117843,7 +118203,15 @@ export namespace Prisma {
     finishingActPrVal?: SortOrder
     finishingVendorPrVal?: SortOrder
     finishingFinalPrVal?: SortOrder
+    totalBgtPrVal?: SortOrder
+    totalActPrVal?: SortOrder
+    totalVendorPrVal?: SortOrder
+    totalFinalPrVal?: SortOrder
     bTrimType?: SortOrder
+    bTrimTotalAutoBgt?: SortOrder
+    bTrimTotalRoughV2?: SortOrder
+    bTrimTotalVdrCost?: SortOrder
+    bTrimTotalFinalCost?: SortOrder
     mBtnAutoBgt?: SortOrder
     mBtnRoughV2?: SortOrder
     mBtnVdrCost?: SortOrder
@@ -118008,6 +118376,10 @@ export namespace Prisma {
     washingFinalCost?: SortOrder
     vaddPrintJson?: SortOrder
     vaddEmpJson?: SortOrder
+    vaddTotalAutoBgt?: SortOrder
+    vaddTotalRoughV2?: SortOrder
+    vaddTotalVendorCost?: SortOrder
+    vaddTotalFinalCost?: SortOrder
     pkgCostType?: SortOrder
     boppNetPrice?: SortOrder
     ctnNetPrice?: SortOrder
@@ -118101,6 +118473,14 @@ export namespace Prisma {
     finishingActPrVal?: SortOrder
     finishingVendorPrVal?: SortOrder
     finishingFinalPrVal?: SortOrder
+    totalBgtPrVal?: SortOrder
+    totalActPrVal?: SortOrder
+    totalVendorPrVal?: SortOrder
+    totalFinalPrVal?: SortOrder
+    bTrimTotalAutoBgt?: SortOrder
+    bTrimTotalRoughV2?: SortOrder
+    bTrimTotalVdrCost?: SortOrder
+    bTrimTotalFinalCost?: SortOrder
     mBtnAutoBgt?: SortOrder
     mBtnRoughV2?: SortOrder
     mBtnVdrCost?: SortOrder
@@ -118263,6 +118643,10 @@ export namespace Prisma {
     washingRoughV2?: SortOrder
     washingVendorCost?: SortOrder
     washingFinalCost?: SortOrder
+    vaddTotalAutoBgt?: SortOrder
+    vaddTotalRoughV2?: SortOrder
+    vaddTotalVendorCost?: SortOrder
+    vaddTotalFinalCost?: SortOrder
     boppNetPrice?: SortOrder
     ctnNetPrice?: SortOrder
     barcodeNetPrice?: SortOrder
@@ -118399,7 +118783,15 @@ export namespace Prisma {
     finishingActPrVal?: SortOrder
     finishingVendorPrVal?: SortOrder
     finishingFinalPrVal?: SortOrder
+    totalBgtPrVal?: SortOrder
+    totalActPrVal?: SortOrder
+    totalVendorPrVal?: SortOrder
+    totalFinalPrVal?: SortOrder
     bTrimType?: SortOrder
+    bTrimTotalAutoBgt?: SortOrder
+    bTrimTotalRoughV2?: SortOrder
+    bTrimTotalVdrCost?: SortOrder
+    bTrimTotalFinalCost?: SortOrder
     mBtnAutoBgt?: SortOrder
     mBtnRoughV2?: SortOrder
     mBtnVdrCost?: SortOrder
@@ -118562,6 +118954,10 @@ export namespace Prisma {
     washingRoughV2?: SortOrder
     washingVendorCost?: SortOrder
     washingFinalCost?: SortOrder
+    vaddTotalAutoBgt?: SortOrder
+    vaddTotalRoughV2?: SortOrder
+    vaddTotalVendorCost?: SortOrder
+    vaddTotalFinalCost?: SortOrder
     pkgCostType?: SortOrder
     boppNetPrice?: SortOrder
     ctnNetPrice?: SortOrder
@@ -118741,7 +119137,15 @@ export namespace Prisma {
     finishingActPrVal?: SortOrder
     finishingVendorPrVal?: SortOrder
     finishingFinalPrVal?: SortOrder
+    totalBgtPrVal?: SortOrder
+    totalActPrVal?: SortOrder
+    totalVendorPrVal?: SortOrder
+    totalFinalPrVal?: SortOrder
     bTrimType?: SortOrder
+    bTrimTotalAutoBgt?: SortOrder
+    bTrimTotalRoughV2?: SortOrder
+    bTrimTotalVdrCost?: SortOrder
+    bTrimTotalFinalCost?: SortOrder
     mBtnAutoBgt?: SortOrder
     mBtnRoughV2?: SortOrder
     mBtnVdrCost?: SortOrder
@@ -118904,6 +119308,10 @@ export namespace Prisma {
     washingRoughV2?: SortOrder
     washingVendorCost?: SortOrder
     washingFinalCost?: SortOrder
+    vaddTotalAutoBgt?: SortOrder
+    vaddTotalRoughV2?: SortOrder
+    vaddTotalVendorCost?: SortOrder
+    vaddTotalFinalCost?: SortOrder
     pkgCostType?: SortOrder
     boppNetPrice?: SortOrder
     ctnNetPrice?: SortOrder
@@ -118996,6 +119404,14 @@ export namespace Prisma {
     finishingActPrVal?: SortOrder
     finishingVendorPrVal?: SortOrder
     finishingFinalPrVal?: SortOrder
+    totalBgtPrVal?: SortOrder
+    totalActPrVal?: SortOrder
+    totalVendorPrVal?: SortOrder
+    totalFinalPrVal?: SortOrder
+    bTrimTotalAutoBgt?: SortOrder
+    bTrimTotalRoughV2?: SortOrder
+    bTrimTotalVdrCost?: SortOrder
+    bTrimTotalFinalCost?: SortOrder
     mBtnAutoBgt?: SortOrder
     mBtnRoughV2?: SortOrder
     mBtnVdrCost?: SortOrder
@@ -119158,6 +119574,10 @@ export namespace Prisma {
     washingRoughV2?: SortOrder
     washingVendorCost?: SortOrder
     washingFinalCost?: SortOrder
+    vaddTotalAutoBgt?: SortOrder
+    vaddTotalRoughV2?: SortOrder
+    vaddTotalVendorCost?: SortOrder
+    vaddTotalFinalCost?: SortOrder
     boppNetPrice?: SortOrder
     ctnNetPrice?: SortOrder
     barcodeNetPrice?: SortOrder
@@ -127538,7 +127958,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -127703,6 +128131,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -127884,7 +128316,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -128049,6 +128489,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -128338,7 +128782,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -128503,6 +128955,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -128684,7 +129140,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -128849,6 +129313,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -129070,7 +129538,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -129235,6 +129711,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -129417,7 +129897,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -129582,6 +130070,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -129767,7 +130259,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -129932,6 +130432,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -130114,7 +130618,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -130279,6 +130791,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -130615,7 +131131,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -130780,6 +131304,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -130962,7 +131490,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -131127,6 +131663,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -131327,7 +131867,15 @@ export namespace Prisma {
     finishingActPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bTrimType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    bTrimTotalAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -131492,6 +132040,10 @@ export namespace Prisma {
     washingFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: JsonNullableFilter<"ExtractionResultFlat">
     vaddEmpJson?: JsonNullableFilter<"ExtractionResultFlat">
+    vaddTotalAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     boppNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -131894,7 +132446,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -132059,6 +132619,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -132241,7 +132805,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -132406,6 +132978,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -134116,7 +134692,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -134281,6 +134865,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -134463,7 +135051,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -134628,6 +135224,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -134861,7 +135461,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -135026,6 +135634,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -135208,7 +135820,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -135373,6 +135993,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -136174,7 +136798,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -136339,6 +136971,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -136527,7 +137163,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -136692,6 +137336,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -136874,7 +137522,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -137039,6 +137695,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -137220,7 +137880,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -137385,6 +138053,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -137632,7 +138304,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -137797,6 +138477,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -138090,7 +138774,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -138255,6 +138947,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -138437,7 +139133,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -138602,6 +139306,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -138783,7 +139491,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -138948,6 +139664,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null

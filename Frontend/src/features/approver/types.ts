@@ -146,6 +146,11 @@ export interface ApproverItem {
   finishingActPrVal: number | string | null;
   finishingVendorPrVal: number | string | null;
   finishingFinalPrVal: number | string | null;
+  // CMP COST TOTAL row (sum of PR VAL per scenario, or a user override)
+  totalBgtPrVal?: number | string | null;
+  totalActPrVal?: number | string | null;
+  totalVendorPrVal?: number | string | null;
+  totalFinalPrVal?: number | string | null;
   isGeneric: boolean;
   genericArticleId: string | null;
   variantSize: string | null;

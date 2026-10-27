@@ -318,8 +318,18 @@ model ExtractionResultFlat {
   finishingActPrVal            Decimal? @map("finishing_act_pr_val") @db.Decimal(10, 4)
   finishingVendorPrVal         Decimal? @map("finishing_vendor_pr_val") @db.Decimal(10, 4)
   finishingFinalPrVal          Decimal? @map("finishing_final_pr_val") @db.Decimal(10, 4)
+  // CMP COST TOTAL row: sum of PR VAL per scenario, or a user override
+  totalBgtPrVal                Decimal? @map("total_bgt_pr_val") @db.Decimal(10, 4)
+  totalActPrVal                Decimal? @map("total_act_pr_val") @db.Decimal(10, 4)
+  totalVendorPrVal             Decimal? @map("total_vendor_pr_val") @db.Decimal(10, 4)
+  totalFinalPrVal              Decimal? @map("total_final_pr_val") @db.Decimal(10, 4)
   // ===== B TRIM COSTING (values belong to the tab in bTrimType) =====
   bTrimType                    String?  @map("b_trim_type") @db.VarChar(10)
+  // B TRIM TOTAL row (saved tab): sum of the rows, or a user override. AUTO-BGT total is never stored.
+  bTrimTotalAutoBgt            Decimal? @map("b_trim_total_auto_bgt") @db.Decimal(10, 2)
+  bTrimTotalRoughV2            Decimal? @map("b_trim_total_rough_v2") @db.Decimal(10, 2)
+  bTrimTotalVdrCost            Decimal? @map("b_trim_total_vdr_cost") @db.Decimal(10, 2)
+  bTrimTotalFinalCost          Decimal? @map("b_trim_total_final_cost") @db.Decimal(10, 2)
   mBtnAutoBgt                  Decimal? @map("m_btn_auto_bgt") @db.Decimal(10, 2)
   mBtnRoughV2                  Decimal? @map("m_btn_rough_v2") @db.Decimal(10, 2)
   mBtnVdrCost                  Decimal? @map("m_btn_vdr_cost") @db.Decimal(10, 2)
@@ -487,6 +497,11 @@ model ExtractionResultFlat {
   // V. ADD extra PRINT / EMB rows (PRINT-1, EMB-1…) — app only, never sent to SAP
   vaddPrintJson                Json?    @map("vadd_print_json")
   vaddEmpJson                  Json?    @map("vadd_emp_json")
+  // V. ADD TOTAL row: AUTO-BGT is always the sum; the others are the sum or a user override
+  vaddTotalAutoBgt             Decimal? @map("vadd_total_auto_bgt") @db.Decimal(10, 2)
+  vaddTotalRoughV2             Decimal? @map("vadd_total_rough_v2") @db.Decimal(10, 2)
+  vaddTotalVendorCost          Decimal? @map("vadd_total_vendor_cost") @db.Decimal(10, 2)
+  vaddTotalFinalCost           Decimal? @map("vadd_total_final_cost") @db.Decimal(10, 2)
   // ===== PKG COST (net prices belong to the tab in pkgCostType) =====
   pkgCostType                  String?  @map("pkg_cost_type") @db.VarChar(10)
   boppNetPrice                 Decimal? @map("bopp_net_price") @db.Decimal(10, 2)
@@ -1302,6 +1317,7 @@ model FabricRawData {
   noOfColors    Int?     @map("no_of_colors")
   price         Decimal? @db.Decimal(10, 2)
   imageUrl      String?  @map("image_url")
+  backImageUrl  String?  @map("back_image_url")
   source        String?  @db.VarChar(50)
 
   // Fabric-specific extras
@@ -1361,6 +1377,7 @@ model GmRawData {
   noOfColors    Int?     @map("no_of_colors")
   price         Decimal? @db.Decimal(10, 2)
   imageUrl      String?  @map("image_url")
+  backImageUrl  String?  @map("back_image_url")
   source        String?  @db.VarChar(50)
 
   // GM-specific extras
@@ -1728,6 +1745,7 @@ model FabricArticleData {
 
   // Media & classification
   imageUrl          String? @map("image_url") @db.Text
+  backImageUrl      String? @map("back_image_url") @db.Text
   fabricArticleType String? @map("fabric_article_type") @db.VarChar(100)
   source            String? @map("source") @db.VarChar(50)
 
@@ -1895,6 +1913,7 @@ model GmArticleData {
 
   // Media & classification
   imageUrl      String? @map("image_url") @db.Text
+  backImageUrl  String? @map("back_image_url") @db.Text
   gmArticleType String? @map("gm_article_type") @db.VarChar(100)
   source        String? @map("source") @db.VarChar(50)
 

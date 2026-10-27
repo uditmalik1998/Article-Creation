@@ -18,7 +18,7 @@ type Row = typeof ROWS[number];
 type Col = 'artNo' | 'artDesc' | 'rate';
 type LocalState = Record<string, Record<string, Partial<Record<Col, string>>>>;
 
-const RATE_FIELD: Record<Row, string> = {
+export const PKG_RATE_FIELDS: Record<Row, string> = {
   BOPP: 'boppNetPrice',
   CTN: 'ctnNetPrice',
   BARCODE: 'barcodeNetPrice',
@@ -71,7 +71,7 @@ const PkgCostCard: React.FC<PkgCostCardProps> = ({ collapsed, onToggleCollapse, 
         ...prev,
         [t]: Object.fromEntries(
           ROWS.map((r) => {
-            const v = rec[RATE_FIELD[r]];
+            const v = rec[PKG_RATE_FIELDS[r]];
             return [r, { ...prev[t]?.[r], rate: v == null || v === '' ? '' : String(Number(v)) }];
           }),
         ),
@@ -93,7 +93,7 @@ const PkgCostCard: React.FC<PkgCostCardProps> = ({ collapsed, onToggleCollapse, 
   const handleSave = () => {
     if (!onSaveTab) return;
     const updates: Record<string, string | null> = { pkgCostType: tab };
-    for (const r of ROWS) updates[RATE_FIELD[r]] = val(r, 'rate') || null;
+    for (const r of ROWS) updates[PKG_RATE_FIELDS[r]] = val(r, 'rate') || null;
     onSaveTab(updates);
     setSavedTab(tab);
     setDirty(false);
