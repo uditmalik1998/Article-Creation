@@ -16,7 +16,7 @@ import { storageService, type WatermarkLabel } from '../services/storageService'
 import { ARTICLE_DESCRIPTION_SOURCE_FIELDS, buildArticleDescription } from '../utils/articleDescriptionBuilder';
 import { getExcludedDescriptionFields } from '../utils/categoryFieldVisibility';
 import { prismaClient as prisma } from '../utils/prisma';
-import { syncGenericToVariants, addColorVariants, getSizesForMajCat, isSizeAllowed } from '../services/variantCreationService';
+import { syncGenericToVariants, addColorVariants, getSizesForMajCat, isSizeAllowed, rebuildVariantsForMajCat } from '../services/variantCreationService';
 import { hasVendorCode, isValidVendorCode, normalizeVendorCode } from '../utils/vendorCode';
 import { getSetMcIndex, setProblems, SET_PARTS_USE_SET_MC, normalMcForCategory } from '../services/setMcMasterService';
 import { linkComboGroupForRow, recomputeComboParent, syncSetsFromRaw, COMBO_PARENT_DERIVED_FIELDS, groupSetParts } from '../services/comboLinkService';
@@ -2651,6 +2651,35 @@ export class ApproverController {
             const finalMajorCategory = (data.majorCategory !== undefined ? data.majorCategory : existingItem.majorCategory) as string | null;
             const finalMrp = data.mrp !== undefined ? data.mrp : existingItem.mrp;
 
+            // Major category change on a generic with colour variants: the sizes belong
+            // to the old category, so the variants are rebuilt after the update (same
+            // colours, new category's sizes). Blocked when a variant is already in SAP,
+            // or when the new category has no sizes (the colours would be lost).
+            const oldMajCat = String(existingItem.majorCategory ?? '').trim().toUpperCase();
+            const newMajCat = String(finalMajorCategory ?? '').trim().toUpperCase();
+            let rebuildSizes: string[] | null = null;
+            if (existingItem.isGeneric && data.majorCategory !== undefined && newMajCat !== oldMajCat) {
+                const variants = await prisma.fgVariantArticleData.findMany({
+                    where: { genericArticleId: id },
+                    select: { variantArticleNumber: true, sapSyncStatus: true },
+                });
+                if (variants.length > 0) {
+                    const inSap = variants.filter((v) => v.variantArticleNumber || v.sapSyncStatus === 'SYNCED').length;
+                    if (inSap > 0) {
+                        return res.status(409).json({
+                            error: `Can't change Major Category: ${inSap} size variant(s) of this article are already in SAP.`,
+                        });
+                    }
+                    const sizes = newMajCat ? await getSizesForMajCat(newMajCat) : [];
+                    if (sizes.length === 0) {
+                        return res.status(422).json({
+                            error: `Can't change Major Category: no active sizes for '${finalMajorCategory ?? ''}' in the Size Master, so the colour variants can't be re-created.`,
+                        });
+                    }
+                    rebuildSizes = sizes;
+                }
+            }
+
             // PR1 size guard: when a variant's size is edited, the new size must be
             // valid for its Major Category (server-side backstop behind the UI dropdown).
             if (!existingItem.isGeneric && (data.variantSize !== undefined || data.size !== undefined)) {
@@ -2728,6 +2757,15 @@ export class ApproverController {
                     where: { id },
                     data: { colour: data.variantColor }
                 });
+            }
+
+            if (rebuildSizes) {
+                try {
+                    const { colors, created } = await rebuildVariantsForMajCat(updated, rebuildSizes);
+                    console.log(`[MajCatChange] ${id}: ${oldMajCat} → ${newMajCat}, rebuilt ${created} variants for ${colors.join(', ')}`);
+                } catch (err: any) {
+                    console.error('[MajCatChange] variant rebuild failed:', err?.message);
+                }
             }
 
             // If this is a generic article being updated, sync changes to variants (fire-and-forget)

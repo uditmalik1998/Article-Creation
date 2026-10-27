@@ -403,7 +403,7 @@ export interface ApproverArticleListProps {
   loading: boolean;
   selectedRowKeys: React.Key[];
   onSelectionChange: (keys: React.Key[]) => void;
-  onSave: (item: ApproverItem, updates: Record<string, unknown>, options?: { silent?: boolean }) => void;
+  onSave: (item: ApproverItem, updates: Record<string, unknown>, options?: { silent?: boolean }) => void | Promise<void>;
   onCreateFabricArticle: (item: ApproverItem) => void;
   onCreateBodyArticle: (item: ApproverItem) => void;
   onProceedFGArticle: (item: ApproverItem) => void;
@@ -468,7 +468,7 @@ const ArticleCard = React.memo(
     item: ApproverItem;
     isSelected: boolean;
     onToggleSelect: (id: string) => void;
-    onSave: (item: ApproverItem, updates: Record<string, unknown>, options?: { silent?: boolean }) => void;
+    onSave: (item: ApproverItem, updates: Record<string, unknown>, options?: { silent?: boolean }) => void | Promise<void>;
     onCreateFabricArticle: (item: ApproverItem) => void;
     onCreateBodyArticle: (item: ApproverItem) => void;
     onProceedFGArticle: (item: ApproverItem) => void;
@@ -487,6 +487,8 @@ const ArticleCard = React.memo(
     const [imgModalOpen, setImgModalOpen] = useState(false);
     const [creatingVariants, setCreatingVariants] = useState(false);
     const [variantRefreshKey, setVariantRefreshKey] = useState(0);
+    // Major category save in flight → Variants table shows "Re-creating…".
+    const [rebuildingVariants, setRebuildingVariants] = useState(false);
     const [localValues, setLocalValues] = useState<Record<string, string | null>>({});
     const [dupConfirmOpen, setDupConfirmOpen] = useState(false);
     const [duplicating, setDuplicating] = useState(false);
@@ -2108,7 +2110,16 @@ const ArticleCard = React.memo(
         setPendingChanges((prev) => ({ ...prev, ...updates }));
         return;
       }
-      onSave({ ...item, ...updates } as ApproverItem, updates as Record<string, unknown>);
+      const saving = onSave({ ...item, ...updates } as ApproverItem, updates as Record<string, unknown>);
+      // Major category change: the server rebuilds the colour variants with the new
+      // category's sizes — reload the table once the save is done.
+      if (field === 'majorCategory') {
+        setRebuildingVariants(true);
+        void Promise.resolve(saving).finally(() => {
+          setRebuildingVariants(false);
+          setVariantRefreshKey((k) => k + 1);
+        });
+      }
 
       // When Base Color changes, auto-create variants for the new color (idempotent).
       if (field === 'colour' && value && !isModifyMode) {
@@ -5099,6 +5110,7 @@ const ArticleCard = React.memo(
                   onRefresh={onRefresh}
                   pathType={pathType}
                   refreshKey={variantRefreshKey}
+                  rebuilding={rebuildingVariants}
                 />
               )}
             </div>
