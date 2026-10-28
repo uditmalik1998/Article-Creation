@@ -848,6 +848,9 @@ enum UserRole {
   /// know about. Declared here purely to stop that crash; no access rules
   /// exist for this role anywhere in the app yet.
   BODY_APPROVER
+  /// Retired 2026-10-28 — replaced by an approver role + the Fabric Article type
+  /// (users.article_types). Kept only because the DB enum still has the value;
+  /// no code grants it access.
   FABRIC_APPROVER
   /// New approval-chain stage, between Category Head and MDM, for tables
   /// whose chain needs it (Segment Master, Size Master) — see

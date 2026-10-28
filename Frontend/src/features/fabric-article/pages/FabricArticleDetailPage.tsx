@@ -244,13 +244,15 @@ export default function ArticleDetailPage({
   }>({ divisions: [], subDivsByDiv: {}, majCatsBySubDiv: {}, mcDesByMajCat: {} });
 
   const isBodyArticlePage = skipMandatoryFieldsCheck;
-  // Approvers with the Fabric Article type (Admin › Users) can approve fabric articles too.
-  const canApprove = user?.role != null && (approveRoles.includes(user.role) || (!isBodyArticlePage && canApproveFabricByType(user)));
+  // Fabric pages: Admin, or an approver with the Fabric Article type (Admin › Users) — same rule as the backend.
+  const canApprove = isBodyArticlePage
+    ? user?.role != null && approveRoles.includes(user.role)
+    : canApproveFabricByType(user);
   // Confirm button: visible to everyone on body article page EXCEPT BODY_APPROVER
   const canCreatorConfirm = isBodyArticlePage && user?.role !== 'BODY_APPROVER';
   // Save & Submit on body article page: only BODY_APPROVER and ADMIN can submit to SAP
   const canSubmitBodyArticle = !isBodyArticlePage || user?.role === 'BODY_APPROVER' || user?.role === 'ADMIN';
-  // Save & Submit on FG New Articles page: only FABRIC_APPROVER and ADMIN can submit fabric articles to SAP
+  // Save & Submit on FG New Articles page: Admin, or an approver with the Fabric Article type
   const canSubmitFabricArticle = !isFGMode || canApproveFabricByType(user);
 
   // ─── Init ───────────────────────────────────────────────────────────────────

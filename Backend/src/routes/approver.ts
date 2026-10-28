@@ -132,7 +132,7 @@ router.get('/fabric-article-data', requireArticleType('FABRIC'), h(ApproverContr
 router.get('/fabric-article-data/export-all', requireArticleType('FABRIC'), h(ApproverController.getFabricArticleDataExportAll));
 
 // Submit FG New Articles to SAP via ZMM_FAB_ART_CREATION_RFC
-// Submit fabric articles to SAP via ZMM_FAB_ART_CREATION_RFC — FABRIC_APPROVER and ADMIN only
+// Submit fabric articles to SAP via ZMM_FAB_ART_CREATION_RFC — ADMIN, or approvers with the Fabric Article type
 router.post('/fabric-article-data/submit', requireFabricApprovalRights, requireArticleType('FABRIC'), h(ApproverController.submitFabricArticleData));
 
 // Delete FG-type fabric_article_data rows on reject (FG New Articles page only)

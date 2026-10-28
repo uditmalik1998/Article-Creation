@@ -8,7 +8,6 @@ export default function FGNewArticleDetailPage() {
       itemsBaseEndpoint="/approver/fabric-article-data"
       approveEndpoint="/approver/fabric-article-data/submit"
       rejectEndpoint="/approver/fabric-article-data/delete"
-      approveRoles={['ADMIN', 'FABRIC_APPROVER']}
       isFGMode
     />
   );
