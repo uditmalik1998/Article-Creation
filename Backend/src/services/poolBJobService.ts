@@ -201,6 +201,8 @@ async function processJobInBackground(
             nicAttrs: res.nicAttrs ?? [],
             lockedAttrs: res.lockedAttrs ?? [],
             errorMessage: res.errorMessage,
+            linkedClass: res.linkedClass,
+            linkError: res.linkError,
           };
         });
 
