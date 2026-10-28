@@ -258,6 +258,24 @@ The "On this page" side box (`JumpNav`) is to move into the dark header. Canvas:
 - **Needs attention:** a table of failed pairs (Class, Characteristic, SUBRC, SAP message, What to do), downloadable as .xlsx. Then "Run again".
 - Checked in a mocked local test page.
 
+### Pool B — "Wrong class" results (2026-10-28)
+
+Some articles are still attached in SAP (KSSK, class type 026) to an older class than their MC (MATKL). The patch FM checks values against that old class, so a characteristic that is already on the MC class still comes back NIC, and running Pool A doesn't help.
+
+The cause was in the class-link step. `Z_LINK_MATNR_CLASS` only returns `EV_JSON` (`{"ok":false,"ret":[…]}` from BAPI_OBJCL_CREATE), but the code read `EV_RC`/`EV_MESSAGE`, so a refused link always looked fine.
+
+Changes in `sapAttributePushService.ts`:
+- `linkMatnrToClass` now parses `EV_JSON`.
+- When the link is refused, `ensureClassLink` reads the real class: INOB → KSSK → KLAH, via `fetchLinkedClasses`.
+- The patch still runs either way. The result carries `linkedClass` and `linkError`.
+
+Changes on the Pool B page:
+- These rows get the orange **Wrong class** tag and their own tab, with "linked: <class>" under MC.
+- The fix text reads: move the article to the MC class in CL24N, or run Pool A for the old class.
+- The download adds a **Linked class** column and the status `NOT SAVED (WRONG CLASS)`.
+
+Example (prod, 2026-10-28): 1122100039 has MC 126290106 but is linked to 126160201.
+
 ### Pool B / KSML — clearer NIC results + KSML function pre-check (2026-10-22)
 
 - **Pool B:**
