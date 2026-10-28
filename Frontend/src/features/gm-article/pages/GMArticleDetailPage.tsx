@@ -248,8 +248,8 @@ export default function ArticleDetailPage({
   const canCreatorConfirm = isBodyArticlePage && user?.role !== 'BODY_APPROVER';
   // Save & Submit on body article page: only BODY_APPROVER and ADMIN can submit to SAP
   const canSubmitBodyArticle = !isBodyArticlePage || user?.role === 'BODY_APPROVER' || user?.role === 'ADMIN';
-  // Save & Submit on FG New Articles page: only FABRIC_APPROVER and ADMIN can submit fabric articles to SAP
-  const canSubmitFabricArticle = !isFGMode || user?.role === 'FABRIC_APPROVER' || user?.role === 'ADMIN';
+  // Save & Submit in FG mode (copied from the fabric page): Admin only
+  const canSubmitFabricArticle = !isFGMode || user?.role === 'ADMIN';
 
   // ─── Init ───────────────────────────────────────────────────────────────────
 

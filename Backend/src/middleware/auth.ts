@@ -359,9 +359,9 @@ export const requireApprover = (
     return;
   }
 
-  // APPROVER, CATEGORY_HEAD, SUB_DIVISION_HEAD, ADMIN, CREATOR, PO_COMMITTEE, BODY_APPROVER, FABRIC_APPROVER, GM_APPROVER, GM_CREATOR roles are allowed
+  // APPROVER, CATEGORY_HEAD, SUB_DIVISION_HEAD, ADMIN, CREATOR, PO_COMMITTEE, BODY_APPROVER, GM_APPROVER, GM_CREATOR roles are allowed
   const role = String(req.user.role || '');
-  if (role !== 'APPROVER' && role !== 'CATEGORY_HEAD' && role !== 'SUB_DIVISION_HEAD' && role !== 'ADMIN' && role !== 'CREATOR' && role !== 'PO_COMMITTEE' && role !== 'PD' && role !== 'BODY_APPROVER' && role !== 'FABRIC_APPROVER' && role !== 'GM_APPROVER' && role !== 'GM_CREATOR') {
+  if (role !== 'APPROVER' && role !== 'CATEGORY_HEAD' && role !== 'SUB_DIVISION_HEAD' && role !== 'ADMIN' && role !== 'CREATOR' && role !== 'PO_COMMITTEE' && role !== 'PD' && role !== 'BODY_APPROVER' && role !== 'GM_APPROVER' && role !== 'GM_CREATOR') {
     res.status(403).json({
       success: false,
       error: 'Approver access required. You do not have permission to access this resource.',
@@ -467,8 +467,8 @@ export const requireArticleType = (type: ArticleType) => (
 };
 
 /**
- * Require ADMIN or FABRIC_APPROVER role to submit fabric articles to SAP.
- * Approver roles whose article types include FABRIC may submit too.
+ * Fabric SAP submit / delete: ADMIN, or an approver role whose article types
+ * include FABRIC (the Fabric Approver role was retired 2026-10-28).
  * Must be used after authenticate middleware.
  */
 export const requireFabricApprovalRights = (
@@ -482,10 +482,10 @@ export const requireFabricApprovalRights = (
   }
   const role = String(req.user.role || '');
   const approverWithFabricType = APPROVAL_ROLES.has(role) && (req.user.articleTypes ?? []).includes('FABRIC');
-  if (role !== 'ADMIN' && role !== 'FABRIC_APPROVER' && !approverWithFabricType) {
+  if (role !== 'ADMIN' && !approverWithFabricType) {
     res.status(403).json({
       success: false,
-      error: 'Only Fabric Approver or Admin can submit fabric articles.',
+      error: 'Only Admin or approvers with the Fabric Article type can submit fabric articles.',
       code: 'INSUFFICIENT_PERMISSIONS',
       userRole: role
     });

@@ -155,7 +155,8 @@ function buildImData(
     };
 }
 
-export async function submitGmArticles(ids: string[], approverName?: string | null): Promise<{
+/** `approvedById` = the submitting user's id, saved to approved_by when SAP creates the article. */
+export async function submitGmArticles(ids: string[], approverName?: string | null, approvedById?: number): Promise<{
     results: { id: string; success: boolean; sapArticleNumber?: string; message?: string }[];
 }> {
     const rows = await prisma.gmArticleData.findMany({
@@ -270,6 +271,7 @@ export async function submitGmArticles(ids: string[], approverName?: string | nu
                     sapSyncMessage:   msg,
                     gmArticleNumber:  success ? sapNumber! : row.gmArticleNumber,
                     approvedAt:       success ? new Date() : undefined,
+                    approvedBy:       success && approvedById ? approvedById : undefined,
                 },
             });
 

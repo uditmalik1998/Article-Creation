@@ -182,7 +182,8 @@ export async function submitFabricVariants(
     }
 }
 
-export async function submitFabricArticles(ids: string[]): Promise<{
+/** `approvedById` = the user submitting; saved to approved_by when SAP creates the article. */
+export async function submitFabricArticles(ids: string[], approvedById?: number): Promise<{
     results: { id: string; success: boolean; sapArticleNumber?: string; message?: string }[];
 }> {
     const rows = await prisma.fabricArticleData.findMany({
@@ -313,6 +314,7 @@ export async function submitFabricArticles(ids: string[]): Promise<{
                     sapSyncMessage:       msg,
                     fabricArticleNumber:  isSuccess ? sapNumber  : row.fabricArticleNumber,
                     approvedAt:           isSuccess ? new Date() : undefined,
+                    approvedBy:           isSuccess && approvedById ? approvedById : undefined,
                 },
             });
 

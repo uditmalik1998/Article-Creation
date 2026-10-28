@@ -19,10 +19,9 @@ export const canAccessArticleType = (user: UserLike, type: ArticleType): boolean
   return types.length === 0 || types.includes(type);
 };
 
-/** Fabric SAP submit: ADMIN, FABRIC_APPROVER, or an approver role that has the Fabric Article type. */
+/** Fabric SAP submit: ADMIN, or an approver role that has the Fabric Article type. */
 export const canApproveFabricByType = (user: UserLike): boolean =>
   user?.role === 'ADMIN' ||
-  user?.role === 'FABRIC_APPROVER' ||
   (APPROVAL_ROLES.includes(String(user?.role ?? '')) && userArticleTypes(user).includes('FABRIC'));
 
 /** Which article area a route path belongs to, if any. */

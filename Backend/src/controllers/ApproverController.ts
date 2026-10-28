@@ -6171,7 +6171,7 @@ export class ApproverController {
             return res.status(400).json({ error: 'ids array is required' });
         }
         const { submitFabricArticles } = await import('../services/zmmFabArtCreationService');
-        const result = await submitFabricArticles(ids);
+        const result = await submitFabricArticles(ids, req.user?.id);
         const allOk = result.results.every(r => r.success);
         return res.status(allOk ? 200 : 207).json(result);
     };
@@ -7100,7 +7100,7 @@ export class ApproverController {
         // frontend so it can be staged as a pending change and saved only when Modify is clicked.
         if (submitNow) {
             const { submitFabricArticles } = await import('../services/zmmFabArtCreationService');
-            const submitResult = await submitFabricArticles(toSubmit.map((e) => e.fabricRowId));
+            const submitResult = await submitFabricArticles(toSubmit.map((e) => e.fabricRowId), req.user?.id);
 
             if (!skipFlatUpdate) {
                 await Promise.all(
@@ -7157,7 +7157,7 @@ export class ApproverController {
             return;
         }
         const { submitGmArticles } = await import('../services/zmmGMArtCreationService');
-        const result = await submitGmArticles(ids, (req as any).user?.name ?? null);
+        const result = await submitGmArticles(ids, (req as any).user?.name ?? null, req.user?.id);
 
         // Then create their colour × size variants in SAP (ZMM_VAR_ART_CRT_V8), like FG.
         const createdIds = result.results.filter(r => r.success).map(r => r.id);
