@@ -20,6 +20,7 @@ type CachedAuthUser = {
   division: string | null;
   subDivision: string | null;
   businessDivision: string | null;
+  articleTypes: string[];
   isActive: boolean;
   lastLogin: Date | null;
 };
@@ -64,6 +65,7 @@ async function fetchAuthUserById(userId: number): Promise<CachedAuthUser | null>
         division: true,
         subDivision: true,
         businessDivision: true,
+        articleTypes: true,
         isActive: true,
         lastLogin: true,
       },
@@ -128,6 +130,8 @@ declare global {
         division?: string | null;
         subDivision?: string | null;
         businessDivision?: string | null;
+        /** FG / FABRIC / GM. Empty = no restriction (role decides, as before). */
+        articleTypes?: string[];
       };
     }
   }
@@ -231,6 +235,7 @@ export const authenticate = async (
       division: user.division,
       subDivision: user.subDivision,
       businessDivision: user.businessDivision,
+      articleTypes: user.articleTypes ?? [],
     };
 
     next();
@@ -422,8 +427,48 @@ export const requireBodyApprovalRights = (
   next();
 };
 
+/** Roles that can approve FG articles (same list as requireApprovalRights). */
+const APPROVAL_ROLES = new Set(['ADMIN', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PO_COMMITTEE', 'PD']);
+
+export type ArticleType = 'FG' | 'FABRIC' | 'GM';
+
+/**
+ * Article-type access from Admin › Users. A user with no article types keeps
+ * today's role-only behaviour; otherwise only the picked types are allowed.
+ * ADMIN is never restricted.
+ */
+export const hasArticleTypeAccess = (user: Request['user'], type: ArticleType): boolean => {
+  if (!user) return false;
+  if (String(user.role) === 'ADMIN') return true;
+  const types = user.articleTypes ?? [];
+  return types.length === 0 || types.includes(type);
+};
+
+/** Blocks the list / approve endpoints of an article area the user's article types exclude. */
+export const requireArticleType = (type: ArticleType) => (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  if (!req.user) {
+    res.status(401).json({ success: false, error: 'Authentication required.', code: 'NOT_AUTHENTICATED' });
+    return;
+  }
+  if (!hasArticleTypeAccess(req.user, type)) {
+    const label = type === 'FG' ? 'FG' : type === 'FABRIC' ? 'Fabric' : 'GM';
+    res.status(403).json({
+      success: false,
+      error: `You do not have access to ${label} articles.`,
+      code: 'ARTICLE_TYPE_FORBIDDEN',
+    });
+    return;
+  }
+  next();
+};
+
 /**
  * Require ADMIN or FABRIC_APPROVER role to submit fabric articles to SAP.
+ * Approver roles whose article types include FABRIC may submit too.
  * Must be used after authenticate middleware.
  */
 export const requireFabricApprovalRights = (
@@ -436,7 +481,8 @@ export const requireFabricApprovalRights = (
     return;
   }
   const role = String(req.user.role || '');
-  if (role !== 'ADMIN' && role !== 'FABRIC_APPROVER') {
+  const approverWithFabricType = APPROVAL_ROLES.has(role) && (req.user.articleTypes ?? []).includes('FABRIC');
+  if (role !== 'ADMIN' && role !== 'FABRIC_APPROVER' && !approverWithFabricType) {
     res.status(403).json({
       success: false,
       error: 'Only Fabric Approver or Admin can submit fabric articles.',
@@ -590,6 +636,7 @@ export const optionalAuth = async (
           division: user.division,
           subDivision: user.subDivision,
           businessDivision: user.businessDivision,
+          articleTypes: user.articleTypes ?? [],
         };
       }
     } catch (jwtError) {

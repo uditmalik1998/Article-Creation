@@ -4789,11 +4789,9 @@ export class ApproverController {
             ORDER BY div, sub_div, maj_cat_nm
         `;
 
-        // Scope: GM_APPROVER / GM_CREATOR with assigned sub-divisions only see their slice
+        // Scope: GM users (GM roles, or approvers with the GM Article type) only see their sub-divisions
         const reqUser = req.user as any;
-        const isGMScoped =
-            (reqUser?.role === 'GM_APPROVER' || reqUser?.role === 'GM_CREATOR') &&
-            reqUser?.subDivision;
+        const isGMScoped = ApproverController.isGmSubDivScoped(reqUser) && reqUser?.subDivision;
         const allowedSubDivs: Set<string> | null = isGMScoped
             ? new Set(
                 String(reqUser.subDivision)
@@ -5051,10 +5049,7 @@ export class ApproverController {
 
         // Enforce GM user scope: restrict to their assigned sub-divisions
         const reqUser = req.user as any;
-        if (
-            (reqUser?.role === 'GM_APPROVER' || reqUser?.role === 'GM_CREATOR') &&
-            reqUser?.subDivision
-        ) {
+        if (ApproverController.isGmSubDivScoped(reqUser) && reqUser?.subDivision) {
             const allowedSubDivs = String(reqUser.subDivision)
                 .split(',')
                 .map((s: string) => s.trim())
@@ -6185,6 +6180,69 @@ export class ApproverController {
     // pathType=new  → all non-APPROVED articles
     // pathType=created → approval_status=APPROVED (SAP-created articles)
 
+    /** Roles whose sub-divisions limit what they see when they carry a GM / Fabric article type. */
+    private static readonly ARTICLE_TYPE_SCOPED_ROLES = new Set(['APPROVER', 'SUB_DIVISION_HEAD', 'CREATOR']);
+
+    /** GM roles, or a scoped role that has the GM Article type, see only their GM sub-divisions. */
+    private static isGmSubDivScoped(user: any): boolean {
+        const role = String(user?.role ?? '');
+        if (role === 'GM_APPROVER' || role === 'GM_CREATOR') return true;
+        return ApproverController.ARTICLE_TYPE_SCOPED_ROLES.has(role) && (user?.articleTypes ?? []).includes('GM');
+    }
+
+    private static fabricMasterCache: { at: number; divBySubDiv: Map<string, string> } | null = null;
+
+    /** sub_div (upper-case) → div from fabric_article_master, cached for 5 minutes. */
+    private static async getFabricMasterDivBySubDiv(): Promise<Map<string, string>> {
+        const cached = ApproverController.fabricMasterCache;
+        if (cached && Date.now() - cached.at < 5 * 60 * 1000) return cached.divBySubDiv;
+        const rows = await prisma.$queryRaw<{ sub_div: string; div: string }[]>`
+            SELECT DISTINCT sub_div, div FROM fabric_article_master
+            WHERE sub_div IS NOT NULL AND sub_div <> '' AND div IS NOT NULL AND div <> ''
+        `;
+        const divBySubDiv = new Map(rows.map((r) => [r.sub_div.trim().toUpperCase(), r.div.trim()]));
+        ApproverController.fabricMasterCache = { at: Date.now(), divBySubDiv };
+        return divBySubDiv;
+    }
+
+    /**
+     * Fabric Article scope for a scoped role that has the Fabric Article type: only the
+     * divisions (Denim/Knits/Woven) of their picked fabric sub-divisions, and within them
+     * their sub-divisions. Fabric rows store division as "K" / "Knits" / "KNITS", so the
+     * division matches on its first letter; sub-division codes that aren't in the fabric
+     * master (SRM's K_Lower, W_Upper…) and empty ones pass, like FG lets empty ones through.
+     * Users with no article types, or without Fabric, are left as today.
+     */
+    private static async applyFabricUserScope(where: any, user: any): Promise<void> {
+        const role = String(user?.role ?? '');
+        if (!ApproverController.ARTICLE_TYPE_SCOPED_ROLES.has(role)) return;
+        if (!(user?.articleTypes ?? []).includes('FABRIC')) return;
+        const divBySubDiv = await ApproverController.getFabricMasterDivBySubDiv();
+        const userCodes = String(user?.subDivision ?? '')
+            .split(',')
+            .map((s: string) => s.trim().toUpperCase())
+            .filter((c: string) => divBySubDiv.has(c));
+        const letters = Array.from(new Set(userCodes.map((c: string) => divBySubDiv.get(c)!.charAt(0).toUpperCase())));
+        // Fabric picked but no fabric sub-division → nothing to show.
+        if (userCodes.length === 0) {
+            where.AND = [...(Array.isArray(where.AND) ? where.AND : []), { id: { in: [] } }];
+            return;
+        }
+        const masterCodes = Array.from(divBySubDiv.keys());
+        where.AND = [
+            ...(Array.isArray(where.AND) ? where.AND : []),
+            { OR: letters.map((l) => ({ division: { startsWith: l, mode: 'insensitive' } })) },
+            {
+                OR: [
+                    { subDivision: { in: userCodes, mode: 'insensitive' } },
+                    { subDivision: null },
+                    { subDivision: '' },
+                    { NOT: { subDivision: { in: masterCodes, mode: 'insensitive' } } },
+                ],
+            },
+        ];
+    }
+
     private static buildFabricArticleDataWhere(query: Record<string, string>) {
         const { pathType = 'new', status, division, subDivision, majorCategory, search, startDate, endDate, source } = query;
 
@@ -6266,6 +6324,7 @@ export class ApproverController {
         const pathType = query.pathType || 'new';
 
         const { where } = ApproverController.buildFabricArticleDataWhere(query);
+        await ApproverController.applyFabricUserScope(where, req.user);
 
         const orderBy = pathType === 'created'
             ? ({ approvedAt: { sort: 'desc', nulls: 'last' } } as const)
@@ -6290,6 +6349,7 @@ export class ApproverController {
         const query = req.query as Record<string, string>;
         const pathType = query.pathType || 'new';
         const { where } = ApproverController.buildFabricArticleDataWhere(query);
+        await ApproverController.applyFabricUserScope(where, req.user);
 
         const orderBy = pathType === 'created'
             ? ({ approvedAt: { sort: 'desc', nulls: 'last' } } as const)

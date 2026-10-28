@@ -107,6 +107,7 @@ router.post('/hierarchy/tree/cache/clear', h(adminController.invalidateHierarchy
 // GM SUB-DIVISIONS
 // ═══════════════════════════════════════════════════════
 router.get('/gm-sub-divisions', h(adminController.getGMSubDivisions));
+router.get('/fabric-sub-divisions', h(adminController.getFabricSubDivisions));
 
 // ═══════════════════════════════════════════════════════
 // USERS (ADMIN ONLY)

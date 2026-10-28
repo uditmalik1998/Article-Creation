@@ -190,6 +190,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
           role: user.role,
           division: user.division,
           subDivision: user.subDivision,
+          articleTypes: user.articleTypes ?? [],
         },
       },
     });
@@ -267,6 +268,7 @@ export const getCurrentUser = async (req: Request, res: Response): Promise<void>
         role: true,
         division: true,
         subDivision: true,
+        articleTypes: true,
         isActive: true,
         createdAt: true,
         lastLogin: true,
@@ -287,6 +289,7 @@ export const getCurrentUser = async (req: Request, res: Response): Promise<void>
         role: user.role,
         division: user.division,
         subDivision: user.subDivision,
+        articleTypes: user.articleTypes ?? [],
         createdAt: user.createdAt.toISOString(),
         lastLogin: user.lastLogin?.toISOString(),
       }
