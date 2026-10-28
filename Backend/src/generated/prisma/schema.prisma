@@ -725,6 +725,8 @@ model User {
   /// with one — shown in the UI as "Business Division" to avoid being
   /// confused with the existing Sub Division field.
   businessDivision String?                @map("business_division") @db.VarChar(20)
+  /// Article types the user works on — any of FG / FABRIC / GM (several allowed).
+  articleTypes     String[]               @default([]) @map("article_types")
   isActive         Boolean                @default(true) @map("is_active")
   lastLogin        DateTime?              @map("last_login")
   createdAt        DateTime               @default(now()) @map("created_at")

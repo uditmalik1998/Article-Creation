@@ -2159,7 +2159,7 @@ const ArticleCard = React.memo(
                         ] : []),
                         { label: 'ARTICLE FASHION TYPE', field: 'articleFashionType', editable: true, mandatory: true, isDropdown: true, isColor: false, isMarkdown: false, boldLabel: true },
                         ...(!isFGMode ? [
-                          { label: 'SEGMENT', field: 'segment', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false, boldLabel: true },
+                          { label: 'SEGMENT', field: 'segment', editable: true, mandatory: true, isDropdown: true, isColor: false, isMarkdown: false, boldLabel: true },
                         ] : []),
                         ...(isFGMode ? [
                           { label: 'VENDOR FABRIC RATE', field: 'fabricRate', editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
@@ -2174,6 +2174,8 @@ const ArticleCard = React.memo(
                         const dropdownOptions: string[] = bom.isDropdown
                           ? bom.field === 'articleFashionType'
                             ? ['C']
+                            : bom.field === 'segment'
+                            ? ['E', 'V', 'P', 'SP']
                             : []
                           : [];
                         return (

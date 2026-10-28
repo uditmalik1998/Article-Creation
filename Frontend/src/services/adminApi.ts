@@ -139,6 +139,9 @@ export interface CategoryAttribute {
  * once). Shown in the Users page as "Business Division". */
 export type AdminUserBusinessDivision = 'MENS' | 'KIDS' | 'LADIES' | 'PD' | 'MDM';
 
+/** Article types a user works on — several allowed. */
+export type AdminUserArticleType = 'FG' | 'FABRIC' | 'GM';
+
 export interface AdminUser {
   id: number;
   email: string;
@@ -147,6 +150,7 @@ export interface AdminUser {
   division?: string | null;
   subDivision?: string | null;
   businessDivision?: AdminUserBusinessDivision | null;
+  articleTypes?: AdminUserArticleType[];
   isActive: boolean;
   createdAt: string;
   lastLogin?: string | null;
@@ -510,6 +514,11 @@ export const getStatusDashboard = async (): Promise<StatusDashboard> => {
 // GM SUB-DIVISIONS
 // ═══════════════════════════════════════════════════════
 
+export const getFabricSubDivisions = async (): Promise<{ subDivisions: string[]; divBySubDiv: Record<string, string> }> => {
+  const { data } = await adminApi.get<{ subDivisions: string[]; divBySubDiv: Record<string, string> }>('/fabric-sub-divisions');
+  return data;
+};
+
 export const getGMSubDivisions = async (): Promise<{ subDivisions: string[]; divBySubDiv: Record<string, string> }> => {
   const { data } = await adminApi.get<{ subDivisions: string[]; divBySubDiv: Record<string, string> }>('/gm-sub-divisions');
   return data;
@@ -532,6 +541,7 @@ export const createUser = async (payload: {
   division?: string;
   subDivision?: string | string[];
   businessDivision?: AdminUserBusinessDivision | null;
+  articleTypes?: AdminUserArticleType[];
 }): Promise<AdminUser> => {
   const { data } = await adminApi.post<ApiResponse<AdminUser>>('/users', payload);
   return data.data;

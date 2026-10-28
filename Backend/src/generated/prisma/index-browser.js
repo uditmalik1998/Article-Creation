@@ -654,6 +654,7 @@ exports.Prisma.UserScalarFieldEnum = {
   division: 'division',
   subDivision: 'subDivision',
   businessDivision: 'businessDivision',
+  articleTypes: 'articleTypes',
   isActive: 'isActive',
   lastLogin: 'lastLogin',
   createdAt: 'createdAt',
@@ -2099,7 +2100,8 @@ exports.Prisma.UserOrderByRelevanceFieldEnum = {
   name: 'name',
   division: 'division',
   subDivision: 'subDivision',
-  businessDivision: 'businessDivision'
+  businessDivision: 'businessDivision',
+  articleTypes: 'articleTypes'
 };
 
 exports.Prisma.ApiKeyOrderByRelevanceFieldEnum = {

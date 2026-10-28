@@ -31,6 +31,7 @@ import {
   getMajCatGridEntry,
 } from '../../../services/articleConfigService';
 import { formatDivisionLabel } from '../../../shared/utils/ui/formatters';
+import { canApproveFabricByType } from '../../../shared/utils/articleTypeAccess';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -242,14 +243,15 @@ export default function ArticleDetailPage({
     mcDesByMajCat: Record<string, string[]>;
   }>({ divisions: [], subDivsByDiv: {}, majCatsBySubDiv: {}, mcDesByMajCat: {} });
 
-  const canApprove = user?.role != null && approveRoles.includes(user.role);
   const isBodyArticlePage = skipMandatoryFieldsCheck;
+  // Approvers with the Fabric Article type (Admin › Users) can approve fabric articles too.
+  const canApprove = user?.role != null && (approveRoles.includes(user.role) || (!isBodyArticlePage && canApproveFabricByType(user)));
   // Confirm button: visible to everyone on body article page EXCEPT BODY_APPROVER
   const canCreatorConfirm = isBodyArticlePage && user?.role !== 'BODY_APPROVER';
   // Save & Submit on body article page: only BODY_APPROVER and ADMIN can submit to SAP
   const canSubmitBodyArticle = !isBodyArticlePage || user?.role === 'BODY_APPROVER' || user?.role === 'ADMIN';
   // Save & Submit on FG New Articles page: only FABRIC_APPROVER and ADMIN can submit fabric articles to SAP
-  const canSubmitFabricArticle = !isFGMode || user?.role === 'FABRIC_APPROVER' || user?.role === 'ADMIN';
+  const canSubmitFabricArticle = !isFGMode || canApproveFabricByType(user);
 
   // ─── Init ───────────────────────────────────────────────────────────────────
 

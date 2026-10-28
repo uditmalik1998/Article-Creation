@@ -1,6 +1,7 @@
 // Modern App Root with Clean Architecture
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { articleTypeForPath, canAccessArticleType, userArticleTypes } from './shared/utils/articleTypeAccess';
 
 // App Configuration
 import { AppProviders } from './app/providers/AppProviders';
@@ -119,7 +120,10 @@ const ExpenseRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   return <>{children}</>;
 };
 
+const ARTICLE_AREA_HOME = { FG: '/approver', FABRIC: '/fabric-article', GM: '/gm-article' } as const;
+
 const ApproverRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const location = useLocation();
   const token = localStorage.getItem('authToken');
   const user = localStorage.getItem('user');
 
@@ -132,6 +136,12 @@ const ApproverRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     // Allow ADMIN, APPROVER, CATEGORY_HEAD, SUB_DIVISION_HEAD, CREATOR, PO_COMMITTEE, PD, BODY_APPROVER, FABRIC_APPROVER, GM_APPROVER, GM_CREATOR
     if (userData.role !== 'APPROVER' && userData.role !== 'CATEGORY_HEAD' && userData.role !== 'SUB_DIVISION_HEAD' && userData.role !== 'ADMIN' && userData.role !== 'CREATOR' && userData.role !== 'PO_COMMITTEE' && userData.role !== 'PD' && userData.role !== 'BODY_APPROVER' && userData.role !== 'FABRIC_APPROVER' && userData.role !== 'GM_APPROVER' && userData.role !== 'GM_CREATOR') {
       return <Navigate to="/dashboard" replace />;
+    }
+    // Article types (Admin › Users) limit which article areas the user can open.
+    const area = articleTypeForPath(location.pathname);
+    if (area && !canAccessArticleType(userData, area)) {
+      const firstAllowed = userArticleTypes(userData)[0] as keyof typeof ARTICLE_AREA_HOME | undefined;
+      return <Navigate to={(firstAllowed && ARTICLE_AREA_HOME[firstAllowed]) || '/dashboard'} replace />;
     }
   }
 

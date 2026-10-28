@@ -15,6 +15,7 @@ import {
 } from '@/shared/components/ui-tw';
 import './Dashboard.css';
 import { APP_CONFIG } from '../../../constants/app/config';
+import { canAccessArticleType } from '../../../shared/utils/articleTypeAccess';
 
 type FlatDashboardRow = {
   id?: string;
@@ -231,7 +232,8 @@ export default function Dashboard() {
 
   // ── Option E "Action-first" home (2026-10-14) ──────────────────────────────
   const role = userData?.role as string | undefined;
-  const canFgArticles = ['APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'CREATOR', 'PO_COMMITTEE', 'PD'].includes(role || '');
+  const canFgArticles = ['APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'CREATOR', 'PO_COMMITTEE', 'PD'].includes(role || '')
+    && canAccessArticleType(userData, 'FG');
   const canModelGen = isAdmin || role === 'CREATOR' || role === 'APPROVER' || role === 'PD_DESIGNER';
 
   const todayKey = new Date().toLocaleDateString('en-GB').replace(/\//g, '-');

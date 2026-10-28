@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { canAccessArticleType } from '../../utils/articleTypeAccess';
 import {
   Home,
   ShoppingBag,
@@ -172,7 +173,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
   }
 
   if (
-    !isPdDesigner && !isGmOnly &&
+    !isPdDesigner && !isGmOnly && canAccessArticleType(userData, 'FG') &&
     (role === 'APPROVER' ||
       role === 'CATEGORY_HEAD' ||
       role === 'SUB_DIVISION_HEAD' ||
@@ -196,7 +197,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
   }
 
   if (
-    !isPdDesigner && !isGmOnly &&
+    !isPdDesigner && !isGmOnly && canAccessArticleType(userData, 'FABRIC') &&
     (role === 'APPROVER' ||
       role === 'CATEGORY_HEAD' ||
       role === 'SUB_DIVISION_HEAD' ||
@@ -247,7 +248,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
 
   // GM Article — visible to standard approver roles AND GM_APPROVER / GM_CREATOR
   if (
-    !isPdDesigner &&
+    !isPdDesigner && canAccessArticleType(userData, 'GM') &&
     (role === 'APPROVER' ||
       role === 'CATEGORY_HEAD' ||
       role === 'SUB_DIVISION_HEAD' ||

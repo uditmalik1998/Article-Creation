@@ -11,6 +11,7 @@ import bcrypt from 'bcryptjs';
 import { syncVendorMaster, getVendorMasterStatus, getLastVendorSyncResult, isVendorSyncInProgress } from '../services/vendorMasterSyncService';
 import { invalidateMandatoryGridCache, invalidateMajCatVisibleCache } from '../services/zmmArtCreationService';
 import { invalidateFieldVisibilityCache } from '../utils/categoryFieldVisibility';
+import { invalidateAuthUserCache } from '../middleware/auth';
 import path from 'path';
 import fs from 'fs';
 
@@ -64,6 +65,8 @@ const AdminCreateUserSchema = z.object({
   // Coarse business-unit tag — independent of division/subDivision above,
   // see the doc comment on User.businessDivision in schema.prisma.
   businessDivision: z.enum(['MENS', 'KIDS', 'LADIES', 'PD', 'MDM']).optional().nullable(),
+  // FG / Fabric / GM — a user can work on more than one.
+  articleTypes: z.array(z.enum(['FG', 'FABRIC', 'GM'])).optional(),
 });
 
 const AdminUpdateUserSchema = AdminCreateUserSchema.partial().extend({
@@ -845,6 +848,7 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
         division: true,
         subDivision: true,
         businessDivision: true,
+        articleTypes: true,
         isActive: true,
         createdAt: true,
         lastLogin: true,
@@ -862,13 +866,15 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
     const validated = AdminCreateUserSchema.parse(req.body);
     const normalizedDivision = normalizeDivisionInput(validated.division);
     const normalizedSubDivision = normalizeSubDivisionInput(validated.subDivision);
+    // Division (Mens/Ladies/Kids) only applies to FG; Fabric/GM scope is sub-divisions alone.
+    const fgScoped = !validated.articleTypes?.length || validated.articleTypes.includes('FG');
 
-    if ((validated.role === 'CREATOR' || validated.role === 'APPROVER' || validated.role === 'SUB_DIVISION_HEAD') && (!normalizedDivision || !normalizedSubDivision)) {
+    if ((validated.role === 'CREATOR' || validated.role === 'APPROVER' || validated.role === 'SUB_DIVISION_HEAD') && ((fgScoped && !normalizedDivision) || !normalizedSubDivision)) {
       res.status(400).json({ success: false, error: 'Division and Sub-Division are required for this role' });
       return;
     }
 
-    if (validated.role === 'CATEGORY_HEAD' && !normalizedDivision) {
+    if (validated.role === 'CATEGORY_HEAD' && fgScoped && !normalizedDivision) {
       res.status(400).json({ success: false, error: 'Division is required for Category Head' });
       return;
     }
@@ -896,6 +902,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
           division: validated.role === 'PO_COMMITTEE' ? null : normalizedDivision,
           subDivision: (validated.role === 'CATEGORY_HEAD' || validated.role === 'PO_COMMITTEE' || validated.role === 'ADMIN') ? null : normalizedSubDivision,
           businessDivision: validated.businessDivision ?? null,
+          articleTypes: Array.from(new Set(validated.articleTypes ?? [])),
           isActive: true,
         },
         select: {
@@ -906,6 +913,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
           division: true,
           subDivision: true,
           businessDivision: true,
+          articleTypes: true,
           isActive: true,
           createdAt: true,
         }
@@ -924,6 +932,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
         division: validated.role === 'PO_COMMITTEE' ? null : normalizedDivision,
         subDivision: (validated.role === 'CATEGORY_HEAD' || validated.role === 'PO_COMMITTEE' || validated.role === 'ADMIN') ? null : normalizedSubDivision,
         businessDivision: validated.businessDivision ?? null,
+        articleTypes: Array.from(new Set(validated.articleTypes ?? [])),
         isActive: true,
       },
       select: {
@@ -973,13 +982,16 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
     const finalSubDivision = validated.subDivision !== undefined
       ? normalizeSubDivisionInput(validated.subDivision)
       : existingUser.subDivision;
+    // Division (Mens/Ladies/Kids) only applies to FG; Fabric/GM scope is sub-divisions alone.
+    const finalArticleTypes = validated.articleTypes ?? existingUser.articleTypes ?? [];
+    const fgScoped = finalArticleTypes.length === 0 || finalArticleTypes.includes('FG');
 
-    if ((finalRole === 'CREATOR' || finalRole === 'APPROVER' || finalRole === 'SUB_DIVISION_HEAD') && (!finalDivision || !finalSubDivision)) {
+    if ((finalRole === 'CREATOR' || finalRole === 'APPROVER' || finalRole === 'SUB_DIVISION_HEAD') && ((fgScoped && !finalDivision) || !finalSubDivision)) {
       res.status(400).json({ success: false, error: 'Division and Sub-Division are required for this role' });
       return;
     }
 
-    if (finalRole === 'CATEGORY_HEAD' && !finalDivision) {
+    if (finalRole === 'CATEGORY_HEAD' && fgScoped && !finalDivision) {
       res.status(400).json({ success: false, error: 'Division is required for Category Head' });
       return;
     }
@@ -993,6 +1005,7 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
       // Unlike division/subDivision, businessDivision has no role-based
       // clearing rule — every role can be tagged Mens/Kids/Ladies/PO.
       businessDivision: validated.businessDivision !== undefined ? validated.businessDivision : undefined,
+      articleTypes: validated.articleTypes !== undefined ? Array.from(new Set(validated.articleTypes)) : undefined,
       email: validated.email ? validated.email.toLowerCase() : undefined,
     };
 
@@ -1020,6 +1033,8 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
       }
     });
 
+    // Role / scope / article types take effect on the user's next request, not after the auth cache expires.
+    invalidateAuthUserCache(userId);
     res.json({ success: true, data: updatedUser, message: 'User updated successfully' });
   } catch (error: any) {
     if (error instanceof z.ZodError) {
@@ -1084,6 +1099,26 @@ export const getGMSubDivisions = async (_req: Request, res: Response): Promise<v
       WHERE sub_div IS NOT NULL AND sub_div <> ''
         AND div IS NOT NULL AND div <> ''
         AND mj_status = 'ACT'
+      ORDER BY div, sub_div
+    `;
+    const subDivisions = rows.map((r) => r.sub_div);
+    const divBySubDiv: Record<string, string> = {};
+    rows.forEach((r) => { divBySubDiv[r.sub_div] = r.div; });
+    res.json({ subDivisions, divBySubDiv });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/** Fabric sub-divisions (Denim / Knits / Woven) for the Users page "Fabric Article" access scope. */
+export const getFabricSubDivisions = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.$queryRaw<{ sub_div: string; div: string }[]>`
+      SELECT DISTINCT sub_div, div
+      FROM fabric_article_master
+      WHERE sub_div IS NOT NULL AND sub_div <> ''
+        AND div IS NOT NULL AND div <> ''
+        AND status = 'ACT'
       ORDER BY div, sub_div
     `;
     const subDivisions = rows.map((r) => r.sub_div);
