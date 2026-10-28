@@ -60,6 +60,12 @@ const getSubDivisionOptions = (division?: string): string[] => {
   return [];
 };
 
+// creator_user / modify_user JSON ([{name, email}]) → "Name (email), Name (email)" for Excel.
+const formatEditors = (v: unknown): string =>
+  Array.isArray(v)
+    ? v.map((e: any) => (e?.name ? `${e.name} (${e?.email ?? ''})` : String(e?.email ?? ''))).filter(Boolean).join(', ')
+    : '';
+
 export const SIMPLE_APPROVER_EXPORT_HEADERS = [
     'Article Number', 'Division', 'Sub Division', 'Major Category', 'MC Code', 'Status',
     'Vendor Name', 'Vendor Code', 'Design Number', 'PPT Number', 'Article Description',
@@ -404,10 +410,13 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
         M_AGE_GROUP: row.ageGroup || '', 'ARTICLE FASHION TYPE': row.articleFashionType || '',
         SEGMENT: row.segment || '', 'Extracted By': row.userName || '',
         'Created Date': formattedDate,
-        // Created Articles tab only: who approved the article
+        // Created Articles tab only: who approved the article + who edited it
+        // on the New page (creator_user) and the Created page (modify_user)
         ...(pathType === 'created' ? {
           'Approved By Name': row.approver?.name || '',
           'Approved By Email': row.approver?.email || '',
+          creator_user: formatEditors((row as any).creatorUser),
+          modify_user: formatEditors((row as any).modifyUser),
         } : {}),
       } as Record<string, string | number | undefined>;
     });
@@ -416,7 +425,7 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
   // Created tab appends the two approver columns; every other tab uses the base set.
   const exportHeaders = useMemo(
     () => pathType === 'created'
-      ? [...SIMPLE_APPROVER_EXPORT_HEADERS, 'Approved By Name', 'Approved By Email']
+      ? [...SIMPLE_APPROVER_EXPORT_HEADERS, 'Approved By Name', 'Approved By Email', 'creator_user', 'modify_user']
       : [...SIMPLE_APPROVER_EXPORT_HEADERS],
     [pathType],
   );

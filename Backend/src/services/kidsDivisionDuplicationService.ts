@@ -295,6 +295,7 @@ export async function duplicateForKidsDivision(flatId: string): Promise<void> {
           ...rest,
           vaddPrintJson: rest.vaddPrintJson ?? Prisma.DbNull,
           vaddEmpJson: rest.vaddEmpJson ?? Prisma.DbNull,
+          creatorUser: Prisma.DbNull, modifyUser: Prisma.DbNull, // a copy starts with no editors
           id: kidsId,
           jobId: newJob.id,
           imageUrl: newImageUrl,

@@ -550,6 +550,60 @@ export default function UsersManagement() {
     setPendingOrphans([]);
   };
 
+  // Users shown in the table (current search / role / status filters) → Excel.
+  // Columns are picked explicitly, so no password (or hash) can ever be exported.
+  const downloadUsers = async () => {
+    if (filteredUsers.length === 0) {
+      message.warning('No users to download for the current filters');
+      return;
+    }
+    try {
+      const ExcelJS = (await import('exceljs')).default;
+      const workbook = new ExcelJS.Workbook();
+      workbook.created = new Date();
+      const sheet = workbook.addWorksheet('Users');
+      sheet.columns = [
+        { header: 'Name', key: 'name', width: 26 },
+        { header: 'Email', key: 'email', width: 32 },
+        { header: 'Role', key: 'role', width: 18 },
+        { header: 'Division', key: 'division', width: 22 },
+        { header: 'Sub Division', key: 'subDivision', width: 40 },
+        { header: 'Business Division', key: 'businessDivision', width: 18 },
+        { header: 'Status', key: 'status', width: 10 },
+        { header: 'Last Login', key: 'lastLogin', width: 22 },
+        { header: 'Created At', key: 'createdAt', width: 22 },
+      ];
+      sheet.getRow(1).font = { bold: true };
+      const fmt = (v?: string | null) =>
+        v ? new Date(v).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '';
+      for (const u of filteredUsers) {
+        sheet.addRow({
+          name: u.name,
+          email: u.email,
+          role: roleLabel(u.role),
+          division: u.division ?? '',
+          subDivision: u.subDivision ?? '',
+          businessDivision: u.businessDivision ? BUSINESS_DIVISION_LABELS[u.businessDivision] : '',
+          status: u.isActive ? 'Active' : 'Inactive',
+          lastLogin: fmt(u.lastLogin) || 'Never signed in',
+          createdAt: fmt(u.createdAt),
+        });
+      }
+      sheet.views = [{ state: 'frozen', ySplit: 1 }];
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `users-${statusFilter}-${new Date().toISOString().split('T')[0]}.xlsx`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+      message.success(`Downloaded ${filteredUsers.length} user${filteredUsers.length !== 1 ? 's' : ''}`);
+    } catch (error) {
+      console.error('User download failed', error);
+      message.error('Failed to download users');
+    }
+  };
+
   const downloadBulkTemplate = async () => {
     try {
       const ExcelJS = (await import('exceljs')).default;
@@ -937,6 +991,15 @@ export default function UsersManagement() {
                 </button>
               ))}
             </div>
+            <Button
+              variant="outline"
+              onClick={downloadUsers}
+              className="h-9"
+              title="Download the users shown below as Excel (no passwords)"
+            >
+              <Download />
+              Download
+            </Button>
           </div>
           <DataTable
             rowKey="id"

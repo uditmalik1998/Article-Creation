@@ -209,6 +209,8 @@ model ExtractionResultFlat {
   apiCost                     Decimal?  @map("api_cost") @db.Decimal(10, 6)
   userId                      Int?      @map("user_id")
   userName                    String?   @map("user_name") @db.VarChar(200)
+  creatorUser                 Json?     @map("creator_user") @db.JsonB // [{name, email}] — distinct editors on the FG New article page
+  modifyUser                  Json?     @map("modify_user") @db.JsonB // [{name, email}] — distinct editors on the FG Created page
   extractionDate              DateTime? @map("extraction_date") @db.Date
   createdAt                   DateTime  @default(now()) @map("created_at")
   updatedAt                   DateTime  @updatedAt @map("updated_at")

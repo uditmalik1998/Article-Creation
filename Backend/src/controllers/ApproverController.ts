@@ -7,7 +7,6 @@ import { syncApprovedItemsToSap } from '../services/sapSyncService';
 import { syncArticlesToSapViaRfc, buildModifyChangesPayload, previewRfcPayloads } from '../services/zmmArtCreationService';
 import { patchArticleAttributes } from '../services/sapModifyService';
 import { FLAT_TO_RFC, FLAT_TO_SAP_KEY } from '../data/flatToRfcMap';
-import { randomUUID } from 'crypto';
 import { validateAgainstNationalGrid } from '../services/nationalGridValidation';
 import { syncVariantsToSapViaRfc } from '../services/zmmVarArtCreationService';
 import { syncGmVariantsToSap, type GmVariantSyncSummary } from '../services/zmmGMVarArtCreationService';
@@ -1362,6 +1361,7 @@ export class ApproverController {
                     year: true,
                     articleType: true,
                     userName: true,
+                    creatorUser: true, modifyUser: true,
                     createdAt: true,
                     updatedAt: true,
                     approvedAt: true,
@@ -2423,12 +2423,17 @@ export class ApproverController {
     static async getFgArticleHistory(req: Request, res: Response) {
         const { id } = req.params;
         try {
+            // stage: BEFORE = while a new article (before approval/creation),
+            // AFTER = once created (approved_at), e.g. Created-page modifications.
             const history = await prisma.$queryRaw<any[]>`
-                SELECT id, article_id, changed_by_id, changed_by_name,
-                       changed_at, field_name, old_value, new_value
-                FROM history_fg_article
-                WHERE article_id = ${id}
-                ORDER BY changed_at DESC
+                SELECT h.id, h.article_id, h.changed_by_id, h.changed_by_name,
+                       h.changed_at, h.field_name, h.old_value, h.new_value,
+                       CASE WHEN f.approved_at IS NOT NULL AND h.changed_at >= f.approved_at
+                            THEN 'AFTER' ELSE 'BEFORE' END AS stage
+                FROM history_fg_article h
+                LEFT JOIN extraction_results_flat f ON f.id = h.article_id
+                WHERE h.article_id = ${id}
+                ORDER BY h.changed_at DESC
                 LIMIT 500
             `;
             return res.json(history);
@@ -2743,6 +2748,12 @@ export class ApproverController {
             void ApproverController.recordFgArticleHistory(id, req.user, data, oldRow)
                 .catch((err: any) => console.error('[fgArticleHistory] record failed:', err?.message));
 
+            // creator_user: editors on the New article page. Approved rows only take
+            // internal saves here (Created page), so they don't count.
+            if (existingItem.approvalStatus !== 'APPROVED') {
+                void ApproverController.recordArticleEditor(id, 'creator_user', req.user);
+            }
+
             // NOTE: We intentionally update ONLY this edited row. The correct
             // mcCode/hsnTaxCode for the new majorCategory are already applied to
             // this row above (data.mcCode / data.hsnTaxCode) and saved via the
@@ -2830,6 +2841,27 @@ export class ApproverController {
             return res.json({ valid: true });
         } catch (err: any) {
             return res.status(500).json({ error: err?.message ?? 'Validation error' });
+        }
+    }
+
+    // creator_user (New page) / modify_user (Created page): each distinct editor
+    // {name, email} appended once, in first-edit order. Atomic, so parallel saves
+    // can't drop or duplicate an entry. Never throws.
+    static async recordArticleEditor(id: string, column: 'creator_user' | 'modify_user', user: any): Promise<void> {
+        const email = String(user?.email ?? '').trim().toLowerCase();
+        if (!email) return;
+        const name = String(user?.name ?? '').trim();
+        const col = Prisma.raw(column);
+        try {
+            await prisma.$executeRaw`
+                UPDATE extraction_results_flat
+                SET ${col} = COALESCE(${col}, '[]'::jsonb)
+                    || jsonb_build_array(jsonb_build_object('name', ${name}::text, 'email', ${email}::text))
+                WHERE id = ${id}
+                  AND NOT COALESCE(${col}, '[]'::jsonb) @> jsonb_build_array(jsonb_build_object('email', ${email}::text))
+            `;
+        } catch (err: any) {
+            console.error(`[${column}] record failed:`, err?.message);
         }
     }
 
@@ -3008,49 +3040,30 @@ export class ApproverController {
                 excludeFields: await getExcludedDescriptionFields(majCatForDescCheck) as any,
             });
 
-            // ── Audit log: compute per-field diff and store in modify_logs ──
-            const modGroupId = randomUUID();
-            const auditEntries: {
-                modificationGroupId: string;
-                articleNumber: string;
-                labelName: string;
-                oldValue: string | null;
-                newValue: string | null;
-                modifiedByName: string;
-                modifiedByEmail: string;
-                sapStatus: string;
-            }[] = [];
-
-            for (const [field, newVal] of Object.entries(data)) {
-                // articleDescription is auto-rebuilt from other fields — not a user label change
-                if (field === 'articleDescription') continue;
-                const oldVal = (existingItem as any)[field];
-                // V. ADD JSON columns: log the JSON text (DbNull → null)
-                const asText = (v: unknown) =>
-                    v == null || v === Prisma.DbNull ? null : VADD_JSON_FIELDS.has(field) ? JSON.stringify(v) : String(v);
-                const oldStr = asText(oldVal);
-                const newStr = asText(newVal);
-                if (oldStr === newStr) continue;
-                auditEntries.push({
-                    modificationGroupId: modGroupId,
-                    articleNumber: matnr,
-                    labelName: FLAT_TO_SAP_KEY[field] ?? field,
-                    oldValue: oldStr,
-                    newValue: newStr,
-                    modifiedByName: req.user?.name ?? 'Unknown',
-                    modifiedByEmail: req.user?.email ?? 'unknown@unknown.com',
-                    sapStatus: 'SUCCESS', // correct for both paths: skipSap=true means frontend already confirmed SAP success
-                });
-            }
-
-            if (auditEntries.length > 0) {
-                // Fire-and-forget: audit failure must never block a successful SAP+DB modify
-                void prisma.modifyLog.createMany({ data: auditEntries }).catch((err: any) =>
-                    console.error('[modifyLog] audit insert failed:', err?.message),
-                );
-            }
+            // Snapshot the full row before the update — history compares every changed
+            // field (costs too, not just the SAP-mapped ones selected above).
+            const oldRowSnap = await prisma.$queryRawUnsafe<any[]>(
+                `SELECT * FROM extraction_results_flat WHERE id = $1`, id
+            );
+            const oldRow: Record<string, any> = oldRowSnap[0] ?? {};
+            // V. ADD JSON columns compare as JSON text (DbNull → null)
+            const asText = (field: string, v: unknown) =>
+                v == null || v === Prisma.DbNull ? null : VADD_JSON_FIELDS.has(field) ? JSON.stringify(v) : String(v);
+            const valueChanged = Object.entries(data).some(
+                ([field, newVal]) => field !== 'articleDescription' && asText(field, oldRow[camelToSnake(field)]) !== asText(field, newVal),
+            );
 
             const updated = await prisma.extractionResultFlat.update({ where: { id }, data });
+
+            // Change history: same history_fg_article table as the New page (the
+            // History button). modify_logs is no longer written.
+            void ApproverController.recordFgArticleHistory(id, req.user, data, oldRow)
+                .catch((err: any) => console.error('[fgArticleHistory] modify record failed:', err?.message));
+
+            // modify_user: editors on the Created page (only when a value really changed)
+            if (valueChanged) {
+                void ApproverController.recordArticleEditor(id, 'modify_user', req.user);
+            }
 
             // Keep variants in sync for generic articles (fire-and-forget)
             if ((existingItem as any).isGeneric) {
@@ -4278,6 +4291,7 @@ export class ApproverController {
                     ...rest,
                     vaddPrintJson: rest.vaddPrintJson ?? Prisma.DbNull,
                     vaddEmpJson: rest.vaddEmpJson ?? Prisma.DbNull,
+                    creatorUser: Prisma.DbNull, modifyUser: Prisma.DbNull, // a copy starts with no editors
                     id: newId,
                     jobId: newJob.id,
                     imageUncPath: null,
