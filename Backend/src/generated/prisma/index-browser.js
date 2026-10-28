@@ -255,6 +255,8 @@ exports.Prisma.ExtractionResultFlatScalarFieldEnum = {
   apiCost: 'apiCost',
   userId: 'userId',
   userName: 'userName',
+  creatorUser: 'creatorUser',
+  modifyUser: 'modifyUser',
   extractionDate: 'extractionDate',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',

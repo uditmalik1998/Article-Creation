@@ -79,6 +79,12 @@ const FIELD_LABELS: Record<string, string> = {
   variantColor: 'Variant Colour', variantWeight: 'Variant Weight',
 };
 
+// Field label for the history list: known label, else camelCase split into words
+// (preciseConsumptionMeter → Precise Consumption Meter).
+const historyFieldLabel = (field: string) =>
+  FIELD_LABELS[field] ??
+  field.replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/^./, (c) => c.toUpperCase());
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 // Cost fields summed from a set's pieces into the set article (see Backend comboLinkService).
@@ -325,6 +331,23 @@ export default function ArticleDetailPage({
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historySearch, setHistorySearch] = useState('');
   const [historyUserFilter, setHistoryUserFilter] = useState('__ALL__');
+  // BEFORE = changed while a new article, AFTER = changed once created
+  const [historyStageFilter, setHistoryStageFilter] = useState<'__ALL__' | 'BEFORE' | 'AFTER'>('__ALL__');
+  const historyFiltered = useMemo(() => {
+    const q = historySearch.toLowerCase();
+    return historyRecords.filter((r) => {
+      if (historyUserFilter !== '__ALL__' && (r.changed_by_name ?? '—') !== historyUserFilter) return false;
+      if (historyStageFilter !== '__ALL__' && r.stage !== historyStageFilter) return false;
+      if (!q) return true;
+      return (
+        historyFieldLabel(r.field_name).toLowerCase().includes(q) ||
+        String(r.field_name ?? '').toLowerCase().includes(q) ||
+        (r.old_value ?? '').toLowerCase().includes(q) ||
+        (r.new_value ?? '').toLowerCase().includes(q) ||
+        (r.changed_by_name ?? '').toLowerCase().includes(q)
+      );
+    });
+  }, [historyRecords, historySearch, historyUserFilter, historyStageFilter]);
 
   const canApprove = user?.role === 'ADMIN' || user?.role === 'APPROVER' || user?.role === 'CATEGORY_HEAD' || user?.role === 'SUB_DIVISION_HEAD' || user?.role === 'PO_COMMITTEE' || user?.role === 'PD' || (extraApproverRoles.length > 0 && extraApproverRoles.includes(user?.role));
 
@@ -839,6 +862,7 @@ export default function ArticleDetailPage({
     setHistoryRecords([]);
     setHistorySearch('');
     setHistoryUserFilter('__ALL__');
+    setHistoryStageFilter('__ALL__');
     try {
       const token = localStorage.getItem('authToken');
       const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${articleId}/history`, {
@@ -1520,8 +1544,8 @@ export default function ArticleDetailPage({
       </Dialog>
 
       {/* Article change history dialog */}
-      <Dialog open={historyOpen} onOpenChange={o => { if (!o) { setHistoryOpen(false); setHistorySearch(''); setHistoryUserFilter('__ALL__'); } }}>
-        <DialogContent className="max-w-3xl p-0 overflow-hidden">
+      <Dialog open={historyOpen} onOpenChange={o => { if (!o) { setHistoryOpen(false); setHistorySearch(''); setHistoryUserFilter('__ALL__'); setHistoryStageFilter('__ALL__'); } }}>
+        <DialogContent className="max-w-4xl p-0 overflow-hidden">
           {/* Header */}
           <div className="flex items-center gap-3 border-b bg-gradient-to-r from-slate-50 to-white px-5 py-4">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-100">
@@ -1558,6 +1582,16 @@ export default function ArticleDetailPage({
                     {uniqueUsers.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
                   </SelectContent>
                 </Select>
+                <Select value={historyStageFilter} onValueChange={(v) => setHistoryStageFilter(v as typeof historyStageFilter)}>
+                  <SelectTrigger className="h-8 w-[150px] bg-white text-[12px]">
+                    <SelectValue placeholder="All stages" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__ALL__">All stages</SelectItem>
+                    <SelectItem value="BEFORE">Before creation</SelectItem>
+                    <SelectItem value="AFTER">After creation</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             );
           })()}
@@ -1576,18 +1610,7 @@ export default function ArticleDetailPage({
                 <span className="text-[11px] opacity-70">Changes will appear here after the first save.</span>
               </div>
             ) : (() => {
-              const q = historySearch.toLowerCase();
-              const filtered = historyRecords.filter(r => {
-                if (historyUserFilter !== '__ALL__' && (r.changed_by_name ?? '—') !== historyUserFilter) return false;
-                if (!q) return true;
-                const label = (FIELD_LABELS[r.field_name] ?? r.field_name).toLowerCase();
-                return (
-                  label.includes(q) ||
-                  (r.old_value ?? '').toLowerCase().includes(q) ||
-                  (r.new_value ?? '').toLowerCase().includes(q) ||
-                  (r.changed_by_name ?? '').toLowerCase().includes(q)
-                );
-              });
+              const filtered = historyFiltered;
               return filtered.length === 0 ? (
                 <div className="flex flex-col items-center justify-center gap-2 py-14 text-muted-foreground">
                   <span className="text-[13px]">No results match your search.</span>
@@ -1598,6 +1621,7 @@ export default function ArticleDetailPage({
                     <tr className="border-b bg-slate-50 text-left">
                       <th className="px-4 py-2.5 w-36 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Date / Time</th>
                       <th className="px-4 py-2.5 w-28 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Changed By</th>
+                      <th className="px-4 py-2.5 w-28 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Stage</th>
                       <th className="px-4 py-2.5 w-36 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Field</th>
                       <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Old Value</th>
                       <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">New Value</th>
@@ -1619,9 +1643,20 @@ export default function ArticleDetailPage({
                             <span className="text-[12px] font-medium text-slate-700">{r.changed_by_name ?? '—'}</span>
                           </div>
                         </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          {r.stage === 'AFTER' ? (
+                            <span className="inline-block rounded bg-slate-800 px-1.5 py-0.5 text-[10px] font-semibold text-white dark:bg-slate-200 dark:text-slate-900" title="Changed after the article was created (Created page)">
+                              After creation
+                            </span>
+                          ) : (
+                            <span className="inline-block rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-semibold text-slate-600" title="Changed while the article was new (before it was created)">
+                              Before creation
+                            </span>
+                          )}
+                        </td>
                         <td className="px-4 py-3">
-                          <span className="inline-block rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-700">
-                            {FIELD_LABELS[r.field_name] ?? r.field_name}
+                          <span className="inline-block rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-700" title={r.field_name}>
+                            {historyFieldLabel(r.field_name)}
                           </span>
                         </td>
                         <td className="px-4 py-3 max-w-[140px]">
@@ -1646,13 +1681,7 @@ export default function ArticleDetailPage({
           <div className="flex items-center justify-between border-t bg-slate-50/60 px-5 py-3">
             <span className="text-[11px] text-muted-foreground">
               {(() => {
-                const q = historySearch.toLowerCase();
-                const filtered = historyRecords.filter(r => {
-                  if (historyUserFilter !== '__ALL__' && (r.changed_by_name ?? '—') !== historyUserFilter) return false;
-                  if (!q) return true;
-                  const label = (FIELD_LABELS[r.field_name] ?? r.field_name).toLowerCase();
-                  return label.includes(q) || (r.old_value ?? '').toLowerCase().includes(q) || (r.new_value ?? '').toLowerCase().includes(q) || (r.changed_by_name ?? '').toLowerCase().includes(q);
-                });
+                const filtered = historyFiltered;
                 return filtered.length !== historyRecords.length
                   ? `Showing ${filtered.length} of ${historyRecords.length} changes`
                   : `${historyRecords.length} total change${historyRecords.length !== 1 ? 's' : ''}`;

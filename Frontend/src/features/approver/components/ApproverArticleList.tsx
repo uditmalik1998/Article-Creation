@@ -132,11 +132,22 @@ const fetchNationalGridValues = (): Promise<NationalGridValues> => {
 // Module-level segment range cache (shared across card instances, keyed by UPPER major category)
 type SegmentRange = { segment_type: string; min: number; max: number };
 const segmentRangeCache = new Map<string, SegmentRange[]>();
+// In-flight requests, so callers asking at the same moment (major category save +
+// the card's MC effect) share one network call instead of each fetching.
+const segmentRangeInFlight = new Map<string, Promise<SegmentRange[]>>();
 
-const fetchSegmentRangesFor = async (mc: string): Promise<SegmentRange[]> => {
+const fetchSegmentRangesFor = (mc: string): Promise<SegmentRange[]> => {
   const key = (mc || '').trim().toUpperCase();
-  if (!key) return [];
-  if (segmentRangeCache.has(key)) return segmentRangeCache.get(key)!;
+  if (!key) return Promise.resolve([]);
+  if (segmentRangeCache.has(key)) return Promise.resolve(segmentRangeCache.get(key)!);
+  const pending = segmentRangeInFlight.get(key);
+  if (pending) return pending;
+  const p = loadSegmentRanges(mc, key).finally(() => segmentRangeInFlight.delete(key));
+  segmentRangeInFlight.set(key, p);
+  return p;
+};
+
+const loadSegmentRanges = async (mc: string, key: string): Promise<SegmentRange[]> => {
   try {
     const token = localStorage.getItem('authToken');
     const r = await fetch(
@@ -156,6 +167,20 @@ const fetchSegmentRangesFor = async (mc: string): Promise<SegmentRange[]> => {
   } catch { /* ignore */ }
   segmentRangeCache.set(key, []);
   return [];
+};
+
+// Identical GETs fired at the same moment (e.g. two effects reacting to one major
+// category change) share one request. Not a cache — finished requests are dropped.
+const getJsonInFlight = new Map<string, Promise<any>>();
+const getJsonShared = (url: string): Promise<any> => {
+  const pending = getJsonInFlight.get(url);
+  if (pending) return pending;
+  const token = localStorage.getItem('authToken');
+  const p = fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+    .then((r) => r.json())
+    .finally(() => getJsonInFlight.delete(url));
+  getJsonInFlight.set(url, p);
+  return p;
 };
 
 const computeSegmentFromMrp = (mrp: string | null | undefined, ranges: SegmentRange[]): string | null => {
@@ -894,12 +919,9 @@ const ArticleCard = React.memo(
         ).trim();
         if (existingMeter !== '') return;
       }
-      const token = localStorage.getItem('authToken');
-      fetch(
+      getJsonShared(
         `${APP_CONFIG.api.baseURL}/approver/body-fabric-consumption/by-width?majorCategory=${encodeURIComponent(effectiveMajCat)}&fabWidth=${encodeURIComponent(currentFWidth)}`,
-        { headers: { Authorization: `Bearer ${token}` } },
       )
-        .then((r) => r.json())
         .then((d: { fabConsumption: number | null }) => {
           if (d.fabConsumption == null) return;
           const updates: Record<string, string> = {
@@ -1149,11 +1171,9 @@ const ArticleCard = React.memo(
       }
       const token = localStorage.getItem('authToken');
       const headers = { Authorization: `Bearer ${token}` };
-      fetch(
+      getJsonShared(
         `${APP_CONFIG.api.baseURL}/approver/body-fabric-consumption/by-width?majorCategory=${encodeURIComponent(effectiveMajCat)}&fabWidth=${encodeURIComponent(currentFWidth)}`,
-        { headers },
       )
-        .then((r) => r.json())
         .then((d: { fabConsumption: number | null }) => {
           if (d.fabConsumption != null) {
             applyRoughUpdates(d.fabConsumption, currentFWidth);
@@ -1979,6 +1999,20 @@ const ArticleCard = React.memo(
     const handleSave = (field: string, value: string | null, extra?: Record<string, string | null>) => {
       // M_FAB_MAIN_MVGR_2 change: fetch its M_FAB_MAIN_MVGR_1 from the mapping and
       // save both together. Cleared MVGR-2 or no mapping row → MVGR-1 cleared.
+      // Major category change: load the new category's segment ranges first so the
+      // re-derived SEGMENT goes in the same PUT as the major category (one request).
+      if (field === 'majorCategory' && value && extra === undefined) {
+        setLocalValues((prev) => ({ ...prev, majorCategory: value }));
+        setEditingField(null);
+        fetchSegmentRangesFor(value)
+          .catch(() => [] as SegmentRange[])
+          .then((ranges) => {
+            setSegmentRanges(ranges);
+            const seg = computeSegmentFromMrp(getValue('mrp'), ranges);
+            handleSave(field, value, seg ? { segment: seg } : {});
+          });
+        return;
+      }
       if (field === 'fabricMainMvgr' && extra === undefined) {
         if (!value) {
           handleSave(field, value, { mainMvgr: null });
@@ -2101,16 +2135,7 @@ const ArticleCard = React.memo(
       if (field === 'majorCategory' && value) {
         const newMcCode = getMcCodeByMajorCategory(value);
         if (newMcCode) updates['mcCode'] = newMcCode;
-        // Async: fetch ranges for the new major category, then auto-set segment
-        const currentMrp = getValue('mrp');
-        fetchSegmentRangesFor(value).then((ranges) => {
-          setSegmentRanges(ranges);
-          const seg = computeSegmentFromMrp(currentMrp, ranges);
-          if (seg) {
-            setLocalValues((prev) => ({ ...prev, segment: seg }));
-            onSave({ ...item, segment: seg } as ApproverItem, { segment: seg } as Record<string, unknown>);
-          }
-        });
+        // segment for the new major category was added by the pre-step above (same PUT).
         // Clear body/fabric article number and description only — attributes remain unchanged
         updates['bodyArticle'] = '';
         updates['bodyArticleDescription'] = '';

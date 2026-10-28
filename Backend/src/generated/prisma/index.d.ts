@@ -17028,6 +17028,8 @@ export namespace Prisma {
     apiCost: number
     userId: number
     userName: number
+    creatorUser: number
+    modifyUser: number
     extractionDate: number
     createdAt: number
     updatedAt: number
@@ -18541,6 +18543,8 @@ export namespace Prisma {
     apiCost?: true
     userId?: true
     userName?: true
+    creatorUser?: true
+    modifyUser?: true
     extractionDate?: true
     createdAt?: true
     updatedAt?: true
@@ -18985,6 +18989,8 @@ export namespace Prisma {
     apiCost: Decimal | null
     userId: number | null
     userName: string | null
+    creatorUser: JsonValue | null
+    modifyUser: JsonValue | null
     extractionDate: Date | null
     createdAt: Date
     updatedAt: Date
@@ -19361,6 +19367,8 @@ export namespace Prisma {
     apiCost?: boolean
     userId?: boolean
     userName?: boolean
+    creatorUser?: boolean
+    modifyUser?: boolean
     extractionDate?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -19724,6 +19732,8 @@ export namespace Prisma {
     apiCost?: boolean
     userId?: boolean
     userName?: boolean
+    creatorUser?: boolean
+    modifyUser?: boolean
     extractionDate?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -20084,6 +20094,8 @@ export namespace Prisma {
     apiCost?: boolean
     userId?: boolean
     userName?: boolean
+    creatorUser?: boolean
+    modifyUser?: boolean
     extractionDate?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -20444,6 +20456,8 @@ export namespace Prisma {
     apiCost?: boolean
     userId?: boolean
     userName?: boolean
+    creatorUser?: boolean
+    modifyUser?: boolean
     extractionDate?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -20781,7 +20795,7 @@ export namespace Prisma {
     imageExtractionRawData?: boolean
   }
 
-  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "oldImageUrl" | "backImageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "totalBgtPrVal" | "totalActPrVal" | "totalVendorPrVal" | "totalFinalPrVal" | "bTrimType" | "bTrimTotalAutoBgt" | "bTrimTotalRoughV2" | "bTrimTotalVdrCost" | "bTrimTotalFinalCost" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "elasticAutoBgt" | "elasticRoughV2" | "elasticVdrCost" | "elasticFinalCost" | "fusingAutoBgt" | "fusingRoughV2" | "fusingVdrCost" | "fusingFinalCost" | "badgeAutoBgt" | "badgeRoughV2" | "badgeVdrCost" | "badgeFinalCost" | "rivetAutoBgt" | "rivetRoughV2" | "rivetVdrCost" | "rivetFinalCost" | "tapeAutoBgt" | "tapeRoughV2" | "tapeVdrCost" | "tapeFinalCost" | "otherAutoBgt" | "otherRoughV2" | "otherVdrCost" | "otherFinalCost" | "adjusterAutoBgt" | "adjusterRoughV2" | "adjusterVdrCost" | "adjusterFinalCost" | "brotchAutoBgt" | "brotchRoughV2" | "brotchVdrCost" | "brotchFinalCost" | "buckleAutoBgt" | "buckleRoughV2" | "buckleVdrCost" | "buckleFinalCost" | "eyeletsAutoBgt" | "eyeletsRoughV2" | "eyeletsVdrCost" | "eyeletsFinalCost" | "hangingDRingAutoBgt" | "hangingDRingRoughV2" | "hangingDRingVdrCost" | "hangingDRingFinalCost" | "hookAutoBgt" | "hookRoughV2" | "hookVdrCost" | "hookFinalCost" | "labelAutoBgt" | "labelRoughV2" | "labelVdrCost" | "labelFinalCost" | "laceAutoBgt" | "laceRoughV2" | "laceVdrCost" | "laceFinalCost" | "pockettingFabricAutoBgt" | "pockettingFabricRoughV2" | "pockettingFabricVdrCost" | "pockettingFabricFinalCost" | "pockettingReadymadeAutoBgt" | "pockettingReadymadeRoughV2" | "pockettingReadymadeVdrCost" | "pockettingReadymadeFinalCost" | "santaAutoBgt" | "santaRoughV2" | "santaVdrCost" | "santaFinalCost" | "stopperAutoBgt" | "stopperRoughV2" | "stopperVdrCost" | "stopperFinalCost" | "tagAutoBgt" | "tagRoughV2" | "tagVdrCost" | "tagFinalCost" | "tasselsAutoBgt" | "tasselsRoughV2" | "tasselsVdrCost" | "tasselsFinalCost" | "mBtnRate" | "mBtnQty" | "dcRate" | "dcQty" | "zipRate" | "zipQty" | "patchRate" | "patchQty" | "hTrfRate" | "hTrfQty" | "elasticRate" | "elasticQty" | "fusingRate" | "fusingQty" | "badgeRate" | "badgeQty" | "rivetRate" | "rivetQty" | "tapeRate" | "tapeQty" | "otherRate" | "otherQty" | "adjusterRate" | "adjusterQty" | "brotchRate" | "brotchQty" | "buckleRate" | "buckleQty" | "eyeletsRate" | "eyeletsQty" | "hangingDRingRate" | "hangingDRingQty" | "hookRate" | "hookQty" | "labelRate" | "labelQty" | "laceRate" | "laceQty" | "pockettingFabricRate" | "pockettingFabricQty" | "pockettingReadymadeRate" | "pockettingReadymadeQty" | "santaRate" | "santaQty" | "stopperRate" | "stopperQty" | "tagRate" | "tagQty" | "tasselsRate" | "tasselsQty" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "vaddPrintJson" | "vaddEmpJson" | "vaddTotalAutoBgt" | "vaddTotalRoughV2" | "vaddTotalVendorCost" | "vaddTotalFinalCost" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "setLinkStatus" | "setLinkMessage" | "setLinkAttempts" | "setLinkedAt" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
+  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "oldImageUrl" | "backImageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "creatorUser" | "modifyUser" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "totalBgtPrVal" | "totalActPrVal" | "totalVendorPrVal" | "totalFinalPrVal" | "bTrimType" | "bTrimTotalAutoBgt" | "bTrimTotalRoughV2" | "bTrimTotalVdrCost" | "bTrimTotalFinalCost" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "elasticAutoBgt" | "elasticRoughV2" | "elasticVdrCost" | "elasticFinalCost" | "fusingAutoBgt" | "fusingRoughV2" | "fusingVdrCost" | "fusingFinalCost" | "badgeAutoBgt" | "badgeRoughV2" | "badgeVdrCost" | "badgeFinalCost" | "rivetAutoBgt" | "rivetRoughV2" | "rivetVdrCost" | "rivetFinalCost" | "tapeAutoBgt" | "tapeRoughV2" | "tapeVdrCost" | "tapeFinalCost" | "otherAutoBgt" | "otherRoughV2" | "otherVdrCost" | "otherFinalCost" | "adjusterAutoBgt" | "adjusterRoughV2" | "adjusterVdrCost" | "adjusterFinalCost" | "brotchAutoBgt" | "brotchRoughV2" | "brotchVdrCost" | "brotchFinalCost" | "buckleAutoBgt" | "buckleRoughV2" | "buckleVdrCost" | "buckleFinalCost" | "eyeletsAutoBgt" | "eyeletsRoughV2" | "eyeletsVdrCost" | "eyeletsFinalCost" | "hangingDRingAutoBgt" | "hangingDRingRoughV2" | "hangingDRingVdrCost" | "hangingDRingFinalCost" | "hookAutoBgt" | "hookRoughV2" | "hookVdrCost" | "hookFinalCost" | "labelAutoBgt" | "labelRoughV2" | "labelVdrCost" | "labelFinalCost" | "laceAutoBgt" | "laceRoughV2" | "laceVdrCost" | "laceFinalCost" | "pockettingFabricAutoBgt" | "pockettingFabricRoughV2" | "pockettingFabricVdrCost" | "pockettingFabricFinalCost" | "pockettingReadymadeAutoBgt" | "pockettingReadymadeRoughV2" | "pockettingReadymadeVdrCost" | "pockettingReadymadeFinalCost" | "santaAutoBgt" | "santaRoughV2" | "santaVdrCost" | "santaFinalCost" | "stopperAutoBgt" | "stopperRoughV2" | "stopperVdrCost" | "stopperFinalCost" | "tagAutoBgt" | "tagRoughV2" | "tagVdrCost" | "tagFinalCost" | "tasselsAutoBgt" | "tasselsRoughV2" | "tasselsVdrCost" | "tasselsFinalCost" | "mBtnRate" | "mBtnQty" | "dcRate" | "dcQty" | "zipRate" | "zipQty" | "patchRate" | "patchQty" | "hTrfRate" | "hTrfQty" | "elasticRate" | "elasticQty" | "fusingRate" | "fusingQty" | "badgeRate" | "badgeQty" | "rivetRate" | "rivetQty" | "tapeRate" | "tapeQty" | "otherRate" | "otherQty" | "adjusterRate" | "adjusterQty" | "brotchRate" | "brotchQty" | "buckleRate" | "buckleQty" | "eyeletsRate" | "eyeletsQty" | "hangingDRingRate" | "hangingDRingQty" | "hookRate" | "hookQty" | "labelRate" | "labelQty" | "laceRate" | "laceQty" | "pockettingFabricRate" | "pockettingFabricQty" | "pockettingReadymadeRate" | "pockettingReadymadeQty" | "santaRate" | "santaQty" | "stopperRate" | "stopperQty" | "tagRate" | "tagQty" | "tasselsRate" | "tasselsQty" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "vaddPrintJson" | "vaddEmpJson" | "vaddTotalAutoBgt" | "vaddTotalRoughV2" | "vaddTotalVendorCost" | "vaddTotalFinalCost" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "setLinkStatus" | "setLinkMessage" | "setLinkAttempts" | "setLinkedAt" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
   export type ExtractionResultFlatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     comboParent?: boolean | ExtractionResultFlat$comboParentArgs<ExtArgs>
@@ -20830,6 +20844,8 @@ export namespace Prisma {
       apiCost: Prisma.Decimal | null
       userId: number | null
       userName: string | null
+      creatorUser: Prisma.JsonValue | null
+      modifyUser: Prisma.JsonValue | null
       extractionDate: Date | null
       createdAt: Date
       updatedAt: Date
@@ -21612,6 +21628,8 @@ export namespace Prisma {
     readonly apiCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly userId: FieldRef<"ExtractionResultFlat", 'Int'>
     readonly userName: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly creatorUser: FieldRef<"ExtractionResultFlat", 'Json'>
+    readonly modifyUser: FieldRef<"ExtractionResultFlat", 'Json'>
     readonly extractionDate: FieldRef<"ExtractionResultFlat", 'DateTime'>
     readonly createdAt: FieldRef<"ExtractionResultFlat", 'DateTime'>
     readonly updatedAt: FieldRef<"ExtractionResultFlat", 'DateTime'>
@@ -91886,6 +91904,8 @@ export namespace Prisma {
     apiCost: 'apiCost',
     userId: 'userId',
     userName: 'userName',
+    creatorUser: 'creatorUser',
+    modifyUser: 'modifyUser',
     extractionDate: 'extractionDate',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
@@ -96003,6 +96023,8 @@ export namespace Prisma {
     apiCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     userId?: IntNullableFilter<"ExtractionResultFlat"> | number | null
     userName?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    creatorUser?: JsonNullableFilter<"ExtractionResultFlat">
+    modifyUser?: JsonNullableFilter<"ExtractionResultFlat">
     extractionDate?: DateTimeNullableFilter<"ExtractionResultFlat"> | Date | string | null
     createdAt?: DateTimeFilter<"ExtractionResultFlat"> | Date | string
     updatedAt?: DateTimeFilter<"ExtractionResultFlat"> | Date | string
@@ -96365,6 +96387,8 @@ export namespace Prisma {
     apiCost?: SortOrderInput | SortOrder
     userId?: SortOrderInput | SortOrder
     userName?: SortOrderInput | SortOrder
+    creatorUser?: SortOrderInput | SortOrder
+    modifyUser?: SortOrderInput | SortOrder
     extractionDate?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -96732,6 +96756,8 @@ export namespace Prisma {
     apiCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     userId?: IntNullableFilter<"ExtractionResultFlat"> | number | null
     userName?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    creatorUser?: JsonNullableFilter<"ExtractionResultFlat">
+    modifyUser?: JsonNullableFilter<"ExtractionResultFlat">
     extractionDate?: DateTimeNullableFilter<"ExtractionResultFlat"> | Date | string | null
     createdAt?: DateTimeFilter<"ExtractionResultFlat"> | Date | string
     updatedAt?: DateTimeFilter<"ExtractionResultFlat"> | Date | string
@@ -97093,6 +97119,8 @@ export namespace Prisma {
     apiCost?: SortOrderInput | SortOrder
     userId?: SortOrderInput | SortOrder
     userName?: SortOrderInput | SortOrder
+    creatorUser?: SortOrderInput | SortOrder
+    modifyUser?: SortOrderInput | SortOrder
     extractionDate?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -97458,6 +97486,8 @@ export namespace Prisma {
     apiCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     userId?: IntNullableWithAggregatesFilter<"ExtractionResultFlat"> | number | null
     userName?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    creatorUser?: JsonNullableWithAggregatesFilter<"ExtractionResultFlat">
+    modifyUser?: JsonNullableWithAggregatesFilter<"ExtractionResultFlat">
     extractionDate?: DateTimeNullableWithAggregatesFilter<"ExtractionResultFlat"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"ExtractionResultFlat"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"ExtractionResultFlat"> | Date | string
@@ -105828,6 +105858,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -106188,6 +106220,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -106546,6 +106580,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -106906,6 +106942,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -107265,6 +107303,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -107621,6 +107661,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -107976,6 +108018,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -118099,6 +118143,8 @@ export namespace Prisma {
     apiCost?: SortOrder
     userId?: SortOrder
     userName?: SortOrder
+    creatorUser?: SortOrder
+    modifyUser?: SortOrder
     extractionDate?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -127854,6 +127900,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -128212,6 +128260,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -128678,6 +128728,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -129036,6 +129088,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -129434,6 +129488,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -129793,6 +129849,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -130155,6 +130213,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -130514,6 +130574,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -131027,6 +131089,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -131386,6 +131450,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -131763,6 +131829,8 @@ export namespace Prisma {
     apiCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     userId?: IntNullableFilter<"ExtractionResultFlat"> | number | null
     userName?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    creatorUser?: JsonNullableFilter<"ExtractionResultFlat">
+    modifyUser?: JsonNullableFilter<"ExtractionResultFlat">
     extractionDate?: DateTimeNullableFilter<"ExtractionResultFlat"> | Date | string | null
     createdAt?: DateTimeFilter<"ExtractionResultFlat"> | Date | string
     updatedAt?: DateTimeFilter<"ExtractionResultFlat"> | Date | string
@@ -132342,6 +132410,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -132701,6 +132771,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -134588,6 +134660,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -134947,6 +135021,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -135357,6 +135433,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -135716,6 +135794,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -136694,6 +136774,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -137059,6 +137141,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -137418,6 +137502,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -137776,6 +137862,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -138200,6 +138288,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -138670,6 +138760,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -139029,6 +139121,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -139387,6 +139481,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
