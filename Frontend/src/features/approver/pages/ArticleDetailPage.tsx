@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   CheckCircle2, XCircle, FileText, LayoutGrid, Rocket, Sparkles,
-  ChevronLeft, ChevronRight, ArrowLeft, Loader2, RotateCw, History, Plus, Trash2, PackagePlus,
+  ChevronLeft, ChevronRight, ArrowLeft, Loader2, RotateCw, History, Plus, Trash2, PackagePlus, X,
 } from 'lucide-react';
 import {
   Button,
@@ -23,6 +23,7 @@ import {
 import { message } from '@/lib/message';
 import { toast } from 'sonner';
 import { ApproverArticleList } from '../components/ApproverArticleList';
+import { getUnsavedCards } from '../components/unsavedCards';
 import type { ApproverItem } from '../types';
 import { APP_CONFIG } from '../../../constants/app/config';
 import { getMcCodeByMajorCategory } from '../../../data/majorCategoryMcCodeMap';
@@ -247,8 +248,11 @@ const MODIFY_FIELDS: { field: string; sapName: string }[] = [
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+/** Thrown by onSave when the caller passed throwOnError (the error toast is already shown). */
+class SaveFailedError extends Error {}
+
 type ConfirmDialog =
-  | { kind: 'approve'; count: number }
+  | { kind: 'approve'; count: number; unsavedCards: string[]; article?: { number: string; mc: string; vendor: string } }
   | { kind: 'reject'; count: number }
   | { kind: 'createFabric'; item: ApproverItem }
   | { kind: 'createBody'; item: ApproverItem }
@@ -628,7 +632,7 @@ export default function ArticleDetailPage({
 
   // Save an edit made on a piece's tab, then reload the parent so its summed
   // costs / mirrored attributes reflect the change.
-  const saveComboChild = async (row: ApproverItem, directUpdates: Record<string, unknown> | undefined, options?: { silent?: boolean }) => {
+  const saveComboChild = async (row: ApproverItem, directUpdates: Record<string, unknown> | undefined, options?: { silent?: boolean; throwOnError?: boolean }) => {
     const prevChildren = comboChildren;
     const child = comboChildren.find(c => c.id === row.id);
     if (!child) return;
@@ -657,6 +661,7 @@ export default function ArticleDetailPage({
         try { const p = await r.json(); if (p?.error) errMsg = p.error; } catch { /* skip */ }
         setComboChildren(prevChildren);
         message.error(errMsg);
+        if (options?.throwOnError) throw new SaveFailedError(errMsg);
         return;
       }
       const saved = await r.json();
@@ -664,9 +669,11 @@ export default function ArticleDetailPage({
       // Reload the set: parent totals change, and the Top piece may change with a major category edit.
       await loadComboChildren();
       if (!options?.silent) message.success('Saved');
-    } catch {
+    } catch (e) {
+      if (e instanceof SaveFailedError) throw e;
       setComboChildren(prevChildren);
       message.error('Failed to save. Please check your connection.');
+      if (options?.throwOnError) throw new SaveFailedError('Failed to save');
     }
   };
 
@@ -786,13 +793,31 @@ export default function ArticleDetailPage({
     //   }
     // }
 
-    setConfirmDialog({ kind: 'approve', count: pendingSelectedKeys.length + pendingComboChildren.length });
+    setConfirmDialog({
+      kind: 'approve',
+      count: pendingSelectedKeys.length + pendingComboChildren.length,
+      unsavedCards: getUnsavedCards().map((c) => c.label),
+      article: currentItem ? {
+        number: currentItem.articleNumber || currentItem.designNumber || currentItem.imageName || '',
+        mc: currentItem.majorCategory || '',
+        vendor: currentItem.vendorName || '',
+      } : undefined,
+    });
   };
 
   const doApprove = async () => {
     const endpoint = '/approver/approve';
     setApproving(true);
     try {
+      // Cards the user filled but didn't Save (B TRIM, V. ADD, PKG COST, CMP COST) are
+      // saved first; if one fails, nothing is sent to SAP.
+      for (const card of getUnsavedCards()) {
+        try {
+          await card.save();
+        } catch {
+          throw new Error(`Could not save ${card.label}. Nothing was sent to SAP — fix it and try again.`);
+        }
+      }
       const token = localStorage.getItem('authToken');
       const r = await fetch(`${APP_CONFIG.api.baseURL}${endpoint}`, {
         method: 'POST',
@@ -1403,6 +1428,7 @@ export default function ArticleDetailPage({
                 try { const p = await r.json(); if (p?.error) errMsg = p.error; } catch { /* skip */ }
                 setItems(prevItems);
                 message.error(errMsg);
+                if (options?.throwOnError) throw new SaveFailedError(errMsg);
                 return;
               }
               const saved = await r.json();
@@ -1414,9 +1440,11 @@ export default function ArticleDetailPage({
                 return copy;
               });
               if (!options?.silent) message.success('Saved');
-            } catch {
+            } catch (e) {
+              if (e instanceof SaveFailedError) throw e;
               setItems(prevItems);
               message.error('Failed to save. Please check your connection.');
+              if (options?.throwOnError) throw new SaveFailedError('Failed to save');
             }
           }}
         />
@@ -1424,17 +1452,62 @@ export default function ArticleDetailPage({
 
       {/* Confirm dialog */}
       <Dialog open={!!confirmDialog} onOpenChange={o => !o && setConfirmDialog(null)}>
-        <DialogContent>
+        <DialogContent
+          showClose={confirmDialog?.kind !== 'approve'}
+          className={confirmDialog?.kind === 'approve' ? 'max-w-[480px] gap-0 p-0' : undefined}
+          onInteractOutside={(e) => { if (approving) e.preventDefault(); }}
+          onEscapeKeyDown={(e) => { if (approving) e.preventDefault(); }}
+        >
           {confirmDialog?.kind === 'approve' && (
             <>
-              <DialogHeader><DialogTitle>Confirm Approval</DialogTitle></DialogHeader>
-              <p className="m-0">Are you sure you want to approve {confirmDialog.count} items? This action cannot be undone.</p>
-              <DialogFooter>
+              <div className="relative bg-[#1e293b] px-5 pb-4 pt-[18px] text-white">
+                <div className="text-[11px] font-bold tracking-[0.08em] text-slate-400">APPROVE &amp; SEND TO SAP</div>
+                <DialogTitle className="mb-2.5 mt-1 text-[21px] font-semibold text-white">
+                  Approve {confirmDialog.count} article{confirmDialog.count === 1 ? '' : 's'}?
+                </DialogTitle>
+                {confirmDialog.count === 1 && confirmDialog.article?.number && (
+                  <span className="inline-flex max-w-full items-center gap-2 rounded-full bg-white/10 px-2.5 py-1 font-mono text-[12.5px] font-semibold text-slate-200">
+                    {confirmDialog.article.number}
+                    {(confirmDialog.article.mc || confirmDialog.article.vendor) && (
+                      <span className="truncate font-sans text-xs font-medium opacity-70">
+                        {[confirmDialog.article.mc, confirmDialog.article.vendor].filter(Boolean).map((s) => `· ${s}`).join(' ')}
+                      </span>
+                    )}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  aria-label="Close"
+                  disabled={approving}
+                  onClick={() => setConfirmDialog(null)}
+                  className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-white/10 hover:text-white disabled:opacity-40"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="flex flex-col gap-3 px-5 py-4">
+                {confirmDialog.unsavedCards.length > 0 && (
+                  <div className="overflow-hidden rounded-[10px] border border-slate-200">
+                    <div className="bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700">Unsaved changes — saved first</div>
+                    {confirmDialog.unsavedCards.map((card) => (
+                      <div key={card} className="flex items-center gap-2.5 border-t border-slate-200 px-3 py-2">
+                        <span className="h-2 w-2 shrink-0 rounded-full bg-amber-500" />
+                        <span className="text-[13px] font-bold text-slate-900">{card}</span>
+                        <span className="ml-auto text-xs text-slate-500">not saved yet</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <p className="m-0 text-[12.5px] text-slate-500">Once sent to SAP the approval can’t be undone.</p>
+              </div>
+              <div className="flex justify-end gap-2 border-t border-slate-200 bg-slate-50 px-5 py-3">
                 <Button variant="outline" onClick={() => setConfirmDialog(null)} disabled={approving}>Cancel</Button>
-                <Button disabled={approving} onClick={doApprove}>
-                  {approving ? <><Loader2 className="h-4 w-4 animate-spin" /> Approving…</> : 'Approve'}
+                <Button disabled={approving} onClick={doApprove} className="bg-[#1e293b] text-white hover:bg-[#0f172a]">
+                  {approving
+                    ? <><Loader2 className="h-4 w-4 animate-spin" /> Approving…</>
+                    : confirmDialog.unsavedCards.length > 0 ? 'Save & Approve' : 'Approve'}
                 </Button>
-              </DialogFooter>
+              </div>
             </>
           )}
           {confirmDialog?.kind === 'reject' && (

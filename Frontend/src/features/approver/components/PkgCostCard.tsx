@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp, Package, Save } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TextCell } from './CostingGridCard';
 import { CARD_THEME } from './cardTheme';
+import { useRegisterUnsavedCard } from './unsavedCards';
 
 // ─── PKG COST card (FG articles) ──────────────────────────────────────────────
 // PKG-1 / PKG-2 tabs, each a table of
@@ -48,7 +49,7 @@ interface PkgCostCardProps {
   /** Reads the article fresh from the DB (the parent's copy can be stale). */
   loadSavedRecord?: () => Promise<Record<string, unknown> | null>;
   /** Save button: persists the current tab's net prices + pkgCostType. */
-  onSaveTab?: (updates: Record<string, string | null>) => void;
+  onSaveTab?: (updates: Record<string, string | null>) => void | Promise<void>;
 }
 
 const PkgCostCard: React.FC<PkgCostCardProps> = ({ collapsed, onToggleCollapse, locked, loadSavedRecord, onSaveTab }) => {
@@ -90,14 +91,20 @@ const PkgCostCard: React.FC<PkgCostCardProps> = ({ collapsed, onToggleCollapse, 
     if (col === 'rate') setDirty(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!onSaveTab) return;
     const updates: Record<string, string | null> = { pkgCostType: tab };
     for (const r of ROWS) updates[PKG_RATE_FIELDS[r]] = val(r, 'rate') || null;
-    onSaveTab(updates);
-    setSavedTab(tab);
     setDirty(false);
+    try {
+      await onSaveTab(updates);
+    } catch (e) {
+      setDirty(true);
+      throw e;
+    }
+    setSavedTab(tab);
   };
+  useRegisterUnsavedCard('PKG COST', dirty && !!onSaveTab && !locked, handleSave);
 
   const total = ROWS.reduce((sum, r) => sum + (parseFloat(val(r, 'rate')) || 0), 0);
 
@@ -162,7 +169,7 @@ const PkgCostCard: React.FC<PkgCostCardProps> = ({ collapsed, onToggleCollapse, 
                 )}
                 <button
                   type="button"
-                  onClick={handleSave}
+                  onClick={() => { handleSave().catch(() => {}); }}
                   disabled={locked}
                   className="flex h-7 items-center gap-1.5 rounded-md bg-white px-3 text-[12.5px] font-bold text-slate-900 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
                 >

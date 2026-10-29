@@ -4233,36 +4233,9 @@ export class ApproverController {
             const source = await prisma.extractionResultFlat.findUnique({ where: { id } });
             if (!source) return res.status(404).json({ error: 'Article not found' });
 
-            // Fetch original job for metadata
-            const originalJob = source.jobId
-                ? await prisma.extractionJob.findUnique({
-                    where: { id: source.jobId },
-                    select: { categoryId: true, userId: true, aiModel: true },
-                })
-                : null;
-            if (!originalJob) return res.status(404).json({ error: 'Source job not found' });
-
-            // Create a new ExtractionJob for the duplicate
-            const newJob = await prisma.extractionJob.create({
-                data: {
-                    userId: originalJob.userId,
-                    categoryId: originalJob.categoryId,
-                    imageUrl: source.imageUrl || '',
-                    status: 'COMPLETED',
-                    aiModel: originalJob.aiModel,
-                    processingTimeMs: source.processingTimeMs,
-                    tokensUsed: source.totalTokens,
-                    inputTokens: source.inputTokens,
-                    outputTokens: source.outputTokens,
-                    apiCost: source.apiCost,
-                    totalAttributes: source.totalAttributes,
-                    extractedCount: source.extractedCount,
-                    avgConfidence: source.avgConfidence,
-                    completedAt: new Date(),
-                    designNumber: source.articleNumber,
-                },
-            });
-
+            // No extraction job for the copy: it was not produced by an AI run, so job_id stays
+            // NULL (like SRM imports) and the AI cost/token fields are cleared — a fake job
+            // used to count the original's Gemini cost again in the stats.
             // Strip identity / status fields — copy everything else
             const {
                 id: _id,
@@ -4293,7 +4266,16 @@ export class ApproverController {
                     vaddEmpJson: rest.vaddEmpJson ?? Prisma.DbNull,
                     creatorUser: Prisma.DbNull, modifyUser: Prisma.DbNull, // a copy starts with no editors
                     id: newId,
-                    jobId: newJob.id,
+                    jobId: null,
+                    inputTokens: null,
+                    outputTokens: null,
+                    totalTokens: null,
+                    apiCost: null,
+                    processingTimeMs: null,
+                    aiModel: null,
+                    avgConfidence: null,
+                    totalAttributes: null,
+                    extractedCount: null,
                     imageUncPath: null,
                     approvalStatus: 'PENDING',
                     approvedBy: null,
@@ -4305,6 +4287,18 @@ export class ApproverController {
                     fabricArticleNumber: null,
                     fabricArticleDescription: null,
                     designNumber: designNumber.trim(),
+                    // Created-page source (already in SAP): the copy is a brand-new article,
+                    // so drop everything tied to the original's SAP life — only attributes carry over.
+                    ...(source.approvalStatus === 'APPROVED' ? {
+                        pdStatus: 'PENDING' as const,
+                        bodyArticle: null,
+                        attrArticleNums: null,
+                        oldImageUrl: null,
+                        isOldArticle: false,
+                        setLinkStatus: null,
+                        srmUniqueId: null,
+                        srmOriginalDesignNumber: null,
+                    } : {}),
                     // A manual duplicate has no pending AI extraction — mark it COMPLETED
                     // so it isn't hidden by the 30-minute SRM extraction gate (which only
                     // holds back source=SRM rows still in SRM_IMPORT) and isn't re-processed
@@ -6821,30 +6815,33 @@ export class ApproverController {
         for (const item of items) {
             const rows = existingRowsByFlatId.get(item.id) ?? [];
 
-            // a) Block if the new desc is already APPROVED for this flatId — same message
-            //    as Check 1 so the user knows which body article number to reuse.
+            // a) Block if the new desc is already APPROVED with a body article number for this
+            //    flatId — same message as Check 1 so the user knows which number to reuse.
+            //    An APPROVED row with no number means the SAP submit failed (e.g. timed out);
+            //    it falls through to b) and is re-submitted rather than blocked with "N/A".
             const approvedSameDesc = rows.find(
                 (r) => r.approvalStatus === 'APPROVED'
+                    && !!r.bodyArticleNumber
                     && (r.bodyArticleDescription ?? '').trim() === (item.bodyArticleDescription ?? '').trim()
             );
             if (approvedSameDesc) {
-                if (approvedSameDesc.bodyArticleNumber) {
-                    await prisma.extractionResultFlat.update({
-                        where: { id: item.id },
-                        data: { bodyArticle: approvedSameDesc.bodyArticleNumber },
-                    }).catch(() => {});
-                }
+                await prisma.extractionResultFlat.update({
+                    where: { id: item.id },
+                    data: { bodyArticle: approvedSameDesc.bodyArticleNumber },
+                }).catch(() => {});
                 return res.status(409).json({
-                    error: `For this ${approvedSameDesc.majorCategory} Major Category, Body Article is already Present: ${approvedSameDesc.bodyArticleNumber ?? 'N/A'}`,
-                    bodyArticleNumber: approvedSameDesc.bodyArticleNumber ?? null,
+                    error: `For this ${approvedSameDesc.majorCategory} Major Category, Body Article is already Present: ${approvedSameDesc.bodyArticleNumber}`,
+                    bodyArticleNumber: approvedSameDesc.bodyArticleNumber,
                     flatId: item.id,
                     duplicateFlatIds: [item.id],
                 });
             }
 
-            // b) Update an existing PENDING or REJECTED row for this flatId
+            // b) Update an existing PENDING / REJECTED row, or an APPROVED row whose SAP
+            //    submit never returned a number
             const pendingOrRejected = rows.find(
                 (r) => r.approvalStatus === 'PENDING' || r.approvalStatus === 'REJECTED'
+                    || (r.approvalStatus === 'APPROVED' && !r.bodyArticleNumber)
             );
             if (pendingOrRejected) {
                 toUpdate.push({ item, existingId: pendingOrRejected.id });

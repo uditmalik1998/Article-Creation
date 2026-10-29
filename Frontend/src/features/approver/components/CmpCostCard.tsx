@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp, Save, Scissors } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TextCell } from './CostingGridCard';
 import { CARD_THEME } from './cardTheme';
+import { useRegisterUnsavedCard } from './unsavedCards';
 
 // ─── CMP COST card (FG articles, shown with the BODY tab) ─────────────────────
 // One matrix: process rows × (BGT | ACT | VENDOR | FINAL) × (SAM | SAM VAL | PR VAL).
@@ -72,7 +73,7 @@ interface CmpCostCardProps {
   /** Persisted PR VAL values loaded from the article record. Keyed by cell key, e.g. 'CUTTING|BGT|PR VAL'. */
   savedPrVals?: Record<string, string>;
   /** Save button: receives every PR VAL field (ApproverItem names) with its current value. */
-  onSave?: (updates: Record<string, string | null>) => void;
+  onSave?: (updates: Record<string, string | null>) => void | Promise<void>;
   /** Presets filled PR VALs that aren't in the DB yet — shown as unsaved. */
   hasUnsavedPreset?: boolean;
 }
@@ -157,15 +158,21 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
     handleChange(key, v);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!onSave) return;
     const updates: Record<string, string | null> = {};
     for (const [key, field] of Object.entries(PR_VAL_FIELD)) updates[field] = values[key] || null;
     for (const stage of STAGES) updates[TOTAL_PR_VAL_FIELD[cellKey('TOTAL', stage, 'PR VAL')]] = totalFor(stage) || null;
-    onSave(updates);
     setDirty(false);
+    try {
+      await onSave(updates);
+    } catch (e) {
+      setDirty(true);
+      throw e;
+    }
   };
   const unsaved = dirty || !!hasUnsavedPreset;
+  useRegisterUnsavedCard('CMP COST', unsaved && !!onSave && !locked, handleSave);
 
   return (
     <div className="col-span-full overflow-hidden rounded-lg border-2 bg-white shadow-[var(--shadow-sm)]" style={{ borderColor: style.border }}>
@@ -188,7 +195,7 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
             )}
             <button
               type="button"
-              onClick={handleSave}
+              onClick={() => { handleSave().catch(() => {}); }}
               disabled={locked}
               className="flex h-6 items-center gap-1 rounded-md bg-white px-2.5 text-[11px] font-bold text-slate-900 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
             >

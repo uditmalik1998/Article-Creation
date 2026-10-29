@@ -95,43 +95,47 @@ const fetchFabricGridValues = (): Promise<FabGridValues> => {
   return fabricGridPromise;
 };
 
-// Module-level segment range cache (shared across card instances, keyed by UPPER major category)
-type SegmentRange = { segment_type: string; min: number; max: number };
-const segmentRangeCache = new Map<string, SegmentRange[]>();
-
-const fetchSegmentRangesFor = async (mc: string): Promise<SegmentRange[]> => {
-  const key = (mc || '').trim().toUpperCase();
-  if (!key) return [];
-  if (segmentRangeCache.has(key)) return segmentRangeCache.get(key)!;
-  try {
-    const token = localStorage.getItem('authToken');
-    const r = await fetch(
-      `${APP_CONFIG.api.baseURL}/article-config/segment-ranges?majorCategory=${encodeURIComponent(mc)}`,
-      { headers: token ? { Authorization: `Bearer ${token}` } : {} },
-    );
-    if (r.ok) {
-      const json = await r.json();
-      const data: SegmentRange[] = (json.data ?? []).map((row: any) => ({
-        segment_type: String(row.segment_type),
-        min: Number(row.min),
-        max: Number(row.max),
-      }));
-      segmentRangeCache.set(key, data);
-      return data;
-    }
-  } catch { /* ignore */ }
-  segmentRangeCache.set(key, []);
-  return [];
+// Fabric Segment master (by cost = RATE): upper limit of E, V, P per division; above P is SP.
+const FABRIC_SEGMENT_LIMITS: Record<'WOVEN' | 'KNITS' | 'DENIM', [number, number, number]> = {
+  WOVEN: [80, 125, 200],
+  KNITS: [300, 400, 500],
+  DENIM: [225, 275, 350],
 };
 
-const computeSegmentFromMrp = (mrp: string | null | undefined, ranges: SegmentRange[]): string | null => {
-  const m = parseFloat(String(mrp ?? ''));
-  if (isNaN(m) || ranges.length === 0) return null;
-  const match = ranges.find((r) => m >= r.min && m <= r.max);
-  return match ? match.segment_type : null;
+/** Division is stored as K / Knits / KNITS, W / Woven, D / Denim — read its first letter. */
+const fabricSegmentDivision = (division: string | null | undefined): keyof typeof FABRIC_SEGMENT_LIMITS | null => {
+  const d = String(division ?? '').trim().toUpperCase();
+  if (d.startsWith('K')) return 'KNITS';
+  if (d.startsWith('D')) return 'DENIM';
+  if (d.startsWith('W')) return 'WOVEN';
+  return null;
+};
+
+const computeFabricSegment = (rate: string | null | undefined, division: string | null | undefined): string | null => {
+  const r = parseFloat(String(rate ?? ''));
+  const div = fabricSegmentDivision(division);
+  if (isNaN(r) || r < 0 || !div) return null;
+  const [e, v, p] = FABRIC_SEGMENT_LIMITS[div];
+  return r <= e ? 'E' : r <= v ? 'V' : r <= p ? 'P' : 'SP';
 };
 
 const f = (schemaKey: string) => SCHEMA_KEY_TO_EXCEL_ATTR[schemaKey] ?? schemaKey;
+
+// FABRIC ARTICLE DESC order per division ("FABRIC ARTICLE SEQUENCE.xlsx"):
+// M_FAB_DIV, M_YARN, M_WEAVE_01, M_LYCRA, M_FAB_MAIN_MVGR_2, M_WIDTH, M_GSM (Knits) /
+// M_OUNZ (Woven & Denim), M_COUNT, M_COMPOSITION. Other FAB fields are not part of it.
+const FAB_DESC_SEQUENCE_KNITS = ['fabDiv', 'yarn1', 'weave', 'lycra', 'fabricMainMvgr', 'fWidth', 'gsm', 'fCount', 'composition'];
+const FAB_DESC_SEQUENCE_WOVEN_DENIM = ['fabDiv', 'yarn1', 'weave', 'lycra', 'fabricMainMvgr', 'fWidth', 'fOunce', 'fCount', 'composition'];
+/** Fields that change the description, plus the division that picks the sequence. */
+const FAB_DESC_TRIGGER_FIELDS = new Set([...FAB_DESC_SEQUENCE_KNITS, 'fOunce', 'division']);
+
+/** Builds FABRIC ARTICLE DESC; division is stored as K / Knits / KNITS, so K… = Knits, anything else = Woven/Denim. */
+const buildFabricArticleDesc = (getVal: (field: string) => string | null): string | null => {
+  const division = (getVal('division') || getVal('fabDiv') || '').trim().toUpperCase();
+  const sequence = division.startsWith('K') ? FAB_DESC_SEQUENCE_KNITS : FAB_DESC_SEQUENCE_WOVEN_DENIM;
+  const parts = sequence.map((field) => getVal(field)).filter((v): v is string => Boolean(v) && !/^-+$/.test(v as string));
+  return parts.length > 0 ? parts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '') : null;
+};
 
 const SCHEMA_KEY_TO_ALL_SAP_KEYS: Record<string, string[]> = Object.entries(SAP_NAME_TO_SCHEMA_KEY).reduce(
   (acc, [sapKey, schemaKey]) => {
@@ -415,22 +419,14 @@ const ArticleCard = React.memo(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [localValues['majorCategory'], item.majorCategory, item.division]);
 
-    // Segment ranges for the current major category — auto-filled when MRP or MC changes
-    const [segmentRanges, setSegmentRanges] = useState<SegmentRange[]>([]);
-    const segmentRangesRef = useRef<SegmentRange[]>([]);
-    segmentRangesRef.current = segmentRanges;
-
+    // SEGMENT is not editable: it always follows RATE + division (Fabric Segment master).
+    // Also corrects articles saved before this rule.
+    const segRate = String((localValues['mrp'] !== undefined ? localValues['mrp'] : item.mrp) ?? '');
+    const segDivision = String((localValues['division'] !== undefined ? localValues['division'] : item.division) ?? '')
+      || String((localValues['fabDiv'] !== undefined ? localValues['fabDiv'] : (item as any).fabDiv) ?? '');
     useEffect(() => {
-      if (!effectiveMajCat) return;
-      fetchSegmentRangesFor(effectiveMajCat).then((ranges) => setSegmentRanges(ranges));
-    }, [effectiveMajCat]);
-
-    // Auto-correct segment when ranges first load (fixes articles saved before this feature)
-    useEffect(() => {
-      if (segmentRanges.length === 0) return;
       if (item.approvalStatus !== 'PENDING') return;
-      const mrpVal = String((localValues['mrp'] !== undefined ? localValues['mrp'] : item.mrp) ?? '');
-      const expected = computeSegmentFromMrp(mrpVal, segmentRanges);
+      const expected = computeFabricSegment(segRate, segDivision);
       if (!expected) return;
       const current = String((localValues['segment'] !== undefined ? localValues['segment'] : item.segment) ?? '');
       if (expected === current) return;
@@ -439,7 +435,7 @@ const ArticleCard = React.memo(
         onSave({ ...item, segment: expected } as ApproverItem, { segment: expected } as Record<string, unknown>, { silent: true });
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [segmentRanges]);
+    }, [item.id, segRate, segDivision]);
 
     // Tracks when the major-category grid JSON (for THIS article's category) has loaded
     const [gridReady, setGridReady] = useState(() => isMajCatGridLoadedFor(effectiveMajCat));
@@ -683,9 +679,7 @@ const ArticleCard = React.memo(
           const v = prev[field] !== undefined ? prev[field] : (item as any)[field];
           return v ? String(v).trim() : null;
         };
-        const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter((v): v is string => Boolean(v) && !/^-+$/.test(v as string));
-        const fabJoined = fabParts.length > 0 ? fabParts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '') : null;
-        const newFabDesc = fabJoined;
+        const newFabDesc = buildFabricArticleDesc(getVal);
         const updates: Record<string, string | null> = {};
         if (newFabDesc !== null && newFabDesc !== prev['fabricArticleDescription']) updates['fabricArticleDescription'] = newFabDesc;
         return Object.keys(updates).length > 0 ? { ...prev, ...updates } : prev;
@@ -698,18 +692,11 @@ const ArticleCard = React.memo(
     React.useEffect(() => {
       if (item.approvalStatus !== 'PENDING') return;
       if (isFGMode && item.fabricArticleDescription) return; // FG: don't overwrite existing
-      // Use ATTRIBUTE_GROUPS FAB fields as fallback if cardGroups didn't populate FAB_FIELDS
-      const effectiveFabFields = FAB_FIELDS.length > 0
-        ? FAB_FIELDS
-        : (ATTRIBUTE_GROUPS.find((g) => g.group === 'FAB')?.fields ?? []).filter(
-            (f) => !f.freeText && f.field !== 'mainMvgr',
-          );
-      const fabParts = effectiveFabFields.map((f) => {
-        const v = (localValues[f.field] !== undefined ? localValues[f.field] : (item as any)[f.field]);
+      const computed = buildFabricArticleDesc((field) => {
+        const v = (localValues[field] !== undefined ? localValues[field] : (item as any)[field]);
         return v ? String(v).trim() : null;
-      }).filter((v): v is string => Boolean(v) && !/^-+$/.test(v as string));
-      if (fabParts.length === 0) return;
-      const computed = fabParts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '');
+      });
+      if (!computed) return;
       if (computed === item.fabricArticleDescription) return; // already in DB
       if (autoSavedFabDescRef.current === computed) return; // already queued this save
       autoSavedFabDescRef.current = computed;
@@ -892,8 +879,11 @@ const ArticleCard = React.memo(
         return;
       }
       const updates: Record<string, string | null> = { [field]: value };
-      if (field === 'mrp') {
-        const seg = computeSegmentFromMrp(value, segmentRangesRef.current);
+      if (field === 'mrp' || field === 'division') {
+        const seg = computeFabricSegment(
+          field === 'mrp' ? value : getValue('mrp'),
+          (field === 'division' ? value : getValue('division')) || getValue('fabDiv'),
+        );
         if (seg) updates['segment'] = seg;
       }
       if (field === 'majorCategory' && value) {
@@ -901,26 +891,15 @@ const ArticleCard = React.memo(
         if (newMcCode) updates['mcCode'] = newMcCode;
         const mcDesOptions = fabHierarchy?.mcDesByMajCat[value] ?? [];
         if (mcDesOptions.length > 0) updates['mcDescription'] = mcDesOptions[0];
-        const currentMrp = getValue('mrp');
-        fetchSegmentRangesFor(value).then((ranges) => {
-          setSegmentRanges(ranges);
-          const seg = computeSegmentFromMrp(currentMrp, ranges);
-          if (seg) {
-            setLocalValues((prev) => ({ ...prev, segment: seg }));
-            onSave({ ...item, segment: seg } as ApproverItem, { segment: seg } as Record<string, unknown>);
-          }
-        });
       }
       // When a Construction & Fabric attribute changes, recompute fabricArticleDescription
       // and bundle it into the same save so the DB value stays in sync with the UI.
-      const fabFieldKeys = new Set(FAB_FIELDS.map((ff) => ff.field));
-      if (fabFieldKeys.has(field)) {
+      if (FAB_DESC_TRIGGER_FIELDS.has(field)) {
         const getVal = (f: string) => {
           const v = updates[f] !== undefined ? updates[f] : (localValues[f] !== undefined ? localValues[f] : (item as any)[f]);
           return v ? String(v).trim() : null;
         };
-        const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter((v): v is string => Boolean(v) && !/^-+$/.test(v as string));
-        const newFabDesc = fabParts.length > 0 ? fabParts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '') : null;
+        const newFabDesc = buildFabricArticleDesc(getVal);
         if (newFabDesc) updates['fabricArticleDescription'] = newFabDesc;
       }
       setLocalValues((prev) => ({ ...prev, ...updates }));
@@ -2112,14 +2091,11 @@ const ArticleCard = React.memo(
                                   );
                                 };
                                 const fabAutoFill = () => {
-                                  const parts = FAB_FIELDS.filter((ff) => mandatoryKeys.has(ff.schemaKey))
-                                    .map((ff) => {
-                                      const v = localValues[ff.field] !== undefined ? localValues[ff.field] : (item as any)[ff.field];
-                                      return v ? String(v).trim() : null;
-                                    })
-                                    .filter((v): v is string => Boolean(v) && !/^-+$/.test(v as string));
-                                  if (parts.length > 0)
-                                    handleSave('fabricArticleDescription', parts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, ''));
+                                  const desc = buildFabricArticleDesc((field) => {
+                                    const v = localValues[field] !== undefined ? localValues[field] : (item as any)[field];
+                                    return v ? String(v).trim() : null;
+                                  });
+                                  if (desc) handleSave('fabricArticleDescription', desc);
                                 };
                                 return (
                                   <>
@@ -2159,7 +2135,7 @@ const ArticleCard = React.memo(
                         ] : []),
                         { label: 'ARTICLE FASHION TYPE', field: 'articleFashionType', editable: true, mandatory: true, isDropdown: true, isColor: false, isMarkdown: false, boldLabel: true },
                         ...(!isFGMode ? [
-                          { label: 'SEGMENT', field: 'segment', editable: true, mandatory: true, isDropdown: true, isColor: false, isMarkdown: false, boldLabel: true },
+                          { label: 'SEGMENT', field: 'segment', editable: false, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false, boldLabel: true },
                         ] : []),
                         ...(isFGMode ? [
                           { label: 'VENDOR FABRIC RATE', field: 'fabricRate', editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
@@ -2174,8 +2150,6 @@ const ArticleCard = React.memo(
                         const dropdownOptions: string[] = bom.isDropdown
                           ? bom.field === 'articleFashionType'
                             ? ['C']
-                            : bom.field === 'segment'
-                            ? ['E', 'V', 'P', 'SP']
                             : []
                           : [];
                         return (

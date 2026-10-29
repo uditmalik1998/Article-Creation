@@ -186,6 +186,16 @@ function toIssue(r: ItemResult): Issue | null {
   if (kinds.length === 0) return null;
 
   const pool = `Run Pool A to add ${r.nicCount !== 1 ? 'them' : 'it'} to class ${r.matkl || '(this MC)'}, then re-upload`;
+  // Another session (often the shared POWERBI RFC user) was editing the article in SAP.
+  const lockedBy = !r.ok && !nicOnlyFailure ? /locked by user (\w+)/i.exec(r.errorMessage ?? '')?.[1] : undefined;
+  if (lockedBy) {
+    return {
+      ...r,
+      kinds,
+      problem: `SAP had this article open (locked by user ${lockedBy}) — nothing was saved`,
+      fix: 'Wait a few minutes, then re-upload this article',
+    };
+  }
   if (!r.ok && !nicOnlyFailure) {
     return {
       ...r,
