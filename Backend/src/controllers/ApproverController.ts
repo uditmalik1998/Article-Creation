@@ -4259,9 +4259,20 @@ export class ApproverController {
             const { randomUUID } = await import('crypto');
             const newId = randomUUID();
 
+            // Created-page KIDS duplicate: the source's image_url is the watermarked approved
+            // copy, so start from the clean source_image_url — the copy is watermarked once on
+            // its own approval. Falls back to image_url when no clean copy is recorded.
+            const fromCreatedKids = source.approvalStatus === 'APPROVED'
+                && (source.division ?? '').toUpperCase() === 'KIDS';
+            const copyImageUrl = fromCreatedKids
+                ? (source.sourceImageUrl || source.imageUrl)
+                : source.imageUrl;
+
             const newRecord = await prisma.extractionResultFlat.create({
                 data: {
                     ...rest,
+                    imageUrl: copyImageUrl,
+                    sourceImageUrl: fromCreatedKids ? (source.sourceImageUrl || null) : rest.sourceImageUrl,
                     vaddPrintJson: rest.vaddPrintJson ?? Prisma.DbNull,
                     vaddEmpJson: rest.vaddEmpJson ?? Prisma.DbNull,
                     creatorUser: Prisma.DbNull, modifyUser: Prisma.DbNull, // a copy starts with no editors
