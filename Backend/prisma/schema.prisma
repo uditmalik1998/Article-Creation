@@ -195,6 +195,9 @@ model ExtractionResultFlat {
   imageName                   String?       @map("image_name") @db.VarChar(255)
   imageUrl                    String?       @map("image_url")
   oldImageUrl                 String?       @map("old_image_url")
+  // Clean (un-watermarked) image — kept by DB trigger trg_set_flat_source_image_url;
+  // image_url is overwritten with the watermarked copy on SAP creation, this is not.
+  sourceImageUrl              String?       @map("source_image_url")
   backImageUrl                String?       @map("back_image_url")
   articleNumber               String?       @map("article_number") @db.VarChar(100)
   extractionStatus            String?       @map("extraction_status") @db.VarChar(50)
