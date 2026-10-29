@@ -90,6 +90,15 @@ const fetchFabricGridValues = (): Promise<FabGridValues> => {
 };
 
 // Module-level segment range cache (shared across card instances, keyed by UPPER major category)
+// BOM cost fields saved to gm_article_data NUMERIC(10,2) columns.
+const GM_COST_FIELDS = new Set(['roughV2', 'vdrCost', 'finalCost']);
+
+// GM MRP rule (BOM card), same as FG OTH GRID-1: RATE fills MRP = rate + 30%.
+// A typed MRP must stay between rate + 15% and rate + 50%.
+const round2 = (n: number) => Math.round(n * 100) / 100;
+const calcGmMrpFromRate = (rate: number): number => round2(rate * 1.3);
+const gmMrpLimits = (rate: number) => ({ min: round2(rate * 1.15), max: round2(rate * 1.5) });
+
 type SegmentRange = { segment_type: string; min: number; max: number };
 const segmentRangeCache = new Map<string, SegmentRange[]>();
 
@@ -821,7 +830,7 @@ const ArticleCard = React.memo(
       }
     }, [item.id]);
 
-    const calcMrpFromRate = (rate: number): number => Math.ceil((rate * 1.47) / 50) * 50;
+    const calcMrpFromRate = calcGmMrpFromRate;
 
     const getValue = (field: string): string | null => {
       if (field in localValues) return localValues[field];
@@ -912,16 +921,23 @@ const ArticleCard = React.memo(
         setEditingField(null);
         return;
       }
+      if (field === 'mrp' && value) {
+        const mrpNew = parseFloat(value);
+        const rateNow = parseFloat(String(getValue('rate') ?? ''));
+        if (!isNaN(mrpNew) && mrpNew > 0 && !isNaN(rateNow) && rateNow > 0) {
+          const { min, max } = gmMrpLimits(rateNow);
+          if (mrpNew < min || mrpNew > max) {
+            message.error(`MRP must be between ${min} and ${max} (rate + 15% to rate + 50%)`);
+            setEditingField(null);
+            return;
+          }
+        }
+      }
       const updates: Record<string, string | null> = { [field]: value };
       if (field === 'rate') {
         const rate = parseFloat(String(value ?? ''));
-        if (!isNaN(rate) && rate > 0) {
-          // Auto-calculate MRP only if user hasn't manually set one (≤1 = placeholder)
-          const existingMrp = parseFloat(String(getValue('mrp') ?? ''));
-          if (isNaN(existingMrp) || existingMrp <= 1) {
-            updates['mrp'] = String(calcMrpFromRate(rate));
-          }
-        }
+        // A new rate always resets MRP to rate + 30% (same as FG).
+        if (!isNaN(rate) && rate > 0) updates['mrp'] = String(calcMrpFromRate(rate));
         const seg = computeSegmentFromMrp(value, segmentRangesRef.current);
         if (seg) updates['segment'] = seg;
       }
@@ -1079,6 +1095,11 @@ const ArticleCard = React.memo(
               if (next === current) return;
               if (field === 'vendorCode' && next && !/^\d{6}$/.test(next)) {
                 message.error('Vendor Code must be exactly 6 digits');
+                e.target.value = current;
+                return;
+              }
+              if (GM_COST_FIELDS.has(field) && next && !/^\d+(\.\d{1,2})?$/.test(next)) {
+                message.error('Enter a number with up to 2 decimals');
                 e.target.value = current;
                 return;
               }
@@ -1352,7 +1373,14 @@ const ArticleCard = React.memo(
           ] as BomField[])
         : []),
       { label: 'Fashion type', field: 'articleFashionType', mandatory: true, kind: 'pick', options: ['C'] },
-      ...(!isFGMode ? ([{ label: 'Segment', field: 'segment', mandatory: true, kind: 'text' }] as BomField[]) : []),
+      ...(!isFGMode
+        ? ([
+            { label: 'Segment', field: 'segment', mandatory: true, kind: 'text' },
+            { label: 'Rough V2', field: 'roughV2', mandatory: false, kind: 'text' },
+            { label: 'Vendor cost', field: 'vdrCost', mandatory: false, kind: 'text' },
+            { label: 'Final cost', field: 'finalCost', mandatory: false, kind: 'text' },
+          ] as BomField[])
+        : []),
       ...(isFGMode
         ? ([
             { label: 'Vendor fabric rate', field: 'fabricRate', mandatory: false, kind: 'text' },

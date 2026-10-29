@@ -94,6 +94,12 @@ import { variantCreatingIds } from '../../fabric-article/variantCreationState';
 // Alias so the combobox trigger can use a distinct name from the plain icon
 const ChevronDownIcon = ChevronDown;
 
+// FG MRP rule (OTH GRID-1): RATE fills MRP = rate + 30%. A typed MRP must stay
+// between rate + 15% and rate + 50%.
+const round2 = (n: number) => Math.round(n * 100) / 100;
+const calcFgMrpFromRate = (rate: number): number => round2(rate * 1.3);
+const fgMrpLimits = (rate: number) => ({ min: round2(rate * 1.15), max: round2(rate * 1.5) });
+
 // Module-level national grid cache — body article dropdown values from national_grid_master
 type NationalGridValues = Record<string, { code: string; fullForm: string }[]>;
 let nationalGridPromise: Promise<NationalGridValues> | null = null;
@@ -860,7 +866,7 @@ const ArticleCard = React.memo(
       const storedMrp = parseFloat(String((item as any).mrp ?? ''));
       const rate = parseFloat(String((item as any).rate ?? ''));
       if (isNaN(rate) || rate <= 0) return;
-      const calculatedMrp = Math.ceil((rate * 1.47) / 50) * 50;
+      const calculatedMrp = calcFgMrpFromRate(rate);
       // Skip if MRP is already saved and matches what we'd calculate — no API call needed
       if (!isNaN(storedMrp) && storedMrp > 0 && storedMrp === calculatedMrp) return;
       // Skip if MRP is already saved as any valid positive number (user may have set it manually)
@@ -1906,7 +1912,7 @@ const ArticleCard = React.memo(
       xhr.send(form);
     };
 
-    const calcMrpFromRate = (rate: number): number => Math.ceil((rate * 1.47) / 50) * 50;
+    const calcMrpFromRate = calcFgMrpFromRate;
 
     const getValue = (field: string): string | null => {
       if (field in localValues) return localValues[field];
@@ -2057,10 +2063,10 @@ const ArticleCard = React.memo(
       if (field === 'mrp' && value) {
         const mrpNew = parseFloat(value);
         const rateNow = parseFloat(String(getValue('rate') ?? ''));
-        if (!isNaN(mrpNew) && mrpNew > 0 && !isNaN(rateNow)) {
-          const markdownPct = ((mrpNew - rateNow) / mrpNew) * 100;
-          if (markdownPct < 20) {
-            message.error('MRP too low — markdown would fall below 20%');
+        if (!isNaN(mrpNew) && mrpNew > 0 && !isNaN(rateNow) && rateNow > 0) {
+          const { min, max } = fgMrpLimits(rateNow);
+          if (mrpNew < min || mrpNew > max) {
+            message.error(`MRP must be between ${min} and ${max} (rate + 15% to rate + 50%)`);
             setEditingField(null);
             return;
           }

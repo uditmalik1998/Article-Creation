@@ -61920,12 +61920,18 @@ export namespace Prisma {
   export type GmArticleDataAvgAggregateOutputType = {
     rate: Decimal | null
     mrp: Decimal | null
+    roughV2: Decimal | null
+    vdrCost: Decimal | null
+    finalCost: Decimal | null
     approvedBy: number | null
   }
 
   export type GmArticleDataSumAggregateOutputType = {
     rate: Decimal | null
     mrp: Decimal | null
+    roughV2: Decimal | null
+    vdrCost: Decimal | null
+    finalCost: Decimal | null
     approvedBy: number | null
   }
 
@@ -62022,6 +62028,9 @@ export namespace Prisma {
     pptNumber: string | null
     rate: Decimal | null
     mrp: Decimal | null
+    roughV2: Decimal | null
+    vdrCost: Decimal | null
+    finalCost: Decimal | null
     segment: string | null
     articleFashionType: string | null
     approvalStatus: string | null
@@ -62131,6 +62140,9 @@ export namespace Prisma {
     pptNumber: string | null
     rate: Decimal | null
     mrp: Decimal | null
+    roughV2: Decimal | null
+    vdrCost: Decimal | null
+    finalCost: Decimal | null
     segment: string | null
     articleFashionType: string | null
     approvalStatus: string | null
@@ -62240,6 +62252,9 @@ export namespace Prisma {
     pptNumber: number
     rate: number
     mrp: number
+    roughV2: number
+    vdrCost: number
+    finalCost: number
     segment: number
     articleFashionType: number
     approvalStatus: number
@@ -62261,12 +62276,18 @@ export namespace Prisma {
   export type GmArticleDataAvgAggregateInputType = {
     rate?: true
     mrp?: true
+    roughV2?: true
+    vdrCost?: true
+    finalCost?: true
     approvedBy?: true
   }
 
   export type GmArticleDataSumAggregateInputType = {
     rate?: true
     mrp?: true
+    roughV2?: true
+    vdrCost?: true
+    finalCost?: true
     approvedBy?: true
   }
 
@@ -62363,6 +62384,9 @@ export namespace Prisma {
     pptNumber?: true
     rate?: true
     mrp?: true
+    roughV2?: true
+    vdrCost?: true
+    finalCost?: true
     segment?: true
     articleFashionType?: true
     approvalStatus?: true
@@ -62472,6 +62496,9 @@ export namespace Prisma {
     pptNumber?: true
     rate?: true
     mrp?: true
+    roughV2?: true
+    vdrCost?: true
+    finalCost?: true
     segment?: true
     articleFashionType?: true
     approvalStatus?: true
@@ -62581,6 +62608,9 @@ export namespace Prisma {
     pptNumber?: true
     rate?: true
     mrp?: true
+    roughV2?: true
+    vdrCost?: true
+    finalCost?: true
     segment?: true
     articleFashionType?: true
     approvalStatus?: true
@@ -62777,6 +62807,9 @@ export namespace Prisma {
     pptNumber: string | null
     rate: Decimal | null
     mrp: Decimal | null
+    roughV2: Decimal | null
+    vdrCost: Decimal | null
+    finalCost: Decimal | null
     segment: string | null
     articleFashionType: string | null
     approvalStatus: string
@@ -62905,6 +62938,9 @@ export namespace Prisma {
     pptNumber?: boolean
     rate?: boolean
     mrp?: boolean
+    roughV2?: boolean
+    vdrCost?: boolean
+    finalCost?: boolean
     segment?: boolean
     articleFashionType?: boolean
     approvalStatus?: boolean
@@ -63014,6 +63050,9 @@ export namespace Prisma {
     pptNumber?: boolean
     rate?: boolean
     mrp?: boolean
+    roughV2?: boolean
+    vdrCost?: boolean
+    finalCost?: boolean
     segment?: boolean
     articleFashionType?: boolean
     approvalStatus?: boolean
@@ -63123,6 +63162,9 @@ export namespace Prisma {
     pptNumber?: boolean
     rate?: boolean
     mrp?: boolean
+    roughV2?: boolean
+    vdrCost?: boolean
+    finalCost?: boolean
     segment?: boolean
     articleFashionType?: boolean
     approvalStatus?: boolean
@@ -63232,6 +63274,9 @@ export namespace Prisma {
     pptNumber?: boolean
     rate?: boolean
     mrp?: boolean
+    roughV2?: boolean
+    vdrCost?: boolean
+    finalCost?: boolean
     segment?: boolean
     articleFashionType?: boolean
     approvalStatus?: boolean
@@ -63248,7 +63293,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type GmArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "gmAgeGrade" | "gmApplicator" | "gmBaseType" | "gmBatteryType" | "gmBpaFree" | "gmBpcForm" | "gmBrand" | "gmBrandType" | "gmCapacityMl" | "gmCareInstruction" | "gmCertification" | "gmClosureType" | "gmCoating" | "gmColourFamily" | "gmColourShade" | "gmCompartmentCount" | "gmComposition" | "gmCosmeticFinish" | "gmDiameterCm" | "gmDimStandard" | "gmDishwasherSafe" | "gmFoldable" | "gmFoodContactSafe" | "gmFragranceConc" | "gmFragranceFamily" | "gmFreeFrom" | "gmFwHeelHtCm" | "gmFwHeelType" | "gmFwSize" | "gmFwSole" | "gmFwToe" | "gmFwUpper" | "gmGsm" | "gmHeatRetentionHr" | "gmHeightCm" | "gmInsulationType" | "gmKeyIngredient" | "gmLeakProof" | "gmLengthCm" | "gmLicence" | "gmLidType" | "gmLifestage" | "gmLiningMaterial" | "gmManufacturer" | "gmMaterial" | "gmMaterialGroup" | "gmMaterialSecondary" | "gmMicrowaveSafe" | "gmMountType" | "gmNetContent" | "gmNetContentUom" | "gmNetWeightG" | "gmPackQty" | "gmPattern" | "gmPlayPattern" | "gmPlayerCount" | "gmPowerSource" | "gmPriceTier" | "gmPrintTheme" | "gmSeason" | "gmSellUom" | "gmSetContents" | "gmShelfLifeMonths" | "gmSkinType" | "gmSpf" | "gmSport" | "gmStrapType" | "gmSurfaceFinish" | "gmTextileFabric" | "gmThreadCount" | "gmUsageOccasion" | "gmVoltageV" | "gmWarrantyMonths" | "gmWattageW" | "gmWeave" | "gmWheelCount" | "gmWidthCm" | "gmYarn" | "gmArticleNumber" | "gmArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "pptNumber" | "rate" | "mrp" | "segment" | "articleFashionType" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "backImageUrl" | "gmArticleType" | "source" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["gmArticleData"]>
+  export type GmArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "gmAgeGrade" | "gmApplicator" | "gmBaseType" | "gmBatteryType" | "gmBpaFree" | "gmBpcForm" | "gmBrand" | "gmBrandType" | "gmCapacityMl" | "gmCareInstruction" | "gmCertification" | "gmClosureType" | "gmCoating" | "gmColourFamily" | "gmColourShade" | "gmCompartmentCount" | "gmComposition" | "gmCosmeticFinish" | "gmDiameterCm" | "gmDimStandard" | "gmDishwasherSafe" | "gmFoldable" | "gmFoodContactSafe" | "gmFragranceConc" | "gmFragranceFamily" | "gmFreeFrom" | "gmFwHeelHtCm" | "gmFwHeelType" | "gmFwSize" | "gmFwSole" | "gmFwToe" | "gmFwUpper" | "gmGsm" | "gmHeatRetentionHr" | "gmHeightCm" | "gmInsulationType" | "gmKeyIngredient" | "gmLeakProof" | "gmLengthCm" | "gmLicence" | "gmLidType" | "gmLifestage" | "gmLiningMaterial" | "gmManufacturer" | "gmMaterial" | "gmMaterialGroup" | "gmMaterialSecondary" | "gmMicrowaveSafe" | "gmMountType" | "gmNetContent" | "gmNetContentUom" | "gmNetWeightG" | "gmPackQty" | "gmPattern" | "gmPlayPattern" | "gmPlayerCount" | "gmPowerSource" | "gmPriceTier" | "gmPrintTheme" | "gmSeason" | "gmSellUom" | "gmSetContents" | "gmShelfLifeMonths" | "gmSkinType" | "gmSpf" | "gmSport" | "gmStrapType" | "gmSurfaceFinish" | "gmTextileFabric" | "gmThreadCount" | "gmUsageOccasion" | "gmVoltageV" | "gmWarrantyMonths" | "gmWattageW" | "gmWeave" | "gmWheelCount" | "gmWidthCm" | "gmYarn" | "gmArticleNumber" | "gmArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "pptNumber" | "rate" | "mrp" | "roughV2" | "vdrCost" | "finalCost" | "segment" | "articleFashionType" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "backImageUrl" | "gmArticleType" | "source" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["gmArticleData"]>
 
   export type $GmArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "GmArticleData"
@@ -63346,6 +63391,9 @@ export namespace Prisma {
       pptNumber: string | null
       rate: Prisma.Decimal | null
       mrp: Prisma.Decimal | null
+      roughV2: Prisma.Decimal | null
+      vdrCost: Prisma.Decimal | null
+      finalCost: Prisma.Decimal | null
       segment: string | null
       articleFashionType: string | null
       approvalStatus: string
@@ -63875,6 +63923,9 @@ export namespace Prisma {
     readonly pptNumber: FieldRef<"GmArticleData", 'String'>
     readonly rate: FieldRef<"GmArticleData", 'Decimal'>
     readonly mrp: FieldRef<"GmArticleData", 'Decimal'>
+    readonly roughV2: FieldRef<"GmArticleData", 'Decimal'>
+    readonly vdrCost: FieldRef<"GmArticleData", 'Decimal'>
+    readonly finalCost: FieldRef<"GmArticleData", 'Decimal'>
     readonly segment: FieldRef<"GmArticleData", 'String'>
     readonly articleFashionType: FieldRef<"GmArticleData", 'String'>
     readonly approvalStatus: FieldRef<"GmArticleData", 'String'>
@@ -93114,6 +93165,9 @@ export namespace Prisma {
     pptNumber: 'pptNumber',
     rate: 'rate',
     mrp: 'mrp',
+    roughV2: 'roughV2',
+    vdrCost: 'vdrCost',
+    finalCost: 'finalCost',
     segment: 'segment',
     articleFashionType: 'articleFashionType',
     approvalStatus: 'approvalStatus',
@@ -101765,6 +101819,9 @@ export namespace Prisma {
     pptNumber?: StringNullableFilter<"GmArticleData"> | string | null
     rate?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
     mrp?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
+    roughV2?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
+    vdrCost?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
+    finalCost?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
     segment?: StringNullableFilter<"GmArticleData"> | string | null
     articleFashionType?: StringNullableFilter<"GmArticleData"> | string | null
     approvalStatus?: StringFilter<"GmArticleData"> | string
@@ -101874,6 +101931,9 @@ export namespace Prisma {
     pptNumber?: SortOrderInput | SortOrder
     rate?: SortOrderInput | SortOrder
     mrp?: SortOrderInput | SortOrder
+    roughV2?: SortOrderInput | SortOrder
+    vdrCost?: SortOrderInput | SortOrder
+    finalCost?: SortOrderInput | SortOrder
     segment?: SortOrderInput | SortOrder
     articleFashionType?: SortOrderInput | SortOrder
     approvalStatus?: SortOrder
@@ -101987,6 +102047,9 @@ export namespace Prisma {
     pptNumber?: StringNullableFilter<"GmArticleData"> | string | null
     rate?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
     mrp?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
+    roughV2?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
+    vdrCost?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
+    finalCost?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
     segment?: StringNullableFilter<"GmArticleData"> | string | null
     articleFashionType?: StringNullableFilter<"GmArticleData"> | string | null
     approvalStatus?: StringFilter<"GmArticleData"> | string
@@ -102096,6 +102159,9 @@ export namespace Prisma {
     pptNumber?: SortOrderInput | SortOrder
     rate?: SortOrderInput | SortOrder
     mrp?: SortOrderInput | SortOrder
+    roughV2?: SortOrderInput | SortOrder
+    vdrCost?: SortOrderInput | SortOrder
+    finalCost?: SortOrderInput | SortOrder
     segment?: SortOrderInput | SortOrder
     articleFashionType?: SortOrderInput | SortOrder
     approvalStatus?: SortOrder
@@ -102213,6 +102279,9 @@ export namespace Prisma {
     pptNumber?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
     rate?: DecimalNullableWithAggregatesFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
     mrp?: DecimalNullableWithAggregatesFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
+    roughV2?: DecimalNullableWithAggregatesFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
+    vdrCost?: DecimalNullableWithAggregatesFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
+    finalCost?: DecimalNullableWithAggregatesFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
     segment?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
     articleFashionType?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
     approvalStatus?: StringWithAggregatesFilter<"GmArticleData"> | string
@@ -113065,6 +113134,9 @@ export namespace Prisma {
     pptNumber?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
+    roughV2?: Decimal | DecimalJsLike | number | string | null
+    vdrCost?: Decimal | DecimalJsLike | number | string | null
+    finalCost?: Decimal | DecimalJsLike | number | string | null
     segment?: string | null
     articleFashionType?: string | null
     approvalStatus?: string
@@ -113174,6 +113246,9 @@ export namespace Prisma {
     pptNumber?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
+    roughV2?: Decimal | DecimalJsLike | number | string | null
+    vdrCost?: Decimal | DecimalJsLike | number | string | null
+    finalCost?: Decimal | DecimalJsLike | number | string | null
     segment?: string | null
     articleFashionType?: string | null
     approvalStatus?: string
@@ -113283,6 +113358,9 @@ export namespace Prisma {
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
@@ -113392,6 +113470,9 @@ export namespace Prisma {
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
@@ -113501,6 +113582,9 @@ export namespace Prisma {
     pptNumber?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
+    roughV2?: Decimal | DecimalJsLike | number | string | null
+    vdrCost?: Decimal | DecimalJsLike | number | string | null
+    finalCost?: Decimal | DecimalJsLike | number | string | null
     segment?: string | null
     articleFashionType?: string | null
     approvalStatus?: string
@@ -113610,6 +113694,9 @@ export namespace Prisma {
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
@@ -113719,6 +113806,9 @@ export namespace Prisma {
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
@@ -122651,6 +122741,9 @@ export namespace Prisma {
     pptNumber?: SortOrder
     rate?: SortOrder
     mrp?: SortOrder
+    roughV2?: SortOrder
+    vdrCost?: SortOrder
+    finalCost?: SortOrder
     segment?: SortOrder
     articleFashionType?: SortOrder
     approvalStatus?: SortOrder
@@ -122670,6 +122763,9 @@ export namespace Prisma {
   export type GmArticleDataAvgOrderByAggregateInput = {
     rate?: SortOrder
     mrp?: SortOrder
+    roughV2?: SortOrder
+    vdrCost?: SortOrder
+    finalCost?: SortOrder
     approvedBy?: SortOrder
   }
 
@@ -122766,6 +122862,9 @@ export namespace Prisma {
     pptNumber?: SortOrder
     rate?: SortOrder
     mrp?: SortOrder
+    roughV2?: SortOrder
+    vdrCost?: SortOrder
+    finalCost?: SortOrder
     segment?: SortOrder
     articleFashionType?: SortOrder
     approvalStatus?: SortOrder
@@ -122875,6 +122974,9 @@ export namespace Prisma {
     pptNumber?: SortOrder
     rate?: SortOrder
     mrp?: SortOrder
+    roughV2?: SortOrder
+    vdrCost?: SortOrder
+    finalCost?: SortOrder
     segment?: SortOrder
     articleFashionType?: SortOrder
     approvalStatus?: SortOrder
@@ -122894,6 +122996,9 @@ export namespace Prisma {
   export type GmArticleDataSumOrderByAggregateInput = {
     rate?: SortOrder
     mrp?: SortOrder
+    roughV2?: SortOrder
+    vdrCost?: SortOrder
+    finalCost?: SortOrder
     approvedBy?: SortOrder
   }
 

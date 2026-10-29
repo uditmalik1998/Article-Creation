@@ -2,7 +2,7 @@
  * zmmGMArtCreationService.ts
  * Calls ZMM_ART_CRT_V3 via the SAP RFC proxy for GM article creation.
  * MC_CD is resolved from gm_major_category_details by maj_cat_nm.
- * HSN_CODE is resolved from major_category_details by majCat.
+ * HSN_CODE is resolved from gm_major_category_details.hsn_cd; submit is blocked when it is missing.
  */
 
 import { prismaClient as prisma } from '../utils/prisma';
@@ -173,14 +173,26 @@ export async function submitGmArticles(ids: string[], approverName?: string | nu
             ? await prisma.$queryRaw<{ mc_cd: string | null; hsn_cd: string | null }[]>`
                 SELECT DISTINCT mc_cd, hsn_cd FROM gm_major_category_details
                 WHERE maj_cat_nm = ${majCat} AND mj_status = 'ACT'
+                ORDER BY (hsn_cd IS NULL OR TRIM(hsn_cd) = '')
                 LIMIT 1
               `
             : [];
         const mcCd    = gmMcRows[0]?.mc_cd  ?? null;
-        const hsnCode = gmMcRows[0]?.hsn_cd ?? null;
+        const hsnCode = gmMcRows[0]?.hsn_cd?.trim() || null;
 
         if (!mcCd) {
             const msg = `Major category "${majCat}" not found in gm_major_category_details. Cannot submit to SAP.`;
+            console.warn(`[ZMM_ART_CRT_V3] ${msg} id=${row.id}`);
+            await prisma.gmArticleData.update({
+                where: { id: row.id },
+                data: { sapSyncStatus: 'FAILED', sapSyncMessage: msg },
+            });
+            return { id: row.id, success: false, message: msg };
+        }
+
+        // SAP creates the article with a blank HSN (MARC-STEUC) if none is sent — block instead.
+        if (!hsnCode) {
+            const msg = `HSN code missing for major category "${majCat}" (gm_major_category_details.hsn_cd). Cannot submit to SAP.`;
             console.warn(`[ZMM_ART_CRT_V3] ${msg} id=${row.id}`);
             await prisma.gmArticleData.update({
                 where: { id: row.id },

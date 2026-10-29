@@ -4941,7 +4941,8 @@ export class ApproverController {
         approvalStatus: true, approvedAt: true, approvedBy: true,
         sapSyncStatus: true, sapSyncMessage: true,
         imageUrl: true, backImageUrl: true, source: true, userName: true,
-        rate: true, mrp: true, segment: true, articleFashionType: true, flatId: true,
+        rate: true, mrp: true, roughV2: true, vdrCost: true, finalCost: true,
+        segment: true, articleFashionType: true, flatId: true,
         createdAt: true, updatedAt: true,
         // GM attribute columns
         gmAgeGrade: true, gmApplicator: true, gmBaseType: true, gmBatteryType: true,
@@ -4999,6 +5000,9 @@ export class ApproverController {
             source:                  r.source ?? null,
             mrp:                     r.mrp != null ? Number(r.mrp) : null,
             rate:                    r.rate != null ? Number(r.rate) : null,
+            roughV2:                 r.roughV2 != null ? Number(r.roughV2) : null,
+            vdrCost:                 r.vdrCost != null ? Number(r.vdrCost) : null,
+            finalCost:               r.finalCost != null ? Number(r.finalCost) : null,
             segment:                 r.segment ?? null,
             articleFashionType:      r.articleFashionType ?? null,
             flatId:                  r.flatId ?? null,
@@ -5274,6 +5278,7 @@ export class ApproverController {
         mcDescription: 'mcDescription', vendorName: 'vendorName', vendorCode: 'vendorCode',
         designNumber: 'designNumber', pptNumber: 'pptNumber',
         mrp: 'mrp', rate: 'rate', segment: 'segment', articleFashionType: 'articleFashionType',
+        roughV2: 'roughV2', vdrCost: 'vdrCost', finalCost: 'finalCost',
         imageUrl: 'imageUrl', source: 'source', userName: 'userName',
         gmArticleNumber: 'gmArticleNumber', gmArticleDescription: 'gmArticleDescription',
         fabricArticleDescription: 'gmArticleDescription',  // frontend field alias
@@ -5344,7 +5349,10 @@ export class ApproverController {
         const data: Record<string, unknown> = {};
         for (const [clientKey, value] of Object.entries(body)) {
             const dbKey = ApproverController.GM_ARTICLE_UPDATE_FIELDS[clientKey];
-            if (dbKey) data[dbKey] = value === undefined ? null : value;
+            if (!dbKey) continue;
+            // Decimal columns: an empty string can't be stored, so it clears the value.
+            const isDecimal = ['rate', 'mrp', 'roughV2', 'vdrCost', 'finalCost'].includes(dbKey);
+            data[dbKey] = value === undefined || (isDecimal && value === '') ? null : value;
         }
         if (Object.keys(data).length === 0) {
             return res.json(ApproverController.gmArticleDataRowToItem(existing));

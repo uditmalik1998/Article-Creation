@@ -1911,6 +1911,9 @@ model GmArticleData {
   pptNumber            String?   @map("ppt_number")             @db.VarChar(100)
   rate                 Decimal?  @map("rate")                   @db.Decimal(10, 2)
   mrp                  Decimal?  @map("mrp")                    @db.Decimal(10, 2)
+  roughV2              Decimal?  @map("rough_v2")               @db.Decimal(10, 2)
+  vdrCost              Decimal?  @map("vdr_cost")               @db.Decimal(10, 2)
+  finalCost            Decimal?  @map("final_cost")             @db.Decimal(10, 2)
   segment              String?   @map("segment")                @db.VarChar(100)
   articleFashionType   String?   @map("article_fashion_type")   @db.VarChar(100)
 
