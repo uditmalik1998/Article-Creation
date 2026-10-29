@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   FileText,
   LayoutGrid,
@@ -24,6 +25,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Tag as TagIcon,
+  Check,
+  ArrowRight,
+  Loader2,
 } from 'lucide-react';
 import {
   Autocomplete,
@@ -445,11 +449,11 @@ export interface ApproverArticleListProps {
   loading: boolean;
   selectedRowKeys: React.Key[];
   onSelectionChange: (keys: React.Key[]) => void;
-  onSave: (item: ApproverItem, updates: Record<string, unknown>, options?: { silent?: boolean }) => void | Promise<void>;
+  onSave: (item: ApproverItem, updates: Record<string, unknown>, options?: { silent?: boolean; throwOnError?: boolean }) => void | Promise<void>;
   onCreateFabricArticle: (item: ApproverItem) => void;
   onCreateBodyArticle: (item: ApproverItem) => void;
   onProceedFGArticle: (item: ApproverItem) => void;
-  onDuplicate: (item: ApproverItem, designNumber: string) => Promise<void>;
+  onDuplicate: (item: ApproverItem, designNumber: string) => Promise<string | void>;
   /**
    * Modify an already-created (SAP-synced) article. Receives only the changed
    * fields. Used by the "Modify" button on the Created Articles page; pushes to
@@ -510,11 +514,11 @@ const ArticleCard = React.memo(
     item: ApproverItem;
     isSelected: boolean;
     onToggleSelect: (id: string) => void;
-    onSave: (item: ApproverItem, updates: Record<string, unknown>, options?: { silent?: boolean }) => void | Promise<void>;
+    onSave: (item: ApproverItem, updates: Record<string, unknown>, options?: { silent?: boolean; throwOnError?: boolean }) => void | Promise<void>;
     onCreateFabricArticle: (item: ApproverItem) => void;
     onCreateBodyArticle: (item: ApproverItem) => void;
     onProceedFGArticle: (item: ApproverItem) => void;
-    onDuplicate: (item: ApproverItem, designNumber: string) => Promise<void>;
+    onDuplicate: (item: ApproverItem, designNumber: string) => Promise<string | void>;
     onModify?: (item: ApproverItem, changes: Record<string, unknown>) => Promise<void>;
     onRefresh: () => void;
     cardGroups: CardGroup[];
@@ -532,9 +536,13 @@ const ArticleCard = React.memo(
     // Major category save in flight → Variants table shows "Re-creating…".
     const [rebuildingVariants, setRebuildingVariants] = useState(false);
     const [localValues, setLocalValues] = useState<Record<string, string | null>>({});
+    const navigate = useNavigate();
     const [dupConfirmOpen, setDupConfirmOpen] = useState(false);
     const [duplicating, setDuplicating] = useState(false);
     const [dupDesignNo, setDupDesignNo] = useState('');
+    const [dupDoneId, setDupDoneId] = useState<string | null>(null);
+    const [dupDoneNo, setDupDoneNo] = useState('');
+    const [dupError, setDupError] = useState<string | null>(null);
     const [allCollapsed, setAllCollapsed] = useState(false);
     const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
     // FG left rail: Article Information / Reference & Vendor start closed.
@@ -3106,8 +3114,7 @@ const ArticleCard = React.memo(
                   )}
                 </Button>
               )}
-              {pathType === 'new' &&
-                item.approvalStatus === 'PENDING' &&
+              {((pathType === 'new' && item.approvalStatus === 'PENDING') || pathType === 'created') &&
                 item.division?.toUpperCase() === 'KIDS' && (
                   <Button
                     size="sm"
@@ -3600,7 +3607,7 @@ const ArticleCard = React.memo(
                           onSaveTab={(updates) => {
                             setLocalValues((prev) => ({ ...prev, ...updates }));
                             if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
-                            else onSave({ ...item, ...updates } as any, updates);
+                            else return onSave({ ...item, ...updates } as any, updates, { throwOnError: true });
                           }}
                         />
                       );
@@ -4970,7 +4977,7 @@ const ArticleCard = React.memo(
                       onSaveTab={(updates) => {
                         setLocalValues((prev) => ({ ...prev, ...updates }));
                         if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
-                        else onSave({ ...item, ...updates } as any, updates);
+                        else return onSave({ ...item, ...updates } as any, updates, { throwOnError: true });
                       }}
                     />
                   )}
@@ -4985,10 +4992,10 @@ const ArticleCard = React.memo(
                       actPreset={cmpActPreset}
                       savedPrVals={cmpSavedPrVals}
                       hasUnsavedPreset={cmpPresetUnsaved}
-                      onSave={(updates) => {
+                      onSave={async (updates) => {
                         setLocalValues((prev) => ({ ...prev, ...updates }));
                         if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
-                        else onSave({ ...item, ...updates } as any, updates);
+                        else await onSave({ ...item, ...updates } as any, updates, { throwOnError: true });
                         setCmpPresetUnsaved(false);
                       }}
                     />
@@ -5310,59 +5317,127 @@ const ArticleCard = React.memo(
           </DialogContent>
         </Dialog>
 
-        {/* Duplicate — asks for Design Number before creating the copy */}
-        <Dialog open={dupConfirmOpen} onOpenChange={(o) => { if (!duplicating) { setDupConfirmOpen(o); if (!o) setDupDesignNo(''); } }}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Duplicate Article</DialogTitle>
-            </DialogHeader>
-            <p className="m-0 text-sm text-muted-foreground">
-              A new copy of this article will be created with all the same values.
-              Enter a Design Number for the duplicate article.
-            </p>
-            <div className="mt-2 flex flex-col gap-1">
-              <label className="text-xs font-semibold uppercase tracking-wide text-slate-600">
-                Design Number <span className="text-red-500">*</span>
-              </label>
-              <Input
-                autoFocus
-                placeholder="Enter design number…"
-                value={dupDesignNo}
-                onChange={(e) => setDupDesignNo(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && !duplicating && dupDesignNo.trim() && (async () => {
-                  setDuplicating(true);
-                  try { await onDuplicate(item, dupDesignNo.trim()); }
-                  catch (err) { message.error(err instanceof Error ? err.message : 'Failed to duplicate article'); }
-                  finally { setDuplicating(false); setDupConfirmOpen(false); setDupDesignNo(''); }
-                })()}
-                disabled={duplicating}
-              />
-              {dupDesignNo.trim() === '' && dupConfirmOpen && (
-                <p className="text-xs text-red-500">Design Number is required.</p>
-              )}
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => { setDupConfirmOpen(false); setDupDesignNo(''); }} disabled={duplicating}>
-                Cancel
-              </Button>
-              <Button
-                disabled={duplicating || dupDesignNo.trim() === ''}
-                onClick={async () => {
-                  setDuplicating(true);
-                  try {
-                    await onDuplicate(item, dupDesignNo.trim());
-                  } catch (err) {
-                    message.error(err instanceof Error ? err.message : 'Failed to duplicate article');
-                  } finally {
-                    setDuplicating(false);
-                    setDupConfirmOpen(false);
-                    setDupDesignNo('');
-                  }
-                }}
-              >
-                {duplicating ? 'Duplicating…' : 'Duplicate'}
-              </Button>
-            </DialogFooter>
+        {/* Duplicate — asks for Design Number, then offers to open the new copy */}
+        <Dialog
+          open={dupConfirmOpen}
+          onOpenChange={(o) => {
+            if (duplicating) return;
+            setDupConfirmOpen(o);
+            if (!o) { setDupDesignNo(''); setDupError(null); setDupDoneId(null); setDupDoneNo(''); }
+          }}
+        >
+          <DialogContent showClose={false} className="max-w-[440px] gap-0 p-0 outline-none">
+            {(() => {
+              const closeDup = () => { setDupConfirmOpen(false); setDupDesignNo(''); setDupError(null); setDupDoneId(null); setDupDoneNo(''); };
+              const runDup = async () => {
+                const designNo = dupDesignNo.trim();
+                if (!designNo || duplicating) return;
+                setDuplicating(true);
+                setDupError(null);
+                try {
+                  const newId = await onDuplicate(item, designNo);
+                  setDupDoneNo(designNo);
+                  setDupDoneId(newId || '');
+                } catch (err) {
+                  setDupError(err instanceof Error ? err.message : 'Failed to duplicate article');
+                } finally {
+                  setDuplicating(false);
+                }
+              };
+              const closeBtn = (
+                <button
+                  type="button"
+                  aria-label="Close"
+                  disabled={duplicating}
+                  onClick={closeDup}
+                  className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 disabled:opacity-40"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              );
+              if (dupDoneId !== null) {
+                return (
+                  <>
+                    {closeBtn}
+                    <div className="flex flex-col items-center gap-2.5 px-6 pb-2 pt-7 text-center">
+                      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#1e293b]">
+                        <Check className="h-5 w-5 text-white" strokeWidth={3} />
+                      </span>
+                      <DialogTitle className="text-xl">Copy created</DialogTitle>
+                      <p className="m-0 text-[13px] text-slate-600">
+                        <b className="font-mono text-slate-900">{dupDoneNo}</b> is now in <b className="text-slate-900">New Articles</b> as PENDING.
+                      </p>
+                    </div>
+                    <div className="flex justify-center gap-2 px-6 pb-5 pt-4">
+                      <Button variant="outline" onClick={closeDup}>Stay here</Button>
+                      {dupDoneId && (
+                        <Button
+                          autoFocus
+                          className="bg-[#1e293b] text-white hover:bg-[#0f172a]"
+                          onClick={() => { const id = dupDoneId; closeDup(); navigate(`/approver/${id}`); }}
+                        >
+                          Open the copy <ArrowRight className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </>
+                );
+              }
+              const sourceLabel = item.designNumber || item.articleNumber || item.imageName || 'article';
+              return (
+                <>
+                  {closeBtn}
+                  <div className="flex flex-col gap-4 px-6 pb-1 pt-6">
+                    <div className="flex items-center gap-2.5 pr-8">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-slate-100">
+                        <Copy className="h-[18px] w-[18px] text-[#1e293b]" />
+                      </span>
+                      <div className="flex min-w-0 flex-col">
+                        <DialogTitle className="truncate text-[19px]">Duplicate {sourceLabel}</DialogTitle>
+                        <span className="text-[12.5px] text-slate-500">
+                          {pathType === 'created' ? 'New PENDING copy in New Articles' : 'New copy with all the same values'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label htmlFor={`dup-design-${item.id}`} className="text-[11.5px] font-bold tracking-[0.06em] text-slate-700">
+                        DESIGN NUMBER <span className="text-red-700">*</span>
+                      </label>
+                      <Input
+                        id={`dup-design-${item.id}`}
+                        autoFocus
+                        placeholder="Design number for the copy"
+                        value={dupDesignNo}
+                        onChange={(e) => { setDupDesignNo(e.target.value); if (dupError) setDupError(null); }}
+                        onKeyDown={(e) => { if (e.key === 'Enter') void runDup(); }}
+                        disabled={duplicating}
+                        aria-invalid={!!dupError}
+                        className={cn('h-[42px] font-mono font-semibold', dupError && 'border-red-600')}
+                      />
+                      {dupError && <p className="m-0 text-xs text-red-700">{dupError}</p>}
+                    </div>
+                    {pathType === 'created' && (
+                      <details className="text-[12.5px] text-slate-600">
+                        <summary className="cursor-pointer font-semibold text-slate-700">What gets copied?</summary>
+                        <div className="pt-1.5">Everything except the article number, SAP status and body / fabric article number.</div>
+                      </details>
+                    )}
+                  </div>
+                  <div className="flex justify-end gap-2 px-6 pb-5 pt-4">
+                    <Button variant="outline" onClick={closeDup} disabled={duplicating}>Cancel</Button>
+                    <Button
+                      disabled={duplicating || dupDesignNo.trim() === ''}
+                      onClick={() => void runDup()}
+                      className="bg-[#1e293b] text-white hover:bg-[#0f172a]"
+                    >
+                      {duplicating
+                        ? <><Loader2 className="h-4 w-4 animate-spin" /> Duplicating…</>
+                        : <><Copy className="h-4 w-4" /> Duplicate</>}
+                    </Button>
+                  </div>
+                </>
+              );
+            })()}
           </DialogContent>
         </Dialog>
 
@@ -5494,7 +5569,7 @@ export const ApproverArticleList: React.FC<ApproverArticleListProps> = ({
   }, [items, selectedRowKeys, onSelectionChange]);
 
   const handleDuplicate = useCallback(
-    async (item: ApproverItem, designNumber: string): Promise<void> => {
+    async (item: ApproverItem, designNumber: string): Promise<string | undefined> => {
       const token = localStorage.getItem('authToken');
       const res = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${item.id}/duplicate`, {
         method: 'POST',
@@ -5505,8 +5580,9 @@ export const ApproverArticleList: React.FC<ApproverArticleListProps> = ({
         const data = await res.json().catch(() => null);
         throw new Error(data?.error || 'Failed to duplicate article');
       }
-      message.success('Article duplicated successfully');
+      const data = await res.json().catch(() => null);
       onRefresh();
+      return data?.id ? String(data.id) : undefined;
     },
     [onRefresh],
   );

@@ -276,6 +276,14 @@ Changes on the Pool B page:
 
 Example (prod, 2026-10-28): 1122100039 has MC 126290106 but is linked to 126160201.
 
+### Pool B — "locked by user" failures (2026-10-29)
+
+**Symptom:** a FAILED row whose raw SAP reply holds CL 525 "Object is currently locked by user POWERBI".
+
+**Cause:** another session had the article's classification open in SAP at that moment. POWERBI is the shared RFC user: it runs VK11 pricing, PO changes and material updates, and on 2026-10-29 it held about 2,960 locks, some of them since 06:30. Nothing is saved for that article, but the lock is temporary.
+
+**What the page does now:** such rows read "SAP had this article open (locked by user X) — nothing was saved", with the fix "Wait a few minutes, then re-upload this article". Locks that stay held for hours belong to Basis (SM12).
+
 ### Pool B / KSML — clearer NIC results + KSML function pre-check (2026-10-22)
 
 - **Pool B:**

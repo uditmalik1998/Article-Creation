@@ -3,6 +3,7 @@ import { ChevronDown, ChevronRight, ChevronUp, Plus, Save, Search, X } from 'luc
 import { Input, Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui-tw';
 import { cn } from '@/lib/utils';
 import { APP_CONFIG } from '../../../constants/app/config';
+import { useRegisterUnsavedCard } from './unsavedCards';
 
 // ─── Costing grid cards (FG articles) ─────────────────────────────────────────
 // Option B layout shared by B TRIM (group 'VA ACC.') and V. ADD ('VA PRCS'):
@@ -232,7 +233,7 @@ interface CostingGridCardProps {
   /** Reads the article fresh from the DB (the parent's copy can be stale). Needed for cost sync. */
   loadSavedRecord?: () => Promise<Record<string, unknown> | null>;
   /** Save button: persists the current tab's spec fields + costs (config.costFields) + bTrimType. */
-  onSaveTab?: (updates: Record<string, string | null>) => void;
+  onSaveTab?: (updates: Record<string, string | null>) => void | Promise<void>;
 }
 
 const SelectCell: React.FC<{
@@ -500,24 +501,24 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
   };
 
   // Fills other-block rows on tab `tb` from config.otherMasterAttr (row name = type):
-  // RATE / AUTO-BGT for the given rows, ROUGH-V2 only where empty. Returns true if anything was set.
+  // RATE / AUTO-BGT for the given rows, ROUGH-V2 only where empty. Returns the rows that were set.
   const fillOtherFromMaster = async (
     tb: string,
     rowsToFill: string[],
     current: (row: string) => RowState | undefined,
-  ): Promise<boolean> => {
-    if (!config.otherMasterAttr) return false;
+  ): Promise<string[]> => {
+    if (!config.otherMasterAttr) return [];
     if (!otherMasterRef.current) otherMasterRef.current = await fetchBasicTrimAll(config.otherMasterAttr);
     const master = otherMasterRef.current;
-    if (!master) return false;
+    if (!master) return [];
     const idx = tabs.indexOf(tb);
-    let filled = false;
+    const filled: string[] = [];
     for (const row of rowsToFill) {
       const m = master[row.toUpperCase()];
       const v = m ? (idx === 0 ? m.bt1 : m.bt2) : '';
       if (!v) continue;
       applyMasterValue(tb, row, v, current(row), 'ifEmpty');
-      filled = true;
+      filled.push(row);
     }
     return filled;
   };
@@ -624,7 +625,9 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
       otherFilledTabsRef.current.add(t);
       if (other && config.otherMasterAttr) {
         const missing = other.rows.filter((row) => needsMaster(rows[row]));
-        if (missing.length > 0 && (await fillOtherFromMaster(t, missing, (row) => rows[row]))) setDirty(true);
+        // Unticked rows are saved empty, so master rates shown on them are not unsaved changes.
+        const filled = missing.length > 0 ? await fillOtherFromMaster(t, missing, (row) => rows[row]) : [];
+        if (filled.some((row) => savedOther.includes(row))) setDirty(true);
         if (cancelled) return;
       }
 
@@ -685,7 +688,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
     return savesToSap(row, col) && a ? (getValue(a.field) ?? '').trim() : localVal(row, col).trim();
   };
 
-  const handleSaveTab = () => {
+  const handleSaveTab = async () => {
     if (!tabSave) return;
     const updates: Record<string, string | null> = config.tabField ? { [config.tabField]: tab } : {};
     for (const [row, map] of Object.entries(cellMap)) {
@@ -725,10 +728,16 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
       updates[config.totalFields.auto] = sumOf('auto')?.toFixed(2) ?? null;
       for (const col of TOTAL_EDIT_COLS) updates[config.totalFields[col]] = totalValue(col) || null;
     }
-    onSaveTab!(updates);
-    setSavedTab(tab);
     setDirty(false);
+    try {
+      await onSaveTab!(updates);
+    } catch (e) {
+      setDirty(true);
+      throw e;
+    }
+    setSavedTab(tab);
   };
+  useRegisterUnsavedCard(config.title, dirty && tabSave && !locked, handleSaveTab);
 
   const renderSpecCell = (row: string, col: SpecCol) => {
     const a = boundAttr(row, col);
@@ -890,7 +899,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
               )}
               <button
                 type="button"
-                onClick={handleSaveTab}
+                onClick={() => { handleSaveTab().catch(() => {}); }}
                 disabled={locked}
                 className="flex h-6 items-center gap-1 rounded-md bg-white px-2.5 text-[11px] font-bold text-slate-900 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
               >
@@ -955,7 +964,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
                 )}
                 <button
                   type="button"
-                  onClick={handleSaveTab}
+                  onClick={() => { handleSaveTab().catch(() => {}); }}
                   disabled={locked}
                   className="flex h-7 items-center gap-1.5 rounded-md bg-white px-3 text-[12.5px] font-bold text-slate-900 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
                 >
