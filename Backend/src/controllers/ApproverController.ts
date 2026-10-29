@@ -3137,6 +3137,7 @@ export class ApproverController {
                 season: parent.season,
                 year: parent.year,
                 imageUrl: parent.imageUrl,
+                sourceImageUrl: parent.sourceImageUrl ?? parent.imageUrl,
                 isGeneric: true,
                 isOldArticle: false,
                 approvalStatus: 'PENDING',
@@ -4272,7 +4273,7 @@ export class ApproverController {
                 data: {
                     ...rest,
                     imageUrl: copyImageUrl,
-                    sourceImageUrl: fromCreatedKids ? (source.sourceImageUrl || null) : rest.sourceImageUrl,
+                    sourceImageUrl: fromCreatedKids ? (source.sourceImageUrl || null) : (rest.sourceImageUrl ?? source.imageUrl),
                     vaddPrintJson: rest.vaddPrintJson ?? Prisma.DbNull,
                     vaddEmpJson: rest.vaddEmpJson ?? Prisma.DbNull,
                     creatorUser: Prisma.DbNull, modifyUser: Prisma.DbNull, // a copy starts with no editors

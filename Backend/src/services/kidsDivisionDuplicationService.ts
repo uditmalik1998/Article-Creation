@@ -299,6 +299,7 @@ export async function duplicateForKidsDivision(flatId: string): Promise<void> {
           id: kidsId,
           jobId: newJob.id,
           imageUrl: newImageUrl,
+          sourceImageUrl: newImageUrl || null,
           approvalStatus: 'PENDING' as const,
           approvedBy: null,
           approvedAt: null,
