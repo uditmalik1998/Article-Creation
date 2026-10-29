@@ -94,11 +94,9 @@ import { variantCreatingIds } from '../../fabric-article/variantCreationState';
 // Alias so the combobox trigger can use a distinct name from the plain icon
 const ChevronDownIcon = ChevronDown;
 
-// FG MRP rule (OTH GRID-1): RATE fills MRP = rate + 30%. A typed MRP must stay
-// between rate + 15% and rate + 50%.
+// FG MRP rule (OTH GRID-1): RATE fills MRP = rate + 30%; the user can change MRP freely.
 const round2 = (n: number) => Math.round(n * 100) / 100;
 const calcFgMrpFromRate = (rate: number): number => round2(rate * 1.3);
-const fgMrpLimits = (rate: number) => ({ min: round2(rate * 1.15), max: round2(rate * 1.5) });
 
 // Module-level national grid cache — body article dropdown values from national_grid_master
 type NationalGridValues = Record<string, { code: string; fullForm: string }[]>;
@@ -2059,18 +2057,6 @@ const ArticleCard = React.memo(
         message.error('Vendor Name is required');
         setEditingField(null);
         return;
-      }
-      if (field === 'mrp' && value) {
-        const mrpNew = parseFloat(value);
-        const rateNow = parseFloat(String(getValue('rate') ?? ''));
-        if (!isNaN(mrpNew) && mrpNew > 0 && !isNaN(rateNow) && rateNow > 0) {
-          const { min, max } = fgMrpLimits(rateNow);
-          if (mrpNew < min || mrpNew > max) {
-            message.error(`MRP must be between ${min} and ${max} (rate + 15% to rate + 50%)`);
-            setEditingField(null);
-            return;
-          }
-        }
       }
       const updates: Record<string, string | null> = { [field]: value, ...(extra ?? {}) };
       // Auto-compute roughConsumptionKg for FG articles when roughConsumptionMeter or gsm is edited.
