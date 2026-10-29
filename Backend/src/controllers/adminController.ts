@@ -9667,7 +9667,8 @@ export const renameMcdGroup = async (req: Request, res: Response): Promise<void>
 // ═══════════════════════════════════════════════════════════════════════════════
 // GM MAJOR CATEGORY DETAILS (gm_major_category_details)
 // Columns: id, seg, div, sub_div, maj_cat_nm, mc_cd, maj_cat_desc, mj_status,
-//          archetype, archetype_nm, family_code, family_name, status, created_at
+//          archetype, archetype_nm, family_code, family_name, status, hsn_cd, created_at
+// hsn_cd is sent to SAP as HSN_CODE; GM submit is blocked without it.
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const GM_MCT_META_FILE = path.join(__dirname, '../../data/gm-mct-meta.json');
@@ -9714,16 +9715,16 @@ export const downloadGMMajCatDetailsTemplate = async (_req: Request, res: Respon
     const ws = wb.addWorksheet('GM_MCT');
 
     // Row 1 — title
-    ws.mergeCells('A1:N1');
+    ws.mergeCells('A1:M1');
     const titleCell = ws.getCell('A1');
     titleCell.value = 'GM Major Category Details Template';
     titleCell.font = { bold: true, size: 13 };
     titleCell.alignment = { horizontal: 'center' };
     ws.getRow(1).height = 22;
 
-    // Row 2 — headers (required cols highlighted green: seg, div, sub_div, maj_cat_nm)
-    const headers = ['seg', 'div', 'sub_div', 'maj_cat_nm', 'mc_cd', 'maj_cat_desc', 'mj_status', 'archetype', 'archetype_nm', 'family_code', 'family_name', 'status'];
-    const requiredCols = new Set([1, 2, 3, 4]); // 1-based
+    // Row 2 — headers (required cols highlighted green: seg, div, sub_div, maj_cat_nm, hsn_cd)
+    const headers = ['seg', 'div', 'sub_div', 'maj_cat_nm', 'mc_cd', 'maj_cat_desc', 'mj_status', 'archetype', 'archetype_nm', 'family_code', 'family_name', 'status', 'hsn_cd'];
+    const requiredCols = new Set([1, 2, 3, 4, 13]); // 1-based
     const headerRow = ws.addRow(headers);
     headerRow.eachCell((cell: any, col: number) => {
       cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
@@ -9735,14 +9736,16 @@ export const downloadGMMajCatDetailsTemplate = async (_req: Request, res: Respon
     });
 
     // Sample rows
-    ws.addRow(['GENERAL', 'GM', 'GM-HOME', 'GM_BEDSHEET', 'GMBS001', 'Bed Sheet', 'ACT', 'HOME_TEXTILE', 'Home Textile', 'GM_BRAND', 'Brand', 'ACT']);
-    ws.addRow(['GENERAL', 'GM', 'GM-HOME', 'GM_BEDSHEET', 'GMBS001', 'Bed Sheet', 'ACT', 'HOME_TEXTILE', 'Home Textile', 'GM_SIZE', 'Size', 'ACT']);
-    ws.addRow(['GENERAL', 'GM', 'GM-KITCHEN', 'GM_COOKWARE', 'GMCK001', 'Cookware', 'ACT', 'KITCHEN', 'Kitchen', 'GM_BRAND', 'Brand', 'ACT']);
+    ws.addRow(['GENERAL', 'GM', 'GM-HOME', 'GM_BEDSHEET', 'GMBS001', 'Bed Sheet', 'ACT', 'HOME_TEXTILE', 'Home Textile', 'GM_BRAND', 'Brand', 'ACT', '630499']);
+    ws.addRow(['GENERAL', 'GM', 'GM-HOME', 'GM_BEDSHEET', 'GMBS001', 'Bed Sheet', 'ACT', 'HOME_TEXTILE', 'Home Textile', 'GM_SIZE', 'Size', 'ACT', '630499']);
+    ws.addRow(['GENERAL', 'GM', 'GM-KITCHEN', 'GM_COOKWARE', 'GMCK001', 'Cookware', 'ACT', 'KITCHEN', 'Kitchen', 'GM_BRAND', 'Brand', 'ACT', '761510']);
+    // hsn_cd as text so leading zeros / 8-digit codes stay as typed.
+    ws.getColumn(13).numFmt = '@';
 
     ws.columns = [
       { width: 12 }, { width: 10 }, { width: 14 }, { width: 20 }, { width: 12 },
       { width: 20 }, { width: 12 }, { width: 16 }, { width: 18 }, { width: 18 },
-      { width: 18 }, { width: 10 },
+      { width: 18 }, { width: 10 }, { width: 12 },
     ];
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -9762,16 +9765,17 @@ export const downloadGMMajCatDetailsData = async (_req: Request, res: Response):
       mc_cd: string | null; maj_cat_desc: string | null; mj_status: string | null;
       archetype: string | null; archetype_nm: string | null;
       family_code: string | null; family_name: string | null; status: string | null;
+      hsn_cd: string | null;
     }[]>`
       SELECT seg, div, sub_div, maj_cat_nm, mc_cd, maj_cat_desc, mj_status,
-             archetype, archetype_nm, family_code, family_name, status
+             archetype, archetype_nm, family_code, family_name, status, hsn_cd
       FROM gm_major_category_details
       ORDER BY div, sub_div, maj_cat_nm, family_code
     `;
 
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet('GM_MCT');
-    const headers = ['seg', 'div', 'sub_div', 'maj_cat_nm', 'mc_cd', 'maj_cat_desc', 'mj_status', 'archetype', 'archetype_nm', 'family_code', 'family_name', 'status'];
+    const headers = ['seg', 'div', 'sub_div', 'maj_cat_nm', 'mc_cd', 'maj_cat_desc', 'mj_status', 'archetype', 'archetype_nm', 'family_code', 'family_name', 'status', 'hsn_cd'];
     const headerRow = ws.addRow(headers);
     headerRow.eachCell((cell: any) => {
       cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
@@ -9779,13 +9783,13 @@ export const downloadGMMajCatDetailsData = async (_req: Request, res: Response):
     });
 
     for (const r of rows) {
-      ws.addRow([r.seg, r.div, r.sub_div, r.maj_cat_nm, r.mc_cd, r.maj_cat_desc, r.mj_status, r.archetype, r.archetype_nm, r.family_code, r.family_name, r.status]);
+      ws.addRow([r.seg, r.div, r.sub_div, r.maj_cat_nm, r.mc_cd, r.maj_cat_desc, r.mj_status, r.archetype, r.archetype_nm, r.family_code, r.family_name, r.status, r.hsn_cd]);
     }
 
     ws.columns = [
       { width: 12 }, { width: 10 }, { width: 14 }, { width: 20 }, { width: 12 },
       { width: 20 }, { width: 12 }, { width: 16 }, { width: 18 }, { width: 18 },
-      { width: 18 }, { width: 10 },
+      { width: 18 }, { width: 10 }, { width: 12 },
     ];
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -9848,6 +9852,7 @@ export const uploadGMMajCatDetails = async (req: Request, res: Response): Promis
         mc_cd: string | null; maj_cat_desc: string | null; mj_status: string | null;
         archetype: string | null; archetype_nm: string | null;
         family_code: string | null; family_name: string | null; status: string | null;
+        hsn_cd: string | null;
       }> = [];
       let skipped = 0;
 
@@ -9868,6 +9873,7 @@ export const uploadGMMajCatDetails = async (req: Request, res: Response): Promis
           family_code: col(row, 'family_code'),
           family_name: col(row, 'family_name'),
           status: col(row, 'status'),
+          hsn_cd: col(row, 'hsn_cd'),
         });
       });
 
@@ -9881,12 +9887,13 @@ export const uploadGMMajCatDetails = async (req: Request, res: Response): Promis
           const batch = dataRows.slice(i, i + BATCH);
           await tx.$executeRaw`
             INSERT INTO gm_major_category_details
-              (seg, div, sub_div, maj_cat_nm, mc_cd, maj_cat_desc, mj_status, archetype, archetype_nm, family_code, family_name, status)
+              (seg, div, sub_div, maj_cat_nm, mc_cd, maj_cat_desc, mj_status, archetype, archetype_nm, family_code, family_name, status, hsn_cd)
             SELECT r.seg, r.div, r.sub_div, r.maj_cat_nm, r.mc_cd, r.maj_cat_desc, r.mj_status,
-                   r.archetype, r.archetype_nm, r.family_code, r.family_name, r.status
+                   r.archetype, r.archetype_nm, r.family_code, r.family_name, r.status, r.hsn_cd
             FROM jsonb_to_recordset(${JSON.stringify(batch)}::jsonb)
               AS r(seg text, div text, sub_div text, maj_cat_nm text, mc_cd text, maj_cat_desc text,
-                   mj_status text, archetype text, archetype_nm text, family_code text, family_name text, status text)
+                   mj_status text, archetype text, archetype_nm text, family_code text, family_name text, status text,
+                   hsn_cd text)
           `;
           job.progress = 40 + Math.round(((i + batch.length) / dataRows.length) * 55);
         }
