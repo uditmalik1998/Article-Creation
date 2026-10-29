@@ -136,6 +136,7 @@ export class FlatteningService {
             // Essential Metadata
             imageName, // UUID-based filename for internal use
             imageUrl: job.imageUrl,
+            sourceImageUrl: job.imageUrl || null, // clean image — approval overwrites imageUrl, not this
             articleNumber, // null until SAP sync assigns the real article number
             extractionStatus: job.status,
             aiModel: job.aiModel,

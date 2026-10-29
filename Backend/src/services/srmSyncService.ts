@@ -709,6 +709,7 @@ async function insertRow(row: SrmRow, rawArticleId?: string): Promise<{ id: stri
       extractionStatus: 'SRM_IMPORT',
       imageName:      null,
       imageUrl:       srmImageUrl,
+      sourceImageUrl: srmImageUrl || null, // clean image — never the watermarked approved copy
       isGeneric:      true,   // SRM records are standalone articles, not variants
 
       // SRM-provided fields
@@ -771,7 +772,7 @@ async function insertRow(row: SrmRow, rawArticleId?: string): Promise<{ id: stri
       finalImageUrl = r2Url;
       await prisma.extractionResultFlat.update({
         where: { id: flat.id },
-        data: { imageUrl: r2Url },
+        data: { imageUrl: r2Url, sourceImageUrl: r2Url },
       });
     }
   }
@@ -859,6 +860,7 @@ export async function syncFromSrm(triggeredBy: 'CRON' | 'ADMIN' | 'WEBHOOK' = 'C
           if (patch.imageUrl) {
             const r2Url = await downloadAndMirrorToR2(patch.imageUrl);
             if (r2Url) patch.imageUrl = r2Url;
+            patch.sourceImageUrl = patch.imageUrl;
           }
           if (patch.backImageUrl) {
             const r2Url = await downloadAndMirrorToR2(patch.backImageUrl);
@@ -1065,7 +1067,7 @@ export async function backfillSrmVlmEnrichment(): Promise<EnrichResult> {
         imageUrl = r2Url;
         await prisma.extractionResultFlat.update({
           where: { id: rec.id },
-          data: { imageUrl: r2Url },
+          data: { imageUrl: r2Url, sourceImageUrl: r2Url },
         });
         console.log(`[SRM Enrich Backfill] Re-mirrored SRM image to R2 for ${rec.id}`);
       } else {
