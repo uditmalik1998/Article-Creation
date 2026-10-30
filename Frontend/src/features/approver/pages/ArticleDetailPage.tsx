@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   CheckCircle2, XCircle, FileText, LayoutGrid, Rocket, Sparkles,
-  ChevronLeft, ChevronRight, ArrowLeft, Loader2, RotateCw, History, Plus, Trash2, PackagePlus, X,
+  ChevronLeft, ChevronRight, ArrowLeft, Loader2, RotateCw, RotateCcw, History, Plus, Trash2, PackagePlus, X,
 } from 'lucide-react';
 import {
   Button,
@@ -254,6 +254,7 @@ class SaveFailedError extends Error {}
 type ConfirmDialog =
   | { kind: 'approve'; count: number; unsavedCards: string[]; article?: { number: string; mc: string; vendor: string } }
   | { kind: 'reject'; count: number }
+  | { kind: 'revert'; item: ApproverItem }
   | { kind: 'createFabric'; item: ApproverItem }
   | { kind: 'createBody'; item: ApproverItem }
   | { kind: 'proceedFG'; item: ApproverItem }
@@ -883,6 +884,23 @@ export default function ArticleDetailPage({
     } catch { message.error('Failed to reject items'); }
   };
 
+  // ADMIN only: a mistakenly rejected article goes back to PENDING (New Articles).
+  const doRevert = async (item: ApproverItem) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${item.id}/revert`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!r.ok) {
+        const p = await r.json().catch(() => null);
+        throw new Error(p?.error || 'Revert failed');
+      }
+      message.success('Article moved back to New Articles (pending)');
+      await refetchCurrentItem();
+    } catch (e) { message.error(e instanceof Error ? e.message : 'Revert failed'); }
+  };
+
   const openHistory = async (articleId: string) => {
     setHistoryOpen(true);
     setHistoryLoading(true);
@@ -1083,6 +1101,14 @@ export default function ArticleDetailPage({
                     </Button>
                   )}
                 </>
+              )}
+              {user?.role === 'ADMIN' && currentItem?.approvalStatus === 'REJECTED' && (
+                <Button size="sm" variant="outline"
+                  onClick={() => setConfirmDialog({ kind: 'revert', item: currentItem })}
+                  title="Move this rejected article back to New Articles (pending)"
+                  className="h-8 border-amber-300/60 bg-transparent px-3 text-[12.5px] font-semibold text-amber-200 hover:bg-amber-500/15 hover:text-amber-100">
+                  <RotateCcw /> Revert
+                </Button>
               )}
               <Tooltip title={!canReject ? 'Only Creator, Approver, Sub-Division Head, Category Head or Admin can reject articles' : undefined}>
                 {/* span wrapper: disabled <button> swallows pointer events; span keeps hover alive */}
@@ -1519,6 +1545,21 @@ export default function ArticleDetailPage({
               <DialogFooter>
                 <Button variant="outline" onClick={() => setConfirmDialog(null)}>Cancel</Button>
                 <Button variant="destructive" onClick={async () => { setConfirmDialog(null); await doReject(); }}>Reject</Button>
+              </DialogFooter>
+            </>
+          )}
+          {confirmDialog?.kind === 'revert' && (
+            <>
+              <DialogHeader><DialogTitle>Revert rejection</DialogTitle></DialogHeader>
+              <p className="m-0">
+                Move "{confirmDialog.item.articleNumber || confirmDialog.item.designNumber || confirmDialog.item.imageName || confirmDialog.item.id}" back to pending?
+                It will show in New Articles again, with its rejected variants.
+              </p>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setConfirmDialog(null)}>Cancel</Button>
+                <Button onClick={async () => { const item = confirmDialog.item; setConfirmDialog(null); await doRevert(item); }}>
+                  <RotateCcw /> Revert
+                </Button>
               </DialogFooter>
             </>
           )}

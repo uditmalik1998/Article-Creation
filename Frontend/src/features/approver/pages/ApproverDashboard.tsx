@@ -685,6 +685,34 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
     }
   }, [selectedIds, fetchItems, currentPage]);
 
+  // ─── Revert selected (Rejected articles, ADMIN) ─────────────────────────────
+  const canRevert = pathType === 'rejected' && user?.role === 'ADMIN';
+  const [revertConfirmOpen, setRevertConfirmOpen] = useState(false);
+  const [reverting, setReverting] = useState(false);
+  const handleRevertSelected = useCallback(async () => {
+    const ids = [...selectedIds];
+    if (ids.length === 0) return;
+    setReverting(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/revert`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ ids }),
+      });
+      const data = await r.json().catch(() => null);
+      if (!r.ok) throw new Error(data?.error || 'Revert failed');
+      const count = data?.count ?? ids.length;
+      message.success(`Moved ${count} article${count !== 1 ? 's' : ''} back to New Articles`);
+      setRevertConfirmOpen(false);
+      fetchItems(currentPage); // also clears the selection
+    } catch (e) {
+      message.error(e instanceof Error ? e.message : 'Revert failed');
+    } finally {
+      setReverting(false);
+    }
+  }, [selectedIds, fetchItems, currentPage]);
+
   const handleExportSelected = useCallback(async () => {
     const rows = items.filter((i) => selectedIds.has(i.id));
     if (rows.length === 0) {
@@ -809,6 +837,8 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
             onExportSelected={handleExportSelected}
             onRejectSelected={pathType === 'new' ? () => setRejectConfirmOpen(true) : undefined}
             rejecting={rejecting}
+            onRevertSelected={canRevert ? () => setRevertConfirmOpen(true) : undefined}
+            reverting={reverting}
             loading={loading}
             onRefresh={() => fetchItems(currentPage)}
             downloads={[
@@ -1075,6 +1105,21 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
             <Button variant="outline" onClick={() => setRejectConfirmOpen(false)} disabled={rejecting}>Cancel</Button>
             <Button variant="destructive" onClick={handleRejectSelected} disabled={rejecting}>
               {rejecting ? 'Rejecting…' : `Reject ${selectedIds.size}`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={revertConfirmOpen} onOpenChange={(o) => { if (!reverting) setRevertConfirmOpen(o); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Revert selected articles</DialogTitle></DialogHeader>
+          <p className="m-0 text-[13px] text-slate-600">
+            Move {selectedIds.size} selected article{selectedIds.size !== 1 ? 's' : ''} back to pending? They show in New Articles again, along with their rejected variants.
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRevertConfirmOpen(false)} disabled={reverting}>Cancel</Button>
+            <Button onClick={handleRevertSelected} disabled={reverting}>
+              {reverting ? 'Reverting…' : `Revert ${selectedIds.size}`}
             </Button>
           </DialogFooter>
         </DialogContent>
