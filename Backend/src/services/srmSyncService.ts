@@ -612,6 +612,13 @@ async function enrichSrmRowWithVlm(
         return false;
       }
 
+      // CMP COST card "AI SAM" — added after the usable-attributes check so it never counts as one.
+      const aiSam = result.aiSam;
+      if (aiSam?.cutting != null) updates.aiCmpCostCutting = aiSam.cutting;
+      if (aiSam?.stitching != null) updates.aiCmpCostStitching = aiSam.stitching;
+      if (aiSam?.ironing != null) updates.aiCmpCostIroning = aiSam.ironing;
+      if (aiSam?.finishing != null) updates.aiCmpCostFinishing = aiSam.finishing;
+
       // ── Save to DB ─────────────────────────────────────────────────────────
       const updatedRow = await prisma.extractionResultFlat.update({ where: { id: flatId }, data: updates });
 

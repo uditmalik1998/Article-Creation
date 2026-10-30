@@ -4981,6 +4981,12 @@ const ArticleCard = React.memo(
                       onToggleCollapse={() => toggleGroupCollapse('CMP')}
                       locked={isLocked}
                       bgtPreset={cmpBgtPreset}
+                      aiSam={{
+                        CUTTING: item.aiCmpCostCutting != null ? String(Number(item.aiCmpCostCutting)) : undefined,
+                        STITCHING: item.aiCmpCostStitching != null ? String(Number(item.aiCmpCostStitching)) : undefined,
+                        IRONING: item.aiCmpCostIroning != null ? String(Number(item.aiCmpCostIroning)) : undefined,
+                        FINISHING: item.aiCmpCostFinishing != null ? String(Number(item.aiCmpCostFinishing)) : undefined,
+                      }}
                       actPreset={cmpActPreset}
                       savedPrVals={cmpSavedPrVals}
                       hasUnsavedPreset={cmpPresetUnsaved}

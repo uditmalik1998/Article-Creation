@@ -1,7 +1,18 @@
 import { VLMProvider, FashionExtractionRequest } from '../../../types/vlm';
-import { EnhancedExtractionResult, AttributeData } from '../../../types/extraction';
+import { EnhancedExtractionResult, AttributeData, CmpSamMinutes } from '../../../types/extraction';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { FULL_WEAVE_CLASSIFICATION_GUIDANCE } from '../prompts/fabricWeaveGuidance';
+
+// "ai_sam" block → minutes per process; anything that is not a sane positive number becomes null.
+function parseAiSam(raw: any): CmpSamMinutes | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const num = (v: any): number | null => {
+    const n = typeof v === 'number' ? v : parseFloat(String(v ?? ''));
+    return Number.isFinite(n) && n > 0 && n < 1000 ? Math.round(n * 100) / 100 : null;
+  };
+  const out = { cutting: num(raw.cutting), stitching: num(raw.stitching), ironing: num(raw.ironing), finishing: num(raw.finishing) };
+  return Object.values(out).some((v) => v !== null) ? out : null;
+}
 
 /**
  * Multi-step JSON repair for malformed Gemini responses.
@@ -98,7 +109,7 @@ export class GoogleVisionProvider implements VLMProvider {
         }
       }
 
-      const { attributes, extractedMetadata, rawGeminiResponse } = await this.parseResponse(response!.content, request.schema);
+      const { attributes, extractedMetadata, rawGeminiResponse, aiSam } = await this.parseResponse(response!.content, request.schema);
 
       const confidence = this.calculateConfidence(attributes);
 
@@ -121,6 +132,7 @@ export class GoogleVisionProvider implements VLMProvider {
         },
         extractedMetadata: extractedMetadata || undefined,
         rawGeminiResponse: rawGeminiResponse || null,
+        aiSam: aiSam ?? null,
       };
     } catch (error) {
       console.error(`❌ [Google Vision] Extraction failed:`, error instanceof Error ? error.message : 'Unknown error');
@@ -222,6 +234,17 @@ Return JSON only, no markdown. Just the flat key-value JSON object.`;
         : '';
       return `${item.key}${allowedValues}`;
     }).join('\n');
+
+    // CMP COST card "AI SAM": minutes per process, estimated from the image only (no reference numbers).
+    const aiSamSection = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧵 AI SAM — production minutes (fill "ai_sam" in the output)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Estimate the SAM (standard allowed minutes) to make ONE piece of this garment for each process: cutting, stitching, ironing, finishing.
+Judge from the visible construction: panels and seams, collar/hood, sleeves and cuffs, plackets, pockets, zips/buttons, prints/embroidery/patches, trims.
+This is an ESTIMATE, not a database lookup: always give your best positive estimate for every process, never 0 and never null.
+Return plain JSON numbers in minutes (max 2 decimals). Typical ranges per piece: cutting 0.3–3, stitching 3–60, ironing 0.3–5, finishing 0.5–8.
+This does not change any attribute rule above.
+`;
 
     return `YOU ARE A FASHION ATTRIBUTE DATABASE LOOKUP SYSTEM.
 
@@ -915,6 +938,7 @@ TOPWEAR EXAMPLE (SHIRT):
   "child_belt": null
 }
 
+${aiSamSection}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📝 OUTPUT FORMAT (JSON only, no markdown):
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -930,6 +954,7 @@ TOPWEAR EXAMPLE (SHIRT):
     "patchText": "string or null",
     "patchDigitsPresent": "true | false | null"
   },
+  "ai_sam": { "cutting": "minutes as a number, e.g. 1.2", "stitching": "minutes", "ironing": "minutes", "finishing": "minutes" },
   "attributes": {
     "attribute_key": {
       "rawValue": "DATABASE VALUE or null",
@@ -1069,7 +1094,7 @@ GOAL: Achieve 90%+ accuracy. Take your time. Be thorough. Be precise.`;
     };
   }
 
-  private async parseResponse(content: string, schema: any[]): Promise<{ attributes: AttributeData; extractedMetadata?: any; rawGeminiResponse?: any }> {
+  private async parseResponse(content: string, schema: any[]): Promise<{ attributes: AttributeData; extractedMetadata?: any; rawGeminiResponse?: any; aiSam?: CmpSamMinutes | null }> {
     try {
       const cleanContent = (content || '').replace(/```json\n?|\n?```/g, '').trim();
       if (!cleanContent) {
@@ -1086,6 +1111,7 @@ GOAL: Achieve 90%+ accuracy. Take your time. Be thorough. Be precise.`;
       }
 
       const extractedMetadata = parsed.metadata || null;
+      const aiSam = parseAiSam(parsed.ai_sam);
       const attributeSource = parsed.attributes || parsed;
 
       const attributes: AttributeData = {};
@@ -1484,7 +1510,7 @@ GOAL: Achieve 90%+ accuracy. Take your time. Be thorough. Be precise.`;
         }
       }
 
-      return { attributes, extractedMetadata: mergedMetadata, rawGeminiResponse: parsed };
+      return { attributes, extractedMetadata: mergedMetadata, rawGeminiResponse: parsed, aiSam };
     } catch (error) {
       console.error('❌ [Google Vision] Failed to parse response:', error);
       throw new Error(`Failed to parse Google Vision response: ${error instanceof Error ? error.message : 'Unknown error'}`);

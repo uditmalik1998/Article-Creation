@@ -198,6 +198,11 @@ model ExtractionResultFlat {
   // Clean (un-watermarked) image — kept by DB trigger trg_set_flat_source_image_url;
   // image_url is overwritten with the watermarked copy on SAP creation, this is not.
   sourceImageUrl              String?       @map("source_image_url")
+  // CMP COST card "AI SAM" (read-only): minutes per process from the Gemini extraction call
+  aiCmpCostCutting            Decimal?      @map("ai_cmp_cost_cutting")   @db.Decimal(10, 2)
+  aiCmpCostStitching          Decimal?      @map("ai_cmp_cost_stitching") @db.Decimal(10, 2)
+  aiCmpCostIroning            Decimal?      @map("ai_cmp_cost_ironing")   @db.Decimal(10, 2)
+  aiCmpCostFinishing          Decimal?      @map("ai_cmp_cost_finishing") @db.Decimal(10, 2)
   backImageUrl                String?       @map("back_image_url")
   articleNumber               String?       @map("article_number") @db.VarChar(100)
   extractionStatus            String?       @map("extraction_status") @db.VarChar(50)

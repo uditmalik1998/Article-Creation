@@ -130,6 +130,11 @@ export interface ApproverItem {
   preciseRatio: number | string | null;
   preciseConsumptionKg: number | string | null;
   preciseConsumptionMeter: number | string | null;
+  /** CMP COST "AI SAM" (read-only), minutes per process from the Gemini extraction. */
+  aiCmpCostCutting?: number | string | null;
+  aiCmpCostStitching?: number | string | null;
+  aiCmpCostIroning?: number | string | null;
+  aiCmpCostFinishing?: number | string | null;
   cuttingBgtPrVal: number | string | null;
   cuttingActPrVal: number | string | null;
   cuttingVendorPrVal: number | string | null;

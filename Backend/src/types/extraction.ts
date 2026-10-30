@@ -54,6 +54,14 @@ export interface DiscoveryStats {
   uniqueKeys: number;
 }
 
+/** SAM (standard allowed minutes) per CMP process. */
+export interface CmpSamMinutes {
+  cutting: number | null;
+  stitching: number | null;
+  ironing: number | null;
+  finishing: number | null;
+}
+
 export interface EnhancedExtractionResult extends ExtractionResult {
   discoveries?: DiscoveredAttribute[];
   discoveryStats?: DiscoveryStats;
@@ -72,6 +80,8 @@ export interface EnhancedExtractionResult extends ExtractionResult {
     discoveryStats?: string | Record<string, unknown> | number;
   };
   rawGeminiResponse?: Record<string, any> | null;
+  /** CMP COST card "AI SAM": Gemini's minutes per process, from the same extraction call. */
+  aiSam?: CmpSamMinutes | null;
 }
 
 export interface BulkExtractionOptions {
