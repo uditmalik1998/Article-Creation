@@ -160,6 +160,7 @@ export class VLMService {
       discoveries: [],
       discoveryStats: { totalFound: 0, highConfidence: 0, schemaPromotable: 0, uniqueKeys: 0 },
       rawGeminiResponse: detailResult.rawGeminiResponse ?? fashionResult.rawGeminiResponse ?? null,
+      aiSam: detailResult.aiSam ?? fashionResult.aiSam ?? null,
     };
   }
 

@@ -15855,6 +15855,10 @@ export namespace Prisma {
   }
 
   export type ExtractionResultFlatAvgAggregateOutputType = {
+    aiCmpCostCutting: Decimal | null
+    aiCmpCostStitching: Decimal | null
+    aiCmpCostIroning: Decimal | null
+    aiCmpCostFinishing: Decimal | null
     avgConfidence: Decimal | null
     processingTimeMs: number | null
     totalAttributes: number | null
@@ -16078,6 +16082,10 @@ export namespace Prisma {
   }
 
   export type ExtractionResultFlatSumAggregateOutputType = {
+    aiCmpCostCutting: Decimal | null
+    aiCmpCostStitching: Decimal | null
+    aiCmpCostIroning: Decimal | null
+    aiCmpCostFinishing: Decimal | null
     avgConfidence: Decimal | null
     processingTimeMs: number | null
     totalAttributes: number | null
@@ -16307,6 +16315,10 @@ export namespace Prisma {
     imageUrl: string | null
     oldImageUrl: string | null
     sourceImageUrl: string | null
+    aiCmpCostCutting: Decimal | null
+    aiCmpCostStitching: Decimal | null
+    aiCmpCostIroning: Decimal | null
+    aiCmpCostFinishing: Decimal | null
     backImageUrl: string | null
     articleNumber: string | null
     extractionStatus: string | null
@@ -16662,6 +16674,10 @@ export namespace Prisma {
     imageUrl: string | null
     oldImageUrl: string | null
     sourceImageUrl: string | null
+    aiCmpCostCutting: Decimal | null
+    aiCmpCostStitching: Decimal | null
+    aiCmpCostIroning: Decimal | null
+    aiCmpCostFinishing: Decimal | null
     backImageUrl: string | null
     articleNumber: string | null
     extractionStatus: string | null
@@ -17017,6 +17033,10 @@ export namespace Prisma {
     imageUrl: number
     oldImageUrl: number
     sourceImageUrl: number
+    aiCmpCostCutting: number
+    aiCmpCostStitching: number
+    aiCmpCostIroning: number
+    aiCmpCostFinishing: number
     backImageUrl: number
     articleNumber: number
     extractionStatus: number
@@ -17373,6 +17393,10 @@ export namespace Prisma {
 
 
   export type ExtractionResultFlatAvgAggregateInputType = {
+    aiCmpCostCutting?: true
+    aiCmpCostStitching?: true
+    aiCmpCostIroning?: true
+    aiCmpCostFinishing?: true
     avgConfidence?: true
     processingTimeMs?: true
     totalAttributes?: true
@@ -17596,6 +17620,10 @@ export namespace Prisma {
   }
 
   export type ExtractionResultFlatSumAggregateInputType = {
+    aiCmpCostCutting?: true
+    aiCmpCostStitching?: true
+    aiCmpCostIroning?: true
+    aiCmpCostFinishing?: true
     avgConfidence?: true
     processingTimeMs?: true
     totalAttributes?: true
@@ -17825,6 +17853,10 @@ export namespace Prisma {
     imageUrl?: true
     oldImageUrl?: true
     sourceImageUrl?: true
+    aiCmpCostCutting?: true
+    aiCmpCostStitching?: true
+    aiCmpCostIroning?: true
+    aiCmpCostFinishing?: true
     backImageUrl?: true
     articleNumber?: true
     extractionStatus?: true
@@ -18180,6 +18212,10 @@ export namespace Prisma {
     imageUrl?: true
     oldImageUrl?: true
     sourceImageUrl?: true
+    aiCmpCostCutting?: true
+    aiCmpCostStitching?: true
+    aiCmpCostIroning?: true
+    aiCmpCostFinishing?: true
     backImageUrl?: true
     articleNumber?: true
     extractionStatus?: true
@@ -18535,6 +18571,10 @@ export namespace Prisma {
     imageUrl?: true
     oldImageUrl?: true
     sourceImageUrl?: true
+    aiCmpCostCutting?: true
+    aiCmpCostStitching?: true
+    aiCmpCostIroning?: true
+    aiCmpCostFinishing?: true
     backImageUrl?: true
     articleNumber?: true
     extractionStatus?: true
@@ -18982,6 +19022,10 @@ export namespace Prisma {
     imageUrl: string | null
     oldImageUrl: string | null
     sourceImageUrl: string | null
+    aiCmpCostCutting: Decimal | null
+    aiCmpCostStitching: Decimal | null
+    aiCmpCostIroning: Decimal | null
+    aiCmpCostFinishing: Decimal | null
     backImageUrl: string | null
     articleNumber: string | null
     extractionStatus: string | null
@@ -19361,6 +19405,10 @@ export namespace Prisma {
     imageUrl?: boolean
     oldImageUrl?: boolean
     sourceImageUrl?: boolean
+    aiCmpCostCutting?: boolean
+    aiCmpCostStitching?: boolean
+    aiCmpCostIroning?: boolean
+    aiCmpCostFinishing?: boolean
     backImageUrl?: boolean
     articleNumber?: boolean
     extractionStatus?: boolean
@@ -19727,6 +19775,10 @@ export namespace Prisma {
     imageUrl?: boolean
     oldImageUrl?: boolean
     sourceImageUrl?: boolean
+    aiCmpCostCutting?: boolean
+    aiCmpCostStitching?: boolean
+    aiCmpCostIroning?: boolean
+    aiCmpCostFinishing?: boolean
     backImageUrl?: boolean
     articleNumber?: boolean
     extractionStatus?: boolean
@@ -20090,6 +20142,10 @@ export namespace Prisma {
     imageUrl?: boolean
     oldImageUrl?: boolean
     sourceImageUrl?: boolean
+    aiCmpCostCutting?: boolean
+    aiCmpCostStitching?: boolean
+    aiCmpCostIroning?: boolean
+    aiCmpCostFinishing?: boolean
     backImageUrl?: boolean
     articleNumber?: boolean
     extractionStatus?: boolean
@@ -20453,6 +20509,10 @@ export namespace Prisma {
     imageUrl?: boolean
     oldImageUrl?: boolean
     sourceImageUrl?: boolean
+    aiCmpCostCutting?: boolean
+    aiCmpCostStitching?: boolean
+    aiCmpCostIroning?: boolean
+    aiCmpCostFinishing?: boolean
     backImageUrl?: boolean
     articleNumber?: boolean
     extractionStatus?: boolean
@@ -20806,7 +20866,7 @@ export namespace Prisma {
     imageExtractionRawData?: boolean
   }
 
-  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "oldImageUrl" | "sourceImageUrl" | "backImageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "creatorUser" | "modifyUser" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "totalBgtPrVal" | "totalActPrVal" | "totalVendorPrVal" | "totalFinalPrVal" | "bTrimType" | "bTrimTotalAutoBgt" | "bTrimTotalRoughV2" | "bTrimTotalVdrCost" | "bTrimTotalFinalCost" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "elasticAutoBgt" | "elasticRoughV2" | "elasticVdrCost" | "elasticFinalCost" | "fusingAutoBgt" | "fusingRoughV2" | "fusingVdrCost" | "fusingFinalCost" | "badgeAutoBgt" | "badgeRoughV2" | "badgeVdrCost" | "badgeFinalCost" | "rivetAutoBgt" | "rivetRoughV2" | "rivetVdrCost" | "rivetFinalCost" | "tapeAutoBgt" | "tapeRoughV2" | "tapeVdrCost" | "tapeFinalCost" | "otherAutoBgt" | "otherRoughV2" | "otherVdrCost" | "otherFinalCost" | "adjusterAutoBgt" | "adjusterRoughV2" | "adjusterVdrCost" | "adjusterFinalCost" | "brotchAutoBgt" | "brotchRoughV2" | "brotchVdrCost" | "brotchFinalCost" | "buckleAutoBgt" | "buckleRoughV2" | "buckleVdrCost" | "buckleFinalCost" | "eyeletsAutoBgt" | "eyeletsRoughV2" | "eyeletsVdrCost" | "eyeletsFinalCost" | "hangingDRingAutoBgt" | "hangingDRingRoughV2" | "hangingDRingVdrCost" | "hangingDRingFinalCost" | "hookAutoBgt" | "hookRoughV2" | "hookVdrCost" | "hookFinalCost" | "labelAutoBgt" | "labelRoughV2" | "labelVdrCost" | "labelFinalCost" | "laceAutoBgt" | "laceRoughV2" | "laceVdrCost" | "laceFinalCost" | "pockettingFabricAutoBgt" | "pockettingFabricRoughV2" | "pockettingFabricVdrCost" | "pockettingFabricFinalCost" | "pockettingReadymadeAutoBgt" | "pockettingReadymadeRoughV2" | "pockettingReadymadeVdrCost" | "pockettingReadymadeFinalCost" | "santaAutoBgt" | "santaRoughV2" | "santaVdrCost" | "santaFinalCost" | "stopperAutoBgt" | "stopperRoughV2" | "stopperVdrCost" | "stopperFinalCost" | "tagAutoBgt" | "tagRoughV2" | "tagVdrCost" | "tagFinalCost" | "tasselsAutoBgt" | "tasselsRoughV2" | "tasselsVdrCost" | "tasselsFinalCost" | "mBtnRate" | "mBtnQty" | "dcRate" | "dcQty" | "zipRate" | "zipQty" | "patchRate" | "patchQty" | "hTrfRate" | "hTrfQty" | "elasticRate" | "elasticQty" | "fusingRate" | "fusingQty" | "badgeRate" | "badgeQty" | "rivetRate" | "rivetQty" | "tapeRate" | "tapeQty" | "otherRate" | "otherQty" | "adjusterRate" | "adjusterQty" | "brotchRate" | "brotchQty" | "buckleRate" | "buckleQty" | "eyeletsRate" | "eyeletsQty" | "hangingDRingRate" | "hangingDRingQty" | "hookRate" | "hookQty" | "labelRate" | "labelQty" | "laceRate" | "laceQty" | "pockettingFabricRate" | "pockettingFabricQty" | "pockettingReadymadeRate" | "pockettingReadymadeQty" | "santaRate" | "santaQty" | "stopperRate" | "stopperQty" | "tagRate" | "tagQty" | "tasselsRate" | "tasselsQty" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "vaddPrintJson" | "vaddEmpJson" | "vaddTotalAutoBgt" | "vaddTotalRoughV2" | "vaddTotalVendorCost" | "vaddTotalFinalCost" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "setLinkStatus" | "setLinkMessage" | "setLinkAttempts" | "setLinkedAt" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
+  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "oldImageUrl" | "sourceImageUrl" | "aiCmpCostCutting" | "aiCmpCostStitching" | "aiCmpCostIroning" | "aiCmpCostFinishing" | "backImageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "creatorUser" | "modifyUser" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "totalBgtPrVal" | "totalActPrVal" | "totalVendorPrVal" | "totalFinalPrVal" | "bTrimType" | "bTrimTotalAutoBgt" | "bTrimTotalRoughV2" | "bTrimTotalVdrCost" | "bTrimTotalFinalCost" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "elasticAutoBgt" | "elasticRoughV2" | "elasticVdrCost" | "elasticFinalCost" | "fusingAutoBgt" | "fusingRoughV2" | "fusingVdrCost" | "fusingFinalCost" | "badgeAutoBgt" | "badgeRoughV2" | "badgeVdrCost" | "badgeFinalCost" | "rivetAutoBgt" | "rivetRoughV2" | "rivetVdrCost" | "rivetFinalCost" | "tapeAutoBgt" | "tapeRoughV2" | "tapeVdrCost" | "tapeFinalCost" | "otherAutoBgt" | "otherRoughV2" | "otherVdrCost" | "otherFinalCost" | "adjusterAutoBgt" | "adjusterRoughV2" | "adjusterVdrCost" | "adjusterFinalCost" | "brotchAutoBgt" | "brotchRoughV2" | "brotchVdrCost" | "brotchFinalCost" | "buckleAutoBgt" | "buckleRoughV2" | "buckleVdrCost" | "buckleFinalCost" | "eyeletsAutoBgt" | "eyeletsRoughV2" | "eyeletsVdrCost" | "eyeletsFinalCost" | "hangingDRingAutoBgt" | "hangingDRingRoughV2" | "hangingDRingVdrCost" | "hangingDRingFinalCost" | "hookAutoBgt" | "hookRoughV2" | "hookVdrCost" | "hookFinalCost" | "labelAutoBgt" | "labelRoughV2" | "labelVdrCost" | "labelFinalCost" | "laceAutoBgt" | "laceRoughV2" | "laceVdrCost" | "laceFinalCost" | "pockettingFabricAutoBgt" | "pockettingFabricRoughV2" | "pockettingFabricVdrCost" | "pockettingFabricFinalCost" | "pockettingReadymadeAutoBgt" | "pockettingReadymadeRoughV2" | "pockettingReadymadeVdrCost" | "pockettingReadymadeFinalCost" | "santaAutoBgt" | "santaRoughV2" | "santaVdrCost" | "santaFinalCost" | "stopperAutoBgt" | "stopperRoughV2" | "stopperVdrCost" | "stopperFinalCost" | "tagAutoBgt" | "tagRoughV2" | "tagVdrCost" | "tagFinalCost" | "tasselsAutoBgt" | "tasselsRoughV2" | "tasselsVdrCost" | "tasselsFinalCost" | "mBtnRate" | "mBtnQty" | "dcRate" | "dcQty" | "zipRate" | "zipQty" | "patchRate" | "patchQty" | "hTrfRate" | "hTrfQty" | "elasticRate" | "elasticQty" | "fusingRate" | "fusingQty" | "badgeRate" | "badgeQty" | "rivetRate" | "rivetQty" | "tapeRate" | "tapeQty" | "otherRate" | "otherQty" | "adjusterRate" | "adjusterQty" | "brotchRate" | "brotchQty" | "buckleRate" | "buckleQty" | "eyeletsRate" | "eyeletsQty" | "hangingDRingRate" | "hangingDRingQty" | "hookRate" | "hookQty" | "labelRate" | "labelQty" | "laceRate" | "laceQty" | "pockettingFabricRate" | "pockettingFabricQty" | "pockettingReadymadeRate" | "pockettingReadymadeQty" | "santaRate" | "santaQty" | "stopperRate" | "stopperQty" | "tagRate" | "tagQty" | "tasselsRate" | "tasselsQty" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "vaddPrintJson" | "vaddEmpJson" | "vaddTotalAutoBgt" | "vaddTotalRoughV2" | "vaddTotalVendorCost" | "vaddTotalFinalCost" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "setLinkStatus" | "setLinkMessage" | "setLinkAttempts" | "setLinkedAt" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
   export type ExtractionResultFlatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     comboParent?: boolean | ExtractionResultFlat$comboParentArgs<ExtArgs>
@@ -20842,6 +20902,10 @@ export namespace Prisma {
       imageUrl: string | null
       oldImageUrl: string | null
       sourceImageUrl: string | null
+      aiCmpCostCutting: Prisma.Decimal | null
+      aiCmpCostStitching: Prisma.Decimal | null
+      aiCmpCostIroning: Prisma.Decimal | null
+      aiCmpCostFinishing: Prisma.Decimal | null
       backImageUrl: string | null
       articleNumber: string | null
       extractionStatus: string | null
@@ -21627,6 +21691,10 @@ export namespace Prisma {
     readonly imageUrl: FieldRef<"ExtractionResultFlat", 'String'>
     readonly oldImageUrl: FieldRef<"ExtractionResultFlat", 'String'>
     readonly sourceImageUrl: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly aiCmpCostCutting: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly aiCmpCostStitching: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly aiCmpCostIroning: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly aiCmpCostFinishing: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly backImageUrl: FieldRef<"ExtractionResultFlat", 'String'>
     readonly articleNumber: FieldRef<"ExtractionResultFlat", 'String'>
     readonly extractionStatus: FieldRef<"ExtractionResultFlat", 'String'>
@@ -91967,6 +92035,10 @@ export namespace Prisma {
     imageUrl: 'imageUrl',
     oldImageUrl: 'oldImageUrl',
     sourceImageUrl: 'sourceImageUrl',
+    aiCmpCostCutting: 'aiCmpCostCutting',
+    aiCmpCostStitching: 'aiCmpCostStitching',
+    aiCmpCostIroning: 'aiCmpCostIroning',
+    aiCmpCostFinishing: 'aiCmpCostFinishing',
     backImageUrl: 'backImageUrl',
     articleNumber: 'articleNumber',
     extractionStatus: 'extractionStatus',
@@ -96093,6 +96165,10 @@ export namespace Prisma {
     imageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     oldImageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     sourceImageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    aiCmpCostCutting?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     backImageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     articleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     extractionStatus?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -96458,6 +96534,10 @@ export namespace Prisma {
     imageUrl?: SortOrderInput | SortOrder
     oldImageUrl?: SortOrderInput | SortOrder
     sourceImageUrl?: SortOrderInput | SortOrder
+    aiCmpCostCutting?: SortOrderInput | SortOrder
+    aiCmpCostStitching?: SortOrderInput | SortOrder
+    aiCmpCostIroning?: SortOrderInput | SortOrder
+    aiCmpCostFinishing?: SortOrderInput | SortOrder
     backImageUrl?: SortOrderInput | SortOrder
     articleNumber?: SortOrderInput | SortOrder
     extractionStatus?: SortOrderInput | SortOrder
@@ -96828,6 +96908,10 @@ export namespace Prisma {
     imageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     oldImageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     sourceImageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    aiCmpCostCutting?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     backImageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     articleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     extractionStatus?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -97192,6 +97276,10 @@ export namespace Prisma {
     imageUrl?: SortOrderInput | SortOrder
     oldImageUrl?: SortOrderInput | SortOrder
     sourceImageUrl?: SortOrderInput | SortOrder
+    aiCmpCostCutting?: SortOrderInput | SortOrder
+    aiCmpCostStitching?: SortOrderInput | SortOrder
+    aiCmpCostIroning?: SortOrderInput | SortOrder
+    aiCmpCostFinishing?: SortOrderInput | SortOrder
     backImageUrl?: SortOrderInput | SortOrder
     articleNumber?: SortOrderInput | SortOrder
     extractionStatus?: SortOrderInput | SortOrder
@@ -97560,6 +97648,10 @@ export namespace Prisma {
     imageUrl?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     oldImageUrl?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     sourceImageUrl?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    aiCmpCostCutting?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     backImageUrl?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     articleNumber?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     extractionStatus?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
@@ -105953,6 +106045,10 @@ export namespace Prisma {
     imageUrl?: string | null
     oldImageUrl?: string | null
     sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
     backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
@@ -106316,6 +106412,10 @@ export namespace Prisma {
     imageUrl?: string | null
     oldImageUrl?: string | null
     sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
     backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
@@ -106677,6 +106777,10 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
@@ -107040,6 +107144,10 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
@@ -107402,6 +107510,10 @@ export namespace Prisma {
     imageUrl?: string | null
     oldImageUrl?: string | null
     sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
     backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
@@ -107761,6 +107873,10 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
@@ -108119,6 +108235,10 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
@@ -118273,6 +118393,10 @@ export namespace Prisma {
     imageUrl?: SortOrder
     oldImageUrl?: SortOrder
     sourceImageUrl?: SortOrder
+    aiCmpCostCutting?: SortOrder
+    aiCmpCostStitching?: SortOrder
+    aiCmpCostIroning?: SortOrder
+    aiCmpCostFinishing?: SortOrder
     backImageUrl?: SortOrder
     articleNumber?: SortOrder
     extractionStatus?: SortOrder
@@ -118627,6 +118751,10 @@ export namespace Prisma {
   }
 
   export type ExtractionResultFlatAvgOrderByAggregateInput = {
+    aiCmpCostCutting?: SortOrder
+    aiCmpCostStitching?: SortOrder
+    aiCmpCostIroning?: SortOrder
+    aiCmpCostFinishing?: SortOrder
     avgConfidence?: SortOrder
     processingTimeMs?: SortOrder
     totalAttributes?: SortOrder
@@ -118856,6 +118984,10 @@ export namespace Prisma {
     imageUrl?: SortOrder
     oldImageUrl?: SortOrder
     sourceImageUrl?: SortOrder
+    aiCmpCostCutting?: SortOrder
+    aiCmpCostStitching?: SortOrder
+    aiCmpCostIroning?: SortOrder
+    aiCmpCostFinishing?: SortOrder
     backImageUrl?: SortOrder
     articleNumber?: SortOrder
     extractionStatus?: SortOrder
@@ -119211,6 +119343,10 @@ export namespace Prisma {
     imageUrl?: SortOrder
     oldImageUrl?: SortOrder
     sourceImageUrl?: SortOrder
+    aiCmpCostCutting?: SortOrder
+    aiCmpCostStitching?: SortOrder
+    aiCmpCostIroning?: SortOrder
+    aiCmpCostFinishing?: SortOrder
     backImageUrl?: SortOrder
     articleNumber?: SortOrder
     extractionStatus?: SortOrder
@@ -119560,6 +119696,10 @@ export namespace Prisma {
   }
 
   export type ExtractionResultFlatSumOrderByAggregateInput = {
+    aiCmpCostCutting?: SortOrder
+    aiCmpCostStitching?: SortOrder
+    aiCmpCostIroning?: SortOrder
+    aiCmpCostFinishing?: SortOrder
     avgConfidence?: SortOrder
     processingTimeMs?: SortOrder
     totalAttributes?: SortOrder
@@ -128060,6 +128200,10 @@ export namespace Prisma {
     imageUrl?: string | null
     oldImageUrl?: string | null
     sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
     backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
@@ -128421,6 +128565,10 @@ export namespace Prisma {
     imageUrl?: string | null
     oldImageUrl?: string | null
     sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
     backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
@@ -128892,6 +129040,10 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
@@ -129253,6 +129405,10 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
@@ -129656,6 +129812,10 @@ export namespace Prisma {
     imageUrl?: string | null
     oldImageUrl?: string | null
     sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
     backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
@@ -130018,6 +130178,10 @@ export namespace Prisma {
     imageUrl?: string | null
     oldImageUrl?: string | null
     sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
     backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
@@ -130383,6 +130547,10 @@ export namespace Prisma {
     imageUrl?: string | null
     oldImageUrl?: string | null
     sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
     backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
@@ -130745,6 +130913,10 @@ export namespace Prisma {
     imageUrl?: string | null
     oldImageUrl?: string | null
     sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
     backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
@@ -131263,6 +131435,10 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
@@ -131625,6 +131801,10 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
@@ -132005,6 +132185,10 @@ export namespace Prisma {
     imageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     oldImageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     sourceImageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    aiCmpCostCutting?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     backImageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     articleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     extractionStatus?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -132587,6 +132771,10 @@ export namespace Prisma {
     imageUrl?: string | null
     oldImageUrl?: string | null
     sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
     backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
@@ -132949,6 +133137,10 @@ export namespace Prisma {
     imageUrl?: string | null
     oldImageUrl?: string | null
     sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
     backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
@@ -134847,6 +135039,10 @@ export namespace Prisma {
     imageUrl?: string | null
     oldImageUrl?: string | null
     sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
     backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
@@ -135209,6 +135405,10 @@ export namespace Prisma {
     imageUrl?: string | null
     oldImageUrl?: string | null
     sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
     backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
@@ -135622,6 +135822,10 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
@@ -135984,6 +136188,10 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
@@ -136965,6 +137173,10 @@ export namespace Prisma {
     imageUrl?: string | null
     oldImageUrl?: string | null
     sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
     backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
@@ -137333,6 +137545,10 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
@@ -137695,6 +137911,10 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138056,6 +138276,10 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138483,6 +138707,10 @@ export namespace Prisma {
     imageUrl?: string | null
     oldImageUrl?: string | null
     sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
     backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
@@ -138956,6 +139184,10 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
@@ -139318,6 +139550,10 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
@@ -139679,6 +139915,10 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null

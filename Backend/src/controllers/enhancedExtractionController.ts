@@ -415,6 +415,13 @@ export class EnhancedExtractionController {
             directFill.designNumber = designNumber;
           }
 
+          // CMP COST card "AI SAM" (minutes per process) from the same Gemini call.
+          const aiSam = result.aiSam;
+          if (aiSam?.cutting != null) directFill.aiCmpCostCutting = String(aiSam.cutting);
+          if (aiSam?.stitching != null) directFill.aiCmpCostStitching = String(aiSam.stitching);
+          if (aiSam?.ironing != null) directFill.aiCmpCostIroning = String(aiSam.ironing);
+          if (aiSam?.finishing != null) directFill.aiCmpCostFinishing = String(aiSam.finishing);
+
           if (image) {
             void this.vlmService.extractAllFashionAttributes(image).then(rawAttrs => {
               if (rawAttrs && flatId) {

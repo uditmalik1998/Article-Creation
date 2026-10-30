@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ChevronDown, ChevronUp, Save, Scissors } from 'lucide-react';
+import { ChevronDown, ChevronUp, Save, Scissors, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TextCell } from './CostingGridCard';
 import { CARD_THEME } from './cardTheme';
 import { useRegisterUnsavedCard } from './unsavedCards';
 
 // ─── CMP COST card (FG articles, shown with the BODY tab) ─────────────────────
-// One matrix: process rows × (BGT | ACT | VENDOR | FINAL) × (SAM | SAM VAL | PR VAL).
+// One matrix: process rows × AI SAM (read-only) + (BGT | ACT | VENDOR | FINAL) × (SAM | SAM VAL | PR VAL).
 // CUTTING has no SAM / SAM VAL — only PR VAL.
 // PR VAL cells are saved to extraction_results_flat only when Save is clicked;
 // SAM/SAM VAL are UI-only. The TOTAL row is the sum of each stage's PR VAL; typing
@@ -76,6 +76,8 @@ interface CmpCostCardProps {
   onSave?: (updates: Record<string, string | null>) => void | Promise<void>;
   /** Presets filled PR VALs that aren't in the DB yet — shown as unsaved. */
   hasUnsavedPreset?: boolean;
+  /** Read-only AI SAM per process (ai_cmp_cost_*). Missing → "—". */
+  aiSam?: Partial<Record<(typeof PROCESSES)[number], string>>;
 }
 
 const CmpCostCard: React.FC<CmpCostCardProps> = ({
@@ -87,6 +89,7 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
   savedPrVals,
   onSave,
   hasUnsavedPreset,
+  aiSam,
 }) => {
   const style = CARD_THEME;
   const [values, setValues] = useState<Record<string, string>>({});
@@ -137,6 +140,17 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
       return next;
     });
   }, [actPreset]);
+
+  // TOTAL of AI SAM: sum of the processes that have a value, or '' when none do.
+  const aiSamTotal = (() => {
+    const nums = PROCESSES.map((p) => toNum(aiSam?.[p])).filter((n): n is number => n !== null);
+    return nums.length ? fmtNum(nums.reduce((a, b) => a + b, 0)) : '';
+  })();
+  const aiCell = (v: string | undefined, bold = false) =>
+    toNum(v) !== null
+      ? <span className={cn('block text-center font-mono text-[12.5px] text-slate-900', bold ? 'font-extrabold' : 'font-bold')}>{v}</span>
+      : <span className="block text-center text-slate-400">—</span>;
+  const AI_COL = 'w-[96px] border-l-2 border-l-slate-300 bg-slate-50';
 
   const handleChange = useCallback((key: string, v: string) => {
     setValues((prev) => ({ ...prev, [key]: v }));
@@ -217,11 +231,18 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
       {!collapsed && (
         <>
           <div className="overflow-x-auto px-1.5 pb-1 pt-1">
-            <table className="w-full min-w-[860px] border-collapse text-[12.5px]">
+            <table className="w-full min-w-[956px] border-collapse text-[12.5px]">
               <thead>
                 <tr className="text-[11px] font-semibold tracking-wider text-slate-700">
                   <th rowSpan={2} className="w-[110px] border-b border-slate-300 bg-slate-100 px-2.5 py-2 text-left">
                     PROCESS
+                  </th>
+                  <th rowSpan={2} className={cn(AI_COL, 'border-b border-slate-300 bg-slate-100 px-1.5 py-1.5 text-center')}>
+                    <span className="flex items-center justify-center gap-1 text-slate-800">
+                      <Sparkles className="h-3 w-3" aria-hidden="true" />
+                      AI SAM
+                    </span>
+                    <span className="block text-[9.5px] font-medium normal-case tracking-normal text-slate-500">read-only</span>
                   </th>
                   {STAGES.map((stage) => (
                     <th
@@ -255,6 +276,7 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
                 {PROCESSES.map((process) => (
                   <tr key={process} className="border-b border-slate-100 last:border-b-0">
                     <td className="px-2.5 py-1.5 font-semibold text-slate-800">{process}</td>
+                    <td className={cn(AI_COL, 'px-1 py-1')}>{aiCell(aiSam?.[process])}</td>
                     {STAGES.map((stage, si) =>
                       MEASURES.map((measure, mi) => {
                         const key = cellKey(process, stage, measure);
@@ -280,6 +302,7 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
                 ))}
                 <tr className="border-t-2 border-slate-300 bg-slate-50/60">
                   <td className="px-2.5 py-1.5 font-bold text-slate-900">TOTAL</td>
+                  <td className={cn(AI_COL, 'px-1 py-1')}>{aiCell(aiSamTotal, true)}</td>
                   {STAGES.map((stage, si) =>
                     MEASURES.map((measure, mi) => {
                       const key = cellKey('TOTAL', stage, measure);
@@ -305,7 +328,7 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
             </table>
           </div>
           <div className="border-t border-slate-100 px-2.5 py-1.5 text-[11.5px] text-slate-500">
-            Cutting has no SAM — only PR VAL. All other cells are required. TOTAL = sum of PR VAL (type to override, clear to go back to the sum).
+            Cutting has no SAM — only PR VAL. AI SAM is for reference only. All other cells are required. TOTAL = sum of PR VAL (type to override, clear to go back to the sum).
           </div>
         </>
       )}
