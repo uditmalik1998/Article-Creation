@@ -402,6 +402,22 @@ export const requireApprovalRights = (
 };
 
 /**
+ * FG reject: everyone with approval rights, plus CREATOR (who can reject but not approve).
+ * Must be used after authenticate middleware.
+ */
+export const requireRejectRights = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  if (req.user?.role === 'CREATOR') {
+    next();
+    return;
+  }
+  requireApprovalRights(req, res, next);
+};
+
+/**
  * Require ADMIN or BODY_APPROVER role to submit (approve) body articles.
  * Must be used after authenticate middleware.
  */

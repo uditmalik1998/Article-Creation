@@ -354,6 +354,8 @@ export default function ArticleDetailPage({
   }, [historyRecords, historySearch, historyUserFilter, historyStageFilter]);
 
   const canApprove = user?.role === 'ADMIN' || user?.role === 'APPROVER' || user?.role === 'CATEGORY_HEAD' || user?.role === 'SUB_DIVISION_HEAD' || user?.role === 'PO_COMMITTEE' || user?.role === 'PD' || (extraApproverRoles.length > 0 && extraApproverRoles.includes(user?.role));
+  // CREATOR can reject FG articles but not approve them.
+  const canReject = canApprove || user?.role === 'CREATOR';
 
   // ─── Init ───────────────────────────────────────────────────────────────────
 
@@ -1082,12 +1084,12 @@ export default function ArticleDetailPage({
                   )}
                 </>
               )}
-              <Tooltip title={!canApprove ? 'Only Approver, Sub-Division Head, Category Head or Admin can reject articles' : undefined}>
+              <Tooltip title={!canReject ? 'Only Creator, Approver, Sub-Division Head, Category Head or Admin can reject articles' : undefined}>
                 {/* span wrapper: disabled <button> swallows pointer events; span keeps hover alive */}
                 <span className="inline-block">
                   <Button size="sm" variant="outline"
                     onClick={() => { if (pendingSelectedKeys.length > 0) setConfirmDialog({ kind: 'reject', count: pendingSelectedKeys.length }); }}
-                    disabled={!canApprove || pendingSelectedKeys.length === 0}
+                    disabled={!canReject || pendingSelectedKeys.length === 0}
                     className="h-8 border-red-300/60 bg-transparent px-3 text-[12.5px] font-semibold text-red-300 hover:bg-red-500/15 hover:text-red-200 disabled:opacity-40">
                     <XCircle /> Reject
                   </Button>
