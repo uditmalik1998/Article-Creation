@@ -3959,6 +3959,66 @@ export class ApproverController {
         }
     }
 
+    // ADMIN only: undo a reject — the article (and the variants rejected with it) go back to PENDING.
+    static async revertRejectedItem(req: Request, res: Response) {
+        const { id } = req.params;
+        const existing = await prisma.extractionResultFlat.findUnique({
+            where: { id },
+            select: { approvalStatus: true },
+        });
+        if (!existing) return res.status(404).json({ error: 'Article not found' });
+        if (existing.approvalStatus !== 'REJECTED') {
+            return res.status(400).json({ error: 'Only rejected articles can be reverted' });
+        }
+
+        await ApproverController.revertToPending([id], req.user);
+        return res.json({ success: true });
+    }
+
+    // ADMIN only, Rejected page "Revert selected": ids that are not REJECTED are skipped.
+    static async revertRejectedItems(req: Request, res: Response) {
+        const { ids } = req.body as { ids?: string[] };
+        if (!Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({ error: 'No items selected' });
+        }
+        const rejected = await prisma.extractionResultFlat.findMany({
+            where: { id: { in: ids }, approvalStatus: 'REJECTED' },
+            select: { id: true },
+        });
+        const count = await ApproverController.revertToPending(rejected.map((r) => r.id), req.user);
+        return res.json({ success: true, count, skipped: ids.length - count });
+    }
+
+    // REJECTED → PENDING for these articles and the variants rejected with them; logged in history.
+    private static async revertToPending(ids: string[], user: any): Promise<number> {
+        if (ids.length === 0) return 0;
+        ApproverController.itemsCache.clear();
+        ApproverController.countCache.clear();
+        const revertData = {
+            approvalStatus: 'PENDING' as const,
+            sapSyncStatus: SapSyncStatus.NOT_SYNCED,
+            sapSyncMessage: null,
+            approvedBy: null,
+            approvedAt: null,
+        };
+        const result = await prisma.extractionResultFlat.updateMany({
+            where: { id: { in: ids }, approvalStatus: 'REJECTED' },
+            data: revertData,
+        });
+        await prisma.fgVariantArticleData.updateMany({
+            where: { genericArticleId: { in: ids }, approvalStatus: 'REJECTED' },
+            data: revertData,
+        });
+        void (async () => {
+            for (const id of ids) {
+                await ApproverController.recordFgArticleHistory(
+                    id, user, { approvalStatus: 'PENDING' }, { approval_status: 'REJECTED' },
+                );
+            }
+        })().catch((err) => console.error('[revertToPending] history write failed:', err));
+        return result.count;
+    }
+
     // Push generic's colour to all variants that have no variantColor set
     static async syncColorToVariants(req: Request, res: Response) {
         try {

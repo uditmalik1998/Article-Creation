@@ -3,7 +3,7 @@ import multer from 'multer';
 import { ApproverController } from '../controllers/ApproverController';
 import { getMajorCategories, lookupVaacTotalValue } from '../controllers/adminController';
 import { getActiveSetCategories } from '../controllers/setMcMasterController';
-import { authenticate, requireApprover, requireApprovalRights, requireRejectRights, requireModifyRights, requireBodyApprovalRights, requireFabricApprovalRights, requireGMApprovalRights, requireArticleType } from '../middleware/auth';
+import { authenticate, requireAdmin, requireApprover, requireApprovalRights, requireRejectRights, requireModifyRights, requireBodyApprovalRights, requireFabricApprovalRights, requireGMApprovalRights, requireArticleType } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
 
 const router = Router();
@@ -77,6 +77,8 @@ router.delete('/combo-articles/children/:childId', h(ApproverController.deleteCo
 
 // Reject selected items — approver roles + PD + ADMIN
 router.post('/reject', requireRejectRights, h(ApproverController.rejectItems));
+router.post('/items/:id/revert', requireAdmin, h(ApproverController.revertRejectedItem));
+router.post('/revert', requireAdmin, h(ApproverController.revertRejectedItems));
 
 // Refresh image URL (fixes expired signed URLs)
 router.get('/image/:id', h(ApproverController.getImageUrl));
