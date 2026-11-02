@@ -91,18 +91,7 @@ export class FlatteningService {
             resultsMap.set(key, result.finalValue || result.rawValue);
         });
 
-        // Extract image name from URL
-        // imageName = UUID-based filename for internal storage
-        // articleNumber = original uploaded filename (stored in job.designNumber)
-        let imageName = null;
         let articleNumber = null;
-
-        if (job.imageUrl) {
-            const fullFilename = job.imageUrl.split('/').pop()?.split('?')[0] || '';
-            // Remove file extension
-            const nameWithoutExt = fullFilename.replace(/\.[^/.]+$/, '');
-            imageName = nameWithoutExt; // UUID for internal use
-        }
 
         // articleNumber is assigned only after successful SAP sync — leave null here
         articleNumber = null;
@@ -134,7 +123,6 @@ export class FlatteningService {
             jobId: job.id,
 
             // Essential Metadata
-            imageName, // UUID-based filename for internal use
             imageUrl: job.imageUrl,
             sourceImageUrl: job.imageUrl || null, // clean image — approval overwrites imageUrl, not this
             articleNumber, // null until SAP sync assigns the real article number

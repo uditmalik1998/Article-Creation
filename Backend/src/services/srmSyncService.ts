@@ -715,7 +715,6 @@ async function insertRow(row: SrmRow, rawArticleId?: string): Promise<{ id: stri
       jobId:          job.id,
       source:         'SRM',
       extractionStatus: 'SRM_IMPORT',
-      imageName:      null,
       imageUrl:       srmImageUrl,
       sourceImageUrl: srmImageUrl || null, // clean image — never the watermarked approved copy
       isGeneric:      true,   // SRM records are standalone articles, not variants

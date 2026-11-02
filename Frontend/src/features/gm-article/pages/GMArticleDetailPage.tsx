@@ -398,7 +398,7 @@ export default function ArticleDetailPage({
             setInfoDialog({
               kind: 'sapSyncFailed',
               failures: [{
-                id: saved.articleNumber || saved.designNumber || saved.imageName || saved.id,
+                id: saved.articleNumber || saved.designNumber || saved.id,
                 message: saved.sapSyncMessage || 'SAP creation failed',
               }],
               total: 1,
@@ -463,7 +463,7 @@ export default function ArticleDetailPage({
           }
         }
       }
-      if (missing.length > 0) acc.push({ articleId: item.sapArticleId || item.articleNumber || item.imageName || item.id, missing });
+      if (missing.length > 0) acc.push({ articleId: item.sapArticleId || item.articleNumber || item.id, missing });
       return acc;
     }, []);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -955,7 +955,7 @@ export default function ArticleDetailPage({
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2"><FileText className="h-4 w-4 text-sky-500" /> Create Fabric Article</DialogTitle>
               </DialogHeader>
-              <p className="m-0">Create fabric article for "{confirmDialog.item.articleNumber || confirmDialog.item.imageName || confirmDialog.item.id}"?</p>
+              <p className="m-0">Create fabric article for "{confirmDialog.item.articleNumber || confirmDialog.item.id}"?</p>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setConfirmDialog(null)}>Cancel</Button>
                 <Button onClick={async () => { const item = confirmDialog.item; setConfirmDialog(null); await doCreateFabric(item); }}>Create Fabric Article</Button>
@@ -967,7 +967,7 @@ export default function ArticleDetailPage({
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2"><LayoutGrid className="h-4 w-4 text-purple-500" /> Create Body Article</DialogTitle>
               </DialogHeader>
-              <p className="m-0">Create body article for "{confirmDialog.item.articleNumber || confirmDialog.item.imageName || confirmDialog.item.id}"?</p>
+              <p className="m-0">Create body article for "{confirmDialog.item.articleNumber || confirmDialog.item.id}"?</p>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setConfirmDialog(null)}>Cancel</Button>
                 <Button onClick={async () => { const item = confirmDialog.item; setConfirmDialog(null); await doCreateBody(item); }}>Create Body Article</Button>

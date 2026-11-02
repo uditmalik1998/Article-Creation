@@ -5,6 +5,18 @@
 
 ---
 
+## 2026-11-02 — extraction_results_flat.image_name removed from code
+
+- `image_name` only ever held the storage UUID (SRM rows: always null) and was used only as a label fallback.
+  Removed from the Prisma model and all selects/writes (ApproverController, flatteningService, srmSyncService,
+  backfill script) and from the FG / Fabric / GM item types and their `articleNumber || … || imageName || id` fallbacks.
+- Admin expenses and `/api/user/costs` keep their `imageName` label field, now `articleNumber || designNumber || 'Unknown'`.
+- DB NOT changed yet (migration declined): `Backend/prisma/migrations/20261102_drop_image_name_extraction_results_flat.sql`.
+  Step 1 (any time): drop the 2 image_name indexes (~22 MB, almost unused) + drop the image_name clause from the
+  `set_is_old_article` trigger (0 rows depended on it). Step 2 (after backend deploy): DROP COLUMN.
+
+---
+
 ## 2026-10-07 — GM Article review page redesign (design H)
 
 - Picked H from two canvas rounds (A–E, then F–I). The GM card now has a wide photo + "Article details" rail

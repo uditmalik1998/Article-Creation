@@ -15,7 +15,6 @@ export interface MasterAttribute {
 
 export interface ApproverItem {
   id: string;
-  imageName: string | null;
   imageUrl: string | null;
   /** FG Created tab: the image a replace swapped out (<article>_OLD.jpg). */
   oldImageUrl?: string | null;

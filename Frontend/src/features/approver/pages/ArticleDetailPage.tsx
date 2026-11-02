@@ -575,7 +575,7 @@ export default function ArticleDetailPage({
             setInfoDialog({
               kind: 'sapSyncFailed',
               failures: [{
-                id: saved.articleNumber || saved.designNumber || saved.imageName || saved.id,
+                id: saved.articleNumber || saved.designNumber || saved.id,
                 message: saved.sapSyncMessage || 'SAP creation failed',
               }],
               total: 1,
@@ -784,8 +784,7 @@ export default function ArticleDetailPage({
       // Readable name: SAP / article number once it exists, else category + design
       // number (a new set article has neither SAP number nor image name).
       const label = item.sapArticleId || item.articleNumber
-        || [item.majorCategory, item.designNumber].filter(Boolean).join(' · ')
-        || item.imageName || item.id;
+        || [item.majorCategory, item.designNumber].filter(Boolean).join(' · ') || item.id;
       const articleId = item.comboRole === 'CHILD'
         ? `Part: ${label}`
         : item.comboRole === 'PARENT' ? `Set: ${label}` : label;
@@ -859,7 +858,7 @@ export default function ArticleDetailPage({
       count: pendingSelectedKeys.length + pendingComboChildren.length,
       unsavedCards: getUnsavedCards().map((c) => c.label),
       article: currentItem ? {
-        number: currentItem.articleNumber || currentItem.designNumber || currentItem.imageName || '',
+        number: currentItem.articleNumber || currentItem.designNumber || '',
         mc: currentItem.majorCategory || '',
         vendor: currentItem.vendorName || '',
       } : undefined,
@@ -1548,7 +1547,7 @@ export default function ArticleDetailPage({
         >
           {leavePrompt && (() => {
             const failedLabel = Object.entries(leaveStatus).find(([, st]) => st === 'failed')?.[0];
-            const articleNo = currentItem?.articleNumber || currentItem?.designNumber || currentItem?.imageName;
+            const articleNo = currentItem?.articleNumber || currentItem?.designNumber;
             return (
               <>
                 <div className="relative bg-[#1e293b] px-5 pb-4 pt-[18px] text-white">
@@ -1699,7 +1698,7 @@ export default function ArticleDetailPage({
             <>
               <DialogHeader><DialogTitle>Revert rejection</DialogTitle></DialogHeader>
               <p className="m-0">
-                Move "{confirmDialog.item.articleNumber || confirmDialog.item.designNumber || confirmDialog.item.imageName || confirmDialog.item.id}" back to pending?
+                Move "{confirmDialog.item.articleNumber || confirmDialog.item.designNumber || confirmDialog.item.id}" back to pending?
                 It will show in New Articles again, with its rejected variants.
               </p>
               <DialogFooter>
@@ -1715,7 +1714,7 @@ export default function ArticleDetailPage({
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2"><FileText className="h-4 w-4 text-sky-500" /> Create Fabric Article</DialogTitle>
               </DialogHeader>
-              <p className="m-0">Create fabric article for "{confirmDialog.item.articleNumber || confirmDialog.item.imageName || confirmDialog.item.id}"?</p>
+              <p className="m-0">Create fabric article for "{confirmDialog.item.articleNumber || confirmDialog.item.id}"?</p>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setConfirmDialog(null)}>Cancel</Button>
                 <Button onClick={async () => { const item = confirmDialog.item; setConfirmDialog(null); await doCreateFabric(item); }}>Create Fabric Article</Button>
@@ -1727,7 +1726,7 @@ export default function ArticleDetailPage({
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2"><LayoutGrid className="h-4 w-4 text-purple-500" /> Create Body Article</DialogTitle>
               </DialogHeader>
-              <p className="m-0">Create body article for "{confirmDialog.item.articleNumber || confirmDialog.item.imageName || confirmDialog.item.id}"?</p>
+              <p className="m-0">Create body article for "{confirmDialog.item.articleNumber || confirmDialog.item.id}"?</p>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setConfirmDialog(null)}>Cancel</Button>
                 <Button onClick={async () => { const item = confirmDialog.item; setConfirmDialog(null); await doCreateBody(item); }}>Create Body Article</Button>
@@ -1739,7 +1738,7 @@ export default function ArticleDetailPage({
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2"><Rocket className="h-4 w-4 text-amber-500" /> Proceed for FG Article Creation</DialogTitle>
               </DialogHeader>
-              <p className="m-0">Proceed with FG article creation for "{confirmDialog.item.articleNumber || confirmDialog.item.imageName || confirmDialog.item.id}"?</p>
+              <p className="m-0">Proceed with FG article creation for "{confirmDialog.item.articleNumber || confirmDialog.item.id}"?</p>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setConfirmDialog(null)}>Cancel</Button>
                 <Button onClick={async () => { const item = confirmDialog.item; setConfirmDialog(null); await doProceedFG(item); }}>Proceed</Button>

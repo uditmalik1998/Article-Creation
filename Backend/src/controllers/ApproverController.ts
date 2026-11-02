@@ -914,7 +914,6 @@ export class ApproverController {
                 orderBy,
                 select: {
                     id: true,
-                    imageName: true,
                     imageUrl: true,
                     oldImageUrl: true,
                     backImageUrl: true,
@@ -1301,7 +1300,6 @@ export class ApproverController {
                 select: {
                     id: true,
                     articleNumber: true,
-                    imageName: true,
                     division: true,
                     subDivision: true,
                     majorCategory: true,
@@ -1467,7 +1465,6 @@ export class ApproverController {
             const sharedSelect = {
                 id: true,
                 articleNumber: true,
-                imageName: true,
                 division: true,
                 subDivision: true,
                 majorCategory: true,
@@ -2267,7 +2264,7 @@ export class ApproverController {
             const item = await prisma.extractionResultFlat.findUnique({
                 where: { id },
                 select: {
-                    id: true, imageName: true, imageUrl: true, oldImageUrl: true, backImageUrl: true, imageUncPath: true,
+                    id: true, imageUrl: true, oldImageUrl: true, backImageUrl: true, imageUncPath: true,
                     articleNumber: true, division: true, subDivision: true, majorCategory: true,
                     vendorName: true, vendorCode: true, designNumber: true, pptNumber: true,
                     referenceArticleNumber: true, referenceArticleDescription: true,
@@ -3261,13 +3258,13 @@ export class ApproverController {
             const genericsToVariant = await prisma.extractionResultFlat.findMany({
                 // Set parents and set parts both get colour × size variants (each from its own category's sizes).
                 where: { id: { in: ids }, isGeneric: true },
-                select: { id: true, colour: true, majorCategory: true, articleNumber: true, imageName: true },
+                select: { id: true, colour: true, majorCategory: true, articleNumber: true },
             });
             for (const g of genericsToVariant) {
                 if (!g.colour || !g.colour.trim()) continue; // no colour → approve generic as-is
                 const sizes = await getSizesForMajCat(g.majorCategory || '');
                 if (sizes.length === 0) {
-                    const label = g.articleNumber || g.imageName || g.id;
+                    const label = g.articleNumber || g.id;
                     return res.status(422).json({
                         error: 'NO_SIZES_FOR_CATEGORY',
                         detail: `No sizes are configured for "${g.majorCategory ?? ''}" (article ${label}). Add them in the Size Master before submitting.`,
@@ -3447,7 +3444,7 @@ export class ApproverController {
                     kimbleNetPrice: true, taftaNetPrice: true, threadNetPrice: true,
                     mcCode: true, hsnTaxCode: true, articleDescription: true, fashionGrid: true,
                     season: true, year: true, articleType: true, referenceArticleNumber: true,
-                    referenceArticleDescription: true, imageUrl: true, imageName: true,
+                    referenceArticleDescription: true, imageUrl: true,
                     sapArticleId: true, isGeneric: true, genericArticleId: true,
                     colour: true, variantSize: true, variantColor: true,
                     attrArticleNums: true, source: true, createdAt: true,
@@ -5039,7 +5036,6 @@ export class ApproverController {
         return {
             id:                      r.id,
             isGeneric:               true,
-            imageName:               null,
             imageUrl:                r.imageUrl ?? null,
             backImageUrl:            r.backImageUrl ?? null,
             articleNumber:           r.gmArticleNumber ?? null,
@@ -5918,7 +5914,6 @@ export class ApproverController {
 
         const data = rows.map((r) => ({
             id:                       r.id,
-            imageName:                null,
             imageUrl:                 r.imageUrl ?? null,
             articleNumber:            r.articleNumber ?? null,
             division:                 r.division ?? null,
@@ -6072,7 +6067,6 @@ export class ApproverController {
     private static bodyRowToApproverItem(r: any) {
         return {
             id: r.id,
-            imageName: null,
             imageUrl: r.imageUrl ?? null,
             articleNumber: r.articleNumber ?? null,
             division: r.division ?? null,
@@ -6655,7 +6649,6 @@ export class ApproverController {
         return {
             id:                       r.id,
             isGeneric:                r.source === 'SRM',
-            imageName:                null,
             imageUrl:                 r.imageUrl ?? null,
             backImageUrl:             r.backImageUrl ?? null,
             articleNumber:            r.fabricArticleNumber ?? null,
