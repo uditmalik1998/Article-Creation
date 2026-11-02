@@ -3596,6 +3596,7 @@ const ArticleCard = React.memo(
                             .filter((a) => !gridCfg.fields.has(a.field) && !FG_CARD_HIDDEN_SCHEMA_KEYS.has(a.schemaKey))
                             .map((a) => renderAttributeRow(a, false, true))}
                           loadSavedRecord={loadFreshItem}
+                          draftId={isModifyMode ? undefined : item.id}
                           onSaveTab={(updates) => {
                             setLocalValues((prev) => ({ ...prev, ...updates }));
                             if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
@@ -4966,6 +4967,7 @@ const ArticleCard = React.memo(
                       onToggleCollapse={() => toggleGroupCollapse('PKG')}
                       locked={isLocked}
                       loadSavedRecord={loadFreshItem}
+                      draftId={isModifyMode ? undefined : item.id}
                       onSaveTab={(updates) => {
                         setLocalValues((prev) => ({ ...prev, ...updates }));
                         if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
@@ -4990,6 +4992,7 @@ const ArticleCard = React.memo(
                       actPreset={cmpActPreset}
                       savedPrVals={cmpSavedPrVals}
                       hasUnsavedPreset={cmpPresetUnsaved}
+                      draftId={isModifyMode ? undefined : item.id}
                       onSave={async (updates) => {
                         setLocalValues((prev) => ({ ...prev, ...updates }));
                         if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));

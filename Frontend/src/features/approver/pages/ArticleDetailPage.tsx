@@ -23,7 +23,9 @@ import {
 import { message } from '@/lib/message';
 import { toast } from 'sonner';
 import { ApproverArticleList } from '../components/ApproverArticleList';
-import { getUnsavedCards } from '../components/unsavedCards';
+import { getUnsavedCards, getUserEditedCards } from '../components/unsavedCards';
+import { clearArticleDrafts } from '../components/cardDrafts';
+import { guardLeave, registerLeaveGuard } from '../../../shared/utils/leaveGuard';
 import type { ApproverItem } from '../types';
 import { APP_CONFIG } from '../../../constants/app/config';
 import { getMcCodeByMajorCategory } from '../../../data/majorCategoryMcCodeMap';
@@ -321,6 +323,9 @@ export default function ArticleDetailPage({
   // Action state
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialog>(null);
+  // Leaving with unsaved costing cards (sidebar, back, ◀ ▶): Save & leave / Leave without saving / Stay.
+  const [leavePrompt, setLeavePrompt] = useState<{ labels: string[]; proceed: () => void } | null>(null);
+  const [leaveSaving, setLeaveSaving] = useState(false);
   const [infoDialog, setInfoDialog] = useState<InfoDialog>(null);
   const [approving, setApproving] = useState(false);
   // Bumped once the per-category mandatory grid finishes loading, so the
@@ -450,12 +455,59 @@ export default function ArticleDetailPage({
   }
 
   const goPrev = useCallback(() => {
-    if (currentIndex > 0) setCurrentIndex(currentIndex - 1);
+    if (currentIndex > 0) guardLeave(() => setCurrentIndex(currentIndex - 1));
   }, [currentIndex]);
 
   const goNext = useCallback(() => {
-    if (currentIndex < items.length - 1) setCurrentIndex(currentIndex + 1);
+    if (currentIndex < items.length - 1) guardLeave(() => setCurrentIndex(currentIndex + 1));
   }, [currentIndex, items.length]);
+
+  // In-app navigation away (sidebar, back, ◀ ▶) asks first when costing cards hold unsaved changes.
+  useEffect(() => registerLeaveGuard((proceed) => {
+    const cards = getUserEditedCards();
+    if (cards.length === 0) return false;
+    setLeavePrompt({ labels: cards.map((c) => c.label), proceed });
+    return true;
+  }), []);
+
+  // Refresh / close tab / typed URL: the browser's own "Leave site?" warning. The local
+  // card drafts keep the values either way.
+  useEffect(() => {
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (getUserEditedCards().length === 0) return;
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, []);
+
+  const saveAndLeave = async () => {
+    if (!leavePrompt) return;
+    setLeaveSaving(true);
+    for (const card of getUserEditedCards()) {
+      try {
+        await card.save();
+      } catch {
+        setLeaveSaving(false);
+        setLeavePrompt(null);
+        message.error(`Could not save ${card.label}. You are still on this page — fix it and try again.`);
+        return;
+      }
+    }
+    setLeaveSaving(false);
+    const { proceed } = leavePrompt;
+    setLeavePrompt(null);
+    proceed();
+  };
+
+  const leaveWithoutSaving = () => {
+    if (!leavePrompt) return;
+    for (const card of getUserEditedCards()) card.discardDraft?.();
+    const { proceed } = leavePrompt;
+    setLeavePrompt(null);
+    proceed();
+  };
 
   // Auto-select current item
   useEffect(() => {
@@ -833,6 +885,7 @@ export default function ArticleDetailPage({
       }
       const payload = await r.json();
       setConfirmDialog(null);
+      clearArticleDrafts([...pendingSelectedKeys.map(String), ...pendingComboChildren.map((c) => c.id)]);
       // Async approval: /approve returns 202 immediately and the SAP create runs in
       // the background worker. Inform the user, free the UI, and poll for completion
       // so the SAP article number fills in (or a failure popup shows) without blocking.
@@ -879,6 +932,7 @@ export default function ArticleDetailPage({
       });
       if (!r.ok) throw new Error('Rejection failed');
       message.success('Items rejected');
+      clearArticleDrafts(pendingSelectedKeys.map(String));
       setSelectedRowKeys([]);
       await refetchCurrentItem();
     } catch { message.error('Failed to reject items'); }
@@ -1037,9 +1091,9 @@ export default function ArticleDetailPage({
           <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 text-white" style={{ background: '#1e293b' }}>
             <div className="flex min-w-0 items-center gap-2.5">
               {/* Back button */}
-              <Button size="sm" variant="ghost" onClick={() => navigate(buildBackUrl(), {
+              <Button size="sm" variant="ghost" onClick={() => guardLeave(() => navigate(buildBackUrl(), {
                   state: navState?.filters ? { restoreFilters: navState.filters } : undefined,
-                })}
+                }))}
                 className="h-7 px-1.5 text-white hover:bg-white/15 hover:text-white">
                 <ArrowLeft className="h-4 w-4" />
               </Button>
@@ -1477,6 +1531,23 @@ export default function ArticleDetailPage({
           }}
         />
       )}
+
+      {/* Leave with unsaved costing cards */}
+      <Dialog open={!!leavePrompt} onOpenChange={(o) => { if (!o && !leaveSaving) setLeavePrompt(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Unsaved changes</DialogTitle></DialogHeader>
+          <p className="m-0 text-[13px] text-slate-600">
+            You have unsaved changes in <b className="text-slate-900">{leavePrompt?.labels.join(', ')}</b>. Save them before leaving?
+          </p>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setLeavePrompt(null)} disabled={leaveSaving}>Stay</Button>
+            <Button variant="outline" onClick={leaveWithoutSaving} disabled={leaveSaving}>Leave without saving</Button>
+            <Button onClick={saveAndLeave} disabled={leaveSaving}>
+              {leaveSaving ? <><Loader2 className="h-4 w-4 animate-spin" /> Saving…</> : 'Save & leave'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Confirm dialog */}
       <Dialog open={!!confirmDialog} onOpenChange={o => !o && setConfirmDialog(null)}>

@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronDown, ChevronUp, Package, Save } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TextCell } from './CostingGridCard';
 import { CARD_THEME } from './cardTheme';
 import { useRegisterUnsavedCard } from './unsavedCards';
+import { useCardDraft, DraftRestoreBanner } from './cardDrafts';
 
 // ─── PKG COST card (FG articles) ──────────────────────────────────────────────
 // PKG-1 / PKG-2 tabs, each a table of
@@ -50,14 +51,18 @@ interface PkgCostCardProps {
   loadSavedRecord?: () => Promise<Record<string, unknown> | null>;
   /** Save button: persists the current tab's net prices + pkgCostType. */
   onSaveTab?: (updates: Record<string, string | null>) => void | Promise<void>;
+  /** Article id for the local draft (FG New page only); omitted → no draft. */
+  draftId?: string;
 }
 
-const PkgCostCard: React.FC<PkgCostCardProps> = ({ collapsed, onToggleCollapse, locked, loadSavedRecord, onSaveTab }) => {
+const PkgCostCard: React.FC<PkgCostCardProps> = ({ collapsed, onToggleCollapse, locked, loadSavedRecord, onSaveTab, draftId }) => {
   const style = CARD_THEME;
   const [tab, setTab] = useState<string>(TABS[0]);
   const [local, setLocal] = useState<LocalState>(INITIAL_LOCAL);
   const [dirty, setDirty] = useState(false);
   const [savedTab, setSavedTab] = useState<string | null>(null);
+  // Any typed cell — drives the local draft.
+  const [edited, setEdited] = useState(false);
 
   useEffect(() => {
     if (!loadSavedRecord) return;
@@ -88,7 +93,19 @@ const PkgCostCard: React.FC<PkgCostCardProps> = ({ collapsed, onToggleCollapse, 
       ...prev,
       [tab]: { ...prev[tab], [row]: { ...prev[tab]?.[row], [col]: v } },
     }));
+    setEdited(true);
     if (col === 'rate') setDirty(true);
+  };
+
+  const draftData = useMemo(() => ({ tab, local }), [tab, local]);
+  const { pendingDraft, clearDraft, dismissPending } = useCardDraft(locked ? undefined : draftId, 'PKG', edited, draftData);
+  const restoreDraft = () => {
+    if (!pendingDraft) return;
+    setTab(pendingDraft.data.tab);
+    setLocal(pendingDraft.data.local);
+    setDirty(true);
+    setEdited(true);
+    dismissPending();
   };
 
   const handleSave = async () => {
@@ -103,8 +120,10 @@ const PkgCostCard: React.FC<PkgCostCardProps> = ({ collapsed, onToggleCollapse, 
       throw e;
     }
     setSavedTab(tab);
+    setEdited(false);
+    clearDraft();
   };
-  useRegisterUnsavedCard('PKG COST', dirty && !!onSaveTab && !locked, handleSave);
+  useRegisterUnsavedCard('PKG COST', dirty && !!onSaveTab && !locked, handleSave, clearDraft);
 
   const total = ROWS.reduce((sum, r) => sum + (parseFloat(val(r, 'rate')) || 0), 0);
 
@@ -181,6 +200,10 @@ const PkgCostCard: React.FC<PkgCostCardProps> = ({ collapsed, onToggleCollapse, 
           </div>
         )}
       </div>
+
+      {pendingDraft && !locked && (
+        <DraftRestoreBanner savedAt={pendingDraft.savedAt} onRestore={restoreDraft} onDiscard={clearDraft} />
+      )}
 
       {!collapsed && (
         <div className="overflow-x-auto px-1.5 pb-2 pt-1">
