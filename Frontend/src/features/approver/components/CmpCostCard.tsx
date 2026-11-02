@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ChevronDown, ChevronUp, Save, Scissors, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TextCell } from './CostingGridCard';
 import { CARD_THEME } from './cardTheme';
 import { useRegisterUnsavedCard } from './unsavedCards';
+import { useCardDraft, DraftRestoreBanner } from './cardDrafts';
 
 // ─── CMP COST card (FG articles, shown with the BODY tab) ─────────────────────
 // One matrix: process rows × AI SAM (read-only) + (BGT | ACT | VENDOR | FINAL) × (SAM | SAM VAL | PR VAL).
@@ -78,6 +79,8 @@ interface CmpCostCardProps {
   hasUnsavedPreset?: boolean;
   /** Read-only AI SAM per process (ai_cmp_cost_*). Missing → "—". */
   aiSam?: Partial<Record<(typeof PROCESSES)[number], string>>;
+  /** Article id for the local draft (FG New page only); omitted → no draft. */
+  draftId?: string;
 }
 
 const CmpCostCard: React.FC<CmpCostCardProps> = ({
@@ -90,10 +93,13 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
   onSave,
   hasUnsavedPreset,
   aiSam,
+  draftId,
 }) => {
   const style = CARD_THEME;
   const [values, setValues] = useState<Record<string, string>>({});
   const [dirty, setDirty] = useState(false);
+  // Any typed cell (incl. UI-only SAM / SAM VAL) — drives the local draft.
+  const [edited, setEdited] = useState(false);
   // Stages whose TOTAL was typed by the user (otherwise TOTAL = live sum of PR VAL).
   const [manualTotals, setManualTotals] = useState<Set<string>>(new Set());
 
@@ -154,6 +160,7 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
 
   const handleChange = useCallback((key: string, v: string) => {
     setValues((prev) => ({ ...prev, [key]: v }));
+    setEdited(true);
     if (PR_VAL_FIELD[key] || TOTAL_PR_VAL_FIELD[key]) setDirty(true);
   }, []);
 
@@ -172,6 +179,17 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
     handleChange(key, v);
   };
 
+  const draftData = useMemo(() => ({ values, manualTotals: [...manualTotals] }), [values, manualTotals]);
+  const { pendingDraft, clearDraft, dismissPending } = useCardDraft(locked ? undefined : draftId, 'CMP', edited, draftData);
+  const restoreDraft = () => {
+    if (!pendingDraft) return;
+    setValues(pendingDraft.data.values);
+    setManualTotals(new Set(pendingDraft.data.manualTotals));
+    setDirty(true);
+    setEdited(true);
+    dismissPending();
+  };
+
   const handleSave = async () => {
     if (!onSave) return;
     const updates: Record<string, string | null> = {};
@@ -184,9 +202,11 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
       setDirty(true);
       throw e;
     }
+    setEdited(false);
+    clearDraft();
   };
   const unsaved = dirty || !!hasUnsavedPreset;
-  useRegisterUnsavedCard('CMP COST', unsaved && !!onSave && !locked, handleSave);
+  useRegisterUnsavedCard('CMP COST', unsaved && !!onSave && !locked, handleSave, clearDraft, dirty);
 
   return (
     <div className="col-span-full overflow-hidden rounded-lg border-2 bg-white shadow-[var(--shadow-sm)]" style={{ borderColor: style.border }}>
@@ -227,6 +247,10 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
           {collapsed ? <ChevronDown className="h-3 w-3" /> : <ChevronUp className="h-3 w-3" />}
         </button>
       </div>
+
+      {pendingDraft && !locked && (
+        <DraftRestoreBanner savedAt={pendingDraft.savedAt} onRestore={restoreDraft} onDiscard={clearDraft} />
+      )}
 
       {!collapsed && (
         <>

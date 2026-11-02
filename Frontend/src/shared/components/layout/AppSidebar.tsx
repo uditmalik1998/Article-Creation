@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { canAccessArticleType } from '../../utils/articleTypeAccess';
+import { guardLeave } from '../../utils/leaveGuard';
 import {
   Home,
   ShoppingBag,
@@ -89,7 +90,12 @@ interface AppSidebarProps {
 }
 
 export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedChange }) => {
-  const navigate = useNavigate();
+  // Every sidebar navigation goes through the leave guard (unsaved costing cards ask first).
+  const rawNavigate = useNavigate();
+  const navigate = useCallback(
+    (to: string) => guardLeave(() => rawNavigate(to)),
+    [rawNavigate],
+  );
   const location = useLocation();
 
   const userData = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : null;

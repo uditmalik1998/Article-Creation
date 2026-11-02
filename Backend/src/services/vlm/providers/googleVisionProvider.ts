@@ -391,6 +391,7 @@ Follow these rules strictly:
 
 - Estimate realistic manufacturing time under efficient industrial production conditions.
 - Assume trained operators using appropriate industrial machinery.
+- Assume SINGLE-PIECE PRODUCTION (1 piece per style): the full fabric spreading/laying, marker or pattern placement, cutting and machine set-up time is charged to this one piece (nothing is shared across a lay or order), and one skilled operator makes the complete garment through all operations, including machine/thread changes, component handling and positioning. Estimate this single-piece make-through time, not bulk production-line time.
 - Do not assume unrealistic perfect production conditions.
 - Do not assign generic low default values.
 - Do not inflate SAM without construction-based justification.

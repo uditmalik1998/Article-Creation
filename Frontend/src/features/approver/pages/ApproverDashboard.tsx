@@ -23,6 +23,7 @@ import {
 import { message } from '@/lib/message';
 import { cn } from '@/lib/utils';
 import type { ApproverItem } from '../types';
+import { clearArticleDrafts } from '../components/cardDrafts';
 import { ArticleSpecCard } from '@/shared/components/articles/ArticleSpecCard';
 import { ArticleCardGrid, ARTICLE_CARD_GRID_CLASS, GroupByControl, useArticleGroupBy } from '@/shared/components/articles/ArticleCardGrid';
 import { DatePresetFilter, DivisionTabs, divisionOption, ResetFiltersButton, SapSyncChips } from '@/shared/components/articles/ArticleFilters';
@@ -676,6 +677,7 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
       const data = await r.json().catch(() => null);
       if (!r.ok) throw new Error(data?.error || 'Rejection failed');
       message.success(`Rejected ${data?.count ?? ids.length} article${ids.length !== 1 ? 's' : ''}`);
+      clearArticleDrafts(ids);
       setRejectConfirmOpen(false);
       fetchItems(currentPage); // also clears the selection
     } catch (e) {

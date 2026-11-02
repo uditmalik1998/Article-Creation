@@ -171,7 +171,7 @@ export async function submitGmArticles(ids: string[], approverName?: string | nu
         // Resolve MC_CD and HSN_CODE from gm_major_category_details in a single query
         const gmMcRows = majCat
             ? await prisma.$queryRaw<{ mc_cd: string | null; hsn_cd: string | null }[]>`
-                SELECT DISTINCT mc_cd, hsn_cd FROM gm_major_category_details
+                SELECT mc_cd, hsn_cd FROM gm_major_category_details
                 WHERE maj_cat_nm = ${majCat} AND mj_status = 'ACT'
                 ORDER BY (hsn_cd IS NULL OR TRIM(hsn_cd) = '')
                 LIMIT 1

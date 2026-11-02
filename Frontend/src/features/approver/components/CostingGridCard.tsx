@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronDown, ChevronRight, ChevronUp, Plus, Save, Search, X } from 'lucide-react';
 import { Input, Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui-tw';
 import { cn } from '@/lib/utils';
 import { APP_CONFIG } from '../../../constants/app/config';
 import { useRegisterUnsavedCard } from './unsavedCards';
+import { useCardDraft, DraftRestoreBanner } from './cardDrafts';
 
 // ─── Costing grid cards (FG articles) ─────────────────────────────────────────
 // Option B layout shared by B TRIM (group 'VA ACC.') and V. ADD ('VA PRCS'):
@@ -234,6 +235,8 @@ interface CostingGridCardProps {
   loadSavedRecord?: () => Promise<Record<string, unknown> | null>;
   /** Save button: persists the current tab's spec fields + costs (config.costFields) + bTrimType. */
   onSaveTab?: (updates: Record<string, string | null>) => void | Promise<void>;
+  /** Article id for the local draft (FG New page only, tab-save mode); omitted → no draft. */
+  draftId?: string;
 }
 
 const SelectCell: React.FC<{
@@ -370,6 +373,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
   extraRows,
   loadSavedRecord,
   onSaveTab,
+  draftId,
 }) => {
   const { grid: GRID, tabs, fixedRows, other, cellMap } = config;
   const costFields = config.costFields;
@@ -383,6 +387,8 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
   const [local, setLocal] = useState<Record<string, Record<string, RowState>>>({});
   const [autoBgtLoading, setAutoBgtLoading] = useState<Record<string, boolean>>({});
   const [dirty, setDirty] = useState(false);
+  // Set by user edits only (not by master auto-fill) — drives the local draft.
+  const [edited, setEdited] = useState(false);
   const [savedTab, setSavedTab] = useState<string | null>(null);
   const basicTrimFetchedRef = useRef<Record<string, string>>({});
   // Other-block master fill: tabs already handled, and the fetched master (one call per mount).
@@ -409,9 +415,11 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
       return { ...prev, [base]: next };
     });
     setDirty(true);
+    setEdited(true);
   };
   const removeRepeat = (base: string, row: string) => {
     setDirty(true);
+    setEdited(true);
     setRepeats((prev) => ({ ...prev, [base]: (prev[base] ?? []).filter((r) => r !== row) }));
     setLocal((prev) =>
       Object.fromEntries(Object.entries(prev).map(([t, rows]) => {
@@ -429,10 +437,12 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
       return { ...prev, [tab]: next };
     });
     setDirty(true);
+    setEdited(true);
   };
   const setAllChecked = (on: boolean) => {
     setChecked((prev) => ({ ...prev, [tab]: new Set(on ? other?.rows ?? [] : []) }));
     setDirty(true);
+    setEdited(true);
   };
 
   const setTabVal = (t: string, row: string, col: Col, v: string) =>
@@ -671,6 +681,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
   const setLocalVal = (row: string, col: Col, v: string) => {
     setTabVal(tab, row, col, v);
     setDirty(true);
+    setEdited(true);
     // Typing a value into an unticked other-block row ticks it.
     if (checkable && v && other!.rows.includes(row) && !isChecked(row)) setRowChecked(row, true);
   };
@@ -686,6 +697,34 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
   const cellVal = (row: string, col: Col): string => {
     const a = boundAttr(row, col);
     return savesToSap(row, col) && a ? (getValue(a.field) ?? '').trim() : localVal(row, col).trim();
+  };
+
+  const draftData = useMemo(
+    () => ({
+      tab,
+      local,
+      repeats,
+      checked: Object.fromEntries(Object.entries(checked).map(([k, s]) => [k, [...s]])),
+    }),
+    [tab, local, repeats, checked],
+  );
+  const { pendingDraft, clearDraft, dismissPending } = useCardDraft(
+    tabSave && !locked ? draftId : undefined,
+    config.title,
+    edited,
+    draftData,
+  );
+  const restoreDraft = () => {
+    if (!pendingDraft) return;
+    const d = pendingDraft.data;
+    setTab(d.tab);
+    setLocal(d.local);
+    setRepeats(d.repeats);
+    setChecked(Object.fromEntries(Object.entries(d.checked).map(([k, rows]) => [k, new Set(rows)])));
+    otherFilledTabsRef.current = new Set(Object.keys(d.local));
+    setDirty(true);
+    setEdited(true);
+    dismissPending();
   };
 
   const handleSaveTab = async () => {
@@ -736,8 +775,10 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
       throw e;
     }
     setSavedTab(tab);
+    setEdited(false);
+    clearDraft();
   };
-  useRegisterUnsavedCard(config.title, dirty && tabSave && !locked, handleSaveTab);
+  useRegisterUnsavedCard(config.title, dirty && tabSave && !locked, handleSaveTab, clearDraft, edited);
 
   const renderSpecCell = (row: string, col: SpecCol) => {
     const a = boundAttr(row, col);
@@ -976,6 +1017,10 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
           </div>
         )}
       </div>
+
+      {pendingDraft && tabSave && !locked && (
+        <DraftRestoreBanner savedAt={pendingDraft.savedAt} onRestore={restoreDraft} onDiscard={clearDraft} />
+      )}
 
       {!collapsed && (
         <>
