@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   CheckCircle2, XCircle, FileText, LayoutGrid, Rocket, Sparkles,
-  ChevronLeft, ChevronRight, ArrowLeft, Loader2, RotateCw, RotateCcw, History, Plus, Trash2, PackagePlus, X,
+  ChevronLeft, ChevronRight, ArrowLeft, Loader2, RotateCw, RotateCcw, History, Plus, Trash2, PackagePlus, X, Check, AlertTriangle,
 } from 'lucide-react';
 import {
   Button,
@@ -326,6 +326,8 @@ export default function ArticleDetailPage({
   // Leaving with unsaved costing cards (sidebar, back, ◀ ▶): Save & leave / Leave without saving / Stay.
   const [leavePrompt, setLeavePrompt] = useState<{ labels: string[]; proceed: () => void } | null>(null);
   const [leaveSaving, setLeaveSaving] = useState(false);
+  // Per-card progress in the leave popup, keyed by card label.
+  const [leaveStatus, setLeaveStatus] = useState<Record<string, 'saving' | 'saved' | 'failed'>>({});
   const [infoDialog, setInfoDialog] = useState<InfoDialog>(null);
   const [approving, setApproving] = useState(false);
   // Bumped once the per-category mandatory grid finishes loading, so the
@@ -466,6 +468,7 @@ export default function ArticleDetailPage({
   useEffect(() => registerLeaveGuard((proceed) => {
     const cards = getUserEditedCards();
     if (cards.length === 0) return false;
+    setLeaveStatus({});
     setLeavePrompt({ labels: cards.map((c) => c.label), proceed });
     return true;
   }), []);
@@ -485,13 +488,16 @@ export default function ArticleDetailPage({
   const saveAndLeave = async () => {
     if (!leavePrompt) return;
     setLeaveSaving(true);
+    // On "Try again" only cards still unsaved come back here; saved ones keep their tick.
     for (const card of getUserEditedCards()) {
+      setLeaveStatus((prev) => ({ ...prev, [card.label]: 'saving' }));
       try {
         await card.save();
+        setLeaveStatus((prev) => ({ ...prev, [card.label]: 'saved' }));
       } catch {
+        // Popup stays open on the failed card: Stay to fix it, or leave without saving.
+        setLeaveStatus((prev) => ({ ...prev, [card.label]: 'failed' }));
         setLeaveSaving(false);
-        setLeavePrompt(null);
-        message.error(`Could not save ${card.label}. You are still on this page — fix it and try again.`);
         return;
       }
     }
@@ -1534,18 +1540,88 @@ export default function ArticleDetailPage({
 
       {/* Leave with unsaved costing cards */}
       <Dialog open={!!leavePrompt} onOpenChange={(o) => { if (!o && !leaveSaving) setLeavePrompt(null); }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Unsaved changes</DialogTitle></DialogHeader>
-          <p className="m-0 text-[13px] text-slate-600">
-            You have unsaved changes in <b className="text-slate-900">{leavePrompt?.labels.join(', ')}</b>. Save them before leaving?
-          </p>
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setLeavePrompt(null)} disabled={leaveSaving}>Stay</Button>
-            <Button variant="outline" onClick={leaveWithoutSaving} disabled={leaveSaving}>Leave without saving</Button>
-            <Button onClick={saveAndLeave} disabled={leaveSaving}>
-              {leaveSaving ? <><Loader2 className="h-4 w-4 animate-spin" /> Saving…</> : 'Save & leave'}
-            </Button>
-          </DialogFooter>
+        <DialogContent
+          showClose={false}
+          className="max-w-[480px] gap-0 p-0 outline-none"
+          onInteractOutside={(e) => { if (leaveSaving) e.preventDefault(); }}
+          onEscapeKeyDown={(e) => { if (leaveSaving) e.preventDefault(); }}
+        >
+          {leavePrompt && (() => {
+            const failedLabel = Object.entries(leaveStatus).find(([, st]) => st === 'failed')?.[0];
+            const articleNo = currentItem?.articleNumber || currentItem?.designNumber || currentItem?.imageName;
+            return (
+              <>
+                <div className="relative bg-[#1e293b] px-5 pb-4 pt-[18px] text-white">
+                  <div className="text-[11px] font-bold tracking-[0.08em] text-slate-400">UNSAVED CHANGES</div>
+                  <DialogTitle className="mb-2.5 mt-1 text-[21px] font-semibold text-white">Save before leaving?</DialogTitle>
+                  {articleNo && (
+                    <span className="inline-flex items-center rounded-full bg-white/10 px-2.5 py-1 font-mono text-[12.5px] font-semibold text-slate-200">
+                      {articleNo}
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    aria-label="Close"
+                    disabled={leaveSaving}
+                    onClick={() => setLeavePrompt(null)}
+                    className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-white/10 hover:text-white disabled:opacity-40"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <div className="flex flex-col gap-3 px-5 py-4">
+                  <div className="overflow-hidden rounded-[10px] border border-slate-200">
+                    <div className="bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700">
+                      {leavePrompt.labels.length === 1 ? '1 card has changes' : `${leavePrompt.labels.length} cards have changes`}
+                    </div>
+                    {leavePrompt.labels.map((label, i) => {
+                      const st = leaveStatus[label];
+                      return (
+                        <div key={`${label}-${i}`} className="flex items-center gap-2.5 border-t border-slate-200 px-3 py-2">
+                          {st === 'saved' ? (
+                            <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#1e293b]">
+                              <Check className="h-2.5 w-2.5 text-white" strokeWidth={3.2} />
+                            </span>
+                          ) : st === 'saving' ? (
+                            <Loader2 className="h-4 w-4 shrink-0 animate-spin text-slate-700" />
+                          ) : st === 'failed' ? (
+                            <AlertTriangle className="h-4 w-4 shrink-0 text-red-700" />
+                          ) : (
+                            <span className="mx-1 h-2 w-2 shrink-0 rounded-full bg-amber-500" />
+                          )}
+                          <span className="text-[13px] font-bold text-slate-900">{label}</span>
+                          <span className={cn('ml-auto text-xs', st === 'failed' ? 'font-semibold text-red-700' : 'text-slate-500')}>
+                            {st === 'saved' ? 'saved' : st === 'saving' ? 'saving…' : st === 'failed' ? 'save failed' : 'not saved'}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {failedLabel && (
+                    <p className="m-0 text-[12.5px] text-red-800">
+                      Could not save {failedLabel}. Stay to fix it, or leave without saving.
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 border-t border-slate-200 bg-slate-50 px-5 py-3">
+                  <button
+                    type="button"
+                    onClick={leaveWithoutSaving}
+                    disabled={leaveSaving}
+                    className="h-9 rounded-lg px-1.5 text-[13.5px] font-bold text-red-700 hover:bg-red-50 disabled:opacity-40"
+                  >
+                    Leave without saving
+                  </button>
+                  <span className="ml-auto flex gap-2">
+                    <Button variant="outline" onClick={() => setLeavePrompt(null)} disabled={leaveSaving}>Stay</Button>
+                    <Button onClick={saveAndLeave} disabled={leaveSaving} className="bg-[#1e293b] text-white hover:bg-[#0f172a]">
+                      {leaveSaving ? <><Loader2 className="h-4 w-4 animate-spin" /> Saving…</> : failedLabel ? 'Try again' : 'Save & leave'}
+                    </Button>
+                  </span>
+                </div>
+              </>
+            );
+          })()}
         </DialogContent>
       </Dialog>
 
