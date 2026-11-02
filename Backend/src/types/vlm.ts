@@ -24,6 +24,8 @@ export interface FashionExtractionRequest {
   image: string; // base64 encoded
   schema: SchemaItem[];
   categoryName?: string;
+  /** Selected major category code (shown in the prompt's category context). */
+  majorCategory?: string;
   customPrompt?: string;
   discoveryMode?: boolean;
   mode?: 'fashion-focused' | 'detailed-analysis' | 'discovery-mode';

@@ -480,6 +480,7 @@ async function enrichSrmRowWithVlm(
         image: base64Image,
         schema: constrainedSchema,
         categoryName: majorCategory || undefined,
+        majorCategory: majorCategory || undefined,
         discoveryMode: false,
       });
 
