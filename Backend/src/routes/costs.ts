@@ -74,7 +74,8 @@ router.get('/images', async (req: Request, res: Response) => {
       where: isAdmin ? {} : { userId },
       select: {
         jobId: true,
-        imageName: true,
+        articleNumber: true,
+        designNumber: true,
         imageUrl: true,
         inputTokens: true,
         outputTokens: true,
@@ -89,7 +90,7 @@ router.get('/images', async (req: Request, res: Response) => {
 
     const images = flatResults.map(r => ({
       imageId: r.jobId,
-      imageName: r.imageName || 'Unknown',
+      imageName: r.articleNumber || r.designNumber || 'Unknown', // display label
       imageUrl: r.imageUrl,
       inputTokens: r.inputTokens || 0,
       outputTokens: r.outputTokens || 0,
@@ -133,7 +134,7 @@ router.get('/image/:imageId', async (req: Request, res: Response) => {
 
     const imageData = {
       imageId: flatResult.jobId,
-      imageName: flatResult.imageName,
+      imageName: flatResult.articleNumber || flatResult.designNumber || 'Unknown',
       imageUrl: flatResult.imageUrl,
       inputTokens: flatResult.inputTokens || 0,
       outputTokens: flatResult.outputTokens || 0,
@@ -176,7 +177,7 @@ router.get('/export', async (req: Request, res: Response) => {
       totalRecords: flatResults.length,
       totalCost: flatResults.reduce((sum, r) => sum + Number(r.apiCost || 0), 0),
       records: flatResults.map(r => ({
-        imageName: r.imageName,
+        imageName: r.articleNumber || r.designNumber || 'Unknown',
         inputTokens: r.inputTokens,
         outputTokens: r.outputTokens,
         apiCost: Number(r.apiCost),

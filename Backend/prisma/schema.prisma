@@ -192,7 +192,6 @@ model ExtractionJob {
 model ExtractionResultFlat {
   id                          String        @id @default(uuid())
   jobId                       String?       @unique @map("job_id")
-  imageName                   String?       @map("image_name") @db.VarChar(255)
   imageUrl                    String?       @map("image_url")
   oldImageUrl                 String?       @map("old_image_url")
   // Clean (un-watermarked) image — kept by DB trigger trg_set_flat_source_image_url;
@@ -606,7 +605,6 @@ model ExtractionResultFlat {
   srmSyncRunItems             SrmSyncRunItem[]
 
   @@index([jobId])
-  @@index([imageName])
   @@index([articleNumber])
   @@index([majorCategory])
   @@index([extractionStatus])

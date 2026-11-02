@@ -1529,7 +1529,7 @@ const ArticleCard = React.memo(
     const isSrm = item.source === 'SRM';
     const infoRows: { label: string; value: React.ReactNode }[] = [
       ...(!isSrm
-        ? [{ label: 'Article ID', value: item.sapArticleId || item.articleNumber || item.imageName || '—' }]
+        ? [{ label: 'Article ID', value: item.sapArticleId || item.articleNumber || '—' }]
         : []),
       {
         label: 'Category',
@@ -1881,11 +1881,6 @@ const ArticleCard = React.memo(
                       </>
                     )}
                   </div>
-                  {item.imageName && (
-                    <span className="truncate font-mono text-[11px] text-slate-600" title={item.imageName}>
-                      {item.imageName}
-                    </span>
-                  )}
                 </div>
               </div>
 
@@ -2328,7 +2323,7 @@ const ArticleCard = React.memo(
         >
           <DialogContent className="w-auto max-w-[92vw] p-0">
             <DialogHeader className="flex flex-row items-center justify-between border-b border-border px-4 py-2">
-              <DialogTitle className="truncate text-sm">{item.imageName || 'Image Preview'}</DialogTitle>
+              <DialogTitle className="truncate text-sm">{item.designNumber || 'Image Preview'}</DialogTitle>
               {/* Zoom + rotate controls */}
               <div className="mr-8 flex items-center gap-1">
                 <Button
@@ -2377,7 +2372,7 @@ const ArticleCard = React.memo(
             <div className="flex items-center justify-center overflow-auto p-4" style={{ maxHeight: '80vh' }}>
               <img
                 src={shownImgUrl || ''}
-                alt={item.imageName || 'preview'}
+                alt={item.designNumber || 'preview'}
                 className="block transition-transform duration-200 will-change-transform"
                 style={{
                   maxWidth: '85vw',

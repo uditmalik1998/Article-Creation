@@ -27,7 +27,6 @@ function cardThumbUrl(url: string): string {
 export interface ArticleCardItem {
   id: string;
   imageUrl?: string | null;
-  imageName?: string | null;
   articleNumber?: string | null;
   division?: string | null;
   subDivision?: string | null;
@@ -258,7 +257,7 @@ function ArticleSpecCardComponent<T extends ArticleCardItem>({
       {imgModalOpen && item.imageUrl && (
         <ImagePreviewDialog
           src={item.imageUrl}
-          title={item.imageName || item.designNumber || 'Image Preview'}
+          title={item.designNumber || 'Image Preview'}
           onClose={() => setImgModalOpen(false)}
         />
       )}

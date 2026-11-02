@@ -1343,7 +1343,6 @@ export const getDetailedExpenses = async (req: Request, res: Response): Promise<
       ...(parsedOffset > 0 ? { skip: parsedOffset } : {}),
       select: {
         jobId: true,
-        imageName: true,
         articleNumber: true,
         imageUrl: true,
         inputTokens: true,
@@ -1358,7 +1357,7 @@ export const getDetailedExpenses = async (req: Request, res: Response): Promise<
     // Format the data for frontend
     const formattedExpenses = expenses.map((expense) => ({
       key: expense.jobId,
-      imageName: expense.imageName || expense.designNumber || 'Unknown',
+      imageName: expense.designNumber || 'Unknown', // display label (image_name column dropped)
       articleNumber: expense.articleNumber, // Include article number
       imageUrl: expense.imageUrl,
       inputTokens: expense.inputTokens || 0,

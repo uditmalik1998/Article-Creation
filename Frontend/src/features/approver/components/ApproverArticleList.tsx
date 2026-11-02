@@ -1816,7 +1816,7 @@ const ArticleCard = React.memo(
         return '';
       }
     };
-    const newImgName = item.imageName || fileNameFromUrl(imgSrc);
+    const newImgName = fileNameFromUrl(imgSrc);
     const oldImgName = fileNameFromUrl(oldImgSrc);
     const backImgUrl = item.backImageUrl ? getImageUrl(item.backImageUrl) : null;
     const imgViews: { key: 'front' | 'back' | 'old'; label: string; url: string | null; name: string; note: string }[] = [
@@ -3410,7 +3410,7 @@ const ArticleCard = React.memo(
                     <div className="flex items-start justify-between gap-2">
                       <span className="font-semibold text-muted-foreground">Article ID</span>
                       <span className="truncate text-right font-bold text-foreground">
-                        {item.sapArticleId || item.articleNumber || item.imageName || '—'}
+                        {item.sapArticleId || item.articleNumber || '—'}
                       </span>
                     </div>
                   )}
@@ -5211,7 +5211,7 @@ const ArticleCard = React.memo(
         >
           <DialogContent className="w-auto max-w-[92vw] p-0">
             <DialogHeader className="flex flex-row items-center justify-between border-b border-border px-4 py-2">
-              <DialogTitle className="truncate text-sm">{item.imageName || 'Image Preview'}</DialogTitle>
+              <DialogTitle className="truncate text-sm">{item.designNumber || 'Image Preview'}</DialogTitle>
               {/* Zoom + rotate controls */}
               <div className="mr-8 flex items-center gap-1">
                 <Button
@@ -5283,7 +5283,7 @@ const ArticleCard = React.memo(
             >
               <img
                 src={shownImgUrl || ''}
-                alt={item.imageName || 'preview'}
+                alt={item.designNumber || 'preview'}
                 draggable={false}
                 onLoad={(e) => {
                   const t = e.currentTarget;
@@ -5384,7 +5384,7 @@ const ArticleCard = React.memo(
                   </>
                 );
               }
-              const sourceLabel = item.designNumber || item.articleNumber || item.imageName || 'article';
+              const sourceLabel = item.designNumber || item.articleNumber || 'article';
               return (
                 <>
                   {closeBtn}
@@ -5452,7 +5452,7 @@ const ArticleCard = React.memo(
               </DialogTitle>
             </DialogHeader>
             <p className="m-0">
-              Create fabric article for &quot;{fabConfirmItem?.articleNumber || fabConfirmItem?.imageName || fabConfirmItem?.id}&quot;?
+              Create fabric article for &quot;{fabConfirmItem?.articleNumber || fabConfirmItem?.id}&quot;?
             </p>
             <DialogFooter>
               <Button variant="outline" onClick={() => setFabConfirmItem(null)} disabled={fabricCreating}>

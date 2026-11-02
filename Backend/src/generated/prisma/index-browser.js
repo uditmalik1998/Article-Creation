@@ -238,7 +238,6 @@ exports.Prisma.ExtractionJobScalarFieldEnum = {
 exports.Prisma.ExtractionResultFlatScalarFieldEnum = {
   id: 'id',
   jobId: 'jobId',
-  imageName: 'imageName',
   imageUrl: 'imageUrl',
   oldImageUrl: 'oldImageUrl',
   sourceImageUrl: 'sourceImageUrl',
@@ -1949,7 +1948,6 @@ exports.Prisma.ExtractionJobOrderByRelevanceFieldEnum = {
 exports.Prisma.ExtractionResultFlatOrderByRelevanceFieldEnum = {
   id: 'id',
   jobId: 'jobId',
-  imageName: 'imageName',
   imageUrl: 'imageUrl',
   oldImageUrl: 'oldImageUrl',
   sourceImageUrl: 'sourceImageUrl',

@@ -114,7 +114,6 @@ async function run() {
       designNumber: true,
       flatResult: {
         select: {
-          imageName: true,
           imageUrl: true
         }
       }
@@ -139,7 +138,6 @@ async function run() {
     }
 
     const fileNameCandidates = [
-      row.flatResult?.imageName || undefined,
       row.designNumber || undefined
     ]
       .filter(Boolean)
