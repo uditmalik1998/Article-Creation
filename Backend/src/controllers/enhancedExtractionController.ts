@@ -760,6 +760,7 @@ export class EnhancedExtractionController {
         discoveryMode: discoveryMode === 'true' || discoveryMode === true,
         department: (enforcedDepartment || watcher_division) as any,
         subDepartment: (enforcedSubDepartment || watcher_sub_division) as any,
+        majorCategory: watcher_major_category || undefined,
         season: season as any,
         occasion: occasion as any
       };
@@ -965,6 +966,7 @@ export class EnhancedExtractionController {
         discoveryMode: discoveryMode || false,
         department: enforcedDepartment as any,
         subDepartment: enforcedSubDepartment as any,
+        majorCategory: typeof majorCategory === 'string' && majorCategory.trim() ? majorCategory.trim() : undefined,
         season: season as any,
         occasion: occasion as any
       };
