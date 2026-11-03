@@ -7,13 +7,16 @@
  * 2. Start batch extraction and review the validated results
  */
 import { useState, useCallback, useEffect, useMemo, type ReactNode } from 'react';
-import { Eraser, Download, Check, Bot } from 'lucide-react';
+import { Eraser, Download, Check, Bot, ChevronDown, ChevronUp, Search } from 'lucide-react';
 import {
   Button,
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   Select,
   SelectContent,
   SelectItem,
@@ -29,22 +32,21 @@ import { AttributeTable } from '../components/AttributeTable';
 import ExportManager from '../components/ExportManager';
 import { useImageExtraction } from '../../../shared/hooks/extraction/useImageExtraction';
 import type { SchemaItem } from '../../../shared/types/extraction/ExtractionTypes';
-import { MAJOR_CATEGORY_ALLOWED_VALUES, getMajorCategoriesBySubDivision } from '../../../data/majorCategoryMcCodeMap';
-import { getMajCatAllowedValues, getMajCatMandatoryKeys } from '../../../data/majCatAttributeMap';
-import { preloadAttributeValues } from '../../../services/articleConfigService';
+import { MAJOR_CATEGORY_ALLOWED_VALUES, getMcCodeByMajorCategory } from '../../../data/majorCategoryMcCodeMap';
+import { getMajCatMandatoryKeys, SCHEMA_KEY_TO_EXCEL_ATTR } from '../../../data/majCatAttributeMap';
+import {
+  getMajCatGridEntry,
+  hasMajCatGridData,
+  isMajCatGridLoadedFor,
+  preloadMajCatGridFor,
+  preloadNationalGrid,
+  type NationalGridValues,
+} from '../../../services/articleConfigService';
 
 import './ExtractionPage.css';
 import '../../../styles/App.css';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? 'http://localhost:5001/api' : '/api');
-
-const KEY_ALIASES: Record<string, string> = {
-  neck_details: 'neck_detail',
-  colour: 'color',
-  child_belt: 'child_belt_detail',
-  lycra_non_lycra: 'lycra_non\nlycra',
-  patches_type: 'patch_type',
-};
 
 const ATTRIBUTE_VALUE_CORRECTIONS: Record<string, Record<string, string>> = {
   weave: { CH_TWL: 'CHN_TWL', CHINA_TWL: 'CHN_TWL' },
@@ -177,6 +179,48 @@ const getDivisionOptions = (): string[] => {
   }
 };
 
+/**
+ * Allowed values for one attribute. A major category with its own grid uses only
+ * that grid; the national grid is used only when the category has no grid at all.
+ * No major category picked yet → null (upload is locked until one is picked).
+ * An attribute neither grid lists gets no options — the values have to be added to
+ * the grid (Admin › Grid Values). Returns null for attributes that aren't grid-driven.
+ */
+const gridValuesFor = (
+  majorCategory: string | null,
+  schemaKey: string,
+  nationalGrid: NationalGridValues,
+): { shortForm: string; fullForm: string }[] | null => {
+  const excelAttr = SCHEMA_KEY_TO_EXCEL_ATTR[schemaKey.toLowerCase()];
+  if (!excelAttr || !majorCategory) return null;
+  if (hasMajCatGridData(majorCategory)) {
+    return (getMajCatGridEntry(majorCategory, excelAttr) ?? []).map((v) => ({ shortForm: v, fullForm: v }));
+  }
+  return (nationalGrid[excelAttr] ?? []).map((v) => ({ shortForm: v.code, fullForm: v.fullForm || v.code }));
+};
+
+type DivisionHierarchy = { subDivisions: string[]; majorCategories: { subDiv: string; majCat: string }[] };
+
+// Sub-divisions + major categories come from major_category_details (Admin › Hierarchy),
+// fetched for the chosen division only and cached per division for the session.
+const divisionHierarchyCache = new Map<string, Promise<DivisionHierarchy | null>>();
+const fetchDivisionHierarchy = (division: string): Promise<DivisionHierarchy | null> => {
+  const key = division.trim().toUpperCase();
+  const cached = divisionHierarchyCache.get(key);
+  if (cached) return cached;
+  const token = localStorage.getItem('authToken');
+  const p = fetch(`${API_BASE_URL}/user/major-category-hierarchy?division=${encodeURIComponent(key)}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((json) => (json?.success ? (json.data as DivisionHierarchy) : null))
+    .catch(() => null);
+  // Don't keep a failed lookup — the next division pick retries.
+  p.then((d) => { if (!d) divisionHierarchyCache.delete(key); });
+  divisionHierarchyCache.set(key, p);
+  return p;
+};
+
 type SavedSetup = {
   selectedCategory?: SimplifiedCategory | null;
   selectedSubDivision?: string | null;
@@ -202,6 +246,75 @@ const SimplifiedExtractionPage = () => {
   const [manualNavigation, setManualNavigation] = useState(false);
   const [missingFieldsDialog, setMissingFieldsDialog] = useState<{ rowName: string; missingLabels: string[] }[] | null>(null);
   const [showMissingDesignOnly, setShowMissingDesignOnly] = useState(false);
+  const [divisionHierarchy, setDivisionHierarchy] = useState<DivisionHierarchy | null>(null);
+  const [hierarchyLoading, setHierarchyLoading] = useState(false);
+  const [majCatOpen, setMajCatOpen] = useState(false);
+  // Bumped once the selected major category's grid (maj_cat_grid_values) is loaded,
+  // so the attribute dropdowns rebuild from it.
+  const [majCatGridVersion, setMajCatGridVersion] = useState(0);
+  // national_grid_master: fallback dropdown values when the category grid has none.
+  const [nationalGrid, setNationalGrid] = useState<NationalGridValues>({});
+
+  // Only needed when the picked major category has no grid of its own — a category
+  // with a grid never calls national-grid-values. (Upload needs a major category.)
+  const needsNationalGrid =
+    !!selectedMajorCategory &&
+    isMajCatGridLoadedFor(selectedMajorCategory) &&
+    !hasMajCatGridData(selectedMajorCategory);
+  useEffect(() => {
+    if (!needsNationalGrid) return;
+    let cancelled = false;
+    preloadNationalGrid().then((grid) => {
+      if (!cancelled) setNationalGrid(grid);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [needsNationalGrid, majCatGridVersion]);
+
+  useEffect(() => {
+    if (!selectedMajorCategory) return;
+    let cancelled = false;
+    preloadMajCatGridFor(selectedMajorCategory)
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setMajCatGridVersion((v) => v + 1);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedMajorCategory]);
+  const [majCatSearch, setMajCatSearch] = useState('');
+  const [majCatActive, setMajCatActive] = useState(0); // keyboard-highlighted row in the filtered list
+
+  useEffect(() => {
+    const division = selectedCategory?.department;
+    setDivisionHierarchy(null);
+    if (!division) return;
+    let cancelled = false;
+    setHierarchyLoading(true);
+    fetchDivisionHierarchy(division).then((data) => {
+      if (cancelled) return;
+      setDivisionHierarchy(data);
+      setHierarchyLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedCategory?.department]);
+
+  const majorCategoriesForSubDiv = useCallback(
+    (subDivision: string | null | undefined): string[] => {
+      const sub = (subDivision || '').trim().toUpperCase();
+      if (!divisionHierarchy || !sub) return [];
+      return [
+        ...new Set(
+          divisionHierarchy.majorCategories.filter((r) => r.subDiv.toUpperCase() === sub).map((r) => r.majCat),
+        ),
+      ];
+    },
+    [divisionHierarchy],
+  );
 
   const {
     extractedRows,
@@ -245,16 +358,23 @@ const SimplifiedExtractionPage = () => {
     localStorage.setItem('simplifiedExtractionState', JSON.stringify(setup));
   }, [selectedCategory, selectedSubDivision, selectedMajorCategory]);
 
+  const subDivisionOptions = divisionHierarchy?.subDivisions ?? [];
   const majorCategoryOptions = useMemo(
-    () =>
-      selectedCategory?.department && selectedSubDivision
-        ? [...new Set(getMajorCategoriesBySubDivision(selectedCategory.department, selectedSubDivision))]
-        : [],
-    [selectedCategory?.department, selectedSubDivision],
+    () => majorCategoriesForSubDiv(selectedSubDivision),
+    [majorCategoriesForSubDiv, selectedSubDivision],
   );
+  // Major category search matches the name or its MC code.
+  const majCatFiltered = useMemo(() => {
+    const q = majCatSearch.trim().toLowerCase();
+    if (!q) return majorCategoryOptions;
+    return majorCategoryOptions.filter(
+      (mc) => mc.toLowerCase().includes(q) || (getMcCodeByMajorCategory(mc) ?? '').includes(q),
+    );
+  }, [majCatSearch, majorCategoryOptions]);
   // Major Category is required whenever the sub-division has any to pick from.
   const isSetupComplete =
     !!selectedCategory?.department &&
+    !!divisionHierarchy &&
     !!selectedSubDivision &&
     (majorCategoryOptions.length === 0 || !!selectedMajorCategory);
   const uploadTargetLabel = [selectedCategory?.department, selectedSubDivision, selectedMajorCategory]
@@ -284,53 +404,19 @@ const SimplifiedExtractionPage = () => {
   };
 
   useEffect(() => {
-    const loadAllowedValues = async () => {
-      try {
-        const token = localStorage.getItem('authToken');
-        const response = await fetch(`${API_BASE_URL}/user/attributes?includeValues=true`, {
-          headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        });
-        if (!response.ok) return;
-        const payload = await response.json();
-        const attributes = payload?.data || [];
-        const allowedMap = new Map<string, any[]>(
-          attributes.map((attr: any) => [String(attr.key).toLowerCase(), attr.allowedValues || []]),
-        );
-        const schemaWithAllowed = BASE_SIMPLIFIED_SCHEMA.map((item) => {
-          const keyLower = item.key.toLowerCase();
-          if (keyLower === 'major_category') {
-            return { ...item, allowedValues: normalizeAllowedValues(item.key, MAJOR_CATEGORY_ALLOWED_VALUES) };
-          }
-          const aliasKey = KEY_ALIASES[keyLower] || keyLower;
-          const fetchedAllowed = allowedMap.get(keyLower) || allowedMap.get(aliasKey);
-          return {
-            ...item,
-            allowedValues: normalizeAllowedValues(item.key, fetchedAllowed && fetchedAllowed.length > 0 ? fetchedAllowed : item.allowedValues || []),
-          };
-        });
-        setBaseSchema(schemaWithAllowed);
-      } catch (error) {
-        console.warn('Failed to load allowed values for simplified schema', error);
-      }
-    };
-    loadAllowedValues();
-  }, []);
-
-  useEffect(() => {
     const majorCat = selectedCategory?.majorCategory;
     if (!majorCat) {
       setSimplifiedSchema(baseSchema);
       return;
     }
     const division = selectedCategory?.department || '';
-    preloadAttributeValues(division).catch(() => {});
     const mandatoryKeys = getMajCatMandatoryKeys(majorCat);
     // `majorCat` here is actually the selected Sub-Division (e.g. MW, MS-U) —
     // narrow the Major Category options to that division + sub-division so
     // e.g. MS-U never shows MW-only categories like MW_THRM_LOWER.
     const subDivisionCategories = normalizeAllowedValues(
       'major_category',
-      getMajorCategoriesBySubDivision(division, majorCat).map((name) => ({ shortForm: name, fullForm: name })),
+      majorCategoriesForSubDiv(majorCat).map((name) => ({ shortForm: name, fullForm: name })),
     );
     const filtered = baseSchema.map((item) => {
       if (item.key === 'major_category') {
@@ -340,26 +426,15 @@ const SimplifiedExtractionPage = () => {
           required: mandatoryKeys.has(item.key),
         };
       }
-      const majCatValues = getMajCatAllowedValues(division, item.key);
+      // Dropdown values: the selected major category's grid (maj_cat_grid_values), or the
+      // national grid (national_grid_master) when that category has no grid at all.
+      const majCatValues = gridValuesFor(selectedMajorCategory, item.key, nationalGrid);
       // design_number is always required regardless of major category config
       const isRequired = item.key === 'design_number' ? true : mandatoryKeys.has(item.key);
       return { ...item, ...(majCatValues ? { allowedValues: majCatValues } : {}), required: isRequired };
     });
     setSimplifiedSchema(filtered);
-  }, [baseSchema, selectedCategory]);
-
-  const handleAddToSchema = useCallback((attributeKey: string, value: string) => {
-    setSimplifiedSchema((prev) =>
-      prev.map((item) => {
-        if (item.key !== attributeKey) return item;
-        const normalizedIncoming = normalizeAllowedValues(attributeKey, [{ shortForm: value, fullForm: value }])[0];
-        if (!normalizedIncoming) return item;
-        const alreadyExists = item.allowedValues?.some((v) => (v.shortForm || '').toLowerCase() === normalizedIncoming.shortForm.toLowerCase());
-        if (alreadyExists) return item;
-        return { ...item, allowedValues: [...(item.allowedValues || []), normalizedIncoming] };
-      }),
-    );
-  }, []);
+  }, [baseSchema, selectedCategory, selectedMajorCategory, majCatGridVersion, nationalGrid, majorCategoriesForSubDiv]);
 
   const handleAttributeChange = useCallback(
     (rowId: string, attributeKey: string, value: string | number | null) => {
@@ -463,6 +538,11 @@ const SimplifiedExtractionPage = () => {
     setCurrentStep('setup');
   };
 
+  const pickMajorCategory = (mc: string) => {
+    setSelectedMajorCategory(mc);
+    setMajCatOpen(false);
+    setMajCatSearch('');
+  };
   const fieldLabel = 'text-[12px] font-semibold tracking-[0.06em] text-slate-600 dark:text-slate-400';
   const fieldTrigger =
     'h-11 w-full rounded-[10px] border-slate-300 bg-white text-[14.5px] font-semibold text-slate-900 focus:ring-slate-800 data-[state=open]:border-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50';
@@ -564,13 +644,23 @@ const SimplifiedExtractionPage = () => {
                       <Select
                         value={selectedSubDivision ?? ''}
                         onValueChange={handleSubDivisionChange}
-                        disabled={!selectedCategory?.department}
+                        disabled={!selectedCategory?.department || subDivisionOptions.length === 0}
                       >
                         <SelectTrigger className={fieldTrigger} aria-label="Sub-division">
-                          <SelectValue placeholder={selectedCategory?.department ? 'Select sub-division' : 'Pick a division first'} />
+                          <SelectValue
+                            placeholder={
+                              !selectedCategory?.department
+                                ? 'Pick a division first'
+                                : hierarchyLoading
+                                ? 'Loading…'
+                                : subDivisionOptions.length === 0
+                                ? 'No sub-divisions found'
+                                : 'Select sub-division'
+                            }
+                          />
                         </SelectTrigger>
                         <SelectContent>
-                          {(SIMPLIFIED_HIERARCHY[selectedCategory?.department ?? ''] || []).map((sub) => (
+                          {subDivisionOptions.map((sub) => (
                             <SelectItem key={sub} value={sub}>
                               {sub}
                             </SelectItem>
@@ -580,30 +670,117 @@ const SimplifiedExtractionPage = () => {
                     </div>
                     <div className="flex flex-col gap-1.5">
                       <span className={fieldLabel}>3 · MAJOR CATEGORY</span>
-                      <Select
-                        value={selectedMajorCategory ?? ''}
-                        onValueChange={setSelectedMajorCategory}
-                        disabled={majorCategoryOptions.length === 0}
+                      {/* Design "Option A": same look as the Sub-division list — full field width,
+                          search inside, MC code per row, slate selected state, ↑ ↓ Enter Esc (no hint bar). */}
+                      <Popover
+                        open={majCatOpen}
+                        onOpenChange={(o) => {
+                          setMajCatOpen(o);
+                          if (!o) setMajCatSearch('');
+                          else setMajCatActive(Math.max(0, majorCategoryOptions.indexOf(selectedMajorCategory ?? '')));
+                        }}
                       >
-                        <SelectTrigger className={fieldTrigger} aria-label="Major category">
-                          <SelectValue
-                            placeholder={
-                              !selectedSubDivision
-                                ? 'Pick a sub-division first'
-                                : majorCategoryOptions.length === 0
-                                ? 'None for this sub-division'
-                                : 'Select major category'
-                            }
-                          />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {majorCategoryOptions.map((mc) => (
-                            <SelectItem key={mc} value={mc}>
-                              {mc}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        <PopoverTrigger asChild>
+                          <button
+                            type="button"
+                            aria-label="Major category"
+                            aria-haspopup="listbox"
+                            disabled={majorCategoryOptions.length === 0}
+                            className={cn(
+                              fieldTrigger,
+                              'flex items-center justify-between border px-3 text-left outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-50',
+                              majCatOpen && 'border-slate-800 ring-[3px] ring-slate-800/15',
+                            )}
+                          >
+                            <span className={cn('truncate', !selectedMajorCategory && 'font-normal text-muted-foreground')}>
+                              {selectedMajorCategory ||
+                                (!selectedSubDivision
+                                  ? 'Pick a sub-division first'
+                                  : majorCategoryOptions.length === 0
+                                  ? 'None for this sub-division'
+                                  : 'Select major category')}
+                            </span>
+                            {majCatOpen ? (
+                              <ChevronUp className="ml-2 h-4 w-4 shrink-0 text-slate-800 dark:text-slate-200" />
+                            ) : (
+                              <ChevronDown className="ml-2 h-4 w-4 shrink-0 text-muted-foreground" />
+                            )}
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                          className="w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-xl border-slate-200 p-0 shadow-xl dark:border-slate-700"
+                          align="start"
+                          sideOffset={6}
+                        >
+                          <div className="flex h-12 items-center gap-2.5 border-b border-slate-200 px-3.5 dark:border-slate-700">
+                            <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+                            <input
+                              autoFocus
+                              value={majCatSearch}
+                              onChange={(e) => {
+                                setMajCatSearch(e.target.value);
+                                setMajCatActive(0);
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'ArrowDown') {
+                                  e.preventDefault();
+                                  setMajCatActive((i) => Math.min(i + 1, majCatFiltered.length - 1));
+                                } else if (e.key === 'ArrowUp') {
+                                  e.preventDefault();
+                                  setMajCatActive((i) => Math.max(i - 1, 0));
+                                } else if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  const mc = majCatFiltered[majCatActive];
+                                  if (mc) pickMajorCategory(mc);
+                                }
+                              }}
+                              placeholder="Search major category or MC code"
+                              aria-label="Search major category"
+                              aria-controls="majcat-listbox"
+                              aria-activedescendant={majCatFiltered[majCatActive] ? `majcat-opt-${majCatActive}` : undefined}
+                              className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                            />
+                            <span className="text-xs tabular-nums text-muted-foreground">
+                              {majCatSearch.trim() ? `${majCatFiltered.length} of ${majorCategoryOptions.length}` : majorCategoryOptions.length}
+                            </span>
+                          </div>
+                          <div id="majcat-listbox" role="listbox" aria-label="Major categories" className="max-h-[420px] overflow-y-auto p-1.5">
+                            {majCatFiltered.length === 0 ? (
+                              <div className="px-3 py-3 text-sm text-muted-foreground">No categories match “{majCatSearch.trim()}”</div>
+                            ) : (
+                              majCatFiltered.map((mc, i) => {
+                                const selected = selectedMajorCategory === mc;
+                                const code = getMcCodeByMajorCategory(mc);
+                                return (
+                                  <button
+                                    key={mc}
+                                    id={`majcat-opt-${i}`}
+                                    type="button"
+                                    role="option"
+                                    aria-selected={selected}
+                                    ref={i === majCatActive ? (el) => el?.scrollIntoView({ block: 'nearest' }) : undefined}
+                                    onMouseMove={() => setMajCatActive(i)}
+                                    onClick={() => pickMajorCategory(mc)}
+                                    className={cn(
+                                      'flex min-h-10 w-full items-center gap-2.5 rounded-lg px-3 text-left text-sm text-slate-900 dark:text-slate-100',
+                                      (i === majCatActive || selected) && 'bg-slate-100 dark:bg-slate-800',
+                                      selected ? 'font-bold' : 'font-medium',
+                                    )}
+                                  >
+                                    <span className="truncate">{mc}</span>
+                                    <span className="ml-auto shrink-0 font-mono text-xs font-medium text-slate-500 dark:text-slate-400">{code ?? ''}</span>
+                                    {selected ? (
+                                      <Check className="h-4 w-4 shrink-0 text-slate-800 dark:text-slate-200" />
+                                    ) : (
+                                      <span className="w-4 shrink-0" />
+                                    )}
+                                  </button>
+                                );
+                              })
+                            )}
+                          </div>
+                        </PopoverContent>
+                      </Popover>
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center justify-between gap-2 text-[12.5px] text-slate-600 dark:text-slate-400">
@@ -719,7 +896,6 @@ const SimplifiedExtractionPage = () => {
                     onDeleteRow={removeRow}
                     onImageClick={handleImageClick}
                     onReExtract={() => {}}
-                    onAddToSchema={handleAddToSchema}
                     isExtracting={isExtracting}
                   />
                 </section>

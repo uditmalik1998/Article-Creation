@@ -9,6 +9,8 @@ import {
   Maximize2,
   Sparkles,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
   ChevronDown,
   Shirt,
   DollarSign,
@@ -18,6 +20,8 @@ import {
   Search,
   Wand2,
   X,
+  Tag as TagIcon,
+  Check,
 } from 'lucide-react';
 import {
   Autocomplete,
@@ -46,23 +50,14 @@ import {
 import { message } from '@/lib/message';
 import { cn } from '@/lib/utils';
 import { CARD_THEME } from '../../approver/components/cardTheme';
-import type { ApproverItem, MasterAttribute } from './FabricArticleTable';
+import type { ApproverItem } from '../types';
 import {
   SCHEMA_KEY_TO_EXCEL_ATTR,
-  SCHEMA_KEY_TO_DB_FIELD,
   SAP_NAME_TO_SCHEMA_KEY,
   normalizeMajorCategory,
 } from '../../../data/majCatAttributeMap';
 import { getMajorCategoriesByDivision, getMcCodeByMajorCategory } from '../../../data/majorCategoryMcCodeMap';
 import {
-  preloadAttributeValues,
-  getCachedValues,
-  isValuesCached,
-  preloadAttributeGroups,
-  getCachedAttributeGroups,
-  preloadCategoryAttributes,
-  getCachedCategoryAttributes,
-  invalidateValuesCache,
   preloadMajCatGridFor,
   isMajCatGridLoadedFor,
   getMajCatGridEntry,
@@ -82,9 +77,6 @@ import FabricArticleVariantSubTable from './FabricArticleVariantSubTable';
 // Alias so the combobox trigger can use a distinct name from the plain icon
 const ChevronDownIcon = ChevronDown;
 
-// Module-level BOM cache (shared across card instances)
-const bomCache = new Map<string, Promise<Record<string, Record<string, string>>>>();
-
 // Module-level fabric grid values cache — fetched once for all cards
 // Shape: { [excelAttrName: string]: { code: string; fullForm: string }[] }
 // e.g. { M_FAB_DIV: [{code:'K', fullForm:'KNIT'}, ...], M_YARN: [...], ... }
@@ -103,57 +95,47 @@ const fetchFabricGridValues = (): Promise<FabGridValues> => {
   return fabricGridPromise;
 };
 
-// Module-level segment range cache (shared across card instances, keyed by UPPER major category)
-type SegmentRange = { segment_type: string; min: number; max: number };
-const segmentRangeCache = new Map<string, SegmentRange[]>();
-
-const fetchSegmentRangesFor = async (mc: string): Promise<SegmentRange[]> => {
-  const key = (mc || '').trim().toUpperCase();
-  if (!key) return [];
-  if (segmentRangeCache.has(key)) return segmentRangeCache.get(key)!;
-  try {
-    const token = localStorage.getItem('authToken');
-    const r = await fetch(
-      `${APP_CONFIG.api.baseURL}/article-config/segment-ranges?majorCategory=${encodeURIComponent(mc)}`,
-      { headers: token ? { Authorization: `Bearer ${token}` } : {} },
-    );
-    if (r.ok) {
-      const json = await r.json();
-      const data: SegmentRange[] = (json.data ?? []).map((row: any) => ({
-        segment_type: String(row.segment_type),
-        min: Number(row.min),
-        max: Number(row.max),
-      }));
-      segmentRangeCache.set(key, data);
-      return data;
-    }
-  } catch { /* ignore */ }
-  segmentRangeCache.set(key, []);
-  return [];
+// Fabric Segment master (by cost = RATE): upper limit of E, V, P per division; above P is SP.
+const FABRIC_SEGMENT_LIMITS: Record<'WOVEN' | 'KNITS' | 'DENIM', [number, number, number]> = {
+  WOVEN: [80, 125, 200],
+  KNITS: [300, 400, 500],
+  DENIM: [225, 275, 350],
 };
 
-const computeSegmentFromMrp = (mrp: string | null | undefined, ranges: SegmentRange[]): string | null => {
-  const m = parseFloat(String(mrp ?? ''));
-  if (isNaN(m) || ranges.length === 0) return null;
-  const match = ranges.find((r) => m >= r.min && m <= r.max);
-  return match ? match.segment_type : null;
+/** Division is stored as K / Knits / KNITS, W / Woven, D / Denim — read its first letter. */
+const fabricSegmentDivision = (division: string | null | undefined): keyof typeof FABRIC_SEGMENT_LIMITS | null => {
+  const d = String(division ?? '').trim().toUpperCase();
+  if (d.startsWith('K')) return 'KNITS';
+  if (d.startsWith('D')) return 'DENIM';
+  if (d.startsWith('W')) return 'WOVEN';
+  return null;
 };
 
-const fetchBomMap = (category: string): Promise<Record<string, Record<string, string>>> => {
-  const existing = bomCache.get(category);
-  if (existing) return existing;
-  const token = localStorage.getItem('authToken');
-  const p = fetch(`${APP_CONFIG.api.baseURL}/approver/bom-art-numbers/${encodeURIComponent(category)}`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  })
-    .then((r) => r.json())
-    .then((res) => (res?.data as Record<string, Record<string, string>>) ?? {})
-    .catch(() => ({}));
-  bomCache.set(category, p);
-  return p;
+const computeFabricSegment = (rate: string | null | undefined, division: string | null | undefined): string | null => {
+  const r = parseFloat(String(rate ?? ''));
+  const div = fabricSegmentDivision(division);
+  if (isNaN(r) || r < 0 || !div) return null;
+  const [e, v, p] = FABRIC_SEGMENT_LIMITS[div];
+  return r <= e ? 'E' : r <= v ? 'V' : r <= p ? 'P' : 'SP';
 };
 
 const f = (schemaKey: string) => SCHEMA_KEY_TO_EXCEL_ATTR[schemaKey] ?? schemaKey;
+
+// FABRIC ARTICLE DESC order per division ("FABRIC ARTICLE SEQUENCE.xlsx"):
+// M_FAB_DIV, M_YARN, M_WEAVE_01, M_LYCRA, M_FAB_MAIN_MVGR_2, M_WIDTH, M_GSM (Knits) /
+// M_OUNZ (Woven & Denim), M_COUNT, M_COMPOSITION. Other FAB fields are not part of it.
+const FAB_DESC_SEQUENCE_KNITS = ['fabDiv', 'yarn1', 'weave', 'lycra', 'fabricMainMvgr', 'fWidth', 'gsm', 'fCount', 'composition'];
+const FAB_DESC_SEQUENCE_WOVEN_DENIM = ['fabDiv', 'yarn1', 'weave', 'lycra', 'fabricMainMvgr', 'fWidth', 'fOunce', 'fCount', 'composition'];
+/** Fields that change the description, plus the division that picks the sequence. */
+const FAB_DESC_TRIGGER_FIELDS = new Set([...FAB_DESC_SEQUENCE_KNITS, 'fOunce', 'division']);
+
+/** Builds FABRIC ARTICLE DESC; division is stored as K / Knits / KNITS, so K… = Knits, anything else = Woven/Denim. */
+const buildFabricArticleDesc = (getVal: (field: string) => string | null): string | null => {
+  const division = (getVal('division') || getVal('fabDiv') || '').trim().toUpperCase();
+  const sequence = division.startsWith('K') ? FAB_DESC_SEQUENCE_KNITS : FAB_DESC_SEQUENCE_WOVEN_DENIM;
+  const parts = sequence.map((field) => getVal(field)).filter((v): v is string => Boolean(v) && !/^-+$/.test(v as string));
+  return parts.length > 0 ? parts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '') : null;
+};
 
 const SCHEMA_KEY_TO_ALL_SAP_KEYS: Record<string, string[]> = Object.entries(SAP_NAME_TO_SCHEMA_KEY).reduce(
   (acc, [sapKey, schemaKey]) => {
@@ -265,29 +247,6 @@ const ColorSelect: React.FC<{
   );
 };
 
-const GROUP_COLORS: Record<string, string> = {
-  FAB: '#e6f4ff',
-};
-const GROUP_ORDER = ['FAB'];
-
-// Construction & Fabric (FAB): full canonical field order — matches FG Articles
-// New Articles page so every user sees the same sequence regardless of backend order.
-const FAB_PRIORITY_KEYS = [
-  'fab_div',          // M_FAB_DIV
-  'yarn_01',          // M_YARN
-  'main_mvgr',        // M_FAB_MAIN_MVGR_1
-  'fabric_main_mvgr', // M_FAB_MAIN_MVGR_2
-  'f_construction',   // M_CONSTRUCTION
-  'f_width',          // M_WIDTH
-  'm_fab2',           // M_WEAVE_02
-  'f_count',          // M_COUNT
-  'weave',            // M_WEAVE_01
-  'composition',      // M_COMPOSITION
-  'finish',           // M_FINISH
-  'gsm',              // M_GSM
-  'lycra_non_lycra',  // M_LYCRA
-];
-
 // ─── Redesign tokens — header/icon palette per group ──────────────────────────
 const GROUP_LABELS: Record<string, string> = {
   FAB: 'FAB',
@@ -307,43 +266,12 @@ const GROUP_HEADER_STYLE: Record<string, { bg: string; fg: string; border: strin
 
 type CardGroup = typeof ATTRIBUTE_GROUPS[number];
 
-function buildCardGroups(entries: { key: string; type: string; group: string }[]): CardGroup[] {
-  const map = new Map<string, CardGroup['fields']>();
-  for (const e of entries) {
-    if (BOM_ONLY_SCHEMA_KEYS.has(e.key)) continue; // belongs to BOM, not attribute groups
-    if (HIDDEN_CARD_SCHEMA_KEYS.has(e.key)) continue; // hidden from card (e.g. shade, weight)
-    const dbField = SCHEMA_KEY_TO_DB_FIELD[e.key];
-    if (!dbField) continue;
-    if (!map.has(e.group)) map.set(e.group, []);
-    map.get(e.group)!.push({ field: dbField, schemaKey: e.key, freeText: e.type === 'TEXT' ? true : undefined });
-  }
-  const built = GROUP_ORDER.filter((g) => map.has(g)).map((g) => {
-    let fields = map.get(g)!;
-    if (g === 'FAB' || g === 'FABRIC') {
-      // Pin the priority keys to the top in FAB_PRIORITY_KEYS order; all other
-      // fields keep their existing relative order (Array.sort is stable).
-      const rank = (k: string) => {
-        const i = FAB_PRIORITY_KEYS.indexOf(k);
-        return i === -1 ? FAB_PRIORITY_KEYS.length : i;
-      };
-      fields = [...fields].sort((a, b) => rank(a.schemaKey) - rank(b.schemaKey));
-    }
-    return {
-      group: g,
-      color: GROUP_COLORS[g] || '#f0f0f0',
-      fields,
-    };
-  });
-  return built.length > 0 ? built : ATTRIBUTE_GROUPS.filter((g) => GROUP_ORDER.includes(g.group));
-}
-
 export interface ApproverArticleListProps {
   items: ApproverItem[];
   majorCategory: string;
   loading: boolean;
   selectedRowKeys: React.Key[];
   onSelectionChange: (keys: React.Key[]) => void;
-  onEdit: (item: ApproverItem) => void;
   onSave: (item: ApproverItem, updates: Record<string, unknown>, options?: { silent?: boolean }) => void;
   onCreateFabricArticle: (item: ApproverItem) => void;
   onCreateBodyArticle: (item: ApproverItem) => void;
@@ -356,9 +284,11 @@ export interface ApproverArticleListProps {
    * support modify (new/old/rejected) simply omit it and the button is hidden.
    */
   onModify?: (item: ApproverItem, changes: Record<string, unknown>) => Promise<void>;
-  attributes: MasterAttribute[];
   onRefresh: () => void;
   pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
+  /** Detail page (design "Option A"): the card's top strip continues the page's ink
+   *  header as one block — square top corners, no top border, divider line. */
+  joinTop?: boolean;
   hideGroups?: string[];
   fabHierarchy?: {
     divisions: string[];
@@ -366,8 +296,6 @@ export interface ApproverArticleListProps {
     majCatsBySubDiv: Record<string, string[]>;
     mcDesByMajCat: Record<string, string[]>;
   };
-  /** When true, always use the static ATTRIBUTE_GROUPS definition instead of the API-built card groups. */
-  forceStaticGroups?: boolean;
   /** When true, hides the "Create Body Article" button (e.g. on the Body Article detail page) */
   hideCreateBody?: boolean;
   /** When true, hides reference/article-desc fields and renames Article Number to Fabric Article Number. */
@@ -400,10 +328,10 @@ const ArticleCard = React.memo(
     onProceedFGArticle,
     onDuplicate,
     onModify,
-    attributes,
     onRefresh,
     cardGroups,
     pathType,
+    joinTop,
     hideGroups,
     isFGMode,
     fabHierarchy,
@@ -417,10 +345,10 @@ const ArticleCard = React.memo(
     onProceedFGArticle: (item: ApproverItem) => void;
     onDuplicate: (item: ApproverItem) => Promise<void>;
     onModify?: (item: ApproverItem, changes: Record<string, unknown>) => Promise<void>;
-    attributes: MasterAttribute[];
     onRefresh: () => void;
     cardGroups: CardGroup[];
     pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
+    joinTop?: boolean;
     hideGroups?: string[];
     isFGMode?: boolean;
     fabHierarchy?: {
@@ -491,22 +419,14 @@ const ArticleCard = React.memo(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [localValues['majorCategory'], item.majorCategory, item.division]);
 
-    // Segment ranges for the current major category — auto-filled when MRP or MC changes
-    const [segmentRanges, setSegmentRanges] = useState<SegmentRange[]>([]);
-    const segmentRangesRef = useRef<SegmentRange[]>([]);
-    segmentRangesRef.current = segmentRanges;
-
+    // SEGMENT is not editable: it always follows RATE + division (Fabric Segment master).
+    // Also corrects articles saved before this rule.
+    const segRate = String((localValues['mrp'] !== undefined ? localValues['mrp'] : item.mrp) ?? '');
+    const segDivision = String((localValues['division'] !== undefined ? localValues['division'] : item.division) ?? '')
+      || String((localValues['fabDiv'] !== undefined ? localValues['fabDiv'] : (item as any).fabDiv) ?? '');
     useEffect(() => {
-      if (!effectiveMajCat) return;
-      fetchSegmentRangesFor(effectiveMajCat).then((ranges) => setSegmentRanges(ranges));
-    }, [effectiveMajCat]);
-
-    // Auto-correct segment when ranges first load (fixes articles saved before this feature)
-    useEffect(() => {
-      if (segmentRanges.length === 0) return;
       if (item.approvalStatus !== 'PENDING') return;
-      const mrpVal = String((localValues['mrp'] !== undefined ? localValues['mrp'] : item.mrp) ?? '');
-      const expected = computeSegmentFromMrp(mrpVal, segmentRanges);
+      const expected = computeFabricSegment(segRate, segDivision);
       if (!expected) return;
       const current = String((localValues['segment'] !== undefined ? localValues['segment'] : item.segment) ?? '');
       if (expected === current) return;
@@ -515,10 +435,8 @@ const ArticleCard = React.memo(
         onSave({ ...item, segment: expected } as ApproverItem, { segment: expected } as Record<string, unknown>, { silent: true });
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [segmentRanges]);
+    }, [item.id, segRate, segDivision]);
 
-    const [cacheReady, setCacheReady] = useState(false);
-    const [catConfigReady, setCatConfigReady] = useState(false);
     // Tracks when the major-category grid JSON (for THIS article's category) has loaded
     const [gridReady, setGridReady] = useState(() => isMajCatGridLoadedFor(effectiveMajCat));
     // Tracks when the mandatory grid (for THIS article's category) has loaded
@@ -672,45 +590,16 @@ const ArticleCard = React.memo(
 
       return { visibleAttrs: visible, mandatoryKeys: mandatory };
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [effectiveMajCat, cacheReady, catConfigReady, gridReady, mandatoryGridReady, attributeFields, localValues, fabricGrid, fabricGridReady]);
+    }, [effectiveMajCat, gridReady, mandatoryGridReady, attributeFields, localValues, fabricGrid, fabricGridReady]);
 
     const [editingField, setEditingField] = useState<string | null>(null);
 
     // Vendor autocomplete state
-    const [vendorQuery, setVendorQuery] = useState('');
+    // null = not typed yet (show the saved name); '' = the user cleared the box.
+    const [vendorQuery, setVendorQuery] = useState<string | null>(null);
     const [vendorOptions, setVendorOptions] = useState<AutocompleteOption[]>([]);
     const [vendorSearching, setVendorSearching] = useState(false);
     const vendorDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    const [attrArticleNums, setAttrArticleNums] = useState<Record<string, string>>(() => {
-      try {
-        return JSON.parse((item as any).attrArticleNums || '{}');
-      } catch {
-        return {};
-      }
-    });
-    const [bomMap, setBomMap] = useState<Record<string, Record<string, string>>>({});
-
-    useEffect(() => {
-      if (!item.division) return;
-      if (isValuesCached(item.division) && getCachedValues(item.division, 'impAtrbt2') === null) {
-        invalidateValuesCache(item.division);
-      }
-      preloadAttributeValues(item.division)
-        .then(() => setCacheReady(true))
-        .catch(() => setCacheReady(true));
-    }, [item.division]);
-
-    useEffect(() => {
-      if (!effectiveMajCat) return;
-      if (getCachedCategoryAttributes(effectiveMajCat)) {
-        setCatConfigReady(true);
-        return;
-      }
-      preloadCategoryAttributes(effectiveMajCat)
-        .then(() => setCatConfigReady(true))
-        .catch(() => setCatConfigReady(true));
-    }, [effectiveMajCat]);
 
     // Fetch fabric attribute grid values (M_FAB_DIV, M_YARN, etc.) from fabric_maj_cat_grid_values
     useEffect(() => {
@@ -747,39 +636,6 @@ const ArticleCard = React.memo(
         .then(() => setMandatoryGridReady(true))
         .catch(() => setMandatoryGridReady(true));
     }, [effectiveMajCat]);
-
-    useEffect(() => {
-      if (!effectiveMajCat) return;
-      let cancelled = false;
-      fetchBomMap(effectiveMajCat).then((data) => {
-        if (!cancelled) setBomMap(data);
-      });
-      return () => {
-        cancelled = true;
-      };
-    }, [effectiveMajCat]);
-
-    const getArtNum = useCallback(
-      (schemaKey: string, field: string, currentValue: string | null): string => {
-        const excelAttrName = SCHEMA_KEY_TO_EXCEL_ATTR[schemaKey];
-        if (excelAttrName && currentValue && bomMap[excelAttrName]?.[currentValue]) {
-          return bomMap[excelAttrName][currentValue];
-        }
-        return attrArticleNums[field] || '';
-      },
-      [bomMap, attrArticleNums],
-    );
-
-    const saveAttrArticleNum = (field: string, val: string) => {
-      const updated = { ...attrArticleNums, [field]: val };
-      setAttrArticleNums(updated);
-      const attrUpdates = { attrArticleNums: JSON.stringify(updated) };
-      if (isModifyMode) {
-        setPendingChanges((prev) => ({ ...prev, ...attrUpdates }));
-        return;
-      }
-      onSave({ ...item, ...attrUpdates } as any, attrUpdates);
-    };
 
     const [failedImg, setFailedImg] = useState(false);
     const [refreshedUrl, setRefreshedUrl] = useState<string | null>(null);
@@ -823,9 +679,7 @@ const ArticleCard = React.memo(
           const v = prev[field] !== undefined ? prev[field] : (item as any)[field];
           return v ? String(v).trim() : null;
         };
-        const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter((v): v is string => Boolean(v) && !/^-+$/.test(v as string));
-        const fabJoined = fabParts.length > 0 ? fabParts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '') : null;
-        const newFabDesc = fabJoined;
+        const newFabDesc = buildFabricArticleDesc(getVal);
         const updates: Record<string, string | null> = {};
         if (newFabDesc !== null && newFabDesc !== prev['fabricArticleDescription']) updates['fabricArticleDescription'] = newFabDesc;
         return Object.keys(updates).length > 0 ? { ...prev, ...updates } : prev;
@@ -838,18 +692,11 @@ const ArticleCard = React.memo(
     React.useEffect(() => {
       if (item.approvalStatus !== 'PENDING') return;
       if (isFGMode && item.fabricArticleDescription) return; // FG: don't overwrite existing
-      // Use ATTRIBUTE_GROUPS FAB fields as fallback if cardGroups didn't populate FAB_FIELDS
-      const effectiveFabFields = FAB_FIELDS.length > 0
-        ? FAB_FIELDS
-        : (ATTRIBUTE_GROUPS.find((g) => g.group === 'FAB')?.fields ?? []).filter(
-            (f) => !f.freeText && f.field !== 'mainMvgr',
-          );
-      const fabParts = effectiveFabFields.map((f) => {
-        const v = (localValues[f.field] !== undefined ? localValues[f.field] : (item as any)[f.field]);
+      const computed = buildFabricArticleDesc((field) => {
+        const v = (localValues[field] !== undefined ? localValues[field] : (item as any)[field]);
         return v ? String(v).trim() : null;
-      }).filter((v): v is string => Boolean(v) && !/^-+$/.test(v as string));
-      if (fabParts.length === 0) return;
-      const computed = fabParts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '');
+      });
+      if (!computed) return;
       if (computed === item.fabricArticleDescription) return; // already in DB
       if (autoSavedFabDescRef.current === computed) return; // already queued this save
       autoSavedFabDescRef.current = computed;
@@ -891,6 +738,16 @@ const ArticleCard = React.memo(
 
     const imgSrc = refreshedUrl || item.imageUrl;
     const imgUrl = imgSrc && !failedImg ? getImageUrl(imgSrc) : null;
+    // Front / Back photo switch (back photo only when SRM sent one).
+    const [showBackImg, setShowBackImg] = useState(false);
+    const [backImgFailed, setBackImgFailed] = useState(false);
+    useEffect(() => {
+      setShowBackImg(false);
+      setBackImgFailed(false);
+    }, [item.id]);
+    const backImgUrl = item.backImageUrl ? getImageUrl(item.backImageUrl) : null;
+    const showingBack = showBackImg && !!backImgUrl;
+    const shownImgUrl = showingBack ? (backImgFailed ? null : backImgUrl) : imgUrl;
 
     const handleImgError = useCallback(async () => {
       if (refreshAttempted.current) {
@@ -924,7 +781,7 @@ const ArticleCard = React.memo(
       return (item as any)[field] ?? null;
     };
 
-    const searchVendors = (q: string) => {
+    const searchVendors = (q: string, by: 'name' | 'code' = 'name') => {
       setVendorQuery(q);
       if (vendorDebounceRef.current) clearTimeout(vendorDebounceRef.current);
       if (!q || q.trim().length < 2) {
@@ -936,7 +793,7 @@ const ArticleCard = React.memo(
         try {
           const token = localStorage.getItem('authToken');
           const res = await fetch(
-            `${APP_CONFIG.api.baseURL}/approver/vendor-search?q=${encodeURIComponent(q.trim())}`,
+            `${APP_CONFIG.api.baseURL}/approver/vendor-search?q=${encodeURIComponent(q.trim())}${by === 'code' ? '&by=code' : ''}`,
             { headers: token ? { Authorization: `Bearer ${token}` } : {} },
           );
           const json = await res.json();
@@ -947,15 +804,36 @@ const ArticleCard = React.memo(
               value: `${v.vendorName}||${v.vendorCode}`,
               vendorCode: v.vendorCode,
               vendorName: v.vendorName,
-              label: (
-                <div className="flex justify-between gap-2">
-                  <span className="font-medium">{v.vendorName}</span>
-                  <span className="text-[11px] text-muted-foreground">
-                    {v.vendorCode}
-                    {v.vendorCity ? ` · ${v.vendorCity}` : ''}
+              // Two lines: name (typed text highlighted), then code · city.
+              label: (() => {
+                const name = String(v.vendorName ?? '');
+                const needle = q.trim().toLowerCase();
+                const at = needle ? name.toLowerCase().indexOf(needle) : -1;
+                return (
+                  <span className="flex min-w-0 flex-col gap-0.5">
+                    <span className="truncate font-semibold">
+                      {at >= 0 ? (
+                        <>
+                          {name.slice(0, at)}
+                          <mark className="rounded-sm bg-amber-100 text-slate-900">{name.slice(at, at + needle.length)}</mark>
+                          {name.slice(at + needle.length)}
+                        </>
+                      ) : (
+                        name
+                      )}
+                    </span>
+                    <span className="flex items-center gap-1.5 text-[11.5px] text-slate-500">
+                      <span className="font-mono">{v.vendorCode}</span>
+                      {v.vendorCity && (
+                        <>
+                          <span aria-hidden="true">·</span>
+                          <span className="truncate">{v.vendorCity}</span>
+                        </>
+                      )}
+                    </span>
                   </span>
-                </div>
-              ),
+                );
+              })(),
             }),
           );
           setVendorOptions(opts);
@@ -965,6 +843,25 @@ const ArticleCard = React.memo(
           setVendorSearching(false);
         }
       }, 300);
+    };
+
+    // Picking a vendor from either dropdown (name or code) fills both fields.
+    const pickVendor = (val: string, option: AutocompleteOption) => {
+      // option.vendorName is the clean name (no code suffix)
+      const cleanName = (option as any).vendorName || String(val ?? '').split('||')[0];
+      const updates: Record<string, string | null> = { vendorName: cleanName };
+      if ((option as any).vendorCode) updates.vendorCode = (option as any).vendorCode;
+      setLocalValues((prev) => ({ ...prev, ...updates }));
+      if (isModifyMode) {
+        setPendingChanges((prev) => ({ ...prev, ...updates }));
+      } else {
+        onSave({ ...item, ...updates } as ApproverItem, updates as Record<string, unknown>);
+      }
+      // The pick also fired onChange with the option value — drop that pending search.
+      if (vendorDebounceRef.current) clearTimeout(vendorDebounceRef.current);
+      setEditingField(null);
+      setVendorOptions([]);
+      setVendorQuery(null);
     };
 
     const handleSave = (field: string, value: string | null) => {
@@ -982,8 +879,11 @@ const ArticleCard = React.memo(
         return;
       }
       const updates: Record<string, string | null> = { [field]: value };
-      if (field === 'mrp') {
-        const seg = computeSegmentFromMrp(value, segmentRangesRef.current);
+      if (field === 'mrp' || field === 'division') {
+        const seg = computeFabricSegment(
+          field === 'mrp' ? value : getValue('mrp'),
+          (field === 'division' ? value : getValue('division')) || getValue('fabDiv'),
+        );
         if (seg) updates['segment'] = seg;
       }
       if (field === 'majorCategory' && value) {
@@ -991,26 +891,15 @@ const ArticleCard = React.memo(
         if (newMcCode) updates['mcCode'] = newMcCode;
         const mcDesOptions = fabHierarchy?.mcDesByMajCat[value] ?? [];
         if (mcDesOptions.length > 0) updates['mcDescription'] = mcDesOptions[0];
-        const currentMrp = getValue('mrp');
-        fetchSegmentRangesFor(value).then((ranges) => {
-          setSegmentRanges(ranges);
-          const seg = computeSegmentFromMrp(currentMrp, ranges);
-          if (seg) {
-            setLocalValues((prev) => ({ ...prev, segment: seg }));
-            onSave({ ...item, segment: seg } as ApproverItem, { segment: seg } as Record<string, unknown>);
-          }
-        });
       }
       // When a Construction & Fabric attribute changes, recompute fabricArticleDescription
       // and bundle it into the same save so the DB value stays in sync with the UI.
-      const fabFieldKeys = new Set(FAB_FIELDS.map((ff) => ff.field));
-      if (fabFieldKeys.has(field)) {
+      if (FAB_DESC_TRIGGER_FIELDS.has(field)) {
         const getVal = (f: string) => {
           const v = updates[f] !== undefined ? updates[f] : (localValues[f] !== undefined ? localValues[f] : (item as any)[f]);
           return v ? String(v).trim() : null;
         };
-        const fabParts = FAB_FIELDS.map((f) => getVal(f.field)).filter((v): v is string => Boolean(v) && !/^-+$/.test(v as string));
-        const newFabDesc = fabParts.length > 0 ? fabParts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, '') : null;
+        const newFabDesc = buildFabricArticleDesc(getVal);
         if (newFabDesc) updates['fabricArticleDescription'] = newFabDesc;
       }
       setLocalValues((prev) => ({ ...prev, ...updates }));
@@ -1151,7 +1040,7 @@ const ArticleCard = React.memo(
           {/* Label stacked above a full-width value (same as the FG page). */}
           <div className="flex flex-col gap-0.5 px-3 py-1.5">
             <span
-              className="text-[10px] font-semibold uppercase tracking-wider"
+              className="text-[12px] font-semibold uppercase tracking-wider"
               style={{ color: showRequiredError ? '#c2410c' : '#475569' }}
             >
               {label}
@@ -1169,7 +1058,7 @@ const ArticleCard = React.memo(
                   <PopoverTrigger asChild>
                     <button
                       type="button"
-                      className="flex h-7 w-full items-center justify-between rounded border border-input bg-background px-2 text-xs hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                      className="flex h-7 w-full items-center justify-between rounded border border-input bg-background px-2 text-sm hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
                     >
                       <span className="truncate text-left">{displayVal || 'Select...'}</span>
                       <ChevronDownIcon className="ml-1 h-3 w-3 shrink-0 text-muted-foreground" />
@@ -1228,7 +1117,7 @@ const ArticleCard = React.memo(
                   <PopoverTrigger asChild>
                     <button
                       type="button"
-                      className="flex h-7 w-full items-center justify-between rounded border border-input bg-background px-2 text-xs hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                      className="flex h-7 w-full items-center justify-between rounded border border-input bg-background px-2 text-sm hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
                     >
                       <span className="truncate text-left">{displayVal || 'Select...'}</span>
                       <ChevronDownIcon className="ml-1 h-3 w-3 shrink-0 text-muted-foreground" />
@@ -1268,45 +1157,50 @@ const ArticleCard = React.memo(
                     </div>
                   </PopoverContent>
                 </Popover>
+              ) : isEditingThis && field === 'vendorCode' ? (
+                <Autocomplete
+                  autoFocus
+                  value={vendorQuery ?? displayVal ?? ''}
+                  onChange={(q) => searchVendors(q, 'code')}
+                  options={vendorOptions}
+                  header={`${vendorOptions.length} vendor${vendorOptions.length !== 1 ? 's' : ''} · ↑ ↓ to move, Enter to pick`}
+                  placeholder="Type 2+ digits of the vendor code"
+                  notFoundContent={vendorSearching ? <span className="flex items-center gap-2"><Spinner size="sm" /> Searching vendors…</span> : null}
+                  onSelect={pickVendor}
+                  onBlur={(e) => {
+                    // A typed code (not picked) is saved as-is; handleSave checks it is 6 digits.
+                    const val = (e.target as HTMLInputElement).value.trim();
+                    if (val && val !== (displayVal ?? '')) handleSave('vendorCode', val);
+                    else setEditingField(null);
+                    setVendorOptions([]);
+                    setVendorQuery(null);
+                  }}
+                  className="text-sm"
+                />
               ) : isEditingThis && field === 'vendorName' ? (
                 <Autocomplete
                   autoFocus
-                  value={vendorQuery || displayVal || ''}
+                  value={vendorQuery ?? displayVal ?? ''}
                   onChange={searchVendors}
                   options={vendorOptions}
-                  notFoundContent={vendorSearching ? <Spinner size="sm" /> : null}
-                  onSelect={(val, option) => {
-                    // option.vendorName is the clean name (no code suffix)
-                    const cleanName = (option as any).vendorName || String(val ?? '').split('||')[0];
-                    const updates: Record<string, string | null> = { vendorName: cleanName };
-                    if ((option as any).vendorCode) updates.vendorCode = (option as any).vendorCode;
-                    setLocalValues((prev) => ({ ...prev, ...updates }));
-                    if (isModifyMode) {
-                      setPendingChanges((prev) => ({ ...prev, ...updates }));
-                    } else {
-                      onSave(
-                        { ...item, ...updates } as ApproverItem,
-                        updates as Record<string, unknown>,
-                      );
-                    }
-                    setEditingField(null);
-                    setVendorOptions([]);
-                    setVendorQuery('');
-                  }}
+                  header={`${vendorOptions.length} vendor${vendorOptions.length !== 1 ? 's' : ''} · ↑ ↓ to move, Enter to pick`}
+                  placeholder="Type 2+ letters of the vendor name"
+                  notFoundContent={vendorSearching ? <span className="flex items-center gap-2"><Spinner size="sm" /> Searching vendors…</span> : null}
+                  onSelect={pickVendor}
                   onBlur={(e) => {
                     const val = (e.target as HTMLInputElement).value;
                     if (val) handleSave('vendorName', val);
                     else setEditingField(null);
                     setVendorOptions([]);
-                    setVendorQuery('');
+                    setVendorQuery(null);
                   }}
-                  className="text-xs"
+                  className="text-sm"
                 />
               ) : isEditingThis ? (
                 <Input
                   autoFocus
                   defaultValue={displayVal || ''}
-                  className="h-7 px-1 text-xs"
+                  className="h-8 px-2 text-sm"
                   onKeyDown={(e) =>
                     e.key === 'Enter' && handleSave(field, (e.target as HTMLInputElement).value || null)
                   }
@@ -1318,11 +1212,11 @@ const ArticleCard = React.memo(
                   className={`block truncate ${
                     displayVal
                       ? field === 'majorCategory' || field === 'mcDescription'
-                        ? 'font-mono text-[11.5px] text-slate-900'
-                        : 'text-[12.5px] font-semibold text-slate-900'
+                        ? 'font-mono text-[13.5px] text-slate-900'
+                        : 'text-[14.5px] font-semibold text-slate-900'
                       : showRequiredError
-                      ? 'text-xs font-semibold italic text-orange-700'
-                      : 'text-xs italic text-slate-500'
+                      ? 'text-sm font-semibold italic text-orange-700'
+                      : 'text-sm italic text-slate-500'
                   }`}
                 >
                   {displayVal || (showRequiredError ? 'Required' : canEdit ? 'Click to fill' : '—')}
@@ -1342,7 +1236,9 @@ const ArticleCard = React.memo(
       freeText: boolean;
       group: string;
       isMandatory?: boolean;
-    }) => {
+    }, big = false) => {
+      // big = Fabric FAB card (matches the FG FAB card): 13 px names, 14 px values, 26 px rows.
+      const valueText = big ? 'text-[14px]' : 'text-[11px]';
       _attrCounter += 1;
       const num = _attrCounter;
       const currentValue = getValue(attr.field);
@@ -1356,7 +1252,7 @@ const ArticleCard = React.memo(
       return (
         <div
           key={attr.field}
-          className="group flex items-center gap-1.5 rounded px-1 py-0.5 transition-colors hover:bg-muted/40"
+          className={cn('group flex items-center rounded transition-colors hover:bg-muted/40', big ? 'mb-0.5 min-h-[26px] gap-2 px-2 py-0.5' : 'gap-1.5 px-1 py-0.5')}
           style={{
             cursor: attrLocked ? 'default' : 'pointer',
             background: isEditing
@@ -1373,23 +1269,24 @@ const ArticleCard = React.memo(
             if (!attrLocked && !isEditing) setEditingField(attr.field);
           }}
         >
-          <span className="w-4 shrink-0 text-right text-[10px] font-bold tabular-nums text-muted-foreground">{num}.</span>
+          <span className={cn('shrink-0 text-right font-bold tabular-nums text-muted-foreground', big ? 'w-6 text-[12px]' : 'w-4 text-[10px]')}>{num}.</span>
           <span
             className={cn(
-              'flex-1 truncate text-[10.5px] leading-snug',
+              'flex-1 truncate leading-snug',
+              big ? 'text-[13px]' : 'text-[10.5px]',
               isMandatory ? 'key-field text-foreground' : 'font-semibold text-foreground/80',
             )}
           >
             {isMandatory && <span className="mandatory-mark">*</span>}
             {attr.label}
           </span>
-          <div className="w-[110px] shrink-0">
+          <div className={cn('shrink-0', big ? 'w-[180px]' : 'w-[110px]')}>
             {attr.freeText ? (
               isEditing ? (
                 <Input
                   autoFocus
                   defaultValue={isEffectivelyEmpty ? '' : currentValue || ''}
-                  className="h-6 px-1 text-[11px]"
+                  className={big ? 'h-7 px-2 text-[13px]' : 'h-6 px-1 text-[11px]'}
                   onKeyDown={(e) =>
                     e.key === 'Enter' && handleSave(attr.field, (e.target as HTMLInputElement).value || null)
                   }
@@ -1397,7 +1294,7 @@ const ArticleCard = React.memo(
                 />
               ) : (
                 <span
-                  className="block truncate text-right text-[11px]"
+                  className={cn('block truncate text-right', valueText)}
                   style={{
                     color: isEffectivelyEmpty ? (isMandatory ? '#dc2626' : '#9ca3af') : '#111827',
                     fontStyle: isEffectivelyEmpty && !isMandatory ? 'italic' : 'normal',
@@ -1426,7 +1323,10 @@ const ArticleCard = React.memo(
                 <PopoverTrigger asChild>
                   <button
                     type="button"
-                    className="flex h-6 w-full items-center justify-between rounded border border-input bg-background px-1.5 text-[11px] hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                    className={cn(
+                      'flex w-full items-center justify-between rounded border border-input bg-background hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring',
+                      big ? 'h-7 px-2 text-[13px]' : 'h-6 px-1.5 text-[11px]',
+                    )}
                   >
                     <span className="truncate text-left">
                       {isEffectivelyEmpty ? 'Select' : currentValue}
@@ -1435,18 +1335,26 @@ const ArticleCard = React.memo(
                   </button>
                 </PopoverTrigger>
                 <PopoverContent
-                  className="w-48 p-0"
+                  className="w-64 overflow-hidden rounded-xl border-slate-200 p-0 shadow-xl dark:border-slate-700"
                   align="end"
+                  sideOffset={6}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="flex items-center border-b px-2 py-1.5">
-                    <Search className="mr-1.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                  {/* Dropdown (Fabric pages): titled panel, roomier search, code + full name per
+                      row, slate highlight + check on the current value; text 1 px up. */}
+                  <div className="flex items-center justify-between gap-2 border-b border-slate-100 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-900">
+                    <span className="truncate text-[12px] font-bold uppercase tracking-wide text-slate-700 dark:text-slate-200">{attr.label}</span>
+                    <span className="shrink-0 text-[11px] text-slate-500">{attr.values.length} options</span>
+                  </div>
+                  <div className="flex h-10 items-center gap-2 border-b border-slate-200 px-3 dark:border-slate-700">
+                    <Search className="h-4 w-4 shrink-0 text-slate-500" />
                     <input
                       autoFocus
                       value={attrSearch}
                       onChange={(e) => setAttrSearch(e.target.value)}
-                      placeholder="Search..."
-                      className="flex-1 bg-transparent text-[11px] outline-none placeholder:text-muted-foreground"
+                      placeholder="Search code or name…"
+                      aria-label={`Search ${attr.label}`}
+                      className="flex-1 bg-transparent text-[12.5px] outline-none placeholder:text-slate-400"
                     />
                   </div>
                   {!isEffectivelyEmpty && (
@@ -1456,13 +1364,14 @@ const ArticleCard = React.memo(
                         handleSave(attr.field, null);
                         setAttrSearch('');
                       }}
-                      className="flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left text-[11px] font-medium text-red-600 hover:bg-red-50"
+                      className="flex w-full items-center gap-2 border-b border-slate-100 px-3 py-2 text-left text-[12px] font-semibold text-red-700 hover:bg-red-50 dark:border-slate-800"
                     >
-                      <X className="h-3 w-3 shrink-0" />
+                      <X className="h-3.5 w-3.5 shrink-0" />
                       Clear selection
+                      <span className="ml-auto truncate font-mono text-[11.5px] font-medium text-slate-500">{currentValue}</span>
                     </button>
                   )}
-                  <div className="max-h-56 overflow-y-auto py-1">
+                  <div className="max-h-64 overflow-y-auto p-1.5">
                     {(() => {
                       const q = attrSearch.trim().toLowerCase();
                       const matches = attr.values.filter(
@@ -1472,39 +1381,45 @@ const ArticleCard = React.memo(
                       );
                       if (matches.length === 0) {
                         return (
-                          <div className="px-3 py-2 text-[11px] text-muted-foreground">
-                            No options found
+                          <div className="px-3 py-3 text-[12px] text-slate-500">
+                            No options match “{attrSearch.trim()}”
                           </div>
                         );
                       }
-                      return matches.map((v) => (
-                        <button
-                          key={v.shortForm}
-                          type="button"
-                          onClick={() => {
-                            handleSave(attr.field, v.shortForm);
-                            setAttrSearch('');
-                          }}
-                          className={cn(
-                            'flex w-full flex-col px-3 py-1.5 text-left text-[11px] hover:bg-accent hover:text-accent-foreground',
-                            v.shortForm === currentValue && 'bg-accent/60',
-                          )}
-                        >
-                          <span className="font-medium">{v.shortForm}</span>
-                          {v.fullForm && v.fullForm !== v.shortForm && (
-                            <span className="truncate text-[10px] text-muted-foreground">
-                              {v.fullForm}
+                      return matches.map((v) => {
+                        const selected = v.shortForm === currentValue;
+                        return (
+                          <button
+                            key={v.shortForm}
+                            type="button"
+                            onClick={() => {
+                              handleSave(attr.field, v.shortForm);
+                              setAttrSearch('');
+                            }}
+                            className={cn(
+                              'flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left transition-colors',
+                              selected ? 'bg-slate-100 dark:bg-slate-800' : 'hover:bg-slate-50 dark:hover:bg-slate-800/60',
+                            )}
+                          >
+                            <span className="flex min-w-0 flex-1 flex-col">
+                              <span className={cn('truncate text-[12.5px] text-slate-900 dark:text-slate-100', selected ? 'font-bold' : 'font-semibold')}>
+                                {v.shortForm}
+                              </span>
+                              {v.fullForm && v.fullForm !== v.shortForm && (
+                                <span className="truncate text-[11px] text-slate-500 dark:text-slate-400">{v.fullForm}</span>
+                              )}
                             </span>
-                          )}
-                        </button>
-                      ));
+                            {selected && <Check className="h-4 w-4 shrink-0 text-slate-800 dark:text-slate-200" />}
+                          </button>
+                        );
+                      });
                     })()}
                   </div>
                 </PopoverContent>
               </Popover>
             ) : (
               <span
-                className="flex items-center justify-end gap-1 text-right text-[11px]"
+                className={cn('flex items-center justify-end gap-1 text-right', valueText)}
                 style={{
                   color: isEffectivelyEmpty ? (isMandatory ? '#dc2626' : '#9ca3af') : '#111827',
                   fontStyle: isEffectivelyEmpty && !isMandatory ? 'italic' : 'normal',
@@ -1514,7 +1429,7 @@ const ArticleCard = React.memo(
                 <span className="truncate">
                   {isEffectivelyEmpty ? (isMandatory ? 'Required' : '—') : currentValue}
                 </span>
-                <ChevronDown className="h-3 w-3 shrink-0 opacity-40" />
+                <ChevronDown className={cn('shrink-0 opacity-40', big ? 'h-4 w-4' : 'h-3 w-3')} />
               </span>
             )}
           </div>
@@ -1614,7 +1529,7 @@ const ArticleCard = React.memo(
     const isSrm = item.source === 'SRM';
     const infoRows: { label: string; value: React.ReactNode }[] = [
       ...(!isSrm
-        ? [{ label: 'Article ID', value: item.sapArticleId || item.articleNumber || item.imageName || '—' }]
+        ? [{ label: 'Article ID', value: item.sapArticleId || item.articleNumber || '—' }]
         : []),
       {
         label: 'Category',
@@ -1645,20 +1560,23 @@ const ArticleCard = React.memo(
       <>
         <div
           key={item.id}
-          className="animate-in flex flex-col rounded-xl border bg-white shadow-sm transition-all fade-in-50 slide-in-from-bottom-1 duration-300"
+          className={cn(
+            'animate-in flex flex-col border bg-white shadow-sm transition-all fade-in-50 slide-in-from-bottom-1 duration-300',
+            joinTop ? 'rounded-b-xl rounded-t-none border-t-0' : 'rounded-xl',
+          )}
           style={{ borderColor }}
         >
           {/* ─── TOP HEADER STRIP (slate, matches dashboard) ─── */}
           <div
-            className="flex items-center justify-between gap-3 px-4 py-2 text-white"
-            style={{ background: 'linear-gradient(90deg, #1f2937 0%, #334155 100%)' }}
+            className={cn('flex items-center justify-between gap-3 px-4 py-2.5 text-white', joinTop && 'border-t border-white/10')}
+            style={{ background: joinTop ? '#1e293b' : 'linear-gradient(90deg, #1f2937 0%, #334155 100%)' }}
           >
             <div className="flex min-w-0 flex-1 items-center gap-3">
               <Checkbox
                 checked={isSelected}
                 disabled={item.approvalStatus === 'REJECTED'}
                 onCheckedChange={() => onToggleSelect(item.id)}
-                className="border-white/60 bg-white/10 data-[state=checked]:bg-white data-[state=checked]:text-[#FF6F61]"
+                className="border-white/60 bg-white/10 data-[state=checked]:bg-white data-[state=checked]:text-slate-900"
               />
               <Badge
                 style={{ background: status.color + 'cc', color: '#fff', borderColor: status.color }}
@@ -1857,7 +1775,10 @@ const ArticleCard = React.memo(
             </div>
             <div className="flex shrink-0 items-center gap-2">
               {item.pptNumber && (
-                <Badge className="bg-amber-300 text-amber-950">PPT: {item.pptNumber}</Badge>
+                <Badge className="gap-1.5 border border-white/15 bg-white/10 font-mono text-[12px] font-semibold text-white">
+                  <TagIcon className="h-3.5 w-3.5" />
+                  PPT {item.pptNumber}
+                </Badge>
               )}
               {isModifyMode && (
                 <Button
@@ -1903,17 +1824,21 @@ const ArticleCard = React.memo(
               {/* Same design as the FG page ("Option A · Ink headers") */}
               <div className="overflow-hidden rounded-xl border border-slate-300 bg-white">
                 {renderInkCardHeader('Article Image', {
-                  right: <span className="rounded-full bg-slate-700 px-2 py-0.5 text-[10.5px] font-semibold">1 / 1</span>,
+                  right: (
+                    <span className="rounded-full bg-slate-700 px-2 py-0.5 text-[10.5px] font-semibold">
+                      {backImgUrl ? `${showingBack ? 'Back · 2' : 'Front · 1'} / 2` : '1 / 1'}
+                    </span>
+                  ),
                 })}
                 <div className="flex flex-col gap-2 p-3">
                   <div className="relative h-[420px] w-full overflow-hidden rounded-lg bg-slate-100">
-                    {imgUrl ? (
+                    {shownImgUrl ? (
                       <>
                         <img
-                          src={imgUrl}
+                          src={shownImgUrl}
                           alt=""
                           className="block h-full w-full cursor-zoom-in object-contain p-2"
-                          onError={handleImgError}
+                          onError={showingBack ? () => setBackImgFailed(true) : handleImgError}
                           onClick={() => setImgModalOpen(true)}
                         />
                         <button
@@ -1926,14 +1851,36 @@ const ArticleCard = React.memo(
                         </button>
                       </>
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center text-xs text-slate-500">No image</div>
+                      <div className="flex h-full w-full items-center justify-center text-xs text-slate-500">
+                        {showingBack ? 'Back photo unavailable' : 'No image'}
+                      </div>
+                    )}
+                    {backImgUrl && (
+                      <>
+                        <span className="absolute left-2.5 top-2.5 rounded-md bg-slate-900 px-2.5 py-1 text-[10.5px] font-bold tracking-[0.06em] text-white">
+                          {showingBack ? 'BACK' : 'FRONT'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setShowBackImg(false)}
+                          disabled={!showingBack}
+                          aria-label="Show front photo"
+                          className="absolute left-2.5 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow hover:bg-white disabled:pointer-events-none disabled:opacity-0"
+                        >
+                          <ChevronLeft className="h-5 w-5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowBackImg(true)}
+                          disabled={showingBack}
+                          aria-label="Show back photo"
+                          className="absolute right-2.5 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow hover:bg-white disabled:pointer-events-none disabled:opacity-0"
+                        >
+                          <ChevronRight className="h-5 w-5" />
+                        </button>
+                      </>
                     )}
                   </div>
-                  {item.imageName && (
-                    <span className="truncate font-mono text-[11px] text-slate-600" title={item.imageName}>
-                      {item.imageName}
-                    </span>
-                  )}
                 </div>
               </div>
 
@@ -1949,7 +1896,7 @@ const ArticleCard = React.memo(
                   ),
                 })}
                 {isLeftCardOpen('info') && (
-                  <dl className="m-0 grid grid-cols-[110px_minmax(0,1fr)] px-3 py-1 text-xs">
+                  <dl className="m-0 grid grid-cols-[120px_minmax(0,1fr)] px-3 py-1 text-sm">
                     {infoRows.map(({ label, value }, i) => (
                       <React.Fragment key={label}>
                         <dt className={`py-1.5 text-slate-600 ${i < infoRows.length - 1 ? 'border-b border-slate-100' : ''}`}>{label}</dt>
@@ -2072,7 +2019,7 @@ const ArticleCard = React.memo(
                         </button>
                         {!collapsed && (
                           <div className="space-y-0 p-1">
-                            {groupMap[g.group].attrs.map((attr) => renderAttributeRow(attr))}
+                            {groupMap[g.group].attrs.map((attr) => renderAttributeRow(attr, g.group === 'FAB'))}
 
                             {/* FAB: fabric article number + description + button */}
                             {g.group === 'FAB' &&
@@ -2100,7 +2047,7 @@ const ArticleCard = React.memo(
                                       }}
                                     >
                                       <div className="mb-0.5 flex items-center justify-between gap-1">
-                                        <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                                           {label}
                                         </span>
                                         {autoFillFn && !isLocked && (
@@ -2121,7 +2068,7 @@ const ArticleCard = React.memo(
                                           autoFocus
                                           defaultValue={displayVal || ''}
                                           maxLength={maxLen}
-                                          className="h-6 px-1 text-[11px]"
+                                          className="h-7 px-2 text-[13px]"
                                           onKeyDown={(e) =>
                                             e.key === 'Enter' && saveVal((e.target as HTMLInputElement).value)
                                           }
@@ -2129,7 +2076,7 @@ const ArticleCard = React.memo(
                                         />
                                       ) : (
                                         <div
-                                          className="truncate text-[11px]"
+                                          className="truncate text-[14px] font-semibold"
                                           style={{ color: displayVal ? '#111827' : '#9ca3af' }}
                                         >
                                           {displayVal || (isLocked ? '—' : 'Click to fill')}
@@ -2139,14 +2086,11 @@ const ArticleCard = React.memo(
                                   );
                                 };
                                 const fabAutoFill = () => {
-                                  const parts = FAB_FIELDS.filter((ff) => mandatoryKeys.has(ff.schemaKey))
-                                    .map((ff) => {
-                                      const v = localValues[ff.field] !== undefined ? localValues[ff.field] : (item as any)[ff.field];
-                                      return v ? String(v).trim() : null;
-                                    })
-                                    .filter((v): v is string => Boolean(v) && !/^-+$/.test(v as string));
-                                  if (parts.length > 0)
-                                    handleSave('fabricArticleDescription', parts.join('-').replace(/-{2,}/g, '-').replace(/-+$/, ''));
+                                  const desc = buildFabricArticleDesc((field) => {
+                                    const v = localValues[field] !== undefined ? localValues[field] : (item as any)[field];
+                                    return v ? String(v).trim() : null;
+                                  });
+                                  if (desc) handleSave('fabricArticleDescription', desc);
                                 };
                                 return (
                                   <>
@@ -2186,7 +2130,7 @@ const ArticleCard = React.memo(
                         ] : []),
                         { label: 'ARTICLE FASHION TYPE', field: 'articleFashionType', editable: true, mandatory: true, isDropdown: true, isColor: false, isMarkdown: false, boldLabel: true },
                         ...(!isFGMode ? [
-                          { label: 'SEGMENT', field: 'segment', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false, boldLabel: true },
+                          { label: 'SEGMENT', field: 'segment', editable: false, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false, boldLabel: true },
                         ] : []),
                         ...(isFGMode ? [
                           { label: 'VENDOR FABRIC RATE', field: 'fabricRate', editable: true, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false },
@@ -2199,19 +2143,14 @@ const ArticleCard = React.memo(
                         const val = String(getValue(bom.field) ?? '').trim() || '—';
                         const isEmpty = val === '—';
                         const dropdownOptions: string[] = bom.isDropdown
-                          ? bom.field === 'impAtrbt2'
-                            ? getMajCatGridEntry(effectiveMajCat, 'IMP ATBT') ??
-                              attributes.find((a) => a.key === 'imp_atrbt2')?.allowedValues.map((v) => v.shortForm) ??
-                              getCachedValues(item.division ?? '', 'impAtrbt2') ??
-                              []
-                            : bom.field === 'articleFashionType'
+                          ? bom.field === 'articleFashionType'
                             ? ['C']
-                            : getCachedValues(item.division ?? '', bom.field) ?? []
+                            : []
                           : [];
                         return (
                           <div
                             key={bom.field}
-                            className="flex items-center gap-1.5 rounded px-1 py-0.5 transition-colors hover:bg-muted/40"
+                            className="mb-0.5 flex min-h-[26px] items-center gap-2 rounded px-2 py-0.5 transition-colors hover:bg-muted/40"
                             style={{
                               cursor: bom.editable && !bomLocked ? 'pointer' : 'default',
                               background: isEditingBom
@@ -2225,7 +2164,7 @@ const ArticleCard = React.memo(
                             }}
                           >
                             <span
-                              className="flex-1 truncate text-[11px]"
+                              className="flex-1 truncate text-[13px]"
                               style={{
                                 color: bom.mandatory && isEmpty && !isLocked ? '#dc2626' : '#374151',
                                 fontWeight: bom.mandatory || (bom as any).boldLabel ? 600 : 400,
@@ -2249,7 +2188,7 @@ const ArticleCard = React.memo(
                                   onValueChange={(v) => handleSave(bom.field, v ?? null)}
                                   onOpenChange={(open) => { if (!open) setEditingField(null); }}
                                 >
-                                  <SelectTrigger className="h-6 w-full text-[11px]">
+                                  <SelectTrigger className="h-7 w-full text-[13px]">
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -2264,7 +2203,7 @@ const ArticleCard = React.memo(
                                 <Input
                                   autoFocus
                                   defaultValue={val === '—' ? '' : val}
-                                  className="h-6 px-1 text-[11px]"
+                                  className="h-7 px-2 text-[13px]"
                                   onKeyDown={(e) =>
                                     e.key === 'Enter' &&
                                     handleSave(bom.field, (e.target as HTMLInputElement).value || null)
@@ -2273,7 +2212,7 @@ const ArticleCard = React.memo(
                                 />
                               ) : (
                                 <span
-                                  className="block truncate text-[11px]"
+                                  className="block truncate text-[14px]"
                                   style={{
                                     color: bom.mandatory && isEmpty && !isLocked
                                       ? '#ea580c'
@@ -2355,7 +2294,6 @@ const ArticleCard = React.memo(
                   <FabricVariantSubTable
                     genericId={item.id}
                     genericRecord={item}
-                    attributes={attributes}
                     onRefresh={onRefresh}
                     pathType={pathType}
                   />
@@ -2385,7 +2323,7 @@ const ArticleCard = React.memo(
         >
           <DialogContent className="w-auto max-w-[92vw] p-0">
             <DialogHeader className="flex flex-row items-center justify-between border-b border-border px-4 py-2">
-              <DialogTitle className="truncate text-sm">{item.imageName || 'Image Preview'}</DialogTitle>
+              <DialogTitle className="truncate text-sm">{item.designNumber || 'Image Preview'}</DialogTitle>
               {/* Zoom + rotate controls */}
               <div className="mr-8 flex items-center gap-1">
                 <Button
@@ -2433,8 +2371,8 @@ const ArticleCard = React.memo(
             </DialogHeader>
             <div className="flex items-center justify-center overflow-auto p-4" style={{ maxHeight: '80vh' }}>
               <img
-                src={imgUrl || ''}
-                alt={item.imageName || 'preview'}
+                src={shownImgUrl || ''}
+                alt={item.designNumber || 'preview'}
                 className="block transition-transform duration-200 will-change-transform"
                 style={{
                   maxWidth: '85vw',
@@ -2491,37 +2429,20 @@ export const FabricArticleList: React.FC<ApproverArticleListProps> = ({
   loading,
   selectedRowKeys,
   onSelectionChange,
-  onEdit: _onEdit,
   onSave,
   onCreateFabricArticle,
   onCreateBodyArticle,
   onProceedFGArticle,
   onModify,
-  attributes,
   onRefresh,
   pathType,
+  joinTop,
   hideGroups,
   isFGMode,
-  forceStaticGroups,
   serverPagination,
   fabHierarchy,
 }) => {
-  const [cardGroups, setCardGroups] = useState<CardGroup[]>(() => {
-    if (forceStaticGroups) return ATTRIBUTE_GROUPS;
-    const cached = getCachedAttributeGroups();
-    return cached && cached.length > 0 ? buildCardGroups(cached) : ATTRIBUTE_GROUPS;
-  });
-
-  useEffect(() => {
-    if (forceStaticGroups) return;
-    preloadAttributeGroups()
-      .then((entries) => {
-        if (entries.length > 0) setCardGroups(buildCardGroups(entries));
-      })
-      .catch(() => {
-        /* keep hardcoded fallback */
-      });
-  }, []);
+  const cardGroups = ATTRIBUTE_GROUPS;
 
   const handleToggleSelect = useCallback(
     (id: string) => {
@@ -2584,10 +2505,10 @@ export const FabricArticleList: React.FC<ApproverArticleListProps> = ({
           onProceedFGArticle={onProceedFGArticle}
           onDuplicate={handleDuplicate}
           onModify={onModify}
-          attributes={attributes}
           onRefresh={onRefresh}
           cardGroups={cardGroups}
           pathType={pathType}
+          joinTop={joinTop}
           hideGroups={hideGroups}
           isFGMode={isFGMode}
           fabHierarchy={fabHierarchy}

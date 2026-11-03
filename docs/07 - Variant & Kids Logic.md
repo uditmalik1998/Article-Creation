@@ -31,7 +31,7 @@ flowchart TD
 
 **Service**: `Backend/src/services/variantCreationService.ts`  
 **Triggered**: After generic article approval (called from `approveItems`)  
-**Source file**: `Backend/data/variant-sizes-mapping.xlsx`
+**Source**: `maj_cat_sizes` table (status = 'ACT'), via `getSizesForMajCat()`
 
 ### How it works
 1. Look up major category in the Excel mapping → get list of sizes

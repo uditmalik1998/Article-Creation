@@ -256,7 +256,11 @@ export async function submitBodyArticles(ids: string[]): Promise<{
 
             return { id: row.id, success, sapArticleNumber: sapNumber ?? undefined, message: msg };
         } catch (err: any) {
-            const msg = err?.message ?? 'Network error';
+            // On a timeout SAP may still have created the article — say so, so nobody
+            // retries blindly and makes a second one.
+            const msg = err?.name === 'AbortError'
+                ? 'SAP did not answer within 120s — the body article may still have been created in SAP. Check SAP before retrying.'
+                : (err?.message ?? 'Network error');
             await prisma.bodyArticleData.update({
                 where: { id: row.id },
                 data: { sapSyncStatus: 'FAILED', sapSyncMessage: msg },

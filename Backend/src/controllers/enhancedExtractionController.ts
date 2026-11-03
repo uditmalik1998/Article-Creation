@@ -1,8 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { VLMService } from '../services/vlm/vlmService';
+import { vlmService } from '../services/vlm/vlmService';
 import { ImageProcessor } from '../utils/imageProcessor';
 import { cacheService } from '../services/cacheService';
-import { SchemaService } from '../services/schemaService';
 import { prismaClient as prisma } from '../utils/prisma';
 import fs from 'fs';
 import path from 'path';
@@ -15,13 +14,11 @@ import { buildArticleDescription } from '../utils/articleDescriptionBuilder';
 import { getExcludedDescriptionFields } from '../utils/categoryFieldVisibility';
 import { duplicateForKidsDivision } from '../services/kidsDivisionDuplicationService';
 import { createVariantsForGeneric } from '../services/variantCreationService';
-import { mirror360FlatUpdate } from '../utils/mirror360Flat';
 import { hierarchyService } from '../services/hierarchyService';
 import { snapValueToGrid } from '../utils/gridSnap';
 
 export class EnhancedExtractionController {
-  private vlmService = new VLMService();
-  private schemaService = new SchemaService();
+  private vlmService = vlmService;
 
   private async persistExtractionJob(params: {
     image: string | null;
@@ -418,6 +415,13 @@ export class EnhancedExtractionController {
             directFill.designNumber = designNumber;
           }
 
+          // CMP COST card "AI SAM" (minutes per process) from the same Gemini call.
+          const aiSam = result.aiSam;
+          if (aiSam?.cutting != null) directFill.aiCmpCostCutting = String(aiSam.cutting);
+          if (aiSam?.stitching != null) directFill.aiCmpCostStitching = String(aiSam.stitching);
+          if (aiSam?.ironing != null) directFill.aiCmpCostIroning = String(aiSam.ironing);
+          if (aiSam?.finishing != null) directFill.aiCmpCostFinishing = String(aiSam.finishing);
+
           if (image) {
             void this.vlmService.extractAllFashionAttributes(image).then(rawAttrs => {
               if (rawAttrs && flatId) {
@@ -431,7 +435,6 @@ export class EnhancedExtractionController {
 
           if (Object.keys(directFill).length > 0) {
             await prisma.extractionResultFlat.update({ where: { id: flatId }, data: directFill });
-            void mirror360FlatUpdate(flatId, directFill);
           }
         }
       } catch (flatError) {
@@ -484,7 +487,6 @@ export class EnhancedExtractionController {
             where: { id: flatId },
             data: overrides,
           });
-          void mirror360FlatUpdate(flatId, overrides);
 
           // ── Step 4: Segment + Article Description (need the updated row values) ──
           const updatedRow = await prisma.extractionResultFlat.findUnique({
@@ -522,7 +524,6 @@ export class EnhancedExtractionController {
                 where: { id: flatId },
                 data: derivedStep2,
               });
-              void mirror360FlatUpdate(flatId, derivedStep2);
             }
           }
         } catch (overrideError) {
@@ -759,6 +760,7 @@ export class EnhancedExtractionController {
         discoveryMode: discoveryMode === 'true' || discoveryMode === true,
         department: (enforcedDepartment || watcher_division) as any,
         subDepartment: (enforcedSubDepartment || watcher_sub_division) as any,
+        majorCategory: watcher_major_category || undefined,
         season: season as any,
         occasion: occasion as any
       };
@@ -964,6 +966,7 @@ export class EnhancedExtractionController {
         discoveryMode: discoveryMode || false,
         department: enforcedDepartment as any,
         subDepartment: enforcedSubDepartment as any,
+        majorCategory: typeof majorCategory === 'string' && majorCategory.trim() ? majorCategory.trim() : undefined,
         season: season as any,
         occasion: occasion as any
       };
@@ -1154,269 +1157,7 @@ export class EnhancedExtractionController {
     }
   }
 
-  /**
-   * Enhanced Category-Based Extraction (Database-Driven Schema)
-   */
-  extractFromCategoryCode = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const {
-        image,
-        categoryCode,
-        vendorName,
-        designNumber,
-        costPrice,
-        sellingPrice,
-        notes,
-        discoveryMode,
-        customPrompt,
-        fileName,
-        folderName
-      } = req.body;
 
-      // Validate required fields
-      if (!image) {
-        res.status(400).json({
-          success: false,
-          error: 'Base64 image is required',
-          timestamp: Date.now()
-        });
-        return;
-      }
 
-      if (!categoryCode) {
-        res.status(400).json({
-          success: false,
-          error: 'Category code is required',
-          timestamp: Date.now()
-        });
-        return;
-      }
 
-      // Load schema from database
-      const { category, schema, stats } = await this.schemaService.getCategorySchema(categoryCode);
-
-      // RBAC: Verify Creator Access
-      const userRole = String(req.user?.role || '');
-      const currentUser = req.user;
-      if (userRole === 'CREATOR') {
-        if (currentUser?.division) {
-          const userDivisions = String(currentUser.division)
-            .split(/[;,|]+/)
-            .map((d) => d.trim().toLowerCase())
-            .filter(Boolean);
-          if (userDivisions.length > 0 && !userDivisions.includes(category.department.name.toLowerCase())) {
-            res.status(403).json({
-              success: false,
-              error: `Access denied. You can only access categories in ${currentUser.division}.`,
-              timestamp: Date.now()
-            });
-            return;
-          }
-        }
-        if (currentUser?.subDivision && category.subDepartment.code.toLowerCase() !== currentUser.subDivision.toLowerCase()) {
-          res.status(403).json({
-            success: false,
-            error: `Access denied. You can only access categories in ${currentUser.subDivision}.`,
-            timestamp: Date.now()
-          });
-          return;
-        }
-      }
-
-      // Create enhanced fashion extraction request with garment type
-      const vlmRequest: FashionExtractionRequest = {
-        image,
-        schema,
-        categoryName: category.name,
-        customPrompt,
-        discoveryMode: discoveryMode === 'true' || discoveryMode === true || false,
-        department: category.department.name.toLowerCase() as any,
-        garmentType: category.garmentType, // NEW: For specialized prompts
-        subDepartment: category.subDepartment.code as any
-      };
-
-      // Extract using Multi-VLM pipeline
-      const result = await this.vlmService.extractFashionAttributes(vlmRequest);
-
-      // Merge extracted metadata with provided metadata
-      const finalMetadata = {
-        vendorName: result.extractedMetadata?.vendorName || vendorName || null,
-        designNumber: result.extractedMetadata?.designNumber || designNumber || null,
-        costPrice: result.extractedMetadata?.price || (costPrice ? parseFloat(costPrice) : null),
-        sellingPrice: sellingPrice ? parseFloat(sellingPrice) : null,
-        pptNumber: result.extractedMetadata?.pptNumber || null,
-        notes,
-        extractionDate: new Date().toISOString()
-      };
-
-      // Upload base64 image to Cloudflare R2 (required for consistent storage)
-      let imagePath = '';
-      try {
-        const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
-        const imageBuffer = Buffer.from(base64Data, 'base64');
-
-        let extension = 'jpg';
-        const base64Prefix = image.match(/^data:image\/(\w+);base64,/);
-        if (base64Prefix) {
-          extension = base64Prefix[1];
-        }
-
-        const originalName = fileName || `upload_${Date.now()}.${extension}`;
-
-        const uploadResult = await storageService.uploadFile(
-          imageBuffer,
-          originalName,
-          `image/${extension}`,
-          'fashion-images'
-        );
-
-        imagePath = uploadResult.url;
-      } catch (uploadError: any) {
-        console.error('R2 Upload Failed for category extraction image:', uploadError);
-        console.error('   Error details:', uploadError.message);
-
-        res.status(500).json({
-          success: false,
-          error: 'Failed to upload image to cloud storage',
-          details: uploadError.message,
-          timestamp: Date.now()
-        });
-        return;
-      }
-
-      if (!imagePath) {
-        res.status(500).json({
-          success: false,
-          error: 'Image upload succeeded but no URL was returned',
-          timestamp: Date.now()
-        });
-        return;
-      }
-
-      const persistence = await this.persistExtractionJob({
-        image: imagePath,
-        schema,
-        categoryName: category.name,
-        userId: req.user?.id,
-        result,
-        originalFilename: typeof fileName === 'string'
-          ? (fileName.split(/[\\/]/).pop() || fileName).replace(/\.[^/.]+$/, '')
-          : undefined,
-        folderName: folderName
-          || (typeof fileName === 'string' && (fileName.includes('/') || fileName.includes('\\'))
-            ? fileName.split(/[\\/]/)[0]
-            : undefined),
-        department: category.department.name,
-        subDepartment: category.subDepartment.code,
-        presentationsType: 'FG Article',
-      });
-
-      res.json({
-        success: true,
-        data: {
-          ...result,
-          category: {
-            code: category.code,
-            name: category.name,
-            fullForm: category.fullForm,
-            department: category.department.name,
-            subDepartment: category.subDepartment.name,
-            fabricDivision: category.fabricDivision
-          },
-          metadata: finalMetadata,
-          persistence,
-          schemaStats: stats,
-          imageUrl: imagePath
-        },
-        timestamp: Date.now()
-      });
-
-    } catch (error: any) {
-      console.error('❌ Category-based extraction failed:', error);
-      if (error.message?.includes('not found')) {
-        res.status(404).json({
-          success: false,
-          error: error.message,
-          timestamp: Date.now()
-        });
-        return;
-      }
-      next(error);
-    }
-  };
-
-  /**
-   * 📂 Get Category Hierarchy for Dropdown
-   */
-  getCategoryHierarchy = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const hierarchy = await this.schemaService.getCategoryHierarchy();
-
-      res.json({
-        success: true,
-        data: hierarchy,
-        timestamp: Date.now()
-      });
-    } catch (error) {
-      console.error('❌ Failed to fetch hierarchy:', error);
-      next(error);
-    }
-  };
-
-  /**
-   * 🔍 Get Category Schema (for preview/debugging)
-   */
-  getCategorySchema = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const { code } = req.params;
-      const schemaData = await this.schemaService.getCategorySchema(code);
-
-      res.json({
-        success: true,
-        data: schemaData,
-        timestamp: Date.now()
-      });
-    } catch (error: any) {
-      console.error(`❌ Failed to fetch schema for ${req.params.code}:`, error);
-      if (error.message?.includes('not found')) {
-        res.status(404).json({
-          success: false,
-          error: error.message,
-          timestamp: Date.now()
-        });
-        return;
-      }
-      next(error);
-    }
-  };
-
-  /**
-   * 🔎 Search Categories
-   */
-  searchCategories = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const { q, limit } = req.query;
-
-      if (!q || typeof q !== 'string') {
-        res.status(400).json({
-          success: false,
-          error: 'Query parameter "q" is required',
-          timestamp: Date.now()
-        });
-        return;
-      }
-
-      const results = await this.schemaService.searchCategories(q, limit ? parseInt(limit as string) : 20);
-
-      res.json({
-        success: true,
-        data: results,
-        count: results.length,
-        timestamp: Date.now()
-      });
-    } catch (error) {
-      console.error('❌ Search failed:', error);
-      next(error);
-    }
-  };
 }

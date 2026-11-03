@@ -16,6 +16,7 @@ import adminRoutes from './routes/admin';
 import expenseRoutes from './routes/expense';
 import authRoutes from './routes/auth';
 import userExtractionRoutes from './routes/userExtraction';
+import imagesRoutes from './routes/images';
 import simplifiedExtractionRoutes from './routes/simplifiedExtraction'; // NEW: Simplified workflow
 import userFeedbackRoutes from './routes/userFeedback'; // NEW: User feedback/correction tracking
 import costRoutes from './routes/costs'; // NEW: Cost tracking routes
@@ -29,12 +30,10 @@ import { errorHandler, notFound, requestTimeout } from './middleware/errorHandle
 import { authenticate, requireAdmin, requireUser } from './middleware/auth';
 import { authenticateJwtOrServiceKey } from './middleware/serviceApiKeyAuth';
 import { authenticateWatcher } from './middleware/watcherAuth';
-import { auditLog, flushAuditLogsOnShutdown } from './middleware/auditLogger';
 
 // Services
 import { checkApiConfiguration } from './services/baseApi';
 import { cacheService } from './services/cacheService';
-import { mvgrMappingService } from './services/mvgrMappingService';
 import { ApproverController } from './controllers/ApproverController';
 import { disconnectPrismaClient, isAppShuttingDown, setAppIsShuttingDown, isDbCircuitOpen } from './utils/prisma';
 import srmHookRoutes from './routes/srmHook';
@@ -174,6 +173,7 @@ app.use('/api/', (req, res, next) => {
   if (req.path.startsWith('/approver/')) return next();
   if (req.path.startsWith('/article-config/')) return next();
   if (req.path.startsWith('/srm-hook/')) return next(); // uses own API key auth + background processing
+  if (req.path.startsWith('/images/')) return next(); // card thumbnails — up to 50 per page load
   return limiter(req, res, next);
 });
 
@@ -253,6 +253,7 @@ if (process.env.NODE_ENV === 'development') {
 // PUBLIC ROUTES (No authentication required)
 // ═══════════════════════════════════════════════════════
 app.use('/api/auth', authRoutes); // Login, verify token
+app.use('/api/images', imagesRoutes); // Card thumbnails (public: <img> can't send a token)
 
 // ═══════════════════════════════════════════════════════
 // SRM WEBHOOK ROUTES (API-key secured, no JWT)
@@ -264,12 +265,12 @@ app.use('/api/srm-hook', srmHookRoutes);
 // ═══════════════════════════════════════════════════════
 // ADMIN ROUTES (Admin role required + Audit logging)
 // ═══════════════════════════════════════════════════════
-app.use('/api/admin', authenticate, requireAdmin, auditLog, adminRoutes);
+app.use('/api/admin', authenticate, requireAdmin, adminRoutes);
 
 // ═══════════════════════════════════════════════════════
 // EXPENSE DATA ROUTES (Creator/Approver/Category-Head/PD/Admin — per-route role checks)
 // ═══════════════════════════════════════════════════════
-app.use('/api/expense', authenticate, auditLog, expenseRoutes);
+app.use('/api/expense', authenticate, expenseRoutes);
 
 // ═══════════════════════════════════════════════════════
 // TEST API ROUTES (Admin role required)
@@ -292,7 +293,7 @@ app.use('/api/poolb', authenticate, requireAdmin, poolBRoutes);
 // ═══════════════════════════════════════════════════════
 // USER ROUTES (Authentication required + Audit logging)
 // ═══════════════════════════════════════════════════════
-app.use('/api/user', authenticate, requireUser, auditLog, userExtractionRoutes);
+app.use('/api/user', authenticate, requireUser, userExtractionRoutes);
 
 // ═══════════════════════════════════════════════════════
 // USER FEEDBACK ROUTES (Track corrections & learning)
@@ -302,7 +303,7 @@ app.use('/api/user/feedback', authenticate, requireUser, userFeedbackRoutes);
 // ═══════════════════════════════════════════════════════
 // SIMPLIFIED WORKFLOW ROUTES (New workflow: Dept → Major Category → Extract)
 // ═══════════════════════════════════════════════════════
-app.use('/api/user/simplified', authenticate, requireUser, auditLog, simplifiedExtractionRoutes);
+app.use('/api/user/simplified', authenticate, requireUser, simplifiedExtractionRoutes);
 
 // ═══════════════════════════════════════════════════════
 // LEGACY ROUTES (Backward compatibility - TO BE DEPRECATED)
@@ -322,7 +323,7 @@ app.use('/api/admin/costs', authenticate, requireAdmin, costRoutes);
 // APPROVER ROUTES (Approver role required)
 // Uses custom rate limiter: 500 requests per 15 minutes (more lenient for edit-on-card)
 // ═══════════════════════════════════════════════════════
-app.use('/api/approver', authenticate, approverLimiter, auditLog, approverRoutes);
+app.use('/api/approver', authenticate, approverLimiter, approverRoutes);
 
 // ═══════════════════════════════════════════════════════
 // WATCHER ROUTES (External file-watcher service only)
@@ -410,13 +411,6 @@ app.use(errorHandler);
       console.error('   Check DATABASE_URL in Azure App Settings. App will start but all DB routes will fail.');
     }
 
-    // Initialize MVGR Mapping Service
-    await mvgrMappingService.initialize();
-    const mvgrStats = mvgrMappingService.getStats();
-    console.log(`✅ MVGR Mapping Service initialized:
-   - Macro MVGR: ${mvgrStats.macroMvgrCount} mappings
-   - Main MVGR: ${mvgrStats.mainMvgrCount} mappings
-   - Weave2: ${mvgrStats.weave2Count} mappings`);
 
     // Check API configuration on startup
     const configCheck = checkApiConfiguration();
@@ -584,12 +578,6 @@ app.use(errorHandler);
         process.exit(1);
       }, 8000);
       forceExit.unref();
-
-      try {
-        await flushAuditLogsOnShutdown();
-      } catch (error) {
-        console.error('❌ Failed to flush audit logs during shutdown:', error);
-      }
 
       server.close(async () => {
         try {

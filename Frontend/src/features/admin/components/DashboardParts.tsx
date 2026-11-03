@@ -15,32 +15,46 @@ export const SLATE_PRIMARY_BTN = 'bg-slate-800 text-white hover:bg-slate-700 dar
 
 export interface JumpNavItem { id: string; label: string; count?: number | string }
 
+/**
+ * Section links for the dark Admin Dashboard header (design option B): a
+ * segmented control whose current item is a white pill. Clicking scrolls to
+ * the section with that id.
+ */
 export function JumpNav({ items }: { items: JumpNavItem[] }) {
   const [active, setActive] = useState(items[0]?.id);
   return (
-    <nav
-      aria-label="On this page"
-      className="sticky top-3 flex w-full flex-col gap-0.5 rounded-xl border border-border bg-card p-2 lg:w-[210px] lg:shrink-0"
-    >
-      <span className="px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">On this page</span>
-      {items.map((item) => (
-        <a
-          key={item.id}
-          href={`#${item.id}`}
-          onClick={(e) => {
-            e.preventDefault();
-            setActive(item.id);
-            document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }}
-          className={cn(
-            'flex h-9 items-center justify-between rounded-lg px-2.5 text-[13.5px] no-underline transition-colors',
-            active === item.id ? cn(SLATE_PRIMARY_BTN, 'font-semibold') : 'text-foreground hover:bg-muted',
-          )}
-        >
-          <span>{item.label}</span>
-          {item.count !== undefined && <span className="text-[12px] opacity-70">{item.count}</span>}
-        </a>
-      ))}
+    <nav aria-label="On this page" className="flex flex-wrap gap-0.5 rounded-xl bg-white/[0.08] p-1">
+      {items.map((item) => {
+        const isActive = active === item.id;
+        return (
+          <a
+            key={item.id}
+            href={`#${item.id}`}
+            aria-current={isActive ? 'location' : undefined}
+            onClick={(e) => {
+              e.preventDefault();
+              setActive(item.id);
+              document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }}
+            className={cn(
+              'inline-flex h-9 items-center gap-1.5 rounded-[9px] px-3.5 text-[13.5px] font-semibold no-underline transition-colors',
+              isActive ? 'bg-white text-slate-800' : 'text-slate-200 hover:bg-white/10 hover:text-white',
+            )}
+          >
+            {item.label}
+            {item.count !== undefined && (
+              <span
+                className={cn(
+                  'inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11.5px] font-bold',
+                  isActive ? 'bg-slate-200 text-slate-700' : 'bg-white/15 text-white',
+                )}
+              >
+                {item.count}
+              </span>
+            )}
+          </a>
+        );
+      })}
     </nav>
   );
 }

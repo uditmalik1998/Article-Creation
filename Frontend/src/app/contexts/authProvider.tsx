@@ -9,6 +9,24 @@ import type { User } from '../../types/auth';
 import { AuthContext } from './auth.context';
 import { clearAuthSession, redirectToLoginOnce } from '../../shared/utils/auth/navigation';
 
+// Global 401 interceptor — any fetch that returns 401 (e.g. TOKEN_EXPIRED)
+// clears the session and sends the user back to /login. Installed at module
+// load, not in a useEffect: child effects run before the provider's, so a
+// page's on-mount fetches would otherwise slip past it.
+const FETCH_PATCHED = '__auth401FetchPatched';
+if (typeof window !== 'undefined' && !(window as any)[FETCH_PATCHED]) {
+  (window as any)[FETCH_PATCHED] = true;
+  const originalFetch = window.fetch.bind(window);
+  window.fetch = async (...args) => {
+    const response = await originalFetch(...args);
+    if (response.status === 401) {
+      clearAuthSession();
+      redirectToLoginOnce();
+    }
+    return response;
+  };
+}
+
 interface AuthProviderProps {
   children: ReactNode;
 }
@@ -26,23 +44,6 @@ export function AuthProvider({ children }: Readonly<AuthProviderProps>) {
       setToken(storedToken);
       setUser(JSON.parse(storedUser));
     }
-  }, []);
-
-  // Global 401 interceptor — any fetch that returns 401 clears the session and
-  // sends the user back to /login, so they never see "Failed to load items".
-  useEffect(() => {
-    const originalFetch = window.fetch;
-    window.fetch = async (...args) => {
-      const response = await originalFetch(...args);
-      if (response.status === 401) {
-        clearAuthSession();
-        redirectToLoginOnce();
-      }
-      return response;
-    };
-    return () => {
-      window.fetch = originalFetch;
-    };
   }, []);
 
   const login = useCallback((userData: User, authToken: string) => {

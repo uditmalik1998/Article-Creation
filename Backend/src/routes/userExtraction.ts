@@ -104,13 +104,6 @@ router.post('/extract/advanced',
   enhancedController.extractWithAdvancedVLM
 );
 
-// Category-based extraction with database schema
-router.post('/extract/category',
-  userExtractionLimiter,
-  validateRequest,
-  enhancedController.extractFromCategoryCode
-);
-
 // ═══════════════════════════════════════════════════════
 // CATEGORY & SCHEMA INFORMATION
 // ═══════════════════════════════════════════════════════
@@ -125,17 +118,27 @@ router.get('/hierarchy', async (req, res) => {
   }
 });
 
-// Get category hierarchy
-router.get('/categories/hierarchy', enhancedController.getCategoryHierarchy);
-
-// Get category with attributes (read-only access to admin endpoint)
-router.get('/categories/:code/attributes', adminController.getCategoryByCode);
-
-// Get category schema by code
-router.get('/categories/:code/schema', enhancedController.getCategorySchema);
-
-// Search categories
-router.get('/categories/search', enhancedController.searchCategories);
+// Sub-divisions + major categories for ONE division, from major_category_details
+// (active rows only) — feeds the FG extraction page's Sub-division / Major category dropdowns.
+// GET /api/user/major-category-hierarchy?division=MENS
+router.get('/major-category-hierarchy', async (req, res) => {
+  try {
+    const division = String(req.query.division || '').trim().toUpperCase();
+    if (!division) return res.status(400).json({ success: false, error: 'division is required' });
+    const rows = await prisma.majorCategoryDetails.findMany({
+      where: { div: { equals: division, mode: 'insensitive' }, mcStatus: 'ACT' },
+      select: { subDiv: true, majCat: true },
+      orderBy: [{ subDiv: 'asc' }, { majCat: 'asc' }],
+    });
+    const majorCategories = rows
+      .filter((r) => r.subDiv && r.majCat)
+      .map((r) => ({ subDiv: r.subDiv!.trim(), majCat: r.majCat!.trim() }));
+    const subDivisions = [...new Set(majorCategories.map((r) => r.subDiv))];
+    return res.json({ success: true, data: { division, subDivisions, majorCategories } });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
 
 // Get all categories (read-only)
 router.get('/categories', adminController.getAllCategories);
@@ -161,60 +164,6 @@ router.get('/sub-departments', adminController.getAllSubDepartments);
 
 // Get all master attributes
 router.get('/attributes', adminController.getAllMasterAttributes);
-
-// Add a new allowed value to a master attribute (any authenticated user)
-// Used when a user types a custom value not present in the master list
-router.post('/attributes/by-key/:key/values', async (req, res) => {
-  try {
-    const { key } = req.params;
-    const { shortForm, fullForm } = req.body;
-
-    if (!shortForm || !shortForm.trim()) {
-      res.status(400).json({ success: false, error: 'shortForm is required' });
-      return;
-    }
-
-    // Find the master attribute by key (case-insensitive)
-    const attribute = await prisma.masterAttribute.findFirst({
-      where: { key: { equals: key, mode: 'insensitive' } }
-    });
-
-    if (!attribute) {
-      res.status(404).json({ success: false, error: `Attribute '${key}' not found in master list` });
-      return;
-    }
-
-    const trimmedShort = shortForm.trim();
-    const trimmedFull = (fullForm || shortForm).trim();
-
-    // Avoid duplicates (case-insensitive check)
-    const existing = await prisma.attributeAllowedValue.findFirst({
-      where: {
-        attributeId: attribute.id,
-        shortForm: { equals: trimmedShort, mode: 'insensitive' }
-      }
-    });
-
-    if (existing) {
-      res.json({ success: true, data: existing, alreadyExists: true });
-      return;
-    }
-
-    const newValue = await prisma.attributeAllowedValue.create({
-      data: {
-        attributeId: attribute.id,
-        shortForm: trimmedShort,
-        fullForm: trimmedFull,
-        displayOrder: 0,
-        isActive: true,
-      }
-    });
-
-    res.status(201).json({ success: true, data: newValue });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
 
 // ═══════════════════════════════════════════════════════
 // USER EXTRACTION HISTORY (NEW)

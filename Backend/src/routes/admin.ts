@@ -81,27 +81,20 @@ router.delete('/sub-departments/:id', mut, h(adminController.deleteSubDepartment
 // CATEGORIES
 // ═══════════════════════════════════════════════════════
 router.get('/categories', h(adminController.getAllCategories));
-router.get('/categories/:id', h(adminController.getCategoryById));
-router.get('/categories/:id/all-attributes', h(adminController.getCategoryWithAllAttributes));
-router.get('/categories/:code/attributes', h(adminController.getCategoryByCode));
 router.post('/categories', mut, h(adminController.createCategory));
 router.put('/categories/:id', mut, h(adminController.updateCategory));
 router.delete('/categories/:id', mut, h(adminController.deleteCategory));
 router.put('/categories/:id/attributes', mut, h(adminController.updateCategoryAttributes));
 router.put('/categories/:categoryId/attributes/:attributeId', mut, h(adminController.updateCategoryAttributeMapping));
-router.post('/categories/:categoryId/attributes', mut, h(adminController.addAttributeToCategory));
 router.delete('/categories/:categoryId/attributes/:attributeId', mut, h(adminController.removeAttributeFromCategory));
 
 // ═══════════════════════════════════════════════════════
 // MASTER ATTRIBUTES
 // ═══════════════════════════════════════════════════════
 router.get('/attributes', h(adminController.getAllMasterAttributes));
-router.get('/attributes/:id', h(adminController.getMasterAttributeById));
 router.post('/attributes', mut, h(adminController.createMasterAttribute));
 router.put('/attributes/:id', mut, h(adminController.updateMasterAttribute));
 router.delete('/attributes/:id', mut, h(adminController.deleteMasterAttribute));
-router.post('/attributes/:id/values', mut, h(adminController.addAllowedValue));
-router.delete('/attributes/:id/values/:valueId', mut, h(adminController.deleteAllowedValue));
 
 // ═══════════════════════════════════════════════════════
 // HIERARCHY
@@ -109,12 +102,12 @@ router.delete('/attributes/:id/values/:valueId', mut, h(adminController.deleteAl
 router.get('/hierarchy/tree', h(adminController.getHierarchyTree));
 router.get('/hierarchy/tree/lightweight', h(adminController.getHierarchyTreeLightweight));
 router.post('/hierarchy/tree/cache/clear', h(adminController.invalidateHierarchyCache));
-router.get('/hierarchy/export', h(adminController.exportHierarchy));
 
 // ═══════════════════════════════════════════════════════
 // GM SUB-DIVISIONS
 // ═══════════════════════════════════════════════════════
 router.get('/gm-sub-divisions', h(adminController.getGMSubDivisions));
+router.get('/fabric-sub-divisions', h(adminController.getFabricSubDivisions));
 
 // ═══════════════════════════════════════════════════════
 // USERS (ADMIN ONLY)
@@ -226,6 +219,10 @@ router.get('/segment-master/status', h(adminController.getSegmentMasterStatus));
 router.get('/segment-master/template', h(adminController.downloadSegmentMasterTemplate));
 router.get('/segment-master/export', h(adminController.exportSegmentMaster));
 router.post('/segment-master/upload', excelUpload.single('file'), h(adminController.uploadSegmentMaster));
+router.get('/fabric-main-mvgr-mapping/status', h(adminController.getFabricMainMvgrMappingStatus));
+router.get('/fabric-main-mvgr-mapping/template', h(adminController.downloadFabricMainMvgrMappingTemplate));
+router.get('/fabric-main-mvgr-mapping/export', h(adminController.exportFabricMainMvgrMapping));
+router.post('/fabric-main-mvgr-mapping/upload', excelUpload.single('file'), h(adminController.uploadFabricMainMvgrMapping));
 
 // ═══════════════════════════════════════════════════════
 // BASIC ACCESSORIES (ADMIN) — basic_trim_cost_master + basic_trim_cost_component
@@ -273,14 +270,6 @@ router.get('/size-master/sizes', h(adminController.getSizeMasterSizes));
 router.get('/size-master/audit', h(adminController.getSizeMasterAudit));
 router.post('/size-master/add', h(adminController.addSizeMasterSize));
 router.post('/size-master/delete', h(adminController.deleteSizeMasterSize));
-
-// ═══════════════════════════════════════════════════════
-// HIERARCHY EXCEL UPLOAD (ADMIN)
-// Upserts Department / SubDepartment / Category from
-// DIV / SUB-DIV / MAJOR_CATEGORY columns of the Mandatory Grid Excel.
-// ═══════════════════════════════════════════════════════
-router.get('/hierarchy/excel-status', h(adminController.getHierarchyExcelStatus));
-router.post('/hierarchy/upload-excel', excelUpload.single('file'), mut, h(adminController.uploadHierarchyExcel));
 
 // ═══════════════════════════════════════════════════════
 // MODIFY LOGS (ADMIN)

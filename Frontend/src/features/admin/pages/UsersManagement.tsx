@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, User, Pencil, Download, Upload as UploadIcon, Search, UserX, Lock, KeyRound } from 'lucide-react';
+import { Plus, User, Pencil, Download, Upload as UploadIcon, Search, UserX, Lock, KeyRound, Check } from 'lucide-react';
 import {
   Button,
   Card,
@@ -40,6 +40,7 @@ import {
   getUsers,
   getDepartments,
   getGMSubDivisions,
+  getFabricSubDivisions,
   type AdminUser,
 } from '../../../services/adminApi';
 // xlsx + exceljs are lazy-loaded inside the bulk-upload handlers below —
@@ -68,6 +69,14 @@ const BUSINESS_DIVISION_LABELS: Record<(typeof BUSINESS_DIVISIONS)[number], stri
   MDM: 'MDM',
 };
 
+/** Article types a user works on; a user can have several. */
+const ARTICLE_TYPES = ['FG', 'FABRIC', 'GM'] as const;
+const ARTICLE_TYPE_LABELS: Record<(typeof ARTICLE_TYPES)[number], string> = {
+  FG: 'FG Article',
+  FABRIC: 'Fabric Article',
+  GM: 'GM Article',
+};
+
 // ─── Table display helpers ─────────────────────────────────────────────────────
 
 /** Role badge colour by family; the label is always written out, so colour is never the only cue. */
@@ -83,7 +92,7 @@ const ROLE_TONE_CLASSES = {
 const ROLE_TONE: Record<AdminUser['role'], keyof typeof ROLE_TONE_CLASSES> = {
   ADMIN: 'admin',
   APPROVER: 'approver', CATEGORY_HEAD: 'approver', SUB_DIVISION_HEAD: 'approver',
-  FABRIC_APPROVER: 'approver', BODY_APPROVER: 'approver', GM_APPROVER: 'approver',
+  BODY_APPROVER: 'approver', GM_APPROVER: 'approver',
   CREATOR: 'creator', GM_CREATOR: 'creator',
   PO_COMMITTEE: 'committee',
   PLANNING: 'planning',
@@ -313,14 +322,86 @@ function AccessScopeEditor({
   );
 }
 
+/** Sub-division chips grouped by division, for the GM and Fabric access scopes.
+ * `selected` is the user's full sub-division list; only this picker's codes are toggled. */
+function GroupedSubDivPicker({
+  subDivisions,
+  divBySubDiv,
+  selected: selectedAll,
+  onChange,
+  emptyText,
+}: {
+  subDivisions: string[];
+  divBySubDiv: Record<string, string>;
+  selected: string[];
+  onChange: (codes: string[]) => void;
+  emptyText: string;
+}) {
+  const selected = new Set(selectedAll);
+  const byDiv: Record<string, string[]> = {};
+  subDivisions.forEach((sd) => {
+    const div = divBySubDiv[sd] ?? 'Other';
+    if (!byDiv[div]) byDiv[div] = [];
+    byDiv[div].push(sd);
+  });
+
+  const chipClass = (on: boolean) => cn(
+    'h-8 rounded-md border px-2.5 font-mono text-[12px] transition-colors',
+    on ? cn(SLATE_SELECTED_CLASS, 'font-semibold') : 'border-input bg-background text-muted-foreground hover:border-slate-400 hover:text-foreground',
+  );
+
+  const toggleSD = (sd: string) =>
+    onChange(selected.has(sd) ? selectedAll.filter((c) => c !== sd) : [...selectedAll, sd]);
+
+  return (
+    <div className="flex flex-col gap-3">
+      {Object.entries(byDiv).map(([div, subs]) => {
+        const count = subs.filter((sd) => selected.has(sd)).length;
+        const full = subs.length > 0 && count === subs.length;
+        return (
+          <div key={div} className="flex flex-col gap-2.5 rounded-xl border border-border px-3.5 py-3">
+            <div className="flex items-center gap-2">
+              <strong className="text-[13.5px]">{div}</strong>
+              <span className="text-[12.5px] text-muted-foreground">{count} of {subs.length}</span>
+              <div className="flex-1" />
+              {subs.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    onChange(full
+                      ? selectedAll.filter((c) => !subs.includes(c))
+                      : [...selectedAll, ...subs.filter((sd) => !selected.has(sd))])
+                  }
+                  className="px-1 text-[12.5px] font-semibold text-slate-800 underline underline-offset-2 dark:text-slate-200"
+                >
+                  {full ? 'Clear all' : 'Select all'}
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {subs.map((sd) => (
+                <button key={sd} type="button" aria-pressed={selected.has(sd)} onClick={() => toggleSD(sd)} className={chipClass(selected.has(sd))}>
+                  {sd}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+      {subDivisions.length === 0 && <span className="text-[12.5px] text-muted-foreground">{emptyText}</span>}
+    </div>
+  );
+}
+
 const userSchema = z.object({
   name: z.string().min(1, 'Please enter name'),
   email: z.string().email('Enter a valid email').min(1, 'Please enter email'),
   password: z.string().optional(),
-  role: z.enum(['CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'FABRIC_APPROVER', 'PLANNING', 'GM_APPROVER', 'GM_CREATOR']),
+  role: z.enum(['CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'PLANNING', 'GM_APPROVER', 'GM_CREATOR']),
   divisionIds: z.array(z.string()).optional(),
   subDivision: z.array(z.string()).optional(),
   businessDivision: z.enum(BUSINESS_DIVISIONS).optional().nullable(),
+  articleTypes: z.array(z.enum(ARTICLE_TYPES)).optional(),
 });
 type UserValues = z.infer<typeof userSchema>;
 
@@ -340,7 +421,7 @@ export default function UsersManagement() {
 
   const form = useForm<UserValues>({
     resolver: zodResolver(userSchema),
-    defaultValues: { name: '', email: '', password: '', role: 'CREATOR', divisionIds: [], subDivision: [], businessDivision: null },
+    defaultValues: { name: '', email: '', password: '', role: 'CREATOR', divisionIds: [], subDivision: [], businessDivision: null, articleTypes: [] },
   });
   const selectedRole = form.watch('role');
   const selectedDivisionIds = form.watch('divisionIds') ?? [];
@@ -366,6 +447,30 @@ export default function UsersManagement() {
     queryFn: getGMSubDivisions,
     staleTime: 5 * 60 * 1000,
   });
+
+  const { data: fabricSubDivData } = useQuery({
+    queryKey: ['admin-fabric-sub-divisions'],
+    queryFn: getFabricSubDivisions,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // FG, GM and Fabric sub-division codes never overlap, so all three share the one
+  // subDivision list; these sets tell which section each code belongs to.
+  const gmCodeSet = useMemo(() => new Set(gmSubDivData?.subDivisions ?? []), [gmSubDivData]);
+  const fabricCodeSet = useMemo(() => new Set(fabricSubDivData?.subDivisions ?? []), [fabricSubDivData]);
+
+  /** Which access-scope sections a role + article types gets. No article type keeps the old role-only behaviour. */
+  const scopeSections = (role: UserValues['role'], types: string[]) => {
+    const roleHasDivision = role === 'CREATOR' || role === 'APPROVER' || role === 'CATEGORY_HEAD' || role === 'SUB_DIVISION_HEAD';
+    const gmRole = role === 'GM_APPROVER' || role === 'GM_CREATOR';
+    // These roles never keep sub-divisions (the backend clears them).
+    const roleHasSubDivs = role !== 'ADMIN' && role !== 'PO_COMMITTEE' && role !== 'CATEGORY_HEAD';
+    return {
+      fg: roleHasDivision && (types.length === 0 || types.includes('FG')),
+      gm: gmRole || (roleHasSubDivs && types.includes('GM')),
+      fabric: roleHasSubDivs && types.includes('FABRIC'),
+    };
+  };
 
   // Status + search first; the role chips count within this set, then the role filter narrows it.
   const searchedUsers = useMemo(() => {
@@ -418,7 +523,7 @@ export default function UsersManagement() {
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedUser(null);
-    form.reset({ name: '', email: '', password: '', role: 'CREATOR', divisionIds: [], subDivision: [], businessDivision: null });
+    form.reset({ name: '', email: '', password: '', role: 'CREATOR', divisionIds: [], subDivision: [], businessDivision: null, articleTypes: [] });
     pendingDivisionChangeRef.current = null;
     setPendingRemoveDivision(null);
     setPendingOrphans([]);
@@ -469,14 +574,21 @@ export default function UsersManagement() {
       return;
     }
     const isGMRole = values.role === 'GM_APPROVER' || values.role === 'GM_CREATOR';
+    const scope = scopeSections(values.role, values.articleTypes ?? []);
+    // With article types picked, keep only the codes of the sections on screen.
+    const subDivision = (values.articleTypes ?? []).length
+      ? (values.subDivision ?? []).filter((c) =>
+          gmCodeSet.has(c) ? scope.gm : fabricCodeSet.has(c) ? scope.fabric : scope.fg)
+      : values.subDivision;
     const payload: any = {
       email: values.email,
       name: values.name,
       role: values.role,
-      // GM roles carry no division — send null explicitly so the backend clears any old value
-      division: isGMRole ? null : (values.divisionIds?.length ? values.divisionIds : undefined),
-      subDivision: values.subDivision,
+      // GM roles and non-FG users carry no division — send null so the backend clears any old value
+      division: isGMRole || !scope.fg ? null : (values.divisionIds?.length ? values.divisionIds : undefined),
+      subDivision,
       businessDivision: values.businessDivision ?? null,
+      articleTypes: values.articleTypes ?? [],
     };
     if (values.password) payload.password = values.password;
 
@@ -498,6 +610,7 @@ export default function UsersManagement() {
       divisionIds,
       subDivision: parseSubDivisionList(u.subDivision),
       businessDivision: u.businessDivision ?? null,
+      articleTypes: (u.articleTypes ?? []).filter((t) => (ARTICLE_TYPES as readonly string[]).includes(t)),
       password: '',
     });
     setIsModalOpen(true);
@@ -550,6 +663,62 @@ export default function UsersManagement() {
     setPendingOrphans([]);
   };
 
+  // Users shown in the table (current search / role / status filters) → Excel.
+  // Columns are picked explicitly, so no password (or hash) can ever be exported.
+  const downloadUsers = async () => {
+    if (filteredUsers.length === 0) {
+      message.warning('No users to download for the current filters');
+      return;
+    }
+    try {
+      const ExcelJS = (await import('exceljs')).default;
+      const workbook = new ExcelJS.Workbook();
+      workbook.created = new Date();
+      const sheet = workbook.addWorksheet('Users');
+      sheet.columns = [
+        { header: 'Name', key: 'name', width: 26 },
+        { header: 'Email', key: 'email', width: 32 },
+        { header: 'Role', key: 'role', width: 18 },
+        { header: 'Division', key: 'division', width: 22 },
+        { header: 'Sub Division', key: 'subDivision', width: 40 },
+        { header: 'Business Division', key: 'businessDivision', width: 18 },
+        { header: 'Article Type', key: 'articleTypes', width: 32 },
+        { header: 'Status', key: 'status', width: 10 },
+        { header: 'Last Login', key: 'lastLogin', width: 22 },
+        { header: 'Created At', key: 'createdAt', width: 22 },
+      ];
+      sheet.getRow(1).font = { bold: true };
+      const fmt = (v?: string | null) =>
+        v ? new Date(v).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '';
+      for (const u of filteredUsers) {
+        sheet.addRow({
+          name: u.name,
+          email: u.email,
+          role: roleLabel(u.role),
+          division: u.division ?? '',
+          subDivision: u.subDivision ?? '',
+          businessDivision: u.businessDivision ? BUSINESS_DIVISION_LABELS[u.businessDivision] : '',
+          articleTypes: (u.articleTypes ?? []).map((t) => ARTICLE_TYPE_LABELS[t] ?? t).join(', '),
+          status: u.isActive ? 'Active' : 'Inactive',
+          lastLogin: fmt(u.lastLogin) || 'Never signed in',
+          createdAt: fmt(u.createdAt),
+        });
+      }
+      sheet.views = [{ state: 'frozen', ySplit: 1 }];
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `users-${statusFilter}-${new Date().toISOString().split('T')[0]}.xlsx`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+      message.success(`Downloaded ${filteredUsers.length} user${filteredUsers.length !== 1 ? 's' : ''}`);
+    } catch (error) {
+      console.error('User download failed', error);
+      message.error('Failed to download users');
+    }
+  };
+
   const downloadBulkTemplate = async () => {
     try {
       const ExcelJS = (await import('exceljs')).default;
@@ -569,7 +738,7 @@ export default function UsersManagement() {
       usersSheet.addRow(['John Creator', 'john.creator@company.com', 'Temp@123', 'CREATOR', 'MENS', 'ML', 'MENS']);
       usersSheet.addRow(['Rita CategoryHead', 'rita.head@company.com', 'Temp@123', 'CATEGORY_HEAD', 'LADIES', '', 'LADIES']);
 
-      const roleOptions = ['CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'FABRIC_APPROVER', 'PLANNING', 'GM_APPROVER', 'GM_CREATOR'];
+      const roleOptions = ['CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'PLANNING', 'GM_APPROVER', 'GM_CREATOR'];
       const divisionOptions = divisionNames;
       const subDivisionOptions = Array.from(
         new Set(departments.flatMap((d) => (d.subDepartments || []).map((s) => s.code).filter(Boolean))),
@@ -635,7 +804,7 @@ export default function UsersManagement() {
 
       const toRole = (roleRaw: string): AdminUser['role'] | null => {
         const role = roleRaw.toUpperCase();
-        if (['CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'FABRIC_APPROVER', 'PLANNING', 'GM_APPROVER', 'GM_CREATOR'].includes(role))
+        if (['CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'PLANNING', 'GM_APPROVER', 'GM_CREATOR'].includes(role))
           return role as AdminUser['role'];
         return null;
       };
@@ -702,9 +871,9 @@ export default function UsersManagement() {
             email,
             password,
             role,
-            division: role === 'PO_COMMITTEE' || role === 'PD' || role === 'BODY_APPROVER' || role === 'FABRIC_APPROVER' || role === 'PLANNING' || role === 'GM_APPROVER' || role === 'GM_CREATOR' ? undefined : division,
+            division: role === 'PO_COMMITTEE' || role === 'PD' || role === 'BODY_APPROVER' || role === 'PLANNING' || role === 'GM_APPROVER' || role === 'GM_CREATOR' ? undefined : division,
             subDivision:
-              role === 'CATEGORY_HEAD' || role === 'PO_COMMITTEE' || role === 'ADMIN' || role === 'PD' || role === 'BODY_APPROVER' || role === 'FABRIC_APPROVER' || role === 'PLANNING'
+              role === 'CATEGORY_HEAD' || role === 'PO_COMMITTEE' || role === 'ADMIN' || role === 'PD' || role === 'BODY_APPROVER' || role === 'PLANNING'
                 ? undefined
                 : subDivision,
             businessDivision,
@@ -779,6 +948,23 @@ export default function UsersManagement() {
         ),
     },
     {
+      title: 'Article type',
+      key: 'articleTypes',
+      width: 170,
+      render: (_v, record) =>
+        record.articleTypes?.length ? (
+          <div className="flex flex-wrap gap-1">
+            {record.articleTypes.map((t) => (
+              <span key={t} className="rounded border border-slate-300 bg-slate-50 px-1.5 py-0.5 text-[12px] font-medium text-slate-800 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                {ARTICLE_TYPE_LABELS[t] ?? t}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <span className="text-[13px] text-muted-foreground">Not set</span>
+        ),
+    },
+    {
       title: 'Last login',
       dataIndex: 'lastLogin',
       key: 'lastLogin',
@@ -841,15 +1027,14 @@ export default function UsersManagement() {
     },
   ];
 
-  const needsDivision =
-    selectedRole === 'CREATOR' ||
-    selectedRole === 'APPROVER' ||
-    selectedRole === 'CATEGORY_HEAD' ||
-    selectedRole === 'SUB_DIVISION_HEAD';
+  const selectedArticleTypes = form.watch('articleTypes') ?? [];
+  const scope = scopeSections(selectedRole, selectedArticleTypes);
+  const fgSubDivisions = selectedSubDivisions.filter((c) => !gmCodeSet.has(c) && !fabricCodeSet.has(c));
+  const nonFgSubDivisions = selectedSubDivisions.filter((c) => gmCodeSet.has(c) || fabricCodeSet.has(c));
+  const gmSelectedCount = selectedSubDivisions.filter((c) => gmCodeSet.has(c)).length;
+  const fabricSelectedCount = selectedSubDivisions.filter((c) => fabricCodeSet.has(c)).length;
   const needsSubDivision =
     selectedRole === 'CREATOR' || selectedRole === 'APPROVER' || selectedRole === 'SUB_DIVISION_HEAD';
-  const needsGMSubDivision =
-    selectedRole === 'GM_APPROVER' || selectedRole === 'GM_CREATOR';
 
 
   return (
@@ -937,6 +1122,15 @@ export default function UsersManagement() {
                 </button>
               ))}
             </div>
+            <Button
+              variant="outline"
+              onClick={downloadUsers}
+              className="h-9"
+              title="Download the users shown below as Excel (no passwords)"
+            >
+              <Download />
+              Download
+            </Button>
           </div>
           <DataTable
             rowKey="id"
@@ -1075,7 +1269,8 @@ export default function UsersManagement() {
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                {(['CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'FABRIC_APPROVER', 'PLANNING', 'GM_APPROVER', 'GM_CREATOR'] as const).map((r) => (
+                                {(['CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'PLANNING', 'GM_APPROVER', 'GM_CREATOR'] as const)
+                                  .map((r) => (
                                   <SelectItem key={r} value={r}>
                                     {roleLabel(r)}
                                   </SelectItem>
@@ -1115,16 +1310,52 @@ export default function UsersManagement() {
                         </FormItem>
                       )}
                     />
+                    <FormField
+                      control={form.control}
+                      name="articleTypes"
+                      render={({ field }) => {
+                        const selected = field.value ?? [];
+                        const toggle = (t: (typeof ARTICLE_TYPES)[number]) =>
+                          field.onChange(selected.includes(t) ? selected.filter((x) => x !== t) : [...selected, t]);
+                        return (
+                          <FormItem className="sm:col-span-2">
+                            <FormLabel>Article type</FormLabel>
+                            <div role="group" aria-label="Article type" className="grid grid-cols-3 gap-2">
+                              {ARTICLE_TYPES.map((t) => {
+                                const on = selected.includes(t);
+                                return (
+                                  <button
+                                    key={t}
+                                    type="button"
+                                    aria-pressed={on}
+                                    onClick={() => toggle(t)}
+                                    className={cn(
+                                      'flex h-9 items-center justify-center gap-1.5 rounded-md border px-3 text-[13px] transition-colors',
+                                      on ? cn(SLATE_SELECTED_CLASS, 'font-semibold') : 'border-input bg-background text-muted-foreground hover:border-slate-400 hover:text-foreground',
+                                    )}
+                                  >
+                                    {on && <Check className="h-3.5 w-3.5" />}
+                                    {ARTICLE_TYPE_LABELS[t]}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            <p className="text-[12px] text-muted-foreground">Pick one or more.</p>
+                            <FormMessage />
+                          </FormItem>
+                        );
+                      }}
+                    />
                   </div>
                 </section>
 
-                {needsDivision && (
+                {scope.fg && (
                   <section className="flex flex-col gap-3">
                     <div className="flex items-baseline justify-between gap-3">
-                      <SectionTitle>Access scope</SectionTitle>
+                      <SectionTitle>{selectedArticleTypes.length ? 'FG access scope' : 'Access scope'}</SectionTitle>
                       {needsSubDivision && (
                         <span className="text-[12.5px] text-muted-foreground">
-                          {selectedSubDivisions.length} sub-division{selectedSubDivisions.length === 1 ? '' : 's'} selected
+                          {fgSubDivisions.length} sub-division{fgSubDivisions.length === 1 ? '' : 's'} selected
                         </span>
                       )}
                     </div>
@@ -1137,92 +1368,49 @@ export default function UsersManagement() {
                       divisionNames={divisionNames}
                       departments={departments}
                       divisionIds={selectedDivisionIds}
-                      subDivisions={selectedSubDivisions}
+                      subDivisions={fgSubDivisions}
                       showSubDivisions={needsSubDivision}
                       onDivisionsChange={handleDivisionChange}
-                      onSubDivisionsChange={(codes) => form.setValue('subDivision', codes, { shouldDirty: true })}
+                      onSubDivisionsChange={(codes) => form.setValue('subDivision', [...codes, ...nonFgSubDivisions], { shouldDirty: true })}
                     />
                   </section>
                 )}
 
-                {needsGMSubDivision && (
+                {scope.fabric && (
                   <section className="flex flex-col gap-3">
                     <div className="flex items-baseline justify-between gap-3">
-                      <SectionTitle>GM Sub-Divisions</SectionTitle>
-                      <span className="text-[12.5px] text-muted-foreground">
-                        {selectedSubDivisions.length} selected
-                      </span>
+                      <SectionTitle>Fabric access scope</SectionTitle>
+                      <span className="text-[12.5px] text-muted-foreground">{fabricSelectedCount} selected</span>
+                    </div>
+                    <span className="text-[12.5px] text-muted-foreground">
+                      Pick which fabric sub-divisions this user can see and work on.
+                    </span>
+                    <GroupedSubDivPicker
+                      subDivisions={fabricSubDivData?.subDivisions ?? []}
+                      divBySubDiv={fabricSubDivData?.divBySubDiv ?? {}}
+                      selected={selectedSubDivisions}
+                      onChange={(codes) => form.setValue('subDivision', codes, { shouldDirty: true })}
+                      emptyText="No fabric sub-divisions found."
+                    />
+                  </section>
+                )}
+
+                {scope.gm && (
+                  <section className="flex flex-col gap-3">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <SectionTitle>{selectedArticleTypes.length ? 'GM access scope' : 'GM Sub-Divisions'}</SectionTitle>
+                      <span className="text-[12.5px] text-muted-foreground">{gmSelectedCount} selected</span>
                     </div>
                     <span className="text-[12.5px] text-muted-foreground">
                       Pick which GM sub-divisions this user can see and work on.
                     </span>
-                    {(() => {
-                      const allGMSubDivs = gmSubDivData?.subDivisions ?? [];
-                      const divBySubDiv = gmSubDivData?.divBySubDiv ?? {};
-                      const selected = new Set(selectedSubDivisions);
-
-                      // Group by division
-                      const byDiv: Record<string, string[]> = {};
-                      allGMSubDivs.forEach((sd) => {
-                        const div = divBySubDiv[sd] ?? 'Other';
-                        if (!byDiv[div]) byDiv[div] = [];
-                        byDiv[div].push(sd);
-                      });
-
-                      const chipClass = (on: boolean) => cn(
-                        'h-8 rounded-md border px-2.5 font-mono text-[12px] transition-colors',
-                        on ? cn(SLATE_SELECTED_CLASS, 'font-semibold') : 'border-input bg-background text-muted-foreground hover:border-slate-400 hover:text-foreground',
-                      );
-
-                      const toggleSD = (sd: string) => {
-                        const next = selected.has(sd)
-                          ? selectedSubDivisions.filter((c) => c !== sd)
-                          : [...selectedSubDivisions, sd];
-                        form.setValue('subDivision', next, { shouldDirty: true });
-                      };
-
-                      return (
-                        <div className="flex flex-col gap-3">
-                          {Object.entries(byDiv).map(([div, subs]) => {
-                            const count = subs.filter((s) => selected.has(s)).length;
-                            const full = subs.length > 0 && count === subs.length;
-                            return (
-                              <div key={div} className="flex flex-col gap-2.5 rounded-xl border border-border px-3.5 py-3">
-                                <div className="flex items-center gap-2">
-                                  <strong className="text-[13.5px]">{div}</strong>
-                                  <span className="text-[12.5px] text-muted-foreground">{count} of {subs.length}</span>
-                                  <div className="flex-1" />
-                                  {subs.length > 0 && (
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        const next = full
-                                          ? selectedSubDivisions.filter((c) => !subs.includes(c))
-                                          : [...selectedSubDivisions, ...subs.filter((s) => !selected.has(s))];
-                                        form.setValue('subDivision', next, { shouldDirty: true });
-                                      }}
-                                      className="px-1 text-[12.5px] font-semibold text-slate-800 underline underline-offset-2 dark:text-slate-200"
-                                    >
-                                      {full ? 'Clear all' : 'Select all'}
-                                    </button>
-                                  )}
-                                </div>
-                                <div className="flex flex-wrap gap-1.5">
-                                  {subs.map((sd) => (
-                                    <button key={sd} type="button" aria-pressed={selected.has(sd)} onClick={() => toggleSD(sd)} className={chipClass(selected.has(sd))}>
-                                      {sd}
-                                    </button>
-                                  ))}
-                                </div>
-                              </div>
-                            );
-                          })}
-                          {allGMSubDivs.length === 0 && (
-                            <span className="text-[12.5px] text-muted-foreground">No GM sub-divisions found.</span>
-                          )}
-                        </div>
-                      );
-                    })()}
+                    <GroupedSubDivPicker
+                      subDivisions={gmSubDivData?.subDivisions ?? []}
+                      divBySubDiv={gmSubDivData?.divBySubDiv ?? {}}
+                      selected={selectedSubDivisions}
+                      onChange={(codes) => form.setValue('subDivision', codes, { shouldDirty: true })}
+                      emptyText="No GM sub-divisions found."
+                    />
                   </section>
                 )}
               </div>

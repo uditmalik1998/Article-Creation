@@ -177,7 +177,6 @@ sequenceDiagram
     UI->>UI: Optimistic update (show new value)
     UI->>API: PUT {field: newValue}
     API->>DB: prisma.update()
-    API->>DB: mirror360FlatUpdate() [fire-and-forget]
     API-->>UI: {updated record}
     UI->>UI: Sync state from server response
     UI->>UI: Clear stale localValues cache
@@ -309,3 +308,114 @@ The two-row header now lives in `shared/components/articles/ArticleListHeader.ts
 - 2026-10-19: V. ADD extra PRINT / EMB rows are saved. New jsonb columns on `extraction_results_flat`: `vadd_print_json` (PRINT-1, PRINT-2…) and `vadd_emp_json` (EMB-1…), each an array of `{ no, type, style, placement, autoBgt, roughV2, vdrCost, finalCost }`. Saved with the card's Save button (sent as a JSON string, parsed by `parseVaddJson` in ApproverController; empty → NULL), loaded back on open. App only — not in FLAT_TO_RFC, never sent to SAP. Excluded from history_fg_article; modify_log stores the JSON text. Copied when an article is duplicated (copy / kids duplication).
 
 - 2026-10-19: V. ADD only — AUTO-BGT is a typed input (`editableAutoBgt` in VADD_CONFIG); saved with Save like the other costs. B TRIM keeps AUTO-BGT read-only (master / RATE × QTY).
+
+- 2026-10-21: Created page (modify mode) — Create Body / Create Fabric Article now fills BODY ARTICLE NO. / FAB ARTICLE NO. Cause: editing a BODY/FAB attribute stages `bodyArticle` / `fabricArticleNumber` = null in localValues + pendingChanges, and the item-sync effect kept staged keys, so the number the server wrote (incl. 409 "already exists" auto-fill) never showed and Modify would have saved null. Fix in ApproverArticleList item-sync effect: a newly arrived number (or any number after the user clicked Create, via awaitingLinkRef) replaces the staged null in both localValues and pendingChanges.
+- 2026-10-21: Create Fabric Article "already exists" (409) now behaves like Create Body Article: backend writes the existing fabric number to extraction_results_flat.fabric_article_number (skipped in modify mode / skipFlatUpdate, where the card stages it for Modify); toast "Fabric Article already exists: N — auto-filled". FAB ARTICLE NO. also covered by the staged-null fix (fabricArticleNumber).
+
+### Card photo popup — Option B built (2026-10-22)
+
+On the dashboard cards, opening a photo shows an empty white strip until the ~4 MB original loads (the card itself shows the WebP thumbnail). Design options: https://claude.ai/artifact/9LjAhatMhe6xFQFcm6dgha
+- A: blur-up from the thumbnail
+- B: 3:4 skeleton + floating toolbar
+- C: dark lightbox with MB ring
+- D: details side panel
+- E: grows from the card, with an error state
+
+**Option B built** in `shared/components/articles/ArticleSpecCard.tsx` (`ImagePreviewDialog`). It is shared, so it applies to the FG, FG New, Fabric, Body and GM dashboards.
+- Ink header "ARTICLE IMAGE · <title>" with its own close button (`showClose={false}`).
+- The frame is sized before load: a 3:4 portrait box fit to 85vw × 70vh. It shows a shimmer skeleton, a shirt icon and "Loading photo…" while the hidden `<img>` loads. After load the frame takes the photo's real ratio, so landscape photos resize once.
+- A failed load shows "Couldn't load the photo" with Try again (remounts the img).
+- The floating toolbar under the photo has − % +, Fit/reset and Rotate, all disabled while loading.
+- Checked in a local test page against a real r2.dev original (~4 s load).
+
+### FAB card — bigger attribute text, Option A built (2026-10-23)
+
+Canvas: https://claude.ai/artifact/56SzsZ1bbQcyYjKPJYBQhe. D was built first, then the user switched to **A**.
+
+In `ApproverArticleList.tsx`, `renderAttributeRow(attr, big)` takes a `big` flag, passed only for the FG FAB card (`!allowGroups && g.group === 'FAB'`). In big mode:
+- Rows are min 30 px.
+- The number is 13 px and the name 14 px.
+- The value column is 180 px, with values at 15 px in the regular font.
+- Inline inputs and dropdown triggers are 32 px / 14 px, and the chevron is 16 px.
+
+The cost rows (AUTO-BGT, ROUGH-V2, VENDOR COST, FINAL COST) use the same renderer, so they follow. The FAB footer fields (Fabric Article No. / Desc) have 12 px labels and 15 px values. **Extended to the FG BODY card** (2026-10-23): the same `big` rows and Body Article No. / Desc at 12/15 px. Other tabs (B TRIM, V. ADD, PKG COST, OTH GRID-1) and the Body/Fabric/GM pages are unchanged. Type-checks; not checked signed in.
+
+_FAB/BODY big text reduced by 1 px on 2026-10-23 at the user’s request: number 12 px, name 13 px, value 14 px, inline editors 13 px; footer labels 11 px and values 14 px. Rows stay 30 px._
+
+_2026-10-23: the FG garment-attribute grid used to switch to 3 columns at 5+ visible cards (turning on V. ADD or PKG COST), which squeezed FAB/BODY. It is now capped at 2 columns._
+
+_2026-10-23: +1 px font size on the FG B TRIM / V. ADD grids (`CostingGridCard.tsx`, all sizes except the dark title strip), CMP COST (`CmpCostCard.tsx`), the FG Rough / Precise Consumption cards (11.5→12.5 px), and OTH GRID-1. OTH GRID-1 covers the BOM rows (11→12 px, FG only) and its attribute rows via a new `plus1` flag on `renderAttributeRow`, which also applies to B TRIM extra rows. Card headers are unchanged so all titles still match. PKG COST is unchanged._
+
+_2026-10-23: PKG COST (`PkgCostCard.tsx`) also +1 px, everything except the dark title strip._
+
+### Article review page header — Option A built (2026-10-23)
+
+Canvas: https://claude.ai/artifact/7kdg8vDcbxSw6zHjXmYh94
+- A: one ink block, two lines
+- B: light, design no. as title
+- C: dark nav + identity strip with price tiles
+- D: breadcrumb + issue chip
+- E: compact sticky bar with issue split-button
+
+**Option A built.** All functions are unchanged.
+- **`ArticleDetailPage.tsx` (line 1):**
+  - The nav bar is solid `#1e293b`; the old gradient and coral are gone. When the article isn't a combo set, it sits flush with rounded top corners only.
+  - The sparkle circle is slate and the title is 14 px. The pager reads "1 of 50".
+  - History is a quiet ghost button (it was solid red), and Reject is a red-outline button on the dark bar.
+  - **Save & Submit** is now the single white button, with the issue count as an amber pill (it was coral with "⚠1").
+- **`ApproverArticleList.tsx` (line 2):** a new `joinTop` prop, passed by the detail page when the article isn't a combo set.
+  - The card has square top corners and no top border, and the identity strip is solid ink with a `border-white/10` divider, so the two bars read as one block.
+  - The PPT badge is a translucent chip with a tag icon (it was yellow).
+  - The checked tick is slate, not coral.
+  - Combo/set articles keep separate blocks, because their set tabs sit in between.
+- Type-checks and compiles. Not checked signed in.
+
+_2026-10-23: FAB/BODY row height reduced by 3 px (min 30 → 27 px, py-0.5). Inline editors are 28 px so editing does not jump. Text sizes are unchanged._
+
+_2026-10-23: FAB/BODY rows reduced another 1 px, to min 26 px._
+
+_2026-10-23: the Option A header is ported to **Fabric article** detail pages. In `FabricArticleDetailPage.tsx`, the flag `inkHeader = ListComponent === FabricArticleList` keeps Body articles, which reuse this page, unchanged. `FabricArticleList.tsx` gets the same `joinTop` prop: solid ink strip, square top corners, translucent PPT chip, slate tick. The look covers Reject as a red outline, Save & Submit in white with an amber issue pill, and the "1 of 50" pager. Type-checks and compiles; not checked signed in._
+
+_2026-10-23: **Fabric Article pages** (`FabricArticleList.tsx`) now match the FG FAB card sizes:
+- FAB rows via a `big` flag on that file's `renderAttributeRow`: 12 px number, 13 px name, 14 px value, 180 px value column, 26 px rows, 28 px editors.
+- The Fabric Article No. / Desc footer: 11 px label, 14 px value.
+- BOM card rows (RATE, ARTICLE FASHION TYPE, SEGMENT): 13 px label, 14 px value, 26 px rows.
+- This also applies to the FG New / FG Created views that use the Fabric list. Type-checks; not checked signed in._
+
+_2026-10-23: the **Fabric pages attribute dropdown** (`FabricArticleList.tsx` `renderAttributeRow` popover) is redesigned:
+- A 256 px panel with a slate title strip showing the attribute name and option count.
+- A 40 px search box ("Search code or name…").
+- Clear selection shows the current value.
+- Rows show the code (12.5 px semibold) with the full name below (11 px).
+- The selected row is slate with a check icon; there is no accent or coral hover.
+- All text is +1 px. Type-checks; not checked signed in._
+
+### Vendor name search — improved suggestions (2026-10-23)
+
+The shared `ui-tw/autocomplete.tsx` was fixed and restyled. It is used by the FG, Fabric and GM article cards and the Admin grid panel.
+- The panel width is the input width (`var(--radix-popover-trigger-width)`, min 320 px, max 520 px). It used to span the whole page because `var()` was missing.
+- Rounded panel with a shadow, an optional `header` line and rows highlighted in slate.
+- ↑ ↓ / Enter / Esc work from the input. Clicking the input no longer closes the panel (`onInteractOutside`).
+
+The FG and Fabric vendor rows have two lines: the name with the typed text highlighted, then code · city. A "N vendors · ↑ ↓ to move, Enter to pick" header and a "Searching vendors…" state were added. Checked in a local test page.
+
+_2026-10-23 fix: clearing the Vendor Name box snapped back to the saved name (e.g. MIX VENDOR) on the last Backspace. The input value was `vendorQuery || savedName`, and an empty string is falsy. `vendorQuery` is now `string | null` (null = not typed yet), and the value is `vendorQuery ?? savedName`. Fixed in the FG, Fabric and GM lists._
+
+_2026-10-23: on **Fabric pages** the Article Information and Reference & Vendor cards are +2 px. Info rows are 14 px, with the label column widened to 120 px. Reference labels are 12 px and values 14.5 px (mono values 13.5 px). "Click to fill" / Required and the inline editors are 14 px. Card headers are unchanged. FG pages are not changed yet._
+
+_2026-10-23: the same +2 px is now on **FG pages** (`ApproverArticleList.tsx`). Article Information rows are 14 px (label column 120 px). Reference & Vendor labels are 12 px and values 14.5 px (mono 13.5 px); empty/Required text and the editors are 14 px. These apply only when `isFgCard`, so the Body/GM list views that share the renderer are unchanged._
+
+_2026-10-23: **GM article page** — every font size in `GMArticleList.tsx` is +1 px. That is 40 arbitrary sizes, plus text-xs→13 px and text-sm→15 px. It covers the identity strip, Article details (FIELD_LABEL 13 px, FIELD_INPUT 14 px), the General merchandise grid, BOM, and the colour picker. Colour variants (GMVariantTable) and the top nav bar (GMArticleDetailPage) are unchanged._
+
+_2026-10-23: GM article page font size +1 px again, so +2 px in total (FIELD_LABEL 14 px, FIELD_INPUT 15 px)._
+
+_2026-10-27: Design options for a **TOTAL** on the FG B TRIM card (AUTO-BGT, ROUGH-V2, VDR COST, FINAL COST). The total counts the 5 BT items plus only the ticked OTHER ACC rows. A: a sticky TOTAL row. B: subtotals plus a grand total. C: summary tiles in the footer. Canvas: https://claude.ai/artifact/EuTbWpfPXCT3JZirVycyBn. **Option A built:** an ink “TOTAL · BT-0x” row at the bottom of the card that sticks while you scroll. It reads “5 items + N selected OTHER ACC” and updates live from the current tab’s values; a column with no values shows “—”. Turned on by `showTotal` on `BTRIM_CONFIG` in `CostingGridCard.tsx`, so V. ADD has none. Computed on screen only, never saved. The card is `overflow-clip` so the sticky row works._
+
+_2026-10-27: Design options for a cost table in FG **OTH GRID-1**, below SEGMENT. Rows are FAB, BODY, B TRIM and V. ADD; columns are AUTO-BGT, ROUGH-V2, VDR COST and FINAL COST. A: a read-only summary with a total. B: an editable grid. C: numbered rows with chips. D: big totals with share bars. Canvas: https://claude.ai/artifact/K1gz1jWCCKWdJ6n9BWjJcR. **Option A built:** a read-only “COST SUMMARY” table under SEGMENT with an ink TOTAL row. Sources:
+- FAB = `autoBgt` / `roughV2` / `vendorFabricRate` / `finalCost`
+- BODY = CMP COST TOTAL row (`totalBgtPrVal` / `totalActPrVal` / `totalVendorPrVal` / `totalFinalPrVal`)
+- B TRIM = `bTrimTotal*`
+- V. ADD = `vaddTotal*`
+- PKG COST (added 2026-10-27) = the sum of the saved NET RATEs (`boppNetPrice` … `threadNetPrice`), shown in both AUTO-BGT and ROUGH-V2. VDR COST and FINAL COST stay empty.
+
+It shows saved values, so each row updates after its card is saved. A value that is not set shows “—”, and TOTAL adds the values that are set. Hover a row to see its source._

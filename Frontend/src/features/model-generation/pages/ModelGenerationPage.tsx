@@ -859,7 +859,6 @@ export default function ModelGenerationPage() {
         <section className="flex flex-col overflow-hidden rounded-[14px] border border-slate-200 bg-white lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:self-start dark:border-slate-700 dark:bg-slate-900">
           {canViewModelImages && pageMode === 'from-article-list' ? (
             <div className="overflow-y-auto p-5">
-              <div className={sectionLabel}>ARTICLE LIST SETTINGS</div>
               <ArticleListPanel submitting={loading} onSubmit={handleArticleListSubmit} />
             </div>
           ) : null}
@@ -1242,9 +1241,11 @@ export default function ModelGenerationPage() {
                     >
                       <Tag className={cn('justify-center text-[10px]', statusTagClass(rj.status))}>{rj.status}</Tag>
                       <span className="flex min-w-0 flex-col">
-                        <span className="truncate font-mono text-[12px]" title={rj.id}>{rj.id}</span>
-                        <span className="text-[11px] text-slate-500">
-                          {rj.done}/{rj.total} done · {rj.failed} failed · {new Date(rj.createdAt).toLocaleTimeString()}
+                        <span className="truncate text-[13px] font-semibold" title={rj.id}>
+                          {new Date(rj.createdAt).toLocaleString([], { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                        <span className="text-[11.5px] text-slate-500">
+                          {rj.done}/{rj.total} done · {rj.failed} failed
                         </span>
                       </span>
                       <Progress
@@ -1338,8 +1339,17 @@ export default function ModelGenerationPage() {
               </span>
               <span className="text-base font-bold text-slate-900 dark:text-slate-50">Results will appear here</span>
               <span className="max-w-[360px] text-[13px] leading-relaxed text-slate-500">
-                Add garment images on the left, choose the model and views, then press{' '}
-                <b className="text-slate-900 dark:text-slate-50">Generate</b>.
+                {pageMode === 'from-article-list' ? (
+                  <>
+                    Add article codes on the left, check they’re ready, then press{' '}
+                    <b className="text-slate-900 dark:text-slate-50">Generate</b>. Open a recent job above to see its images.
+                  </>
+                ) : (
+                  <>
+                    Add garment images on the left, choose the model and views, then press{' '}
+                    <b className="text-slate-900 dark:text-slate-50">Generate</b>.
+                  </>
+                )}
               </span>
             </section>
           )}

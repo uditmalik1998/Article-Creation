@@ -6,7 +6,8 @@
  * AUSP (KLART=026) via the V64 + link chain:
  *
  *   1. RFC_READ_TABLE MARA -> MATKL   (authoritative class lookup)
- *   2. Z_LINK_MATNR_CLASS              (idempotent class link to MATKL-class)
+ *   2. Z_LINK_MATNR_CLASS              (class link to MATKL-class; on refusal we read
+ *                                      the class the article really sits in — KSSK)
  *   3. Z_ART_PATCH_RFC_V64             (KSML-aware writer; routes to AUSP)
  *
  * On atomic-fail (V64 returns ok:false because >=1 attr is NIC/LOCKED), the
@@ -26,7 +27,15 @@ export type AttributePushResult = {
   writtenCount: number;
   nicCount: number;
   lockedCount: number;
+  /** Characteristics SAP refused because they are not on the article's class (NIC). */
+  nicAttrs?: string[];
+  /** Characteristics SAP refused because they are locked. */
+  lockedAttrs?: string[];
   errorMessage?: string;
+  /** Class the article is actually attached to in SAP (KSSK, type 026) when it is not its MC class. */
+  linkedClass?: string;
+  /** SAP's reason the link to the MC class failed (BAPI_OBJCL_CREATE messages). */
+  linkError?: string;
   planLog?: Array<{ atnam: string; value: string; status: string; route?: string }>;
 };
 
@@ -112,13 +121,64 @@ const linkMatnrToClass = async (matnr: string, matkl: string, env?: string): Pro
   if (!res.ok) {
     return { ok: false, message: `Z_LINK_MATNR_CLASS HTTP ${res.status}: ${res.rawText.slice(0, 200)}` };
   }
-  // "already linked" returned by FM is treated as success (idempotent)
-  const msg = sapValue(res.body?.EV_MESSAGE ?? res.body?.MESSAGE ?? res.body?.message) || '';
-  const rc = res.body?.EV_RC ?? res.body?.RC ?? 0;
-  if (rc !== 0 && rc !== '0' && !/already.*link/i.test(msg)) {
-    return { ok: false, message: msg || `link rc=${rc}` };
+  // The FM only returns EV_JSON {"ok":bool,"ret":[{"t":"E","m":"…"}]} (BAPI_OBJCL_CREATE
+  // messages). It used to be read as EV_RC / EV_MESSAGE, which never exist, so every
+  // failed link looked like success.
+  const inner = unwrapBody(res.body);
+  const msgs: string[] = Array.isArray(inner?.ret)
+    ? inner.ret.map((r: any) => sapValue(r?.m)).filter((m: string | null): m is string => !!m)
+    : [];
+  const msg = msgs.join('; ');
+  if (inner?.ok === false) {
+    return { ok: false, message: msg || 'link failed' };
   }
   return { ok: true, message: msg || 'linked' };
+};
+
+/** RFC_READ_TABLE rows as trimmed column arrays (DELIMITER '^'). */
+const readTable = async (table: string, fields: string[], where: string, env?: string): Promise<string[][]> => {
+  const res = await callProxy('RFC_READ_TABLE', {
+    QUERY_TABLE: table,
+    FIELDS: fields.map((f) => ({ FIELDNAME: f })),
+    OPTIONS: [{ TEXT: where }],
+    ROWCOUNT: 20,
+    DELIMITER: '^',
+  }, env);
+  const rows = res.ok ? res.body?.DATA || res.body?.data || res.body?.ET_DATA : null;
+  if (!Array.isArray(rows)) return [];
+  return rows.map((r: any) => String(r?.WA ?? r?.wa ?? '').split('^').map((c) => c.trim()));
+};
+
+/** Class(es) the article is attached to (class type 026): INOB → KSSK → KLAH. */
+export const fetchLinkedClasses = async (matnr: string, env?: string): Promise<string[]> => {
+  const inob = await readTable('INOB', ['CUOBJ'], `OBJEK = '${padMatnr(matnr)}' AND KLART = '026'`, env);
+  const cuobj = inob[0]?.[0];
+  if (!cuobj) return [];
+  const kssk = await readTable('KSSK', ['CLINT', 'LKENZ'], `OBJEK = '${cuobj}' AND KLART = '026'`, env);
+  const clints = kssk.filter((r) => !r[1]).map((r) => r[0]).filter(Boolean);
+  const classes: string[] = [];
+  for (const clint of clints) {
+    const klah = await readTable('KLAH', ['CLASS'], `CLINT = '${clint}'`, env);
+    if (klah[0]?.[0]) classes.push(klah[0][0]);
+  }
+  return classes;
+};
+
+/**
+ * Link the article to its MC class. When SAP refuses (usually: it already sits in
+ * another class), read the class it is really in. Never aborts — the patch FM still
+ * runs and writes what the existing class allows.
+ */
+const ensureClassLink = async (
+  matnr: string,
+  matkl: string,
+  env?: string,
+): Promise<{ linkedClass?: string; linkError?: string }> => {
+  const link = await linkMatnrToClass(matnr, matkl, env);
+  if (link.ok) return {};
+  const classes = await fetchLinkedClasses(matnr, env).catch(() => [] as string[]);
+  if (classes.includes(matkl)) return {}; // already in the MC class
+  return { linkedClass: classes.join(', ') || undefined, linkError: link.message };
 };
 
 type PlanRow = { atnam: string; value: string; status: string; route?: string; msg?: string };
@@ -212,17 +272,22 @@ const buildChangesString = (item: Record<string, unknown>): { changes: string; c
   return { changes: parts.join('|'), count: parts.length };
 };
 
+// A row whose message says the characteristic is missing from the class
+// (e.g. "attr in CABN but not in any class KSML") is NIC too, even when the FM
+// gives it a different status — the fix is the same: run Pool A (KSML).
+const NOT_IN_CLASS_RE = /not in (any )?class|ksml/i;
+
 const tallyPlan = (plan: PlanRow[]) => {
   let writtenCount = 0;
-  let nicCount = 0;
-  let lockedCount = 0;
+  const nicAttrs: string[] = [];
+  const lockedAttrs: string[] = [];
   for (const row of plan) {
     const s = row.status.toUpperCase();
     if (s === 'APPLIED' || s === 'PLANNED' || s === 'OK') writtenCount++;
-    else if (s === 'NIC') nicCount++;
-    else if (s === 'LOCKED' || s === 'REJECT') lockedCount++;
+    else if (s === 'NIC' || NOT_IN_CLASS_RE.test(String(row.msg ?? ''))) nicAttrs.push(row.atnam);
+    else if (s === 'LOCKED' || s === 'REJECT') lockedAttrs.push(row.atnam);
   }
-  return { writtenCount, nicCount, lockedCount };
+  return { writtenCount, nicCount: nicAttrs.length, lockedCount: lockedAttrs.length, nicAttrs, lockedAttrs };
 };
 
 export const isAttributePushEnabled = (): boolean => SAP_ATTRIBUTE_PUSH_ENABLED;
@@ -269,11 +334,7 @@ export const pushAttributesViaV64 = async (
     result.matkl = matkl;
 
     // Step 2: link matnr to MATKL-class (idempotent)
-    const link = await linkMatnrToClass(matnr, matkl);
-    if (!link.ok) {
-      result.errorMessage = `class link failed: ${link.message}`;
-      return result;
-    }
+    Object.assign(result, await ensureClassLink(matnr, matkl));
 
     // Step 3: V64 write
     const first = await callV64(matnr, built.changes, '');
@@ -390,11 +451,7 @@ export const pushRawAttributesToSap = async (
     }
     result.matkl = matkl;
 
-    const link = await linkMatnrToClass(matnr, matkl, env);
-    if (!link.ok) {
-      result.errorMessage = `class link failed: ${link.message}`;
-      return result;
-    }
+    Object.assign(result, await ensureClassLink(matnr, matkl, env));
 
     const first = await callV64(matnr, ivChanges, testMode, env);
     result.planLog = first.plan;
@@ -404,6 +461,8 @@ export const pushRawAttributesToSap = async (
       result.writtenCount = tally.writtenCount;
       result.nicCount = tally.nicCount;
       result.lockedCount = tally.lockedCount;
+      result.nicAttrs = tally.nicAttrs;
+      result.lockedAttrs = tally.lockedAttrs;
       return result;
     }
 
@@ -417,11 +476,14 @@ export const pushRawAttributesToSap = async (
         .join('|');
       const second = await callV64(matnr, filtered, testMode, env);
       result.planLog = second.plan;
+      const firstTally = tallyPlan(first.plan);
       const tally = tallyPlan(second.plan);
       result.ok = second.ok;
       result.writtenCount = tally.writtenCount;
-      result.nicCount = (first.plan.length - planned.length) + tally.nicCount;
-      result.lockedCount = tally.lockedCount;
+      result.nicAttrs = [...firstTally.nicAttrs, ...tally.nicAttrs];
+      result.lockedAttrs = [...firstTally.lockedAttrs, ...tally.lockedAttrs];
+      result.nicCount = result.nicAttrs.length;
+      result.lockedCount = result.lockedAttrs.length;
       if (!second.ok) {
         const msgs = second.plan.map((p) => p.msg).filter(Boolean).join('; ');
         result.errorMessage = `patch retry ok:false (${tally.writtenCount} written, ${tally.nicCount} nic)` + (msgs ? ` | ${msgs}` : '');
@@ -432,6 +494,8 @@ export const pushRawAttributesToSap = async (
     const tally = tallyPlan(first.plan);
     result.nicCount = tally.nicCount;
     result.lockedCount = tally.lockedCount;
+    result.nicAttrs = tally.nicAttrs;
+    result.lockedAttrs = tally.lockedAttrs;
     // Empty/unrecognised plan → surface the raw SAP response so we can see WHY
     // (e.g. FM not found on this env, or a different response shape).
     let rawSnippet = '';

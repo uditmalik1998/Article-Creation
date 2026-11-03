@@ -11,6 +11,7 @@ import bcrypt from 'bcryptjs';
 import { syncVendorMaster, getVendorMasterStatus, getLastVendorSyncResult, isVendorSyncInProgress } from '../services/vendorMasterSyncService';
 import { invalidateMandatoryGridCache, invalidateMajCatVisibleCache } from '../services/zmmArtCreationService';
 import { invalidateFieldVisibilityCache } from '../utils/categoryFieldVisibility';
+import { invalidateAuthUserCache } from '../middleware/auth';
 import path from 'path';
 import fs from 'fs';
 
@@ -54,24 +55,18 @@ const MasterAttributeSchema = z.object({
   group: z.string().max(50).optional().nullable(),
 });
 
-const AllowedValueSchema = z.object({
-  attributeId: z.number().int(),
-  shortForm: z.string().min(1).max(100),
-  fullForm: z.string().min(1).max(200),
-  displayOrder: z.number().int().default(0),
-  isActive: z.boolean().default(true),
-});
-
 const AdminCreateUserSchema = z.object({
   email: z.string().email().max(255),
   password: z.string().min(6).max(128),
   name: z.string().min(1).max(100),
-  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'FABRIC_APPROVER', 'PLANNING', 'GM_APPROVER', 'GM_CREATOR']).optional().default('USER'),
+  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'PLANNING', 'GM_APPROVER', 'GM_CREATOR']).optional().default('USER'),
   division: z.union([z.string(), z.array(z.string())]).optional().nullable(),
   subDivision: z.union([z.string(), z.array(z.string())]).optional().nullable(),
   // Coarse business-unit tag — independent of division/subDivision above,
   // see the doc comment on User.businessDivision in schema.prisma.
   businessDivision: z.enum(['MENS', 'KIDS', 'LADIES', 'PD', 'MDM']).optional().nullable(),
+  // FG / Fabric / GM — a user can work on more than one.
+  articleTypes: z.array(z.enum(['FG', 'FABRIC', 'GM'])).optional(),
 });
 
 const AdminUpdateUserSchema = AdminCreateUserSchema.partial().extend({
@@ -85,7 +80,7 @@ const AdminUpdateUserSchema = AdminCreateUserSchema.partial().extend({
   // here with no default so an omitted role truly stays undefined, and
   // `updateUser`'s `validated.role ?? existingUser.role` correctly keeps
   // whatever role the user already had.
-  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'FABRIC_APPROVER', 'PLANNING', 'GM_APPROVER', 'GM_CREATOR']).optional(),
+  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'PLANNING', 'GM_APPROVER', 'GM_CREATOR']).optional(),
 });
 
 const normalizeSubDivisionInput = (value: unknown): string | null => {
@@ -397,164 +392,6 @@ export const getAllCategories = async (req: Request, res: Response): Promise<voi
   }
 };
 
-export const getCategoryById = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { id } = req.params;
-
-    const category = await prisma.category.findUnique({
-      where: { id: parseInt(id) },
-      include: {
-        subDepartment: {
-          include: {
-            department: true,
-          },
-        },
-        attributes: {
-          include: {
-            attribute: {
-              include: {
-                allowedValues: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!category) {
-      res.status(404).json({ success: false, error: 'Category not found' });
-      return;
-    }
-
-    res.json({ success: true, data: category });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-};
-
-/**
- * Get category by code with all attributes
- * Used by frontend extraction flow
- */
-export const getCategoryByCode = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { code } = req.params;
-
-    const category = await prisma.category.findUnique({
-      where: { code: code },
-      include: {
-        subDepartment: {
-          include: {
-            department: true,
-          },
-        },
-        attributes: {
-          orderBy: {
-            displayOrder: 'asc',
-          },
-          include: {
-            attribute: {
-              include: {
-                allowedValues: {
-                  orderBy: {
-                    displayOrder: 'asc',
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!category) {
-      res.status(404).json({ success: false, error: `Category with code '${code}' not found` });
-      return;
-    }
-
-    res.json({ success: true, data: category });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-};
-
-/**
- * Get category with ALL master attributes (showing enabled/disabled status)
- * This is used by the admin panel matrix to show all 44 attributes with toggles
- */
-export const getCategoryWithAllAttributes = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { id } = req.params;
-    const categoryId = parseInt(id);
-
-    // Get the category
-    const category = await prisma.category.findUnique({
-      where: { id: categoryId },
-      include: {
-        subDepartment: {
-          include: {
-            department: true,
-          },
-        },
-      },
-    });
-
-    if (!category) {
-      res.status(404).json({ success: false, error: `Category with ID ${id} not found` });
-      return;
-    }
-
-    // Get ALL master attributes
-    const allAttributes = await prisma.masterAttribute.findMany({
-      orderBy: { displayOrder: 'asc' },
-      include: {
-        allowedValues: {
-          where: { isActive: true },
-          orderBy: { displayOrder: 'asc' },
-        },
-      },
-    });
-
-    // Get existing category-attribute mappings
-    const existingMappings = await prisma.categoryAttribute.findMany({
-      where: { categoryId: categoryId },
-    });
-
-    // Create a map for quick lookup
-    const mappingMap = new Map(
-      existingMappings.map(m => [m.attributeId, m])
-    );
-
-    // Merge: for each master attribute, check if mapping exists
-    const attributesWithStatus = allAttributes.map(attr => {
-      const mapping = mappingMap.get(attr.id);
-      return {
-        attributeId: attr.id,
-        attributeKey: attr.key,
-        attributeLabel: attr.label,
-        attributeType: attr.type,
-        attributeGroup: attr.group ?? null,
-        allowedValues: attr.allowedValues,
-        isEnabled: mapping?.isEnabled || false,
-        isRequired: mapping?.isRequired || false,
-        displayOrder: mapping?.displayOrder || attr.displayOrder,
-        defaultValue: mapping?.defaultValue || null,
-        hasMapping: !!mapping,
-      };
-    });
-
-    res.json({
-      success: true,
-      data: {
-        ...category,
-        allAttributes: attributesWithStatus,
-      },
-    });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-};
-
 export const createCategory = async (req: Request, res: Response): Promise<void> => {
   try {
     const validated = CategorySchema.parse(req.body);
@@ -693,36 +530,6 @@ export const updateCategoryAttributeMapping = async (req: Request, res: Response
   }
 };
 
-// Add attribute to category
-export const addAttributeToCategory = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { categoryId } = req.params;
-    const { attributeId, isEnabled, isRequired, displayOrder, defaultValue } = req.body;
-
-    const mapping = await prisma.categoryAttribute.create({
-      data: {
-        categoryId: parseInt(categoryId),
-        attributeId,
-        isEnabled: isEnabled ?? true,
-        isRequired: isRequired ?? false,
-        displayOrder: displayOrder ?? 0,
-        defaultValue: defaultValue ?? null,
-      },
-      include: {
-        attribute: {
-          include: {
-            allowedValues: true,
-          },
-        },
-      },
-    });
-
-    res.status(201).json({ success: true, data: mapping });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-};
-
 // Remove attribute from category
 export const removeAttributeFromCategory = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -747,42 +554,11 @@ export const removeAttributeFromCategory = async (req: Request, res: Response): 
 
 export const getAllMasterAttributes = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { includeValues } = req.query;
-
     const attributes = await prisma.masterAttribute.findMany({
       orderBy: { displayOrder: 'asc' },
-      include: includeValues === 'true' ? {
-        allowedValues: {
-          orderBy: { displayOrder: 'asc' },
-        },
-      } : undefined,
     });
 
     res.json({ success: true, data: attributes });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-};
-
-export const getMasterAttributeById = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { id } = req.params;
-
-    const attribute = await prisma.masterAttribute.findUnique({
-      where: { id: parseInt(id) },
-      include: {
-        allowedValues: {
-          orderBy: { displayOrder: 'asc' },
-        },
-      },
-    });
-
-    if (!attribute) {
-      res.status(404).json({ success: false, error: 'Attribute not found' });
-      return;
-    }
-
-    res.json({ success: true, data: attribute });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -835,42 +611,6 @@ export const deleteMasterAttribute = async (req: Request, res: Response): Promis
     });
 
     res.json({ success: true, message: 'Attribute deleted successfully' });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-};
-
-export const addAllowedValue = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { id } = req.params;
-    const validated = AllowedValueSchema.omit({ attributeId: true }).parse(req.body);
-
-    const allowedValue = await prisma.attributeAllowedValue.create({
-      data: {
-        ...validated,
-        attributeId: parseInt(id),
-      },
-    });
-
-    res.status(201).json({ success: true, data: allowedValue });
-  } catch (error: any) {
-    if (error instanceof z.ZodError) {
-      res.status(400).json({ success: false, error: error.issues });
-      return;
-    }
-    res.status(500).json({ success: false, error: error.message });
-  }
-};
-
-export const deleteAllowedValue = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { valueId } = req.params;
-
-    await prisma.attributeAllowedValue.delete({
-      where: { id: parseInt(valueId) },
-    });
-
-    res.json({ success: true, message: 'Allowed value deleted successfully' });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -1036,48 +776,6 @@ export const invalidateHierarchyCache = async (_req: Request, res: Response): Pr
   res.json({ success: true, message: 'Hierarchy tree cache cleared' });
 };
 
-export const exportHierarchy = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const [departments, attributes] = await Promise.all([
-      prisma.department.findMany({
-        include: {
-          subDepartments: {
-            include: {
-              categories: {
-                include: {
-                  attributes: {
-                    include: {
-                      attribute: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      }),
-      prisma.masterAttribute.findMany({
-        include: {
-          allowedValues: true,
-        },
-      }),
-    ]);
-
-    const exportData = {
-      version: '1.0',
-      exportedAt: new Date().toISOString(),
-      departments,
-      masterAttributes: attributes,
-    };
-
-    res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Content-Disposition', 'attachment; filename=hierarchy-export.json');
-    res.json(exportData);
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-};
-
 // ═══════════════════════════════════════════════════════
 // EXTRACTION HISTORY (ADMIN ONLY)
 // ═══════════════════════════════════════════════════════
@@ -1150,6 +848,7 @@ export const getAllUsers = async (req: Request, res: Response): Promise<void> =>
         division: true,
         subDivision: true,
         businessDivision: true,
+        articleTypes: true,
         isActive: true,
         createdAt: true,
         lastLogin: true,
@@ -1167,13 +866,15 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
     const validated = AdminCreateUserSchema.parse(req.body);
     const normalizedDivision = normalizeDivisionInput(validated.division);
     const normalizedSubDivision = normalizeSubDivisionInput(validated.subDivision);
+    // Division (Mens/Ladies/Kids) only applies to FG; Fabric/GM scope is sub-divisions alone.
+    const fgScoped = !validated.articleTypes?.length || validated.articleTypes.includes('FG');
 
-    if ((validated.role === 'CREATOR' || validated.role === 'APPROVER' || validated.role === 'SUB_DIVISION_HEAD') && (!normalizedDivision || !normalizedSubDivision)) {
+    if ((validated.role === 'CREATOR' || validated.role === 'APPROVER' || validated.role === 'SUB_DIVISION_HEAD') && ((fgScoped && !normalizedDivision) || !normalizedSubDivision)) {
       res.status(400).json({ success: false, error: 'Division and Sub-Division are required for this role' });
       return;
     }
 
-    if (validated.role === 'CATEGORY_HEAD' && !normalizedDivision) {
+    if (validated.role === 'CATEGORY_HEAD' && fgScoped && !normalizedDivision) {
       res.status(400).json({ success: false, error: 'Division is required for Category Head' });
       return;
     }
@@ -1201,6 +902,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
           division: validated.role === 'PO_COMMITTEE' ? null : normalizedDivision,
           subDivision: (validated.role === 'CATEGORY_HEAD' || validated.role === 'PO_COMMITTEE' || validated.role === 'ADMIN') ? null : normalizedSubDivision,
           businessDivision: validated.businessDivision ?? null,
+          articleTypes: Array.from(new Set(validated.articleTypes ?? [])),
           isActive: true,
         },
         select: {
@@ -1211,6 +913,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
           division: true,
           subDivision: true,
           businessDivision: true,
+          articleTypes: true,
           isActive: true,
           createdAt: true,
         }
@@ -1229,6 +932,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
         division: validated.role === 'PO_COMMITTEE' ? null : normalizedDivision,
         subDivision: (validated.role === 'CATEGORY_HEAD' || validated.role === 'PO_COMMITTEE' || validated.role === 'ADMIN') ? null : normalizedSubDivision,
         businessDivision: validated.businessDivision ?? null,
+        articleTypes: Array.from(new Set(validated.articleTypes ?? [])),
         isActive: true,
       },
       select: {
@@ -1278,13 +982,16 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
     const finalSubDivision = validated.subDivision !== undefined
       ? normalizeSubDivisionInput(validated.subDivision)
       : existingUser.subDivision;
+    // Division (Mens/Ladies/Kids) only applies to FG; Fabric/GM scope is sub-divisions alone.
+    const finalArticleTypes = validated.articleTypes ?? existingUser.articleTypes ?? [];
+    const fgScoped = finalArticleTypes.length === 0 || finalArticleTypes.includes('FG');
 
-    if ((finalRole === 'CREATOR' || finalRole === 'APPROVER' || finalRole === 'SUB_DIVISION_HEAD') && (!finalDivision || !finalSubDivision)) {
+    if ((finalRole === 'CREATOR' || finalRole === 'APPROVER' || finalRole === 'SUB_DIVISION_HEAD') && ((fgScoped && !finalDivision) || !finalSubDivision)) {
       res.status(400).json({ success: false, error: 'Division and Sub-Division are required for this role' });
       return;
     }
 
-    if (finalRole === 'CATEGORY_HEAD' && !finalDivision) {
+    if (finalRole === 'CATEGORY_HEAD' && fgScoped && !finalDivision) {
       res.status(400).json({ success: false, error: 'Division is required for Category Head' });
       return;
     }
@@ -1298,6 +1005,7 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
       // Unlike division/subDivision, businessDivision has no role-based
       // clearing rule — every role can be tagged Mens/Kids/Ladies/PO.
       businessDivision: validated.businessDivision !== undefined ? validated.businessDivision : undefined,
+      articleTypes: validated.articleTypes !== undefined ? Array.from(new Set(validated.articleTypes)) : undefined,
       email: validated.email ? validated.email.toLowerCase() : undefined,
     };
 
@@ -1325,6 +1033,8 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
       }
     });
 
+    // Role / scope / article types take effect on the user's next request, not after the auth cache expires.
+    invalidateAuthUserCache(userId);
     res.json({ success: true, data: updatedUser, message: 'User updated successfully' });
   } catch (error: any) {
     if (error instanceof z.ZodError) {
@@ -1389,6 +1099,26 @@ export const getGMSubDivisions = async (_req: Request, res: Response): Promise<v
       WHERE sub_div IS NOT NULL AND sub_div <> ''
         AND div IS NOT NULL AND div <> ''
         AND mj_status = 'ACT'
+      ORDER BY div, sub_div
+    `;
+    const subDivisions = rows.map((r) => r.sub_div);
+    const divBySubDiv: Record<string, string> = {};
+    rows.forEach((r) => { divBySubDiv[r.sub_div] = r.div; });
+    res.json({ subDivisions, divBySubDiv });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/** Fabric sub-divisions (Denim / Knits / Woven) for the Users page "Fabric Article" access scope. */
+export const getFabricSubDivisions = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.$queryRaw<{ sub_div: string; div: string }[]>`
+      SELECT DISTINCT sub_div, div
+      FROM fabric_article_master
+      WHERE sub_div IS NOT NULL AND sub_div <> ''
+        AND div IS NOT NULL AND div <> ''
+        AND status = 'ACT'
       ORDER BY div, sub_div
     `;
     const subDivisions = rows.map((r) => r.sub_div);
@@ -1613,7 +1343,6 @@ export const getDetailedExpenses = async (req: Request, res: Response): Promise<
       ...(parsedOffset > 0 ? { skip: parsedOffset } : {}),
       select: {
         jobId: true,
-        imageName: true,
         articleNumber: true,
         imageUrl: true,
         inputTokens: true,
@@ -1628,7 +1357,7 @@ export const getDetailedExpenses = async (req: Request, res: Response): Promise<
     // Format the data for frontend
     const formattedExpenses = expenses.map((expense) => ({
       key: expense.jobId,
-      imageName: expense.imageName || expense.designNumber || 'Unknown',
+      imageName: expense.designNumber || 'Unknown', // display label (image_name column dropped)
       articleNumber: expense.articleNumber, // Include article number
       imageUrl: expense.imageUrl,
       inputTokens: expense.inputTokens || 0,
@@ -4479,235 +4208,6 @@ export const downloadMandatoryGridData = async (_req: Request, res: Response): P
     res.end();
   } catch (error: any) {
     console.error('[MandatoryGrid] Download error:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-};
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// HIERARCHY EXCEL UPLOAD
-// Reads DIV / SUB-DIV / MAJOR_CATEGORY columns from the Mandatory Grid Excel
-// and upserts rows into departments, sub_departments, categories tables.
-// ═══════════════════════════════════════════════════════════════════════════════
-
-/** Compact Excel sub-div codes → normalised DB codes */
-const SUB_DIV_NORMALIZE: Record<string, string> = {
-  KGU:    'KG-U',
-  KGWU:   'KGW-U',
-  KBU:    'KB-U',
-  KBWU:   'KBW-U',
-  KGL:    'KG-L',
-  KGWL:   'KGW-L',
-  KBL:    'KB-L',
-  KBWL:   'KBW-L',
-  KBSETS: 'KB-SETS',
-  KBWSETS:'KBW-SETS',
-  MSU:    'MS-U',
-  MSL:    'MS-L',
-  MSIW:   'MS-IW',
-};
-
-function normalizeSubDiv(raw: string): string {
-  const upper = raw.trim().toUpperCase();
-  return SUB_DIV_NORMALIZE[upper] ?? raw.trim();
-}
-
-interface HierarchyRow {
-  div: string;
-  subDiv: string;
-  majorCategory: string;
-}
-
-interface HierarchyUploadResult {
-  departments:    { new: number; updated: number; total: number };
-  subDepartments: { new: number; updated: number; total: number };
-  categories:     { new: number; updated: number; total: number };
-  skippedRows:    number;
-  dryRun:         boolean;
-  preview?: {
-    divisions:      string[];
-    subDivisions:   string[];
-    majorCategories: string[];
-  };
-}
-
-/**
- * GET /api/admin/hierarchy/upload-excel/status
- * Returns summary counts from the three hierarchy tables.
- */
-export const getHierarchyExcelStatus = async (_req: Request, res: Response): Promise<void> => {
-  try {
-    const [depts, subs, cats] = await Promise.all([
-      prisma.department.count({ where: { isActive: true } }),
-      prisma.subDepartment.count({ where: { isActive: true } }),
-      prisma.category.count({ where: { isActive: true } }),
-    ]);
-    res.json({ success: true, data: { departments: depts, subDepartments: subs, categories: cats } });
-  } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message });
-  }
-};
-
-/**
- * POST /api/admin/hierarchy/upload-excel
- * ?dryRun=true  → parse only, return preview without saving
- */
-export const uploadHierarchyExcel = async (req: Request, res: Response): Promise<void> => {
-  try {
-    if (!req.file) {
-      res.status(400).json({ success: false, error: 'No file uploaded' });
-      return;
-    }
-
-    const dryRun = req.query.dryRun === 'true';
-
-    const ExcelJS = require('exceljs');
-    const wb = new ExcelJS.Workbook();
-    await wb.xlsx.load(req.file.buffer as any);
-    const ws = wb.worksheets[0];
-    if (!ws) {
-      res.status(400).json({ success: false, error: 'Excel file has no worksheets' });
-      return;
-    }
-
-    // Parse rows — DIV=col1, SUB-DIV=col2, MAJOR_CATEGORY=col3
-    // Row 1: title, Row 2: blank, Row 3: primary headers, Row 4: SAP keys, Row 5: blank, Row 6+: data
-    const rows: HierarchyRow[] = [];
-    let skippedRows = 0;
-
-    ws.eachRow({ includeEmpty: false }, (row: any, rowNum: number) => {
-      if (rowNum <= 5) return; // skip header block
-
-      const rawDiv = row.getCell(1).value;
-      const rawSub = row.getCell(2).value;
-      const rawCat = row.getCell(3).value;
-
-      const div          = String(rawDiv ?? '').trim().toUpperCase();
-      const subDivRaw    = String(rawSub ?? '').trim();
-      const majorCategory = String(rawCat ?? '').trim();
-
-      if (!div || !subDivRaw || !majorCategory) { skippedRows++; return; }
-
-      rows.push({ div, subDiv: normalizeSubDiv(subDivRaw), majorCategory });
-    });
-
-    // Deduplicate
-    const uniqueDivs    = [...new Set(rows.map(r => r.div))];
-    const uniqueSubDivs = [...new Set(rows.map(r => `${r.div}||${r.subDiv}`))];
-    const uniqueCats    = [...new Set(rows.map(r => r.majorCategory))];
-
-    console.log(`[HierarchyExcel] Parsed ${rows.length} rows → ${uniqueDivs.length} divs, ${uniqueSubDivs.length} sub-divs, ${uniqueCats.length} major categories, ${skippedRows} skipped`);
-
-    // ── Dry run: return preview only ────────────────────────────────────────────
-    if (dryRun) {
-      const result: HierarchyUploadResult = {
-        departments:    { new: 0, updated: 0, total: uniqueDivs.length },
-        subDepartments: { new: 0, updated: 0, total: uniqueSubDivs.length },
-        categories:     { new: 0, updated: 0, total: uniqueCats.length },
-        skippedRows,
-        dryRun: true,
-        preview: {
-          divisions:      uniqueDivs,
-          subDivisions:   [...new Set(rows.map(r => r.subDiv))].sort(),
-          majorCategories: uniqueCats,
-        },
-      };
-      res.json({ success: true, data: result });
-      return;
-    }
-
-    // ── Real upsert ──────────────────────────────────────────────────────────────
-    const deptStats = { new: 0, updated: 0 };
-    const subStats  = { new: 0, updated: 0 };
-    const catStats  = { new: 0, updated: 0 };
-
-    // 1. Upsert Departments — case-insensitive lookup to avoid creating duplicates
-    //    (e.g. "Kids" already in DB + "KIDS" from Excel → same record)
-    const deptMap = new Map<string, number>(); // code → id
-    for (const divCode of uniqueDivs) {
-      const existing = await prisma.department.findFirst({
-        where: { code: { equals: divCode, mode: 'insensitive' } },
-      });
-      if (existing) {
-        // Normalise the stored code to uppercase
-        await prisma.department.update({
-          where: { id: existing.id },
-          data: { code: divCode, name: divCode, isActive: true },
-        });
-        deptMap.set(divCode, existing.id);
-        deptStats.updated++;
-      } else {
-        const created = await prisma.department.create({
-          data: { code: divCode, name: divCode, displayOrder: 0, isActive: true },
-        });
-        deptMap.set(divCode, created.id);
-        deptStats.new++;
-      }
-    }
-
-    // 2. Upsert SubDepartments
-    const subMap = new Map<string, number>(); // "div||subDiv" → id
-    const subDivPairs = [...new Map(rows.map(r => [`${r.div}||${r.subDiv}`, r])).values()];
-    for (const { div, subDiv } of subDivPairs) {
-      const departmentId = deptMap.get(div);
-      if (!departmentId) continue;
-      const key = `${div}||${subDiv}`;
-
-      const existing = await prisma.subDepartment.findFirst({
-        where: { departmentId, code: subDiv },
-      });
-      if (existing) {
-        await prisma.subDepartment.update({
-          where: { id: existing.id },
-          data: { name: subDiv, isActive: true },
-        });
-        subMap.set(key, existing.id);
-        subStats.updated++;
-      } else {
-        const created = await prisma.subDepartment.create({
-          data: { departmentId, code: subDiv, name: subDiv, displayOrder: 0, isActive: true },
-        });
-        subMap.set(key, created.id);
-        subStats.new++;
-      }
-    }
-
-    // 3. Upsert Categories
-    for (const { div, subDiv, majorCategory } of rows) {
-      const subDepartmentId = subMap.get(`${div}||${subDiv}`);
-      if (!subDepartmentId) continue;
-
-      const existing = await prisma.category.findUnique({ where: { code: majorCategory } });
-      if (existing) {
-        await prisma.category.update({
-          where: { id: existing.id },
-          data: { subDepartmentId, name: majorCategory, isActive: true },
-        });
-        catStats.updated++;
-      } else {
-        await prisma.category.create({
-          data: { subDepartmentId, code: majorCategory, name: majorCategory, displayOrder: 0, isActive: true },
-        });
-        catStats.new++;
-      }
-    }
-
-    const result: HierarchyUploadResult = {
-      departments:    { ...deptStats, total: uniqueDivs.length },
-      subDepartments: { ...subStats,  total: uniqueSubDivs.length },
-      categories:     { ...catStats,  total: uniqueCats.length },
-      skippedRows,
-      dryRun: false,
-    };
-
-    console.log(`[HierarchyExcel] Done — Depts: +${deptStats.new}/~${deptStats.updated}, SubDepts: +${subStats.new}/~${subStats.updated}, Cats: +${catStats.new}/~${catStats.updated}`);
-
-    res.json({
-      success: true,
-      message: `Hierarchy updated — ${deptStats.new} new / ${deptStats.updated} existing departments, ${subStats.new} new / ${subStats.updated} existing sub-divisions, ${catStats.new} new / ${catStats.updated} existing major categories.`,
-      data: result,
-    });
-  } catch (error: any) {
-    console.error('[HierarchyExcel] Upload error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -8406,6 +7906,28 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
     displayColumns: ['major_category', 'sap_key'],
     defaultSort: { column: 'id', dir: 'desc' },
   },
+  'fabric-main-mvgr-mapping': {
+    kind: 'raw',
+    tableName: 'm_fabric_main_mvgr_mapping',
+    idColumn: 'id',
+    // Small master (MVGR-1 -> MVGR-2 codes), mainly re-uploaded from Excel on
+    // the Admin -> Expenses page; row add/delete kept for one-off fixes.
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['mvgr1', 'mvgr2'],
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'mvgr1', label: 'MVGR-1' },
+      { key: 'mvgr1_full_form', label: 'MVGR-1 Full Form' },
+      { key: 'mvgr2', label: 'MVGR-2' },
+      { key: 'mvgr2_full_form', label: 'MVGR-2 Full Form' },
+      { key: 'created_at', label: 'Created At', editable: false },
+      { key: 'updated_at', label: 'Updated At', editable: false },
+    ],
+    searchColumns: ['mvgr1', 'mvgr1_full_form', 'mvgr2', 'mvgr2_full_form'],
+    displayColumns: ['mvgr1', 'mvgr2'],
+    defaultSort: { column: 'id', dir: 'asc' },
+  },
   'segment-master': {
     kind: 'raw',
     tableName: 'maj_cat_segment',
@@ -10144,7 +9666,8 @@ export const renameMcdGroup = async (req: Request, res: Response): Promise<void>
 // ═══════════════════════════════════════════════════════════════════════════════
 // GM MAJOR CATEGORY DETAILS (gm_major_category_details)
 // Columns: id, seg, div, sub_div, maj_cat_nm, mc_cd, maj_cat_desc, mj_status,
-//          archetype, archetype_nm, family_code, family_name, status, created_at
+//          archetype, archetype_nm, family_code, family_name, status, hsn_cd, created_at
+// hsn_cd is sent to SAP as HSN_CODE; GM submit is blocked without it.
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const GM_MCT_META_FILE = path.join(__dirname, '../../data/gm-mct-meta.json');
@@ -10191,16 +9714,16 @@ export const downloadGMMajCatDetailsTemplate = async (_req: Request, res: Respon
     const ws = wb.addWorksheet('GM_MCT');
 
     // Row 1 — title
-    ws.mergeCells('A1:N1');
+    ws.mergeCells('A1:M1');
     const titleCell = ws.getCell('A1');
     titleCell.value = 'GM Major Category Details Template';
     titleCell.font = { bold: true, size: 13 };
     titleCell.alignment = { horizontal: 'center' };
     ws.getRow(1).height = 22;
 
-    // Row 2 — headers (required cols highlighted green: seg, div, sub_div, maj_cat_nm)
-    const headers = ['seg', 'div', 'sub_div', 'maj_cat_nm', 'mc_cd', 'maj_cat_desc', 'mj_status', 'archetype', 'archetype_nm', 'family_code', 'family_name', 'status'];
-    const requiredCols = new Set([1, 2, 3, 4]); // 1-based
+    // Row 2 — headers (required cols highlighted green: seg, div, sub_div, maj_cat_nm, hsn_cd)
+    const headers = ['seg', 'div', 'sub_div', 'maj_cat_nm', 'mc_cd', 'maj_cat_desc', 'mj_status', 'archetype', 'archetype_nm', 'family_code', 'family_name', 'status', 'hsn_cd'];
+    const requiredCols = new Set([1, 2, 3, 4, 13]); // 1-based
     const headerRow = ws.addRow(headers);
     headerRow.eachCell((cell: any, col: number) => {
       cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
@@ -10212,14 +9735,16 @@ export const downloadGMMajCatDetailsTemplate = async (_req: Request, res: Respon
     });
 
     // Sample rows
-    ws.addRow(['GENERAL', 'GM', 'GM-HOME', 'GM_BEDSHEET', 'GMBS001', 'Bed Sheet', 'ACT', 'HOME_TEXTILE', 'Home Textile', 'GM_BRAND', 'Brand', 'ACT']);
-    ws.addRow(['GENERAL', 'GM', 'GM-HOME', 'GM_BEDSHEET', 'GMBS001', 'Bed Sheet', 'ACT', 'HOME_TEXTILE', 'Home Textile', 'GM_SIZE', 'Size', 'ACT']);
-    ws.addRow(['GENERAL', 'GM', 'GM-KITCHEN', 'GM_COOKWARE', 'GMCK001', 'Cookware', 'ACT', 'KITCHEN', 'Kitchen', 'GM_BRAND', 'Brand', 'ACT']);
+    ws.addRow(['GENERAL', 'GM', 'GM-HOME', 'GM_BEDSHEET', 'GMBS001', 'Bed Sheet', 'ACT', 'HOME_TEXTILE', 'Home Textile', 'GM_BRAND', 'Brand', 'ACT', '630499']);
+    ws.addRow(['GENERAL', 'GM', 'GM-HOME', 'GM_BEDSHEET', 'GMBS001', 'Bed Sheet', 'ACT', 'HOME_TEXTILE', 'Home Textile', 'GM_SIZE', 'Size', 'ACT', '630499']);
+    ws.addRow(['GENERAL', 'GM', 'GM-KITCHEN', 'GM_COOKWARE', 'GMCK001', 'Cookware', 'ACT', 'KITCHEN', 'Kitchen', 'GM_BRAND', 'Brand', 'ACT', '761510']);
+    // hsn_cd as text so leading zeros / 8-digit codes stay as typed.
+    ws.getColumn(13).numFmt = '@';
 
     ws.columns = [
       { width: 12 }, { width: 10 }, { width: 14 }, { width: 20 }, { width: 12 },
       { width: 20 }, { width: 12 }, { width: 16 }, { width: 18 }, { width: 18 },
-      { width: 18 }, { width: 10 },
+      { width: 18 }, { width: 10 }, { width: 12 },
     ];
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -10239,16 +9764,17 @@ export const downloadGMMajCatDetailsData = async (_req: Request, res: Response):
       mc_cd: string | null; maj_cat_desc: string | null; mj_status: string | null;
       archetype: string | null; archetype_nm: string | null;
       family_code: string | null; family_name: string | null; status: string | null;
+      hsn_cd: string | null;
     }[]>`
       SELECT seg, div, sub_div, maj_cat_nm, mc_cd, maj_cat_desc, mj_status,
-             archetype, archetype_nm, family_code, family_name, status
+             archetype, archetype_nm, family_code, family_name, status, hsn_cd
       FROM gm_major_category_details
       ORDER BY div, sub_div, maj_cat_nm, family_code
     `;
 
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet('GM_MCT');
-    const headers = ['seg', 'div', 'sub_div', 'maj_cat_nm', 'mc_cd', 'maj_cat_desc', 'mj_status', 'archetype', 'archetype_nm', 'family_code', 'family_name', 'status'];
+    const headers = ['seg', 'div', 'sub_div', 'maj_cat_nm', 'mc_cd', 'maj_cat_desc', 'mj_status', 'archetype', 'archetype_nm', 'family_code', 'family_name', 'status', 'hsn_cd'];
     const headerRow = ws.addRow(headers);
     headerRow.eachCell((cell: any) => {
       cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
@@ -10256,13 +9782,13 @@ export const downloadGMMajCatDetailsData = async (_req: Request, res: Response):
     });
 
     for (const r of rows) {
-      ws.addRow([r.seg, r.div, r.sub_div, r.maj_cat_nm, r.mc_cd, r.maj_cat_desc, r.mj_status, r.archetype, r.archetype_nm, r.family_code, r.family_name, r.status]);
+      ws.addRow([r.seg, r.div, r.sub_div, r.maj_cat_nm, r.mc_cd, r.maj_cat_desc, r.mj_status, r.archetype, r.archetype_nm, r.family_code, r.family_name, r.status, r.hsn_cd]);
     }
 
     ws.columns = [
       { width: 12 }, { width: 10 }, { width: 14 }, { width: 20 }, { width: 12 },
       { width: 20 }, { width: 12 }, { width: 16 }, { width: 18 }, { width: 18 },
-      { width: 18 }, { width: 10 },
+      { width: 18 }, { width: 10 }, { width: 12 },
     ];
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -10325,6 +9851,7 @@ export const uploadGMMajCatDetails = async (req: Request, res: Response): Promis
         mc_cd: string | null; maj_cat_desc: string | null; mj_status: string | null;
         archetype: string | null; archetype_nm: string | null;
         family_code: string | null; family_name: string | null; status: string | null;
+        hsn_cd: string | null;
       }> = [];
       let skipped = 0;
 
@@ -10345,6 +9872,7 @@ export const uploadGMMajCatDetails = async (req: Request, res: Response): Promis
           family_code: col(row, 'family_code'),
           family_name: col(row, 'family_name'),
           status: col(row, 'status'),
+          hsn_cd: col(row, 'hsn_cd'),
         });
       });
 
@@ -10358,12 +9886,13 @@ export const uploadGMMajCatDetails = async (req: Request, res: Response): Promis
           const batch = dataRows.slice(i, i + BATCH);
           await tx.$executeRaw`
             INSERT INTO gm_major_category_details
-              (seg, div, sub_div, maj_cat_nm, mc_cd, maj_cat_desc, mj_status, archetype, archetype_nm, family_code, family_name, status)
+              (seg, div, sub_div, maj_cat_nm, mc_cd, maj_cat_desc, mj_status, archetype, archetype_nm, family_code, family_name, status, hsn_cd)
             SELECT r.seg, r.div, r.sub_div, r.maj_cat_nm, r.mc_cd, r.maj_cat_desc, r.mj_status,
-                   r.archetype, r.archetype_nm, r.family_code, r.family_name, r.status
+                   r.archetype, r.archetype_nm, r.family_code, r.family_name, r.status, r.hsn_cd
             FROM jsonb_to_recordset(${JSON.stringify(batch)}::jsonb)
               AS r(seg text, div text, sub_div text, maj_cat_nm text, mc_cd text, maj_cat_desc text,
-                   mj_status text, archetype text, archetype_nm text, family_code text, family_name text, status text)
+                   mj_status text, archetype text, archetype_nm text, family_code text, family_name text, status text,
+                   hsn_cd text)
           `;
           job.progress = 40 + Math.round(((i + batch.length) / dataRows.length) * 55);
         }
@@ -10920,6 +10449,197 @@ export const uploadPreciseFabricArticleData = async (req: Request, res: Response
     res.json({ success: true, data: { inserted: inserts.length } });
   } catch (error: any) {
     console.error('[PreciseFabricArticleData] Upload error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+
+// ═══════════════════════════════════════════════════════
+// FABRIC MAIN MVGR MAPPING (m_fabric_main_mvgr_mapping) — MVGR-1 → MVGR-2
+// ═══════════════════════════════════════════════════════
+
+const MVGR_MAPPING_HEADERS = ['MVGR-1', 'MVGR-1 FULL FORM', 'MVGR-2', 'MVGR-2 FULL FORM'];
+
+const writeMvgrMappingSheet = async (res: Response, filename: string, rows: string[][]): Promise<void> => {
+  const ExcelJS = require('exceljs');
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('MVGR MAPPING');
+  const headerRow = ws.addRow(MVGR_MAPPING_HEADERS);
+  headerRow.eachCell((cell: any) => {
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+    cell.alignment = { horizontal: 'center' };
+  });
+  for (const r of rows) ws.addRow(r);
+  ws.columns = [{ width: 12 }, { width: 22 }, { width: 16 }, { width: 26 }];
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  await wb.xlsx.write(res);
+  res.end();
+};
+
+export const getFabricMainMvgrMappingStatus = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.$queryRaw<{ total: bigint; mvgr1_count: bigint; last_updated: Date | null }[]>`
+      SELECT COUNT(*)::bigint AS total,
+             COUNT(DISTINCT mvgr1)::bigint AS mvgr1_count,
+             MAX(updated_at) AS last_updated
+      FROM m_fabric_main_mvgr_mapping
+    `;
+    const r = rows[0] ?? { total: 0n, mvgr1_count: 0n, last_updated: null };
+    res.json({
+      success: true,
+      data: {
+        total: Number(r.total),
+        mvgr1Count: Number(r.mvgr1_count),
+        lastUpdated: r.last_updated ? r.last_updated.toISOString() : null,
+      },
+    });
+  } catch (error: any) {
+    console.error('[FabricMainMvgrMapping] Status error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const downloadFabricMainMvgrMappingTemplate = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    await writeMvgrMappingSheet(res, 'FABRIC_MAIN_MVGR_MAPPING_TEMPLATE.xlsx', [
+      ['DNM', 'DNM', 'DNM_CHK', 'DENIM CHECK'],
+      ['PRT', 'PRINT', 'PRT_FLRL', 'PRINT FLORAL'],
+    ]);
+  } catch (error: any) {
+    console.error('[FabricMainMvgrMapping] Template error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const exportFabricMainMvgrMapping = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.$queryRaw<{ mvgr1: string; mvgr1_full_form: string | null; mvgr2: string; mvgr2_full_form: string | null }[]>`
+      SELECT mvgr1, mvgr1_full_form, mvgr2, mvgr2_full_form
+      FROM m_fabric_main_mvgr_mapping
+      ORDER BY id
+    `;
+    await writeMvgrMappingSheet(
+      res,
+      'FABRIC_MAIN_MVGR_MAPPING_EXPORT.xlsx',
+      rows.map((r) => [r.mvgr1, r.mvgr1_full_form ?? '', r.mvgr2, r.mvgr2_full_form ?? '']),
+    );
+  } catch (error: any) {
+    console.error('[FabricMainMvgrMapping] Export error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// Accepts the template (MVGR-1, MVGR-1 FULL FORM, MVGR-2, MVGR-2 FULL FORM) and the
+// original "MVGR1 AND MVGR2 MAPPING" sheet (title rows, a label column, then
+// FAB_MAIN_MVGR-1 | FULL FORM | … | FAB-MAIN-MVGR-2 | FULL FORM). A FULL FORM column
+// belongs to the MVGR column before it; the last MVGR-n column wins. Replaces the table.
+export const uploadFabricMainMvgrMapping = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ success: false, error: 'No file uploaded. Send a .xlsx file as "file" field.' });
+      return;
+    }
+    const ExcelJS = (await import('exceljs')).default;
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(req.file.buffer as any);
+    const ws = wb.worksheets[0];
+    if (!ws) {
+      res.status(400).json({ success: false, error: 'No worksheets found in the uploaded Excel file.' });
+      return;
+    }
+    const cellStr = (row: any, c: number): string => {
+      let v = row.getCell(c).value;
+      if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
+      if (v && typeof v === 'object' && 'text' in v) v = (v as any).text;
+      return v == null ? '' : String(v).trim();
+    };
+
+    // Header row: first row (of the top 10) with an MVGR-1 and an MVGR-2 column.
+    let headerRow = 0;
+    const code: Record<1 | 2, number> = { 1: 0, 2: 0 };
+    const full: Record<1 | 2, number> = { 1: 0, 2: 0 };
+    for (let r = 1; r <= Math.min(10, ws.rowCount) && !headerRow; r++) {
+      const row = ws.getRow(r);
+      const c1 = { 1: 0, 2: 0 } as Record<1 | 2, number>;
+      const f1 = { 1: 0, 2: 0 } as Record<1 | 2, number>;
+      let last: 1 | 2 | 0 = 0;
+      for (let c = 1; c <= 15; c++) {
+        const h = cellStr(row, c).toUpperCase();
+        if (!h) continue;
+        if (h.includes('FULL')) {
+          if (last) f1[last] = c;
+          continue;
+        }
+        const m = h.match(/MVGR[\s_-]*([12])/);
+        if (m) {
+          last = m[1] === '1' ? 1 : 2;
+          c1[last] = c;
+        }
+      }
+      if (c1[1] && c1[2]) {
+        headerRow = r;
+        Object.assign(code, c1);
+        Object.assign(full, f1);
+      }
+    }
+    if (!headerRow) {
+      res.status(400).json({ success: false, error: `Header row not found. Expected columns: ${MVGR_MAPPING_HEADERS.join(', ')}.` });
+      return;
+    }
+
+    const byMvgr2 = new Map<string, { mvgr1: string; mvgr1Full: string | null; mvgr2: string; mvgr2Full: string | null }>();
+    let skipped = 0;
+    let duplicates = 0;
+    for (let r = headerRow + 1; r <= ws.rowCount; r++) {
+      const row = ws.getRow(r);
+      const mvgr1 = cellStr(row, code[1]).toUpperCase();
+      const mvgr2 = cellStr(row, code[2]).toUpperCase();
+      if (!mvgr1 && !mvgr2) continue;
+      if (!mvgr1 || !mvgr2) {
+        skipped++;
+        continue;
+      }
+      if (byMvgr2.has(mvgr2)) duplicates++;
+      byMvgr2.set(mvgr2, {
+        mvgr1,
+        mvgr1Full: (full[1] ? cellStr(row, full[1]).toUpperCase() : '') || null,
+        mvgr2,
+        mvgr2Full: (full[2] ? cellStr(row, full[2]).toUpperCase() : '') || null,
+      });
+    }
+    const rows = [...byMvgr2.values()];
+    if (rows.length === 0) {
+      res.status(400).json({ success: false, error: 'No valid rows found (each row needs MVGR-1 and MVGR-2).' });
+      return;
+    }
+
+    await prisma.$transaction([
+      prisma.$executeRaw`TRUNCATE TABLE m_fabric_main_mvgr_mapping RESTART IDENTITY`,
+      prisma.$executeRaw`
+        INSERT INTO m_fabric_main_mvgr_mapping (mvgr1, mvgr1_full_form, mvgr2, mvgr2_full_form)
+        VALUES ${Prisma.join(rows.map((r) => Prisma.sql`(${r.mvgr1}, ${r.mvgr1Full}, ${r.mvgr2}, ${r.mvgr2Full})`))}
+      `,
+    ]);
+    console.log(`[FabricMainMvgrMapping] Replaced table with ${rows.length} rows (${skipped} skipped, ${duplicates} duplicate MVGR-2)`);
+
+    const notes = [
+      skipped > 0 ? `${skipped} rows skipped (missing MVGR-1 or MVGR-2)` : '',
+      duplicates > 0 ? `${duplicates} duplicate MVGR-2 (last kept)` : '',
+    ].filter(Boolean).join(', ');
+    res.json({
+      success: true,
+      message: `MVGR mapping updated: ${rows.length} rows inserted${notes ? `; ${notes}` : ''}.`,
+      data: {
+        total: rows.length,
+        mvgr1Count: new Set(rows.map((r) => r.mvgr1)).size,
+        skipped: skipped + duplicates,
+        lastUpdated: new Date().toISOString(),
+      },
+    });
+  } catch (error: any) {
+    console.error('[FabricMainMvgrMapping] Upload error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 };

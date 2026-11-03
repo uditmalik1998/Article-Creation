@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import { prismaClient as prisma } from '../utils/prisma';
 import { parseNumericValue } from '../utils/mrpCalculator';
 import { hasVendorCode, isValidVendorCode, normalizeVendorCode } from '../utils/vendorCode';
-import { mirror360FlatUpdate } from '../utils/mirror360Flat';
 
 export class FlatExtractionController {
     private attributeKeyToFieldMap: Record<string, string> = {
@@ -436,9 +435,6 @@ export class FlatExtractionController {
                 where: { id: existing.id },
                 data
             });
-
-            // Mirror to 360article.article_360_flat (fire-and-forget)
-            void mirror360FlatUpdate(existing.id, data);
 
             res.json({
                 success: true,

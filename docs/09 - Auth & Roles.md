@@ -77,6 +77,8 @@ flowchart TD
 
 **Middleware file**: `Backend/src/middleware/auth.ts`
 
+**Frontend 401 handling**: an expired/invalid token returns 401 (`TOKEN_EXPIRED` / `INVALID_TOKEN`). Every `fetch` is wrapped at module load in `Frontend/src/app/contexts/authProvider.tsx`; axios clients in `services/adminApi.ts` have their own interceptor. Both clear the session and call `redirectToLoginOnce()`. The fetch wrapper must stay at module level: a `useEffect` in the provider runs after child pages' on-mount fetches, so those used to show "Token has expired" toasts without redirecting (fixed 2026-10-22).
+
 | Middleware | Allowed roles |
 |-----------|--------------|
 | `authenticate` | Any valid JWT |
@@ -115,8 +117,8 @@ This is enforced **server-side** — the UI cannot bypass it.
 
 ```
 /login, /register          → Public (no auth needed)
-/dashboard, /products      → ProtectedRoute (any authenticated user)
-/extraction/*              → CreatorRoute (blocks APPROVER/CATEGORY_HEAD)
+/dashboard                 → ProtectedRoute (any authenticated user)
+/extraction/*              → ExtractionRoute (blocks CATEGORY_HEAD, PD_DESIGNER)
 /approver/*                → ApproverRoute (APPROVER, CATEGORY_HEAD, ADMIN)
 /admin/*                   → AdminRoute (ADMIN only)
 /po-presentation           → ProtectedRoute

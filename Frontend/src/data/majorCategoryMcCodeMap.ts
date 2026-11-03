@@ -53,19 +53,3 @@ export const getMajorCategoriesByDivision = (division: string): string[] => {
     .map(row => String(row['mc des'] ?? row.MC_DESC ?? '').trim())
     .filter(Boolean);
 };
-
-// Narrows the major category list down to the user-selected division AND
-// sub-division (e.g. MENS + MW), so e.g. MW's list never leaks MS-U/MS-L items.
-export const getMajorCategoriesBySubDivision = (division: string, subDivision: string): string[] => {
-  const div = normalizeDivision(division);
-  const subDiv = (subDivision || '').trim().toUpperCase();
-  if (!subDiv) return getMajorCategoriesByDivision(division);
-  return (mcCodeListData as McCodeListRow[])
-    .filter(
-      row =>
-        (row.division || '').toUpperCase() === div &&
-        (row['sub division'] || '').trim().toUpperCase() === subDiv,
-    )
-    .map(row => String(row['mc des'] ?? row.MC_DESC ?? '').trim())
-    .filter(Boolean);
-};

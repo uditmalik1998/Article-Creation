@@ -22,7 +22,8 @@ import {
 } from '@/shared/components/ui-tw';
 import { message } from '@/lib/message';
 import { cn } from '@/lib/utils';
-import type { ApproverItem } from '../components/ApproverTable';
+import type { ApproverItem } from '../types';
+import { clearArticleDrafts } from '../components/cardDrafts';
 import { ArticleSpecCard } from '@/shared/components/articles/ArticleSpecCard';
 import { ArticleCardGrid, ARTICLE_CARD_GRID_CLASS, GroupByControl, useArticleGroupBy } from '@/shared/components/articles/ArticleCardGrid';
 import { DatePresetFilter, DivisionTabs, divisionOption, ResetFiltersButton, SapSyncChips } from '@/shared/components/articles/ArticleFilters';
@@ -59,6 +60,12 @@ const getSubDivisionOptions = (division?: string): string[] => {
   if (division.match(/MEN/i)) return SIMPLIFIED_HIERARCHY['MENS'];
   return [];
 };
+
+// creator_user / modify_user JSON ([{name, email}]) → "Name (email), Name (email)" for Excel.
+const formatEditors = (v: unknown): string =>
+  Array.isArray(v)
+    ? v.map((e: any) => (e?.name ? `${e.name} (${e?.email ?? ''})` : String(e?.email ?? ''))).filter(Boolean).join(', ')
+    : '';
 
 export const SIMPLE_APPROVER_EXPORT_HEADERS = [
     'Article Number', 'Division', 'Sub Division', 'Major Category', 'MC Code', 'Status',
@@ -404,10 +411,13 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
         M_AGE_GROUP: row.ageGroup || '', 'ARTICLE FASHION TYPE': row.articleFashionType || '',
         SEGMENT: row.segment || '', 'Extracted By': row.userName || '',
         'Created Date': formattedDate,
-        // Created Articles tab only: who approved the article
+        // Created Articles tab only: who approved the article + who edited it
+        // on the New page (creator_user) and the Created page (modify_user)
         ...(pathType === 'created' ? {
           'Approved By Name': row.approver?.name || '',
           'Approved By Email': row.approver?.email || '',
+          creator_user: formatEditors((row as any).creatorUser),
+          modify_user: formatEditors((row as any).modifyUser),
         } : {}),
       } as Record<string, string | number | undefined>;
     });
@@ -416,7 +426,7 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
   // Created tab appends the two approver columns; every other tab uses the base set.
   const exportHeaders = useMemo(
     () => pathType === 'created'
-      ? [...SIMPLE_APPROVER_EXPORT_HEADERS, 'Approved By Name', 'Approved By Email']
+      ? [...SIMPLE_APPROVER_EXPORT_HEADERS, 'Approved By Name', 'Approved By Email', 'creator_user', 'modify_user']
       : [...SIMPLE_APPROVER_EXPORT_HEADERS],
     [pathType],
   );
@@ -667,12 +677,41 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
       const data = await r.json().catch(() => null);
       if (!r.ok) throw new Error(data?.error || 'Rejection failed');
       message.success(`Rejected ${data?.count ?? ids.length} article${ids.length !== 1 ? 's' : ''}`);
+      clearArticleDrafts(ids);
       setRejectConfirmOpen(false);
       fetchItems(currentPage); // also clears the selection
     } catch (e) {
       message.error(e instanceof Error ? e.message : 'Rejection failed');
     } finally {
       setRejecting(false);
+    }
+  }, [selectedIds, fetchItems, currentPage]);
+
+  // ─── Revert selected (Rejected articles, ADMIN) ─────────────────────────────
+  const canRevert = pathType === 'rejected' && user?.role === 'ADMIN';
+  const [revertConfirmOpen, setRevertConfirmOpen] = useState(false);
+  const [reverting, setReverting] = useState(false);
+  const handleRevertSelected = useCallback(async () => {
+    const ids = [...selectedIds];
+    if (ids.length === 0) return;
+    setReverting(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/revert`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ ids }),
+      });
+      const data = await r.json().catch(() => null);
+      if (!r.ok) throw new Error(data?.error || 'Revert failed');
+      const count = data?.count ?? ids.length;
+      message.success(`Moved ${count} article${count !== 1 ? 's' : ''} back to New Articles`);
+      setRevertConfirmOpen(false);
+      fetchItems(currentPage); // also clears the selection
+    } catch (e) {
+      message.error(e instanceof Error ? e.message : 'Revert failed');
+    } finally {
+      setReverting(false);
     }
   }, [selectedIds, fetchItems, currentPage]);
 
@@ -800,6 +839,8 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
             onExportSelected={handleExportSelected}
             onRejectSelected={pathType === 'new' ? () => setRejectConfirmOpen(true) : undefined}
             rejecting={rejecting}
+            onRevertSelected={canRevert ? () => setRevertConfirmOpen(true) : undefined}
+            reverting={reverting}
             loading={loading}
             onRefresh={() => fetchItems(currentPage)}
             downloads={[
@@ -1066,6 +1107,21 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
             <Button variant="outline" onClick={() => setRejectConfirmOpen(false)} disabled={rejecting}>Cancel</Button>
             <Button variant="destructive" onClick={handleRejectSelected} disabled={rejecting}>
               {rejecting ? 'Rejecting…' : `Reject ${selectedIds.size}`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={revertConfirmOpen} onOpenChange={(o) => { if (!reverting) setRevertConfirmOpen(o); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Revert selected articles</DialogTitle></DialogHeader>
+          <p className="m-0 text-[13px] text-slate-600">
+            Move {selectedIds.size} selected article{selectedIds.size !== 1 ? 's' : ''} back to pending? They show in New Articles again, along with their rejected variants.
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRevertConfirmOpen(false)} disabled={reverting}>Cancel</Button>
+            <Button onClick={handleRevertSelected} disabled={reverting}>
+              {reverting ? 'Reverting…' : `Revert ${selectedIds.size}`}
             </Button>
           </DialogFooter>
         </DialogContent>

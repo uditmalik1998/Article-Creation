@@ -3,7 +3,7 @@ import multer from 'multer';
 import { ApproverController } from '../controllers/ApproverController';
 import { getMajorCategories, lookupVaacTotalValue } from '../controllers/adminController';
 import { getActiveSetCategories } from '../controllers/setMcMasterController';
-import { authenticate, requireApprover, requireApprovalRights, requireModifyRights, requireBodyApprovalRights, requireFabricApprovalRights, requireGMApprovalRights } from '../middleware/auth';
+import { authenticate, requireAdmin, requireApprover, requireApprovalRights, requireRejectRights, requireModifyRights, requireBodyApprovalRights, requireFabricApprovalRights, requireGMApprovalRights, requireArticleType } from '../middleware/auth';
 import { asyncHandler } from '../middleware/asyncHandler';
 
 const router = Router();
@@ -25,10 +25,11 @@ router.use(authenticate);
 router.use(requireApprover);
 
 // Get attributes for dropdowns
-router.get('/attributes', h(ApproverController.getAttributes));
 
 // Get items for dashboard
-router.get('/items', h(ApproverController.getItems));
+// Article-type guards cover only the list + approve endpoints: Fabric/GM pages still
+// reuse some /items/:id helpers (duplicate, variants, modify), so those stay open.
+router.get('/items', requireArticleType('FG'), h(ApproverController.getItems));
 
 // Export ALL items matching current filters (capped at 10k rows)
 router.get('/items/export-all', h(ApproverController.exportAll));
@@ -62,7 +63,7 @@ router.post('/items/:id/validate-modify', h(ApproverController.validateModify));
 router.post('/items/:id/modify', requireModifyRights, h(ApproverController.modifyItem));
 
 // FINAL submit — creates the article in SAP.
-router.post('/approve', requireApprovalRights, h(ApproverController.approveItems));
+router.post('/approve', requireApprovalRights, requireArticleType('FG'), h(ApproverController.approveItems));
 
 // GM Article approve — same handler as /approve but allows GM_APPROVER role.
 router.post('/gm-approve', requireGMApprovalRights, h(ApproverController.approveItems));
@@ -75,7 +76,9 @@ router.post('/combo-articles/:parentId/children', h(ApproverController.addComboC
 router.delete('/combo-articles/children/:childId', h(ApproverController.deleteComboChild));
 
 // Reject selected items — approver roles + PD + ADMIN
-router.post('/reject', requireApprovalRights, h(ApproverController.rejectItems));
+router.post('/reject', requireRejectRights, h(ApproverController.rejectItems));
+router.post('/items/:id/revert', requireAdmin, h(ApproverController.revertRejectedItem));
+router.post('/revert', requireAdmin, h(ApproverController.revertRejectedItems));
 
 // Refresh image URL (fixes expired signed URLs)
 router.get('/image/:id', h(ApproverController.getImageUrl));
@@ -127,15 +130,15 @@ router.post('/create-fabric-article', h(ApproverController.createFabricArticleFr
 router.get('/body-articles', h(ApproverController.getBodyArticleItems));
 
 // Fabric Article data list — source=SRM for SRM pages, default=FG for FG New Articles page
-router.get('/fabric-article-data', h(ApproverController.getFabricArticleDataItems));
-router.get('/fabric-article-data/export-all', h(ApproverController.getFabricArticleDataExportAll));
+router.get('/fabric-article-data', requireArticleType('FABRIC'), h(ApproverController.getFabricArticleDataItems));
+router.get('/fabric-article-data/export-all', requireArticleType('FABRIC'), h(ApproverController.getFabricArticleDataExportAll));
 
 // Submit FG New Articles to SAP via ZMM_FAB_ART_CREATION_RFC
-// Submit fabric articles to SAP via ZMM_FAB_ART_CREATION_RFC — FABRIC_APPROVER and ADMIN only
-router.post('/fabric-article-data/submit', requireFabricApprovalRights, h(ApproverController.submitFabricArticleData));
+// Submit fabric articles to SAP via ZMM_FAB_ART_CREATION_RFC — ADMIN, or approvers with the Fabric Article type
+router.post('/fabric-article-data/submit', requireFabricApprovalRights, requireArticleType('FABRIC'), h(ApproverController.submitFabricArticleData));
 
 // Delete FG-type fabric_article_data rows on reject (FG New Articles page only)
-router.post('/fabric-article-data/delete', requireFabricApprovalRights, h(ApproverController.deleteFGFabricArticles));
+router.post('/fabric-article-data/delete', requireFabricApprovalRights, requireArticleType('FABRIC'), h(ApproverController.deleteFGFabricArticles));
 
 // Fabric Article Variants (fabric_variants_article_data) — SRM Fabric Articles tab only
 router.get('/fabric-article-data/:genericId/variants', h(ApproverController.getFabricArticleVariants));
@@ -162,12 +165,10 @@ router.post('/body-articles/:id/confirm', h(ApproverController.creatorConfirmBod
 
 // Sizes for a given major category (from maj_cat_sizes table)
 router.get('/sizes-for-majcat/:majCat', h(ApproverController.getSizesForMajCat));
+router.get('/fabric-main-mvgr1/:mvgr2', h(ApproverController.getFabricMainMvgr1));
 
 // Color master list for the Add Color Variants dropdown (from color_master table)
 router.get('/colors', h(ApproverController.getColorMaster));
-
-// BOM grid Art # lookup — returns { attrName: { mvgrValue: sapCd } } for a major category
-router.get('/bom-art-numbers/:majCat', h(ApproverController.getBomArtNumbers));
 
 // Admin: backfill article descriptions for a date range
 // POST /api/approver/backfill-descriptions?fromDate=2026-04-10&toDate=2026-04-16
@@ -188,7 +189,7 @@ router.get('/gm-grid-values', h(ApproverController.getGMGridValues));
 router.get('/gm-description-format', h(ApproverController.getGmDescriptionFormat));
 
 // GM Article data list — paginated list from gm_article_data
-router.get('/gm-articles', h(ApproverController.getGmArticleItems));
+router.get('/gm-articles', requireArticleType('GM'), h(ApproverController.getGmArticleItems));
 
 // Get / Update a single gm_article_data record
 router.get('/gm-articles/:id', h(ApproverController.getGmArticleById));
@@ -202,10 +203,10 @@ router.post('/gm-articles/:genericId/retry-variants', h(ApproverController.retry
 router.get('/gm-sizes-for-majcat/:majCat', h(ApproverController.getGmSizesForMajCat));
 
 // Reject GM articles — sets approvalStatus to REJECTED in gm_article_data
-router.post('/gm-articles/reject', requireGMApprovalRights, h(ApproverController.rejectGmArticles));
+router.post('/gm-articles/reject', requireGMApprovalRights, requireArticleType('GM'), h(ApproverController.rejectGmArticles));
 
 // Submit GM articles to SAP via ZMM_ART_CRT_V3 — synchronous, returns { results: [...] }
-router.post('/gm-articles/submit', requireGMApprovalRights, h(ApproverController.submitGmArticles));
+router.post('/gm-articles/submit', requireGMApprovalRights, requireArticleType('GM'), h(ApproverController.submitGmArticles));
 
 // Fabric attribute grid values from fabric_maj_cat_grid_values (M_FAB_DIV, M_YARN, etc.)
 router.get('/fabric-grid-values', h(ApproverController.getFabricGridValues));

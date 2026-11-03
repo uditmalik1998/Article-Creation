@@ -5,11 +5,11 @@
  *   Row 1 (ink): icon · title · "division · sub-division · N articles";
  *                division tabs on their own line below, on the left.
  *   Row 2 (light; slate while cards are ticked):
- *     left  — "N selected · Clear · Export selected · [Reject selected]" or a hint
+ *     left  — "N selected · Clear · Export selected · [Reject selected] · [Revert selected]" or a hint
  *     right — Refresh, then the DOWNLOAD button group.
  */
 import type { ReactNode } from 'react';
-import { Download, RotateCw, Sparkles, XCircle } from 'lucide-react';
+import { Download, RotateCcw, RotateCw, Sparkles, XCircle } from 'lucide-react';
 import { Button } from '@/shared/components/ui-tw';
 import { cn } from '@/lib/utils';
 
@@ -33,6 +33,9 @@ interface ArticleListHeaderProps {
   /** Shown only when given (FG New Articles page). */
   onRejectSelected?: () => void;
   rejecting?: boolean;
+  /** Shown only when given (FG Rejected Articles page, ADMIN). */
+  onRevertSelected?: () => void;
+  reverting?: boolean;
   loading: boolean;
   onRefresh: () => void;
   downloads: ArticleListDownload[];
@@ -48,6 +51,8 @@ export const ArticleListHeader: React.FC<ArticleListHeaderProps> = ({
   onExportSelected,
   onRejectSelected,
   rejecting,
+  onRevertSelected,
+  reverting,
   loading,
   onRefresh,
   downloads,
@@ -99,10 +104,20 @@ export const ArticleListHeader: React.FC<ArticleListHeaderProps> = ({
                 <XCircle /> Reject selected
               </Button>
             )}
+            {onRevertSelected && (
+              <Button
+                size="sm"
+                onClick={onRevertSelected}
+                disabled={reverting}
+                className="h-8 bg-slate-800 px-3 text-[12.5px] font-semibold text-white hover:bg-slate-900"
+              >
+                <RotateCcw /> Revert selected
+              </Button>
+            )}
           </>
         ) : (
           <span className="text-slate-600">
-            Tick cards to {onRejectSelected ? 'export or reject' : 'export'} them together.
+            Tick cards to {onRejectSelected ? 'export or reject' : onRevertSelected ? 'export or revert' : 'export'} them together.
           </span>
         )}
       </div>

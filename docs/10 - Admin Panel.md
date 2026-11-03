@@ -146,8 +146,8 @@ Building blocks in `features/admin/components/DashboardParts.tsx`:
   (stacked progress bar + counts, View data, the original run Popconfirm), plus the SRM fetch tool
   (by date / by PPT number) at the bottom.
 - **Vendor sync** — one compact row (records, last sync, source, View data, refresh, Sync now Popconfirm).
-- **Master data** — 18 `MasterDataCard`s in collapsible `MasterGroup`s: Attributes & grids (7), GM (2),
-  Fabric & body (4), Costs (3), Hierarchy & menus (2). Each card shows status (Uploaded / Not uploaded /
+- **Master data** — 18 `MasterDataCard`s in collapsible `MasterGroup`s: FG Attributes & Grid (7; renamed 2026-10-22, cards "FG Major Category Grid Values" and "FG Major Category Details"), GM (2),
+  Fabric & body (4), Costs and Broader Menu (3; was Costs + Hierarchy & menus until 2026-10-22, Hierarchy Excel removed). Each card shows status (Uploaded / Not uploaded /
   Unknown), rows, last upload, and Upload / View / Download / Template / refresh. **Upload** expands the card
   (full width) to show its original status details + upload panel; it stays expanded while that upload runs
   (Hierarchy also while a preview awaits confirmation). Upload logic per card is unchanged.
@@ -230,3 +230,67 @@ Replaced the flat list + modal with two panes (stack on narrow screens):
 - Flow: drop/browse Excel → preview runs automatically (no SAP call) → "Ready to run" card (counts, warnings, batch note, sample) with QA/PROD and Test/Live segmented controls → inline confirm (replaces `window.confirm`; live PROD requires typing PROD) → console.
 - Console is the same for sync reports and async jobs: dark slate panel with status pill, % and ok/failed/waiting bar, one tile per batch; below it **Needs attention** built from per-article results (`results` JSON on `pool_b_batches`, or the sync report): NIC / Locked / Error tags, MC, what-to-do text, filter chips, .xlsx download. A running batch's articles only appear once that batch finishes.
 - No backend change. Canvas with all 5 options: https://claude.ai/artifact/U2AAwYLJxHF9BPKwSpugRa
+
+### Admin Dashboard header — section links (2026-10-22, Option B built)
+
+The "On this page" side box (`JumpNav`) is to move into the dark header. Canvas: https://claude.ai/artifact/M2wWzqr7nVYHueF75dh9qo
+- A: tabs row
+- B: one-row segmented
+- C: sticky status bar
+- D: stat tiles
+- E: chips
+
+**Option B built.** `JumpNav` in `DashboardParts.tsx` is now a segmented control for the dark header: a white pill for the current section and count badges. In `Admin.tsx` it sits between the "Admin Dashboard" title and the buttons. The subtitle and the left "On this page" box are removed, so the content is full width. Checked in a local test page; not checked signed in.
+
+### Master data — Hierarchy Excel removed, Broader Menu moved (2026-10-22)
+
+- **Hierarchy Excel card removed**: its state, handlers and types in `Admin.tsx`, the routes `GET /admin/hierarchy/excel-status` and `POST /admin/hierarchy/upload-excel`, and the "HIERARCHY EXCEL UPLOAD" block in `adminController.ts`. The `departments` / `sub_departments` / `categories` tables are kept; extraction still reads them. Hierarchy is managed in the Admin › Hierarchy tab (`major_category_details`).
+- The **Broader Menu** card moved into the Costs group, renamed **"Costs and Broader Menu"** (3 datasets). The "Hierarchy & menus" group is gone. The Master data count is now 21.
+
+### KSML Uploader (Pool A) — Pool B layout (2026-10-22, built)
+
+`KsmlUploaderPage.tsx` was rewritten to match the Pool B "job console" page. Frontend only; the `/ksml/preview` and `/ksml/commit` APIs are unchanged.
+- **Header:** "Pool A — KSML class characteristics", a file chip with New upload, and a Template button (`class`, `characteristic`).
+- **Upload:** a drag/drop dropzone; preview runs automatically when a file is picked.
+- **Ready to run card:** Classes / Pairs / Rows read / Rows skipped, warnings, the detected columns and a sample table.
+- **Run bar:** QA/PROD and Test/Live switches with an inline confirm (live PROD needs PROD typed). This replaces `window.confirm`.
+- **Console:** a dark panel. While the synchronous commit runs it shows an elapsed timer and an indeterminate bar. When done it shows a big "on their class" count and an added / already / failed bar.
+- **Needs attention:** a table of failed pairs (Class, Characteristic, SUBRC, SAP message, What to do), downloadable as .xlsx. Then "Run again".
+- Checked in a mocked local test page.
+
+### Pool B — "Wrong class" results (2026-10-28)
+
+Some articles are still attached in SAP (KSSK, class type 026) to an older class than their MC (MATKL). The patch FM checks values against that old class, so a characteristic that is already on the MC class still comes back NIC, and running Pool A doesn't help.
+
+The cause was in the class-link step. `Z_LINK_MATNR_CLASS` only returns `EV_JSON` (`{"ok":false,"ret":[…]}` from BAPI_OBJCL_CREATE), but the code read `EV_RC`/`EV_MESSAGE`, so a refused link always looked fine.
+
+Changes in `sapAttributePushService.ts`:
+- `linkMatnrToClass` now parses `EV_JSON`.
+- When the link is refused, `ensureClassLink` reads the real class: INOB → KSSK → KLAH, via `fetchLinkedClasses`.
+- The patch still runs either way. The result carries `linkedClass` and `linkError`.
+
+Changes on the Pool B page:
+- These rows get the orange **Wrong class** tag and their own tab, with "linked: <class>" under MC.
+- The fix text reads: move the article to the MC class in CL24N, or run Pool A for the old class.
+- The download adds a **Linked class** column and the status `NOT SAVED (WRONG CLASS)`.
+
+Example (prod, 2026-10-28): 1122100039 has MC 126290106 but is linked to 126160201.
+
+### Pool B — "locked by user" failures (2026-10-29)
+
+**Symptom:** a FAILED row whose raw SAP reply holds CL 525 "Object is currently locked by user POWERBI".
+
+**Cause:** another session had the article's classification open in SAP at that moment. POWERBI is the shared RFC user: it runs VK11 pricing, PO changes and material updates, and on 2026-10-29 it held about 2,960 locks, some of them since 06:30. Nothing is saved for that article, but the lock is temporary.
+
+**What the page does now:** such rows read "SAP had this article open (locked by user X) — nothing was saved", with the fix "Wait a few minutes, then re-upload this article". Locks that stay held for hours belong to Basis (SM12).
+
+### Pool B / KSML — clearer NIC results + KSML function pre-check (2026-10-22)
+
+- **Pool B:**
+  - `sapAttributePushService.tallyPlan` now counts a plan row whose message says "not in (any) class / KSML" as NIC, even when its status is not `NIC`. Example message: `attr in CABN but not in any class KSML`.
+  - Results carry `nicAttrs` and `lockedAttrs` (characteristic names), passed through by `poolBPatchService` and `poolBJobService`.
+  - The page labels an article that failed only for NIC as **NIC**, not Error. Its Problem cell lists the names ("Not on the class: M_FAB_DIV, M_WASH — SAP saved nothing for this article"), and What to do says "Run Pool A to add them to class <MC>, then re-upload".
+  - The .xlsx download gains "Not on class" and "Locked fields" columns.
+  - The retry path no longer counts LOCKED rows as NIC.
+- **KSML:** `POST /ksml/commit` first calls `checkKsmlFmAvailable(env)`, a read-only `RFC_GET_FUNCTION_INTERFACE` on `Z_CLS_ADD_CHAR_BAPI`. If SAP says FU_NOT_FOUND, it returns 409 `FM_NOT_FOUND` ("ask BASIS to import S4DK926264") and sends nothing. The page shows this as a red box in the run bar. An inconclusive check lets the run go ahead.
+- SAP status: on 2026-10-22 the function was first missing on QA and PROD, then present on both later the same day (the transport was imported).

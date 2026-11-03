@@ -1,9 +1,9 @@
+import { cn } from '@/lib/utils';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
 import {
   CheckCircle2, XCircle, FileText, LayoutGrid, Rocket, Sparkles,
-  ChevronLeft, ChevronRight, ArrowLeft, Loader2, RotateCw, History, Plus, Trash2, PackagePlus,
+  ChevronLeft, ChevronRight, ArrowLeft, Loader2, RotateCw, RotateCcw, History, Plus, Trash2, PackagePlus, X, Check, AlertTriangle,
 } from 'lucide-react';
 import {
   Button,
@@ -12,41 +12,29 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
   Input,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-  Textarea,
   Tooltip,
 } from '@/shared/components/ui-tw';
 import { message } from '@/lib/message';
 import { toast } from 'sonner';
 import { ApproverArticleList } from '../components/ApproverArticleList';
-import type { ApproverItem, MasterAttribute } from '../components/ApproverTable';
+import { getUnsavedCards, getUserEditedCards } from '../components/unsavedCards';
+import { clearArticleDrafts } from '../components/cardDrafts';
+import { guardLeave, registerLeaveGuard } from '../../../shared/utils/leaveGuard';
+import type { ApproverItem } from '../types';
 import { APP_CONFIG } from '../../../constants/app/config';
-import { SIMPLIFIED_HIERARCHY } from '../../extraction/components/SimplifiedCategorySelector';
 import { getMcCodeByMajorCategory } from '../../../data/majorCategoryMcCodeMap';
 import {
-  getMajCatAllowedValues,
-  getMajCatMandatoryKeys,
-  normalizeMajorCategory,
   SAP_NAME_TO_SCHEMA_KEY,
   SCHEMA_KEY_TO_DB_FIELD,
   SCHEMA_KEY_TO_EXCEL_ATTR,
 } from '../../../data/majCatAttributeMap';
 import {
-  preloadAttributeValues,
   preloadMandatoryGridFor,
   isMandatoryGridFieldActive,
   getMandatoryGridFieldLabel,
@@ -94,6 +82,12 @@ const FIELD_LABELS: Record<string, string> = {
   variantColor: 'Variant Colour', variantWeight: 'Variant Weight',
 };
 
+// Field label for the history list: known label, else camelCase split into words
+// (preciseConsumptionMeter → Precise Consumption Meter).
+const historyFieldLabel = (field: string) =>
+  FIELD_LABELS[field] ??
+  field.replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/^./, (c) => c.toUpperCase());
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 // Cost fields summed from a set's pieces into the set article (see Backend comboLinkService).
@@ -109,23 +103,6 @@ const formatComboCost = (v: unknown) => {
 };
 
 const inferMcCode = (majorCategory?: string | null) => getMcCodeByMajorCategory(majorCategory);
-
-const parseNumericValue = (value: unknown): number | null => {
-  if (value === null || value === undefined || value === '') return null;
-  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
-  const cleaned = String(value).replace(/[₹$€£¥,]/g, '').replace(/\s+/g, ' ').replace(/\/-$/, '').replace(/\/$/, '').replace(/-$/, '').trim();
-  const match = cleaned.match(/-?\d+(\.\d+)?/);
-  if (!match) return null;
-  const parsed = parseFloat(match[0]);
-  return Number.isNaN(parsed) ? null : parsed;
-};
-
-const calcMarkdown = (mrp: unknown, rate: unknown): string | null => {
-  const m = parseNumericValue(mrp);
-  const r = parseNumericValue(rate);
-  if (m === null || r === null || m === 0) return null;
-  return (((m - r) / m) * 100).toFixed(1) + '%';
-};
 
 // Maps schemaKey → all SAP key aliases for mandatory-grid lookups
 const SCHEMA_KEY_TO_ALL_SAP_KEYS: Record<string, string[]> = Object.entries(SAP_NAME_TO_SCHEMA_KEY).reduce(
@@ -206,51 +183,12 @@ function getMissingMandatoryFields(item: any, majorCatOverride?: string | null):
   return missing;
 }
 
-const ATTRIBUTE_FIELDS: { formName: string; label: string; schemaKey: string }[] = [
-  { formName: 'macroMvgr',       label: 'Macro MVGR',        schemaKey: 'macro_mvgr' },
-  { formName: 'mainMvgr',        label: 'Main MVGR',         schemaKey: 'main_mvgr' },
-  { formName: 'yarn1',           label: 'Yarn 1',            schemaKey: 'yarn_01' },
-  { formName: 'fabricMainMvgr',  label: 'Fabric Main MVGR',  schemaKey: 'fabric_main_mvgr' },
-  { formName: 'weave',           label: 'Weave',             schemaKey: 'weave' },
-  { formName: 'mFab2',           label: 'M FAB 2',           schemaKey: 'm_fab2' },
-  { formName: 'fabDiv',          label: 'M FAB DIV',         schemaKey: 'fab_div' },
-  { formName: 'composition',     label: 'Composition',       schemaKey: 'composition' },
-  { formName: 'finish',          label: 'Finish',            schemaKey: 'finish' },
-  { formName: 'gsm',             label: 'GSM',               schemaKey: 'gsm' },
-  { formName: 'weight',          label: 'G-Weight',          schemaKey: 'weight' },
-  { formName: 'lycra',           label: 'Lycra / Non-Lycra', schemaKey: 'lycra_non_lycra' },
-  { formName: 'shade',           label: 'Shade',             schemaKey: 'shade' },
-  { formName: 'pattern',         label: 'Body Style',        schemaKey: 'body_style' },
-  { formName: 'fit',             label: 'Fit',               schemaKey: 'fit' },
-  { formName: 'wash',            label: 'Wash',              schemaKey: 'wash' },
-  { formName: 'neck',            label: 'Neck',              schemaKey: 'neck' },
-  { formName: 'neckDetails',     label: 'Neck Details',      schemaKey: 'neck_details' },
-  { formName: 'collar',          label: 'Collar',            schemaKey: 'collar' },
-  { formName: 'placket',         label: 'Placket',           schemaKey: 'placket' },
-  { formName: 'sleeve',          label: 'Sleeve',            schemaKey: 'sleeve' },
-  { formName: 'length',          label: 'Length',            schemaKey: 'length' },
-  { formName: 'bottomFold',      label: 'Bottom Fold',       schemaKey: 'bottom_fold' },
-  { formName: 'frontOpenStyle',  label: 'Front Open Style',  schemaKey: 'front_open_style' },
-  { formName: 'pocketType',      label: 'Pocket Type',       schemaKey: 'pocket_type' },
-  { formName: 'drawcord',        label: 'Drawcord',          schemaKey: 'drawcord' },
-  { formName: 'button',          label: 'Button',            schemaKey: 'button' },
-  { formName: 'zipper',          label: 'Zipper',            schemaKey: 'zipper' },
-  { formName: 'zipColour',       label: 'Zip Colour',        schemaKey: 'zip_colour' },
-  { formName: 'fatherBelt',      label: 'Father Belt',       schemaKey: 'father_belt' },
-  { formName: 'childBelt',       label: 'Child Belt',        schemaKey: 'child_belt' },
-  { formName: 'printType',       label: 'Print Type',        schemaKey: 'print_type' },
-  { formName: 'printStyle',      label: 'Print Style',       schemaKey: 'print_style' },
-  { formName: 'printPlacement',  label: 'Print Placement',   schemaKey: 'print_placement' },
-  { formName: 'patches',         label: 'Patches',           schemaKey: 'patches' },
-  { formName: 'patchesType',     label: 'Patches Type',      schemaKey: 'patches_type' },
-  { formName: 'embroidery',      label: 'Embroidery',        schemaKey: 'embroidery' },
-  { formName: 'embroideryType',  label: 'Embroidery Type',   schemaKey: 'embroidery_type' },
-];
-
 const PAGE_SIZE = 50;
 
 // DB field name → SAP characteristic name for every field visible in the Modify form.
 const MODIFY_FIELDS: { field: string; sapName: string }[] = [
+  // Vendor code on an existing article (admin only — locked for everyone else)
+  { field: 'vendorCode',        sapName: 'EXTWG' },
   // FAB
   { field: 'fabDiv',             sapName: 'M_FAB_DIV' },
   { field: 'yarn1',              sapName: 'M_YARN' },
@@ -312,9 +250,13 @@ const MODIFY_FIELDS: { field: string; sapName: string }[] = [
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+/** Thrown by onSave when the caller passed throwOnError (the error toast is already shown). */
+class SaveFailedError extends Error {}
+
 type ConfirmDialog =
-  | { kind: 'approve'; count: number }
+  | { kind: 'approve'; count: number; unsavedCards: string[]; article?: { number: string; mc: string; vendor: string } }
   | { kind: 'reject'; count: number }
+  | { kind: 'revert'; item: ApproverItem }
   | { kind: 'createFabric'; item: ApproverItem }
   | { kind: 'createBody'; item: ApproverItem }
   | { kind: 'proceedFG'; item: ApproverItem }
@@ -376,12 +318,16 @@ export default function ArticleDetailPage({
   const [currentPage, setCurrentPage] = useState(navState?.currentPage ?? 1);
   const [totalCount, setTotalCount] = useState(navState?.totalCount ?? 0);
   const [loadingItem, setLoadingItem] = useState(!navState?.items?.length);
-  const [attributes, setAttributes] = useState<MasterAttribute[]>([]);
   const [user, setUser] = useState<any>(null);
 
   // Action state
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialog>(null);
+  // Leaving with unsaved costing cards (sidebar, back, ◀ ▶): Save & leave / Leave without saving / Stay.
+  const [leavePrompt, setLeavePrompt] = useState<{ labels: string[]; proceed: () => void } | null>(null);
+  const [leaveSaving, setLeaveSaving] = useState(false);
+  // Per-card progress in the leave popup, keyed by card label.
+  const [leaveStatus, setLeaveStatus] = useState<Record<string, 'saving' | 'saved' | 'failed'>>({});
   const [infoDialog, setInfoDialog] = useState<InfoDialog>(null);
   const [approving, setApproving] = useState(false);
   // Bumped once the per-category mandatory grid finishes loading, so the
@@ -390,7 +336,6 @@ export default function ArticleDetailPage({
   const [gridVersion, setGridVersion] = useState(0);
 
   // Maps itemId → number of variants missing weight (for Save & Submit gate)
-  const [variantWeightIssues, setVariantWeightIssues] = useState<Record<string, number>>({});
 
   // Article change history
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -398,16 +343,27 @@ export default function ArticleDetailPage({
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historySearch, setHistorySearch] = useState('');
   const [historyUserFilter, setHistoryUserFilter] = useState('__ALL__');
-
-  // Edit modal
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<ApproverItem | null>(null);
-  const editForm = useForm<Record<string, any>>({ defaultValues: {} });
-  const [modalMarkdown, setModalMarkdown] = useState<string | null>(null);
-  const [editActiveTab, setEditActiveTab] = useState<'core' | 'attributes' | 'business'>('core');
-  const modalDivision = editForm.watch('division');
+  // BEFORE = changed while a new article, AFTER = changed once created
+  const [historyStageFilter, setHistoryStageFilter] = useState<'__ALL__' | 'BEFORE' | 'AFTER'>('__ALL__');
+  const historyFiltered = useMemo(() => {
+    const q = historySearch.toLowerCase();
+    return historyRecords.filter((r) => {
+      if (historyUserFilter !== '__ALL__' && (r.changed_by_name ?? '—') !== historyUserFilter) return false;
+      if (historyStageFilter !== '__ALL__' && r.stage !== historyStageFilter) return false;
+      if (!q) return true;
+      return (
+        historyFieldLabel(r.field_name).toLowerCase().includes(q) ||
+        String(r.field_name ?? '').toLowerCase().includes(q) ||
+        (r.old_value ?? '').toLowerCase().includes(q) ||
+        (r.new_value ?? '').toLowerCase().includes(q) ||
+        (r.changed_by_name ?? '').toLowerCase().includes(q)
+      );
+    });
+  }, [historyRecords, historySearch, historyUserFilter, historyStageFilter]);
 
   const canApprove = user?.role === 'ADMIN' || user?.role === 'APPROVER' || user?.role === 'CATEGORY_HEAD' || user?.role === 'SUB_DIVISION_HEAD' || user?.role === 'PO_COMMITTEE' || user?.role === 'PD' || (extraApproverRoles.length > 0 && extraApproverRoles.includes(user?.role));
+  // CREATOR can reject FG articles but not approve them.
+  const canReject = canApprove || user?.role === 'CREATOR';
 
   // ─── Init ───────────────────────────────────────────────────────────────────
 
@@ -416,11 +372,6 @@ export default function ArticleDetailPage({
     if (str) { try { setUser(JSON.parse(str)); } catch { /* skip */ } }
   }, []);
 
-  useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    fetch(`${APP_CONFIG.api.baseURL}/approver/attributes`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json()).then(data => { if (Array.isArray(data)) setAttributes(data); }).catch(() => {});
-  }, []);
 
   // Active set categories of the Set MC Master (a set's own photo before it is linked as PARENT).
   const [setCategories, setSetCategories] = useState<Set<string>>(new Set());
@@ -432,6 +383,10 @@ export default function ArticleDetailPage({
       .catch(() => {});
   }, []);
 
+  // Id of an article just loaded fresh by the fetch below, so the open-refresh
+  // effect doesn't read it a second time.
+  const freshlyFetchedIdRef = useRef<string | null>(null);
+
   // Fetch by ID when opened directly (no navigation state)
   useEffect(() => {
     if (navState?.items?.length) { setLoadingItem(false); return; }
@@ -442,6 +397,7 @@ export default function ArticleDetailPage({
       .then(r => r.json())
       .then(item => {
         const withMc = { ...item, mcCode: item.mcCode || inferMcCode(item.majorCategory) };
+        freshlyFetchedIdRef.current = withMc.id ?? null;
         setItems([withMc]);
         setCurrentIndex(0);
         setTotalCount(1);
@@ -450,9 +406,6 @@ export default function ArticleDetailPage({
       .finally(() => setLoadingItem(false));
   }, [id]);
 
-  useEffect(() => {
-    if (editingItem?.division) preloadAttributeValues(editingItem.division).catch(() => {});
-  }, [editingItem?.division]);
 
   // Ensure the mandatory grid for every loaded article's major category is cached,
   // then bump gridVersion so the Save & Submit gate recomputes with real data.
@@ -504,12 +457,63 @@ export default function ArticleDetailPage({
   }
 
   const goPrev = useCallback(() => {
-    if (currentIndex > 0) setCurrentIndex(currentIndex - 1);
+    if (currentIndex > 0) guardLeave(() => setCurrentIndex(currentIndex - 1));
   }, [currentIndex]);
 
   const goNext = useCallback(() => {
-    if (currentIndex < items.length - 1) setCurrentIndex(currentIndex + 1);
+    if (currentIndex < items.length - 1) guardLeave(() => setCurrentIndex(currentIndex + 1));
   }, [currentIndex, items.length]);
+
+  // In-app navigation away (sidebar, back, ◀ ▶) asks first when costing cards hold unsaved changes.
+  useEffect(() => registerLeaveGuard((proceed) => {
+    const cards = getUserEditedCards();
+    if (cards.length === 0) return false;
+    setLeaveStatus({});
+    setLeavePrompt({ labels: cards.map((c) => c.label), proceed });
+    return true;
+  }), []);
+
+  // Refresh / close tab / typed URL: the browser's own "Leave site?" warning. The local
+  // card drafts keep the values either way.
+  useEffect(() => {
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (getUserEditedCards().length === 0) return;
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, []);
+
+  const saveAndLeave = async () => {
+    if (!leavePrompt) return;
+    setLeaveSaving(true);
+    // On "Try again" only cards still unsaved come back here; saved ones keep their tick.
+    for (const card of getUserEditedCards()) {
+      setLeaveStatus((prev) => ({ ...prev, [card.label]: 'saving' }));
+      try {
+        await card.save();
+        setLeaveStatus((prev) => ({ ...prev, [card.label]: 'saved' }));
+      } catch {
+        // Popup stays open on the failed card: Stay to fix it, or leave without saving.
+        setLeaveStatus((prev) => ({ ...prev, [card.label]: 'failed' }));
+        setLeaveSaving(false);
+        return;
+      }
+    }
+    setLeaveSaving(false);
+    const { proceed } = leavePrompt;
+    setLeavePrompt(null);
+    proceed();
+  };
+
+  const leaveWithoutSaving = () => {
+    if (!leavePrompt) return;
+    for (const card of getUserEditedCards()) card.discardDraft?.();
+    const { proceed } = leavePrompt;
+    setLeavePrompt(null);
+    proceed();
+  };
 
   // Auto-select current item
   useEffect(() => {
@@ -571,7 +575,7 @@ export default function ArticleDetailPage({
             setInfoDialog({
               kind: 'sapSyncFailed',
               failures: [{
-                id: saved.articleNumber || saved.designNumber || saved.imageName || saved.id,
+                id: saved.articleNumber || saved.designNumber || saved.id,
                 message: saved.sapSyncMessage || 'SAP creation failed',
               }],
               total: 1,
@@ -591,7 +595,9 @@ export default function ArticleDetailPage({
   // from a stale list now shows its SAP article number instead of "Creating in SAP…".
   useEffect(() => {
     if (!currentItem) return;
-    void refetchCurrentItem();
+    // Skip the refresh when this article was just fetched by id (hard refresh / direct link).
+    if (freshlyFetchedIdRef.current === currentItem.id) freshlyFetchedIdRef.current = null;
+    else void refetchCurrentItem();
     if (currentItem.approvalStatus === 'APPROVED' && currentItem.sapSyncStatus === 'PENDING') {
       pollUntilSynced(currentItem.id);
     } else {
@@ -687,7 +693,7 @@ export default function ArticleDetailPage({
 
   // Save an edit made on a piece's tab, then reload the parent so its summed
   // costs / mirrored attributes reflect the change.
-  const saveComboChild = async (row: ApproverItem, directUpdates: Record<string, unknown> | undefined, options?: { silent?: boolean }) => {
+  const saveComboChild = async (row: ApproverItem, directUpdates: Record<string, unknown> | undefined, options?: { silent?: boolean; throwOnError?: boolean }) => {
     const prevChildren = comboChildren;
     const child = comboChildren.find(c => c.id === row.id);
     if (!child) return;
@@ -716,6 +722,7 @@ export default function ArticleDetailPage({
         try { const p = await r.json(); if (p?.error) errMsg = p.error; } catch { /* skip */ }
         setComboChildren(prevChildren);
         message.error(errMsg);
+        if (options?.throwOnError) throw new SaveFailedError(errMsg);
         return;
       }
       const saved = await r.json();
@@ -723,9 +730,11 @@ export default function ArticleDetailPage({
       // Reload the set: parent totals change, and the Top piece may change with a major category edit.
       await loadComboChildren();
       if (!options?.silent) message.success('Saved');
-    } catch {
+    } catch (e) {
+      if (e instanceof SaveFailedError) throw e;
       setComboChildren(prevChildren);
       message.error('Failed to save. Please check your connection.');
+      if (options?.throwOnError) throw new SaveFailedError('Failed to save');
     }
   };
 
@@ -743,32 +752,6 @@ export default function ArticleDetailPage({
       setSelectedRowKeys([activeComboChild.id]);
     }
   }, [activeComboChild?.id, activeComboChild?.approvalStatus, currentItem?.approvalStatus]);
-
-  // Fetch variants for all pending-selected items and check for missing weight.
-  // Runs whenever the selection or items list changes.
-  useEffect(() => {
-    if (pendingSelectedKeys.length === 0) { setVariantWeightIssues({}); return; }
-    const token = localStorage.getItem('authToken');
-    const issues: Record<string, number> = {};
-    Promise.all(
-      pendingSelectedKeys.map(async (id) => {
-        try {
-          const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${id}/variants`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (!r.ok) return;
-          const data = await r.json();
-          const variantList: any[] = data.data || data;
-          if (!Array.isArray(variantList)) return;
-          const missing = variantList.filter(
-            (v) => !v.isGeneric && (v.variantWeight === null || v.variantWeight === undefined || String(v.variantWeight).trim() === ''),
-          ).length;
-          if (missing > 0) issues[String(id)] = missing;
-        } catch { /* non-blocking */ }
-      }),
-    ).then(() => setVariantWeightIssues({ ...issues }));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingSelectedKeys.join(',')]);
 
   // A set article is submitted as a whole — its pending pieces are validated too.
   const pendingComboChildren = useMemo(
@@ -798,13 +781,10 @@ export default function ArticleDetailPage({
       }
       if (!(item.bodyArticleDescription || '').trim()) missing.push('BODY ARTICLE DESC.');
       missing.push(...getMissingMandatoryFields(item, isComboItem && item.id === currentItem?.id ? setTopCategory : null));
-      // const missingWeightCount = variantWeightIssues[item.id];
-      // if (missingWeightCount) missing.push(`VARIANT WEIGHT (${missingWeightCount} variant${missingWeightCount > 1 ? 's' : ''} missing)`);
       // Readable name: SAP / article number once it exists, else category + design
       // number (a new set article has neither SAP number nor image name).
       const label = item.sapArticleId || item.articleNumber
-        || [item.majorCategory, item.designNumber].filter(Boolean).join(' · ')
-        || item.imageName || item.id;
+        || [item.majorCategory, item.designNumber].filter(Boolean).join(' · ') || item.id;
       const articleId = item.comboRole === 'CHILD'
         ? `Part: ${label}`
         : item.comboRole === 'PARENT' ? `Set: ${label}` : label;
@@ -812,7 +792,7 @@ export default function ArticleDetailPage({
       return acc;
     }, comboBlock);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingSelectedKeys, items, gridVersion, pathType, variantWeightIssues, pendingComboChildren, comboChildren, isComboItem, setTopCategory]);
+  }, [pendingSelectedKeys, items, gridVersion, pathType, pendingComboChildren, comboChildren, isComboItem, setTopCategory]);
 
   // Jump to a missing field: open the right set tab, scroll its row into view and
   // flash it. Rows carry data-field-label / data-item-id (ApproverArticleList).
@@ -873,13 +853,31 @@ export default function ArticleDetailPage({
     //   }
     // }
 
-    setConfirmDialog({ kind: 'approve', count: pendingSelectedKeys.length + pendingComboChildren.length });
+    setConfirmDialog({
+      kind: 'approve',
+      count: pendingSelectedKeys.length + pendingComboChildren.length,
+      unsavedCards: getUnsavedCards().map((c) => c.label),
+      article: currentItem ? {
+        number: currentItem.articleNumber || currentItem.designNumber || '',
+        mc: currentItem.majorCategory || '',
+        vendor: currentItem.vendorName || '',
+      } : undefined,
+    });
   };
 
   const doApprove = async () => {
     const endpoint = '/approver/approve';
     setApproving(true);
     try {
+      // Cards the user filled but didn't Save (B TRIM, V. ADD, PKG COST, CMP COST) are
+      // saved first; if one fails, nothing is sent to SAP.
+      for (const card of getUnsavedCards()) {
+        try {
+          await card.save();
+        } catch {
+          throw new Error(`Could not save ${card.label}. Nothing was sent to SAP — fix it and try again.`);
+        }
+      }
       const token = localStorage.getItem('authToken');
       const r = await fetch(`${APP_CONFIG.api.baseURL}${endpoint}`, {
         method: 'POST',
@@ -892,6 +890,7 @@ export default function ArticleDetailPage({
       }
       const payload = await r.json();
       setConfirmDialog(null);
+      clearArticleDrafts([...pendingSelectedKeys.map(String), ...pendingComboChildren.map((c) => c.id)]);
       // Async approval: /approve returns 202 immediately and the SAP create runs in
       // the background worker. Inform the user, free the UI, and poll for completion
       // so the SAP article number fills in (or a failure popup shows) without blocking.
@@ -938,9 +937,27 @@ export default function ArticleDetailPage({
       });
       if (!r.ok) throw new Error('Rejection failed');
       message.success('Items rejected');
+      clearArticleDrafts(pendingSelectedKeys.map(String));
       setSelectedRowKeys([]);
       await refetchCurrentItem();
     } catch { message.error('Failed to reject items'); }
+  };
+
+  // ADMIN only: a mistakenly rejected article goes back to PENDING (New Articles).
+  const doRevert = async (item: ApproverItem) => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${item.id}/revert`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!r.ok) {
+        const p = await r.json().catch(() => null);
+        throw new Error(p?.error || 'Revert failed');
+      }
+      message.success('Article moved back to New Articles (pending)');
+      await refetchCurrentItem();
+    } catch (e) { message.error(e instanceof Error ? e.message : 'Revert failed'); }
   };
 
   const openHistory = async (articleId: string) => {
@@ -949,6 +966,7 @@ export default function ArticleDetailPage({
     setHistoryRecords([]);
     setHistorySearch('');
     setHistoryUserFilter('__ALL__');
+    setHistoryStageFilter('__ALL__');
     try {
       const token = localStorage.getItem('authToken');
       const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${articleId}/history`, {
@@ -973,8 +991,9 @@ export default function ArticleDetailPage({
       const data = await r.json();
       if (!r.ok) {
         if (data.fabricArticleNumber && item) {
+          // Backend already wrote the number back to the FG row (like Create Body Article)
           updateItemInList({ id: item.id, fabricArticleNumber: String(data.fabricArticleNumber) } as any);
-          toast.warning(data.error || 'Fabric article already exists — number filled.', { id: tid, duration: 8000 });
+          toast.success(`Fabric Article already exists: ${data.fabricArticleNumber} — auto-filled`, { id: tid, duration: 6000 });
         } else {
           toast.error(data.error || 'Failed to create fabric article', { id: tid, duration: 8000 });
         }
@@ -1065,259 +1084,29 @@ export default function ArticleDetailPage({
     } catch { message.error('Failed to proceed with FG article creation'); }
   };
 
-  // ─── Edit modal ──────────────────────────────────────────────────────────────
-
-  const handleEdit = (item: ApproverItem) => {
-    setEditingItem(item);
-    editForm.reset({
-      articleNumber: item.articleNumber ?? '', division: item.division ?? '',
-      subDivision: item.subDivision ?? '', majorCategory: item.majorCategory ?? '',
-      vendorName: item.vendorName ?? '', designNumber: item.designNumber ?? '',
-      pptNumber: item.pptNumber ?? '', referenceArticleNumber: item.referenceArticleNumber ?? '',
-      referenceArticleDescription: item.referenceArticleDescription ?? '',
-      rate: item.rate ?? '', size: item.size ?? '', fabricMainMvgr: item.fabricMainMvgr ?? '',
-      composition: item.composition ?? '', weave: item.weave ?? '',
-      macroMvgr: item.macroMvgr ?? '', mainMvgr: item.mainMvgr ?? '',
-      mFab2: item.mFab2 ?? '', fabDiv: item.fabDiv ?? '', gsm: item.gsm ?? '',
-      finish: item.finish ?? '', shade: item.shade ?? '', weight: item.weight ?? '',
-      lycra: item.lycra ?? '', yarn1: item.yarn1 ?? '', colour: item.colour ?? '',
-      pattern: item.pattern ?? '', fit: item.fit ?? '', neck: item.neck ?? '',
-      sleeve: item.sleeve ?? '', length: item.length ?? '', collar: item.collar ?? '',
-      placket: item.placket ?? '', bottomFold: item.bottomFold ?? '',
-      frontOpenStyle: item.frontOpenStyle ?? '', pocketType: item.pocketType ?? '',
-      drawcord: item.drawcord ?? '', button: item.button ?? '', zipper: item.zipper ?? '',
-      zipColour: item.zipColour ?? '', fatherBelt: item.fatherBelt ?? '',
-      childBelt: item.childBelt ?? '', printType: item.printType ?? '',
-      printStyle: item.printStyle ?? '', printPlacement: item.printPlacement ?? '',
-      patches: item.patches ?? '', patchesType: item.patchesType ?? '',
-      embroidery: item.embroidery ?? '', embroideryType: item.embroideryType ?? '',
-      wash: item.wash ?? '', neckDetails: item.neckDetails ?? '',
-      vendorCode: item.vendorCode ?? '', mrp: item.mrp ?? '',
-      mcCode: item.mcCode || inferMcCode(item.majorCategory) || '',
-      segment: item.segment ?? '', season: item.season ?? '',
-      hsnTaxCode: item.hsnTaxCode ?? '', articleDescription: item.articleDescription ?? '',
-      fashionGrid: item.fashionGrid ?? '', year: item.year ?? '', articleType: item.articleType ?? '',
-    });
-    setModalMarkdown(calcMarkdown(item.mrp, item.rate));
-    setEditActiveTab('core');
-    setIsEditModalOpen(true);
-  };
-
-  const handleSaveEdit = async (values: Record<string, any>) => {
-    try {
-      const token = localStorage.getItem('authToken');
-      if (values.majorCategory && (values.majorCategory !== editingItem?.majorCategory || !values.mcCode)) {
-        values.mcCode = inferMcCode(values.majorCategory) || values.mcCode;
-      }
-      const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${editingItem?.id}`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(values),
-      });
-      if (!r.ok) {
-        let msg = 'Failed to update item';
-        try { const p = await r.json(); if (p?.error) msg = p.error; } catch { /* skip */ }
-        throw new Error(msg);
-      }
-      message.success('Item updated');
-      setIsEditModalOpen(false);
-      const wasEditingChild = editingItem && editingItem.id !== currentItem?.id;
-      setEditingItem(null);
-      if (wasEditingChild) await loadComboChildren();
-      else await refetchCurrentItem();
-    } catch (err) { message.error(err instanceof Error ? err.message : 'Failed to update item'); }
-  };
-
-  const getSubDivisionOptions = (div?: string): string[] => {
-    if (!div) return [];
-    if (div.match(/LADIES|WOMEN/i)) return SIMPLIFIED_HIERARCHY['Ladies'];
-    if (div.match(/KIDS/i)) return SIMPLIFIED_HIERARCHY['Kids'];
-    if (div.match(/MEN/i)) return SIMPLIFIED_HIERARCHY['MENS'];
-    return [];
-  };
-
-  const renderTextField = (name: string, label: string) => (
-    <FormField control={editForm.control} name={name}
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>{label}</FormLabel>
-          <FormControl><Input {...field} value={field.value ?? ''} /></FormControl>
-        </FormItem>
-      )}
-    />
-  );
-
-  const coreTab = (
-    <div className="grid grid-cols-2 gap-4">
-      {renderTextField('articleNumber', 'Article Number')}
-      {renderTextField('designNumber', 'Design Number')}
-      {renderTextField('majorCategory', 'Major Category')}
-      <FormField control={editForm.control} name="division"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Division</FormLabel>
-            <FormControl>
-              <Select value={field.value || ''} onValueChange={(v) => { field.onChange(v); editForm.setValue('subDivision', ''); }}
-                disabled={(user?.role === 'APPROVER' || user?.role === 'CATEGORY_HEAD') && !!user?.division}>
-                <SelectTrigger><SelectValue placeholder="Select division" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="MEN">MENS</SelectItem>
-                  <SelectItem value="LADIES">LADIES</SelectItem>
-                  <SelectItem value="KIDS">KIDS</SelectItem>
-                </SelectContent>
-              </Select>
-            </FormControl>
-          </FormItem>
-        )}
-      />
-      <FormField control={editForm.control} name="subDivision"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Sub-Division</FormLabel>
-            <FormControl>
-              <Select value={field.value || ''} onValueChange={field.onChange}
-                disabled={user?.role === 'APPROVER' && !!user?.subDivision}>
-                <SelectTrigger><SelectValue placeholder="Select sub-division" /></SelectTrigger>
-                <SelectContent>
-                  {getSubDivisionOptions(modalDivision).map(sd => (
-                    <SelectItem key={sd} value={sd}>{sd}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormControl>
-          </FormItem>
-        )}
-      />
-      {renderTextField('vendorName', 'Vendor Name')}
-      {renderTextField('pptNumber', 'PPT Number')}
-      {renderTextField('referenceArticleNumber', 'Ref. Article #')}
-      {renderTextField('referenceArticleDescription', 'Ref. Description')}
-      <FormField control={editForm.control} name="rate"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Rate</FormLabel>
-            <FormControl>
-              <Input {...field} value={field.value ?? ''}
-                onChange={e => { field.onChange(e.target.value); setModalMarkdown(calcMarkdown(editForm.getValues('mrp'), e.target.value)); }} />
-            </FormControl>
-          </FormItem>
-        )}
-      />
-      <FormField control={editForm.control} name="mrp"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>MRP</FormLabel>
-            <FormControl>
-              <Input {...field} placeholder="e.g. 599" value={field.value ?? ''}
-                onChange={e => { field.onChange(e.target.value); setModalMarkdown(calcMarkdown(e.target.value, editForm.getValues('rate'))); }} />
-            </FormControl>
-          </FormItem>
-        )}
-      />
-      {modalMarkdown !== null && (
-        <div className="col-span-2 rounded-md border border-blue-300 bg-blue-50 px-3 py-1.5 text-[13px]">
-          <span className="text-muted-foreground">Markdown: </span>
-          <span className="font-bold text-blue-600">{modalMarkdown}</span>
-          <span className="ml-2 text-xs text-muted-foreground">(MRP − Rate) ÷ MRP × 100</span>
-        </div>
-      )}
-      {renderTextField('size', 'Size')}
-    </div>
-  );
-
-  const attributesTab = (() => {
-    const division = editingItem?.division || '';
-    const majorCat = normalizeMajorCategory(editingItem?.majorCategory || '', division);
-    const mandatoryKeys = getMajCatMandatoryKeys(majorCat);
-    const visibleFields = ATTRIBUTE_FIELDS.filter(f => {
-      if (!majorCat) return true;
-      const cur = editingItem?.[f.formName as keyof typeof editingItem];
-      if (cur) return true;
-      if (!mandatoryKeys.has(f.schemaKey)) return false;
-      return getMajCatAllowedValues(division, f.schemaKey) !== null;
-    });
-    if (visibleFields.length === 0) return <div className="p-6 text-center text-muted-foreground">No attributes defined for this major category.</div>;
-    return (
-      <div className="max-h-[60vh] overflow-y-auto pr-1">
-        <table className="w-full border-collapse">
-          <tbody>
-            {visibleFields.map(f => {
-              const values = division ? getMajCatAllowedValues(division, f.schemaKey) : null;
-              const isMandatory = mandatoryKeys.has(f.schemaKey);
-              return (
-                <tr key={f.formName} className="border-b border-border">
-                  <td className="w-[180px] whitespace-nowrap py-1.5 pr-3 align-middle text-[13px]"
-                    style={{ fontWeight: isMandatory ? 600 : 400, color: isMandatory ? '#1f1f1f' : '#595959' }}>
-                    {isMandatory && <span className="mr-1 text-red-500">*</span>}{f.label}
-                  </td>
-                  <td className="py-1">
-                    <FormField control={editForm.control} name={f.formName}
-                      render={({ field }) =>
-                        values ? (
-                          <Select value={field.value || ''} onValueChange={field.onChange}>
-                            <SelectTrigger className="h-8"><SelectValue placeholder="Select..." /></SelectTrigger>
-                            <SelectContent>
-                              {values.map(v => <SelectItem key={v.shortForm} value={v.shortForm}>{v.shortForm}</SelectItem>)}
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          <Input {...field} value={field.value ?? ''} placeholder="Enter value..." className="h-8" />
-                        )
-                      }
-                    />
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    );
-  })();
-
-  const businessTab = (
-    <div className="grid grid-cols-3 gap-4">
-      <div className="col-span-3"><h5 className="text-base font-semibold">Business & SAP Fields</h5></div>
-      {renderTextField('vendorCode', 'Vendor Code')}
-      {renderTextField('mcCode', 'MC Code')}
-      {renderTextField('segment', 'Segment')}
-      {renderTextField('season', 'Season')}
-      {renderTextField('hsnTaxCode', 'HSN Tax Code')}
-      {renderTextField('fashionGrid', 'Fashion Grid')}
-      {renderTextField('year', 'Year')}
-      {renderTextField('articleType', 'Article Type')}
-      <FormField control={editForm.control} name="articleDescription"
-        render={({ field }) => (
-          <FormItem className="col-span-3">
-            <FormLabel>Article Description</FormLabel>
-            <FormControl><Textarea rows={3} {...field} value={field.value ?? ''} /></FormControl>
-          </FormItem>
-        )}
-      />
-    </div>
-  );
-
   // ─── Render ──────────────────────────────────────────────────────────────────
 
   return (
     <div className="flex flex-col">
       {/* Sticky header */}
-      <div className="sticky top-0 z-30 mb-2 -mx-1 px-1 pt-1">
-        <div className="overflow-hidden rounded-xl border border-white/60 bg-white/85 shadow-[var(--shadow-md)] backdrop-blur">
-          <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 text-white"
-            style={{ background: 'linear-gradient(90deg, #1f2937 0%, #334155 100%)' }}>
+      {/* Design "Option A": this bar and the article card's top strip read as one ink
+          block — nav + actions here, the article's identity on the line below. */}
+      <div className={cn('sticky top-0 z-30 -mx-1 px-1 pt-1', isComboItem ? 'mb-2' : 'mb-0')}>
+        <div className={cn('overflow-hidden border border-slate-800 shadow-[var(--shadow-md)]', isComboItem ? 'rounded-xl' : 'rounded-t-xl')}>
+          <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 text-white" style={{ background: '#1e293b' }}>
             <div className="flex min-w-0 items-center gap-2.5">
               {/* Back button */}
-              <Button size="sm" variant="ghost" onClick={() => navigate(buildBackUrl(), {
+              <Button size="sm" variant="ghost" onClick={() => guardLeave(() => navigate(buildBackUrl(), {
                   state: navState?.filters ? { restoreFilters: navState.filters } : undefined,
-                })}
+                }))}
                 className="h-7 px-1.5 text-white hover:bg-white/15 hover:text-white">
                 <ArrowLeft className="h-4 w-4" />
               </Button>
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#FF6F61]/90">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/10">
                 <Sparkles className="h-3.5 w-3.5 text-white" />
               </div>
               <div className="min-w-0">
-                <div className="font-display truncate text-[13px] font-semibold leading-tight tracking-tight">
+                <div className="font-display truncate text-[14px] font-semibold leading-tight tracking-tight">
                   {pathType === 'old' ? 'Old Articles' : pathType === 'new' ? 'New Articles'
                     : pathType === 'rejected' ? 'Rejected Articles'
                     : pathType === 'created' ? 'Created Articles'
@@ -1331,12 +1120,12 @@ export default function ArticleDetailPage({
               </div>
               {/* Prev / Next nav */}
               {totalCount > 0 && (
-                <div className="ml-1.5 flex items-center gap-0.5 rounded-md bg-white/10 px-0.5 py-0.5">
+                <div className="ml-2 flex items-center gap-0.5 rounded-lg bg-white/10 px-1 py-0.5">
                   <Button size="sm" variant="ghost" onClick={goPrev} disabled={isFirstArticle}
                     className="h-6 px-1.5 text-white hover:bg-white/15 hover:text-white disabled:opacity-30">
                     <ChevronLeft />
                   </Button>
-                  <span className="px-0.5 text-[11px] font-semibold tabular-nums">{globalPosition} / {batchSize}</span>
+                  <span className="px-1 text-[12.5px] font-bold tabular-nums">{globalPosition} <span className="font-medium text-white/70">of</span> {batchSize}</span>
                   <Button size="sm" variant="ghost" onClick={goNext} disabled={isLastArticle}
                     className="h-6 px-1.5 text-white hover:bg-white/15 hover:text-white disabled:opacity-30">
                     <ChevronRight />
@@ -1372,13 +1161,21 @@ export default function ArticleDetailPage({
                   )}
                 </>
               )}
-              <Tooltip title={!canApprove ? 'Only Approver, Sub-Division Head, Category Head or Admin can reject articles' : undefined}>
+              {user?.role === 'ADMIN' && currentItem?.approvalStatus === 'REJECTED' && (
+                <Button size="sm" variant="outline"
+                  onClick={() => setConfirmDialog({ kind: 'revert', item: currentItem })}
+                  title="Move this rejected article back to New Articles (pending)"
+                  className="h-8 border-amber-300/60 bg-transparent px-3 text-[12.5px] font-semibold text-amber-200 hover:bg-amber-500/15 hover:text-amber-100">
+                  <RotateCcw /> Revert
+                </Button>
+              )}
+              <Tooltip title={!canReject ? 'Only Creator, Approver, Sub-Division Head, Category Head or Admin can reject articles' : undefined}>
                 {/* span wrapper: disabled <button> swallows pointer events; span keeps hover alive */}
                 <span className="inline-block">
-                  <Button size="sm" variant="destructive"
+                  <Button size="sm" variant="outline"
                     onClick={() => { if (pendingSelectedKeys.length > 0) setConfirmDialog({ kind: 'reject', count: pendingSelectedKeys.length }); }}
-                    disabled={!canApprove || pendingSelectedKeys.length === 0}
-                    className="h-7 px-2.5 text-[12px]">
+                    disabled={!canReject || pendingSelectedKeys.length === 0}
+                    className="h-8 border-red-300/60 bg-transparent px-3 text-[12.5px] font-semibold text-red-300 hover:bg-red-500/15 hover:text-red-200 disabled:opacity-40">
                     <XCircle /> Reject
                   </Button>
                 </span>
@@ -1387,7 +1184,7 @@ export default function ArticleDetailPage({
                 <button
                   onClick={() => openHistory(currentItem.id)}
                   title="View change history"
-                  className="group flex h-7 items-center gap-1.5 rounded-md bg-red-500 px-2.5 text-[12px] font-medium text-white transition-colors hover:bg-red-600 active:bg-red-700"
+                  className="group flex h-8 items-center gap-1.5 rounded-md px-2.5 text-[12.5px] font-semibold text-slate-200 transition-colors hover:bg-white/10 hover:text-white"
                 >
                   <History className="h-3.5 w-3.5 transition-transform group-hover:rotate-12" />
                   <span>History</span>
@@ -1426,9 +1223,13 @@ export default function ArticleDetailPage({
                       missing fields, each of which jumps to its row. */}
                   <Button size="sm" onClick={handleApproveClick}
                     disabled={!canApprove || pendingSelectedKeys.length === 0}
-                    className="h-7 border-none bg-[#FF6F61] px-3 text-[12px] font-semibold text-white shadow-sm hover:bg-[#ff5b4d] disabled:bg-white/20 disabled:text-white/50">
+                    className="h-8 border-none bg-white px-3.5 text-[12.5px] font-bold text-slate-900 shadow-sm hover:bg-slate-100 disabled:bg-white/20 disabled:text-white/50">
                     <CheckCircle2 /> Save &amp; Submit
-                    {approveBlockedReasons.length > 0 && <span className="ml-1 text-[10px] text-amber-200">⚠ {approveBlockedReasons.length}</span>}
+                    {approveBlockedReasons.length > 0 && (
+                      <span className="ml-1 inline-flex items-center gap-0.5 rounded-full bg-amber-100 px-1.5 text-[11px] font-bold text-amber-800">
+                        ⚠ {approveBlockedReasons.length}
+                      </span>
+                    )}
                   </Button>
                 </span>
               </Tooltip>
@@ -1515,6 +1316,7 @@ export default function ArticleDetailPage({
         </div>
       ) : (
         <ApproverArticleList
+          joinTop={!isComboItem}
           items={displayedItem ? [displayedItem] : []}
           majorCategory={displayedItem?.majorCategory || ''}
           readOnly={isComboItem && !activeComboChild}
@@ -1522,7 +1324,6 @@ export default function ArticleDetailPage({
           loading={false}
           selectedRowKeys={selectedRowKeys}
           onSelectionChange={setSelectedRowKeys}
-          onEdit={handleEdit}
           onCreateFabricArticle={item => {
             const missing = getMissingFabricCreationFields(item);
             if (missing.length > 0) {
@@ -1676,7 +1477,6 @@ export default function ArticleDetailPage({
               throw err instanceof Error ? err : new Error('Failed to modify');
             }
           }}
-          attributes={attributes}
           onRefresh={activeComboChild ? loadComboChildren : refetchCurrentItem}
           pathType={pathType}
           serverPagination={{ total: totalCount, current: currentPage, pageSize: PAGE_SIZE, onChange: () => {} }}
@@ -1715,6 +1515,7 @@ export default function ArticleDetailPage({
                 try { const p = await r.json(); if (p?.error) errMsg = p.error; } catch { /* skip */ }
                 setItems(prevItems);
                 message.error(errMsg);
+                if (options?.throwOnError) throw new SaveFailedError(errMsg);
                 return;
               }
               const saved = await r.json();
@@ -1726,52 +1527,161 @@ export default function ArticleDetailPage({
                 return copy;
               });
               if (!options?.silent) message.success('Saved');
-            } catch {
+            } catch (e) {
+              if (e instanceof SaveFailedError) throw e;
               setItems(prevItems);
               message.error('Failed to save. Please check your connection.');
+              if (options?.throwOnError) throw new SaveFailedError('Failed to save');
             }
           }}
         />
       )}
 
-      {/* Edit Modal */}
-      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="max-h-[90vh] w-[1000px] max-w-[1000px] overflow-y-auto">
-          <DialogHeader><DialogTitle>Edit Article Details</DialogTitle></DialogHeader>
-          <Form {...editForm}>
-            <form onSubmit={editForm.handleSubmit(handleSaveEdit)}>
-              <Tabs value={editActiveTab} onValueChange={v => setEditActiveTab(v as typeof editActiveTab)}>
-                <TabsList>
-                  <TabsTrigger value="core">Core Details</TabsTrigger>
-                  <TabsTrigger value="attributes">Attributes</TabsTrigger>
-                  <TabsTrigger value="business">Business & SAP</TabsTrigger>
-                </TabsList>
-                <TabsContent value="core">{coreTab}</TabsContent>
-                <TabsContent value="attributes">{attributesTab}</TabsContent>
-                <TabsContent value="business">{businessTab}</TabsContent>
-              </Tabs>
-              <DialogFooter className="mt-4">
-                <Button type="button" variant="outline" onClick={() => setIsEditModalOpen(false)}>Cancel</Button>
-                <Button type="submit">Save Changes</Button>
-              </DialogFooter>
-            </form>
-          </Form>
+      {/* Leave with unsaved costing cards */}
+      <Dialog open={!!leavePrompt} onOpenChange={(o) => { if (!o && !leaveSaving) setLeavePrompt(null); }}>
+        <DialogContent
+          showClose={false}
+          className="max-w-[480px] gap-0 p-0 outline-none"
+          onInteractOutside={(e) => { if (leaveSaving) e.preventDefault(); }}
+          onEscapeKeyDown={(e) => { if (leaveSaving) e.preventDefault(); }}
+        >
+          {leavePrompt && (() => {
+            const failedLabel = Object.entries(leaveStatus).find(([, st]) => st === 'failed')?.[0];
+            const articleNo = currentItem?.articleNumber || currentItem?.designNumber;
+            return (
+              <>
+                <div className="relative bg-[#1e293b] px-5 pb-4 pt-[18px] text-white">
+                  <div className="text-[11px] font-bold tracking-[0.08em] text-slate-400">UNSAVED CHANGES</div>
+                  <DialogTitle className="mb-2.5 mt-1 text-[21px] font-semibold text-white">Save before leaving?</DialogTitle>
+                  {articleNo && (
+                    <span className="inline-flex items-center rounded-full bg-white/10 px-2.5 py-1 font-mono text-[12.5px] font-semibold text-slate-200">
+                      {articleNo}
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    aria-label="Close"
+                    disabled={leaveSaving}
+                    onClick={() => setLeavePrompt(null)}
+                    className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-white/10 hover:text-white disabled:opacity-40"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <div className="flex flex-col gap-3 px-5 py-4">
+                  <div className="overflow-hidden rounded-[10px] border border-slate-200">
+                    <div className="bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700">
+                      {leavePrompt.labels.length === 1 ? '1 card has changes' : `${leavePrompt.labels.length} cards have changes`}
+                    </div>
+                    {leavePrompt.labels.map((label, i) => {
+                      const st = leaveStatus[label];
+                      return (
+                        <div key={`${label}-${i}`} className="flex items-center gap-2.5 border-t border-slate-200 px-3 py-2">
+                          {st === 'saved' ? (
+                            <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#1e293b]">
+                              <Check className="h-2.5 w-2.5 text-white" strokeWidth={3.2} />
+                            </span>
+                          ) : st === 'saving' ? (
+                            <Loader2 className="h-4 w-4 shrink-0 animate-spin text-slate-700" />
+                          ) : st === 'failed' ? (
+                            <AlertTriangle className="h-4 w-4 shrink-0 text-red-700" />
+                          ) : (
+                            <span className="mx-1 h-2 w-2 shrink-0 rounded-full bg-amber-500" />
+                          )}
+                          <span className="text-[13px] font-bold text-slate-900">{label}</span>
+                          <span className={cn('ml-auto text-xs', st === 'failed' ? 'font-semibold text-red-700' : 'text-slate-500')}>
+                            {st === 'saved' ? 'saved' : st === 'saving' ? 'saving…' : st === 'failed' ? 'save failed' : 'not saved'}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {failedLabel && (
+                    <p className="m-0 text-[12.5px] text-red-800">
+                      Could not save {failedLabel}. Stay to fix it, or leave without saving.
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 border-t border-slate-200 bg-slate-50 px-5 py-3">
+                  <button
+                    type="button"
+                    onClick={leaveWithoutSaving}
+                    disabled={leaveSaving}
+                    className="h-9 rounded-lg px-1.5 text-[13.5px] font-bold text-red-700 hover:bg-red-50 disabled:opacity-40"
+                  >
+                    Leave without saving
+                  </button>
+                  <span className="ml-auto flex gap-2">
+                    <Button variant="outline" onClick={() => setLeavePrompt(null)} disabled={leaveSaving}>Stay</Button>
+                    <Button onClick={saveAndLeave} disabled={leaveSaving} className="bg-[#1e293b] text-white hover:bg-[#0f172a]">
+                      {leaveSaving ? <><Loader2 className="h-4 w-4 animate-spin" /> Saving…</> : failedLabel ? 'Try again' : 'Save & leave'}
+                    </Button>
+                  </span>
+                </div>
+              </>
+            );
+          })()}
         </DialogContent>
       </Dialog>
 
       {/* Confirm dialog */}
       <Dialog open={!!confirmDialog} onOpenChange={o => !o && setConfirmDialog(null)}>
-        <DialogContent>
+        <DialogContent
+          showClose={confirmDialog?.kind !== 'approve'}
+          className={confirmDialog?.kind === 'approve' ? 'max-w-[480px] gap-0 p-0' : undefined}
+          onInteractOutside={(e) => { if (approving) e.preventDefault(); }}
+          onEscapeKeyDown={(e) => { if (approving) e.preventDefault(); }}
+        >
           {confirmDialog?.kind === 'approve' && (
             <>
-              <DialogHeader><DialogTitle>Confirm Approval</DialogTitle></DialogHeader>
-              <p className="m-0">Are you sure you want to approve {confirmDialog.count} items? This action cannot be undone.</p>
-              <DialogFooter>
+              <div className="relative bg-[#1e293b] px-5 pb-4 pt-[18px] text-white">
+                <div className="text-[11px] font-bold tracking-[0.08em] text-slate-400">APPROVE &amp; SEND TO SAP</div>
+                <DialogTitle className="mb-2.5 mt-1 text-[21px] font-semibold text-white">
+                  Approve {confirmDialog.count} article{confirmDialog.count === 1 ? '' : 's'}?
+                </DialogTitle>
+                {confirmDialog.count === 1 && confirmDialog.article?.number && (
+                  <span className="inline-flex max-w-full items-center gap-2 rounded-full bg-white/10 px-2.5 py-1 font-mono text-[12.5px] font-semibold text-slate-200">
+                    {confirmDialog.article.number}
+                    {(confirmDialog.article.mc || confirmDialog.article.vendor) && (
+                      <span className="truncate font-sans text-xs font-medium opacity-70">
+                        {[confirmDialog.article.mc, confirmDialog.article.vendor].filter(Boolean).map((s) => `· ${s}`).join(' ')}
+                      </span>
+                    )}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  aria-label="Close"
+                  disabled={approving}
+                  onClick={() => setConfirmDialog(null)}
+                  className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-white/10 hover:text-white disabled:opacity-40"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="flex flex-col gap-3 px-5 py-4">
+                {confirmDialog.unsavedCards.length > 0 && (
+                  <div className="overflow-hidden rounded-[10px] border border-slate-200">
+                    <div className="bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700">Unsaved changes — saved first</div>
+                    {confirmDialog.unsavedCards.map((card) => (
+                      <div key={card} className="flex items-center gap-2.5 border-t border-slate-200 px-3 py-2">
+                        <span className="h-2 w-2 shrink-0 rounded-full bg-amber-500" />
+                        <span className="text-[13px] font-bold text-slate-900">{card}</span>
+                        <span className="ml-auto text-xs text-slate-500">not saved yet</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <p className="m-0 text-[12.5px] text-slate-500">Once sent to SAP the approval can’t be undone.</p>
+              </div>
+              <div className="flex justify-end gap-2 border-t border-slate-200 bg-slate-50 px-5 py-3">
                 <Button variant="outline" onClick={() => setConfirmDialog(null)} disabled={approving}>Cancel</Button>
-                <Button disabled={approving} onClick={doApprove}>
-                  {approving ? <><Loader2 className="h-4 w-4 animate-spin" /> Approving…</> : 'Approve'}
+                <Button disabled={approving} onClick={doApprove} className="bg-[#1e293b] text-white hover:bg-[#0f172a]">
+                  {approving
+                    ? <><Loader2 className="h-4 w-4 animate-spin" /> Approving…</>
+                    : confirmDialog.unsavedCards.length > 0 ? 'Save & Approve' : 'Approve'}
                 </Button>
-              </DialogFooter>
+              </div>
             </>
           )}
           {confirmDialog?.kind === 'reject' && (
@@ -1784,12 +1694,27 @@ export default function ArticleDetailPage({
               </DialogFooter>
             </>
           )}
+          {confirmDialog?.kind === 'revert' && (
+            <>
+              <DialogHeader><DialogTitle>Revert rejection</DialogTitle></DialogHeader>
+              <p className="m-0">
+                Move "{confirmDialog.item.articleNumber || confirmDialog.item.designNumber || confirmDialog.item.id}" back to pending?
+                It will show in New Articles again, with its rejected variants.
+              </p>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setConfirmDialog(null)}>Cancel</Button>
+                <Button onClick={async () => { const item = confirmDialog.item; setConfirmDialog(null); await doRevert(item); }}>
+                  <RotateCcw /> Revert
+                </Button>
+              </DialogFooter>
+            </>
+          )}
           {confirmDialog?.kind === 'createFabric' && (
             <>
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2"><FileText className="h-4 w-4 text-sky-500" /> Create Fabric Article</DialogTitle>
               </DialogHeader>
-              <p className="m-0">Create fabric article for "{confirmDialog.item.articleNumber || confirmDialog.item.imageName || confirmDialog.item.id}"?</p>
+              <p className="m-0">Create fabric article for "{confirmDialog.item.articleNumber || confirmDialog.item.id}"?</p>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setConfirmDialog(null)}>Cancel</Button>
                 <Button onClick={async () => { const item = confirmDialog.item; setConfirmDialog(null); await doCreateFabric(item); }}>Create Fabric Article</Button>
@@ -1801,7 +1726,7 @@ export default function ArticleDetailPage({
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2"><LayoutGrid className="h-4 w-4 text-purple-500" /> Create Body Article</DialogTitle>
               </DialogHeader>
-              <p className="m-0">Create body article for "{confirmDialog.item.articleNumber || confirmDialog.item.imageName || confirmDialog.item.id}"?</p>
+              <p className="m-0">Create body article for "{confirmDialog.item.articleNumber || confirmDialog.item.id}"?</p>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setConfirmDialog(null)}>Cancel</Button>
                 <Button onClick={async () => { const item = confirmDialog.item; setConfirmDialog(null); await doCreateBody(item); }}>Create Body Article</Button>
@@ -1813,7 +1738,7 @@ export default function ArticleDetailPage({
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2"><Rocket className="h-4 w-4 text-amber-500" /> Proceed for FG Article Creation</DialogTitle>
               </DialogHeader>
-              <p className="m-0">Proceed with FG article creation for "{confirmDialog.item.articleNumber || confirmDialog.item.imageName || confirmDialog.item.id}"?</p>
+              <p className="m-0">Proceed with FG article creation for "{confirmDialog.item.articleNumber || confirmDialog.item.id}"?</p>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setConfirmDialog(null)}>Cancel</Button>
                 <Button onClick={async () => { const item = confirmDialog.item; setConfirmDialog(null); await doProceedFG(item); }}>Proceed</Button>
@@ -1881,8 +1806,8 @@ export default function ArticleDetailPage({
       </Dialog>
 
       {/* Article change history dialog */}
-      <Dialog open={historyOpen} onOpenChange={o => { if (!o) { setHistoryOpen(false); setHistorySearch(''); setHistoryUserFilter('__ALL__'); } }}>
-        <DialogContent className="max-w-3xl p-0 overflow-hidden">
+      <Dialog open={historyOpen} onOpenChange={o => { if (!o) { setHistoryOpen(false); setHistorySearch(''); setHistoryUserFilter('__ALL__'); setHistoryStageFilter('__ALL__'); } }}>
+        <DialogContent className="max-w-4xl p-0 overflow-hidden">
           {/* Header */}
           <div className="flex items-center gap-3 border-b bg-gradient-to-r from-slate-50 to-white px-5 py-4">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-100">
@@ -1919,6 +1844,16 @@ export default function ArticleDetailPage({
                     {uniqueUsers.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
                   </SelectContent>
                 </Select>
+                <Select value={historyStageFilter} onValueChange={(v) => setHistoryStageFilter(v as typeof historyStageFilter)}>
+                  <SelectTrigger className="h-8 w-[150px] bg-white text-[12px]">
+                    <SelectValue placeholder="All stages" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__ALL__">All stages</SelectItem>
+                    <SelectItem value="BEFORE">Before creation</SelectItem>
+                    <SelectItem value="AFTER">After creation</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             );
           })()}
@@ -1937,18 +1872,7 @@ export default function ArticleDetailPage({
                 <span className="text-[11px] opacity-70">Changes will appear here after the first save.</span>
               </div>
             ) : (() => {
-              const q = historySearch.toLowerCase();
-              const filtered = historyRecords.filter(r => {
-                if (historyUserFilter !== '__ALL__' && (r.changed_by_name ?? '—') !== historyUserFilter) return false;
-                if (!q) return true;
-                const label = (FIELD_LABELS[r.field_name] ?? r.field_name).toLowerCase();
-                return (
-                  label.includes(q) ||
-                  (r.old_value ?? '').toLowerCase().includes(q) ||
-                  (r.new_value ?? '').toLowerCase().includes(q) ||
-                  (r.changed_by_name ?? '').toLowerCase().includes(q)
-                );
-              });
+              const filtered = historyFiltered;
               return filtered.length === 0 ? (
                 <div className="flex flex-col items-center justify-center gap-2 py-14 text-muted-foreground">
                   <span className="text-[13px]">No results match your search.</span>
@@ -1959,6 +1883,7 @@ export default function ArticleDetailPage({
                     <tr className="border-b bg-slate-50 text-left">
                       <th className="px-4 py-2.5 w-36 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Date / Time</th>
                       <th className="px-4 py-2.5 w-28 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Changed By</th>
+                      <th className="px-4 py-2.5 w-28 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Stage</th>
                       <th className="px-4 py-2.5 w-36 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Field</th>
                       <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Old Value</th>
                       <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">New Value</th>
@@ -1980,9 +1905,20 @@ export default function ArticleDetailPage({
                             <span className="text-[12px] font-medium text-slate-700">{r.changed_by_name ?? '—'}</span>
                           </div>
                         </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          {r.stage === 'AFTER' ? (
+                            <span className="inline-block rounded bg-slate-800 px-1.5 py-0.5 text-[10px] font-semibold text-white dark:bg-slate-200 dark:text-slate-900" title="Changed after the article was created (Created page)">
+                              After creation
+                            </span>
+                          ) : (
+                            <span className="inline-block rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-semibold text-slate-600" title="Changed while the article was new (before it was created)">
+                              Before creation
+                            </span>
+                          )}
+                        </td>
                         <td className="px-4 py-3">
-                          <span className="inline-block rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-700">
-                            {FIELD_LABELS[r.field_name] ?? r.field_name}
+                          <span className="inline-block rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-700" title={r.field_name}>
+                            {historyFieldLabel(r.field_name)}
                           </span>
                         </td>
                         <td className="px-4 py-3 max-w-[140px]">
@@ -2007,13 +1943,7 @@ export default function ArticleDetailPage({
           <div className="flex items-center justify-between border-t bg-slate-50/60 px-5 py-3">
             <span className="text-[11px] text-muted-foreground">
               {(() => {
-                const q = historySearch.toLowerCase();
-                const filtered = historyRecords.filter(r => {
-                  if (historyUserFilter !== '__ALL__' && (r.changed_by_name ?? '—') !== historyUserFilter) return false;
-                  if (!q) return true;
-                  const label = (FIELD_LABELS[r.field_name] ?? r.field_name).toLowerCase();
-                  return label.includes(q) || (r.old_value ?? '').toLowerCase().includes(q) || (r.new_value ?? '').toLowerCase().includes(q) || (r.changed_by_name ?? '').toLowerCase().includes(q);
-                });
+                const filtered = historyFiltered;
                 return filtered.length !== historyRecords.length
                   ? `Showing ${filtered.length} of ${historyRecords.length} changes`
                   : `${historyRecords.length} total change${historyRecords.length !== 1 ? 's' : ''}`;

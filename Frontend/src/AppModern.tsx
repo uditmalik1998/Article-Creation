@@ -1,6 +1,7 @@
 // Modern App Root with Clean Architecture
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { articleTypeForPath, canAccessArticleType, userArticleTypes } from './shared/utils/articleTypeAccess';
 
 // App Configuration
 import { AppProviders } from './app/providers/AppProviders';
@@ -12,8 +13,7 @@ import MainLayout from './shared/components/layout/MainLayout';
 import { LoginPage, RegisterPage } from './features/auth';
 
 import SimplifiedExtractionPage from './features/extraction/pages/SimplifiedExtractionPage'; // NEW: Simplified workflow
-import FabricExtractionPage from './features/extraction/pages/FabricExtractionPage';
-import { DashboardPage, ProfilePage, ProductsPage } from './features/dashboard';
+import { DashboardPage, ProfilePage } from './features/dashboard';
 import { HierarchyManagement, UsersManagement, StatusDashboard } from './features/admin';
 import Admin from './features/admin/pages/Admin'; // Admin Dashboard
 import SrmFailedExtractionsPage from './features/admin/pages/SrmFailedExtractionsPage'; // SRM Failed Extractions
@@ -57,7 +57,6 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
   // PD_DESIGNER only has access to model-generation
   // BODY_APPROVER only has access to body-article
-  // FABRIC_APPROVER only has access to fabric-article FG new articles
   // GM_APPROVER / GM_CREATOR only have access to gm-article
   if (user) {
     const userData = JSON.parse(user);
@@ -66,9 +65,6 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
     }
     if (userData.role === 'BODY_APPROVER') {
       return <Navigate to="/body-article" replace />;
-    }
-    if (userData.role === 'FABRIC_APPROVER') {
-      return <Navigate to="/fabric-article/fg-new" replace />;
     }
     if (userData.role === 'GM_APPROVER' || userData.role === 'GM_CREATOR') {
       return <Navigate to="/gm-article" replace />;
@@ -120,7 +116,10 @@ const ExpenseRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   return <>{children}</>;
 };
 
+const ARTICLE_AREA_HOME = { FG: '/approver', FABRIC: '/fabric-article', GM: '/gm-article' } as const;
+
 const ApproverRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const location = useLocation();
   const token = localStorage.getItem('authToken');
   const user = localStorage.getItem('user');
 
@@ -130,43 +129,23 @@ const ApproverRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
   if (user) {
     const userData = JSON.parse(user);
-    // Allow ADMIN, APPROVER, CATEGORY_HEAD, SUB_DIVISION_HEAD, CREATOR, PO_COMMITTEE, PD, BODY_APPROVER, FABRIC_APPROVER, GM_APPROVER, GM_CREATOR
-    if (userData.role !== 'APPROVER' && userData.role !== 'CATEGORY_HEAD' && userData.role !== 'SUB_DIVISION_HEAD' && userData.role !== 'ADMIN' && userData.role !== 'CREATOR' && userData.role !== 'PO_COMMITTEE' && userData.role !== 'PD' && userData.role !== 'BODY_APPROVER' && userData.role !== 'FABRIC_APPROVER' && userData.role !== 'GM_APPROVER' && userData.role !== 'GM_CREATOR') {
+    // Allow ADMIN, APPROVER, CATEGORY_HEAD, SUB_DIVISION_HEAD, CREATOR, PO_COMMITTEE, PD, BODY_APPROVER, GM_APPROVER, GM_CREATOR
+    if (userData.role !== 'APPROVER' && userData.role !== 'CATEGORY_HEAD' && userData.role !== 'SUB_DIVISION_HEAD' && userData.role !== 'ADMIN' && userData.role !== 'CREATOR' && userData.role !== 'PO_COMMITTEE' && userData.role !== 'PD' && userData.role !== 'BODY_APPROVER' && userData.role !== 'GM_APPROVER' && userData.role !== 'GM_CREATOR') {
       return <Navigate to="/dashboard" replace />;
     }
-  }
-
-  return <>{children}</>;
-};
-
-
-const CreatorRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const token = localStorage.getItem('authToken');
-  const user = localStorage.getItem('user');
-
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (user) {
-    const userData = JSON.parse(user);
-    // APPROVER and CATEGORY_HEAD cannot access creator pages; SUB_DIVISION_HEAD can
-    if (userData.role === 'APPROVER' || userData.role === 'CATEGORY_HEAD') {
-      return <Navigate to="/approver" replace />;
-    }
-    if (userData.role === 'PD') {
-      return <Navigate to="/approver" replace />;
-    }
-    // PD_DESIGNER only has access to model-generation
-    if (userData.role === 'PD_DESIGNER') {
-      return <Navigate to="/model-generation" replace />;
+    // Article types (Admin › Users) limit which article areas the user can open.
+    const area = articleTypeForPath(location.pathname);
+    if (area && !canAccessArticleType(userData, area)) {
+      const firstAllowed = userArticleTypes(userData)[0] as keyof typeof ARTICLE_AREA_HOME | undefined;
+      return <Navigate to={(firstAllowed && ARTICLE_AREA_HOME[firstAllowed]) || '/dashboard'} replace />;
     }
   }
 
   return <>{children}</>;
 };
 
-// Extraction page — same access as CreatorRoute, but APPROVER is also allowed.
+
+// Extraction page — every signed-in role except CATEGORY_HEAD and PD_DESIGNER.
 const ExtractionRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const token = localStorage.getItem('authToken');
   const user  = localStorage.getItem('user');
@@ -239,16 +218,6 @@ const App: React.FC = () => {
                 }
               />
               <Route
-                path="/products"
-                element={
-                  <CreatorRoute>
-                    <MainLayout>
-                      <ProductsPage />
-                    </MainLayout>
-                  </CreatorRoute>
-                }
-              />
-              <Route
                 path="/extraction"
                 element={<Navigate to="/extraction/fg-article" replace />}
               />
@@ -269,16 +238,6 @@ const App: React.FC = () => {
                   <ExtractionRoute>
                     <MainLayout>
                       <SimplifiedExtractionPage />
-                    </MainLayout>
-                  </ExtractionRoute>
-                }
-              />
-              <Route
-                path="/extraction/fabric-article"
-                element={
-                  <ExtractionRoute>
-                    <MainLayout>
-                      <FabricExtractionPage />
                     </MainLayout>
                   </ExtractionRoute>
                 }

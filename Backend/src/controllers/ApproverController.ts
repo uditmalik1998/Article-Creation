@@ -1,7 +1,5 @@
 import { Request, Response } from 'express';
 import { ApprovalStatus, SapSyncStatus, Prisma } from '../generated/prisma';
-import fs from 'fs';
-import path from 'path';
 import { getHsnCodeByMcCode, getMcCodeByMajorCategory } from '../utils/mcCodeMapper';
 import { parseNumericValue } from '../utils/mrpCalculator';
 import { getSegmentFromMaster } from '../services/segmentMasterService';
@@ -9,7 +7,6 @@ import { syncApprovedItemsToSap } from '../services/sapSyncService';
 import { syncArticlesToSapViaRfc, buildModifyChangesPayload, previewRfcPayloads } from '../services/zmmArtCreationService';
 import { patchArticleAttributes } from '../services/sapModifyService';
 import { FLAT_TO_RFC, FLAT_TO_SAP_KEY } from '../data/flatToRfcMap';
-import { randomUUID } from 'crypto';
 import { validateAgainstNationalGrid } from '../services/nationalGridValidation';
 import { syncVariantsToSapViaRfc } from '../services/zmmVarArtCreationService';
 import { syncGmVariantsToSap, type GmVariantSyncSummary } from '../services/zmmGMVarArtCreationService';
@@ -18,9 +15,8 @@ import { storageService, type WatermarkLabel } from '../services/storageService'
 import { ARTICLE_DESCRIPTION_SOURCE_FIELDS, buildArticleDescription } from '../utils/articleDescriptionBuilder';
 import { getExcludedDescriptionFields } from '../utils/categoryFieldVisibility';
 import { prismaClient as prisma } from '../utils/prisma';
-import { syncGenericToVariants, addColorVariants, getSizesForMajCat, isSizeAllowed } from '../services/variantCreationService';
+import { syncGenericToVariants, addColorVariants, getSizesForMajCat, isSizeAllowed, rebuildVariantsForMajCat } from '../services/variantCreationService';
 import { hasVendorCode, isValidVendorCode, normalizeVendorCode } from '../utils/vendorCode';
-import { mirror360FlatUpdate } from '../utils/mirror360Flat';
 import { getSetMcIndex, setProblems, SET_PARTS_USE_SET_MC, normalMcForCategory } from '../services/setMcMasterService';
 import { linkComboGroupForRow, recomputeComboParent, syncSetsFromRaw, COMBO_PARENT_DERIVED_FIELDS, groupSetParts } from '../services/comboLinkService';
 import { linkSetPart, retryPendingSetLinks } from '../services/setLinkService';
@@ -64,8 +60,9 @@ const ITEM_UPDATE_ALLOWED_FIELDS = [
     'stitchingBgtPrVal', 'stitchingActPrVal', 'stitchingVendorPrVal', 'stitchingFinalPrVal',
     'ironingBgtPrVal', 'ironingActPrVal', 'ironingVendorPrVal', 'ironingFinalPrVal',
     'finishingBgtPrVal', 'finishingActPrVal', 'finishingVendorPrVal', 'finishingFinalPrVal',
+    'totalBgtPrVal', 'totalActPrVal', 'totalVendorPrVal', 'totalFinalPrVal',
     // B TRIM costing (values belong to the tab in bTrimType)
-    'bTrimType',
+    'bTrimType', 'bTrimTotalAutoBgt', 'bTrimTotalRoughV2', 'bTrimTotalVdrCost', 'bTrimTotalFinalCost',
     'mBtnAutoBgt', 'mBtnRoughV2', 'mBtnVdrCost', 'mBtnFinalCost',
     'dcAutoBgt', 'dcRoughV2', 'dcVdrCost', 'dcFinalCost',
     'zipAutoBgt', 'zipRoughV2', 'zipVdrCost', 'zipFinalCost',
@@ -96,6 +93,7 @@ const ITEM_UPDATE_ALLOWED_FIELDS = [
     'printAutoBgt', 'printRoughV2', 'printVendorCost', 'printFinalCost',
     'embAutoBgt', 'embRoughV2', 'embVendorCost', 'embFinalCost',
     'washingAutoBgt', 'washingRoughV2', 'washingVendorCost', 'washingFinalCost',
+    'vaddTotalAutoBgt', 'vaddTotalRoughV2', 'vaddTotalVendorCost', 'vaddTotalFinalCost',
     // V. ADD extra PRINT / EMB rows (JSON arrays, app only — not in FLAT_TO_RFC so never sent to SAP)
     'vaddPrintJson', 'vaddEmpJson',
     // PKG COST (net prices belong to the tab in pkgCostType)
@@ -142,10 +140,7 @@ export class ApproverController {
     private static readonly STARTUP_BACKFILL_DELAY_MS = parseInt(process.env.STARTUP_BACKFILL_DELAY_MS || '15000', 10);
     private static readonly STARTUP_BACKFILLS_ENABLED = String(process.env.STARTUP_BACKFILLS_ENABLED ?? 'true').toLowerCase() !== 'false';
     private static readonly STARTUP_BACKFILLS_IN_DEV = String(process.env.STARTUP_BACKFILLS_IN_DEV ?? 'false').toLowerCase() === 'true';
-    private static readonly APPROVER_ATTRIBUTES_CACHE_TTL_MS = parseInt(process.env.APPROVER_ATTRIBUTES_CACHE_TTL_MS || '300000', 10);
     private static startupBackfillRunning = false;
-    private static attributesCache: { data: any[]; expiresAt: number } | null = null;
-    private static pendingAttributesLoad: Promise<any[]> | null = null;
     // Short-lived cache for getItems responses (8s TTL). Eliminates redundant DB hits
     // when multiple users load the same page simultaneously or filters haven't changed.
     private static readonly ITEMS_CACHE_TTL_MS = 8_000;
@@ -919,9 +914,9 @@ export class ApproverController {
                 orderBy,
                 select: {
                     id: true,
-                    imageName: true,
                     imageUrl: true,
                     oldImageUrl: true,
+                    backImageUrl: true,
                     imageUncPath: true,
                     articleNumber: true,
                     division: true,
@@ -1015,10 +1010,11 @@ export class ApproverController {
                     roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
                     preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
                     cuttingBgtPrVal: true, cuttingActPrVal: true, cuttingVendorPrVal: true, cuttingFinalPrVal: true,
+                    aiCmpCostCutting: true, aiCmpCostStitching: true, aiCmpCostIroning: true, aiCmpCostFinishing: true,
                     stitchingBgtPrVal: true, stitchingActPrVal: true, stitchingVendorPrVal: true, stitchingFinalPrVal: true,
                     ironingBgtPrVal: true, ironingActPrVal: true, ironingVendorPrVal: true, ironingFinalPrVal: true,
-                    finishingBgtPrVal: true, finishingActPrVal: true, finishingVendorPrVal: true, finishingFinalPrVal: true,
-                    bTrimType: true,
+                    finishingBgtPrVal: true, finishingActPrVal: true, finishingVendorPrVal: true, finishingFinalPrVal: true, totalBgtPrVal: true, totalActPrVal: true, totalVendorPrVal: true, totalFinalPrVal: true,
+                    bTrimType: true, bTrimTotalAutoBgt: true, bTrimTotalRoughV2: true, bTrimTotalVdrCost: true, bTrimTotalFinalCost: true,
                     mBtnAutoBgt: true, mBtnRoughV2: true, mBtnVdrCost: true, mBtnFinalCost: true,
                     dcAutoBgt: true, dcRoughV2: true, dcVdrCost: true, dcFinalCost: true,
                     zipAutoBgt: true, zipRoughV2: true, zipVdrCost: true, zipFinalCost: true,
@@ -1048,6 +1044,7 @@ export class ApproverController {
                     printAutoBgt: true, printRoughV2: true, printVendorCost: true, printFinalCost: true,
                     embAutoBgt: true, embRoughV2: true, embVendorCost: true, embFinalCost: true,
                     washingAutoBgt: true, washingRoughV2: true, washingVendorCost: true, washingFinalCost: true,
+                    vaddTotalAutoBgt: true, vaddTotalRoughV2: true, vaddTotalVendorCost: true, vaddTotalFinalCost: true,
                     vaddPrintJson: true, vaddEmpJson: true,
                     pkgCostType: true, boppNetPrice: true, ctnNetPrice: true, barcodeNetPrice: true,
                     kimbleNetPrice: true, taftaNetPrice: true, threadNetPrice: true,
@@ -1303,7 +1300,6 @@ export class ApproverController {
                 select: {
                     id: true,
                     articleNumber: true,
-                    imageName: true,
                     division: true,
                     subDivision: true,
                     majorCategory: true,
@@ -1364,6 +1360,7 @@ export class ApproverController {
                     year: true,
                     articleType: true,
                     userName: true,
+                    creatorUser: true, modifyUser: true,
                     createdAt: true,
                     updatedAt: true,
                     approvedAt: true,
@@ -1380,10 +1377,11 @@ export class ApproverController {
                     roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
                     preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
                     cuttingBgtPrVal: true, cuttingActPrVal: true, cuttingVendorPrVal: true, cuttingFinalPrVal: true,
+                    aiCmpCostCutting: true, aiCmpCostStitching: true, aiCmpCostIroning: true, aiCmpCostFinishing: true,
                     stitchingBgtPrVal: true, stitchingActPrVal: true, stitchingVendorPrVal: true, stitchingFinalPrVal: true,
                     ironingBgtPrVal: true, ironingActPrVal: true, ironingVendorPrVal: true, ironingFinalPrVal: true,
-                    finishingBgtPrVal: true, finishingActPrVal: true, finishingVendorPrVal: true, finishingFinalPrVal: true,
-                    bTrimType: true,
+                    finishingBgtPrVal: true, finishingActPrVal: true, finishingVendorPrVal: true, finishingFinalPrVal: true, totalBgtPrVal: true, totalActPrVal: true, totalVendorPrVal: true, totalFinalPrVal: true,
+                    bTrimType: true, bTrimTotalAutoBgt: true, bTrimTotalRoughV2: true, bTrimTotalVdrCost: true, bTrimTotalFinalCost: true,
                     mBtnAutoBgt: true, mBtnRoughV2: true, mBtnVdrCost: true, mBtnFinalCost: true,
                     dcAutoBgt: true, dcRoughV2: true, dcVdrCost: true, dcFinalCost: true,
                     zipAutoBgt: true, zipRoughV2: true, zipVdrCost: true, zipFinalCost: true,
@@ -1413,6 +1411,7 @@ export class ApproverController {
                     printAutoBgt: true, printRoughV2: true, printVendorCost: true, printFinalCost: true,
                     embAutoBgt: true, embRoughV2: true, embVendorCost: true, embFinalCost: true,
                     washingAutoBgt: true, washingRoughV2: true, washingVendorCost: true, washingFinalCost: true,
+                    vaddTotalAutoBgt: true, vaddTotalRoughV2: true, vaddTotalVendorCost: true, vaddTotalFinalCost: true,
                     pkgCostType: true, boppNetPrice: true, ctnNetPrice: true, barcodeNetPrice: true,
                     kimbleNetPrice: true, taftaNetPrice: true, threadNetPrice: true,
                     // BODY extras
@@ -1466,7 +1465,6 @@ export class ApproverController {
             const sharedSelect = {
                 id: true,
                 articleNumber: true,
-                imageName: true,
                 division: true,
                 subDivision: true,
                 majorCategory: true,
@@ -1665,10 +1663,11 @@ export class ApproverController {
                     roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
                     preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
                     cuttingBgtPrVal: true, cuttingActPrVal: true, cuttingVendorPrVal: true, cuttingFinalPrVal: true,
+                    aiCmpCostCutting: true, aiCmpCostStitching: true, aiCmpCostIroning: true, aiCmpCostFinishing: true,
                     stitchingBgtPrVal: true, stitchingActPrVal: true, stitchingVendorPrVal: true, stitchingFinalPrVal: true,
                     ironingBgtPrVal: true, ironingActPrVal: true, ironingVendorPrVal: true, ironingFinalPrVal: true,
-                    finishingBgtPrVal: true, finishingActPrVal: true, finishingVendorPrVal: true, finishingFinalPrVal: true,
-                    bTrimType: true,
+                    finishingBgtPrVal: true, finishingActPrVal: true, finishingVendorPrVal: true, finishingFinalPrVal: true, totalBgtPrVal: true, totalActPrVal: true, totalVendorPrVal: true, totalFinalPrVal: true,
+                    bTrimType: true, bTrimTotalAutoBgt: true, bTrimTotalRoughV2: true, bTrimTotalVdrCost: true, bTrimTotalFinalCost: true,
                     mBtnAutoBgt: true, mBtnRoughV2: true, mBtnVdrCost: true, mBtnFinalCost: true,
                     dcAutoBgt: true, dcRoughV2: true, dcVdrCost: true, dcFinalCost: true,
                     zipAutoBgt: true, zipRoughV2: true, zipVdrCost: true, zipFinalCost: true,
@@ -1698,6 +1697,7 @@ export class ApproverController {
                     printAutoBgt: true, printRoughV2: true, printVendorCost: true, printFinalCost: true,
                     embAutoBgt: true, embRoughV2: true, embVendorCost: true, embFinalCost: true,
                     washingAutoBgt: true, washingRoughV2: true, washingVendorCost: true, washingFinalCost: true,
+                    vaddTotalAutoBgt: true, vaddTotalRoughV2: true, vaddTotalVendorCost: true, vaddTotalFinalCost: true,
                     pkgCostType: true, boppNetPrice: true, ctnNetPrice: true, barcodeNetPrice: true,
                     kimbleNetPrice: true, taftaNetPrice: true, threadNetPrice: true,
                     approvedAt: true,
@@ -2268,43 +2268,6 @@ export class ApproverController {
         }
     }
 
-    // Get master attributes for dropdowns
-    static async getAttributes(req: Request, res: Response) {
-        try {
-            const cached = ApproverController.attributesCache;
-            let attributes = cached && cached.expiresAt > Date.now() ? cached.data : null;
-
-            if (!attributes) {
-                if (!ApproverController.pendingAttributesLoad) {
-                    ApproverController.pendingAttributesLoad = prisma.masterAttribute.findMany({
-                        where: { isActive: true },
-                        include: {
-                            allowedValues: {
-                                where: { isActive: true },
-                                orderBy: { displayOrder: 'asc' }
-                            }
-                        },
-                        orderBy: { displayOrder: 'asc' }
-                    }).then((rows) => {
-                        ApproverController.attributesCache = {
-                            data: rows,
-                            expiresAt: Date.now() + ApproverController.APPROVER_ATTRIBUTES_CACHE_TTL_MS
-                        };
-                        return rows;
-                    }).finally(() => {
-                        ApproverController.pendingAttributesLoad = null;
-                    });
-                }
-
-                attributes = await ApproverController.pendingAttributesLoad;
-            }
-
-            return res.json(attributes);
-        } catch (error) {
-            console.error('Error fetching attributes:', error);
-            return res.status(500).json({ error: 'Failed to fetch attributes' });
-        }
-    }
 
     // Fetch a single item by id — used by the detail page on direct URL access
     static async getById(req: Request, res: Response) {
@@ -2313,7 +2276,7 @@ export class ApproverController {
             const item = await prisma.extractionResultFlat.findUnique({
                 where: { id },
                 select: {
-                    id: true, imageName: true, imageUrl: true, oldImageUrl: true, imageUncPath: true,
+                    id: true, imageUrl: true, oldImageUrl: true, backImageUrl: true, imageUncPath: true,
                     articleNumber: true, division: true, subDivision: true, majorCategory: true,
                     vendorName: true, vendorCode: true, designNumber: true, pptNumber: true,
                     referenceArticleNumber: true, referenceArticleDescription: true,
@@ -2345,10 +2308,11 @@ export class ApproverController {
                     roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
                     preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
                     cuttingBgtPrVal: true, cuttingActPrVal: true, cuttingVendorPrVal: true, cuttingFinalPrVal: true,
+                    aiCmpCostCutting: true, aiCmpCostStitching: true, aiCmpCostIroning: true, aiCmpCostFinishing: true,
                     stitchingBgtPrVal: true, stitchingActPrVal: true, stitchingVendorPrVal: true, stitchingFinalPrVal: true,
                     ironingBgtPrVal: true, ironingActPrVal: true, ironingVendorPrVal: true, ironingFinalPrVal: true,
-                    finishingBgtPrVal: true, finishingActPrVal: true, finishingVendorPrVal: true, finishingFinalPrVal: true,
-                    bTrimType: true,
+                    finishingBgtPrVal: true, finishingActPrVal: true, finishingVendorPrVal: true, finishingFinalPrVal: true, totalBgtPrVal: true, totalActPrVal: true, totalVendorPrVal: true, totalFinalPrVal: true,
+                    bTrimType: true, bTrimTotalAutoBgt: true, bTrimTotalRoughV2: true, bTrimTotalVdrCost: true, bTrimTotalFinalCost: true,
                     mBtnAutoBgt: true, mBtnRoughV2: true, mBtnVdrCost: true, mBtnFinalCost: true,
                     dcAutoBgt: true, dcRoughV2: true, dcVdrCost: true, dcFinalCost: true,
                     zipAutoBgt: true, zipRoughV2: true, zipVdrCost: true, zipFinalCost: true,
@@ -2378,6 +2342,7 @@ export class ApproverController {
                     printAutoBgt: true, printRoughV2: true, printVendorCost: true, printFinalCost: true,
                     embAutoBgt: true, embRoughV2: true, embVendorCost: true, embFinalCost: true,
                     washingAutoBgt: true, washingRoughV2: true, washingVendorCost: true, washingFinalCost: true,
+                    vaddTotalAutoBgt: true, vaddTotalRoughV2: true, vaddTotalVendorCost: true, vaddTotalFinalCost: true,
                     vaddPrintJson: true, vaddEmpJson: true,
                     pkgCostType: true, boppNetPrice: true, ctnNetPrice: true, barcodeNetPrice: true,
                     kimbleNetPrice: true, taftaNetPrice: true, threadNetPrice: true,
@@ -2471,12 +2436,17 @@ export class ApproverController {
     static async getFgArticleHistory(req: Request, res: Response) {
         const { id } = req.params;
         try {
+            // stage: BEFORE = while a new article (before approval/creation),
+            // AFTER = once created (approved_at), e.g. Created-page modifications.
             const history = await prisma.$queryRaw<any[]>`
-                SELECT id, article_id, changed_by_id, changed_by_name,
-                       changed_at, field_name, old_value, new_value
-                FROM history_fg_article
-                WHERE article_id = ${id}
-                ORDER BY changed_at DESC
+                SELECT h.id, h.article_id, h.changed_by_id, h.changed_by_name,
+                       h.changed_at, h.field_name, h.old_value, h.new_value,
+                       CASE WHEN f.approved_at IS NOT NULL AND h.changed_at >= f.approved_at
+                            THEN 'AFTER' ELSE 'BEFORE' END AS stage
+                FROM history_fg_article h
+                LEFT JOIN extraction_results_flat f ON f.id = h.article_id
+                WHERE h.article_id = ${id}
+                ORDER BY h.changed_at DESC
                 LIMIT 500
             `;
             return res.json(history);
@@ -2699,6 +2669,35 @@ export class ApproverController {
             const finalMajorCategory = (data.majorCategory !== undefined ? data.majorCategory : existingItem.majorCategory) as string | null;
             const finalMrp = data.mrp !== undefined ? data.mrp : existingItem.mrp;
 
+            // Major category change on a generic with colour variants: the sizes belong
+            // to the old category, so the variants are rebuilt after the update (same
+            // colours, new category's sizes). Blocked when a variant is already in SAP,
+            // or when the new category has no sizes (the colours would be lost).
+            const oldMajCat = String(existingItem.majorCategory ?? '').trim().toUpperCase();
+            const newMajCat = String(finalMajorCategory ?? '').trim().toUpperCase();
+            let rebuildSizes: string[] | null = null;
+            if (existingItem.isGeneric && data.majorCategory !== undefined && newMajCat !== oldMajCat) {
+                const variants = await prisma.fgVariantArticleData.findMany({
+                    where: { genericArticleId: id },
+                    select: { variantArticleNumber: true, sapSyncStatus: true },
+                });
+                if (variants.length > 0) {
+                    const inSap = variants.filter((v) => v.variantArticleNumber || v.sapSyncStatus === 'SYNCED').length;
+                    if (inSap > 0) {
+                        return res.status(409).json({
+                            error: `Can't change Major Category: ${inSap} size variant(s) of this article are already in SAP.`,
+                        });
+                    }
+                    const sizes = newMajCat ? await getSizesForMajCat(newMajCat) : [];
+                    if (sizes.length === 0) {
+                        return res.status(422).json({
+                            error: `Can't change Major Category: no active sizes for '${finalMajorCategory ?? ''}' in the Size Master, so the colour variants can't be re-created.`,
+                        });
+                    }
+                    rebuildSizes = sizes;
+                }
+            }
+
             // PR1 size guard: when a variant's size is edited, the new size must be
             // valid for its Major Category (server-side backstop behind the UI dropdown).
             if (!existingItem.isGeneric && (data.variantSize !== undefined || data.size !== undefined)) {
@@ -2758,12 +2757,15 @@ export class ApproverController {
                 if (isComboParent) updated = (await prisma.extractionResultFlat.findUnique({ where: { id } }))!;
             }
 
-            // Mirror to 360article.article_360_flat (fire-and-forget)
-            void mirror360FlatUpdate(id, data).catch((err: any) => console.error('[mirror360] update failed:', err?.message));
-
             // Record per-field history (fire-and-forget)
             void ApproverController.recordFgArticleHistory(id, req.user, data, oldRow)
                 .catch((err: any) => console.error('[fgArticleHistory] record failed:', err?.message));
+
+            // creator_user: editors on the New article page. Approved rows only take
+            // internal saves here (Created page), so they don't count.
+            if (existingItem.approvalStatus !== 'APPROVED') {
+                void ApproverController.recordArticleEditor(id, 'creator_user', req.user);
+            }
 
             // NOTE: We intentionally update ONLY this edited row. The correct
             // mcCode/hsnTaxCode for the new majorCategory are already applied to
@@ -2779,6 +2781,15 @@ export class ApproverController {
                     where: { id },
                     data: { colour: data.variantColor }
                 });
+            }
+
+            if (rebuildSizes) {
+                try {
+                    const { colors, created } = await rebuildVariantsForMajCat(updated, rebuildSizes);
+                    console.log(`[MajCatChange] ${id}: ${oldMajCat} → ${newMajCat}, rebuilt ${created} variants for ${colors.join(', ')}`);
+                } catch (err: any) {
+                    console.error('[MajCatChange] variant rebuild failed:', err?.message);
+                }
             }
 
             // If this is a generic article being updated, sync changes to variants (fire-and-forget)
@@ -2811,6 +2822,21 @@ export class ApproverController {
                 return res.status(400).json({ error: 'changes object is required' });
             }
 
+            // Vendor change (EXTWG): admin only, and the code must be in the vendor master.
+            if (changes.vendorCode != null && String(changes.vendorCode).trim() !== '') {
+                if (String(req.user?.role || '') !== 'ADMIN') {
+                    return res.status(403).json({ error: 'Only an admin can change the vendor of a created article.' });
+                }
+                if (!isValidVendorCode(changes.vendorCode)) {
+                    return res.status(400).json({ error: 'Vendor Code must be exactly 6 digits.' });
+                }
+                const code = normalizeVendorCode(changes.vendorCode) ?? '';
+                const vendor = await prisma.masterVendorDetail.findUnique({ where: { vendorCode: code }, select: { vendorCode: true } });
+                if (!vendor) {
+                    return res.status(400).json({ error: `Vendor code ${code} was not found in the vendor master.` });
+                }
+            }
+
             // Build SAP key → value map (mirrors modifyItem logic)
             const attrMap: Record<string, string | null | undefined> = {};
             for (const [field, value] of Object.entries(changes)) {
@@ -2831,6 +2857,27 @@ export class ApproverController {
         }
     }
 
+    // creator_user (New page) / modify_user (Created page): each distinct editor
+    // {name, email} appended once, in first-edit order. Atomic, so parallel saves
+    // can't drop or duplicate an entry. Never throws.
+    static async recordArticleEditor(id: string, column: 'creator_user' | 'modify_user', user: any): Promise<void> {
+        const email = String(user?.email ?? '').trim().toLowerCase();
+        if (!email) return;
+        const name = String(user?.name ?? '').trim();
+        const col = Prisma.raw(column);
+        try {
+            await prisma.$executeRaw`
+                UPDATE extraction_results_flat
+                SET ${col} = COALESCE(${col}, '[]'::jsonb)
+                    || jsonb_build_array(jsonb_build_object('name', ${name}::text, 'email', ${email}::text))
+                WHERE id = ${id}
+                  AND NOT COALESCE(${col}, '[]'::jsonb) @> jsonb_build_array(jsonb_build_object('email', ${email}::text))
+            `;
+        } catch (err: any) {
+            console.error(`[${column}] record failed:`, err?.message);
+        }
+    }
+
     static async modifyItem(req: Request, res: Response) {
         ApproverController.itemsCache.clear();
         ApproverController.countCache.clear();
@@ -2846,8 +2893,11 @@ export class ApproverController {
             // Created-article identity/price fields are LOCKED — they are set at
             // creation time and must never change on modify (neither in SAP nor in
             // the local DB). Silently ignore any attempt to edit them.
+            // Exception: ADMIN users may change the vendor code (sent to SAP as
+            // EXTWG); the vendor name then follows from the vendor master.
+            const isAdmin = String(req.user?.role || '') === 'ADMIN';
             const MODIFY_LOCKED_FIELDS = new Set<string>([
-                'vendorCode',    // VENDOR
+                ...(isAdmin ? [] : ['vendorCode', 'vendorName']), // EXTWG — admin only
                 'mrp',           // MRP
                 'rate',          // cost / PURCH_PRICE
                 'colour',        // colour
@@ -2880,6 +2930,10 @@ export class ApproverController {
                 }
                 data[field] = value;
             }
+
+            // Vendor name always follows the vendor code (from the vendor master) —
+            // never accepted on its own.
+            delete data.vendorName;
 
             if (Object.keys(data).length === 0) {
                 return res.status(400).json({ error: 'No valid fields to modify' });
@@ -2929,6 +2983,28 @@ export class ApproverController {
                 return res.status(400).json({ error: 'This article has no SAP article number yet, so it cannot be modified in SAP.' });
             }
 
+            // Admin vendor change: the code must exist in the vendor master; its name
+            // is saved with it. Unchanged codes are dropped from the update.
+            let vendorCodeChanged = false;
+            if (data.vendorCode !== undefined) {
+                if (data.vendorCode === normalizeVendorCode((existingItem as any).vendorCode)) {
+                    delete data.vendorCode;
+                } else {
+                    const vendor = await prisma.masterVendorDetail.findUnique({
+                        where: { vendorCode: data.vendorCode },
+                        select: { vendorName: true },
+                    });
+                    if (!vendor?.vendorName) {
+                        return res.status(400).json({ error: `Vendor code ${data.vendorCode} was not found in the vendor master.` });
+                    }
+                    data.vendorName = vendor.vendorName;
+                    vendorCodeChanged = true;
+                }
+                if (Object.keys(data).length === 0) {
+                    return res.status(400).json({ error: 'No valid fields to modify' });
+                }
+            }
+
             // ── National Grid validation: reject if any submitted attribute value is not in grid ──
             {
                 // Map camelCase data keys → SAP attribute names for grid lookup
@@ -2956,6 +3032,8 @@ export class ApproverController {
                 for (const k of ['HSN_CODE', 'SUB_DIV', 'MC_CD', 'SEASON', 'PRICE_BAND_CATEGORY', 'PURCH_PRICE', 'NET_WEIGHT', 'VENDOR', 'MRP', 'DSG_NO', 'ARTICLE_DES1']) {
                     delete (sapChanges as any)[k];
                 }
+                // Vendor code on an existing article is the EXTWG attribute in SAP.
+                if (vendorCodeChanged) sapChanges.EXTWG = String(data.vendorCode);
 
                 // ── Call SAP FIRST. Only persist locally on success. ──
                 const result = await patchArticleAttributes(matnr, sapChanges);
@@ -2975,52 +3053,30 @@ export class ApproverController {
                 excludeFields: await getExcludedDescriptionFields(majCatForDescCheck) as any,
             });
 
-            // ── Audit log: compute per-field diff and store in modify_logs ──
-            const modGroupId = randomUUID();
-            const auditEntries: {
-                modificationGroupId: string;
-                articleNumber: string;
-                labelName: string;
-                oldValue: string | null;
-                newValue: string | null;
-                modifiedByName: string;
-                modifiedByEmail: string;
-                sapStatus: string;
-            }[] = [];
-
-            for (const [field, newVal] of Object.entries(data)) {
-                // articleDescription is auto-rebuilt from other fields — not a user label change
-                if (field === 'articleDescription') continue;
-                const oldVal = (existingItem as any)[field];
-                // V. ADD JSON columns: log the JSON text (DbNull → null)
-                const asText = (v: unknown) =>
-                    v == null || v === Prisma.DbNull ? null : VADD_JSON_FIELDS.has(field) ? JSON.stringify(v) : String(v);
-                const oldStr = asText(oldVal);
-                const newStr = asText(newVal);
-                if (oldStr === newStr) continue;
-                auditEntries.push({
-                    modificationGroupId: modGroupId,
-                    articleNumber: matnr,
-                    labelName: FLAT_TO_SAP_KEY[field] ?? field,
-                    oldValue: oldStr,
-                    newValue: newStr,
-                    modifiedByName: req.user?.name ?? 'Unknown',
-                    modifiedByEmail: req.user?.email ?? 'unknown@unknown.com',
-                    sapStatus: 'SUCCESS', // correct for both paths: skipSap=true means frontend already confirmed SAP success
-                });
-            }
-
-            if (auditEntries.length > 0) {
-                // Fire-and-forget: audit failure must never block a successful SAP+DB modify
-                void prisma.modifyLog.createMany({ data: auditEntries }).catch((err: any) =>
-                    console.error('[modifyLog] audit insert failed:', err?.message),
-                );
-            }
+            // Snapshot the full row before the update — history compares every changed
+            // field (costs too, not just the SAP-mapped ones selected above).
+            const oldRowSnap = await prisma.$queryRawUnsafe<any[]>(
+                `SELECT * FROM extraction_results_flat WHERE id = $1`, id
+            );
+            const oldRow: Record<string, any> = oldRowSnap[0] ?? {};
+            // V. ADD JSON columns compare as JSON text (DbNull → null)
+            const asText = (field: string, v: unknown) =>
+                v == null || v === Prisma.DbNull ? null : VADD_JSON_FIELDS.has(field) ? JSON.stringify(v) : String(v);
+            const valueChanged = Object.entries(data).some(
+                ([field, newVal]) => field !== 'articleDescription' && asText(field, oldRow[camelToSnake(field)]) !== asText(field, newVal),
+            );
 
             const updated = await prisma.extractionResultFlat.update({ where: { id }, data });
 
-            // Mirror to 360article.article_360_flat (fire-and-forget)
-            void mirror360FlatUpdate(id, data).catch((err: any) => console.error('[mirror360] modify update failed:', err?.message));
+            // Change history: same history_fg_article table as the New page (the
+            // History button). modify_logs is no longer written.
+            void ApproverController.recordFgArticleHistory(id, req.user, data, oldRow)
+                .catch((err: any) => console.error('[fgArticleHistory] modify record failed:', err?.message));
+
+            // modify_user: editors on the Created page (only when a value really changed)
+            if (valueChanged) {
+                void ApproverController.recordArticleEditor(id, 'modify_user', req.user);
+            }
 
             // Keep variants in sync for generic articles (fire-and-forget)
             if ((existingItem as any).isGeneric) {
@@ -3094,6 +3150,7 @@ export class ApproverController {
                 season: parent.season,
                 year: parent.year,
                 imageUrl: parent.imageUrl,
+                sourceImageUrl: parent.sourceImageUrl ?? parent.imageUrl,
                 isGeneric: true,
                 isOldArticle: false,
                 approvalStatus: 'PENDING',
@@ -3213,13 +3270,13 @@ export class ApproverController {
             const genericsToVariant = await prisma.extractionResultFlat.findMany({
                 // Set parents and set parts both get colour × size variants (each from its own category's sizes).
                 where: { id: { in: ids }, isGeneric: true },
-                select: { id: true, colour: true, majorCategory: true, articleNumber: true, imageName: true },
+                select: { id: true, colour: true, majorCategory: true, articleNumber: true },
             });
             for (const g of genericsToVariant) {
                 if (!g.colour || !g.colour.trim()) continue; // no colour → approve generic as-is
                 const sizes = await getSizesForMajCat(g.majorCategory || '');
                 if (sizes.length === 0) {
-                    const label = g.articleNumber || g.imageName || g.id;
+                    const label = g.articleNumber || g.id;
                     return res.status(422).json({
                         error: 'NO_SIZES_FOR_CATEGORY',
                         detail: `No sizes are configured for "${g.majorCategory ?? ''}" (article ${label}). Add them in the Size Master before submitting.`,
@@ -3360,10 +3417,11 @@ export class ApproverController {
                     roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
                     preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
                     cuttingBgtPrVal: true, cuttingActPrVal: true, cuttingVendorPrVal: true, cuttingFinalPrVal: true,
+                    aiCmpCostCutting: true, aiCmpCostStitching: true, aiCmpCostIroning: true, aiCmpCostFinishing: true,
                     stitchingBgtPrVal: true, stitchingActPrVal: true, stitchingVendorPrVal: true, stitchingFinalPrVal: true,
                     ironingBgtPrVal: true, ironingActPrVal: true, ironingVendorPrVal: true, ironingFinalPrVal: true,
-                    finishingBgtPrVal: true, finishingActPrVal: true, finishingVendorPrVal: true, finishingFinalPrVal: true,
-                    bTrimType: true,
+                    finishingBgtPrVal: true, finishingActPrVal: true, finishingVendorPrVal: true, finishingFinalPrVal: true, totalBgtPrVal: true, totalActPrVal: true, totalVendorPrVal: true, totalFinalPrVal: true,
+                    bTrimType: true, bTrimTotalAutoBgt: true, bTrimTotalRoughV2: true, bTrimTotalVdrCost: true, bTrimTotalFinalCost: true,
                     mBtnAutoBgt: true, mBtnRoughV2: true, mBtnVdrCost: true, mBtnFinalCost: true,
                     dcAutoBgt: true, dcRoughV2: true, dcVdrCost: true, dcFinalCost: true,
                     zipAutoBgt: true, zipRoughV2: true, zipVdrCost: true, zipFinalCost: true,
@@ -3393,11 +3451,12 @@ export class ApproverController {
                     printAutoBgt: true, printRoughV2: true, printVendorCost: true, printFinalCost: true,
                     embAutoBgt: true, embRoughV2: true, embVendorCost: true, embFinalCost: true,
                     washingAutoBgt: true, washingRoughV2: true, washingVendorCost: true, washingFinalCost: true,
+                    vaddTotalAutoBgt: true, vaddTotalRoughV2: true, vaddTotalVendorCost: true, vaddTotalFinalCost: true,
                     pkgCostType: true, boppNetPrice: true, ctnNetPrice: true, barcodeNetPrice: true,
                     kimbleNetPrice: true, taftaNetPrice: true, threadNetPrice: true,
                     mcCode: true, hsnTaxCode: true, articleDescription: true, fashionGrid: true,
                     season: true, year: true, articleType: true, referenceArticleNumber: true,
-                    referenceArticleDescription: true, imageUrl: true, imageName: true,
+                    referenceArticleDescription: true, imageUrl: true,
                     sapArticleId: true, isGeneric: true, genericArticleId: true,
                     colour: true, variantSize: true, variantColor: true,
                     attrArticleNums: true, source: true, createdAt: true,
@@ -3465,19 +3524,6 @@ export class ApproverController {
                 if (!r.success || !r.sapArticleNumber || approvedItemById.get(r.id)?.comboRole !== 'CHILD') continue;
                 await linkSetPart(r.id).catch((err: any) => console.error(`[SetLink] ${r.id}:`, err?.message));
             }
-
-            // Mirror approval + SAP sync outcome to 360article.article_360_flat
-            void Promise.all(finalizedSyncResults.map((syncResult: any) => {
-                const approvedItem = approvedItemById.get(syncResult.id);
-                return mirror360FlatUpdate(syncResult.id, {
-                    approvalStatus:  'APPROVED',
-                    sapSyncStatus:   syncResult.success ? 'SYNCED' : 'FAILED',
-                    sapSyncMessage:  syncResult.message ?? null,
-                    sapArticleId:    syncResult.sapArticleNumber ?? null,
-                    articleNumber:   syncResult.sapArticleNumber ?? approvedItem?.articleNumber ?? null,
-                    imageUrl:        syncResult.approvedImageUrl ?? approvedItem?.imageUrl ?? null,
-                });
-            })).catch((err: any) => console.error('[mirror360] approval mirror failed:', err?.message));
 
             // Fetch all variants for successfully synced generics before Phase 2,
             // so we can upload their images immediately alongside the generic.
@@ -3900,11 +3946,6 @@ export class ApproverController {
                 }
             });
 
-            // Mirror rejection to 360article (fire-and-forget)
-            void Promise.all(ids.map((rid: string) =>
-                mirror360FlatUpdate(rid, { approvalStatus: 'REJECTED', sapSyncStatus: 'NOT_SYNCED' })
-            )).catch((err: any) => console.error('[mirror360] rejection mirror failed:', err?.message));
-
             // Auto-reject all variants of rejected generic articles
             const rejectedIds = ids;
             const variantsToReject = await prisma.fgVariantArticleData.findMany({
@@ -3922,11 +3963,6 @@ export class ApproverController {
                 },
             });
 
-            // Mirror variant rejections to 360article (fire-and-forget)
-            void Promise.all(variantsToReject.map(v =>
-                mirror360FlatUpdate(v.id, { approvalStatus: 'REJECTED', sapSyncStatus: 'NOT_SYNCED' })
-            )).catch((err: any) => console.error('[mirror360] variant rejection mirror failed:', err?.message));
-
             return res.json({
                 message: 'Items rejected',
                 count: result.count
@@ -3935,6 +3971,66 @@ export class ApproverController {
             console.error('Error rejecting items:', error);
             return res.status(500).json({ error: 'Failed to reject items' });
         }
+    }
+
+    // ADMIN only: undo a reject — the article (and the variants rejected with it) go back to PENDING.
+    static async revertRejectedItem(req: Request, res: Response) {
+        const { id } = req.params;
+        const existing = await prisma.extractionResultFlat.findUnique({
+            where: { id },
+            select: { approvalStatus: true },
+        });
+        if (!existing) return res.status(404).json({ error: 'Article not found' });
+        if (existing.approvalStatus !== 'REJECTED') {
+            return res.status(400).json({ error: 'Only rejected articles can be reverted' });
+        }
+
+        await ApproverController.revertToPending([id], req.user);
+        return res.json({ success: true });
+    }
+
+    // ADMIN only, Rejected page "Revert selected": ids that are not REJECTED are skipped.
+    static async revertRejectedItems(req: Request, res: Response) {
+        const { ids } = req.body as { ids?: string[] };
+        if (!Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({ error: 'No items selected' });
+        }
+        const rejected = await prisma.extractionResultFlat.findMany({
+            where: { id: { in: ids }, approvalStatus: 'REJECTED' },
+            select: { id: true },
+        });
+        const count = await ApproverController.revertToPending(rejected.map((r) => r.id), req.user);
+        return res.json({ success: true, count, skipped: ids.length - count });
+    }
+
+    // REJECTED → PENDING for these articles and the variants rejected with them; logged in history.
+    private static async revertToPending(ids: string[], user: any): Promise<number> {
+        if (ids.length === 0) return 0;
+        ApproverController.itemsCache.clear();
+        ApproverController.countCache.clear();
+        const revertData = {
+            approvalStatus: 'PENDING' as const,
+            sapSyncStatus: SapSyncStatus.NOT_SYNCED,
+            sapSyncMessage: null,
+            approvedBy: null,
+            approvedAt: null,
+        };
+        const result = await prisma.extractionResultFlat.updateMany({
+            where: { id: { in: ids }, approvalStatus: 'REJECTED' },
+            data: revertData,
+        });
+        await prisma.fgVariantArticleData.updateMany({
+            where: { genericArticleId: { in: ids }, approvalStatus: 'REJECTED' },
+            data: revertData,
+        });
+        void (async () => {
+            for (const id of ids) {
+                await ApproverController.recordFgArticleHistory(
+                    id, user, { approvalStatus: 'PENDING' }, { approval_status: 'REJECTED' },
+                );
+            }
+        })().catch((err) => console.error('[revertToPending] history write failed:', err));
+        return result.count;
     }
 
     // Push generic's colour to all variants that have no variantColor set
@@ -4212,36 +4308,9 @@ export class ApproverController {
             const source = await prisma.extractionResultFlat.findUnique({ where: { id } });
             if (!source) return res.status(404).json({ error: 'Article not found' });
 
-            // Fetch original job for metadata
-            const originalJob = source.jobId
-                ? await prisma.extractionJob.findUnique({
-                    where: { id: source.jobId },
-                    select: { categoryId: true, userId: true, aiModel: true },
-                })
-                : null;
-            if (!originalJob) return res.status(404).json({ error: 'Source job not found' });
-
-            // Create a new ExtractionJob for the duplicate
-            const newJob = await prisma.extractionJob.create({
-                data: {
-                    userId: originalJob.userId,
-                    categoryId: originalJob.categoryId,
-                    imageUrl: source.imageUrl || '',
-                    status: 'COMPLETED',
-                    aiModel: originalJob.aiModel,
-                    processingTimeMs: source.processingTimeMs,
-                    tokensUsed: source.totalTokens,
-                    inputTokens: source.inputTokens,
-                    outputTokens: source.outputTokens,
-                    apiCost: source.apiCost,
-                    totalAttributes: source.totalAttributes,
-                    extractedCount: source.extractedCount,
-                    avgConfidence: source.avgConfidence,
-                    completedAt: new Date(),
-                    designNumber: source.articleNumber,
-                },
-            });
-
+            // No extraction job for the copy: it was not produced by an AI run, so job_id stays
+            // NULL (like SRM imports) and the AI cost/token fields are cleared — a fake job
+            // used to count the original's Gemini cost again in the stats.
             // Strip identity / status fields — copy everything else
             const {
                 id: _id,
@@ -4265,13 +4334,34 @@ export class ApproverController {
             const { randomUUID } = await import('crypto');
             const newId = randomUUID();
 
+            // Created-page KIDS duplicate: the source's image_url is the watermarked approved
+            // copy, so start from the clean source_image_url — the copy is watermarked once on
+            // its own approval. Falls back to image_url when no clean copy is recorded.
+            const fromCreatedKids = source.approvalStatus === 'APPROVED'
+                && (source.division ?? '').toUpperCase() === 'KIDS';
+            const copyImageUrl = fromCreatedKids
+                ? (source.sourceImageUrl || source.imageUrl)
+                : source.imageUrl;
+
             const newRecord = await prisma.extractionResultFlat.create({
                 data: {
                     ...rest,
+                    imageUrl: copyImageUrl,
+                    sourceImageUrl: fromCreatedKids ? (source.sourceImageUrl || null) : (rest.sourceImageUrl ?? source.imageUrl),
                     vaddPrintJson: rest.vaddPrintJson ?? Prisma.DbNull,
                     vaddEmpJson: rest.vaddEmpJson ?? Prisma.DbNull,
+                    creatorUser: Prisma.DbNull, modifyUser: Prisma.DbNull, // a copy starts with no editors
                     id: newId,
-                    jobId: newJob.id,
+                    jobId: null,
+                    inputTokens: null,
+                    outputTokens: null,
+                    totalTokens: null,
+                    apiCost: null,
+                    processingTimeMs: null,
+                    aiModel: null,
+                    avgConfidence: null,
+                    totalAttributes: null,
+                    extractedCount: null,
                     imageUncPath: null,
                     approvalStatus: 'PENDING',
                     approvedBy: null,
@@ -4283,6 +4373,18 @@ export class ApproverController {
                     fabricArticleNumber: null,
                     fabricArticleDescription: null,
                     designNumber: designNumber.trim(),
+                    // Created-page source (already in SAP): the copy is a brand-new article,
+                    // so drop everything tied to the original's SAP life — only attributes carry over.
+                    ...(source.approvalStatus === 'APPROVED' ? {
+                        pdStatus: 'PENDING' as const,
+                        bodyArticle: null,
+                        attrArticleNums: null,
+                        oldImageUrl: null,
+                        isOldArticle: false,
+                        setLinkStatus: null,
+                        srmUniqueId: null,
+                        srmOriginalDesignNumber: null,
+                    } : {}),
                     // A manual duplicate has no pending AI extraction — mark it COMPLETED
                     // so it isn't hidden by the 30-minute SRM extraction gate (which only
                     // holds back source=SRM rows still in SRM_IMPORT) and isn't re-processed
@@ -4415,23 +4517,29 @@ export class ApproverController {
         }
     }
 
-    // Cached BOM grid map (loaded once from disk)
-    private static bomGridMap: Record<string, Record<string, Record<string, string>>> | null = null;
-
-    private static loadBomGridMap() {
-        if (ApproverController.bomGridMap) return ApproverController.bomGridMap;
-        try {
-            const filePath = path.resolve(__dirname, '../data/majCatGridMap.json');
-            ApproverController.bomGridMap = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-        } catch (err) {
-            console.error('[BomGrid] Failed to load majCatGridMap.json:', err);
-            ApproverController.bomGridMap = {};
-        }
-        return ApproverController.bomGridMap!;
-    }
-
     // GET /api/approver/sizes-for-majcat/:majCat
     // Returns active sizes array for the given major category (from maj_cat_sizes table)
+    // FAB card: M_FAB_MAIN_MVGR_1 is filled from the chosen M_FAB_MAIN_MVGR_2 via
+    // m_fabric_main_mvgr_mapping. data = null when the MVGR-2 has no mapping row.
+    static async getFabricMainMvgr1(req: Request, res: Response) {
+        try {
+            const mvgr2 = String(req.params.mvgr2 ?? '').trim().toUpperCase();
+            if (!mvgr2) return res.status(400).json({ error: 'mvgr2 is required' });
+            const rows = await prisma.$queryRaw<{ mvgr1: string; mvgr1_full_form: string | null; mvgr2_full_form: string | null }[]>`
+                SELECT mvgr1, mvgr1_full_form, mvgr2_full_form
+                FROM m_fabric_main_mvgr_mapping
+                WHERE UPPER(TRIM(mvgr2)) = ${mvgr2}
+                LIMIT 1
+            `;
+            const r = rows[0];
+            return res.json({
+                data: r ? { mvgr1: r.mvgr1, mvgr1FullForm: r.mvgr1_full_form, mvgr2, mvgr2FullForm: r.mvgr2_full_form } : null,
+            });
+        } catch (err: any) {
+            return res.status(500).json({ error: err.message });
+        }
+    }
+
     static async getSizesForMajCat(req: Request, res: Response) {
         const { majCat } = req.params;
         const sizes = await getSizesForMajCat(majCat || '');
@@ -4461,20 +4569,6 @@ export class ApproverController {
         } catch (error) {
             console.error('Error fetching color master:', error);
             return res.status(500).json({ error: 'Failed to fetch colors' });
-        }
-    }
-
-    // GET /api/approver/bom-art-numbers/:majCat
-    // Returns { [excelAttrName]: { [mvgrValue]: sapCd } } for the given major category
-    static async getBomArtNumbers(req: Request, res: Response) {
-        try {
-            const { majCat } = req.params;
-            const map = ApproverController.loadBomGridMap();
-            const catData = map[majCat] || {};
-            return res.json({ success: true, data: catData });
-        } catch (err: any) {
-            console.error('[BomGrid] getBomArtNumbers error:', err);
-            return res.status(500).json({ success: false, error: 'Failed to load BOM art numbers' });
         }
     }
 
@@ -4649,26 +4743,28 @@ export class ApproverController {
     }
 
     /**
-     * GET /api/approver/vendor-search?q=<query>
-     * Returns up to 15 vendor records matching the typed name (case-insensitive).
+     * GET /api/approver/vendor-search?q=<query>[&by=code]
+     * Returns up to 15 vendor records matching the typed name (case-insensitive),
+     * or with by=code, vendors whose code starts with the typed digits.
      * Requires at least 2 characters to avoid returning the full 8k list.
      */
     static async vendorSearch(req: Request, res: Response) {
         const q = String(req.query.q ?? '').trim();
+        const byCode = req.query.by === 'code';
         if (q.length < 2) {
             return res.json({ success: true, data: [] });
         }
 
         const results = await prisma.masterVendorDetail.findMany({
-            where: {
-                vendorName: { contains: q, mode: 'insensitive' },
-            },
+            where: byCode
+                ? { vendorCode: { startsWith: q.replace(/^0+/, '') || q } }
+                : { vendorName: { contains: q, mode: 'insensitive' } },
             select: {
                 vendorCode: true,
                 vendorName: true,
                 vendorCity: true,
             },
-            orderBy: { vendorName: 'asc' },
+            orderBy: byCode ? { vendorCode: 'asc' } : { vendorName: 'asc' },
             take: 15,
         });
 
@@ -4773,11 +4869,9 @@ export class ApproverController {
             ORDER BY div, sub_div, maj_cat_nm
         `;
 
-        // Scope: GM_APPROVER / GM_CREATOR with assigned sub-divisions only see their slice
+        // Scope: GM users (GM roles, or approvers with the GM Article type) only see their sub-divisions
         const reqUser = req.user as any;
-        const isGMScoped =
-            (reqUser?.role === 'GM_APPROVER' || reqUser?.role === 'GM_CREATOR') &&
-            reqUser?.subDivision;
+        const isGMScoped = ApproverController.isGmSubDivScoped(reqUser) && reqUser?.subDivision;
         const allowedSubDivs: Set<string> | null = isGMScoped
             ? new Set(
                 String(reqUser.subDivision)
@@ -4920,8 +5014,9 @@ export class ApproverController {
         vendorName: true, vendorCode: true, designNumber: true, pptNumber: true,
         approvalStatus: true, approvedAt: true, approvedBy: true,
         sapSyncStatus: true, sapSyncMessage: true,
-        imageUrl: true, source: true, userName: true,
-        rate: true, mrp: true, segment: true, articleFashionType: true, flatId: true,
+        imageUrl: true, backImageUrl: true, source: true, userName: true,
+        rate: true, mrp: true, roughV2: true, vdrCost: true, finalCost: true,
+        segment: true, articleFashionType: true, flatId: true,
         createdAt: true, updatedAt: true,
         // GM attribute columns
         gmAgeGrade: true, gmApplicator: true, gmBaseType: true, gmBatteryType: true,
@@ -4953,8 +5048,8 @@ export class ApproverController {
         return {
             id:                      r.id,
             isGeneric:               true,
-            imageName:               null,
             imageUrl:                r.imageUrl ?? null,
+            backImageUrl:            r.backImageUrl ?? null,
             articleNumber:           r.gmArticleNumber ?? null,
             fabricArticleNumber:     r.gmArticleNumber ?? null,
             fabricArticleDescription: r.gmArticleDescription ?? null,
@@ -4978,6 +5073,9 @@ export class ApproverController {
             source:                  r.source ?? null,
             mrp:                     r.mrp != null ? Number(r.mrp) : null,
             rate:                    r.rate != null ? Number(r.rate) : null,
+            roughV2:                 r.roughV2 != null ? Number(r.roughV2) : null,
+            vdrCost:                 r.vdrCost != null ? Number(r.vdrCost) : null,
+            finalCost:               r.finalCost != null ? Number(r.finalCost) : null,
             segment:                 r.segment ?? null,
             articleFashionType:      r.articleFashionType ?? null,
             flatId:                  r.flatId ?? null,
@@ -5034,10 +5132,7 @@ export class ApproverController {
 
         // Enforce GM user scope: restrict to their assigned sub-divisions
         const reqUser = req.user as any;
-        if (
-            (reqUser?.role === 'GM_APPROVER' || reqUser?.role === 'GM_CREATOR') &&
-            reqUser?.subDivision
-        ) {
+        if (ApproverController.isGmSubDivScoped(reqUser) && reqUser?.subDivision) {
             const allowedSubDivs = String(reqUser.subDivision)
                 .split(',')
                 .map((s: string) => s.trim())
@@ -5256,6 +5351,7 @@ export class ApproverController {
         mcDescription: 'mcDescription', vendorName: 'vendorName', vendorCode: 'vendorCode',
         designNumber: 'designNumber', pptNumber: 'pptNumber',
         mrp: 'mrp', rate: 'rate', segment: 'segment', articleFashionType: 'articleFashionType',
+        roughV2: 'roughV2', vdrCost: 'vdrCost', finalCost: 'finalCost',
         imageUrl: 'imageUrl', source: 'source', userName: 'userName',
         gmArticleNumber: 'gmArticleNumber', gmArticleDescription: 'gmArticleDescription',
         fabricArticleDescription: 'gmArticleDescription',  // frontend field alias
@@ -5326,7 +5422,10 @@ export class ApproverController {
         const data: Record<string, unknown> = {};
         for (const [clientKey, value] of Object.entries(body)) {
             const dbKey = ApproverController.GM_ARTICLE_UPDATE_FIELDS[clientKey];
-            if (dbKey) data[dbKey] = value === undefined ? null : value;
+            if (!dbKey) continue;
+            // Decimal columns: an empty string can't be stored, so it clears the value.
+            const isDecimal = ['rate', 'mrp', 'roughV2', 'vdrCost', 'finalCost'].includes(dbKey);
+            data[dbKey] = value === undefined || (isDecimal && value === '') ? null : value;
         }
         if (Object.keys(data).length === 0) {
             return res.json(ApproverController.gmArticleDataRowToItem(existing));
@@ -5827,7 +5926,6 @@ export class ApproverController {
 
         const data = rows.map((r) => ({
             id:                       r.id,
-            imageName:                null,
             imageUrl:                 r.imageUrl ?? null,
             articleNumber:            r.articleNumber ?? null,
             division:                 r.division ?? null,
@@ -5886,9 +5984,9 @@ export class ApproverController {
             cuttingBgtPrVal: null, cuttingActPrVal: null, cuttingVendorPrVal: null, cuttingFinalPrVal: null,
             stitchingBgtPrVal: null, stitchingActPrVal: null, stitchingVendorPrVal: null, stitchingFinalPrVal: null,
             ironingBgtPrVal: null, ironingActPrVal: null, ironingVendorPrVal: null, ironingFinalPrVal: null,
-            finishingBgtPrVal: null, finishingActPrVal: null, finishingVendorPrVal: null, finishingFinalPrVal: null,
+            finishingBgtPrVal: null, finishingActPrVal: null, finishingVendorPrVal: null, finishingFinalPrVal: null, totalBgtPrVal: null, totalActPrVal: null, totalVendorPrVal: null, totalFinalPrVal: null,
             bTrimType: null,
-            mBtnAutoBgt: null, mBtnRoughV2: null, mBtnVdrCost: null, mBtnFinalCost: null,
+            mBtnAutoBgt: null, mBtnRoughV2: null, mBtnVdrCost: null, mBtnFinalCost: null, bTrimTotalAutoBgt: null, bTrimTotalRoughV2: null, bTrimTotalVdrCost: null, bTrimTotalFinalCost: null,
             dcAutoBgt: null, dcRoughV2: null, dcVdrCost: null, dcFinalCost: null,
             zipAutoBgt: null, zipRoughV2: null, zipVdrCost: null, zipFinalCost: null,
             patchAutoBgt: null, patchRoughV2: null, patchVdrCost: null, patchFinalCost: null,
@@ -5917,6 +6015,7 @@ export class ApproverController {
             printAutoBgt: null, printRoughV2: null, printVendorCost: null, printFinalCost: null,
             embAutoBgt: null, embRoughV2: null, embVendorCost: null, embFinalCost: null,
             washingAutoBgt: null, washingRoughV2: null, washingVendorCost: null, washingFinalCost: null,
+            vaddTotalAutoBgt: null, vaddTotalRoughV2: null, vaddTotalVendorCost: null, vaddTotalFinalCost: null,
             pkgCostType: null, boppNetPrice: null, ctnNetPrice: null, barcodeNetPrice: null,
             kimbleNetPrice: null, taftaNetPrice: null, threadNetPrice: null,
             pptNumber: null, source: null, rate: null, mrp: null,
@@ -5980,7 +6079,6 @@ export class ApproverController {
     private static bodyRowToApproverItem(r: any) {
         return {
             id: r.id,
-            imageName: null,
             imageUrl: r.imageUrl ?? null,
             articleNumber: r.articleNumber ?? null,
             division: r.division ?? null,
@@ -6158,7 +6256,7 @@ export class ApproverController {
             return res.status(400).json({ error: 'ids array is required' });
         }
         const { submitFabricArticles } = await import('../services/zmmFabArtCreationService');
-        const result = await submitFabricArticles(ids);
+        const result = await submitFabricArticles(ids, req.user?.id);
         const allOk = result.results.every(r => r.success);
         return res.status(allOk ? 200 : 207).json(result);
     };
@@ -6166,6 +6264,69 @@ export class ApproverController {
     // ─── Fabric Article Data list (type=FG) ──────────────────────────────────────
     // pathType=new  → all non-APPROVED articles
     // pathType=created → approval_status=APPROVED (SAP-created articles)
+
+    /** Roles whose sub-divisions limit what they see when they carry a GM / Fabric article type. */
+    private static readonly ARTICLE_TYPE_SCOPED_ROLES = new Set(['APPROVER', 'SUB_DIVISION_HEAD', 'CREATOR']);
+
+    /** GM roles, or a scoped role that has the GM Article type, see only their GM sub-divisions. */
+    private static isGmSubDivScoped(user: any): boolean {
+        const role = String(user?.role ?? '');
+        if (role === 'GM_APPROVER' || role === 'GM_CREATOR') return true;
+        return ApproverController.ARTICLE_TYPE_SCOPED_ROLES.has(role) && (user?.articleTypes ?? []).includes('GM');
+    }
+
+    private static fabricMasterCache: { at: number; divBySubDiv: Map<string, string> } | null = null;
+
+    /** sub_div (upper-case) → div from fabric_article_master, cached for 5 minutes. */
+    private static async getFabricMasterDivBySubDiv(): Promise<Map<string, string>> {
+        const cached = ApproverController.fabricMasterCache;
+        if (cached && Date.now() - cached.at < 5 * 60 * 1000) return cached.divBySubDiv;
+        const rows = await prisma.$queryRaw<{ sub_div: string; div: string }[]>`
+            SELECT DISTINCT sub_div, div FROM fabric_article_master
+            WHERE sub_div IS NOT NULL AND sub_div <> '' AND div IS NOT NULL AND div <> ''
+        `;
+        const divBySubDiv = new Map(rows.map((r) => [r.sub_div.trim().toUpperCase(), r.div.trim()]));
+        ApproverController.fabricMasterCache = { at: Date.now(), divBySubDiv };
+        return divBySubDiv;
+    }
+
+    /**
+     * Fabric Article scope for a scoped role that has the Fabric Article type: only the
+     * divisions (Denim/Knits/Woven) of their picked fabric sub-divisions, and within them
+     * their sub-divisions. Fabric rows store division as "K" / "Knits" / "KNITS", so the
+     * division matches on its first letter; sub-division codes that aren't in the fabric
+     * master (SRM's K_Lower, W_Upper…) and empty ones pass, like FG lets empty ones through.
+     * Users with no article types, or without Fabric, are left as today.
+     */
+    private static async applyFabricUserScope(where: any, user: any): Promise<void> {
+        const role = String(user?.role ?? '');
+        if (!ApproverController.ARTICLE_TYPE_SCOPED_ROLES.has(role)) return;
+        if (!(user?.articleTypes ?? []).includes('FABRIC')) return;
+        const divBySubDiv = await ApproverController.getFabricMasterDivBySubDiv();
+        const userCodes = String(user?.subDivision ?? '')
+            .split(',')
+            .map((s: string) => s.trim().toUpperCase())
+            .filter((c: string) => divBySubDiv.has(c));
+        const letters = Array.from(new Set(userCodes.map((c: string) => divBySubDiv.get(c)!.charAt(0).toUpperCase())));
+        // Fabric picked but no fabric sub-division → nothing to show.
+        if (userCodes.length === 0) {
+            where.AND = [...(Array.isArray(where.AND) ? where.AND : []), { id: { in: [] } }];
+            return;
+        }
+        const masterCodes = Array.from(divBySubDiv.keys());
+        where.AND = [
+            ...(Array.isArray(where.AND) ? where.AND : []),
+            { OR: letters.map((l) => ({ division: { startsWith: l, mode: 'insensitive' } })) },
+            {
+                OR: [
+                    { subDivision: { in: userCodes, mode: 'insensitive' } },
+                    { subDivision: null },
+                    { subDivision: '' },
+                    { NOT: { subDivision: { in: masterCodes, mode: 'insensitive' } } },
+                ],
+            },
+        ];
+    }
 
     private static buildFabricArticleDataWhere(query: Record<string, string>) {
         const { pathType = 'new', status, division, subDivision, majorCategory, search, startDate, endDate, source } = query;
@@ -6230,7 +6391,7 @@ export class ApproverController {
         vendorName: true, vendorCode: true,
         approvalStatus: true, approvedAt: true,
         sapSyncStatus: true, sapSyncMessage: true,
-        imageUrl: true, userName: true,
+        imageUrl: true, backImageUrl: true, userName: true,
         createdAt: true, updatedAt: true,
         mFabDiv: true, mYarn: true, mFabMainMvgr1: true, mFabMainMvgr2: true,
         mConstruction: true, mOunz: true, mWidth: true, mWeave02: true,
@@ -6248,6 +6409,7 @@ export class ApproverController {
         const pathType = query.pathType || 'new';
 
         const { where } = ApproverController.buildFabricArticleDataWhere(query);
+        await ApproverController.applyFabricUserScope(where, req.user);
 
         const orderBy = pathType === 'created'
             ? ({ approvedAt: { sort: 'desc', nulls: 'last' } } as const)
@@ -6272,6 +6434,7 @@ export class ApproverController {
         const query = req.query as Record<string, string>;
         const pathType = query.pathType || 'new';
         const { where } = ApproverController.buildFabricArticleDataWhere(query);
+        await ApproverController.applyFabricUserScope(where, req.user);
 
         const orderBy = pathType === 'created'
             ? ({ approvedAt: { sort: 'desc', nulls: 'last' } } as const)
@@ -6498,8 +6661,8 @@ export class ApproverController {
         return {
             id:                       r.id,
             isGeneric:                r.source === 'SRM',
-            imageName:                null,
             imageUrl:                 r.imageUrl ?? null,
+            backImageUrl:             r.backImageUrl ?? null,
             articleNumber:            r.fabricArticleNumber ?? null,
             fabricArticleNumber:      r.fabricArticleNumber ?? null,
             fabricArticleDescription: r.fabricArticleDescription ?? null,
@@ -6742,30 +6905,33 @@ export class ApproverController {
         for (const item of items) {
             const rows = existingRowsByFlatId.get(item.id) ?? [];
 
-            // a) Block if the new desc is already APPROVED for this flatId — same message
-            //    as Check 1 so the user knows which body article number to reuse.
+            // a) Block if the new desc is already APPROVED with a body article number for this
+            //    flatId — same message as Check 1 so the user knows which number to reuse.
+            //    An APPROVED row with no number means the SAP submit failed (e.g. timed out);
+            //    it falls through to b) and is re-submitted rather than blocked with "N/A".
             const approvedSameDesc = rows.find(
                 (r) => r.approvalStatus === 'APPROVED'
+                    && !!r.bodyArticleNumber
                     && (r.bodyArticleDescription ?? '').trim() === (item.bodyArticleDescription ?? '').trim()
             );
             if (approvedSameDesc) {
-                if (approvedSameDesc.bodyArticleNumber) {
-                    await prisma.extractionResultFlat.update({
-                        where: { id: item.id },
-                        data: { bodyArticle: approvedSameDesc.bodyArticleNumber },
-                    }).catch(() => {});
-                }
+                await prisma.extractionResultFlat.update({
+                    where: { id: item.id },
+                    data: { bodyArticle: approvedSameDesc.bodyArticleNumber },
+                }).catch(() => {});
                 return res.status(409).json({
-                    error: `For this ${approvedSameDesc.majorCategory} Major Category, Body Article is already Present: ${approvedSameDesc.bodyArticleNumber ?? 'N/A'}`,
-                    bodyArticleNumber: approvedSameDesc.bodyArticleNumber ?? null,
+                    error: `For this ${approvedSameDesc.majorCategory} Major Category, Body Article is already Present: ${approvedSameDesc.bodyArticleNumber}`,
+                    bodyArticleNumber: approvedSameDesc.bodyArticleNumber,
                     flatId: item.id,
                     duplicateFlatIds: [item.id],
                 });
             }
 
-            // b) Update an existing PENDING or REJECTED row for this flatId
+            // b) Update an existing PENDING / REJECTED row, or an APPROVED row whose SAP
+            //    submit never returned a number
             const pendingOrRejected = rows.find(
                 (r) => r.approvalStatus === 'PENDING' || r.approvalStatus === 'REJECTED'
+                    || (r.approvalStatus === 'APPROVED' && !r.bodyArticleNumber)
             );
             if (pendingOrRejected) {
                 toUpdate.push({ item, existingId: pendingOrRejected.id });
@@ -6867,8 +7033,8 @@ export class ApproverController {
                 cuttingBgtPrVal: true, cuttingActPrVal: true, cuttingVendorPrVal: true, cuttingFinalPrVal: true,
                 stitchingBgtPrVal: true, stitchingActPrVal: true, stitchingVendorPrVal: true, stitchingFinalPrVal: true,
                 ironingBgtPrVal: true, ironingActPrVal: true, ironingVendorPrVal: true, ironingFinalPrVal: true,
-                finishingBgtPrVal: true, finishingActPrVal: true, finishingVendorPrVal: true, finishingFinalPrVal: true,
-                bTrimType: true,
+                finishingBgtPrVal: true, finishingActPrVal: true, finishingVendorPrVal: true, finishingFinalPrVal: true, totalBgtPrVal: true, totalActPrVal: true, totalVendorPrVal: true, totalFinalPrVal: true,
+                bTrimType: true, bTrimTotalAutoBgt: true, bTrimTotalRoughV2: true, bTrimTotalVdrCost: true, bTrimTotalFinalCost: true,
                 mBtnAutoBgt: true, mBtnRoughV2: true, mBtnVdrCost: true, mBtnFinalCost: true,
                 dcAutoBgt: true, dcRoughV2: true, dcVdrCost: true, dcFinalCost: true,
                 zipAutoBgt: true, zipRoughV2: true, zipVdrCost: true, zipFinalCost: true,
@@ -6898,6 +7064,7 @@ export class ApproverController {
                 printAutoBgt: true, printRoughV2: true, printVendorCost: true, printFinalCost: true,
                 embAutoBgt: true, embRoughV2: true, embVendorCost: true, embFinalCost: true,
                 washingAutoBgt: true, washingRoughV2: true, washingVendorCost: true, washingFinalCost: true,
+                vaddTotalAutoBgt: true, vaddTotalRoughV2: true, vaddTotalVendorCost: true, vaddTotalFinalCost: true,
                 pkgCostType: true, boppNetPrice: true, ctnNetPrice: true, barcodeNetPrice: true,
                 kimbleNetPrice: true, taftaNetPrice: true, threadNetPrice: true,
                 mrp: true, segment: true,
@@ -6976,6 +7143,14 @@ export class ApproverController {
                 select: { id: true, fabricArticleNumber: true },
             });
             if (existingByDesc) {
+                // Same as Create Body Article: auto-fill the existing number on the FG row so the
+                // card shows it. Modify mode (skipFlatUpdate) stages it in the UI instead.
+                if (!skipFlatUpdate && existingByDesc.fabricArticleNumber) {
+                    await prisma.extractionResultFlat.update({
+                        where: { id: item.id },
+                        data: { fabricArticleNumber: existingByDesc.fabricArticleNumber },
+                    }).catch(() => {});
+                }
                 return res.status(409).json({
                     error: `Fabric Article already created for this description. Fabric Article No: ${existingByDesc.fabricArticleNumber}`,
                     fabricArticleNumber: existingByDesc.fabricArticleNumber,
@@ -7012,7 +7187,7 @@ export class ApproverController {
         // frontend so it can be staged as a pending change and saved only when Modify is clicked.
         if (submitNow) {
             const { submitFabricArticles } = await import('../services/zmmFabArtCreationService');
-            const submitResult = await submitFabricArticles(toSubmit.map((e) => e.fabricRowId));
+            const submitResult = await submitFabricArticles(toSubmit.map((e) => e.fabricRowId), req.user?.id);
 
             if (!skipFlatUpdate) {
                 await Promise.all(
@@ -7069,7 +7244,7 @@ export class ApproverController {
             return;
         }
         const { submitGmArticles } = await import('../services/zmmGMArtCreationService');
-        const result = await submitGmArticles(ids, (req as any).user?.name ?? null);
+        const result = await submitGmArticles(ids, (req as any).user?.name ?? null, req.user?.id);
 
         // Then create their colour × size variants in SAP (ZMM_VAR_ART_CRT_V8), like FG.
         const createdIds = result.results.filter(r => r.success).map(r => r.id);

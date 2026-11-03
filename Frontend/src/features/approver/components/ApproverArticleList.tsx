@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   FileText,
   LayoutGrid,
@@ -23,6 +24,10 @@ import {
   Upload,
   ChevronLeft,
   ChevronRight,
+  Tag as TagIcon,
+  Check,
+  ArrowRight,
+  Loader2,
 } from 'lucide-react';
 import {
   Autocomplete,
@@ -52,9 +57,9 @@ import {
 import { message } from '@/lib/message';
 import { cn } from '@/lib/utils';
 import { useDragToPan } from '@/shared/hooks/ui/useDragToPan';
-import type { ApproverItem, MasterAttribute } from './ApproverTable';
+import type { ApproverItem } from '../types';
 import CostingGridCard, { BTRIM_CONFIG, VADD_CONFIG, gridFields } from './CostingGridCard';
-import PkgCostCard from './PkgCostCard';
+import PkgCostCard, { PKG_RATE_FIELDS } from './PkgCostCard';
 import CmpCostCard, { PR_VAL_FIELD } from './CmpCostCard';
 import { CARD_ACTION_BTN, CARD_THEME } from './cardTheme';
 
@@ -65,20 +70,11 @@ const COSTING_GRID_CONFIGS: Record<string, { config: typeof BTRIM_CONFIG; fields
 };
 import {
   SCHEMA_KEY_TO_EXCEL_ATTR,
-  SCHEMA_KEY_TO_DB_FIELD,
   SAP_NAME_TO_SCHEMA_KEY,
   normalizeMajorCategory,
 } from '../../../data/majCatAttributeMap';
 import { getMcCodeByMajorCategory } from '../../../data/majorCategoryMcCodeMap';
 import {
-  preloadAttributeValues,
-  getCachedValues,
-  isValuesCached,
-  preloadAttributeGroups,
-  getCachedAttributeGroups,
-  preloadCategoryAttributes,
-  getCachedCategoryAttributes,
-  invalidateValuesCache,
   preloadMajCatGridFor,
   isMajCatGridLoadedFor,
   getMajCatGridEntry,
@@ -98,8 +94,9 @@ import { variantCreatingIds } from '../../fabric-article/variantCreationState';
 // Alias so the combobox trigger can use a distinct name from the plain icon
 const ChevronDownIcon = ChevronDown;
 
-// Module-level BOM cache (shared across card instances)
-const bomCache = new Map<string, Promise<Record<string, Record<string, string>>>>();
+// FG MRP rule (OTH GRID-1): RATE fills MRP = rate + 30%; the user can change MRP freely.
+const round2 = (n: number) => Math.round(n * 100) / 100;
+const calcFgMrpFromRate = (rate: number): number => round2(rate * 1.3);
 
 // Module-level national grid cache — body article dropdown values from national_grid_master
 type NationalGridValues = Record<string, { code: string; fullForm: string }[]>;
@@ -143,11 +140,22 @@ const fetchNationalGridValues = (): Promise<NationalGridValues> => {
 // Module-level segment range cache (shared across card instances, keyed by UPPER major category)
 type SegmentRange = { segment_type: string; min: number; max: number };
 const segmentRangeCache = new Map<string, SegmentRange[]>();
+// In-flight requests, so callers asking at the same moment (major category save +
+// the card's MC effect) share one network call instead of each fetching.
+const segmentRangeInFlight = new Map<string, Promise<SegmentRange[]>>();
 
-const fetchSegmentRangesFor = async (mc: string): Promise<SegmentRange[]> => {
+const fetchSegmentRangesFor = (mc: string): Promise<SegmentRange[]> => {
   const key = (mc || '').trim().toUpperCase();
-  if (!key) return [];
-  if (segmentRangeCache.has(key)) return segmentRangeCache.get(key)!;
+  if (!key) return Promise.resolve([]);
+  if (segmentRangeCache.has(key)) return Promise.resolve(segmentRangeCache.get(key)!);
+  const pending = segmentRangeInFlight.get(key);
+  if (pending) return pending;
+  const p = loadSegmentRanges(mc, key).finally(() => segmentRangeInFlight.delete(key));
+  segmentRangeInFlight.set(key, p);
+  return p;
+};
+
+const loadSegmentRanges = async (mc: string, key: string): Promise<SegmentRange[]> => {
   try {
     const token = localStorage.getItem('authToken');
     const r = await fetch(
@@ -169,26 +177,18 @@ const fetchSegmentRangesFor = async (mc: string): Promise<SegmentRange[]> => {
   return [];
 };
 
-const vaacCache = new Map<string, number | null>();
-const fetchVaacTotalValue = async (majorCategory: string): Promise<number | null> => {
-  const key = (majorCategory || '').trim().toUpperCase();
-  if (!key) return null;
-  if (vaacCache.has(key)) return vaacCache.get(key)!;
-  try {
-    const token = localStorage.getItem('authToken');
-    const r = await fetch(
-      `${APP_CONFIG.api.baseURL}/approver/value-addition-accessories-cost/lookup?majorCategory=${encodeURIComponent(majorCategory)}`,
-      { headers: token ? { Authorization: `Bearer ${token}` } : {} },
-    );
-    if (r.ok) {
-      const json = await r.json();
-      const val = json.data?.totalValue ?? null;
-      vaacCache.set(key, val); // only cache on success so HTTP errors are retried
-      return val;
-    }
-    // HTTP error (403/404/500) — don't cache, allow retry on next render
-  } catch { /* network error — don't cache, allow retry */ }
-  return null;
+// Identical GETs fired at the same moment (e.g. two effects reacting to one major
+// category change) share one request. Not a cache — finished requests are dropped.
+const getJsonInFlight = new Map<string, Promise<any>>();
+const getJsonShared = (url: string): Promise<any> => {
+  const pending = getJsonInFlight.get(url);
+  if (pending) return pending;
+  const token = localStorage.getItem('authToken');
+  const p = fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+    .then((r) => r.json())
+    .finally(() => getJsonInFlight.delete(url));
+  getJsonInFlight.set(url, p);
+  return p;
 };
 
 const computeSegmentFromMrp = (mrp: string | null | undefined, ranges: SegmentRange[]): string | null => {
@@ -196,20 +196,6 @@ const computeSegmentFromMrp = (mrp: string | null | undefined, ranges: SegmentRa
   if (isNaN(m) || ranges.length === 0) return null;
   const match = ranges.find((r) => m >= r.min && m <= r.max);
   return match ? match.segment_type : null;
-};
-
-const fetchBomMap = (category: string): Promise<Record<string, Record<string, string>>> => {
-  const existing = bomCache.get(category);
-  if (existing) return existing;
-  const token = localStorage.getItem('authToken');
-  const p = fetch(`${APP_CONFIG.api.baseURL}/approver/bom-art-numbers/${encodeURIComponent(category)}`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  })
-    .then((r) => r.json())
-    .then((res) => (res?.data as Record<string, Record<string, string>>) ?? {})
-    .catch(() => ({}));
-  bomCache.set(category, p);
-  return p;
 };
 
 const f = (schemaKey: string) => SCHEMA_KEY_TO_EXCEL_ATTR[schemaKey] ?? schemaKey;
@@ -333,6 +319,23 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
   },
 ];
 
+// FAB card: M_FAB_MAIN_MVGR_1 (mainMvgr) is read-only and follows M_FAB_MAIN_MVGR_2
+// (fabricMainMvgr) through m_fabric_main_mvgr_mapping. null = no mapping row.
+const mainMvgr1Cache = new Map<string, string | null>();
+const lookupMainMvgr1 = async (mvgr2: string): Promise<string | null> => {
+  const key = mvgr2.trim().toUpperCase();
+  if (mainMvgr1Cache.has(key)) return mainMvgr1Cache.get(key)!;
+  const token = localStorage.getItem('authToken');
+  const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/fabric-main-mvgr1/${encodeURIComponent(key)}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!r.ok) throw new Error('MVGR-1 lookup failed');
+  const d = await r.json();
+  const mvgr1: string | null = d?.data?.mvgr1 ?? null;
+  mainMvgr1Cache.set(key, mvgr1);
+  return mvgr1;
+};
+
 // REFERENCE ARTICLE DESC source fields, in the user-confirmed sequence.
 // These item keys span several cards (FAB / BODY / VA PRCS):
 //   M_FAB_MAIN_MVGR_2 → M_WEAVE_02 → M_BLT_TYPE → M_BLT_STYLE →
@@ -407,32 +410,6 @@ const ColorSelect: React.FC<{
   );
 };
 
-const GROUP_COLORS: Record<string, string> = {
-  FAB: '#e6f4ff',
-  BODY: '#f6ffed',
-  'VA ACC.': '#fff7e6',
-  'VA PRCS': '#fff0f6',
-  BUSINESS: '#f9f0ff',
-};
-const GROUP_ORDER = ['FAB', 'BODY', 'VA ACC.', 'VA PRCS', 'BUSINESS'];
-
-// Construction & Fabric (FAB): these attributes must appear first, in this
-// exact order, regardless of the order the backend returns them in. Everything
-// else in the group keeps its existing relative order below them.
-//   fab_div          → M_FAB_DIV
-//   yarn_01          → M_YARN
-//   main_mvgr        → M_FAB_MAIN_MVGR_1
-//   fabric_main_mvgr → M_FAB_MAIN_MVGR_2
-const FAB_PRIORITY_KEYS = ['fab_div', 'yarn_01', 'main_mvgr', 'fabric_main_mvgr'];
-// Canonical BODY & CONSTRUCTION field order — enforced in buildCardGroups so
-// every user session sees fields in the same sequence regardless of DB displayOrder.
-const BODY_PRIORITY_KEYS = [
-  'collar', 'collar_style', 'neck_details', 'neck', 'placket',
-  'father_belt', 'child_belt', 'sleeve', 'sleeve_fold', 'set',
-  'bottom_fold', 'no_of_pocket', 'pocket_type', 'extra_pocket',
-  'fit', 'body_style', 'length',
-];
-
 // FG OTH GRID-1 card: BUSINESS attrs shown under Rate/MRP/Colours in this order
 // (M_AGE_GROUP → M_IMP_ATBT → ARTICLE FASHION TYPE → SEGMENT), rest after.
 const OTH_GRID_1_ORDER = ['age_group', 'imp_atrbt2', 'article_fashion_type', 'segment'];
@@ -470,80 +447,17 @@ const GROUP_HEADER_STYLE: Record<string, { bg: string; fg: string; border: strin
 
 type CardGroup = typeof ATTRIBUTE_GROUPS[number];
 
-// Lookup map: schemaKey → mandatory flag from ATTRIBUTE_GROUPS static config
-const STATIC_MANDATORY_KEYS = new Map<string, boolean>(
-  ATTRIBUTE_GROUPS.flatMap((g) => g.fields.filter((f) => f.mandatory).map((f) => [f.schemaKey, true] as [string, boolean]))
-);
-
-function buildCardGroups(entries: { key: string; type: string; group: string }[]): CardGroup[] {
-  const map = new Map<string, CardGroup['fields']>();
-  for (const e of entries) {
-    if (BOM_ONLY_SCHEMA_KEYS.has(e.key)) continue; // belongs to BOM, not attribute groups
-    if (HIDDEN_CARD_SCHEMA_KEYS.has(e.key)) continue; // hidden from card (e.g. shade, weight)
-    const dbField = SCHEMA_KEY_TO_DB_FIELD[e.key];
-    if (!dbField) continue;
-    if (!map.has(e.group)) map.set(e.group, []);
-    const mandatory = STATIC_MANDATORY_KEYS.get(e.key) ? true : undefined;
-    map.get(e.group)!.push({ field: dbField, schemaKey: e.key, freeText: e.type === 'TEXT' ? true : undefined, mandatory });
-  }
-  const built = GROUP_ORDER.filter((g) => map.has(g)).map((g) => {
-    let fields = map.get(g)!;
-    if (g === 'FAB' || g === 'FABRIC') {
-      // Pin the priority keys to the top in FAB_PRIORITY_KEYS order; all other
-      // fields keep their existing relative order (Array.sort is stable).
-      const rank = (k: string) => {
-        const i = FAB_PRIORITY_KEYS.indexOf(k);
-        return i === -1 ? FAB_PRIORITY_KEYS.length : i;
-      };
-      fields = [...fields].sort((a, b) => rank(a.schemaKey) - rank(b.schemaKey));
-    }
-    if (g === 'BODY') {
-      // Enforce canonical BODY field order so every user sees the same sequence
-      // regardless of DB displayOrder (which can be non-deterministic when tied).
-      const rank = (k: string) => {
-        const i = BODY_PRIORITY_KEYS.indexOf(k);
-        return i === -1 ? BODY_PRIORITY_KEYS.length : i;
-      };
-      fields = [...fields].sort((a, b) => rank(a.schemaKey) - rank(b.schemaKey));
-    }
-    return {
-      group: g,
-      color: GROUP_COLORS[g] || '#f0f0f0',
-      fields,
-    };
-  });
-
-  if (built.length > 0) {
-    // Merge static freeText fields from ATTRIBUTE_GROUPS that the dynamic
-    // attribute data doesn't carry (e.g. fab_weight alias for M_FAB_WEIGHT).
-    for (const staticGroup of ATTRIBUTE_GROUPS) {
-      const builtGroup = built.find((g) => g.group === staticGroup.group);
-      for (const sf of staticGroup.fields) {
-        if (builtGroup && builtGroup.fields.some((f) => f.field === sf.field && f.schemaKey === sf.schemaKey)) continue;
-        if (builtGroup) {
-          builtGroup.fields.push(sf);
-        } else {
-          built.push({ group: staticGroup.group, color: staticGroup.color, fields: [sf] });
-        }
-      }
-    }
-    return built;
-  }
-  return ATTRIBUTE_GROUPS;
-}
-
 export interface ApproverArticleListProps {
   items: ApproverItem[];
   majorCategory: string;
   loading: boolean;
   selectedRowKeys: React.Key[];
   onSelectionChange: (keys: React.Key[]) => void;
-  onEdit: (item: ApproverItem) => void;
-  onSave: (item: ApproverItem, updates: Record<string, unknown>, options?: { silent?: boolean }) => void;
+  onSave: (item: ApproverItem, updates: Record<string, unknown>, options?: { silent?: boolean; throwOnError?: boolean }) => void | Promise<void>;
   onCreateFabricArticle: (item: ApproverItem) => void;
   onCreateBodyArticle: (item: ApproverItem) => void;
   onProceedFGArticle: (item: ApproverItem) => void;
-  onDuplicate: (item: ApproverItem, designNumber: string) => Promise<void>;
+  onDuplicate: (item: ApproverItem, designNumber: string) => Promise<string | void>;
   /**
    * Modify an already-created (SAP-synced) article. Receives only the changed
    * fields. Used by the "Modify" button on the Created Articles page; pushes to
@@ -551,13 +465,15 @@ export interface ApproverArticleListProps {
    * support modify (new/old/rejected) simply omit it and the button is hidden.
    */
   onModify?: (item: ApproverItem, changes: Record<string, unknown>) => Promise<void>;
-  attributes: MasterAttribute[];
   onRefresh: () => void;
   pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
   /** When set, only these attribute group names are shown in article cards. */
   allowGroups?: string[];
   /** When true, hides the "Create Body Article" button (used by BodyArticleList). */
   hideCreateBody?: boolean;
+  /** Detail page (design "Option A"): the card's top strip continues the page's ink
+   *  header as one block — square top corners, no top border, divider line. */
+  joinTop?: boolean;
   /** When true, cards are display-only (e.g. a combo/set parent derived from its pieces). */
   readOnly?: boolean;
   /** Set parent: take attribute visibility / required fields from this category (its Top part). */
@@ -590,30 +506,30 @@ const ArticleCard = React.memo(
     onProceedFGArticle,
     onDuplicate,
     onModify,
-    attributes,
     onRefresh,
     cardGroups,
     pathType,
     allowGroups,
     hideCreateBody,
+    joinTop,
     readOnly,
     attributeMajorCategory,
   }: {
     item: ApproverItem;
     isSelected: boolean;
     onToggleSelect: (id: string) => void;
-    onSave: (item: ApproverItem, updates: Record<string, unknown>, options?: { silent?: boolean }) => void;
+    onSave: (item: ApproverItem, updates: Record<string, unknown>, options?: { silent?: boolean; throwOnError?: boolean }) => void | Promise<void>;
     onCreateFabricArticle: (item: ApproverItem) => void;
     onCreateBodyArticle: (item: ApproverItem) => void;
     onProceedFGArticle: (item: ApproverItem) => void;
-    onDuplicate: (item: ApproverItem, designNumber: string) => Promise<void>;
+    onDuplicate: (item: ApproverItem, designNumber: string) => Promise<string | void>;
     onModify?: (item: ApproverItem, changes: Record<string, unknown>) => Promise<void>;
-    attributes: MasterAttribute[];
     onRefresh: () => void;
     cardGroups: CardGroup[];
     pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
     allowGroups?: string[];
     hideCreateBody?: boolean;
+    joinTop?: boolean;
     readOnly?: boolean;
     attributeMajorCategory?: string;
   }) => {
@@ -621,10 +537,16 @@ const ArticleCard = React.memo(
     const [imgModalOpen, setImgModalOpen] = useState(false);
     const [creatingVariants, setCreatingVariants] = useState(false);
     const [variantRefreshKey, setVariantRefreshKey] = useState(0);
+    // Major category save in flight → Variants table shows "Re-creating…".
+    const [rebuildingVariants, setRebuildingVariants] = useState(false);
     const [localValues, setLocalValues] = useState<Record<string, string | null>>({});
+    const navigate = useNavigate();
     const [dupConfirmOpen, setDupConfirmOpen] = useState(false);
     const [duplicating, setDuplicating] = useState(false);
     const [dupDesignNo, setDupDesignNo] = useState('');
+    const [dupDoneId, setDupDoneId] = useState<string | null>(null);
+    const [dupDoneNo, setDupDoneNo] = useState('');
+    const [dupError, setDupError] = useState<string | null>(null);
     const [allCollapsed, setAllCollapsed] = useState(false);
     const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
     // FG left rail: Article Information / Reference & Vendor start closed.
@@ -662,8 +584,13 @@ const ArticleCard = React.memo(
         'FINISHING|ACT|PR VAL':    fmt(item.finishingActPrVal),
         'FINISHING|VENDOR|PR VAL': fmt(item.finishingVendorPrVal),
         'FINISHING|FINAL|PR VAL':  fmt(item.finishingFinalPrVal),
+        'TOTAL|BGT|PR VAL':        fmt(item.totalBgtPrVal),
+        'TOTAL|ACT|PR VAL':        fmt(item.totalActPrVal),
+        'TOTAL|VENDOR|PR VAL':     fmt(item.totalVendorPrVal),
+        'TOTAL|FINAL|PR VAL':      fmt(item.totalFinalPrVal),
       };
-    }, [item.cuttingBgtPrVal, item.cuttingActPrVal, item.cuttingVendorPrVal, item.cuttingFinalPrVal,
+    }, [item.totalBgtPrVal, item.totalActPrVal, item.totalVendorPrVal, item.totalFinalPrVal,
+        item.cuttingBgtPrVal, item.cuttingActPrVal, item.cuttingVendorPrVal, item.cuttingFinalPrVal,
         item.stitchingBgtPrVal, item.stitchingActPrVal, item.stitchingVendorPrVal, item.stitchingFinalPrVal,
         item.ironingBgtPrVal, item.ironingActPrVal, item.ironingVendorPrVal, item.ironingFinalPrVal,
         item.finishingBgtPrVal, item.finishingActPrVal, item.finishingVendorPrVal, item.finishingFinalPrVal]);
@@ -704,6 +631,37 @@ const ArticleCard = React.memo(
     const [roughV2Loading, setRoughV2Loading] = useState(false);
     const roughV2FetchedRef = React.useRef(false);
 
+    // Automatic fills (MRP from rate, ROUGH V2 / AUTO BGT, segment, descriptions,
+    // consumption) are merged and sent as ONE silent save shortly after the last
+    // one (1.5 s), instead of one PUT per field. Flushed early if the card unmounts.
+    const latestItemRef = React.useRef(item);
+    latestItemRef.current = item;
+    const latestOnSaveRef = React.useRef(onSave);
+    latestOnSaveRef.current = onSave;
+    const autoSaveRef = React.useRef<{ updates: Record<string, unknown>; timer: ReturnType<typeof setTimeout> | null }>({
+      updates: {},
+      timer: null,
+    });
+    const flushAutoSave = useCallback(() => {
+      const pending = autoSaveRef.current;
+      if (pending.timer) clearTimeout(pending.timer);
+      pending.timer = null;
+      const updates = pending.updates;
+      pending.updates = {};
+      if (Object.keys(updates).length === 0) return;
+      latestOnSaveRef.current({ ...latestItemRef.current, ...updates } as ApproverItem, updates, { silent: true });
+    }, []);
+    const queueAutoSave = useCallback(
+      (updates: Record<string, unknown>) => {
+        const pending = autoSaveRef.current;
+        pending.updates = { ...pending.updates, ...updates };
+        if (pending.timer) clearTimeout(pending.timer);
+        pending.timer = setTimeout(flushAutoSave, 1500);
+      },
+      [flushAutoSave],
+    );
+    useEffect(() => flushAutoSave, [flushAutoSave]);
+
     // Auto-fill Rough-V2 on mount if not already set — exact match on 5 attrs
     useEffect(() => {
       const existingRoughV2 = (item as any).roughV2;
@@ -732,7 +690,7 @@ const ArticleCard = React.memo(
             if (isModifyMode) {
               setPendingChanges((prev) => ({ ...prev, roughV2: rateStr }));
             } else {
-              onSave({ ...item, roughV2: rateStr } as any, { roughV2: rateStr });
+              queueAutoSave({ roughV2: rateStr });
             }
           }
         })
@@ -762,7 +720,7 @@ const ArticleCard = React.memo(
       if (isModifyMode) {
         setPendingChanges((prev) => ({ ...prev, ...updates }));
       } else {
-        onSave({ ...item, ...updates } as any, updates);
+        queueAutoSave(updates);
       }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentVendorRate]);
@@ -843,18 +801,41 @@ const ArticleCard = React.memo(
     }, [imgModalOpen]);
 
     const prevItemRef = React.useRef<ApproverItem>(item);
+    // Set when Create Body / Create Fabric Article is clicked: the next number the
+    // server returns for that field is adopted even if it equals the old one.
+    const awaitingLinkRef = React.useRef<Set<string>>(new Set());
     const pendingChangesRef = React.useRef(pendingChanges);
     pendingChangesRef.current = pendingChanges;
     React.useEffect(() => {
       const prev = prevItemRef.current;
       prevItemRef.current = item;
       if (prev === item) return;
+      // Linked article numbers the server fills in itself (Create Body / Fabric Article,
+      // or "already exists" auto-fill). Editing a BODY / FAB attribute stages them as
+      // null, so a newly arrived number must replace that staged null — otherwise the
+      // card stays empty and "Modify" would wipe the number again.
+      const arrived: Record<string, string> = {};
+      for (const k of ['bodyArticle', 'fabricArticleNumber']) {
+        const now = String((item as any)[k] ?? '').trim();
+        const before = String((prev as any)[k] ?? '').trim();
+        if (now && (now !== before || awaitingLinkRef.current.has(k))) {
+          arrived[k] = now;
+          awaitingLinkRef.current.delete(k);
+        }
+      }
+      if (Object.keys(arrived).length > 0) {
+        setPendingChanges((p) => {
+          const hit = Object.keys(arrived).filter((k) => k in p);
+          return hit.length ? { ...p, ...Object.fromEntries(hit.map((k) => [k, arrived[k]])) } : p;
+        });
+      }
       setLocalValues((local) => {
         const next: Record<string, string | null> = {};
         const staged = pendingChangesRef.current;
         for (const [k, v] of Object.entries(local)) {
+          if (k in arrived) { next[k] = arrived[k]; continue; }
           // Always keep keys that the user has staged — they haven't been saved yet
-          if (k in staged) { next[k] = v; continue; }
+          if (k in staged || k in autoSaveRef.current.updates) { next[k] = v; continue; }
           const itemVal = (item as any)[k] ?? null;
           const strItemVal = itemVal === null ? null : String(itemVal);
           if (strItemVal !== (v === null ? null : String(v ?? ''))) {
@@ -883,14 +864,14 @@ const ArticleCard = React.memo(
       const storedMrp = parseFloat(String((item as any).mrp ?? ''));
       const rate = parseFloat(String((item as any).rate ?? ''));
       if (isNaN(rate) || rate <= 0) return;
-      const calculatedMrp = Math.ceil((rate * 1.47) / 50) * 50;
+      const calculatedMrp = calcFgMrpFromRate(rate);
       // Skip if MRP is already saved and matches what we'd calculate — no API call needed
       if (!isNaN(storedMrp) && storedMrp > 0 && storedMrp === calculatedMrp) return;
       // Skip if MRP is already saved as any valid positive number (user may have set it manually)
       if (!isNaN(storedMrp) && storedMrp > 0) return;
       const calculated = String(calculatedMrp);
       setLocalValues((prev) => ({ ...prev, mrp: calculated }));
-      onSave({ ...item, mrp: calculated } as ApproverItem, { mrp: calculated }, { silent: true });
+      queueAutoSave({ mrp: calculated });
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [item.id]);
 
@@ -950,12 +931,9 @@ const ArticleCard = React.memo(
         ).trim();
         if (existingMeter !== '') return;
       }
-      const token = localStorage.getItem('authToken');
-      fetch(
+      getJsonShared(
         `${APP_CONFIG.api.baseURL}/approver/body-fabric-consumption/by-width?majorCategory=${encodeURIComponent(effectiveMajCat)}&fabWidth=${encodeURIComponent(currentFWidth)}`,
-        { headers: { Authorization: `Bearer ${token}` } },
       )
-        .then((r) => r.json())
         .then((d: { fabConsumption: number | null }) => {
           if (d.fabConsumption == null) return;
           const updates: Record<string, string> = {
@@ -966,7 +944,7 @@ const ArticleCard = React.memo(
           if (isModifyMode) {
             setPendingChanges((prev) => ({ ...prev, ...updates }));
           } else {
-            onSave({ ...item, ...updates } as any, updates, { silent: true });
+            queueAutoSave(updates);
           }
         })
         .catch(() => {});
@@ -999,7 +977,7 @@ const ArticleCard = React.memo(
       };
       setLocalValues((prev) => ({ ...prev, ...updates }));
       if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
-      else onSave({ ...item, ...updates } as any, updates, { silent: true });
+      else queueAutoSave(updates);
     };
 
     // `item` can be stale (the detail page restores it from navigation state on reload),
@@ -1195,7 +1173,7 @@ const ArticleCard = React.memo(
           const updates: Record<string, string> = { roughConsumptionKg: kg };
           setLocalValues((prev) => ({ ...prev, ...updates }));
           if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
-          else onSave({ ...item, ...updates } as any, updates, { silent: true });
+          else queueAutoSave(updates);
           return;
         }
       } else {
@@ -1205,11 +1183,9 @@ const ArticleCard = React.memo(
       }
       const token = localStorage.getItem('authToken');
       const headers = { Authorization: `Bearer ${token}` };
-      fetch(
+      getJsonShared(
         `${APP_CONFIG.api.baseURL}/approver/body-fabric-consumption/by-width?majorCategory=${encodeURIComponent(effectiveMajCat)}&fabWidth=${encodeURIComponent(currentFWidth)}`,
-        { headers },
       )
-        .then((r) => r.json())
         .then((d: { fabConsumption: number | null }) => {
           if (d.fabConsumption != null) {
             applyRoughUpdates(d.fabConsumption, currentFWidth);
@@ -1253,7 +1229,7 @@ const ArticleCard = React.memo(
       const updates: Record<string, string> = { roughConsumptionKg: kg };
       setLocalValues((prev) => ({ ...prev, ...updates }));
       if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
-      else onSave({ ...item, ...updates } as any, updates, { silent: true });
+      else queueAutoSave(updates);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentGsm, isBodyArticle]);
 
@@ -1280,7 +1256,7 @@ const ArticleCard = React.memo(
       };
       setLocalValues((prev) => ({ ...prev, ...updates }));
       if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
-      else onSave({ ...item, ...updates } as any, updates, { silent: true });
+      else queueAutoSave(updates);
     };
 
     // fWidth effect: fetches on every genuine M_WIDTH change for precise consumption.
@@ -1309,7 +1285,7 @@ const ArticleCard = React.memo(
           const updates: Record<string, string> = { preciseConsumptionKg: kg };
           setLocalValues((prev) => ({ ...prev, ...updates }));
           if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
-          else onSave({ ...item, ...updates } as any, updates, { silent: true });
+          else queueAutoSave(updates);
           return;
         }
       } else {
@@ -1356,7 +1332,7 @@ const ArticleCard = React.memo(
       const updates: Record<string, string> = { preciseConsumptionKg: kg };
       setLocalValues((prev) => ({ ...prev, ...updates }));
       if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
-      else onSave({ ...item, ...updates } as any, updates, { silent: true });
+      else queueAutoSave(updates);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentGsm, isBodyArticle]);
     // ── END PRECISE CONSUMPTION ───────────────────────────────────────────────
@@ -1378,7 +1354,7 @@ const ArticleCard = React.memo(
           if (d.gsm == null) return;
           const updates: Record<string, string> = { gsm: String(d.gsm) };
           setLocalValues((prev) => ({ ...prev, ...updates }));
-          onSave({ ...item, ...updates } as any, updates, { silent: true });
+          queueAutoSave(updates);
         })
         .catch(() => {});
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1395,13 +1371,11 @@ const ArticleCard = React.memo(
       if (expected === current) return;
       setLocalValues((prev) => ({ ...prev, segment: expected }));
       if (!isModifyMode) {
-        onSave({ ...item, segment: expected } as ApproverItem, { segment: expected } as Record<string, unknown>, { silent: true });
+        queueAutoSave({ segment: expected });
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [segmentRanges]);
 
-    const [cacheReady, setCacheReady] = useState(false);
-    const [catConfigReady, setCatConfigReady] = useState(false);
     // Tracks when the major-category grid JSON (for THIS article's category) has loaded
     const [gridReady, setGridReady] = useState(() => isMajCatGridLoadedFor(effectiveMajCat));
     // Tracks when the mandatory grid (for THIS article's category) has loaded
@@ -1602,61 +1576,16 @@ const ArticleCard = React.memo(
 
       return { visibleAttrs: visible, mandatoryKeys: mandatory };
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [attrMajCat, cacheReady, catConfigReady, gridReady, mandatoryGridReady, attributeFields, localValues, nationalGrid, nationalGridReady, allowGroups]);
+    }, [attrMajCat, gridReady, mandatoryGridReady, attributeFields, localValues, nationalGrid, nationalGridReady, allowGroups]);
 
     const [editingField, setEditingField] = useState<string | null>(null);
 
     // Vendor autocomplete state
-    const [vendorQuery, setVendorQuery] = useState('');
+    // null = not typed yet (show the saved name); '' = the user cleared the box.
+    const [vendorQuery, setVendorQuery] = useState<string | null>(null);
     const [vendorOptions, setVendorOptions] = useState<AutocompleteOption[]>([]);
     const [vendorSearching, setVendorSearching] = useState(false);
     const vendorDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    const [attrArticleNums, setAttrArticleNums] = useState<Record<string, string>>(() => {
-      try {
-        return JSON.parse((item as any).attrArticleNums || '{}');
-      } catch {
-        return {};
-      }
-    });
-    const [bomMap, setBomMap] = useState<Record<string, Record<string, string>>>({});
-
-    useEffect(() => {
-      if (!item.division) return;
-      if (isValuesCached(item.division) && getCachedValues(item.division, 'impAtrbt2') === null) {
-        invalidateValuesCache(item.division);
-      }
-      preloadAttributeValues(item.division)
-        .then(() => setCacheReady(true))
-        .catch(() => setCacheReady(true));
-    }, [item.division]);
-
-    useEffect(() => {
-      if (!effectiveMajCat) return;
-      if (getCachedCategoryAttributes(effectiveMajCat)) {
-        setCatConfigReady(true);
-        return;
-      }
-      preloadCategoryAttributes(effectiveMajCat)
-        .then(() => setCatConfigReady(true))
-        .catch(() => setCatConfigReady(true));
-    }, [effectiveMajCat]);
-
-    // Auto-fill VALUE ADD ACC. COST from the VAAC table on initial load (only if empty).
-    // Only runs for PENDING articles — approved/rejected articles already have their value locked.
-    useEffect(() => {
-      if (!effectiveMajCat) return;
-      if (item.approvalStatus !== 'PENDING') return;
-      const current = (item as any).valueAddCost ?? localValues['valueAddCost'];
-      if (current != null && String(current).trim() !== '') return; // already has a value — skip
-      fetchVaacTotalValue(effectiveMajCat).then((val) => {
-        if (val == null) return;
-        const strVal = String(val);
-        setLocalValues((prev) => ({ ...prev, valueAddCost: strVal }));
-        onSave({ ...item, valueAddCost: strVal } as ApproverItem, { valueAddCost: strVal } as Record<string, unknown>);
-      });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []); // intentionally run only on mount
 
     // Preload the major-category grid (dropdown values) for THIS article's
     // category only — not the entire grid. Re-runs if the category changes.
@@ -1686,39 +1615,6 @@ const ArticleCard = React.memo(
         .catch(() => setMandatoryGridReady(true));
     }, [effectiveMajCat]);
 
-    useEffect(() => {
-      if (!effectiveMajCat) return;
-      let cancelled = false;
-      fetchBomMap(effectiveMajCat).then((data) => {
-        if (!cancelled) setBomMap(data);
-      });
-      return () => {
-        cancelled = true;
-      };
-    }, [effectiveMajCat]);
-
-    const getArtNum = useCallback(
-      (schemaKey: string, field: string, currentValue: string | null): string => {
-        const excelAttrName = SCHEMA_KEY_TO_EXCEL_ATTR[schemaKey];
-        if (excelAttrName && currentValue && bomMap[excelAttrName]?.[currentValue]) {
-          return bomMap[excelAttrName][currentValue];
-        }
-        return attrArticleNums[field] || '';
-      },
-      [bomMap, attrArticleNums],
-    );
-
-    const saveAttrArticleNum = (field: string, val: string) => {
-      const updated = { ...attrArticleNums, [field]: val };
-      setAttrArticleNums(updated);
-      const attrUpdates = { attrArticleNums: JSON.stringify(updated) };
-      if (isModifyMode) {
-        setPendingChanges((prev) => ({ ...prev, ...attrUpdates }));
-        return;
-      }
-      onSave({ ...item, ...attrUpdates } as any, attrUpdates);
-    };
-
     const [failedImg, setFailedImg] = useState(false);
     const [refreshedUrl, setRefreshedUrl] = useState<string | null>(null);
     const refreshAttempted = React.useRef(false);
@@ -1727,8 +1623,14 @@ const ArticleCard = React.memo(
     // first one as <article>_OLD.jpg / old_image_url) and arrow between new and old.
     const canReplaceImage =
       pathType === 'created' && !allowGroups && !readOnly && String(item.vendorName ?? '').trim().toUpperCase().startsWith('V2 S');
-    const [imgView, setImgView] = useState<'new' | 'old'>('new');
+    // Photo views shown with the arrows: front, then back (SRM back photo), then old (replace).
+    const [imgViewIdx, setImgViewIdx] = useState(0);
     const [oldImgFailed, setOldImgFailed] = useState(false);
+    const [backImgFailed, setBackImgFailed] = useState(false);
+    useEffect(() => {
+      setImgViewIdx(0);
+      setBackImgFailed(false);
+    }, [item.id]);
     const [localOldImageUrl, setLocalOldImageUrl] = useState<string | null>(null);
     const [replaceOpen, setReplaceOpen] = useState(false);
     const [replaceFile, setReplaceFile] = useState<File | null>(null);
@@ -1809,7 +1711,7 @@ const ArticleCard = React.memo(
         // Persist bodyArticleDescription to DB when it was missing (null) but is now computable.
         if (newBodyDesc && !item.bodyArticleDescription) {
           setTimeout(() => {
-            onSave({ ...item } as any, { bodyArticleDescription: newBodyDesc }, { silent: true });
+            queueAutoSave({ bodyArticleDescription: newBodyDesc });
           }, 0);
         }
         // Persist fabricArticleDescription to DB whenever the computed value differs from what's
@@ -1817,7 +1719,7 @@ const ArticleCard = React.memo(
         if (newFabDesc && newFabDesc !== item.fabricArticleDescription && autoSavedFabDescRef.current !== newFabDesc) {
           autoSavedFabDescRef.current = newFabDesc;
           setTimeout(() => {
-            onSave({ ...item } as any, { fabricArticleDescription: newFabDesc }, { silent: true });
+            queueAutoSave({ fabricArticleDescription: newFabDesc });
           }, 0);
         }
         return Object.keys(updates).length > 0 ? { ...prev, ...updates } : prev;
@@ -1836,13 +1738,24 @@ const ArticleCard = React.memo(
     // Created-article identity/price fields are LOCKED even in modify mode — they
     // are fixed at creation time and must never be edited afterward (so they can
     // neither reach SAP nor change the local DB). The user cannot open these fields.
+    // Exception: ADMIN users may change the vendor (EXTWG in SAP) — picking a vendor
+    // name sets both code and name from the vendor master.
+    const isAdminUser = useMemo(() => {
+      try {
+        return JSON.parse(localStorage.getItem('user') || '{}')?.role === 'ADMIN';
+      } catch {
+        return false;
+      }
+    }, []);
     const MODIFY_LOCKED_FIELDS = new Set<string>([
-      'vendorCode', 'vendorName', 'mrp', 'rate', 'colour',
+      ...(isAdminUser ? [] : ['vendorCode', 'vendorName']),
+      'mrp', 'rate', 'colour',
       'designNumber', 'division', 'subDivision', 'majorCategory', 'segment',
     ]);
     // Body & Construction fields are read-only in FG article context — values
    const isFieldLocked = (field: string) =>
     field === 'segment' ||
+    field === 'mainMvgr' || // auto-filled from M_FAB_MAIN_MVGR_2
     isLocked ||
     (isModifyMode && MODIFY_LOCKED_FIELDS.has(field));
 
@@ -1895,8 +1808,6 @@ const ArticleCard = React.memo(
     const oldImgSrc = canReplaceImage ? localOldImageUrl || item.oldImageUrl || null : null;
     const oldImgUrl = oldImgSrc ? getImageUrl(oldImgSrc) : null;
     const hasOldImage = !!oldImgUrl;
-    const viewingOldImg = imgView === 'old' && hasOldImage;
-    const shownImgUrl = viewingOldImg ? (oldImgFailed ? null : oldImgUrl) : imgUrl;
     const fileNameFromUrl = (u: string | null | undefined) => {
       if (!u) return '';
       try {
@@ -1905,8 +1816,28 @@ const ArticleCard = React.memo(
         return '';
       }
     };
-    const newImgName = item.imageName || fileNameFromUrl(imgSrc);
+    const newImgName = fileNameFromUrl(imgSrc);
     const oldImgName = fileNameFromUrl(oldImgSrc);
+    const backImgUrl = item.backImageUrl ? getImageUrl(item.backImageUrl) : null;
+    const imgViews: { key: 'front' | 'back' | 'old'; label: string; url: string | null; name: string; note: string }[] = [
+      {
+        key: 'front',
+        label: hasOldImage ? 'New' : 'Front',
+        url: imgUrl,
+        name: newImgName,
+        note: hasOldImage ? ' · current' : ' · front',
+      },
+      ...(backImgUrl
+        ? [{ key: 'back' as const, label: 'Back', url: backImgFailed ? null : backImgUrl, name: fileNameFromUrl(item.backImageUrl), note: ' · back' }]
+        : []),
+      ...(hasOldImage
+        ? [{ key: 'old' as const, label: 'Old', url: oldImgFailed ? null : oldImgUrl, name: oldImgName, note: ' · original' }]
+        : []),
+    ];
+    const activeImgIdx = Math.min(imgViewIdx, imgViews.length - 1);
+    const activeImgView = imgViews[activeImgIdx];
+    const viewingOldImg = activeImgView.key === 'old';
+    const shownImgUrl = activeImgView.url;
     const imgStem = (fileNameFromUrl(imgSrc) || 'article.jpg').replace(/\.[^.]+$/, '');
 
     const clearReplace = () => {
@@ -1963,7 +1894,7 @@ const ArticleCard = React.memo(
           setRefreshedUrl(body.imageUrl);
           setLocalOldImageUrl(body.oldImageUrl ?? null);
           setOldImgFailed(false);
-          setImgView('new');
+          setImgViewIdx(0);
           setReplaceOpen(false);
           clearReplace();
           message.success('Image replaced');
@@ -1979,7 +1910,7 @@ const ArticleCard = React.memo(
       xhr.send(form);
     };
 
-    const calcMrpFromRate = (rate: number): number => Math.ceil((rate * 1.47) / 50) * 50;
+    const calcMrpFromRate = calcFgMrpFromRate;
 
     const getValue = (field: string): string | null => {
       if (field in localValues) return localValues[field];
@@ -1994,7 +1925,7 @@ const ArticleCard = React.memo(
       return (item as any)[field] ?? null;
     };
 
-    const searchVendors = (q: string) => {
+    const searchVendors = (q: string, by: 'name' | 'code' = 'name') => {
       setVendorQuery(q);
       if (vendorDebounceRef.current) clearTimeout(vendorDebounceRef.current);
       if (!q || q.trim().length < 2) {
@@ -2006,7 +1937,7 @@ const ArticleCard = React.memo(
         try {
           const token = localStorage.getItem('authToken');
           const res = await fetch(
-            `${APP_CONFIG.api.baseURL}/approver/vendor-search?q=${encodeURIComponent(q.trim())}`,
+            `${APP_CONFIG.api.baseURL}/approver/vendor-search?q=${encodeURIComponent(q.trim())}${by === 'code' ? '&by=code' : ''}`,
             { headers: token ? { Authorization: `Bearer ${token}` } : {} },
           );
           const json = await res.json();
@@ -2017,15 +1948,36 @@ const ArticleCard = React.memo(
               value: `${v.vendorName}||${v.vendorCode}`,
               vendorCode: v.vendorCode,
               vendorName: v.vendorName,
-              label: (
-                <div className="flex justify-between gap-2">
-                  <span className="font-medium">{v.vendorName}</span>
-                  <span className="text-[11px] text-muted-foreground">
-                    {v.vendorCode}
-                    {v.vendorCity ? ` · ${v.vendorCity}` : ''}
+              // Two lines: name (typed text highlighted), then code · city.
+              label: (() => {
+                const name = String(v.vendorName ?? '');
+                const needle = q.trim().toLowerCase();
+                const at = needle ? name.toLowerCase().indexOf(needle) : -1;
+                return (
+                  <span className="flex min-w-0 flex-col gap-0.5">
+                    <span className="truncate font-semibold">
+                      {at >= 0 ? (
+                        <>
+                          {name.slice(0, at)}
+                          <mark className="rounded-sm bg-amber-100 text-slate-900">{name.slice(at, at + needle.length)}</mark>
+                          {name.slice(at + needle.length)}
+                        </>
+                      ) : (
+                        name
+                      )}
+                    </span>
+                    <span className="flex items-center gap-1.5 text-[11.5px] text-slate-500">
+                      <span className="font-mono">{v.vendorCode}</span>
+                      {v.vendorCity && (
+                        <>
+                          <span aria-hidden="true">·</span>
+                          <span className="truncate">{v.vendorCity}</span>
+                        </>
+                      )}
+                    </span>
                   </span>
-                </div>
-              ),
+                );
+              })(),
             }),
           );
           setVendorOptions(opts);
@@ -2037,7 +1989,62 @@ const ArticleCard = React.memo(
       }, 300);
     };
 
-    const handleSave = (field: string, value: string | null) => {
+    // Picking a vendor from either dropdown (name or code) fills both fields.
+    const pickVendor = (val: string, option: AutocompleteOption) => {
+      // option.vendorName is the clean name (no code suffix)
+      const cleanName = (option as any).vendorName || String(val ?? '').split('||')[0];
+      const updates: Record<string, string | null> = { vendorName: cleanName };
+      if ((option as any).vendorCode) updates.vendorCode = (option as any).vendorCode;
+      setLocalValues((prev) => ({ ...prev, ...updates }));
+      if (isModifyMode) {
+        setPendingChanges((prev) => ({ ...prev, ...updates }));
+      } else {
+        onSave({ ...item, ...updates } as ApproverItem, updates as Record<string, unknown>);
+      }
+      // The pick also fired onChange with the option value — drop that pending search.
+      if (vendorDebounceRef.current) clearTimeout(vendorDebounceRef.current);
+      setEditingField(null);
+      setVendorOptions([]);
+      setVendorQuery(null);
+    };
+
+    const handleSave = (field: string, value: string | null, extra?: Record<string, string | null>) => {
+      // M_FAB_MAIN_MVGR_2 change: fetch its M_FAB_MAIN_MVGR_1 from the mapping and
+      // save both together. Cleared MVGR-2 or no mapping row → MVGR-1 cleared.
+      // Major category change: load the new category's segment ranges first so the
+      // re-derived SEGMENT goes in the same PUT as the major category (one request).
+      if (field === 'majorCategory' && value && extra === undefined) {
+        setLocalValues((prev) => ({ ...prev, majorCategory: value }));
+        setEditingField(null);
+        fetchSegmentRangesFor(value)
+          .catch(() => [] as SegmentRange[])
+          .then((ranges) => {
+            setSegmentRanges(ranges);
+            const seg = computeSegmentFromMrp(getValue('mrp'), ranges);
+            handleSave(field, value, seg ? { segment: seg } : {});
+          });
+        return;
+      }
+      if (field === 'fabricMainMvgr' && extra === undefined) {
+        if (!value) {
+          handleSave(field, value, { mainMvgr: null });
+          return;
+        }
+        setLocalValues((prev) => ({ ...prev, fabricMainMvgr: value }));
+        setEditingField(null);
+        lookupMainMvgr1(value)
+          .then((mvgr1) => {
+            if (!mvgr1) {
+              message.warning(`No M_FAB_MAIN_MVGR_1 mapping for ${value} — add it in Admin › Expenses › Fabric Main MVGR Mapping.`);
+            }
+            handleSave(field, value, { mainMvgr: mvgr1 });
+          })
+          .catch(() => {
+            message.error(`Couldn't look up M_FAB_MAIN_MVGR_1 for ${value}. M_FAB_MAIN_MVGR_2 saved; MVGR-1 unchanged.`);
+            handleSave(field, value, {});
+          });
+        return;
+      }
       if (field === 'vendorCode' && value) {
         const trimmed = value.trim();
         if (!/^\d{6}$/.test(trimmed)) {
@@ -2051,19 +2058,7 @@ const ArticleCard = React.memo(
         setEditingField(null);
         return;
       }
-      if (field === 'mrp' && value) {
-        const mrpNew = parseFloat(value);
-        const rateNow = parseFloat(String(getValue('rate') ?? ''));
-        if (!isNaN(mrpNew) && mrpNew > 0 && !isNaN(rateNow)) {
-          const markdownPct = ((mrpNew - rateNow) / mrpNew) * 100;
-          if (markdownPct < 20) {
-            message.error('MRP too low — markdown would fall below 20%');
-            setEditingField(null);
-            return;
-          }
-        }
-      }
-      const updates: Record<string, string | null> = { [field]: value };
+      const updates: Record<string, string | null> = { [field]: value, ...(extra ?? {}) };
       // Auto-compute roughConsumptionKg for FG articles when roughConsumptionMeter or gsm is edited.
       // GSM may be a range "140-160" — use midpoint. Width is fWidth (strip trailing ").
       if (!isBodyArticle && (field === 'roughConsumptionMeter' || field === 'gsm')) {
@@ -2140,26 +2135,7 @@ const ArticleCard = React.memo(
       if (field === 'majorCategory' && value) {
         const newMcCode = getMcCodeByMajorCategory(value);
         if (newMcCode) updates['mcCode'] = newMcCode;
-        // Async: fetch ranges for the new major category, then auto-set segment
-        const currentMrp = getValue('mrp');
-        fetchSegmentRangesFor(value).then((ranges) => {
-          setSegmentRanges(ranges);
-          const seg = computeSegmentFromMrp(currentMrp, ranges);
-          if (seg) {
-            setLocalValues((prev) => ({ ...prev, segment: seg }));
-            onSave({ ...item, segment: seg } as ApproverItem, { segment: seg } as Record<string, unknown>);
-          }
-        });
-        // Async: fetch VAAC total value for the new major category — skip if user chose Precise
-        const effectiveCostType = localValues['valueAddAccCostType'] ?? (item as any).valueAddAccCostType ?? 'Rough';
-        if (effectiveCostType !== 'Precise') {
-          fetchVaacTotalValue(value).then((val) => {
-            if (val == null) return;
-            const strVal = String(val);
-            setLocalValues((prev) => ({ ...prev, valueAddCost: strVal }));
-            onSave({ ...item, valueAddCost: strVal } as ApproverItem, { valueAddCost: strVal } as Record<string, unknown>);
-          });
-        }
+        // segment for the new major category was added by the pre-step above (same PUT).
         // Clear body/fabric article number and description only — attributes remain unchanged
         updates['bodyArticle'] = '';
         updates['bodyArticleDescription'] = '';
@@ -2199,7 +2175,16 @@ const ArticleCard = React.memo(
         setPendingChanges((prev) => ({ ...prev, ...updates }));
         return;
       }
-      onSave({ ...item, ...updates } as ApproverItem, updates as Record<string, unknown>);
+      const saving = onSave({ ...item, ...updates } as ApproverItem, updates as Record<string, unknown>);
+      // Major category change: the server rebuilds the colour variants with the new
+      // category's sizes — reload the table once the save is done.
+      if (field === 'majorCategory') {
+        setRebuildingVariants(true);
+        void Promise.resolve(saving).finally(() => {
+          setRebuildingVariants(false);
+          setVariantRefreshKey((k) => k + 1);
+        });
+      }
 
       // When Base Color changes, auto-create variants for the new color (idempotent).
       if (field === 'colour' && value && !isModifyMode) {
@@ -2391,7 +2376,7 @@ const ArticleCard = React.memo(
         >
           <div className={isFgCard ? 'flex flex-col gap-0.5 px-3 py-1.5' : 'flex items-start justify-between gap-2 px-2 py-0.5'}>
             <span
-              className={isFgCard ? 'text-[10px] font-semibold uppercase tracking-wider' : 'shrink-0 text-[9px] font-semibold uppercase tracking-wider'}
+              className={isFgCard ? 'text-[12px] font-semibold uppercase tracking-wider' : 'shrink-0 text-[9px] font-semibold uppercase tracking-wider'}
               style={{ color: showRequiredError ? (isFgCard ? '#c2410c' : '#dc2626') : isFgCard ? '#475569' : '#6b7280' }}
             >
               {label}
@@ -2409,7 +2394,7 @@ const ArticleCard = React.memo(
                   <PopoverTrigger asChild>
                     <button
                       type="button"
-                      className="flex h-7 w-full items-center justify-between rounded border border-input bg-background px-2 text-xs hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                      className={cn('flex h-7 w-full items-center justify-between rounded border border-input bg-background px-2 hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring', isFgCard ? 'text-sm' : 'text-xs')}
                     >
                       <span className="truncate text-left">{displayVal || 'Select...'}</span>
                       <ChevronDownIcon className="ml-1 h-3 w-3 shrink-0 text-muted-foreground" />
@@ -2455,45 +2440,52 @@ const ArticleCard = React.memo(
                     </div>
                   </PopoverContent>
                 </Popover>
+              ) : isEditingThis && field === 'vendorCode' ? (
+                <Autocomplete
+                  autoFocus
+                  value={vendorQuery ?? displayVal ?? ''}
+                  onChange={(q) => searchVendors(q, 'code')}
+                  options={vendorOptions}
+                  header={`${vendorOptions.length} vendor${vendorOptions.length !== 1 ? 's' : ''} · ↑ ↓ to move, Enter to pick`}
+                  placeholder="Type 2+ digits of the vendor code"
+                  notFoundContent={vendorSearching ? <span className="flex items-center gap-2"><Spinner size="sm" /> Searching vendors…</span> : null}
+                  onSelect={pickVendor}
+                  onBlur={(e) => {
+                    // A typed code (not picked) is saved as-is; handleSave checks it is 6 digits.
+                    const val = (e.target as HTMLInputElement).value.trim();
+                    if (val && val !== (displayVal ?? '')) handleSave('vendorCode', val);
+                    else setEditingField(null);
+                    setVendorOptions([]);
+                    setVendorQuery(null);
+                  }}
+                  className={isFgCard ? 'text-sm' : 'text-xs'}
+                />
               ) : isEditingThis && field === 'vendorName' ? (
                 <Autocomplete
                   autoFocus
-                  value={vendorQuery || displayVal || ''}
+                  value={vendorQuery ?? displayVal ?? ''}
                   onChange={searchVendors}
                   options={vendorOptions}
-                  notFoundContent={vendorSearching ? <Spinner size="sm" /> : null}
-                  onSelect={(val, option) => {
-                    // option.vendorName is the clean name (no code suffix)
-                    const cleanName = (option as any).vendorName || String(val ?? '').split('||')[0];
-                    const updates: Record<string, string | null> = { vendorName: cleanName };
-                    if ((option as any).vendorCode) updates.vendorCode = (option as any).vendorCode;
-                    setLocalValues((prev) => ({ ...prev, ...updates }));
-                    if (isModifyMode) {
-                      setPendingChanges((prev) => ({ ...prev, ...updates }));
-                    } else {
-                      onSave(
-                        { ...item, ...updates } as ApproverItem,
-                        updates as Record<string, unknown>,
-                      );
-                    }
-                    setEditingField(null);
-                    setVendorOptions([]);
-                    setVendorQuery('');
-                  }}
+                  header={`${vendorOptions.length} vendor${vendorOptions.length !== 1 ? 's' : ''} · ↑ ↓ to move, Enter to pick`}
+                  placeholder="Type 2+ letters of the vendor name"
+                  notFoundContent={vendorSearching ? <span className="flex items-center gap-2"><Spinner size="sm" /> Searching vendors…</span> : null}
+                  onSelect={pickVendor}
                   onBlur={(e) => {
                     const val = (e.target as HTMLInputElement).value;
-                    if (val) handleSave('vendorName', val);
+                    // Modify mode: the vendor must be picked from the list (code + name
+                    // from the vendor master) — a typed name alone is not kept.
+                    if (val && !isModifyMode) handleSave('vendorName', val);
                     else setEditingField(null);
                     setVendorOptions([]);
-                    setVendorQuery('');
+                    setVendorQuery(null);
                   }}
-                  className="text-xs"
+                  className={isFgCard ? 'text-sm' : 'text-xs'}
                 />
               ) : isEditingThis ? (
                 <Input
                   autoFocus
                   defaultValue={displayVal || ''}
-                  className="h-7 px-1 text-xs"
+                  className={isFgCard ? 'h-8 px-2 text-sm' : 'h-7 px-1 text-xs'}
                   onKeyDown={(e) =>
                     e.key === 'Enter' && handleSave(field, (e.target as HTMLInputElement).value || null)
                   }
@@ -2505,11 +2497,11 @@ const ArticleCard = React.memo(
                   className={`block truncate ${
                     displayVal
                       ? monoField
-                        ? 'font-mono text-[11.5px] text-slate-900'
-                        : 'text-[12.5px] font-semibold text-slate-900'
+                        ? 'font-mono text-[13.5px] text-slate-900'
+                        : 'text-[14.5px] font-semibold text-slate-900'
                       : showRequiredError
-                      ? 'text-xs font-semibold italic text-orange-700'
-                      : 'text-xs italic text-slate-500'
+                      ? 'text-sm font-semibold italic text-orange-700'
+                      : 'text-sm italic text-slate-500'
                   }`}
                 >
                   {displayVal || (showRequiredError ? 'Required' : canEdit ? 'Click to fill' : '—')}
@@ -2540,7 +2532,10 @@ const ArticleCard = React.memo(
       group: string;
       isMandatory?: boolean;
       mandatory?: boolean;
-    }) => {
+    }, big = false, plus1 = false) => {
+      // plus1 = FG OTH GRID-1 / B TRIM extra rows: everything 1 px bigger than the default.
+      // big = FG FAB and BODY cards (design "Option A", -1 px): 13 px names, 14 px values, 30 px rows.
+      const valueText = big ? 'text-[14px]' : plus1 ? 'text-[12px]' : 'text-[11px]';
       _attrCounter += 1;
       const num = _attrCounter;
       const currentValue = getValue(attr.field);
@@ -2556,7 +2551,8 @@ const ArticleCard = React.memo(
           key={attr.field}
           data-field-label={attr.label}
           data-item-id={item.id}
-          className="group flex items-center gap-1.5 rounded px-1 py-0.5 transition-colors hover:bg-muted/40"
+          title={attr.field === 'mainMvgr' ? 'Auto-filled from M_FAB_MAIN_MVGR_2 (Fabric Main MVGR Mapping)' : undefined}
+          className={cn('group flex items-center rounded transition-colors hover:bg-muted/40', big ? 'mb-0.5 min-h-[26px] gap-2 px-2 py-0.5' : 'gap-1.5 px-1 py-0.5')}
           style={{
             cursor: attrLocked ? 'default' : 'pointer',
             background: isEditing
@@ -2573,23 +2569,24 @@ const ArticleCard = React.memo(
             if (!attrLocked && !isEditing) setEditingField(attr.field);
           }}
         >
-          <span className="w-4 shrink-0 text-right text-[10px] font-bold tabular-nums text-muted-foreground">{num}.</span>
+          <span className={cn('shrink-0 text-right font-bold tabular-nums text-muted-foreground', big ? 'w-6 text-[12px]' : plus1 ? 'w-4 text-[11px]' : 'w-4 text-[10px]')}>{num}.</span>
           <span
             className={cn(
-              'flex-1 truncate text-[10.5px] leading-snug',
+              'flex-1 truncate leading-snug',
+              big ? 'text-[13px]' : plus1 ? 'text-[11.5px]' : 'text-[10.5px]',
               isMandatory ? 'key-field text-foreground' : 'font-semibold text-foreground/80',
             )}
           >
             {isMandatory && <span className="mandatory-mark">*</span>}
             {attr.label}
           </span>
-          <div className="w-[110px] shrink-0">
+          <div className={cn('shrink-0', big ? 'w-[180px]' : 'w-[110px]')}>
             {attr.freeText ? (
               isEditing ? (
                 <Input
                   autoFocus
                   defaultValue={isEffectivelyEmpty ? '' : currentValue || ''}
-                  className="h-6 px-1 text-[11px]"
+                  className={big ? 'h-7 px-2 text-[13px]' : plus1 ? 'h-6 px-1 text-[12px]' : 'h-6 px-1 text-[11px]'}
                   onKeyDown={(e) =>
                     e.key === 'Enter' && handleSave(attr.field, (e.target as HTMLInputElement).value || null)
                   }
@@ -2597,7 +2594,7 @@ const ArticleCard = React.memo(
                 />
               ) : (
                 <span
-                  className="block truncate text-right text-[11px]"
+                  className={cn('block truncate text-right', valueText)}
                   style={{
                     color: isEffectivelyEmpty ? (isMandatory ? '#dc2626' : '#9ca3af') : '#111827',
                     fontStyle: isEffectivelyEmpty && !isMandatory ? 'italic' : 'normal',
@@ -2626,7 +2623,10 @@ const ArticleCard = React.memo(
                 <PopoverTrigger asChild>
                   <button
                     type="button"
-                    className="flex h-6 w-full items-center justify-between rounded border border-input bg-background px-1.5 text-[11px] hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                    className={cn(
+                      'flex w-full items-center justify-between rounded border border-input bg-background hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring',
+                      big ? 'h-7 px-2 text-[13px]' : plus1 ? 'h-6 px-1.5 text-[12px]' : 'h-6 px-1.5 text-[11px]',
+                    )}
                   >
                     <span className="truncate text-left">
                       {isEffectivelyEmpty ? 'Select' : currentValue}
@@ -2704,7 +2704,7 @@ const ArticleCard = React.memo(
               </Popover>
             ) : (
               <span
-                className="flex items-center justify-end gap-1 text-right text-[11px]"
+                className={cn('flex items-center justify-end gap-1 text-right', valueText)}
                 style={{
                   color: isEffectivelyEmpty ? (isMandatory ? '#dc2626' : '#9ca3af') : '#111827',
                   fontStyle: isEffectivelyEmpty && !isMandatory ? 'italic' : 'normal',
@@ -2714,7 +2714,7 @@ const ArticleCard = React.memo(
                 <span className="truncate">
                   {isEffectivelyEmpty ? (isMandatory ? 'Required' : '—') : currentValue}
                 </span>
-                <ChevronDown className="h-3 w-3 shrink-0 opacity-40" />
+                <ChevronDown className={cn('shrink-0 opacity-40', big ? 'h-4 w-4' : 'h-3 w-3')} />
               </span>
             )}
           </div>
@@ -2919,20 +2919,23 @@ const ArticleCard = React.memo(
       <>
         <div
           key={item.id}
-          className="animate-in flex flex-col rounded-xl border bg-white shadow-sm transition-all fade-in-50 slide-in-from-bottom-1 duration-300"
+          className={cn(
+            'animate-in flex flex-col border bg-white shadow-sm transition-all fade-in-50 slide-in-from-bottom-1 duration-300',
+            joinTop ? 'rounded-b-xl rounded-t-none border-t-0' : 'rounded-xl',
+          )}
           style={{ borderColor }}
         >
           {/* ─── TOP HEADER STRIP (slate, matches dashboard) ─── */}
           <div
-            className="flex items-center justify-between gap-3 px-4 py-2 text-white"
-            style={{ background: 'linear-gradient(90deg, #1f2937 0%, #334155 100%)' }}
+            className={cn('flex items-center justify-between gap-3 px-4 py-2.5 text-white', joinTop && 'border-t border-white/10')}
+            style={{ background: joinTop ? '#1e293b' : 'linear-gradient(90deg, #1f2937 0%, #334155 100%)' }}
           >
             <div className="flex min-w-0 flex-1 items-center gap-3">
               <Checkbox
                 checked={isSelected}
                 disabled={item.approvalStatus === 'REJECTED' && !hideCreateBody}
                 onCheckedChange={() => onToggleSelect(item.id)}
-                className="border-white/60 bg-white/10 data-[state=checked]:bg-white data-[state=checked]:text-[#FF6F61]"
+                className="border-white/60 bg-white/10 data-[state=checked]:bg-white data-[state=checked]:text-slate-900"
               />
               <Badge
                 style={{ background: status.color + 'cc', color: '#fff', borderColor: status.color }}
@@ -3082,7 +3085,10 @@ const ArticleCard = React.memo(
             </div>
             <div className="flex shrink-0 items-center gap-2">
               {item.pptNumber && (
-                <Badge className="bg-amber-300 text-amber-950">PPT: {item.pptNumber}</Badge>
+                <Badge className="gap-1.5 border border-white/15 bg-white/10 font-mono text-[12px] font-semibold text-white">
+                  <TagIcon className="h-3.5 w-3.5" />
+                  PPT {item.pptNumber}
+                </Badge>
               )}
               {isModifyMode && (
                 <Button
@@ -3100,8 +3106,7 @@ const ArticleCard = React.memo(
                   )}
                 </Button>
               )}
-              {pathType === 'new' &&
-                item.approvalStatus === 'PENDING' &&
+              {((pathType === 'new' && item.approvalStatus === 'PENDING') || pathType === 'created') &&
                 item.division?.toUpperCase() === 'KIDS' && (
                   <Button
                     size="sm"
@@ -3133,7 +3138,11 @@ const ArticleCard = React.memo(
                       right: (
                         <span className="flex items-center gap-1.5">
                           <span className="rounded-full bg-slate-700 px-2 py-0.5 text-[10.5px] font-semibold">
-                            {replaceOpen ? 'Replacing' : hasOldImage ? (viewingOldImg ? 'Old · 2 / 2' : 'New · 1 / 2') : '1 / 1'}
+                            {replaceOpen
+                              ? 'Replacing'
+                              : imgViews.length > 1
+                              ? `${activeImgView.label} · ${activeImgIdx + 1} / ${imgViews.length}`
+                              : '1 / 1'}
                           </span>
                           {canReplaceImage && !replaceOpen && (
                             <button
@@ -3235,7 +3244,13 @@ const ArticleCard = React.memo(
                                   src={shownImgUrl}
                                   alt=""
                                   className="block h-full w-full cursor-zoom-in object-contain p-2"
-                                  onError={viewingOldImg ? () => setOldImgFailed(true) : handleImgError}
+                                  onError={
+                                    activeImgView.key === 'old'
+                                      ? () => setOldImgFailed(true)
+                                      : activeImgView.key === 'back'
+                                      ? () => setBackImgFailed(true)
+                                      : handleImgError
+                                  }
                                   onClick={() => setImgModalOpen(true)}
                                 />
                                 <button
@@ -3249,28 +3264,28 @@ const ArticleCard = React.memo(
                               </>
                             ) : (
                               <div className="flex h-full w-full items-center justify-center text-xs text-slate-500">
-                                {viewingOldImg ? 'Old image unavailable' : 'No image'}
+                                {activeImgView.key === 'front' ? 'No image' : `${activeImgView.label} image unavailable`}
                               </div>
                             )}
-                            {hasOldImage && (
+                            {imgViews.length > 1 && (
                               <>
                                 <span className="absolute left-2.5 top-2.5 rounded-md bg-slate-900 px-2.5 py-1 text-[10.5px] font-bold tracking-[0.06em] text-white">
-                                  {viewingOldImg ? 'OLD' : 'NEW'}
+                                  {activeImgView.label.toUpperCase()}
                                 </span>
                                 <button
                                   type="button"
-                                  onClick={() => setImgView('new')}
-                                  disabled={!viewingOldImg}
-                                  aria-label="Show new image"
+                                  onClick={() => setImgViewIdx(Math.max(0, activeImgIdx - 1))}
+                                  disabled={activeImgIdx === 0}
+                                  aria-label="Previous image"
                                   className="absolute left-2.5 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow hover:bg-white disabled:pointer-events-none disabled:opacity-0"
                                 >
                                   <ChevronLeft className="h-5 w-5" />
                                 </button>
                                 <button
                                   type="button"
-                                  onClick={() => setImgView('old')}
-                                  disabled={viewingOldImg}
-                                  aria-label="Show old image"
+                                  onClick={() => setImgViewIdx(Math.min(imgViews.length - 1, activeImgIdx + 1))}
+                                  disabled={activeImgIdx === imgViews.length - 1}
+                                  aria-label="Next image"
                                   className="absolute right-2.5 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow hover:bg-white disabled:pointer-events-none disabled:opacity-0"
                                 >
                                   <ChevronRight className="h-5 w-5" />
@@ -3278,16 +3293,20 @@ const ArticleCard = React.memo(
                               </>
                             )}
                           </div>
-                          {hasOldImage && (
+                          {imgViews.length > 1 && (
                             <div className="flex justify-center gap-1.5" aria-hidden="true">
-                              <span className={cn('h-1.5 rounded-full', viewingOldImg ? 'w-1.5 bg-slate-300' : 'w-4 bg-slate-900')} />
-                              <span className={cn('h-1.5 rounded-full', viewingOldImg ? 'w-4 bg-slate-900' : 'w-1.5 bg-slate-300')} />
+                              {imgViews.map((v, i) => (
+                                <span
+                                  key={v.key}
+                                  className={cn('h-1.5 rounded-full', i === activeImgIdx ? 'w-4 bg-slate-900' : 'w-1.5 bg-slate-300')}
+                                />
+                              ))}
                             </div>
                           )}
-                          {(viewingOldImg ? oldImgName : newImgName) && (
-                            <span className="truncate font-mono text-[11px] text-slate-600" title={viewingOldImg ? oldImgName : newImgName}>
-                              {viewingOldImg ? oldImgName : newImgName}
-                              {hasOldImage && (viewingOldImg ? ' · original' : ' · current')}
+                          {activeImgView.name && (
+                            <span className="truncate font-mono text-[11px] text-slate-600" title={activeImgView.name}>
+                              {activeImgView.name}
+                              {imgViews.length > 1 && activeImgView.note}
                             </span>
                           )}
                         </>
@@ -3305,7 +3324,7 @@ const ArticleCard = React.memo(
                       ),
                     })}
                     {isLeftCardOpen('info') && (
-                      <dl className="m-0 grid grid-cols-[110px_minmax(0,1fr)] px-3 py-1 text-xs">
+                      <dl className="m-0 grid grid-cols-[120px_minmax(0,1fr)] px-3 py-1 text-sm">
                         {fgInfoRows.map(({ label, value }, i) => (
                           <React.Fragment key={label}>
                             <dt className={`py-1.5 text-slate-600 ${i < fgInfoRows.length - 1 ? 'border-b border-slate-100' : ''}`}>{label}</dt>
@@ -3391,7 +3410,7 @@ const ArticleCard = React.memo(
                     <div className="flex items-start justify-between gap-2">
                       <span className="font-semibold text-muted-foreground">Article ID</span>
                       <span className="truncate text-right font-bold text-foreground">
-                        {item.sapArticleId || item.articleNumber || item.imageName || '—'}
+                        {item.sapArticleId || item.articleNumber || '—'}
                       </span>
                     </div>
                   )}
@@ -3547,10 +3566,10 @@ const ArticleCard = React.memo(
                   allowGroups
                     ? 'grid-cols-1'
                     : (() => {
+                        // FG: never more than 2 columns. Switching to 3 when a 5th card (V. ADD /
+                        // PKG COST) was turned on squeezed FAB and BODY to a third of the width.
                         const visibleCount = visibleGroups.length + (showBomCard ? 1 : 0) + (showPkgCard ? 1 : 0);
-                        if (visibleCount <= 1) return 'grid-cols-1';
-                        if (visibleCount <= 4) return 'grid-cols-2';
-                        return 'grid-cols-3';
+                        return visibleCount <= 1 ? 'grid-cols-1' : 'grid-cols-2';
                       })()
                 }`}>
                   {visibleGroups.map((g) => {
@@ -3575,12 +3594,13 @@ const ArticleCard = React.memo(
                           locked={isLocked}
                           extraRows={groupAttrs
                             .filter((a) => !gridCfg.fields.has(a.field) && !FG_CARD_HIDDEN_SCHEMA_KEYS.has(a.schemaKey))
-                            .map((a) => renderAttributeRow(a))}
+                            .map((a) => renderAttributeRow(a, false, true))}
                           loadSavedRecord={loadFreshItem}
+                          draftId={isModifyMode ? undefined : item.id}
                           onSaveTab={(updates) => {
                             setLocalValues((prev) => ({ ...prev, ...updates }));
                             if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
-                            else onSave({ ...item, ...updates } as any, updates);
+                            else return onSave({ ...item, ...updates } as any, updates, { throwOnError: true });
                           }}
                         />
                       );
@@ -3612,7 +3632,7 @@ const ArticleCard = React.memo(
                         </button>
                         {!collapsed && (
                           <div className="space-y-0 p-1">
-                            {groupMap[g.group].attrs.map((attr) => renderAttributeRow(attr))}
+                            {groupMap[g.group].attrs.map((attr) => renderAttributeRow(attr, !allowGroups && (g.group === 'FAB' || g.group === 'BODY')))}
 
                             {/* Costing Type, CMP Cost, Basic Trim Cost, CMTP Cost — Body Article only,
                                 appended after the 17 Body & Construction attribute rows. */}
@@ -3751,7 +3771,7 @@ const ArticleCard = React.memo(
                                       }}
                                     >
                                       <div className="mb-0.5 flex items-center justify-between gap-1">
-                                        <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                        <span className={cn('font-semibold uppercase tracking-wider text-muted-foreground', !allowGroups ? 'text-[11px]' : 'text-[9px]')}>
                                           {label}
                                         </span>
                                         {autoFillFn && !isLocked && (
@@ -3780,7 +3800,7 @@ const ArticleCard = React.memo(
                                         />
                                       ) : (
                                         <div
-                                          className="truncate text-[11px]"
+                                          className={cn('truncate', !allowGroups ? 'text-[14px] font-semibold' : 'text-[11px]')}
                                           style={{ color: displayVal ? '#111827' : '#9ca3af' }}
                                         >
                                           {displayVal || (isLocked ? '—' : 'Click to fill')}
@@ -3821,7 +3841,7 @@ const ArticleCard = React.memo(
                                       }}
                                     >
                                       <div className="mb-0.5 flex items-center justify-between gap-1">
-                                        <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                        <span className={cn('font-semibold uppercase tracking-wider text-muted-foreground', !allowGroups ? 'text-[11px]' : 'text-[9px]')}>
                                           FABRIC ARTICLE NO.
                                         </span>
                                       </div>
@@ -3919,7 +3939,7 @@ const ArticleCard = React.memo(
                                         </div>
                                       ) : (
                                         <div
-                                          className="truncate text-[11px]"
+                                          className={cn('truncate', !allowGroups ? 'text-[14px] font-semibold' : 'text-[11px]')}
                                           style={{
                                             color: fabNoDisplayVal ? '#111827' : '#9ca3af',
                                             fontWeight: 600,
@@ -3996,7 +4016,7 @@ const ArticleCard = React.memo(
                                           }}
                                         >
                                           <div className="mb-0.5 flex items-center justify-between gap-1">
-                                            <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                            <span className={cn('font-semibold uppercase tracking-wider text-muted-foreground', !allowGroups ? 'text-[11px]' : 'text-[9px]')}>
                                               FABRIC ARTICLE DESC
                                             </span>
                                             {!isFabDescEditing && !isLocked && (
@@ -4127,7 +4147,7 @@ const ArticleCard = React.memo(
                                             </Popover>
                                           ) : (
                                             <div
-                                              className="truncate text-[11px]"
+                                              className={cn('truncate', !allowGroups ? 'text-[14px] font-semibold' : 'text-[11px]')}
                                               style={{ color: fabDescDisplayVal ? '#111827' : '#9ca3af' }}
                                             >
                                               {fabDescDisplayVal || (isLocked ? '—' : 'Click to fill')}
@@ -4164,6 +4184,7 @@ const ArticleCard = React.memo(
                                           }
 
                                           // Non-modify mode: use the standard parent flow (modal in parent)
+                                          awaitingLinkRef.current.add('fabricArticleNumber');
                                           onCreateFabricArticle(mergedItem);
                                         }}
                                         className={CARD_ACTION_BTN}
@@ -4383,7 +4404,7 @@ const ArticleCard = React.memo(
                                       }}
                                     >
                                       <div className="mb-0.5 flex items-center justify-between gap-1">
-                                        <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                        <span className={cn('font-semibold uppercase tracking-wider text-muted-foreground', !allowGroups ? 'text-[11px]' : 'text-[9px]')}>
                                           BODY ARTICLE NO.
                                         </span>
                                       </div>
@@ -4469,7 +4490,7 @@ const ArticleCard = React.memo(
                                           </Popover>
                                       ) : (
                                         <div
-                                          className="truncate text-[11px]"
+                                          className={cn('truncate', !allowGroups ? 'text-[14px] font-semibold' : 'text-[11px]')}
                                           style={{ color: bodyNoDisplayVal ? '#111827' : '#9ca3af' }}
                                         >
                                           {bodyNoDisplayVal || (isLocked ? '—' : 'Click to fill')}
@@ -4491,7 +4512,7 @@ const ArticleCard = React.memo(
                                       }}
                                     >
                                       <div className="mb-0.5 flex items-center justify-between gap-1">
-                                        <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                        <span className={cn('font-semibold uppercase tracking-wider text-muted-foreground', !allowGroups ? 'text-[11px]' : 'text-[9px]')}>
                                           BODY ARTICLE DESC
                                         </span>
                                         <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
@@ -4569,7 +4590,7 @@ const ArticleCard = React.memo(
                                           </Popover>
                                       ) : (
                                         <div
-                                          className="truncate text-[11px]"
+                                          className={cn('truncate', !allowGroups ? 'text-[14px] font-semibold' : 'text-[11px]')}
                                           style={{ color: bodyDescDisplayVal ? '#111827' : '#9ca3af' }}
                                         >
                                           {bodyDescDisplayVal || (isLocked ? '—' : 'Click to fill')}
@@ -4583,6 +4604,7 @@ const ArticleCard = React.memo(
                                         onClick={() => {
                                           // Merge unsaved localValues so backend gets current attribute values,
                                           // not the stale DB values (important on Created page before Modify is clicked).
+                                          awaitingLinkRef.current.add('bodyArticle');
                                           onCreateBodyArticle({ ...item, ...localValues } as typeof item);
                                         }}
                                         className={CARD_ACTION_BTN}
@@ -4646,12 +4668,7 @@ const ArticleCard = React.memo(
                         const dropdownOptions: string[] = bom.isDropdown
                           ? bom.field === 'bodyConsumptionType'
                             ? ['Rough', 'Actual']
-                            : bom.field === 'impAtrbt2'
-                            ? getMajCatGridEntry(effectiveMajCat, 'IMP ATBT') ??
-                              attributes.find((a) => a.key === 'imp_atrbt2')?.allowedValues.map((v) => v.shortForm) ??
-                              getCachedValues(item.division ?? '', 'impAtrbt2') ??
-                              []
-                            : getCachedValues(item.division ?? '', bom.field) ?? []
+                            : []
                           : [];
                         return (
                           <div
@@ -4672,7 +4689,7 @@ const ArticleCard = React.memo(
                             }}
                           >
                             <span
-                              className="flex-1 truncate text-[11px]"
+                              className={cn('flex-1 truncate', isBodyArticle ? 'text-[11px]' : 'text-[12px]')}
                               style={{
                                 color: bom.mandatory && isEmpty && !isLocked ? '#dc2626' : '#374151',
                                 fontWeight: bom.mandatory ? 600 : 400,
@@ -4689,7 +4706,7 @@ const ArticleCard = React.memo(
                                 >
                                   <PopoverAnchor asChild>
                                     <span
-                                      className="flex items-center justify-end gap-1 text-right text-[11px]"
+                                      className={cn('flex items-center justify-end gap-1 text-right', isBodyArticle ? 'text-[11px]' : 'text-[12px]')}
                                       style={{
                                         color: isEmpty ? '#9ca3af' : '#111827',
                                         fontStyle: isEmpty ? 'italic' : 'normal',
@@ -4754,7 +4771,7 @@ const ArticleCard = React.memo(
                                 >
                                   <PopoverAnchor asChild>
                                     <span
-                                      className="flex items-center justify-end gap-1 text-right text-[11px]"
+                                      className={cn('flex items-center justify-end gap-1 text-right', isBodyArticle ? 'text-[11px]' : 'text-[12px]')}
                                       style={{
                                         color: isEmpty ? '#9ca3af' : '#111827',
                                         fontStyle: isEmpty ? 'italic' : 'normal',
@@ -4811,7 +4828,7 @@ const ArticleCard = React.memo(
                                   defaultValue={val === '—' ? undefined : val}
                                   onValueChange={(v) => handleSave(bom.field, v ?? null)}
                                 >
-                                  <SelectTrigger className="h-6 w-full text-[11px]">
+                                  <SelectTrigger className={cn('h-6 w-full', isBodyArticle ? 'text-[11px]' : 'text-[12px]')}>
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -4826,7 +4843,7 @@ const ArticleCard = React.memo(
                                 <Input
                                   autoFocus
                                   defaultValue={val === '—' ? '' : val}
-                                  className="h-6 px-1 text-[11px]"
+                                  className={cn('h-6 px-1', isBodyArticle ? 'text-[11px]' : 'text-[12px]')}
                                   onKeyDown={(e) =>
                                     e.key === 'Enter' &&
                                     handleSave(bom.field, (e.target as HTMLInputElement).value || null)
@@ -4835,7 +4852,7 @@ const ArticleCard = React.memo(
                                 />
                               ) : (
                                 <span
-                                  className="block truncate text-[11px]"
+                                  className={cn('block truncate', isBodyArticle ? 'text-[11px]' : 'text-[12px]')}
                                   style={{
                                     color: bom.isMarkdown
                                       ? '#7c3aed'
@@ -4868,7 +4885,78 @@ const ArticleCard = React.memo(
                             };
                             return rank(a.schemaKey) - rank(b.schemaKey);
                           })
-                          .map((a) => renderAttributeRow(a))}
+                          .map((a) => renderAttributeRow(a, false, true))}
+
+                      {/* FG: cost summary under SEGMENT — read-only, from each card's saved values.
+                          FAB = the Fab card's per-unit costs on a per-piece basis, same formula as the
+                          Precise Costing export's FAB row: cost × PR PC CONS. × (100 + WST 4%) / 100;
+                          BODY = the CMP COST TOTAL row (BGT / ACT / VENDOR / FINAL PR VAL);
+                          PKG COST = sum of its saved NET RATEs, in AUTO-BGT and ROUGH-V2 only. */}
+                      {!allowGroups && (() => {
+                        const COST_SOURCES: { label: string; title: string; fields: [string, string, string, string] }[] = [
+                          { label: 'FAB', title: 'FAB card: AUTO-BGT / ROUGH-V2 / VENDOR COST / FINAL COST', fields: ['autoBgt', 'roughV2', 'vendorFabricRate', 'finalCost'] },
+                          { label: 'BODY', title: 'CMP COST total: BGT / ACT / VENDOR / FINAL PR VAL', fields: ['totalBgtPrVal', 'totalActPrVal', 'totalVendorPrVal', 'totalFinalPrVal'] },
+                          { label: 'B TRIM', title: 'B TRIM card TOTAL', fields: ['bTrimTotalAutoBgt', 'bTrimTotalRoughV2', 'bTrimTotalVdrCost', 'bTrimTotalFinalCost'] },
+                          { label: 'V. ADD', title: 'V. ADD card TOTAL', fields: ['vaddTotalAutoBgt', 'vaddTotalRoughV2', 'vaddTotalVendorCost', 'vaddTotalFinalCost'] },
+                        ];
+                        const numOf = (field: string) => {
+                          const v = getFieldVal(field);
+                          const n = v == null ? NaN : Number(v);
+                          return Number.isFinite(n) ? n : null;
+                        };
+                        const fmt = (n: number | null) =>
+                          n == null ? '—' : n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        const rows = COST_SOURCES.map((s) => ({ label: s.label, title: s.title, vals: s.fields.map(numOf) }));
+                        // FAB per piece: PR PC CONS. = first of precise kg, rough kg, precise meter, rough meter
+                        // (as in the export); no consumption → no FAB cost.
+                        const FAB_WST_PCT = 4;
+                        const fabCons = ['preciseConsumptionKg', 'roughConsumptionKg', 'preciseConsumptionMeter', 'roughConsumptionMeter']
+                          .map(numOf)
+                          .find((v): v is number => v != null) ?? null;
+                        rows[0] = {
+                          ...rows[0],
+                          title: 'FAB card cost × PR PC CONS. × (100 + 4% WST) / 100 — as in Precise Costing',
+                          vals: rows[0].vals.map((v) => (v == null || fabCons == null ? null : (v * fabCons * (100 + FAB_WST_PCT)) / 100)),
+                        };
+                        // PKG COST: saved NET RATE total goes to AUTO-BGT and ROUGH-V2; no VDR / FINAL.
+                        const pkgRates = Object.values(PKG_RATE_FIELDS).map(numOf).filter((v): v is number => v != null);
+                        const pkgTotal = pkgRates.length ? pkgRates.reduce((a, b) => a + b, 0) : null;
+                        rows.push({ label: 'PKG COST', title: 'PKG COST: TOTAL NET RATE (saved tab)', vals: [pkgTotal, pkgTotal, null, null] });
+                        const totals = [0, 1, 2, 3].map((i) => {
+                          const vs = rows.map((r) => r.vals[i]).filter((v): v is number => v != null);
+                          return vs.length ? vs.reduce((a, b) => a + b, 0) : null;
+                        });
+                        const COLS = 'grid grid-cols-[110px_repeat(4,minmax(0,1fr))] gap-2';
+                        return (
+                          <div className="mx-1 mb-1 mt-2 overflow-hidden rounded-lg border border-slate-200" role="table" aria-label="Cost summary">
+                            <div className="border-b border-slate-200 bg-slate-50 px-2.5 py-1.5 text-[11px] font-extrabold tracking-[0.08em] text-slate-800">
+                              COST SUMMARY
+                            </div>
+                            <div role="row" className={cn(COLS, 'px-2.5 py-1.5 text-[11px] font-bold tracking-wider text-slate-500')}>
+                              <span role="columnheader">COST SOURCE</span>
+                              {['AUTO-BGT', 'ROUGH-V2', 'VDR COST', 'FINAL COST'].map((h) => (
+                                <span key={h} role="columnheader" className="text-right">{h}</span>
+                              ))}
+                            </div>
+                            {rows.map((r) => (
+                              <div key={r.label} role="row" className={cn(COLS, 'items-center border-t border-slate-100 px-2.5 py-1.5')} title={r.title}>
+                                <span role="rowheader" className="text-[13px] font-bold text-slate-900">{r.label}</span>
+                                {r.vals.map((v, i) => (
+                                  <span key={i} role="cell" className={cn('text-right font-mono text-[13px] font-semibold tabular-nums', v == null ? 'text-slate-400' : 'text-slate-900')}>
+                                    {fmt(v)}
+                                  </span>
+                                ))}
+                              </div>
+                            ))}
+                            <div role="row" className={cn(COLS, 'items-center bg-[#1e293b] px-2.5 py-2 text-white')}>
+                              <span role="rowheader" className="text-[13px] font-extrabold tracking-wider">TOTAL</span>
+                              {totals.map((v, i) => (
+                                <span key={i} role="cell" className="text-right font-mono text-[13.5px] font-extrabold tabular-nums">{fmt(v)}</span>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>}
 
@@ -4879,10 +4967,11 @@ const ArticleCard = React.memo(
                       onToggleCollapse={() => toggleGroupCollapse('PKG')}
                       locked={isLocked}
                       loadSavedRecord={loadFreshItem}
+                      draftId={isModifyMode ? undefined : item.id}
                       onSaveTab={(updates) => {
                         setLocalValues((prev) => ({ ...prev, ...updates }));
                         if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
-                        else onSave({ ...item, ...updates } as any, updates);
+                        else return onSave({ ...item, ...updates } as any, updates, { throwOnError: true });
                       }}
                     />
                   )}
@@ -4894,13 +4983,20 @@ const ArticleCard = React.memo(
                       onToggleCollapse={() => toggleGroupCollapse('CMP')}
                       locked={isLocked}
                       bgtPreset={cmpBgtPreset}
+                      aiSam={{
+                        CUTTING: item.aiCmpCostCutting != null ? String(Number(item.aiCmpCostCutting)) : undefined,
+                        STITCHING: item.aiCmpCostStitching != null ? String(Number(item.aiCmpCostStitching)) : undefined,
+                        IRONING: item.aiCmpCostIroning != null ? String(Number(item.aiCmpCostIroning)) : undefined,
+                        FINISHING: item.aiCmpCostFinishing != null ? String(Number(item.aiCmpCostFinishing)) : undefined,
+                      }}
                       actPreset={cmpActPreset}
                       savedPrVals={cmpSavedPrVals}
                       hasUnsavedPreset={cmpPresetUnsaved}
-                      onSave={(updates) => {
+                      draftId={isModifyMode ? undefined : item.id}
+                      onSave={async (updates) => {
                         setLocalValues((prev) => ({ ...prev, ...updates }));
                         if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
-                        else onSave({ ...item, ...updates } as any, updates);
+                        else await onSave({ ...item, ...updates } as any, updates, { throwOnError: true });
                         setCmpPresetUnsaved(false);
                       }}
                     />
@@ -4926,18 +5022,18 @@ const ArticleCard = React.memo(
                               className="flex cursor-pointer items-center justify-between rounded px-1.5 py-1 hover:bg-muted/40"
                               onClick={() => { if (!isEditingR) setEditingField(`rough_${field}`); }}
                             >
-                              <span className="text-[11.5px] text-slate-600">{label}</span>
+                              <span className="text-[12.5px] text-slate-600">{label}</span>
                               {isEditingR ? (
                                 <input
                                   autoFocus
                                   type="number"
-                                  className="w-24 rounded border border-border px-1 text-right text-[11.5px]"
+                                  className="w-24 rounded border border-border px-1 text-right text-[12.5px]"
                                   defaultValue={isEmpty ? '' : displayVal}
                                   onBlur={(e) => { handleSave(field, e.target.value || null); setEditingField(null); }}
                                   onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingField(null); }}
                                 />
                               ) : (
-                                <span className="text-[11.5px]" style={{ color: isEmpty ? '#9ca3af' : '#111827' }}>{displayVal}</span>
+                                <span className="text-[12.5px]" style={{ color: isEmpty ? '#9ca3af' : '#111827' }}>{displayVal}</span>
                               )}
                             </div>
                           );
@@ -4966,18 +5062,18 @@ const ArticleCard = React.memo(
                               className="flex cursor-pointer items-center justify-between rounded px-1.5 py-1 hover:bg-muted/40"
                               onClick={() => { if (!isEditingP) setEditingField(`fgprecise_${field}`); }}
                             >
-                              <span className="text-[11.5px] text-slate-600">{label}</span>
+                              <span className="text-[12.5px] text-slate-600">{label}</span>
                               {isEditingP ? (
                                 <input
                                   autoFocus
                                   type="number"
-                                  className="w-24 rounded border border-border px-1 text-right text-[11.5px]"
+                                  className="w-24 rounded border border-border px-1 text-right text-[12.5px]"
                                   defaultValue={isEmpty ? '' : displayVal}
                                   onBlur={(e) => { handleSave(field, e.target.value || null); setEditingField(null); }}
                                   onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingField(null); }}
                                 />
                               ) : (
-                                <span className="text-[11.5px]" style={{ color: isEmpty ? '#9ca3af' : '#111827' }}>{displayVal}</span>
+                                <span className="text-[12.5px]" style={{ color: isEmpty ? '#9ca3af' : '#111827' }}>{displayVal}</span>
                               )}
                             </div>
                           );
@@ -5085,10 +5181,10 @@ const ArticleCard = React.memo(
                 <VariantSubTable
                   genericId={item.id}
                   genericRecord={item}
-                  attributes={attributes}
                   onRefresh={onRefresh}
                   pathType={pathType}
                   refreshKey={variantRefreshKey}
+                  rebuilding={rebuildingVariants}
                 />
               )}
             </div>
@@ -5115,7 +5211,7 @@ const ArticleCard = React.memo(
         >
           <DialogContent className="w-auto max-w-[92vw] p-0">
             <DialogHeader className="flex flex-row items-center justify-between border-b border-border px-4 py-2">
-              <DialogTitle className="truncate text-sm">{item.imageName || 'Image Preview'}</DialogTitle>
+              <DialogTitle className="truncate text-sm">{item.designNumber || 'Image Preview'}</DialogTitle>
               {/* Zoom + rotate controls */}
               <div className="mr-8 flex items-center gap-1">
                 <Button
@@ -5187,7 +5283,7 @@ const ArticleCard = React.memo(
             >
               <img
                 src={shownImgUrl || ''}
-                alt={item.imageName || 'preview'}
+                alt={item.designNumber || 'preview'}
                 draggable={false}
                 onLoad={(e) => {
                   const t = e.currentTarget;
@@ -5222,59 +5318,127 @@ const ArticleCard = React.memo(
           </DialogContent>
         </Dialog>
 
-        {/* Duplicate — asks for Design Number before creating the copy */}
-        <Dialog open={dupConfirmOpen} onOpenChange={(o) => { if (!duplicating) { setDupConfirmOpen(o); if (!o) setDupDesignNo(''); } }}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Duplicate Article</DialogTitle>
-            </DialogHeader>
-            <p className="m-0 text-sm text-muted-foreground">
-              A new copy of this article will be created with all the same values.
-              Enter a Design Number for the duplicate article.
-            </p>
-            <div className="mt-2 flex flex-col gap-1">
-              <label className="text-xs font-semibold uppercase tracking-wide text-slate-600">
-                Design Number <span className="text-red-500">*</span>
-              </label>
-              <Input
-                autoFocus
-                placeholder="Enter design number…"
-                value={dupDesignNo}
-                onChange={(e) => setDupDesignNo(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && !duplicating && dupDesignNo.trim() && (async () => {
-                  setDuplicating(true);
-                  try { await onDuplicate(item, dupDesignNo.trim()); }
-                  catch (err) { message.error(err instanceof Error ? err.message : 'Failed to duplicate article'); }
-                  finally { setDuplicating(false); setDupConfirmOpen(false); setDupDesignNo(''); }
-                })()}
-                disabled={duplicating}
-              />
-              {dupDesignNo.trim() === '' && dupConfirmOpen && (
-                <p className="text-xs text-red-500">Design Number is required.</p>
-              )}
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => { setDupConfirmOpen(false); setDupDesignNo(''); }} disabled={duplicating}>
-                Cancel
-              </Button>
-              <Button
-                disabled={duplicating || dupDesignNo.trim() === ''}
-                onClick={async () => {
-                  setDuplicating(true);
-                  try {
-                    await onDuplicate(item, dupDesignNo.trim());
-                  } catch (err) {
-                    message.error(err instanceof Error ? err.message : 'Failed to duplicate article');
-                  } finally {
-                    setDuplicating(false);
-                    setDupConfirmOpen(false);
-                    setDupDesignNo('');
-                  }
-                }}
-              >
-                {duplicating ? 'Duplicating…' : 'Duplicate'}
-              </Button>
-            </DialogFooter>
+        {/* Duplicate — asks for Design Number, then offers to open the new copy */}
+        <Dialog
+          open={dupConfirmOpen}
+          onOpenChange={(o) => {
+            if (duplicating) return;
+            setDupConfirmOpen(o);
+            if (!o) { setDupDesignNo(''); setDupError(null); setDupDoneId(null); setDupDoneNo(''); }
+          }}
+        >
+          <DialogContent showClose={false} className="max-w-[440px] gap-0 p-0 outline-none">
+            {(() => {
+              const closeDup = () => { setDupConfirmOpen(false); setDupDesignNo(''); setDupError(null); setDupDoneId(null); setDupDoneNo(''); };
+              const runDup = async () => {
+                const designNo = dupDesignNo.trim();
+                if (!designNo || duplicating) return;
+                setDuplicating(true);
+                setDupError(null);
+                try {
+                  const newId = await onDuplicate(item, designNo);
+                  setDupDoneNo(designNo);
+                  setDupDoneId(newId || '');
+                } catch (err) {
+                  setDupError(err instanceof Error ? err.message : 'Failed to duplicate article');
+                } finally {
+                  setDuplicating(false);
+                }
+              };
+              const closeBtn = (
+                <button
+                  type="button"
+                  aria-label="Close"
+                  disabled={duplicating}
+                  onClick={closeDup}
+                  className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 disabled:opacity-40"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              );
+              if (dupDoneId !== null) {
+                return (
+                  <>
+                    {closeBtn}
+                    <div className="flex flex-col items-center gap-2.5 px-6 pb-2 pt-7 text-center">
+                      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#1e293b]">
+                        <Check className="h-5 w-5 text-white" strokeWidth={3} />
+                      </span>
+                      <DialogTitle className="text-xl">Copy created</DialogTitle>
+                      <p className="m-0 text-[13px] text-slate-600">
+                        <b className="font-mono text-slate-900">{dupDoneNo}</b> is now in <b className="text-slate-900">New Articles</b> as PENDING.
+                      </p>
+                    </div>
+                    <div className="flex justify-center gap-2 px-6 pb-5 pt-4">
+                      <Button variant="outline" onClick={closeDup}>Stay here</Button>
+                      {dupDoneId && (
+                        <Button
+                          autoFocus
+                          className="bg-[#1e293b] text-white hover:bg-[#0f172a]"
+                          onClick={() => { const id = dupDoneId; closeDup(); navigate(`/approver/${id}`); }}
+                        >
+                          Open the copy <ArrowRight className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </>
+                );
+              }
+              const sourceLabel = item.designNumber || item.articleNumber || 'article';
+              return (
+                <>
+                  {closeBtn}
+                  <div className="flex flex-col gap-4 px-6 pb-1 pt-6">
+                    <div className="flex items-center gap-2.5 pr-8">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-slate-100">
+                        <Copy className="h-[18px] w-[18px] text-[#1e293b]" />
+                      </span>
+                      <div className="flex min-w-0 flex-col">
+                        <DialogTitle className="truncate text-[19px]">Duplicate {sourceLabel}</DialogTitle>
+                        <span className="text-[12.5px] text-slate-500">
+                          {pathType === 'created' ? 'New PENDING copy in New Articles' : 'New copy with all the same values'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label htmlFor={`dup-design-${item.id}`} className="text-[11.5px] font-bold tracking-[0.06em] text-slate-700">
+                        DESIGN NUMBER <span className="text-red-700">*</span>
+                      </label>
+                      <Input
+                        id={`dup-design-${item.id}`}
+                        autoFocus
+                        placeholder="Design number for the copy"
+                        value={dupDesignNo}
+                        onChange={(e) => { setDupDesignNo(e.target.value); if (dupError) setDupError(null); }}
+                        onKeyDown={(e) => { if (e.key === 'Enter') void runDup(); }}
+                        disabled={duplicating}
+                        aria-invalid={!!dupError}
+                        className={cn('h-[42px] font-mono font-semibold', dupError && 'border-red-600')}
+                      />
+                      {dupError && <p className="m-0 text-xs text-red-700">{dupError}</p>}
+                    </div>
+                    {pathType === 'created' && (
+                      <details className="text-[12.5px] text-slate-600">
+                        <summary className="cursor-pointer font-semibold text-slate-700">What gets copied?</summary>
+                        <div className="pt-1.5">Everything except the article number, SAP status and body / fabric article number.</div>
+                      </details>
+                    )}
+                  </div>
+                  <div className="flex justify-end gap-2 px-6 pb-5 pt-4">
+                    <Button variant="outline" onClick={closeDup} disabled={duplicating}>Cancel</Button>
+                    <Button
+                      disabled={duplicating || dupDesignNo.trim() === ''}
+                      onClick={() => void runDup()}
+                      className="bg-[#1e293b] text-white hover:bg-[#0f172a]"
+                    >
+                      {duplicating
+                        ? <><Loader2 className="h-4 w-4 animate-spin" /> Duplicating…</>
+                        : <><Copy className="h-4 w-4" /> Duplicate</>}
+                    </Button>
+                  </div>
+                </>
+              );
+            })()}
           </DialogContent>
         </Dialog>
 
@@ -5288,7 +5452,7 @@ const ArticleCard = React.memo(
               </DialogTitle>
             </DialogHeader>
             <p className="m-0">
-              Create fabric article for &quot;{fabConfirmItem?.articleNumber || fabConfirmItem?.imageName || fabConfirmItem?.id}&quot;?
+              Create fabric article for &quot;{fabConfirmItem?.articleNumber || fabConfirmItem?.id}&quot;?
             </p>
             <DialogFooter>
               <Button variant="outline" onClick={() => setFabConfirmItem(null)} disabled={fabricCreating}>
@@ -5335,7 +5499,7 @@ const ArticleCard = React.memo(
                     if (!r.ok) {
                       if (data.fabricArticleNumber) {
                         handleSave('fabricArticleNumber', String(data.fabricArticleNumber));
-                        message.warning(data.error || 'Fabric article already exists — number filled.');
+                        message.success(`Fabric Article already exists: ${data.fabricArticleNumber} — auto-filled. Click Modify to save.`);
                       } else {
                         message.error(data.error || 'Failed to create fabric article');
                       }
@@ -5372,39 +5536,23 @@ export const ApproverArticleList: React.FC<ApproverArticleListProps> = ({
   loading,
   selectedRowKeys,
   onSelectionChange,
-  onEdit: _onEdit,
   onSave,
   onCreateFabricArticle,
   onCreateBodyArticle,
   onProceedFGArticle,
   onModify,
-  attributes,
   onRefresh,
   pathType,
   allowGroups,
   hideCreateBody,
+  joinTop,
   readOnly,
   attributeMajorCategory,
   serverPagination,
 }) => {
-  const [cardGroups, setCardGroups] = useState<CardGroup[]>(() => {
-    const cached = getCachedAttributeGroups();
-    return cached && cached.length > 0 ? buildCardGroups(cached) : ATTRIBUTE_GROUPS;
-  });
-
-  useEffect(() => {
-    preloadAttributeGroups()
-      .then((entries) => {
-        if (entries.length > 0) setCardGroups(buildCardGroups(entries));
-      })
-      .catch(() => {
-        /* keep hardcoded fallback */
-      });
-  }, []);
-
   const visibleCardGroups = allowGroups
-    ? cardGroups.filter((g) => allowGroups.includes(g.group))
-    : cardGroups;
+    ? ATTRIBUTE_GROUPS.filter((g) => allowGroups.includes(g.group))
+    : ATTRIBUTE_GROUPS;
 
   const handleToggleSelect = useCallback(
     (id: string) => {
@@ -5422,7 +5570,7 @@ export const ApproverArticleList: React.FC<ApproverArticleListProps> = ({
   }, [items, selectedRowKeys, onSelectionChange]);
 
   const handleDuplicate = useCallback(
-    async (item: ApproverItem, designNumber: string): Promise<void> => {
+    async (item: ApproverItem, designNumber: string): Promise<string | undefined> => {
       const token = localStorage.getItem('authToken');
       const res = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${item.id}/duplicate`, {
         method: 'POST',
@@ -5433,8 +5581,9 @@ export const ApproverArticleList: React.FC<ApproverArticleListProps> = ({
         const data = await res.json().catch(() => null);
         throw new Error(data?.error || 'Failed to duplicate article');
       }
-      message.success('Article duplicated successfully');
+      const data = await res.json().catch(() => null);
       onRefresh();
+      return data?.id ? String(data.id) : undefined;
     },
     [onRefresh],
   );
@@ -5468,12 +5617,12 @@ export const ApproverArticleList: React.FC<ApproverArticleListProps> = ({
           onProceedFGArticle={onProceedFGArticle}
           onDuplicate={handleDuplicate}
           onModify={onModify}
-          attributes={attributes}
           onRefresh={onRefresh}
           cardGroups={visibleCardGroups}
           pathType={pathType}
           allowGroups={allowGroups}
           hideCreateBody={hideCreateBody}
+          joinTop={joinTop}
           readOnly={readOnly}
           attributeMajorCategory={attributeMajorCategory}
         />

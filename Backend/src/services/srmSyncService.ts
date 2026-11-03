@@ -26,9 +26,7 @@ import { getHsnCodeByMcCode, getMcCodeByMajorCategory } from '../utils/mcCodeMap
 import { getSegmentFromMaster } from './segmentMasterService';
 import { buildArticleDescription } from '../utils/articleDescriptionBuilder';
 import { getExcludedDescriptionFields } from '../utils/categoryFieldVisibility';
-import { mirror360FlatUpdate } from '../utils/mirror360Flat';
-import { VLMService } from './vlm/vlmService';
-import { mvgrMappingService } from './mvgrMappingService';
+import { vlmService } from './vlm/vlmService';
 import { storageService } from './storageService';
 import { upsertRawArticleFromSrm, RAW_PIPELINE_CUTOFF } from './rawArticleExtractionService';
 import { hierarchyService } from './hierarchyService';
@@ -53,6 +51,8 @@ interface SrmRow {
   no_of_colors: number;
   price: number;
   image_url?: string | null;
+  /** Back photo of the design (optional; front stays in image_url). */
+  back_image_url?: string | null;
   presentations_type?: string | null;
   /** SRM set article: shared by every photo of one set; role is PARENT | TOP | PIECE. */
   set_group_id?: string | null;
@@ -189,18 +189,17 @@ let cachedEnrichSchema: Array<{ key: string; label: string; type: any; allowedVa
 
 async function getEnrichSchema() {
   if (cachedEnrichSchema) return cachedEnrichSchema;
+  // Values are not loaded here — enrichSrmRowWithVlm replaces them with the
+  // major category's grid values before calling the VLM.
   const masterAttrs = await prisma.masterAttribute.findMany({
     where: { isActive: true },
     orderBy: { displayOrder: 'asc' },
-    include: {
-      allowedValues: { where: { isActive: true }, orderBy: { displayOrder: 'asc' } }
-    }
   });
   cachedEnrichSchema = masterAttrs.map(attr => ({
     key: attr.key,
     label: attr.label || attr.key,
     type: attr.type.toLowerCase() as any,
-    allowedValues: attr.allowedValues.map((av: any) => av.shortForm),
+    allowedValues: [] as string[],
   }));
   return cachedEnrichSchema;
 }
@@ -304,7 +303,7 @@ async function fetchAllRows(): Promise<SrmRow[]> {
  * `srmOriginalDesignNumber` is set ONCE on insert and never touched again, making
  * it a reliable stable key regardless of what the user changes later.
  */
-async function findExisting(presentationNo: string, srmDesignNumber: string): Promise<{ id: string; imageUrl: string | null; vendorCode: string | null; vendorName: string | null } | null> {
+async function findExisting(presentationNo: string, srmDesignNumber: string): Promise<{ id: string; imageUrl: string | null; backImageUrl: string | null; vendorCode: string | null; vendorName: string | null } | null> {
   return prisma.extractionResultFlat.findFirst({
     where: {
       pptNumber: presentationNo,
@@ -329,7 +328,24 @@ async function findExisting(presentationNo: string, srmDesignNumber: string): Pr
     // Prefer an already-enriched row (COMPLETED < SRM_IMPORT alphabetically) over
     // an un-enriched stub when both exist for the same design number.
     orderBy: { extractionStatus: 'asc' },
-    select: { id: true, imageUrl: true, vendorCode: true, vendorName: true },
+    select: { id: true, imageUrl: true, backImageUrl: true, vendorCode: true, vendorName: true },
+  });
+}
+
+/**
+ * Store SRM's back photo on a flat record, mirrored to R2 like the front photo
+ * (SRM URLs are private / short-lived). Only fills an empty back_image_url.
+ */
+export async function attachSrmBackImage(
+  flatId: string,
+  srmBackImageUrl: string | null | undefined,
+  currentBackImageUrl: string | null = null,
+): Promise<void> {
+  if (!srmBackImageUrl || currentBackImageUrl) return;
+  const r2Url = await downloadAndMirrorToR2(srmBackImageUrl);
+  await prisma.extractionResultFlat.update({
+    where: { id: flatId },
+    data: { backImageUrl: r2Url || srmBackImageUrl },
   });
 }
 
@@ -362,13 +378,10 @@ async function resolveCategoryId(majorCategory: string, division: string): Promi
   throw new Error('No Category found in database — cannot create ExtractionJob');
 }
 
-/**
- * VLM enrichment for SRM records that have an image URL.
- * Runs after the flat row is already created, fills in all the garment
- * attributes that SRM doesn't provide (FAB, BODY, VA ACC, PRINTING groups).
- * Never overwrites the SRM-authoritative fields.
- */
-const vlmService = new VLMService();
+// ── VLM enrichment for SRM records that have an image URL ──────────────────
+// Runs after the flat row is already created, fills in all the garment
+// attributes that SRM doesn't provide (FAB, BODY, VA ACC, PRINTING groups),
+// using the app-wide shared vlmService. Never overwrites SRM-authoritative fields.
 
 // Max VLM attempts per record: 1 initial call + 2 automatic retries
 const VLM_MAX_ATTEMPTS = 3;
@@ -467,6 +480,7 @@ async function enrichSrmRowWithVlm(
         image: base64Image,
         schema: constrainedSchema,
         categoryName: majorCategory || undefined,
+        majorCategory: majorCategory || undefined,
         discoveryMode: false,
       });
 
@@ -506,16 +520,10 @@ async function enrichSrmRowWithVlm(
       // FAB group
       const yarn1 = get('yarn_01');       if (yarn1)  updates.yarn1  = yarn1;
       const yarn2 = get('yarn_02');       if (yarn2)  updates.yarn2  = yarn2;
-      const mainMvgr = get('main_mvgr'); if (mainMvgr) {
-        updates.mainMvgr = mainMvgr;
-        updates.mainMvgrFullForm = mvgrMappingService.getMainMvgrFullForm(mainMvgr);
-      }
+      const mainMvgr = get('main_mvgr'); if (mainMvgr) updates.mainMvgr = mainMvgr;
       const fabMain = get('fabric_main_mvgr'); if (fabMain) updates.fabricMainMvgr = fabMain;
       const weave   = get('weave');            if (weave)   updates.weave           = weave;
-      const mFab2   = get('m_fab2');           if (mFab2)   {
-        updates.mFab2 = mFab2;
-        updates.mFab2FullForm = mvgrMappingService.getWeave2FullForm(mFab2);
-      }
+      const mFab2   = get('m_fab2');           if (mFab2)   updates.mFab2           = mFab2;
       const comp    = get('composition');      if (comp)    updates.composition     = comp;
       const finish  = get('finish');           if (finish)  updates.finish          = finish;
       const gsm     = get('gsm', 'gram_per_square_meter'); if (gsm) updates.gsm   = gsm;
@@ -605,6 +613,13 @@ async function enrichSrmRowWithVlm(
         return false;
       }
 
+      // CMP COST card "AI SAM" — added after the usable-attributes check so it never counts as one.
+      const aiSam = result.aiSam;
+      if (aiSam?.cutting != null) updates.aiCmpCostCutting = aiSam.cutting;
+      if (aiSam?.stitching != null) updates.aiCmpCostStitching = aiSam.stitching;
+      if (aiSam?.ironing != null) updates.aiCmpCostIroning = aiSam.ironing;
+      if (aiSam?.finishing != null) updates.aiCmpCostFinishing = aiSam.finishing;
+
       // ── Save to DB ─────────────────────────────────────────────────────────
       const updatedRow = await prisma.extractionResultFlat.update({ where: { id: flatId }, data: updates });
 
@@ -622,7 +637,6 @@ async function enrichSrmRowWithVlm(
         }
       }
 
-      void mirror360FlatUpdate(flatId, updates);
       return true;
 
     } catch (err: any) {
@@ -701,8 +715,8 @@ async function insertRow(row: SrmRow, rawArticleId?: string): Promise<{ id: stri
       jobId:          job.id,
       source:         'SRM',
       extractionStatus: 'SRM_IMPORT',
-      imageName:      null,
       imageUrl:       srmImageUrl,
+      sourceImageUrl: srmImageUrl || null, // clean image — never the watermarked approved copy
       isGeneric:      true,   // SRM records are standalone articles, not variants
 
       // SRM-provided fields
@@ -745,22 +759,10 @@ async function insertRow(row: SrmRow, rawArticleId?: string): Promise<{ id: stri
         where: { id: flat.id },
         data: { articleDescription: artDesc },
       });
-      void mirror360FlatUpdate(flat.id, { articleDescription: artDesc });
     }
   } catch {
     // Non-critical
   }
-
-  // Mirror to 360article schema
-  void mirror360FlatUpdate(flat.id, {
-    source: 'SRM', extractionStatus: 'SRM_IMPORT',
-    pptNumber: flat.pptNumber, designNumber: flat.designNumber,
-    vendorCode: flat.vendorCode, vendorName: flat.vendorName, division: flat.division,
-    subDivision: flat.subDivision, majorCategory: flat.majorCategory,
-    macroMvgr: flat.macroMvgr, rate: flat.rate,
-    year: flat.year, season: flat.season, mcCode: flat.mcCode,
-    hsnTaxCode: flat.hsnTaxCode, segment: flat.segment,
-  });
 
   // NOTE: Do NOT call duplicateForKidsDivision for SRM records.
   // SRM provides the exact major category from the vendor — we must trust it as-is.
@@ -777,11 +779,11 @@ async function insertRow(row: SrmRow, rawArticleId?: string): Promise<{ id: stri
       finalImageUrl = r2Url;
       await prisma.extractionResultFlat.update({
         where: { id: flat.id },
-        data: { imageUrl: r2Url },
+        data: { imageUrl: r2Url, sourceImageUrl: r2Url },
       });
-      void mirror360FlatUpdate(flat.id, { imageUrl: r2Url });
     }
   }
+  await attachSrmBackImage(flat.id, row.back_image_url);
 
   return { id: flat.id, imageUrl: finalImageUrl };
 }
@@ -856,6 +858,7 @@ export async function syncFromSrm(triggeredBy: 'CRON' | 'ADMIN' | 'WEBHOOK' = 'C
         // Do NOT trigger VLM here — raw_articles extraction cron owns that.
         const patch: Record<string, any> = {};
         if (row.image_url && !existing.imageUrl) patch.imageUrl = row.image_url;
+        if (row.back_image_url && !existing.backImageUrl) patch.backImageUrl = row.back_image_url;
         const normCode = normaliseVendorCode(row.vendor_code);
         if (normCode && existing.vendorCode !== normCode) patch.vendorCode = normCode;
         if (row.vendor_name && !existing.vendorName) patch.vendorName = row.vendor_name;
@@ -864,9 +867,13 @@ export async function syncFromSrm(triggeredBy: 'CRON' | 'ADMIN' | 'WEBHOOK' = 'C
           if (patch.imageUrl) {
             const r2Url = await downloadAndMirrorToR2(patch.imageUrl);
             if (r2Url) patch.imageUrl = r2Url;
+            patch.sourceImageUrl = patch.imageUrl;
+          }
+          if (patch.backImageUrl) {
+            const r2Url = await downloadAndMirrorToR2(patch.backImageUrl);
+            if (r2Url) patch.backImageUrl = r2Url;
           }
           await prisma.extractionResultFlat.update({ where: { id: existing.id }, data: patch });
-          void mirror360FlatUpdate(existing.id, patch);
           console.log(`[SRM Sync] Patched [${Object.keys(patch).join(', ')}] for: ${row.presentation_no} / ${row.design_number}`);
           result.inserted++;
           itemLogs.push({ runId: run.id, pptNumber: row.presentation_no, srmDesignNumber: row.design_number, flatId: existing.id, action: 'PATCHED', errorMessage: null });
@@ -1067,9 +1074,8 @@ export async function backfillSrmVlmEnrichment(): Promise<EnrichResult> {
         imageUrl = r2Url;
         await prisma.extractionResultFlat.update({
           where: { id: rec.id },
-          data: { imageUrl: r2Url },
+          data: { imageUrl: r2Url, sourceImageUrl: r2Url },
         });
-        void mirror360FlatUpdate(rec.id, { imageUrl: r2Url });
         console.log(`[SRM Enrich Backfill] Re-mirrored SRM image to R2 for ${rec.id}`);
       } else {
         console.warn(`[SRM Enrich Backfill] Could not re-mirror image for ${rec.id} — skipping VLM`);
@@ -1110,6 +1116,7 @@ interface SrmByRefImage {
   quantity: number | null;
   available_date: string | null;
   image_url: string | null;
+  back_image_url?: string | null;
   cost_sheet_url: string | null;
   notes: string | null;
   uploaded_at: string;
@@ -1203,10 +1210,12 @@ export async function syncSinglePresentation(
         no_of_colors:    img.no_of_colors ?? 0,
         price:           img.price ?? 0,
         image_url:       img.image_url || null,
+        back_image_url:  img.back_image_url || null,
       };
 
       const existing = await findExisting(row.presentation_no, row.design_number);
       if (existing) {
+        await attachSrmBackImage(existing.id, row.back_image_url, existing.backImageUrl);
         if (row.image_url && !existing.imageUrl) {
           // Mirror to R2 first so the stored URL is permanent
           const r2Url = await downloadAndMirrorToR2(row.image_url);
@@ -1215,7 +1224,6 @@ export async function syncSinglePresentation(
             where: { id: existing.id },
             data: { imageUrl: finalUrl },
           });
-          void mirror360FlatUpdate(existing.id, { imageUrl: finalUrl });
           toEnrich.push({ id: existing.id, imageUrl: finalUrl, majorCategory: presentation.major_category });
           result.inserted++;
         } else {
@@ -1261,6 +1269,7 @@ export async function syncSinglePresentation(
 export interface SrmWebhookImage {
   design_number: string;
   image_url?: string | null;
+  back_image_url?: string | null;
   price?: number;
   fabric?: string;
   no_of_colors?: number;
@@ -1313,7 +1322,7 @@ export async function processSrmWebhookBatch(
   console.log(`[SRM Hook] Batch started — presentation: ${req.presentation_no} | images: ${req.images.length}`);
 
   // ── Audit trail ───────────────────────────────────────────────────────────
-  // The webhook is otherwise invisible (it's excluded from audit_logs), which is
+  // The webhook is otherwise invisible (no request log covers it), which is
   // why the 8-June duplication was hard to trace. Record a persistent run +
   // per-image item rows in the SAME tables the cron sync uses (srm_sync_runs /
   // srm_sync_run_items), with triggeredBy='WEBHOOK'. All logging is best-effort:
@@ -1358,6 +1367,7 @@ export async function processSrmWebhookBatch(
         no_of_colors:               img.no_of_colors ?? 0,
         price:                      img.price        ?? 0,
         image_url:                  img.image_url    || null,
+        back_image_url:             img.back_image_url || null,
       };
 
       // ── 1. Insert or locate existing DB record ──────────────────────────
@@ -1369,6 +1379,7 @@ export async function processSrmWebhookBatch(
         flatId   = existing.id;
         imageUrl = existing.imageUrl;
         action   = 'SKIPPED';
+        await attachSrmBackImage(flatId, img.back_image_url, existing.backImageUrl);
 
         // If this call now provides an image URL we didn't have before — mirror it
         if (img.image_url && !existing.imageUrl) {
@@ -1376,7 +1387,6 @@ export async function processSrmWebhookBatch(
           if (r2Url) {
             imageUrl = r2Url;
             await prisma.extractionResultFlat.update({ where: { id: flatId }, data: { imageUrl: r2Url } });
-            void mirror360FlatUpdate(flatId, { imageUrl: r2Url });
             action = 'PATCHED';
           }
         }

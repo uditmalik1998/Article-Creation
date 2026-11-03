@@ -1,7 +1,18 @@
 import { VLMProvider, FashionExtractionRequest } from '../../../types/vlm';
-import { EnhancedExtractionResult, AttributeData } from '../../../types/extraction';
+import { EnhancedExtractionResult, AttributeData, CmpSamMinutes } from '../../../types/extraction';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { FULL_WEAVE_CLASSIFICATION_GUIDANCE } from '../prompts/fabricWeaveGuidance';
+
+// "ai_sam" block → minutes per process; anything that is not a sane positive number becomes null.
+function parseAiSam(raw: any): CmpSamMinutes | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const num = (v: any): number | null => {
+    const n = typeof v === 'number' ? v : parseFloat(String(v ?? ''));
+    return Number.isFinite(n) && n > 0 && n < 1000 ? Math.round(n * 100) / 100 : null;
+  };
+  const out = { cutting: num(raw.cutting), stitching: num(raw.stitching), ironing: num(raw.ironing), finishing: num(raw.finishing) };
+  return Object.values(out).some((v) => v !== null) ? out : null;
+}
 
 /**
  * Multi-step JSON repair for malformed Gemini responses.
@@ -56,7 +67,7 @@ export class GoogleVisionProvider implements VLMProvider {
   constructor(config?: Partial<GoogleVisionConfig>) {
     this.config = {
       model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
-      maxTokens: 65536,  // Gemini 2.5-pro max — effectively unlimited
+      maxTokens: 65536,  
       temperature: 0.0,
       timeout: 300000,
       ...config
@@ -98,7 +109,7 @@ export class GoogleVisionProvider implements VLMProvider {
         }
       }
 
-      const { attributes, extractedMetadata, rawGeminiResponse } = await this.parseResponse(response!.content, request.schema);
+      const { attributes, extractedMetadata, rawGeminiResponse, aiSam } = await this.parseResponse(response!.content, request.schema);
 
       const confidence = this.calculateConfidence(attributes);
 
@@ -121,6 +132,7 @@ export class GoogleVisionProvider implements VLMProvider {
         },
         extractedMetadata: extractedMetadata || undefined,
         rawGeminiResponse: rawGeminiResponse || null,
+        aiSam: aiSam ?? null,
       };
     } catch (error) {
       console.error(`❌ [Google Vision] Extraction failed:`, error instanceof Error ? error.message : 'Unknown error');
@@ -206,7 +218,7 @@ Return JSON only, no markdown. Just the flat key-value JSON object.`;
   }
 
   private buildPrompt(request: FashionExtractionRequest): string {
-    const { schema, categoryName, department, subDepartment } = request;
+    const { schema, categoryName, department, subDepartment, majorCategory } = request;
 
     const categoryContext = categoryName
       ? `\nCATEGORY: ${categoryName} (${department}/${subDepartment})`
@@ -223,30 +235,357 @@ Return JSON only, no markdown. Just the flat key-value JSON object.`;
       return `${item.key}${allowedValues}`;
     }).join('\n');
 
-    return `YOU ARE A FASHION ATTRIBUTE DATABASE LOOKUP SYSTEM.
+    // CMP COST card "AI SAM": minutes per process, estimated from the image (no BGT benchmark is sent —
+    // 2026-10-30: Gemini copied the rough_cmp_cost_master numbers when they were supplied).
+    const aiSamSection = `
+# AI GARMENT SAM ESTIMATION — OPERATION-BASED IE APPROACH
 
-🤖 YOUR IDENTITY:
-• You are NOT a creative AI - you are a STRICT LOOKUP MACHINE
-• Your brain ONLY contains the allowed values from the database below
-• You CANNOT make up values, use approximations, or provide generic answers
-• You CANNOT use "yes", "no", "present", "visible", or any generic terms
-• If a value is not in your database → return NULL (leave blank)
-• If you are unsure → return NULL (leave blank)
-• You ONLY return EXACT values from the allowed list below
-• If both short and full forms exist, RETURN the SHORT FORM (e.g., "MTL_ZIP")
+## ROLE
 
-🎯 TASK: Extract ${schema.length} attributes from this ${categoryName || 'garment'}.${categoryContext}
+You are a Senior Industrial Engineer (IE) with expertise in garment manufacturing, garment construction, production engineering, operation breakdown, and Standard Allowed Minute (SAM) estimation.
 
-⚠️ CRITICAL RULES:
-• EVERY value MUST be from the "ONLY USE THESE VALUES" list below
-• NO generic answers like "yes", "no", "present", "visible", "standard"
-• NO creative thinking - ONLY match what you see to database values
-• If unsure or not in database → NULL
-• EXACT spelling and case from database required
-• PATTERN must use only PATTERN allowed values (do NOT use solid/printed/AOP/abstract/heather/polka unless they are explicitly in PATTERN)
-• PATTERN: Do NOT default to BASIC. Use BASIC only if garment is truly plain with no cut-sew panels, no layers, no contrast blocks, no design structure. If unsure, return NULL.
+Your task is to analyze the uploaded garment image and calculate realistic manufacturing SAM for four departments:
 
-PATTERN DEFINITIONS (use ONLY these if visible):
+1. Cutting
+2. Stitching
+3. Ironing
+4. Finishing
+
+You must follow an operation-based estimation methodology similar to an experienced garment factory IE.
+
+Do not estimate SAM merely by identifying the garment category. Analyze its actual construction and manufacturing requirements.
+
+---
+
+## STAGE 1: GARMENT CONSTRUCTION ANALYSIS
+
+First, carefully inspect the uploaded garment image.
+
+Identify all visible construction details, including:
+
+- Garment type and category.
+- Fabric type, appearance, thickness, and characteristics.
+- Number of panels and garment components.
+- Collar or hood construction.
+- Front opening, placket, buttons, zippers, or other closures.
+- Pockets and pocket construction.
+- Sleeve type, sleeve attachment, cuffs, and hems.
+- Waistbands, elastic, drawstrings, lining, and trims.
+- Seams, topstitching, reinforcement, and decorative stitching.
+- Checks, stripes, prints, embroidery, and pattern matching.
+- Any additional construction details that increase manufacturing complexity.
+
+IMPORTANT:
+Do not assume that hidden construction details are absent. Where the image does not provide enough information, use reasonable garment-industry assumptions without inventing unnecessary components.
+
+---
+
+## STAGE 2: OPERATION-WISE TIME ESTIMATION
+
+Internally break down the garment into individual manufacturing operations.
+
+For each operation, estimate the required time based on:
+
+- Operation complexity.
+- Number of components involved.
+- Fabric handling difficulty.
+- Sewing or processing requirements.
+- Machine operation requirements.
+- Handling and positioning time.
+- Skilled operator performance.
+- Practical production-line working conditions.
+
+Do not use one generic time value for an entire garment.
+
+### A. CUTTING SAM
+
+Consider the following operations where applicable:
+
+- Fabric spreading and handling.
+- Marker and pattern preparation.
+- Pattern placement and alignment.
+- Fabric checks or stripe matching.
+- Cutting garment panels.
+- Cutting sleeves, collars, cuffs, pockets, hoods, and other components.
+- Component separation and bundling.
+
+Increase cutting SAM when fabric matching, multiple panels, or complex components require additional handling.
+
+### B. STITCHING SAM
+
+This department requires the most detailed construction analysis.
+
+Identify and estimate all applicable operations, such as:
+
+- Shoulder joining.
+- Side seam joining.
+- Sleeve construction.
+- Sleeve attachment.
+- Sleeve closing.
+- Collar construction and attachment.
+- Hood panel joining and hood attachment.
+- Front placket construction.
+- Button and buttonhole operations.
+- Pocket preparation and attachment.
+- Cuff construction and attachment.
+- Hemming.
+- Topstitching.
+- Reinforcement stitching.
+- Elastic and drawstring attachment.
+- Lining and trim attachment.
+- Other visible garment construction operations.
+
+IMPORTANT:
+- Do not underestimate stitching SAM by considering only the main body seams.
+- A hood, pocket, placket, cuff, lining, or additional construction detail must contribute to the estimate when present.
+- Avoid counting the same operation twice.
+- Do not include operations that are not required by the garment.
+
+### C. IRONING SAM
+
+Consider:
+
+- Intermediate pressing where required.
+- Seam opening and pressing.
+- Collar and cuff pressing.
+- Hood and placket pressing.
+- Sleeve and body pressing.
+- Final garment ironing.
+- Fabric-specific pressing requirements.
+
+### D. FINISHING SAM
+
+Consider:
+
+- Thread trimming.
+- Button, zipper, and accessory checking.
+- Measurement checking.
+- Garment appearance inspection.
+- Loose thread removal.
+- Final quality checking.
+- Folding and finishing preparation.
+
+---
+
+## STAGE 3: FACTORY BENCHMARK CALIBRATION
+
+If factory-approved SAM benchmarks or similar garment records are supplied, use them as the primary calibration reference.
+
+Apply these rules:
+
+1. Identify the closest matching garment category and construction type.
+2. Compare its components and complexity with the uploaded garment.
+3. Use relevant approved BGT SAM values as reference points.
+4. Adjust the estimate for additional or missing construction operations.
+5. Do not blindly copy benchmarks from a different garment type.
+6. Do not use BGT PR VAL, costing values, or monetary amounts as SAM minutes.
+7. If no relevant benchmark exists, estimate using the construction and operation analysis.
+
+A benchmark is a calibration reference, not a replacement for garment analysis.
+
+---
+
+## STAGE 4: SAM ESTIMATION RULES
+
+Follow these rules strictly:
+
+- Estimate realistic manufacturing time under efficient industrial production conditions.
+- Assume trained operators using appropriate industrial machinery.
+- Assume SINGLE-PIECE PRODUCTION (1 piece per style): the full fabric spreading/laying, marker or pattern placement, cutting and machine set-up time is charged to this one piece (nothing is shared across a lay or order), and one skilled operator makes the complete garment through all operations, including machine/thread changes, component handling and positioning. Estimate this single-piece make-through time, not bulk production-line time.
+- Do not assume unrealistic perfect production conditions.
+- Do not assign generic low default values.
+- Do not inflate SAM without construction-based justification.
+- Account for all visible construction complexity.
+- Estimate each department independently.
+- Use positive numeric values only.
+- Round each department estimate to a maximum of two decimal places.
+- Calculate total SAM by adding the four departmental values.
+- Do not force the estimate to match a predetermined target.
+- Do not claim the estimate is factory-approved or time-study validated.
+
+If image details are unclear, use reasonable conservative assumptions.
+
+---
+
+## STAGE 5: INTERNAL VALIDATION
+
+Before returning the result, verify:
+
+1. Have all visible garment components been considered?
+2. Has every major stitching operation been accounted for?
+3. Have additional features such as pockets, hoods, collars, cuffs, plackets, and closures been considered?
+4. Has fabric complexity been reflected in cutting and stitching?
+5. Are ironing and finishing estimates appropriate for the garment?
+6. Have duplicate operations been avoided?
+7. Are the estimates consistent with relevant factory benchmarks, if provided?
+8. Does total SAM exactly equal the sum of all four departments?
+
+Do not expose internal reasoning or operation-wise calculations in the final output.
+
+---
+
+## STAGE 6: STRICT JSON OUTPUT
+
+Put the result in the "ai_sam" field of the main JSON output (do not return it as a separate JSON document, and keep all other output fields). Inside "ai_sam", do not include Markdown, explanations, operation breakdowns, comments, or additional fields.
+
+Use exactly this structure:
+
+"ai_sam": {
+  "cutting": number,
+  "stitching": number,
+  "ironing": number,
+  "finishing": number,
+  "total_sam": number
+}
+
+There are no default or target values.
+
+All values must be numeric and positive.
+
+The total_sam must equal:
+
+cutting + stitching + ironing + finishing
+`;
+
+    return `YOU ARE A FASHION GARMENT IMAGE ATTRIBUTE EXTRACTION
+AND STRICT DATABASE VALIDATION SYSTEM.
+
+Your task is to accurately extract ${schema.length} garment
+attributes from the uploaded image using the supplied
+Division, Sub-Division, Major Category, attribute definitions
+and database grid values.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. GARMENT CATEGORY CONTEXT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Division: ${department || 'not supplied'}
+Sub-Division: ${subDepartment || 'not supplied'}
+Major Category: ${majorCategory || categoryName || 'not supplied'}
+Garment Category: ${categoryName || "garment"}
+
+${categoryContext}
+
+Use this category context to understand the intended
+garment type, construction and applicable attributes.
+
+Do not change the supplied category codes.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. IMAGE ANALYSIS RULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Analyze the uploaded image carefully before assigning values.
+
+Identify only visually supported garment characteristics,
+including:
+
+• Garment type and silhouette
+• Fabric appearance and construction
+• Neckline, collar, hood, sleeves and cuffs
+• Waistband, hem and closures
+• Pockets, panels, seams and layering
+• Prints, embroidery, trims and embellishments
+• Visible styling and design details
+
+Distinguish garment construction from surface appearance.
+
+Do not classify printed designs as embroidery.
+Do not classify fabric texture or weave as print.
+Do not confuse cut-and-sew panels with fabric layers.
+Do not infer hidden details without reliable evidence.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. STRICT DATABASE VALUE RULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ATTRIBUTE DATABASE:
+${schemaDefinition}
+
+GRID VALUES FOR SELECTED CATEGORY:
+The allowed lists in the attribute database above are already
+the grid values for the selected Division, Sub-Division and
+Major Category.
+
+For every extracted attribute:
+
+1. Return only an exact value from its applicable allowed list.
+2. For grid-controlled attributes, use only values supplied
+   for the selected Division, Sub-Division and Major Category.
+3. Match exact spelling, capitalization and formatting.
+4. Do not invent, paraphrase, approximate or normalize values.
+5. Do not select a value merely because it exists in the grid.
+   It must match the garment image and category context.
+6. Never use values from another category or division.
+7. If no valid value can be established, return null.
+8. Never return generic values such as YES, NO, PRESENT,
+   VISIBLE, STANDARD or UNKNOWN.
+9. Do not add, remove or rename output attribute keys.
+10. Preserve the required output data types.
+
+The database defines valid values.
+The image provides visual evidence.
+The category context determines applicability.
+The grid restricts valid choices.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. CATEGORY-SPECIFIC ATTRIBUTE RULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+M_AGE_GROUP:
+
+Return exactly ONE of these four values:
+
+"GEN X   (46-61Y)"
+"MILLENIALS (30-45Y)"
+"GEN Z (13-29Y)"
+"ALL GROUP"
+
+Do not return any other age group, age range,
+generation name, combination or modified spelling.
+
+Determine the intended target age group using the garment's
+design, styling, proportions, category context and supplied
+major-category information.
+
+Do not estimate the wearer's actual age.
+Do not assume that every garment belongs to GEN Z.
+Do not select ALL GROUP simply because the image is ambiguous.
+
+If the garment is genuinely designed for all age groups,
+select ALL GROUP.
+
+If the intended age group cannot be determined reliably,
+return null, unless the application explicitly requires
+one of the four values for every record.
+
+For M_AGE_GROUP, never return a value outside the
+four listed options.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. PATTERN CLASSIFICATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use only the allowed PATTERN values.
+
+Apply the supplied PATTERN definitions to identify
+silhouette, construction, layers and design structure.
+
+Important distinctions:
+
+• BASIC = genuinely simple garment construction
+• CARGO = visible utility cargo pockets
+• JOGGER = jogger construction with elasticated/cuffed hems
+• CUT AND SEW = assembled from multiple fabric pieces
+• LAYER = multiple fabric layers, not multiple panels
+• PRINTED/AOP/ABSTRACT = use only if explicitly allowed
+  under PATTERN
+
+Do not default to BASIC.
+Do not classify a printed motif as a construction pattern.
+If no valid pattern can be established, return null.
+
+PATTERN DEFINITIONS:
   • 1 LAYER = single-layer garment construction
   • 2 CUT N SEW = two fabric panels stitched together
   • 2 HORIZONTAL CUT N SEW = two panels joined horizontally
@@ -324,7 +663,22 @@ PATTERN DEFINITIONS (use ONLY these if visible):
   • WIRED = support wires (bras)
   • WITH_INNER = attached inner/lining (use dataset spelling if present)
 
-EMBROIDERY TECHNIQUE DEFINITIONS (use ONLY if visible/identifiable):
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. EMBROIDERY CLASSIFICATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Return embroidery attributes only when embroidery
+is visibly identifiable.
+
+Distinguish thread work, beads, sequins, stones,
+mirrors, metallic work, cutwork and other techniques
+using the supplied definitions.
+
+Do not classify printed motifs as embroidery.
+Do not guess the embroidery technique from color alone.
+
+EMBROIDERY TECHNIQUE DEFINITIONS:
   • DORI EMBROIDERY = raised cords/dori stitched on fabric; rope-like continuous lines, 3D, outline motifs
   • EMBROIDERY TAPE = flat narrow tapes stitched onto fabric; ribbon-like, smooth, low height
   • GOTTA PATTI = shiny metallic gold/silver ribbons cut into shapes and stitched; high shine, traditional motifs
@@ -338,7 +692,8 @@ EMBROIDERY TECHNIQUE DEFINITIONS (use ONLY if visible/identifiable):
   • BEADS = small beads stitched; rounded texture, raised points
   • THREAD WORK = embroidery only with thread; no stones/beads/mirrors
 
-EMBROIDERY TYPE DEFINITIONS (use ONLY if visible/identifiable):
+
+EMBROIDERY TYPE DEFINITIONS:
   • BRAND EMBROIDERY = brand logo/name/wordmark; clean precise lettering, corporate look
   • FLORAL EMBROIDERY = flowers/leaves/vines; organic curves, botanical motifs
   • PAISLEY EMBROIDERY = teardrop/mango-shaped motifs; intricate inner details, traditional
@@ -346,7 +701,27 @@ EMBROIDERY TYPE DEFINITIONS (use ONLY if visible/identifiable):
   • CARTOON EMBROIDERY = playful characters/icons; bold outlines, simplified shapes
   • ANIMAL EMBROIDERY = animals/birds/insects; realistic or stylized motifs
 
-PRINT TECHNIQUE DEFINITIONS (use ONLY if visible/identifiable):
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. PRINT CLASSIFICATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Return print attributes only when a visible printed
+motif or graphic is present.
+
+Do not treat weave, knit structure, jacquard,
+fabric grain or embroidery as print.
+
+Use only the allowed print technique values.
+Do not infer a specific printing process unless
+the image provides sufficient evidence.
+
+If no print is visible:
+print_type = null
+print_style = null
+print_placement = null
+
+PRINT TECHNIQUE DEFINITIONS:
   • DISCHARGE PRINT = dye removed from dyed fabric to create lighter/white designs; soft, breathable, vintage look, no ink feel
   • FLOCK PRINT = velvety raised texture using short fiber particles; suede/velour touch, luxury surface
   • FOIL PRINT = metallic foil heat-pressed onto fabric; glossy gold/silver, high shine
@@ -364,37 +739,40 @@ PRINT TECHNIQUE DEFINITIONS (use ONLY if visible/identifiable):
   • EMBOSS PRINT = pressed/raised pattern without heavy ink; tonal, luxury minimal texture
   • REFLECTIVE PRINT = ink reflects light; sportswear/safety, night visibility
 
-PRINT TYPE STRICT RULES (CRITICAL):
-  • Output print_type ONLY if a clear printed/graphic/patterned motif is visible on the garment
-  • Do NOT treat texture, weave, knit structure, self-jacquard, tonal emboss, or fabric grain as a print
-  • If no print is visible, set print_type = null, print_style = null, print_placement = null
-  • If unsure, return null (never guess a print)
 
-NOT IN DATASET → RETURN NULL (do not use): BK LESS, MUFFLER, SHRUG/SHRUGS, WITH INNER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. ATTRIBUTE VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-📋 ALLOWED VALUES (key [val1|val2|...] — use ONLY these exact values, NULL if not present):
-${schemaDefinition}
+Before returning the response, validate every attribute:
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🔬 MANDATORY ANALYSIS PROTOCOL (FOLLOW EXACTLY):
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• Is the value supported by the image?
+• Is it applicable to the selected major category?
+• Is it present in the allowed database values?
+• If grid-controlled, is it present in the supplied grid?
+• Is its spelling and formatting an exact match?
+• Is it assigned to the correct output key?
 
-STEP 0: GARMENT TYPE IDENTIFICATION (CRITICAL FIRST STEP)
-🎯 Look at the image and identify the EXACT garment category:
-   
-   TOPWEAR: T-shirt, Shirt, Blouse, Top, Sweatshirt, Hoodie, Jacket, Blazer, Sweater, Cardigan
-   BOTTOMWEAR: Jeans, Pants, Trousers, Shorts, Skirt, Leggings, Joggers, Track Pants
-   FULL BODY: Dress, Jumpsuit, Romper, Saree, Kurta Set, Co-ord Set, Overall
-   INNERWEAR: Bra, Panty, Brief, Boxers, Vest, Camisole
-   ACCESSORIES: Belt, Scarf, Cap, Hat
+If any check fails, return null for that attribute.
 
-⚠️ CONDITIONAL ATTRIBUTE EXTRACTION RULES:
-   
-  IF TOPWEAR (shirts, t-shirts, tops, jackets, etc.):
-    ✅ Extract: neck, neck_details, collar, placket, sleeve, pocket_type, fit, pattern, length, 
-            bottom_fold, button, zipper, zip_colour, print_type, print_style, print_placement, 
-            patches, patches_type, embroidery, embroidery_type, wash, colour, front_open_style
-    ❌ Skip: drawcord, father_belt, child_belt
+NOT IN DATASET — ALWAYS RETURN NULL:
+BK LESS, MUFFLER, SHRUG, SHRUGS, WITH INNER.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. AI SAM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+${aiSamSection}
+
+SAM is a separate numeric estimation field.
+Do not validate SAM values against garment attribute
+database lists or grid values.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+10. FIELD-SPECIFIC AND BOARD/TAG (OCR) RULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    🔎 Belt rule: choose father_belt from allowed list based on waistband (elastic/inner/outer/fixed/adjustable). If elastic, also choose child_belt_detail when visible.
 
     NECK DETAIL DEFINITIONS (use ONLY if visible):
       • DTM RIB NK = DYED/ DYEABLE RIB NECK (same color as garment)
@@ -416,13 +794,6 @@ STEP 0: GARMENT TYPE IDENTIFICATION (CRITICAL FIRST STEP)
       • ENVLP NK = ENVELOPE NECK
       • MANDARIAN NK = MANDARIN NECK
       • SNAP BTN SHLDR NK = SNAP BUTTON SHOULDER NECK
-   
-   IF BOTTOMWEAR (jeans, pants, shorts, skirts, etc.):
-      ✅ Extract: pocket_type, fit, pattern, length, bottom_fold, drawcord, button, zipper, 
-                 zip_colour, print_type, print_style, print_placement, patches, patches_type, 
-           embroidery, embroidery_type, wash, colour, father_belt, child_belt
-      ❌ Skip: neck, neck_details, collar, placket, sleeve
-    🔎 Belt rule: choose father_belt from allowed list based on waistband (elastic/inner/outer/fixed/adjustable). If elastic, also choose child_belt_detail when visible.
 
    CHILD BELT DETAIL DEFINITIONS (use ONLY if visible):
      • SLF GTHR BLT = self fabric waistband gathered with elastic
@@ -441,22 +812,6 @@ STEP 0: GARMENT TYPE IDENTIFICATION (CRITICAL FIRST STEP)
      • ELS CTRT BLT = elastic waistband in contrast color
      • CTRT_FLAT_KNIT = flat-knit waistband in contrast color
      • ROLL_UP = roll-up waistband/hem detail
-   
-   IF FULL BODY (dresses, jumpsuits, etc.):
-      ✅ Extract: ALL 27 ATTRIBUTES (full body garments may have all features)
-   
-   IF INNERWEAR/ACCESSORIES:
-      ✅ Extract: fit, pattern, colour, print_type, print_style, embroidery, wash
-      ❌ Skip: Most structural attributes (use judgment based on item)
-
-📝 For attributes you skip, return:
-   "attribute_name": null  (DO NOT extract if not applicable to garment type)
-
-STEP 1: IMAGE ANALYSIS (Based on garment type identified in STEP 0)
-├─ Identify EXACT garment type from image
-├─ Locate all visible construction details
-├─ Read any visible tags/labels
-└─ Match what you see to DATABASE VALUES ONLY
 
 STEP 2: ZONE-BY-ZONE DETAILED INSPECTION
 ├─ NECK/COLLAR AREA:
@@ -701,223 +1056,24 @@ PATCH TYPE RULE (CRITICAL):
 • Also set metadata.patchDigitsPresent = true if ANY digits are visible on the patch
 • If metadata.patchDigitsPresent is true, PATCH TYPE MUST be NUM (do not output BRAND LOGO)
 
-STEP 4: ATTRIBUTE EXTRACTION WITH REASONING
-For EACHDATABASE LOOKUP (STRICT MATCHING ONLY)
-For EACH APPLICABLE attribute (based on garment type from STEP 0):
 
-🔍 MATCHING PROCESS:
-1. Look at the garment feature
-2. Search your database (allowed values list above) for EXACT match
-3. If exact match found → return that value
-4. If no exact match found → return NULL
-5. If attribute doesn't apply to garment type → return NULL
-6. If you're unsure → return NULL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+11. FINAL OUTPUT REQUIREMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-🚨 ABSOLUTE RULES:
-   • NO "yes" or "no" - these are NOT in your database
-   • NO generic terms - ONLY specific database values
-   • NO approximations - EXACT match or NULL
-   • For TOPWEAR → bottom_fold, drawcord, belts = NULL
-   • For BOTTOMWEAR → neck, collar, sleeve, placket = NULL
+Return valid JSON only, in exactly the OUTPUT FORMAT below.
 
-⚠️ VALUE FORMAT:
-• rawValue: EXACT value from database (e.g., "STONE", "MTL_ZIP", "SLIM FIT", "PATCH_PKT")
-• schemaValue: SAME as rawValue
-• reasoning: Brief explanation of what you see and which database value you matched
+• Preserve all existing attribute keys.
+• Use exact database values for categorical attributes.
+• Use null for unsupported or invalid values.
+• Put explanations only in each attribute's "reasoning" field;
+  no Markdown or comments anywhere.
+• Do not add fields beyond the OUTPUT FORMAT below.
+• Keep ai_sam in its existing required structure.
+• Ensure the JSON is syntactically valid.
+• Ensure every output value matches its required data type.
 
-EXAMPLES OF CORRECT MATCHING:
-❌ WRONG: "rawValue": "yes" (NOT in database)
-✅ CORRECT: "rawValue": "MTL" (from BUTTON allowed values)
-
-❌ WRONG: "rawValue": "stone wash" (doesn't match database spelling)
-✅ CORRECT: "rawValue": "STONE" (exact match from WASH allowed values)
-
-❌ WRONG: "rawValue": "fly front" (not in database)
-✅ CORRECT: "rawValue": "F_ZIP" (from FRONT_OPEN_STYLE allowed values)
-
-❌ WRONG: "rawValue": "five pocket" (not exact match)
-✅ CORRECT: "rawValue": "PATCH POCKET" (exact match from POCKET_TYPE allowed values)
-
-❌ WRONG: macro_mvgr = "ALL OVER PRINT" (free text, not a code)
-✅ CORRECT: macro_mvgr = "AOP" (exact code from macro_mvgr allowed values)
-
-❌ WRONG: main_mvgr = "AOP_ABSTRACT" (spelling wrong)
-✅ CORRECT: main_mvgr = "AOP_ABST" (exact code from main_mvgr allowed values)
-
-❌ WRONG: main_mvgr = "STRT" when macro_mvgr = "AOP" (contradicts macro)
-✅ CORRECT: macro_mvgr = "STRT", main_mvgr = "STRT" (consistent pairing)
-
-❌ WRONG: m_fab2 = "plain knit" (free text, not a code)
-✅ CORRECT: m_fab2 = "JAQ" (jacquard knit, exact code from m_fab2 allowed values)
-
-❌ WRONG: m_fab2 filled for a woven denim jeans (woven garment → null)
-✅ CORRECT: m_fab2 = null (woven garments do not have knit structure)
-STEP 5: QUALITY VERIFICATION (Self-check)
-├─ Did I extract SPECIFIC values (not labels)?
-├─ Did I avoid echoing attribute names?
-├─ Are all confidences above 65% (or null)?
-├─ Did I use fashion industry terminology?
-└─ Is every value based on VISIBLE evidence?
-
-━━ABSOLUTELY FORBIDDEN (AUTO-REJECTED):
-   • ❌ "yes" or "no" - NOT database values
-   • ❌ "present", "visible", "not visible" - NOT database values
-   • ❌ "standard", "regular", "normal" - NOT database values (unless exact match in list)
-   • ❌ Echoing attribute names: "neck": "Neck" ← NOT a database value
-   • ❌ Descriptions: "fly front with button" ← NOT a database value
-   • ❌ Approximations: "stone washed" instead of "STONE" ← NOT exact match
-   • ❌ Creative answers ← You are NOT creative, you are a LOOKUP MACHINE
-   • ❌ Values not in database ← AUTO-REJECTED by system
-   • ❌ Spelling variations ← Must match EXACTLY
-
-✅ YOUR ONLY ALLOWED BEHAVIOR:
-   • ✅ LOOK at image → FIND exact match in database → RETURN that value
-   • ✅ NO match found → RETURN null
-   • ✅ Unsure → RETURN null
-   • ✅ Copy database values EXACTLY (spelling, case, underscores, spaces)
-   • ✅ Reasoning field explains what you saw and why you picked that database value
-   • ✅ Think like a barcode scanner - match or no match, nothing in between
-   • Match EXACT values from allowed list (case-sensitive preferred)
-   • Save descriptions for reasoning field only ← CORRECT
-   • Honest null values when confidence < 65% ← CORRECT
-   • If perfect match not found in list, use closest EXACT match or null
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📚 FASHION TERMINOLOGY REFERENCE:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-NECK TYPES: crew neck, v-neck, scoop neck, boat neck, square neck, sweetheart, halter, cowl, turtleneck, mock neck
-COLLAR TYPES: spread collar, point collar, button-down, mandarin, peter pan, shawl, notched, wingtip
-SLEEVE TYPES: cap sleeve, short sleeve, 3/4 sleeve, long sleeve, sleeveless, raglan, dolman, bell, puff
-FIT TYPES: skinny, slim, slim fit, regular fit, relaxed fit, loose fit, oversized, tailored, athletic fit
-POCKET TYPES: 5-pocket (denim), patch pocket, welt pocket, flap pocket, zipper pocket, coin pocket, kangaroo
-WASH TYPES: raw denim, rinse wash, light wash, medium wash, dark wash, stone wash, acid wash, vintage wash, distressed, bleached
-PATTERN TYPES: solid, stripe, check, plaid, polka dot, floral, geometric, abstract, camo, tie-dye
-LENGTH TYPES: cropped, regular, long, full length, ankle length, floor length, knee length, midi, maxi
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💡 REAL EXAMPLES (Non-applicable attributes = null):
-
-BOTTOMWEAR EXAMPLE (JEANS):
-{
-  "neck": null,
-  "neck_details": null,
-  "collar": null,
-  "placket": null,
-  "sleeve": null,
-  "front_open_style": null,
-  "pocket_type": {
-    "rawValue": "PATCH POCKET",
-    "schemaValue": "PATCH POCKET",
-    "visualConfidence": 95,
-    "reasoning": "Two back patch pockets visible. Database match: POCKET_TYPE → PATCH POCKET"
-  },
-  "wash": {
-    "rawValue": "STONE",
-    "schemaValue": "STONE",
-    "visualConfidence": 92,
-    "reasoning": "Stone wash effect with fading visible. Database match: WASH → STONE"
-  },
-  "fit": {
-    "rawValue": "SLIM FIT",
-    "schemaValue": "SLIM FIT",
-    "visualConfidence": 90,
-    "reasoning": "Tapered leg opening, fitted through thigh. Database match: FIT → SLIM FIT"
-  },
-  "length": {
-    "rawValue": "FULL LENGTH",
-    "schemaValue": "FULL LENGTH",
-    "visualConfidence": 88,
-    "reasoning": "Full length jeans to ankle. Database match: LENGTH → FULL LENGTH"
-  },
-  "button": {
-    "rawValue": "MTL",
-    "schemaValue": "MTL",
-    "visualConfidence": 93,
-    "reasoning": "Metal button visible at waist. Database match: BUTTON → MTL"
-  },
-  "zipper": {
-    "rawValue": "MTL_ZIP",
-    "schemaValue": "MTL_ZIP",
-    "visualConfidence": 94,
-    "reasoning": "Metal zipper at fly. Database match: ZIPPER → MTL_ZIP"
-  },
-  "bottom_fold": {
-    "rawValue": "SLF FOLD",
-    "schemaValue": "SLF FOLD",
-    "visualConfidence": 78,
-    "reasoning": "Self-folded hem finish. Database match: BOTTOM_FOLD → SLF FOLD"
-  },
-  "drawcord": null,
-  "colour": {
-    "rawValue": "DNM_BLU",
-    "schemaValue": "DNM_BLU",
-    "visualConfidence": 96,
-    "reasoning": "Dark denim blue color. Database match: COLOR → DNM_BLU"
-  },
-  "father_belt": null,
-  "child_belt": null
-}
-
-TOPWEAR EXAMPLE (SHIRT):
-{
-  "neck": {
-    "rawValue": "REG_CLR",
-    "schemaValue": "REG_CLR",
-    "visualConfidence": 94,
-    "reasoning": "Regular collar at neckline. Database match: NECK → REG_CLR"
-  },
-  "collar": {
-    "rawValue": "REG_CLR",
-    "schemaValue": "REG_CLR",
-    "visualConfidence": 94,
-    "reasoning": "Regular spread collar. Database match: COLLAR → REG_CLR"
-  },
-  "sleeve": {
-    "rawValue": "REG_SLV",
-    "schemaValue": "REG_SLV",
-    "visualConfidence": 97,
-    "reasoning": "Regular full-length sleeves. Database match: SLEEVE → REG_SLV"
-  },
-  "placket": {
-    "rawValue": "PLN PLKT",
-    "schemaValue": "PLN PLKT",
-    "visualConfidence": 95,
-    "reasoning": "Plain vertical button placket. Database match: PLACKET → PLN PLKT"
-  },
-  "button": {
-    "rawValue": "4HOLE_MTL_BTN",
-    "schemaValue": "4HOLE_MTL_BTN",
-    "visualConfidence": 96,
-    "reasoning": "4-hole metal buttons on placket. Database match: BUTTON → 4HOLE_MTL_BTN"
-  },
-  "pocket_type": {
-    "rawValue": "PATCH_PKT",
-    "schemaValue": "PATCH_PKT",
-    "visualConfidence": 90,
-    "reasoning": "Patch pocket on left chest. Database match: POCKET_TYPE → PATCH_PKT"
-  },
-  "fit": {
-    "rawValue": "REG FIT",
-    "schemaValue": "REG FIT",
-    "visualConfidence": 88,
-    "reasoning": "Regular fit silhouette. Database match: FIT → REG FIT"
-  },
-  "front_open_style": {
-    "rawValue": "6 BTN",
-    "schemaValue": "6 BTN",
-    "visualConfidence": 95,
-    "reasoning": "6 buttons for front closure. Database match: FRONT_OPEN_STYLE → 6 BTN"
-  },
-  "bottom_fold": null,
-  "drawcord": null,
-  "father_belt": null,
-  "child_belt": null
-}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📝 OUTPUT FORMAT (JSON only, no markdown):
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 {
   "metadata": {
@@ -930,6 +1086,7 @@ TOPWEAR EXAMPLE (SHIRT):
     "patchText": "string or null",
     "patchDigitsPresent": "true | false | null"
   },
+  "ai_sam": { "cutting": "minutes as a number, e.g. 1.2", "stitching": "minutes", "ironing": "minutes", "finishing": "minutes", "total_sam": "sum of the four" },
   "attributes": {
     "attribute_key": {
       "rawValue": "DATABASE VALUE or null",
@@ -945,38 +1102,7 @@ TOPWEAR EXAMPLE (SHIRT):
 
 IMPORTANT: In "all_extracted_attributes", include EVERY fashion/product attribute you can identify from the image that is NOT already listed in the "attributes" section above. Use descriptive key names (snake_case). Values must be plain strings. Include anything you can visually observe: garment construction details, embellishments, hardware, fabric texture, silhouette, styling details, care symbols, brand elements, etc. Do NOT repeat keys that are already in "attributes". If nothing additional is found, return an empty object {}.
 
-{VALIDATION CHECKLIST:
-□ Garment type identified correctly (TOPWEAR/BOTTOMWEAR/etc.)
-□ Non-applicable attributes = null
-□ ZERO "yes" or "no" values (NOT in database)
-□ ZERO generic terms like "present", "visible", "standard"
-□ EVERY value is EXACT match from database
-□ NO spelling variations, NO approximations
-□ If no exact database match found → null
-□ Confidence ≥ 70% or null
-□ Reasoning explains: "what I saw" + "which database value matched"
-□ I behaved as a LOOKUP MACHINE, not a creative AI
-      "schemaValue": "SAME AS RAW VALUE",
-      "visualConfidence": 75,
-      "reasoning": "detailed explanation of what you see and why you chose this value"
-    }
-  }
-}
-
-🚨 FINAL CHECKLIST BEFORE SUBMISSION:
-□ STEP 0: Identified garment type (TOPWEAR/BOTTOMWEAR/FULL BODY/etc.)
-□ Applied conditional extraction rules based on garment type
-□ Set null for non-applicable attributes (e.g., no neck for jeans)
-□ Every rawValue MUST be from the "ONLY USE THESE VALUES" list above
-□ Every value is SHORT (2-4 words max, not sentences)
-□ No attribute names echoed as values
-□ All confidences ≥ 65% (or null)
-□ Used EXACT values from allowed list (check spelling and case)
-□ Based on VISIBLE evidence only
-□ Detailed explanations ONLY in "reasoning" field
-□ JSON is valid (no markdown, no code blocks)
-
-GOAL: Achieve 90%+ accuracy. Take your time. Be thorough. Be precise.`;
+Return the final JSON only.`;
   }
 
   private async callGeminiVision(imageData: string, prompt: string): Promise<{
@@ -1069,7 +1195,7 @@ GOAL: Achieve 90%+ accuracy. Take your time. Be thorough. Be precise.`;
     };
   }
 
-  private async parseResponse(content: string, schema: any[]): Promise<{ attributes: AttributeData; extractedMetadata?: any; rawGeminiResponse?: any }> {
+  private async parseResponse(content: string, schema: any[]): Promise<{ attributes: AttributeData; extractedMetadata?: any; rawGeminiResponse?: any; aiSam?: CmpSamMinutes | null }> {
     try {
       const cleanContent = (content || '').replace(/```json\n?|\n?```/g, '').trim();
       if (!cleanContent) {
@@ -1086,6 +1212,7 @@ GOAL: Achieve 90%+ accuracy. Take your time. Be thorough. Be precise.`;
       }
 
       const extractedMetadata = parsed.metadata || null;
+      const aiSam = parseAiSam(parsed.ai_sam);
       const attributeSource = parsed.attributes || parsed;
 
       const attributes: AttributeData = {};
@@ -1484,7 +1611,7 @@ GOAL: Achieve 90%+ accuracy. Take your time. Be thorough. Be precise.`;
         }
       }
 
-      return { attributes, extractedMetadata: mergedMetadata, rawGeminiResponse: parsed };
+      return { attributes, extractedMetadata: mergedMetadata, rawGeminiResponse: parsed, aiSam };
     } catch (error) {
       console.error('❌ [Google Vision] Failed to parse response:', error);
       throw new Error(`Failed to parse Google Vision response: ${error instanceof Error ? error.message : 'Unknown error'}`);

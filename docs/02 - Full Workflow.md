@@ -39,7 +39,7 @@ flowchart TD
     end
 
     subgraph VARIANTS["🔀 VARIANT CREATION"]
-        SIZE[Size Variants\nfrom variant-sizes-mapping.xlsx]
+        SIZE[Size Variants\nfrom maj_cat_sizes]
         COLOR[Color Variants\nmanual Add Color]
         KIDS[Kids Duplication\nauto for KIDS division]
     end
@@ -115,7 +115,6 @@ Three ways images enter the system:
 
 - One `ExtractionResultFlat` row created per image/article
 - Auto-derives: `mcCode`, `hsnTaxCode`, `segment`, `articleDescription`, `season`
-- Mirrors to `360article.article_360_flat` (analytics) — fire-and-forget, never blocks
 - Startup backfills run at every backend start to repair missing derived fields
 
 ---

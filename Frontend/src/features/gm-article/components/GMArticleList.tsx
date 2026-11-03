@@ -2,12 +2,13 @@ import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import {
   FileText,
   LayoutGrid,
-  Rocket,
   Info,
   Users,
   Copy,
   Maximize2,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
   ChevronDown,
   Plus,
   Minus,
@@ -42,23 +43,14 @@ import {
 } from '@/shared/components/ui-tw';
 import { message } from '@/lib/message';
 import { cn } from '@/lib/utils';
-import type { ApproverItem, MasterAttribute } from './GMArticleTable';
+import type { ApproverItem } from '../types';
 import {
   SCHEMA_KEY_TO_EXCEL_ATTR,
-  SCHEMA_KEY_TO_DB_FIELD,
   SAP_NAME_TO_SCHEMA_KEY,
   normalizeMajorCategory,
 } from '../../../data/majCatAttributeMap';
 import { getMajorCategoriesByDivision, getMcCodeByMajorCategory } from '../../../data/majorCategoryMcCodeMap';
 import {
-  preloadAttributeValues,
-  getCachedValues,
-  isValuesCached,
-  preloadAttributeGroups,
-  getCachedAttributeGroups,
-  preloadCategoryAttributes,
-  getCachedCategoryAttributes,
-  invalidateValuesCache,
   preloadMajCatGridFor,
   isMajCatGridLoadedFor,
   getMajCatGridEntry,
@@ -79,9 +71,6 @@ import { formatDivisionLabel } from '../../../shared/utils/ui/formatters';
 import { SIMPLIFIED_HIERARCHY } from '../../extraction/components/SimplifiedCategorySelector';
 import GMVariantTable from './GMVariantTable';
 
-// Module-level BOM cache (shared across card instances)
-const bomCache = new Map<string, Promise<Record<string, Record<string, string>>>>();
-
 // Module-level fabric grid values cache — fetched once for all cards
 // Shape: { [excelAttrName: string]: { code: string; fullForm: string }[] }
 // e.g. { M_FAB_DIV: [{code:'K', fullForm:'KNIT'}, ...], M_YARN: [...], ... }
@@ -101,6 +90,14 @@ const fetchFabricGridValues = (): Promise<FabGridValues> => {
 };
 
 // Module-level segment range cache (shared across card instances, keyed by UPPER major category)
+// BOM cost fields saved to gm_article_data NUMERIC(10,2) columns.
+const GM_COST_FIELDS = new Set(['roughV2', 'vdrCost', 'finalCost']);
+
+// GM MRP rule (BOM card), same as FG OTH GRID-1: RATE fills MRP = rate + 30%;
+// the user can change MRP freely.
+const round2 = (n: number) => Math.round(n * 100) / 100;
+const calcGmMrpFromRate = (rate: number): number => round2(rate * 1.3);
+
 type SegmentRange = { segment_type: string; min: number; max: number };
 const segmentRangeCache = new Map<string, SegmentRange[]>();
 
@@ -134,20 +131,6 @@ const computeSegmentFromMrp = (mrp: string | null | undefined, ranges: SegmentRa
   if (isNaN(m) || ranges.length === 0) return null;
   const match = ranges.find((r) => m >= r.min && m <= r.max);
   return match ? match.segment_type : null;
-};
-
-const fetchBomMap = (category: string): Promise<Record<string, Record<string, string>>> => {
-  const existing = bomCache.get(category);
-  if (existing) return existing;
-  const token = localStorage.getItem('authToken');
-  const p = fetch(`${APP_CONFIG.api.baseURL}/approver/bom-art-numbers/${encodeURIComponent(category)}`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  })
-    .then((r) => r.json())
-    .then((res) => (res?.data as Record<string, Record<string, string>>) ?? {})
-    .catch(() => ({}));
-  bomCache.set(category, p);
-  return p;
 };
 
 const f = (schemaKey: string) => SCHEMA_KEY_TO_EXCEL_ATTR[schemaKey] ?? schemaKey;
@@ -248,7 +231,7 @@ const ColorSelect: React.FC<{
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="flex h-6 w-full items-center justify-between rounded border border-input bg-background px-1.5 text-[11px]"
+          className="flex h-6 w-full items-center justify-between rounded border border-input bg-background px-1.5 text-[13px]"
         >
           <span className="truncate">{value || 'Select…'}</span>
           <ChevronDown className="h-3 w-3 shrink-0 text-muted-foreground" />
@@ -261,7 +244,7 @@ const ColorSelect: React.FC<{
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search colors…"
-            className="h-7 text-[12px]"
+            className="h-7 text-[14px]"
           />
         </div>
         <div className="max-h-[240px] overflow-y-auto py-1">
@@ -271,16 +254,16 @@ const ColorSelect: React.FC<{
               type="button"
               onClick={() => onPick(c.code)}
               className={cn(
-                'flex w-full items-center justify-between gap-2 px-2.5 py-1 text-left text-[12px] transition-colors hover:bg-primary/5',
+                'flex w-full items-center justify-between gap-2 px-2.5 py-1 text-left text-[14px] transition-colors hover:bg-primary/5',
                 value === c.code && 'bg-primary/10 font-medium',
               )}
             >
               <span className="truncate">{c.name}</span>
-              <span className="shrink-0 font-mono text-[11px] text-muted-foreground">{c.code}</span>
+              <span className="shrink-0 font-mono text-[13px] text-muted-foreground">{c.code}</span>
             </button>
           ))}
           {filtered.length === 0 && (
-            <div className="px-2.5 py-2 text-[12px] text-muted-foreground">No colors match.</div>
+            <div className="px-2.5 py-2 text-[14px] text-muted-foreground">No colors match.</div>
           )}
         </div>
       </PopoverContent>
@@ -288,60 +271,7 @@ const ColorSelect: React.FC<{
   );
 };
 
-const GROUP_COLORS: Record<string, string> = {
-  FAB: '#e6f4ff',
-};
-const GROUP_ORDER = ['FAB'];
-
-// Construction & Fabric (FAB): full canonical field order — matches FG Articles
-// New Articles page so every user sees the same sequence regardless of backend order.
-const FAB_PRIORITY_KEYS = [
-  'fab_div',          // M_FAB_DIV
-  'yarn_01',          // M_YARN
-  'main_mvgr',        // M_FAB_MAIN_MVGR_1
-  'fabric_main_mvgr', // M_FAB_MAIN_MVGR_2
-  'f_construction',   // M_CONSTRUCTION
-  'f_width',          // M_WIDTH
-  'm_fab2',           // M_WEAVE_02
-  'f_count',          // M_COUNT
-  'weave',            // M_WEAVE_01
-  'composition',      // M_COMPOSITION
-  'finish',           // M_FINISH
-  'gsm',              // M_GSM
-  'lycra_non_lycra',  // M_LYCRA
-];
-
 type CardGroup = typeof ATTRIBUTE_GROUPS[number];
-
-function buildCardGroups(entries: { key: string; type: string; group: string }[]): CardGroup[] {
-  const map = new Map<string, CardGroup['fields']>();
-  for (const e of entries) {
-    if (BOM_ONLY_SCHEMA_KEYS.has(e.key)) continue; // belongs to BOM, not attribute groups
-    if (HIDDEN_CARD_SCHEMA_KEYS.has(e.key)) continue; // hidden from card (e.g. shade, weight)
-    const dbField = SCHEMA_KEY_TO_DB_FIELD[e.key];
-    if (!dbField) continue;
-    if (!map.has(e.group)) map.set(e.group, []);
-    map.get(e.group)!.push({ field: dbField, schemaKey: e.key, freeText: e.type === 'TEXT' ? true : undefined });
-  }
-  const built = GROUP_ORDER.filter((g) => map.has(g)).map((g) => {
-    let fields = map.get(g)!;
-    if (g === 'FAB' || g === 'FABRIC') {
-      // Pin the priority keys to the top in FAB_PRIORITY_KEYS order; all other
-      // fields keep their existing relative order (Array.sort is stable).
-      const rank = (k: string) => {
-        const i = FAB_PRIORITY_KEYS.indexOf(k);
-        return i === -1 ? FAB_PRIORITY_KEYS.length : i;
-      };
-      fields = [...fields].sort((a, b) => rank(a.schemaKey) - rank(b.schemaKey));
-    }
-    return {
-      group: g,
-      color: GROUP_COLORS[g] || '#f0f0f0',
-      fields,
-    };
-  });
-  return built.length > 0 ? built : ATTRIBUTE_GROUPS.filter((g) => GROUP_ORDER.includes(g.group));
-}
 
 export interface ApproverArticleListProps {
   items: ApproverItem[];
@@ -349,11 +279,9 @@ export interface ApproverArticleListProps {
   loading: boolean;
   selectedRowKeys: React.Key[];
   onSelectionChange: (keys: React.Key[]) => void;
-  onEdit: (item: ApproverItem) => void;
   onSave: (item: ApproverItem, updates: Record<string, unknown>, options?: { silent?: boolean }) => void;
   onCreateFabricArticle: (item: ApproverItem) => void;
   onCreateBodyArticle: (item: ApproverItem) => void;
-  onProceedFGArticle: (item: ApproverItem) => void;
   onDuplicate: (item: ApproverItem) => Promise<void>;
   /**
    * Modify an already-created (SAP-synced) article. Receives only the changed
@@ -362,7 +290,6 @@ export interface ApproverArticleListProps {
    * support modify (new/old/rejected) simply omit it and the button is hidden.
    */
   onModify?: (item: ApproverItem, changes: Record<string, unknown>) => Promise<void>;
-  attributes: MasterAttribute[];
   onRefresh: () => void;
   pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
   hideGroups?: string[];
@@ -372,8 +299,6 @@ export interface ApproverArticleListProps {
     majCatsBySubDiv: Record<string, string[]>;
     mcDesByMajCat: Record<string, string[]>;
   };
-  /** When true, always use the static ATTRIBUTE_GROUPS definition instead of the API-built card groups. */
-  forceStaticGroups?: boolean;
   /** When true, hides the "Create Body Article" button (e.g. on the Body Article detail page) */
   hideCreateBody?: boolean;
   /** When true, hides reference/article-desc fields and renames Article Number to Fabric Article Number. */
@@ -403,10 +328,8 @@ const ArticleCard = React.memo(
     onSave,
     onCreateFabricArticle,
     onCreateBodyArticle,
-    onProceedFGArticle,
     onDuplicate,
     onModify,
-    attributes,
     onRefresh,
     cardGroups,
     pathType,
@@ -420,10 +343,8 @@ const ArticleCard = React.memo(
     onSave: (item: ApproverItem, updates: Record<string, unknown>, options?: { silent?: boolean }) => void;
     onCreateFabricArticle: (item: ApproverItem) => void;
     onCreateBodyArticle: (item: ApproverItem) => void;
-    onProceedFGArticle: (item: ApproverItem) => void;
     onDuplicate: (item: ApproverItem) => Promise<void>;
     onModify?: (item: ApproverItem, changes: Record<string, unknown>) => Promise<void>;
-    attributes: MasterAttribute[];
     onRefresh: () => void;
     cardGroups: CardGroup[];
     pathType?: 'old' | 'new' | 'rejected' | 'created' | 'failed';
@@ -515,8 +436,6 @@ const ArticleCard = React.memo(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [segmentRanges]);
 
-    const [cacheReady, setCacheReady] = useState(false);
-    const [catConfigReady, setCatConfigReady] = useState(false);
     // Tracks when the major-category grid JSON (for THIS article's category) has loaded
     const [gridReady, setGridReady] = useState(() => isMajCatGridLoadedFor(effectiveMajCat));
     // Tracks when the mandatory grid (for THIS article's category) has loaded
@@ -682,45 +601,16 @@ const ArticleCard = React.memo(
 
       return { visibleAttrs: visible, mandatoryKeys: mandatory };
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [effectiveMajCat, cacheReady, catConfigReady, gridReady, mandatoryGridReady, attributeFields, localValues, fabricGrid, fabricGridReady]);
+    }, [effectiveMajCat, gridReady, mandatoryGridReady, attributeFields, localValues, fabricGrid, fabricGridReady]);
 
     const [editingField, setEditingField] = useState<string | null>(null);
 
     // Vendor autocomplete state
-    const [vendorQuery, setVendorQuery] = useState('');
+    // null = not typed yet (show the saved name); '' = the user cleared the box.
+    const [vendorQuery, setVendorQuery] = useState<string | null>(null);
     const [vendorOptions, setVendorOptions] = useState<AutocompleteOption[]>([]);
     const [vendorSearching, setVendorSearching] = useState(false);
     const vendorDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    const [attrArticleNums, setAttrArticleNums] = useState<Record<string, string>>(() => {
-      try {
-        return JSON.parse((item as any).attrArticleNums || '{}');
-      } catch {
-        return {};
-      }
-    });
-    const [bomMap, setBomMap] = useState<Record<string, Record<string, string>>>({});
-
-    useEffect(() => {
-      if (!item.division) return;
-      if (isValuesCached(item.division) && getCachedValues(item.division, 'impAtrbt2') === null) {
-        invalidateValuesCache(item.division);
-      }
-      preloadAttributeValues(item.division)
-        .then(() => setCacheReady(true))
-        .catch(() => setCacheReady(true));
-    }, [item.division]);
-
-    useEffect(() => {
-      if (!effectiveMajCat) return;
-      if (getCachedCategoryAttributes(effectiveMajCat)) {
-        setCatConfigReady(true);
-        return;
-      }
-      preloadCategoryAttributes(effectiveMajCat)
-        .then(() => setCatConfigReady(true))
-        .catch(() => setCatConfigReady(true));
-    }, [effectiveMajCat]);
 
     // Fetch fabric attribute grid values (M_FAB_DIV, M_YARN, etc.) from fabric_maj_cat_grid_values
     useEffect(() => {
@@ -757,39 +647,6 @@ const ArticleCard = React.memo(
         .then(() => setMandatoryGridReady(true))
         .catch(() => setMandatoryGridReady(true));
     }, [effectiveMajCat]);
-
-    useEffect(() => {
-      if (!effectiveMajCat) return;
-      let cancelled = false;
-      fetchBomMap(effectiveMajCat).then((data) => {
-        if (!cancelled) setBomMap(data);
-      });
-      return () => {
-        cancelled = true;
-      };
-    }, [effectiveMajCat]);
-
-    const getArtNum = useCallback(
-      (schemaKey: string, field: string, currentValue: string | null): string => {
-        const excelAttrName = SCHEMA_KEY_TO_EXCEL_ATTR[schemaKey];
-        if (excelAttrName && currentValue && bomMap[excelAttrName]?.[currentValue]) {
-          return bomMap[excelAttrName][currentValue];
-        }
-        return attrArticleNums[field] || '';
-      },
-      [bomMap, attrArticleNums],
-    );
-
-    const saveAttrArticleNum = (field: string, val: string) => {
-      const updated = { ...attrArticleNums, [field]: val };
-      setAttrArticleNums(updated);
-      const attrUpdates = { attrArticleNums: JSON.stringify(updated) };
-      if (isModifyMode) {
-        setPendingChanges((prev) => ({ ...prev, ...attrUpdates }));
-        return;
-      }
-      onSave({ ...item, ...attrUpdates } as any, attrUpdates);
-    };
 
     const [failedImg, setFailedImg] = useState(false);
     const [refreshedUrl, setRefreshedUrl] = useState<string | null>(null);
@@ -934,6 +791,16 @@ const ArticleCard = React.memo(
 
     const imgSrc = refreshedUrl || item.imageUrl;
     const imgUrl = imgSrc && !failedImg ? getImageUrl(imgSrc) : null;
+    // Front / Back photo switch (back photo only when SRM sent one).
+    const [showBackImg, setShowBackImg] = useState(false);
+    const [backImgFailed, setBackImgFailed] = useState(false);
+    useEffect(() => {
+      setShowBackImg(false);
+      setBackImgFailed(false);
+    }, [item.id]);
+    const backImgUrl = item.backImageUrl ? getImageUrl(item.backImageUrl) : null;
+    const showingBack = showBackImg && !!backImgUrl;
+    const shownImgUrl = showingBack ? (backImgFailed ? null : backImgUrl) : imgUrl;
 
     const handleImgError = useCallback(async () => {
       if (refreshAttempted.current) {
@@ -962,7 +829,7 @@ const ArticleCard = React.memo(
       }
     }, [item.id]);
 
-    const calcMrpFromRate = (rate: number): number => Math.ceil((rate * 1.47) / 50) * 50;
+    const calcMrpFromRate = calcGmMrpFromRate;
 
     const getValue = (field: string): string | null => {
       if (field in localValues) return localValues[field];
@@ -977,7 +844,7 @@ const ArticleCard = React.memo(
       return (item as any)[field] ?? null;
     };
 
-    const searchVendors = (q: string) => {
+    const searchVendors = (q: string, by: 'name' | 'code' = 'name') => {
       setVendorQuery(q);
       if (vendorDebounceRef.current) clearTimeout(vendorDebounceRef.current);
       if (!q || q.trim().length < 2) {
@@ -989,7 +856,7 @@ const ArticleCard = React.memo(
         try {
           const token = localStorage.getItem('authToken');
           const res = await fetch(
-            `${APP_CONFIG.api.baseURL}/approver/vendor-search?q=${encodeURIComponent(q.trim())}`,
+            `${APP_CONFIG.api.baseURL}/approver/vendor-search?q=${encodeURIComponent(q.trim())}${by === 'code' ? '&by=code' : ''}`,
             { headers: token ? { Authorization: `Bearer ${token}` } : {} },
           );
           const json = await res.json();
@@ -1003,7 +870,7 @@ const ArticleCard = React.memo(
               label: (
                 <div className="flex justify-between gap-2">
                   <span className="font-medium">{v.vendorName}</span>
-                  <span className="text-[11px] text-muted-foreground">
+                  <span className="text-[13px] text-muted-foreground">
                     {v.vendorCode}
                     {v.vendorCity ? ` · ${v.vendorCity}` : ''}
                   </span>
@@ -1018,6 +885,25 @@ const ArticleCard = React.memo(
           setVendorSearching(false);
         }
       }, 300);
+    };
+
+    // Picking a vendor from either dropdown (name or code) fills both fields.
+    const pickVendor = (val: string, option: AutocompleteOption) => {
+      // option.vendorName is the clean name (no code suffix)
+      const cleanName = (option as any).vendorName || String(val ?? '').split('||')[0];
+      const updates: Record<string, string | null> = { vendorName: cleanName };
+      if ((option as any).vendorCode) updates.vendorCode = (option as any).vendorCode;
+      setLocalValues((prev) => ({ ...prev, ...updates }));
+      if (isModifyMode) {
+        setPendingChanges((prev) => ({ ...prev, ...updates }));
+      } else {
+        onSave({ ...item, ...updates } as ApproverItem, updates as Record<string, unknown>);
+      }
+      // The pick also fired onChange with the option value — drop that pending search.
+      if (vendorDebounceRef.current) clearTimeout(vendorDebounceRef.current);
+      setEditingField(null);
+      setVendorOptions([]);
+      setVendorQuery(null);
     };
 
     const handleSave = (field: string, value: string | null) => {
@@ -1037,13 +923,8 @@ const ArticleCard = React.memo(
       const updates: Record<string, string | null> = { [field]: value };
       if (field === 'rate') {
         const rate = parseFloat(String(value ?? ''));
-        if (!isNaN(rate) && rate > 0) {
-          // Auto-calculate MRP only if user hasn't manually set one (≤1 = placeholder)
-          const existingMrp = parseFloat(String(getValue('mrp') ?? ''));
-          if (isNaN(existingMrp) || existingMrp <= 1) {
-            updates['mrp'] = String(calcMrpFromRate(rate));
-          }
-        }
+        // A new rate always resets MRP to rate + 30% (same as FG).
+        if (!isNaN(rate) && rate > 0) updates['mrp'] = String(calcMrpFromRate(rate));
         const seg = computeSegmentFromMrp(value, segmentRangesRef.current);
         if (seg) updates['segment'] = seg;
       }
@@ -1159,18 +1040,18 @@ const ArticleCard = React.memo(
     // Right: GM grid (dynamic per major category, Required / Optional), then a
     // separate BOM card, then colour variants. Every state colour is slate.
 
-    const FIELD_LABEL = 'flex min-w-0 flex-col gap-[3px] text-[12px] font-semibold text-slate-600';
+    const FIELD_LABEL = 'flex min-w-0 flex-col gap-[3px] text-[14px] font-semibold text-slate-600';
     const FIELD_INPUT =
-      'h-[34px] rounded-lg border-slate-200 bg-white px-2.5 text-[13px] font-medium text-slate-900 shadow-none ' +
+      'h-[34px] rounded-lg border-slate-200 bg-white px-2.5 text-[15px] font-medium text-slate-900 shadow-none ' +
       'hover:border-slate-400 focus-visible:border-slate-500 focus-visible:ring-slate-400/25 ' +
       'disabled:bg-slate-50 disabled:text-slate-500 disabled:opacity-100';
     const FIELD_BOX =
       'flex h-[34px] w-full min-w-0 items-center justify-between gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 ' +
-      'text-left text-[13px] font-medium text-slate-900 transition-colors hover:border-slate-400 ' +
+      'text-left text-[15px] font-medium text-slate-900 transition-colors hover:border-slate-400 ' +
       'focus:outline-none focus-visible:border-slate-500 focus-visible:ring-[3px] focus-visible:ring-slate-400/25 ' +
       'data-[state=open]:border-slate-500 data-[state=open]:ring-[3px] data-[state=open]:ring-slate-400/25 ' +
       'disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500 disabled:hover:border-slate-200';
-    const OPTION_ROW = 'flex w-full flex-col px-3 py-1.5 text-left text-[12px] hover:bg-slate-100';
+    const OPTION_ROW = 'flex w-full flex-col px-3 py-1.5 text-left text-[14px] hover:bg-slate-100';
 
     const readField = (field: string): string => String(getValue(field) ?? '').trim();
 
@@ -1192,7 +1073,7 @@ const ArticleCard = React.memo(
             disabled={opts.disabled}
             placeholder={opts.disabled ? '—' : opts.placeholder}
             invalid={opts.invalid}
-            className={cn(FIELD_INPUT, opts.mono && 'font-mono text-[12.5px]')}
+            className={cn(FIELD_INPUT, opts.mono && 'font-mono text-[14.5px]')}
             onKeyDown={(e) => {
               if (e.key === 'Enter') e.currentTarget.blur();
             }}
@@ -1201,6 +1082,11 @@ const ArticleCard = React.memo(
               if (next === current) return;
               if (field === 'vendorCode' && next && !/^\d{6}$/.test(next)) {
                 message.error('Vendor Code must be exactly 6 digits');
+                e.target.value = current;
+                return;
+              }
+              if (GM_COST_FIELDS.has(field) && next && !/^\d+(\.\d{1,2})?$/.test(next)) {
+                message.error('Enter a number with up to 2 decimals');
                 e.target.value = current;
                 return;
               }
@@ -1259,14 +1145,14 @@ const ArticleCard = React.memo(
                   value={attrSearch}
                   onChange={(e) => setAttrSearch(e.target.value)}
                   placeholder="Search..."
-                  className="flex-1 bg-transparent text-[12px] outline-none placeholder:text-muted-foreground"
+                  className="flex-1 bg-transparent text-[14px] outline-none placeholder:text-muted-foreground"
                 />
               </div>
               {opts.allowClear && opts.value && (
                 <button
                   type="button"
                   onClick={() => opts.onPick(null)}
-                  className="flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left text-[12px] font-medium text-red-600 hover:bg-red-50"
+                  className="flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left text-[14px] font-medium text-red-600 hover:bg-red-50"
                 >
                   <X className="h-3 w-3 shrink-0" />
                   Clear selection
@@ -1274,7 +1160,7 @@ const ArticleCard = React.memo(
               )}
               <div className="max-h-60 overflow-y-auto py-1">
                 {filtered.length === 0 ? (
-                  <div className="px-3 py-2 text-[12px] text-muted-foreground">{opts.emptyText ?? 'No options found'}</div>
+                  <div className="px-3 py-2 text-[14px] text-muted-foreground">{opts.emptyText ?? 'No options found'}</div>
                 ) : (
                   filtered.map((o) => (
                     <button
@@ -1358,11 +1244,11 @@ const ArticleCard = React.memo(
           className="grid min-h-[48px] grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-2.5 border-b border-slate-100 px-4 py-1.5 @2xl:border-r @2xl:even:border-r-0"
         >
           <span className="flex min-w-0 flex-col gap-1">
-            <span className="truncate text-[13px] font-semibold leading-[18px] text-slate-900">
+            <span className="truncate text-[15px] font-semibold leading-[18px] text-slate-900">
               {gmAttrLabel(attr)}
               {attr.mandatory && <RequiredMark />}
             </span>
-            <span className="truncate font-mono text-[11px] leading-[14px] text-slate-500">{attr.code}</span>
+            <span className="truncate font-mono text-[13px] leading-[14px] text-slate-500">{attr.code}</span>
           </span>
           {freeText ? (
             <Input
@@ -1411,7 +1297,7 @@ const ArticleCard = React.memo(
                     value={attrSearch}
                     onChange={(e) => setAttrSearch(e.target.value)}
                     placeholder="Search..."
-                    className="flex-1 bg-transparent text-[12px] outline-none placeholder:text-muted-foreground"
+                    className="flex-1 bg-transparent text-[14px] outline-none placeholder:text-muted-foreground"
                   />
                 </div>
                 {value && (
@@ -1421,7 +1307,7 @@ const ArticleCard = React.memo(
                       handleSave(attr.code, null);
                       setAttrSearch('');
                     }}
-                    className="flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left text-[12px] font-medium text-red-600 hover:bg-red-50"
+                    className="flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left text-[14px] font-medium text-red-600 hover:bg-red-50"
                   >
                     <X className="h-3 w-3 shrink-0" />
                     Clear selection
@@ -1431,7 +1317,7 @@ const ArticleCard = React.memo(
                   {(() => {
                     const matches = attr.values.filter((v) => v.toLowerCase().includes(q));
                     if (matches.length === 0) {
-                      return <div className="px-3 py-2 text-[12px] text-muted-foreground">No options found</div>;
+                      return <div className="px-3 py-2 text-[14px] text-muted-foreground">No options found</div>;
                     }
                     return matches.map((v) => (
                       <button
@@ -1474,7 +1360,14 @@ const ArticleCard = React.memo(
           ] as BomField[])
         : []),
       { label: 'Fashion type', field: 'articleFashionType', mandatory: true, kind: 'pick', options: ['C'] },
-      ...(!isFGMode ? ([{ label: 'Segment', field: 'segment', mandatory: true, kind: 'text' }] as BomField[]) : []),
+      ...(!isFGMode
+        ? ([
+            { label: 'Segment', field: 'segment', mandatory: true, kind: 'text' },
+            { label: 'Rough V2', field: 'roughV2', mandatory: false, kind: 'text' },
+            { label: 'Vendor cost', field: 'vdrCost', mandatory: false, kind: 'text' },
+            { label: 'Final cost', field: 'finalCost', mandatory: false, kind: 'text' },
+          ] as BomField[])
+        : []),
       ...(isFGMode
         ? ([
             { label: 'Vendor fabric rate', field: 'fabricRate', mandatory: false, kind: 'text' },
@@ -1501,7 +1394,7 @@ const ArticleCard = React.memo(
         return (
           <div key={bom.field} className={FIELD_LABEL}>
             <span>{label}</span>
-            <span className="flex h-[34px] items-center rounded-lg bg-slate-100 px-2.5 text-[13px] font-semibold tabular-nums text-slate-900">
+            <span className="flex h-[34px] items-center rounded-lg bg-slate-100 px-2.5 text-[15px] font-semibold tabular-nums text-slate-900">
               {bom.kind === 'markdown' ? markdown : afterTax}
             </span>
           </div>
@@ -1530,7 +1423,7 @@ const ArticleCard = React.memo(
     const countPill = (done: number, total: number) => (
       <span
         className={cn(
-          'shrink-0 rounded-full px-2.5 py-0.5 text-[12px] font-bold tabular-nums',
+          'shrink-0 rounded-full px-2.5 py-0.5 text-[14px] font-bold tabular-nums',
           done === total ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800',
         )}
       >
@@ -1554,10 +1447,10 @@ const ArticleCard = React.memo(
               className="border-white/60 bg-white/10 data-[state=checked]:bg-white data-[state=checked]:text-slate-800"
             />
             <div className="flex min-w-0 flex-1 flex-col">
-              <strong className="truncate text-[14px] font-semibold">
+              <strong className="truncate text-[16px] font-semibold">
                 {[currentMajCat, readField('designNumber')].filter(Boolean).join(' · ') || 'Untitled article'}
               </strong>
-              <span className="truncate text-[12px] text-slate-300">
+              <span className="truncate text-[14px] text-slate-300">
                 {[vendorNameVal, item.pptNumber ? `PPT ${item.pptNumber}` : null, item.sapArticleId || item.articleNumber]
                   .filter(Boolean)
                   .join(' · ') || '—'}
@@ -1565,15 +1458,15 @@ const ArticleCard = React.memo(
             </div>
             <Badge
               style={{ background: status.color + 'cc', color: '#fff', borderColor: status.color }}
-              className="border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+              className="border px-2 py-0.5 text-[12px] font-semibold uppercase tracking-wider"
             >
               {status.label}
             </Badge>
             {item.sapSyncMessage && (
               <Tooltip
                 title={
-                  <div className="max-h-[260px] overflow-y-auto text-xs">
-                    <div className="mb-1.5 text-[13px] font-bold text-red-700">⚠ SAP Remark</div>
+                  <div className="max-h-[260px] overflow-y-auto text-[14px]">
+                    <div className="mb-1.5 text-[15px] font-bold text-red-700">⚠ SAP Remark</div>
                     <div className="whitespace-pre-wrap leading-relaxed">{item.sapSyncMessage}</div>
                   </div>
                 }
@@ -1587,12 +1480,12 @@ const ArticleCard = React.memo(
                 size="sm"
                 onClick={handleModify}
                 disabled={Object.keys(pendingChanges).length === 0 || modifying}
-                className="h-8 border-none bg-white px-3 text-[12px] font-semibold text-slate-800 shadow-sm hover:bg-slate-100 disabled:bg-white/20 disabled:text-white/50"
+                className="h-8 border-none bg-white px-3 text-[14px] font-semibold text-slate-800 shadow-sm hover:bg-slate-100 disabled:bg-white/20 disabled:text-white/50"
               >
                 {modifying ? <Spinner size="sm" /> : <Wand2 />}
                 {modifying ? 'Modifying…' : 'Modify'}
                 {Object.keys(pendingChanges).length > 0 && !modifying && (
-                  <span className="ml-1 rounded-full bg-slate-800/10 px-1.5 text-[10px] tabular-nums">
+                  <span className="ml-1 rounded-full bg-slate-800/10 px-1.5 text-[12px] tabular-nums">
                     {Object.keys(pendingChanges).length}
                   </span>
                 )}
@@ -1616,21 +1509,48 @@ const ArticleCard = React.memo(
             <aside className="flex min-w-0 flex-col gap-3">
               {/* Photo */}
               <div className="group relative aspect-[5/4] w-full overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100">
-                {imgUrl ? (
+                {shownImgUrl ? (
                   <img
-                    src={imgUrl}
+                    src={shownImgUrl}
                     alt=""
                     className="block h-full w-full cursor-zoom-in object-contain p-3"
-                    onError={handleImgError}
+                    onError={showingBack ? () => setBackImgFailed(true) : handleImgError}
                     onClick={() => setImgModalOpen(true)}
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">No Image</div>
+                  <div className="flex h-full w-full items-center justify-center text-[16px] text-muted-foreground">
+                    {showingBack ? 'Back photo unavailable' : 'No Image'}
+                  </div>
                 )}
-                <span className="absolute bottom-2.5 left-3 rounded-md bg-white/85 px-2 py-0.5 text-[11.5px] font-medium text-slate-600">
-                  Article photo · 1 of 1
+                {backImgUrl && (
+                  <>
+                    <span className="absolute left-2.5 top-2.5 rounded-md bg-slate-900 px-2.5 py-1 text-[10.5px] font-bold tracking-[0.06em] text-white">
+                      {showingBack ? 'BACK' : 'FRONT'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowBackImg(false)}
+                      disabled={!showingBack}
+                      aria-label="Show front photo"
+                      className="absolute left-2.5 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow hover:bg-white disabled:pointer-events-none disabled:opacity-0"
+                    >
+                      <ChevronLeft className="h-5 w-5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowBackImg(true)}
+                      disabled={showingBack}
+                      aria-label="Show back photo"
+                      className="absolute right-2.5 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow hover:bg-white disabled:pointer-events-none disabled:opacity-0"
+                    >
+                      <ChevronRight className="h-5 w-5" />
+                    </button>
+                  </>
+                )}
+                <span className="absolute bottom-2.5 left-3 rounded-md bg-white/85 px-2 py-0.5 text-[13.5px] font-medium text-slate-600">
+                  {backImgUrl ? `${showingBack ? 'Back' : 'Front'} photo · ${showingBack ? 2 : 1} of 2` : 'Article photo · 1 of 1'}
                 </span>
-                {imgUrl && (
+                {shownImgUrl && (
                   <Button
                     size="icon"
                     variant="outline"
@@ -1646,8 +1566,8 @@ const ArticleCard = React.memo(
               {/* Article details */}
               <section className={cn(CARD, 'flex flex-col gap-2.5 px-3.5 pb-3 pt-3')}>
                 <div className="flex flex-wrap items-baseline gap-x-2.5">
-                  <h2 className="m-0 text-[14px] font-bold text-slate-900">Article details</h2>
-                  <span className="text-[12px] text-slate-500">
+                  <h2 className="m-0 text-[16px] font-bold text-slate-900">Article details</h2>
+                  <span className="text-[14px] text-slate-500">
                     {pathType === 'created' ? 'Last updated' : 'Created'}{' '}
                     {createdAtRaw
                       ? new Date(createdAtRaw as string).toLocaleString('en-IN', {
@@ -1718,19 +1638,44 @@ const ArticleCard = React.memo(
                     placeholder: 'Auto-built from attributes',
                   })}
                 </div>
-                {renderTextField(
-                  'vendorCode',
-                  <>
+                <div className={FIELD_LABEL}>
+                  <span>
                     Vendor code
                     <RequiredMark />
-                  </>,
-                  {
-                    value: vendorCodeVal,
-                    disabled: isFieldLocked('vendorCode'),
-                    invalid: !vendorCodeVal && !isLocked,
-                    placeholder: '6-digit vendor code',
-                  },
-                )}
+                  </span>
+                  {editingField === 'hdr_vendorCode' ? (
+                    <Autocomplete
+                      autoFocus
+                      value={vendorQuery ?? vendorCodeVal}
+                      onChange={(q) => searchVendors(q, 'code')}
+                      options={vendorOptions}
+                      notFoundContent={vendorSearching ? <Spinner size="sm" /> : null}
+                      placeholder="Type 2+ digits of the vendor code"
+                      onSelect={pickVendor}
+                      onBlur={(e) => {
+                        // A typed code (not picked) is saved as-is; handleSave checks it is 6 digits.
+                        const val = (e.target as HTMLInputElement).value.trim();
+                        if (val && val !== vendorCodeVal) handleSave('vendorCode', val);
+                        else setEditingField(null);
+                        setVendorOptions([]);
+                        setVendorQuery(null);
+                      }}
+                      className={cn(FIELD_INPUT, 'font-mono text-[14.5px]')}
+                    />
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={isFieldLocked('vendorCode')}
+                      onClick={() => setEditingField('hdr_vendorCode')}
+                      className={cn(FIELD_BOX, !vendorCodeVal && !isLocked && 'border-red-300 bg-red-50/60')}
+                    >
+                      <span className={cn('truncate font-mono', !vendorCodeVal && 'font-sans font-normal text-slate-400')}>
+                        {vendorCodeVal || (isFieldLocked('vendorCode') ? '—' : '6-digit vendor code')}
+                      </span>
+                      {!isFieldLocked('vendorCode') && <Search className="h-3.5 w-3.5 shrink-0 text-slate-400" />}
+                    </button>
+                  )}
+                </div>
                 <div className={FIELD_LABEL}>
                   <span>
                     Vendor name
@@ -1739,32 +1684,18 @@ const ArticleCard = React.memo(
                   {editingField === 'hdr_vendorName' ? (
                     <Autocomplete
                       autoFocus
-                      value={vendorQuery || vendorNameVal}
+                      value={vendorQuery ?? vendorNameVal}
                       onChange={searchVendors}
                       options={vendorOptions}
                       notFoundContent={vendorSearching ? <Spinner size="sm" /> : null}
                       placeholder="Search vendor"
-                      onSelect={(val, option) => {
-                        // option.vendorName is the clean name (no code suffix)
-                        const cleanName = (option as any).vendorName || String(val ?? '').split('||')[0];
-                        const updates: Record<string, string | null> = { vendorName: cleanName };
-                        if ((option as any).vendorCode) updates.vendorCode = (option as any).vendorCode;
-                        setLocalValues((prev) => ({ ...prev, ...updates }));
-                        if (isModifyMode) {
-                          setPendingChanges((prev) => ({ ...prev, ...updates }));
-                        } else {
-                          onSave({ ...item, ...updates } as ApproverItem, updates as Record<string, unknown>);
-                        }
-                        setEditingField(null);
-                        setVendorOptions([]);
-                        setVendorQuery('');
-                      }}
+                      onSelect={pickVendor}
                       onBlur={(e) => {
                         const val = (e.target as HTMLInputElement).value.trim();
                         if (val && val !== vendorNameVal) handleSave('vendorName', val);
                         else setEditingField(null);
                         setVendorOptions([]);
-                        setVendorQuery('');
+                        setVendorQuery(null);
                       }}
                       className={FIELD_INPUT}
                     />
@@ -1791,8 +1722,8 @@ const ArticleCard = React.memo(
               <section className={cn(CARD, '@container')}>
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-slate-100 px-4 py-3.5">
                   <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                    <h2 className="m-0 text-[16px] font-bold text-slate-900">General merchandise grid</h2>
-                    <span className="text-[12.5px] text-slate-500">
+                    <h2 className="m-0 text-[18px] font-bold text-slate-900">General merchandise grid</h2>
+                    <span className="text-[14.5px] text-slate-500">
                       {gmRows.length > 0
                         ? `${gmRows.length} attributes for ${currentMajCat} · ${gmFilledCount} filled`
                         : currentMajCat || 'No major category set'}
@@ -1801,7 +1732,7 @@ const ArticleCard = React.memo(
                   {gmRequiredRows.length > 0 && countPill(gmRequiredDone, gmRequiredRows.length)}
                 </div>
                 {gmRows.length === 0 ? (
-                  <div className="px-4 py-6 text-center text-[13px] text-slate-500">
+                  <div className="px-4 py-6 text-center text-[15px] text-slate-500">
                     {!currentMajCat ? (
                       'Choose a major category to load its grid.'
                     ) : !gmGridLoaded ? (
@@ -1819,8 +1750,8 @@ const ArticleCard = React.memo(
                     .map((s) => (
                       <div key={s.title}>
                         <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-2.5">
-                          <strong className="text-[12px] uppercase tracking-[0.06em] text-slate-700">{s.title}</strong>
-                          <span className="text-[12.5px] text-slate-500">{s.rows.length}</span>
+                          <strong className="text-[14px] uppercase tracking-[0.06em] text-slate-700">{s.title}</strong>
+                          <span className="text-[14.5px] text-slate-500">{s.rows.length}</span>
                         </div>
                         <div className="grid @2xl:grid-cols-2">{s.rows.map(renderGmRow)}</div>
                       </div>
@@ -1831,29 +1762,13 @@ const ArticleCard = React.memo(
               {/* BOM — its own card, never mixed into the grid */}
               <section className={CARD}>
                 <div className="flex items-center gap-2.5 border-b border-slate-100 px-4 py-3.5">
-                  <h2 className="m-0 text-[16px] font-bold text-slate-900">BOM</h2>
+                  <h2 className="m-0 text-[18px] font-bold text-slate-900">BOM</h2>
                   {bomRequired.length > 0 && countPill(bomRequiredDone, bomRequired.length)}
                 </div>
                 <div className="grid grid-cols-[repeat(auto-fit,minmax(110px,1fr))] gap-x-3 gap-y-3 px-4 py-3.5">
                   {BOM_FIELDS.map(renderBomField)}
                 </div>
               </section>
-
-              {/* Proceed for FG Article Creation — hidden on New Articles and Failed Creations */}
-              {!item.articleNumber && pathType !== 'new' && pathType !== 'failed' && (
-                <Tooltip title={!vendorCodeVal ? 'Vendor Code is required before proceeding' : undefined}>
-                  <span className="block">
-                    <Button
-                      disabled={!vendorCodeVal}
-                      onClick={() => onProceedFGArticle(item)}
-                      className="h-9 w-full border-none bg-slate-800 text-[13px] font-semibold text-white hover:bg-slate-700 disabled:bg-slate-100 disabled:text-slate-400"
-                    >
-                      <Rocket />
-                      Proceed for FG Article Creation
-                    </Button>
-                  </span>
-                </Tooltip>
-              )}
             </div>
           </div>
 
@@ -1866,8 +1781,8 @@ const ArticleCard = React.memo(
                 className="flex w-full items-center gap-2.5 px-4 py-3.5 text-left hover:bg-slate-50"
               >
                 <Users className="h-4 w-4 text-slate-500" />
-                <h2 className="m-0 flex-1 text-[15px] font-bold text-slate-900">Colour variants</h2>
-                <span className="text-[12.5px] text-slate-500">{showVariants ? 'Hide' : 'Show'}</span>
+                <h2 className="m-0 flex-1 text-[17px] font-bold text-slate-900">Colour variants</h2>
+                <span className="text-[14.5px] text-slate-500">{showVariants ? 'Hide' : 'Show'}</span>
                 {showVariants ? (
                   <ChevronUp className="h-4 w-4 text-slate-400" />
                 ) : (
@@ -1883,7 +1798,7 @@ const ArticleCard = React.memo(
           )}
 
           {/* ─── Tip footer ─── */}
-          <div className="flex shrink-0 items-center gap-1.5 border-t border-slate-200 bg-white px-4 py-1.5 text-[11px] text-slate-500">
+          <div className="flex shrink-0 items-center gap-1.5 border-t border-slate-200 bg-white px-4 py-1.5 text-[13px] text-slate-500">
             <Info className="h-3 w-3 text-slate-400" />
             <span>
               {isModifyMode
@@ -1903,7 +1818,7 @@ const ArticleCard = React.memo(
         >
           <DialogContent className="w-auto max-w-[92vw] p-0">
             <DialogHeader className="flex flex-row items-center justify-between border-b border-border px-4 py-2">
-              <DialogTitle className="truncate text-sm">{item.imageName || 'Image Preview'}</DialogTitle>
+              <DialogTitle className="truncate text-[16px]">{item.designNumber || 'Image Preview'}</DialogTitle>
               {/* Zoom + rotate controls */}
               <div className="mr-8 flex items-center gap-1">
                 <Button
@@ -1916,7 +1831,7 @@ const ArticleCard = React.memo(
                 >
                   <Minus />
                 </Button>
-                <span className="w-12 text-center text-xs tabular-nums text-muted-foreground">
+                <span className="w-12 text-center text-[14px] tabular-nums text-muted-foreground">
                   {Math.round(imgZoom * 100)}%
                 </span>
                 <Button
@@ -1941,7 +1856,7 @@ const ArticleCard = React.memo(
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="ml-1 h-7 px-2 text-xs"
+                  className="ml-1 h-7 px-2 text-[14px]"
                   onClick={resetImageView}
                   disabled={imgZoom === 1 && imgRotation === 0}
                 >
@@ -1951,8 +1866,8 @@ const ArticleCard = React.memo(
             </DialogHeader>
             <div className="flex items-center justify-center overflow-auto p-4" style={{ maxHeight: '80vh' }}>
               <img
-                src={imgUrl || ''}
-                alt={item.imageName || 'preview'}
+                src={shownImgUrl || ''}
+                alt={item.designNumber || 'preview'}
                 className="block transition-transform duration-200 will-change-transform"
                 style={{
                   maxWidth: '85vw',
@@ -2009,37 +1924,18 @@ export const GMArticleList: React.FC<ApproverArticleListProps> = ({
   loading,
   selectedRowKeys,
   onSelectionChange,
-  onEdit: _onEdit,
   onSave,
   onCreateFabricArticle,
   onCreateBodyArticle,
-  onProceedFGArticle,
   onModify,
-  attributes,
   onRefresh,
   pathType,
   hideGroups,
   isFGMode,
-  forceStaticGroups,
   serverPagination,
   fabHierarchy,
 }) => {
-  const [cardGroups, setCardGroups] = useState<CardGroup[]>(() => {
-    if (forceStaticGroups) return ATTRIBUTE_GROUPS;
-    const cached = getCachedAttributeGroups();
-    return cached && cached.length > 0 ? buildCardGroups(cached) : ATTRIBUTE_GROUPS;
-  });
-
-  useEffect(() => {
-    if (forceStaticGroups) return;
-    preloadAttributeGroups()
-      .then((entries) => {
-        if (entries.length > 0) setCardGroups(buildCardGroups(entries));
-      })
-      .catch(() => {
-        /* keep hardcoded fallback */
-      });
-  }, []);
+  const cardGroups = ATTRIBUTE_GROUPS;
 
   const handleToggleSelect = useCallback(
     (id: string) => {
@@ -2099,10 +1995,8 @@ export const GMArticleList: React.FC<ApproverArticleListProps> = ({
           onSave={onSave}
           onCreateFabricArticle={onCreateFabricArticle}
           onCreateBodyArticle={onCreateBodyArticle}
-          onProceedFGArticle={onProceedFGArticle}
           onDuplicate={handleDuplicate}
           onModify={onModify}
-          attributes={attributes}
           onRefresh={onRefresh}
           cardGroups={cardGroups}
           pathType={pathType}

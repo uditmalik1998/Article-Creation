@@ -66,7 +66,13 @@ interface ItemResult {
   writtenCount: number;
   nicCount: number;
   lockedCount: number;
+  /** Characteristic names SAP refused as not-on-class / locked (newer backends only). */
+  nicAttrs?: string[];
+  lockedAttrs?: string[];
   errorMessage?: string;
+  /** Class the article really sits in when SAP refused to link it to its MC class. */
+  linkedClass?: string;
+  linkError?: string;
 }
 
 interface SyncReport {
@@ -114,7 +120,7 @@ interface JobStatus {
   batches: JobBatch[];
 }
 
-type IssueKind = 'NIC' | 'Locked' | 'Error';
+type IssueKind = 'NIC' | 'Wrong class' | 'Locked' | 'Error';
 
 interface Issue extends ItemResult {
   kinds: IssueKind[];
@@ -159,14 +165,38 @@ function clockTime(ts: string | null): string {
   return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
+/** "M_A, M_B, M_C +2 more" — keeps the Problem cell short. */
+function nameList(names: string[] | undefined, max = 4): string {
+  if (!names || names.length === 0) return '';
+  return names.slice(0, max).join(', ') + (names.length > max ? ` +${names.length - max} more` : '');
+}
+
 function toIssue(r: ItemResult): Issue | null {
   const kinds: IssueKind[] = [];
-  if (!r.ok) kinds.push('Error');
-  if (r.nicCount > 0) kinds.push('NIC');
+  // A failed article whose only problem is characteristics missing from its
+  // class (SAP's "not in any class KSML" atomic-fail) is NIC, not a generic
+  // error — the fix is Pool A, not the article.
+  const nicOnlyFailure = !r.ok && r.nicCount > 0;
+  if (!r.ok && !nicOnlyFailure) kinds.push('Error');
+  // NIC because the article still sits in an older class (KSSK) — Pool A on the MC
+  // class can't help; the article has to move to its MC class.
+  const wrongClass = r.nicCount > 0 && !!r.linkedClass && r.linkedClass !== r.matkl;
+  if (r.nicCount > 0) kinds.push(wrongClass ? 'Wrong class' : 'NIC');
   if (r.lockedCount > 0) kinds.push('Locked');
   if (kinds.length === 0) return null;
 
-  if (!r.ok) {
+  const pool = `Run Pool A to add ${r.nicCount !== 1 ? 'them' : 'it'} to class ${r.matkl || '(this MC)'}, then re-upload`;
+  // Another session (often the shared POWERBI RFC user) was editing the article in SAP.
+  const lockedBy = !r.ok && !nicOnlyFailure ? /locked by user (\w+)/i.exec(r.errorMessage ?? '')?.[1] : undefined;
+  if (lockedBy) {
+    return {
+      ...r,
+      kinds,
+      problem: `SAP had this article open (locked by user ${lockedBy}) — nothing was saved`,
+      fix: 'Wait a few minutes, then re-upload this article',
+    };
+  }
+  if (!r.ok && !nicOnlyFailure) {
     return {
       ...r,
       kinds,
@@ -176,18 +206,34 @@ function toIssue(r: ItemResult): Issue | null {
         : 'Fix the cause, then re-upload this article',
     };
   }
-  if (r.nicCount > 0) {
+  if (wrongClass) {
+    const names = nameList(r.nicAttrs);
     return {
       ...r,
       kinds,
-      problem: `${r.nicCount} characteristic${r.nicCount !== 1 ? 's' : ''} not on the class`,
-      fix: `Run Pool A for ${r.matkl || 'this class'}, then re-upload`,
+      problem:
+        `In SAP the article is linked to class ${r.linkedClass}, not its MC ${r.matkl} — ` +
+        `${names || `${r.nicCount} characteristic${r.nicCount !== 1 ? 's' : ''}`} not on ${r.linkedClass}` +
+        (r.ok ? '' : '; SAP saved nothing for this article'),
+      fix: `Move the article to class ${r.matkl} in SAP (CL24N), or run Pool A for class ${r.linkedClass}, then re-upload`,
     };
   }
+  if (r.nicCount > 0) {
+    const names = nameList(r.nicAttrs);
+    return {
+      ...r,
+      kinds,
+      problem:
+        `Not on the class${names ? `: ${names}` : ` (${r.nicCount} characteristic${r.nicCount !== 1 ? 's' : ''})`}` +
+        (r.ok ? '' : ' — SAP saved nothing for this article'),
+      fix: pool,
+    };
+  }
+  const locked = nameList(r.lockedAttrs);
   return {
     ...r,
     kinds,
-    problem: `${r.lockedCount} locked field${r.lockedCount !== 1 ? 's' : ''} ignored`,
+    problem: `Locked, ignored${locked ? `: ${locked}` : ` (${r.lockedCount} field${r.lockedCount !== 1 ? 's' : ''})`}`,
     fix: 'No action — locked fields are not changed',
   };
 }
@@ -195,6 +241,7 @@ function toIssue(r: ItemResult): Issue | null {
 const KIND_STYLE: Record<IssueKind, string> = {
   Error: 'bg-red-100 text-red-700',
   NIC: 'bg-amber-100 text-amber-800',
+  'Wrong class': 'bg-orange-100 text-orange-800',
   Locked: 'bg-slate-200 text-slate-800',
 };
 
@@ -343,13 +390,14 @@ function AttentionTable({ issues, running, onDownload }: { issues: Issue[]; runn
   const counts = useMemo(
     () => ({
       NIC: issues.filter((i) => i.kinds.includes('NIC')).length,
+      'Wrong class': issues.filter((i) => i.kinds.includes('Wrong class')).length,
       Locked: issues.filter((i) => i.kinds.includes('Locked')).length,
       Error: issues.filter((i) => i.kinds.includes('Error')).length,
     }),
     [issues],
   );
   const shown = filter === 'All' ? issues : issues.filter((i) => i.kinds.includes(filter));
-  const tabs: ('All' | IssueKind)[] = ['All', 'NIC', 'Locked', 'Error'];
+  const tabs: ('All' | IssueKind)[] = ['All', 'NIC', 'Wrong class', 'Locked', 'Error'];
 
   if (issues.length === 0) {
     return (
@@ -412,7 +460,14 @@ function AttentionTable({ issues, running, onDownload }: { issues: Issue[]; runn
             {shown.map((i) => (
               <tr key={i.matnr} className="border-t border-slate-100">
                 <td className="px-4 py-2.5 font-mono font-medium sm:px-5">{i.matnr}</td>
-                <td className="px-3 py-2.5 font-mono text-muted-foreground">{i.matkl || '—'}</td>
+                <td className="px-3 py-2.5 font-mono text-muted-foreground">
+                  {i.matkl || '—'}
+                  {i.kinds.includes('Wrong class') && (
+                    <span className="block text-[11px] font-semibold text-orange-800" title={i.linkError}>
+                      linked: {i.linkedClass}
+                    </span>
+                  )}
+                </td>
                 <td className="px-3 py-2.5">{i.writtenCount}</td>
                 <td className="px-3 py-2.5">
                   <span className="flex flex-wrap items-center gap-1.5">
@@ -433,6 +488,12 @@ function AttentionTable({ issues, running, onDownload }: { issues: Issue[]; runn
       {counts.NIC > 0 && (
         <p className="border-t border-border px-4 py-3 text-xs text-muted-foreground sm:px-5">
           NIC = the characteristic is not assigned to the article's class. Run Pool A (KSML Uploader) for those classes first.
+        </p>
+      )}
+      {counts['Wrong class'] > 0 && (
+        <p className="border-t border-border px-4 py-3 text-xs text-muted-foreground sm:px-5">
+          Wrong class = SAP keeps the article in an older class than its MC, so it checks values against that class.
+          Move it to its MC class in SAP (CL24N), or add the characteristics to the old class with Pool A.
         </p>
       )}
     </section>
@@ -644,10 +705,19 @@ export default function PoolBUploaderPage() {
         issues.map((i) => ({
           Article: i.matnr,
           MC: i.matkl ?? '',
-          Status: i.ok ? 'OK' : 'FAILED',
+          'Linked class': i.linkedClass ?? '',
+          Status: i.ok
+            ? 'OK'
+            : i.kinds.includes('Error')
+              ? 'FAILED'
+              : i.kinds.includes('Wrong class')
+                ? 'NOT SAVED (WRONG CLASS)'
+                : 'NOT SAVED (NIC)',
           'Values written': i.writtenCount,
           NIC: i.nicCount,
+          'Not on class': (i.nicAttrs ?? []).join(', '),
           Locked: i.lockedCount,
+          'Locked fields': (i.lockedAttrs ?? []).join(', '),
           Problem: i.problem,
           'What to do': i.fix,
         })),

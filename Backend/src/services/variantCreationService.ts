@@ -7,7 +7,6 @@
  */
 import { randomUUID } from 'crypto';
 import { prismaClient as prisma } from '../utils/prisma';
-import { mirror360FlatUpdate } from '../utils/mirror360Flat';
 
 /**
  * Active sizes for a major category, read from the `maj_cat_sizes` table
@@ -190,6 +189,58 @@ export async function addColorVariants(
   return created;
 }
 
+/**
+ * Major category changed on a generic: its size variants were built from the old
+ * category's sizes, so delete them and re-create every colour (keeping its photo)
+ * with all active sizes of the new category. The caller must already have
+ * checked that no variant is in SAP and passes the new category's sizes.
+ * One read + one transaction (deleteMany + createMany), so the save stays quick.
+ */
+export async function rebuildVariantsForMajCat(
+  generic: {
+    id: string; articleNumber: string | null; division: string | null; subDivision: string | null;
+    majorCategory: string | null; vendorName: string | null; vendorCode: string | null;
+    designNumber: string | null; mrp: any; rate: any; imageUrl: string | null;
+  },
+  sizes: string[],
+): Promise<{ colors: string[]; created: number }> {
+  const old = await prisma.fgVariantArticleData.findMany({
+    where: { genericArticleId: generic.id },
+    orderBy: { createdAt: 'asc' },
+    select: { variantColor: true, imageUrl: true },
+  });
+  const imageByColor = new Map<string, string | null>();
+  for (const v of old) {
+    const color = (v.variantColor || '').trim().toUpperCase();
+    if (color && !imageByColor.has(color)) imageByColor.set(color, v.imageUrl || generic.imageUrl || null);
+  }
+  const rows = [...imageByColor].flatMap(([color, imageUrl]) =>
+    sizes.map((size) => ({
+      id: randomUUID(),
+      genericArticleId: generic.id,
+      genericArticleNumber: generic.articleNumber || null,
+      variantColor: color,
+      variantSize: size,
+      division: generic.division || null,
+      subDivision: generic.subDivision || null,
+      majorCategory: generic.majorCategory || null,
+      vendorName: generic.vendorName || null,
+      vendorCode: generic.vendorCode || null,
+      designNumber: generic.designNumber || null,
+      mrp: generic.mrp ?? null,
+      rate: generic.rate ?? null,
+      imageUrl,
+      approvalStatus: 'PENDING',
+      sapSyncStatus: 'NOT_SYNCED',
+    })),
+  );
+  await prisma.$transaction([
+    prisma.fgVariantArticleData.deleteMany({ where: { genericArticleId: generic.id } }),
+    prisma.fgVariantArticleData.createMany({ data: rows }),
+  ]);
+  return { colors: [...imageByColor.keys()], created: rows.length };
+}
+
 export async function syncGenericToVariants(genericId: string, updatedData: Record<string, any>): Promise<void> {
   try {
     // Remove variant-specific fields from sync payload
@@ -228,9 +279,6 @@ export async function syncGenericToVariants(genericId: string, updatedData: Reco
         data: fgSyncData,
       }).catch((e: any) => console.error(`[VariantSync] fg_variant sync failed for generic=${genericId}:`, e?.message));
     }
-
-    // Mirror sync to 360article (fire-and-forget)
-    void Promise.all(variantIds.map(v => mirror360FlatUpdate(v.id, syncData)));
 
   } catch (err: any) {
     // Log but do not rethrow — variant sync failure must not crash the main update request

@@ -4,7 +4,6 @@ import { Button, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle 
 import { message } from '@/lib/message';
 import { cn } from '@/lib/utils';
 import { APP_CONFIG } from '../../../constants/app/config';
-import type { MasterAttribute } from './GMArticleTable';
 
 // ─── Add Color Variants — GM Article pages (design "Option A · 3-step wizard") ──
 // 1 · Colors  → pick one or more colors (searchable list)
@@ -22,7 +21,6 @@ interface GMAddColorModalProps {
   majorCategory: string;
   /** Existing (size, color) pairs already created, as `SIZE||COLOR` (upper-cased). */
   existingPairs: Set<string>;
-  attributes: MasterAttribute[];
   onClose: () => void;
   onAdded: () => void;
 }
@@ -36,7 +34,6 @@ const GMAddColorModal: React.FC<GMAddColorModalProps> = ({
   genericId,
   majorCategory,
   existingPairs,
-  attributes,
   onClose,
   onAdded,
 }) => {
@@ -80,15 +77,11 @@ const GMAddColorModal: React.FC<GMAddColorModalProps> = ({
   }, [open, majorCategory, sizesPath]);
 
   // Colors from color_master (value = SAP code, label = "NAME - CODE"); falls back
-  // to the COLOR attribute, then a short hardcoded list.
+  // to a short hardcoded list only if color_master is unavailable.
   const options: ColorOption[] = useMemo(() => {
     if (masterColors.length > 0) return masterColors.map((c) => ({ value: c.code, label: `${c.name} - ${c.code}` }));
-    const colorAttr = attributes.find((a) => ['COLOR', 'COLOUR'].includes(a.key.toUpperCase()) || ['COLOR', 'COLOUR'].includes(a.label.toUpperCase()));
-    const base = colorAttr && colorAttr.allowedValues.length > 0
-      ? colorAttr.allowedValues.map((v) => ({ code: v.shortForm, label: v.fullForm }))
-      : FALLBACK_COLORS.map((c) => ({ code: c, label: c }));
-    return base.map(({ code, label }) => ({ value: code, label: label !== code ? `${code} — ${label}` : code }));
-  }, [masterColors, attributes]);
+    return FALLBACK_COLORS.map((c) => ({ value: c, label: c }));
+  }, [masterColors]);
 
   const labelOf = (code: string) => options.find((o) => o.value === code)?.label ?? code;
   const sizeExists = (size: string, color: string) => existingPairs.has(pairKey(size, color));

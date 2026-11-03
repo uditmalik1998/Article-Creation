@@ -38,7 +38,6 @@ jobs:
             FRONTEND_URL=https://articlecreation.v2retail.net \
             STARTUP_BACKFILLS_ENABLED=false \
             ENABLE_REDIS=true \
-            ENABLE_AUDIT_LOGGING=false \
             VLM_FUSION_MODE=high-quality \
             ZMM_RFC_URL=http://192.168.151.36:9005/api/ZMM_ART_CREATION_RFC \
             ZMM_RFC_ENABLED=true \

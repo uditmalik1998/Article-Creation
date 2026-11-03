@@ -46,14 +46,20 @@ const ExportManager: React.FC<ExportManagerProps> = ({ extractedRows, schema, ca
   const [exporting, setExporting] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  const exportSchema = useMemo(() => buildExportSchema(schema, masterAttributes), [masterAttributes, schema]);
+  // Columns come from the master attribute list; each column's dropdown values come
+  // from the page's schema (major-category / national grid), not attribute_allowed_values.
+  const exportSchema = useMemo(() => {
+    const gridValuesByKey = new Map(schema.map((item) => [item.key, item.allowedValues ?? []]));
+    const masters = masterAttributes.map((attr) => ({ ...attr, allowedValues: gridValuesByKey.get(attr.key) ?? [] }));
+    return buildExportSchema(schema, masters);
+  }, [masterAttributes, schema]);
   const orderedHeaders = useMemo(() => [...ORDERED_EXPORT_HEADERS], []);
 
   useEffect(() => {
     const fetchMasterAttributes = async () => {
       try {
         const token = localStorage.getItem('authToken');
-        const response = await fetch(`${APP_CONFIG.api.baseURL}/user/attributes?includeValues=true`, {
+        const response = await fetch(`${APP_CONFIG.api.baseURL}/user/attributes`, {
           headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         });
         if (!response.ok) return;

@@ -139,14 +139,18 @@ export interface CategoryAttribute {
  * once). Shown in the Users page as "Business Division". */
 export type AdminUserBusinessDivision = 'MENS' | 'KIDS' | 'LADIES' | 'PD' | 'MDM';
 
+/** Article types a user works on — several allowed. */
+export type AdminUserArticleType = 'FG' | 'FABRIC' | 'GM';
+
 export interface AdminUser {
   id: number;
   email: string;
   name: string;
-  role: 'ADMIN' | 'CREATOR' | 'PO_COMMITTEE' | 'APPROVER' | 'CATEGORY_HEAD' | 'SUB_DIVISION_HEAD' | 'PD_DESIGNER' | 'PD' | 'BODY_APPROVER' | 'FABRIC_APPROVER' | 'PLANNING' | 'GM_APPROVER' | 'GM_CREATOR';
+  role: 'ADMIN' | 'CREATOR' | 'PO_COMMITTEE' | 'APPROVER' | 'CATEGORY_HEAD' | 'SUB_DIVISION_HEAD' | 'PD_DESIGNER' | 'PD' | 'BODY_APPROVER' | 'PLANNING' | 'GM_APPROVER' | 'GM_CREATOR';
   division?: string | null;
   subDivision?: string | null;
   businessDivision?: AdminUserBusinessDivision | null;
+  articleTypes?: AdminUserArticleType[];
   isActive: boolean;
   createdAt: string;
   lastLogin?: string | null;
@@ -246,11 +250,6 @@ export const getCategories = async (params: GetCategoriesParams = {}): Promise<P
   return data;
 };
 
-export const getCategoryById = async (id: number): Promise<Category> => {
-  const { data } = await adminApi.get<ApiResponse<Category>>(`/categories/${id}`);
-  return data.data;
-};
-
 export const createCategory = async (category: Partial<Category>): Promise<Category> => {
   const { data } = await adminApi.post<ApiResponse<Category>>('/categories', category);
   return data.data;
@@ -282,23 +281,6 @@ export const updateCategoryAttributeMapping = async (
   await adminApi.put(`/categories/${categoryId}/attributes/${attributeId}`, data);
 };
 
-export const addAttributeToCategory = async (
-  categoryId: number,
-  data: {
-    attributeId: number;
-    isEnabled?: boolean;
-    isRequired?: boolean;
-    displayOrder?: number;
-    defaultValue?: string | null;
-  }
-): Promise<CategoryAttribute> => {
-  const { data: response } = await adminApi.post<ApiResponse<CategoryAttribute>>(
-    `/categories/${categoryId}/attributes`,
-    data
-  );
-  return response.data;
-};
-
 export const removeAttributeFromCategory = async (
   categoryId: number,
   attributeId: number
@@ -310,15 +292,8 @@ export const removeAttributeFromCategory = async (
 // MASTER ATTRIBUTES
 // ═══════════════════════════════════════════════════════
 
-export const getMasterAttributes = async (includeValues = false): Promise<MasterAttribute[]> => {
-  const { data } = await adminApi.get<ApiResponse<MasterAttribute[]>>('/attributes', {
-    params: { includeValues },
-  });
-  return data.data;
-};
-
-export const getMasterAttributeById = async (id: number): Promise<MasterAttribute> => {
-  const { data } = await adminApi.get<ApiResponse<MasterAttribute>>(`/attributes/${id}`);
+export const getMasterAttributes = async (): Promise<MasterAttribute[]> => {
+  const { data } = await adminApi.get<ApiResponse<MasterAttribute[]>>('/attributes');
   return data.data;
 };
 
@@ -334,15 +309,6 @@ export const updateMasterAttribute = async (id: number, attribute: Partial<Maste
 
 export const deleteMasterAttribute = async (id: number): Promise<void> => {
   await adminApi.delete(`/attributes/${id}`);
-};
-
-export const addAllowedValue = async (attributeId: number, value: Partial<AllowedValue>): Promise<AllowedValue> => {
-  const { data } = await adminApi.post<ApiResponse<AllowedValue>>(`/attributes/${attributeId}/values`, value);
-  return data.data;
-};
-
-export const deleteAllowedValue = async (attributeId: number, valueId: number): Promise<void> => {
-  await adminApi.delete(`/attributes/${attributeId}/values/${valueId}`);
 };
 
 // ═══════════════════════════════════════════════════════
@@ -428,22 +394,6 @@ export interface LightweightDepartment {
 export const getHierarchyTreeLightweight = async (): Promise<LightweightDepartment[]> => {
   const { data } = await adminApi.get<ApiResponse<{ departments: LightweightDepartment[] }>>('/hierarchy/tree/lightweight');
   return data.data.departments;
-};
-
-/**
- * Get category with ALL master attributes (showing enabled/disabled status)
- * Used by admin matrix to show all 44 attributes with toggles
- */
-export const getCategoryWithAllAttributes = async (categoryId: number) => {
-  const { data } = await adminApi.get(`/categories/${categoryId}/all-attributes`);
-  return data.data;
-};
-
-export const exportHierarchy = async (): Promise<Blob> => {
-  const { data } = await adminApi.get('/hierarchy/export', {
-    responseType: 'blob',
-  });
-  return data;
 };
 
 // ═══════════════════════════════════════════════════════
@@ -564,6 +514,11 @@ export const getStatusDashboard = async (): Promise<StatusDashboard> => {
 // GM SUB-DIVISIONS
 // ═══════════════════════════════════════════════════════
 
+export const getFabricSubDivisions = async (): Promise<{ subDivisions: string[]; divBySubDiv: Record<string, string> }> => {
+  const { data } = await adminApi.get<{ subDivisions: string[]; divBySubDiv: Record<string, string> }>('/fabric-sub-divisions');
+  return data;
+};
+
 export const getGMSubDivisions = async (): Promise<{ subDivisions: string[]; divBySubDiv: Record<string, string> }> => {
   const { data } = await adminApi.get<{ subDivisions: string[]; divBySubDiv: Record<string, string> }>('/gm-sub-divisions');
   return data;
@@ -582,10 +537,11 @@ export const createUser = async (payload: {
   email: string;
   password: string;
   name: string;
-  role?: 'ADMIN' | 'CREATOR' | 'PO_COMMITTEE' | 'APPROVER' | 'CATEGORY_HEAD' | 'SUB_DIVISION_HEAD' | 'PD_DESIGNER' | 'PD' | 'BODY_APPROVER' | 'FABRIC_APPROVER' | 'PLANNING' | 'GM_APPROVER' | 'GM_CREATOR';
+  role?: 'ADMIN' | 'CREATOR' | 'PO_COMMITTEE' | 'APPROVER' | 'CATEGORY_HEAD' | 'SUB_DIVISION_HEAD' | 'PD_DESIGNER' | 'PD' | 'BODY_APPROVER' | 'PLANNING' | 'GM_APPROVER' | 'GM_CREATOR';
   division?: string;
   subDivision?: string | string[];
   businessDivision?: AdminUserBusinessDivision | null;
+  articleTypes?: AdminUserArticleType[];
 }): Promise<AdminUser> => {
   const { data } = await adminApi.post<ApiResponse<AdminUser>>('/users', payload);
   return data.data;

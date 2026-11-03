@@ -53,14 +53,11 @@ flowchart TD
 
     EXTR[EnhancedExtractionController] --> VLM[vlm/vlmService\nClaude, GPT-4o, FashionCLIP]
     EXTR --> FLAT[flatteningService\nNormalize + persist]
-    EXTR --> QUEUE[queueManagementService\nmaxConcurrent=4]
     EXTR --> COST[sessionCostTracker]
-    EXTR --> MIRROR[mirror360Flat\nfire-and-forget]
 
     SRM[srmSyncService] --> EXTRFLAT[(ExtractionResultFlat)]
 
     VLM --> PROM[promptService\nsimplifiedPromptService]
-    FLAT --> MVGR[mvgrMappingService\nBook10/11/FAB2.json]
     FLAT --> SCHEMA[schemaService\ncategory attributes]
 ```
 
@@ -80,7 +77,6 @@ flowchart TD
 | GET | `/items/:id/variants` | `getVariants` | Size/color variants for generic |
 | POST | `/items/:id/add-color` | `addColor` | Add color variant |
 | POST | `/items/:id/sync-color` | `syncColorToVariants` | Push color to all variants |
-| GET | `/bom-art-numbers/:majCat` | `getBomArtNumbers` | BOM article # lookup |
 | POST | `/backfill-descriptions` | `backfillDescriptions` | Admin: fix article descriptions |
 
 ---
@@ -123,7 +119,6 @@ Attribute values: 5-minute cache (`getAttributes`)
 | `getMcCodeByMajorCategory` | `utils/mcCodeMapper.ts` | majorCategory → mcCode |
 | `getHsnCodeByMcCode` | `utils/hsnMapper.ts` | mcCode → hsnTaxCode |
 | `getSegmentByCategoryAndMrp` | `utils/segmentRangeMapper.ts` | (majorCategory, mrp) → segment |
-| `mirror360FlatUpdate` | `utils/mirror360Flat.ts` | flat row → 360article upsert |
 
 ---
 

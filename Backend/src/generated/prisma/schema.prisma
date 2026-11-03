@@ -192,9 +192,17 @@ model ExtractionJob {
 model ExtractionResultFlat {
   id                          String    @id @default(uuid())
   jobId                       String?   @unique @map("job_id")
-  imageName                   String?   @map("image_name") @db.VarChar(255)
   imageUrl                    String?   @map("image_url")
   oldImageUrl                 String?   @map("old_image_url")
+  // Clean (un-watermarked) image — kept by DB trigger trg_set_flat_source_image_url;
+  // image_url is overwritten with the watermarked copy on SAP creation, this is not.
+  sourceImageUrl              String?   @map("source_image_url")
+  // CMP COST card "AI SAM" (read-only): minutes per process from the Gemini extraction call
+  aiCmpCostCutting            Decimal?  @map("ai_cmp_cost_cutting") @db.Decimal(10, 2)
+  aiCmpCostStitching          Decimal?  @map("ai_cmp_cost_stitching") @db.Decimal(10, 2)
+  aiCmpCostIroning            Decimal?  @map("ai_cmp_cost_ironing") @db.Decimal(10, 2)
+  aiCmpCostFinishing          Decimal?  @map("ai_cmp_cost_finishing") @db.Decimal(10, 2)
+  backImageUrl                String?   @map("back_image_url")
   articleNumber               String?   @map("article_number") @db.VarChar(100)
   extractionStatus            String?   @map("extraction_status") @db.VarChar(50)
   aiModel                     String?   @map("ai_model") @db.VarChar(100)
@@ -208,6 +216,8 @@ model ExtractionResultFlat {
   apiCost                     Decimal?  @map("api_cost") @db.Decimal(10, 6)
   userId                      Int?      @map("user_id")
   userName                    String?   @map("user_name") @db.VarChar(200)
+  creatorUser                 Json?     @map("creator_user") @db.JsonB // [{name, email}] — distinct editors on the FG New article page
+  modifyUser                  Json?     @map("modify_user") @db.JsonB // [{name, email}] — distinct editors on the FG Created page
   extractionDate              DateTime? @map("extraction_date") @db.Date
   createdAt                   DateTime  @default(now()) @map("created_at")
   updatedAt                   DateTime  @updatedAt @map("updated_at")
@@ -317,8 +327,18 @@ model ExtractionResultFlat {
   finishingActPrVal            Decimal? @map("finishing_act_pr_val") @db.Decimal(10, 4)
   finishingVendorPrVal         Decimal? @map("finishing_vendor_pr_val") @db.Decimal(10, 4)
   finishingFinalPrVal          Decimal? @map("finishing_final_pr_val") @db.Decimal(10, 4)
+  // CMP COST TOTAL row: sum of PR VAL per scenario, or a user override
+  totalBgtPrVal                Decimal? @map("total_bgt_pr_val") @db.Decimal(10, 4)
+  totalActPrVal                Decimal? @map("total_act_pr_val") @db.Decimal(10, 4)
+  totalVendorPrVal             Decimal? @map("total_vendor_pr_val") @db.Decimal(10, 4)
+  totalFinalPrVal              Decimal? @map("total_final_pr_val") @db.Decimal(10, 4)
   // ===== B TRIM COSTING (values belong to the tab in bTrimType) =====
   bTrimType                    String?  @map("b_trim_type") @db.VarChar(10)
+  // B TRIM TOTAL row (saved tab): sum of the rows, or a user override. AUTO-BGT total is never stored.
+  bTrimTotalAutoBgt            Decimal? @map("b_trim_total_auto_bgt") @db.Decimal(10, 2)
+  bTrimTotalRoughV2            Decimal? @map("b_trim_total_rough_v2") @db.Decimal(10, 2)
+  bTrimTotalVdrCost            Decimal? @map("b_trim_total_vdr_cost") @db.Decimal(10, 2)
+  bTrimTotalFinalCost          Decimal? @map("b_trim_total_final_cost") @db.Decimal(10, 2)
   mBtnAutoBgt                  Decimal? @map("m_btn_auto_bgt") @db.Decimal(10, 2)
   mBtnRoughV2                  Decimal? @map("m_btn_rough_v2") @db.Decimal(10, 2)
   mBtnVdrCost                  Decimal? @map("m_btn_vdr_cost") @db.Decimal(10, 2)
@@ -486,6 +506,11 @@ model ExtractionResultFlat {
   // V. ADD extra PRINT / EMB rows (PRINT-1, EMB-1…) — app only, never sent to SAP
   vaddPrintJson                Json?    @map("vadd_print_json")
   vaddEmpJson                  Json?    @map("vadd_emp_json")
+  // V. ADD TOTAL row: AUTO-BGT is always the sum; the others are the sum or a user override
+  vaddTotalAutoBgt             Decimal? @map("vadd_total_auto_bgt") @db.Decimal(10, 2)
+  vaddTotalRoughV2             Decimal? @map("vadd_total_rough_v2") @db.Decimal(10, 2)
+  vaddTotalVendorCost          Decimal? @map("vadd_total_vendor_cost") @db.Decimal(10, 2)
+  vaddTotalFinalCost           Decimal? @map("vadd_total_final_cost") @db.Decimal(10, 2)
   // ===== PKG COST (net prices belong to the tab in pkgCostType) =====
   pkgCostType                  String?  @map("pkg_cost_type") @db.VarChar(10)
   boppNetPrice                 Decimal? @map("bopp_net_price") @db.Decimal(10, 2)
@@ -580,7 +605,6 @@ model ExtractionResultFlat {
   srmSyncRunItems SrmSyncRunItem[]
 
   @@index([jobId])
-  @@index([imageName])
   @@index([articleNumber])
   @@index([majorCategory])
   @@index([extractionStatus])
@@ -707,6 +731,8 @@ model User {
   /// with one — shown in the UI as "Business Division" to avoid being
   /// confused with the existing Sub Division field.
   businessDivision String?                @map("business_division") @db.VarChar(20)
+  /// Article types the user works on — any of FG / FABRIC / GM (several allowed).
+  articleTypes     String[]               @default([]) @map("article_types")
   isActive         Boolean                @default(true) @map("is_active")
   lastLogin        DateTime?              @map("last_login")
   createdAt        DateTime               @default(now()) @map("created_at")
@@ -719,33 +745,6 @@ model User {
   @@index([email])
   @@index([role])
   @@map("users")
-  @@schema("public")
-}
-
-/// Audit Log: Comprehensive audit trail for all API calls
-model AuditLog {
-  id           Int      @id @default(autoincrement())
-  userId       Int?     @map("user_id")
-  action       String   @db.VarChar(50)
-  resource     String   @db.VarChar(100)
-  resourceId   String?  @map("resource_id") @db.VarChar(100)
-  method       String   @db.VarChar(10)
-  path         String   @db.VarChar(500)
-  statusCode   Int      @map("status_code")
-  ip           String   @db.VarChar(45)
-  userAgent    String?  @map("user_agent")
-  requestBody  Json?    @map("request_body")
-  responseBody Json?    @map("response_body")
-  duration     Int
-  errorMessage String?  @map("error_message")
-  timestamp    DateTime @default(now())
-
-  @@index([userId])
-  @@index([action])
-  @@index([resource])
-  @@index([timestamp])
-  @@index([statusCode])
-  @@map("audit_logs")
   @@schema("public")
 }
 
@@ -855,6 +854,9 @@ enum UserRole {
   /// know about. Declared here purely to stop that crash; no access rules
   /// exist for this role anywhere in the app yet.
   BODY_APPROVER
+  /// Retired 2026-10-28 — replaced by an approver role + the Fabric Article type
+  /// (users.article_types). Kept only because the DB enum still has the value;
+  /// no code grants it access.
   FABRIC_APPROVER
   /// New approval-chain stage, between Category Head and MDM, for tables
   /// whose chain needs it (Segment Master, Size Master) — see
@@ -1262,6 +1264,7 @@ model RawArticle {
   noOfColors               Int?      @map("no_of_colors")
   price                    Decimal?  @db.Decimal(10, 2)
   imageUrl                 String?   @map("image_url")
+  backImageUrl             String?   @map("back_image_url")
   presentationsType        String?   @map("Presentations_type") @db.VarChar(200)
 
   // SRM set article (see ExtractionResultFlat.setGroupId). NULL = normal article.
@@ -1327,6 +1330,7 @@ model FabricRawData {
   noOfColors    Int?     @map("no_of_colors")
   price         Decimal? @db.Decimal(10, 2)
   imageUrl      String?  @map("image_url")
+  backImageUrl  String?  @map("back_image_url")
   source        String?  @db.VarChar(50)
 
   // Fabric-specific extras
@@ -1386,6 +1390,7 @@ model GmRawData {
   noOfColors    Int?     @map("no_of_colors")
   price         Decimal? @db.Decimal(10, 2)
   imageUrl      String?  @map("image_url")
+  backImageUrl  String?  @map("back_image_url")
   source        String?  @db.VarChar(50)
 
   // GM-specific extras
@@ -1753,6 +1758,7 @@ model FabricArticleData {
 
   // Media & classification
   imageUrl          String? @map("image_url") @db.Text
+  backImageUrl      String? @map("back_image_url") @db.Text
   fabricArticleType String? @map("fabric_article_type") @db.VarChar(100)
   source            String? @map("source") @db.VarChar(50)
 
@@ -1908,6 +1914,9 @@ model GmArticleData {
   pptNumber          String?  @map("ppt_number") @db.VarChar(100)
   rate               Decimal? @map("rate") @db.Decimal(10, 2)
   mrp                Decimal? @map("mrp") @db.Decimal(10, 2)
+  roughV2            Decimal? @map("rough_v2") @db.Decimal(10, 2)
+  vdrCost            Decimal? @map("vdr_cost") @db.Decimal(10, 2)
+  finalCost          Decimal? @map("final_cost") @db.Decimal(10, 2)
   segment            String?  @map("segment") @db.VarChar(100)
   articleFashionType String?  @map("article_fashion_type") @db.VarChar(100)
 
@@ -1920,6 +1929,7 @@ model GmArticleData {
 
   // Media & classification
   imageUrl      String? @map("image_url") @db.Text
+  backImageUrl  String? @map("back_image_url") @db.Text
   gmArticleType String? @map("gm_article_type") @db.VarChar(100)
   source        String? @map("source") @db.VarChar(50)
 

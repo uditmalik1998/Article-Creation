@@ -86,11 +86,6 @@ export type MasterVendorDetail = $Result.DefaultSelection<Prisma.$MasterVendorDe
  */
 export type User = $Result.DefaultSelection<Prisma.$UserPayload>
 /**
- * Model AuditLog
- * Audit Log: Comprehensive audit trail for all API calls
- */
-export type AuditLog = $Result.DefaultSelection<Prisma.$AuditLogPayload>
-/**
  * Model ApiKey
  * API Key: For programmatic access and integrations
  */
@@ -878,16 +873,6 @@ export class PrismaClient<
     * ```
     */
   get user(): Prisma.UserDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.auditLog`: Exposes CRUD operations for the **AuditLog** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more AuditLogs
-    * const auditLogs = await prisma.auditLog.findMany()
-    * ```
-    */
-  get auditLog(): Prisma.AuditLogDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.apiKey`: Exposes CRUD operations for the **ApiKey** model.
@@ -1841,7 +1826,6 @@ export namespace Prisma {
     MvgrLookup: 'MvgrLookup',
     MasterVendorDetail: 'MasterVendorDetail',
     User: 'User',
-    AuditLog: 'AuditLog',
     ApiKey: 'ApiKey',
     ChangeHistory: 'ChangeHistory',
     CostSummary: 'CostSummary',
@@ -1910,7 +1894,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "auditLog" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "gmRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "preciseFabricArticleData" | "gmArticleData" | "gmVariantArticleData" | "fgVariantArticleData" | "fabricVariantArticleData" | "valueAdditionAccessoriesCost" | "bodyArticleData" | "referenceArticleData" | "bodyFabricConsumption" | "roughCmpCostMaster" | "basicTrimMaster" | "basicTrimCostMaster" | "preciseTrimMaster" | "basicTrimCostComponent" | "majorCategoryDetails" | "expenseApprovalStage" | "gridContributionAssignment" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog" | "bodyArticleDescriptionFormate" | "gmArticleDescriptionFormate" | "preciseBodyArticleConsumption" | "gmSizeMaster"
+      modelProps: "department" | "subDepartment" | "category" | "masterAttribute" | "attributeAllowedValue" | "categoryAttribute" | "extractionJob" | "extractionResultFlat" | "modelGenerationResult" | "modelImageApproval" | "mvgrLookup" | "masterVendorDetail" | "user" | "apiKey" | "changeHistory" | "costSummary" | "article360" | "articleFab" | "articleBody" | "articleVaAcc" | "articleVaPrcs" | "articleBom" | "sapFieldConfig" | "sapAttributeValue" | "article360Flat" | "rawArticle" | "fabricRawData" | "gmRawData" | "srmSyncRun" | "srmSyncRunItem" | "poolBJob" | "poolBBatch" | "nationalGridMaster" | "broaderMenu" | "majorCatMaster" | "fabricArticleMaster" | "fabricMajCatGridValue" | "modifyLog" | "fabricArticleData" | "preciseFabricArticleData" | "gmArticleData" | "gmVariantArticleData" | "fgVariantArticleData" | "fabricVariantArticleData" | "valueAdditionAccessoriesCost" | "bodyArticleData" | "referenceArticleData" | "bodyFabricConsumption" | "roughCmpCostMaster" | "basicTrimMaster" | "basicTrimCostMaster" | "preciseTrimMaster" | "basicTrimCostComponent" | "majorCategoryDetails" | "expenseApprovalStage" | "gridContributionAssignment" | "expenseChangeRequest" | "expenseAccessGrant" | "expenseAuditLog" | "bodyArticleDescriptionFormate" | "gmArticleDescriptionFormate" | "preciseBodyArticleConsumption" | "gmSizeMaster"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2873,80 +2857,6 @@ export namespace Prisma {
           count: {
             args: Prisma.UserCountArgs<ExtArgs>
             result: $Utils.Optional<UserCountAggregateOutputType> | number
-          }
-        }
-      }
-      AuditLog: {
-        payload: Prisma.$AuditLogPayload<ExtArgs>
-        fields: Prisma.AuditLogFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.AuditLogFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuditLogPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.AuditLogFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuditLogPayload>
-          }
-          findFirst: {
-            args: Prisma.AuditLogFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuditLogPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.AuditLogFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuditLogPayload>
-          }
-          findMany: {
-            args: Prisma.AuditLogFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuditLogPayload>[]
-          }
-          create: {
-            args: Prisma.AuditLogCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuditLogPayload>
-          }
-          createMany: {
-            args: Prisma.AuditLogCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.AuditLogCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuditLogPayload>[]
-          }
-          delete: {
-            args: Prisma.AuditLogDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuditLogPayload>
-          }
-          update: {
-            args: Prisma.AuditLogUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuditLogPayload>
-          }
-          deleteMany: {
-            args: Prisma.AuditLogDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.AuditLogUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.AuditLogUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuditLogPayload>[]
-          }
-          upsert: {
-            args: Prisma.AuditLogUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AuditLogPayload>
-          }
-          aggregate: {
-            args: Prisma.AuditLogAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateAuditLog>
-          }
-          groupBy: {
-            args: Prisma.AuditLogGroupByArgs<ExtArgs>
-            result: $Utils.Optional<AuditLogGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.AuditLogCountArgs<ExtArgs>
-            result: $Utils.Optional<AuditLogCountAggregateOutputType> | number
           }
         }
       }
@@ -6755,7 +6665,6 @@ export namespace Prisma {
     mvgrLookup?: MvgrLookupOmit
     masterVendorDetail?: MasterVendorDetailOmit
     user?: UserOmit
-    auditLog?: AuditLogOmit
     apiKey?: ApiKeyOmit
     changeHistory?: ChangeHistoryOmit
     costSummary?: CostSummaryOmit
@@ -15946,6 +15855,10 @@ export namespace Prisma {
   }
 
   export type ExtractionResultFlatAvgAggregateOutputType = {
+    aiCmpCostCutting: Decimal | null
+    aiCmpCostStitching: Decimal | null
+    aiCmpCostIroning: Decimal | null
+    aiCmpCostFinishing: Decimal | null
     avgConfidence: Decimal | null
     processingTimeMs: number | null
     totalAttributes: number | null
@@ -15982,6 +15895,14 @@ export namespace Prisma {
     finishingActPrVal: Decimal | null
     finishingVendorPrVal: Decimal | null
     finishingFinalPrVal: Decimal | null
+    totalBgtPrVal: Decimal | null
+    totalActPrVal: Decimal | null
+    totalVendorPrVal: Decimal | null
+    totalFinalPrVal: Decimal | null
+    bTrimTotalAutoBgt: Decimal | null
+    bTrimTotalRoughV2: Decimal | null
+    bTrimTotalVdrCost: Decimal | null
+    bTrimTotalFinalCost: Decimal | null
     mBtnAutoBgt: Decimal | null
     mBtnRoughV2: Decimal | null
     mBtnVdrCost: Decimal | null
@@ -16144,6 +16065,10 @@ export namespace Prisma {
     washingRoughV2: Decimal | null
     washingVendorCost: Decimal | null
     washingFinalCost: Decimal | null
+    vaddTotalAutoBgt: Decimal | null
+    vaddTotalRoughV2: Decimal | null
+    vaddTotalVendorCost: Decimal | null
+    vaddTotalFinalCost: Decimal | null
     boppNetPrice: Decimal | null
     ctnNetPrice: Decimal | null
     barcodeNetPrice: Decimal | null
@@ -16157,6 +16082,10 @@ export namespace Prisma {
   }
 
   export type ExtractionResultFlatSumAggregateOutputType = {
+    aiCmpCostCutting: Decimal | null
+    aiCmpCostStitching: Decimal | null
+    aiCmpCostIroning: Decimal | null
+    aiCmpCostFinishing: Decimal | null
     avgConfidence: Decimal | null
     processingTimeMs: number | null
     totalAttributes: number | null
@@ -16193,6 +16122,14 @@ export namespace Prisma {
     finishingActPrVal: Decimal | null
     finishingVendorPrVal: Decimal | null
     finishingFinalPrVal: Decimal | null
+    totalBgtPrVal: Decimal | null
+    totalActPrVal: Decimal | null
+    totalVendorPrVal: Decimal | null
+    totalFinalPrVal: Decimal | null
+    bTrimTotalAutoBgt: Decimal | null
+    bTrimTotalRoughV2: Decimal | null
+    bTrimTotalVdrCost: Decimal | null
+    bTrimTotalFinalCost: Decimal | null
     mBtnAutoBgt: Decimal | null
     mBtnRoughV2: Decimal | null
     mBtnVdrCost: Decimal | null
@@ -16355,6 +16292,10 @@ export namespace Prisma {
     washingRoughV2: Decimal | null
     washingVendorCost: Decimal | null
     washingFinalCost: Decimal | null
+    vaddTotalAutoBgt: Decimal | null
+    vaddTotalRoughV2: Decimal | null
+    vaddTotalVendorCost: Decimal | null
+    vaddTotalFinalCost: Decimal | null
     boppNetPrice: Decimal | null
     ctnNetPrice: Decimal | null
     barcodeNetPrice: Decimal | null
@@ -16370,9 +16311,14 @@ export namespace Prisma {
   export type ExtractionResultFlatMinAggregateOutputType = {
     id: string | null
     jobId: string | null
-    imageName: string | null
     imageUrl: string | null
     oldImageUrl: string | null
+    sourceImageUrl: string | null
+    aiCmpCostCutting: Decimal | null
+    aiCmpCostStitching: Decimal | null
+    aiCmpCostIroning: Decimal | null
+    aiCmpCostFinishing: Decimal | null
+    backImageUrl: string | null
     articleNumber: string | null
     extractionStatus: string | null
     aiModel: string | null
@@ -16490,7 +16436,15 @@ export namespace Prisma {
     finishingActPrVal: Decimal | null
     finishingVendorPrVal: Decimal | null
     finishingFinalPrVal: Decimal | null
+    totalBgtPrVal: Decimal | null
+    totalActPrVal: Decimal | null
+    totalVendorPrVal: Decimal | null
+    totalFinalPrVal: Decimal | null
     bTrimType: string | null
+    bTrimTotalAutoBgt: Decimal | null
+    bTrimTotalRoughV2: Decimal | null
+    bTrimTotalVdrCost: Decimal | null
+    bTrimTotalFinalCost: Decimal | null
     mBtnAutoBgt: Decimal | null
     mBtnRoughV2: Decimal | null
     mBtnVdrCost: Decimal | null
@@ -16653,6 +16607,10 @@ export namespace Prisma {
     washingRoughV2: Decimal | null
     washingVendorCost: Decimal | null
     washingFinalCost: Decimal | null
+    vaddTotalAutoBgt: Decimal | null
+    vaddTotalRoughV2: Decimal | null
+    vaddTotalVendorCost: Decimal | null
+    vaddTotalFinalCost: Decimal | null
     pkgCostType: string | null
     boppNetPrice: Decimal | null
     ctnNetPrice: Decimal | null
@@ -16711,9 +16669,14 @@ export namespace Prisma {
   export type ExtractionResultFlatMaxAggregateOutputType = {
     id: string | null
     jobId: string | null
-    imageName: string | null
     imageUrl: string | null
     oldImageUrl: string | null
+    sourceImageUrl: string | null
+    aiCmpCostCutting: Decimal | null
+    aiCmpCostStitching: Decimal | null
+    aiCmpCostIroning: Decimal | null
+    aiCmpCostFinishing: Decimal | null
+    backImageUrl: string | null
     articleNumber: string | null
     extractionStatus: string | null
     aiModel: string | null
@@ -16831,7 +16794,15 @@ export namespace Prisma {
     finishingActPrVal: Decimal | null
     finishingVendorPrVal: Decimal | null
     finishingFinalPrVal: Decimal | null
+    totalBgtPrVal: Decimal | null
+    totalActPrVal: Decimal | null
+    totalVendorPrVal: Decimal | null
+    totalFinalPrVal: Decimal | null
     bTrimType: string | null
+    bTrimTotalAutoBgt: Decimal | null
+    bTrimTotalRoughV2: Decimal | null
+    bTrimTotalVdrCost: Decimal | null
+    bTrimTotalFinalCost: Decimal | null
     mBtnAutoBgt: Decimal | null
     mBtnRoughV2: Decimal | null
     mBtnVdrCost: Decimal | null
@@ -16994,6 +16965,10 @@ export namespace Prisma {
     washingRoughV2: Decimal | null
     washingVendorCost: Decimal | null
     washingFinalCost: Decimal | null
+    vaddTotalAutoBgt: Decimal | null
+    vaddTotalRoughV2: Decimal | null
+    vaddTotalVendorCost: Decimal | null
+    vaddTotalFinalCost: Decimal | null
     pkgCostType: string | null
     boppNetPrice: Decimal | null
     ctnNetPrice: Decimal | null
@@ -17052,9 +17027,14 @@ export namespace Prisma {
   export type ExtractionResultFlatCountAggregateOutputType = {
     id: number
     jobId: number
-    imageName: number
     imageUrl: number
     oldImageUrl: number
+    sourceImageUrl: number
+    aiCmpCostCutting: number
+    aiCmpCostStitching: number
+    aiCmpCostIroning: number
+    aiCmpCostFinishing: number
+    backImageUrl: number
     articleNumber: number
     extractionStatus: number
     aiModel: number
@@ -17068,6 +17048,8 @@ export namespace Prisma {
     apiCost: number
     userId: number
     userName: number
+    creatorUser: number
+    modifyUser: number
     extractionDate: number
     createdAt: number
     updatedAt: number
@@ -17172,7 +17154,15 @@ export namespace Prisma {
     finishingActPrVal: number
     finishingVendorPrVal: number
     finishingFinalPrVal: number
+    totalBgtPrVal: number
+    totalActPrVal: number
+    totalVendorPrVal: number
+    totalFinalPrVal: number
     bTrimType: number
+    bTrimTotalAutoBgt: number
+    bTrimTotalRoughV2: number
+    bTrimTotalVdrCost: number
+    bTrimTotalFinalCost: number
     mBtnAutoBgt: number
     mBtnRoughV2: number
     mBtnVdrCost: number
@@ -17337,6 +17327,10 @@ export namespace Prisma {
     washingFinalCost: number
     vaddPrintJson: number
     vaddEmpJson: number
+    vaddTotalAutoBgt: number
+    vaddTotalRoughV2: number
+    vaddTotalVendorCost: number
+    vaddTotalFinalCost: number
     pkgCostType: number
     boppNetPrice: number
     ctnNetPrice: number
@@ -17396,6 +17390,10 @@ export namespace Prisma {
 
 
   export type ExtractionResultFlatAvgAggregateInputType = {
+    aiCmpCostCutting?: true
+    aiCmpCostStitching?: true
+    aiCmpCostIroning?: true
+    aiCmpCostFinishing?: true
     avgConfidence?: true
     processingTimeMs?: true
     totalAttributes?: true
@@ -17432,6 +17430,14 @@ export namespace Prisma {
     finishingActPrVal?: true
     finishingVendorPrVal?: true
     finishingFinalPrVal?: true
+    totalBgtPrVal?: true
+    totalActPrVal?: true
+    totalVendorPrVal?: true
+    totalFinalPrVal?: true
+    bTrimTotalAutoBgt?: true
+    bTrimTotalRoughV2?: true
+    bTrimTotalVdrCost?: true
+    bTrimTotalFinalCost?: true
     mBtnAutoBgt?: true
     mBtnRoughV2?: true
     mBtnVdrCost?: true
@@ -17594,6 +17600,10 @@ export namespace Prisma {
     washingRoughV2?: true
     washingVendorCost?: true
     washingFinalCost?: true
+    vaddTotalAutoBgt?: true
+    vaddTotalRoughV2?: true
+    vaddTotalVendorCost?: true
+    vaddTotalFinalCost?: true
     boppNetPrice?: true
     ctnNetPrice?: true
     barcodeNetPrice?: true
@@ -17607,6 +17617,10 @@ export namespace Prisma {
   }
 
   export type ExtractionResultFlatSumAggregateInputType = {
+    aiCmpCostCutting?: true
+    aiCmpCostStitching?: true
+    aiCmpCostIroning?: true
+    aiCmpCostFinishing?: true
     avgConfidence?: true
     processingTimeMs?: true
     totalAttributes?: true
@@ -17643,6 +17657,14 @@ export namespace Prisma {
     finishingActPrVal?: true
     finishingVendorPrVal?: true
     finishingFinalPrVal?: true
+    totalBgtPrVal?: true
+    totalActPrVal?: true
+    totalVendorPrVal?: true
+    totalFinalPrVal?: true
+    bTrimTotalAutoBgt?: true
+    bTrimTotalRoughV2?: true
+    bTrimTotalVdrCost?: true
+    bTrimTotalFinalCost?: true
     mBtnAutoBgt?: true
     mBtnRoughV2?: true
     mBtnVdrCost?: true
@@ -17805,6 +17827,10 @@ export namespace Prisma {
     washingRoughV2?: true
     washingVendorCost?: true
     washingFinalCost?: true
+    vaddTotalAutoBgt?: true
+    vaddTotalRoughV2?: true
+    vaddTotalVendorCost?: true
+    vaddTotalFinalCost?: true
     boppNetPrice?: true
     ctnNetPrice?: true
     barcodeNetPrice?: true
@@ -17820,9 +17846,14 @@ export namespace Prisma {
   export type ExtractionResultFlatMinAggregateInputType = {
     id?: true
     jobId?: true
-    imageName?: true
     imageUrl?: true
     oldImageUrl?: true
+    sourceImageUrl?: true
+    aiCmpCostCutting?: true
+    aiCmpCostStitching?: true
+    aiCmpCostIroning?: true
+    aiCmpCostFinishing?: true
+    backImageUrl?: true
     articleNumber?: true
     extractionStatus?: true
     aiModel?: true
@@ -17940,7 +17971,15 @@ export namespace Prisma {
     finishingActPrVal?: true
     finishingVendorPrVal?: true
     finishingFinalPrVal?: true
+    totalBgtPrVal?: true
+    totalActPrVal?: true
+    totalVendorPrVal?: true
+    totalFinalPrVal?: true
     bTrimType?: true
+    bTrimTotalAutoBgt?: true
+    bTrimTotalRoughV2?: true
+    bTrimTotalVdrCost?: true
+    bTrimTotalFinalCost?: true
     mBtnAutoBgt?: true
     mBtnRoughV2?: true
     mBtnVdrCost?: true
@@ -18103,6 +18142,10 @@ export namespace Prisma {
     washingRoughV2?: true
     washingVendorCost?: true
     washingFinalCost?: true
+    vaddTotalAutoBgt?: true
+    vaddTotalRoughV2?: true
+    vaddTotalVendorCost?: true
+    vaddTotalFinalCost?: true
     pkgCostType?: true
     boppNetPrice?: true
     ctnNetPrice?: true
@@ -18161,9 +18204,14 @@ export namespace Prisma {
   export type ExtractionResultFlatMaxAggregateInputType = {
     id?: true
     jobId?: true
-    imageName?: true
     imageUrl?: true
     oldImageUrl?: true
+    sourceImageUrl?: true
+    aiCmpCostCutting?: true
+    aiCmpCostStitching?: true
+    aiCmpCostIroning?: true
+    aiCmpCostFinishing?: true
+    backImageUrl?: true
     articleNumber?: true
     extractionStatus?: true
     aiModel?: true
@@ -18281,7 +18329,15 @@ export namespace Prisma {
     finishingActPrVal?: true
     finishingVendorPrVal?: true
     finishingFinalPrVal?: true
+    totalBgtPrVal?: true
+    totalActPrVal?: true
+    totalVendorPrVal?: true
+    totalFinalPrVal?: true
     bTrimType?: true
+    bTrimTotalAutoBgt?: true
+    bTrimTotalRoughV2?: true
+    bTrimTotalVdrCost?: true
+    bTrimTotalFinalCost?: true
     mBtnAutoBgt?: true
     mBtnRoughV2?: true
     mBtnVdrCost?: true
@@ -18444,6 +18500,10 @@ export namespace Prisma {
     washingRoughV2?: true
     washingVendorCost?: true
     washingFinalCost?: true
+    vaddTotalAutoBgt?: true
+    vaddTotalRoughV2?: true
+    vaddTotalVendorCost?: true
+    vaddTotalFinalCost?: true
     pkgCostType?: true
     boppNetPrice?: true
     ctnNetPrice?: true
@@ -18502,9 +18562,14 @@ export namespace Prisma {
   export type ExtractionResultFlatCountAggregateInputType = {
     id?: true
     jobId?: true
-    imageName?: true
     imageUrl?: true
     oldImageUrl?: true
+    sourceImageUrl?: true
+    aiCmpCostCutting?: true
+    aiCmpCostStitching?: true
+    aiCmpCostIroning?: true
+    aiCmpCostFinishing?: true
+    backImageUrl?: true
     articleNumber?: true
     extractionStatus?: true
     aiModel?: true
@@ -18518,6 +18583,8 @@ export namespace Prisma {
     apiCost?: true
     userId?: true
     userName?: true
+    creatorUser?: true
+    modifyUser?: true
     extractionDate?: true
     createdAt?: true
     updatedAt?: true
@@ -18622,7 +18689,15 @@ export namespace Prisma {
     finishingActPrVal?: true
     finishingVendorPrVal?: true
     finishingFinalPrVal?: true
+    totalBgtPrVal?: true
+    totalActPrVal?: true
+    totalVendorPrVal?: true
+    totalFinalPrVal?: true
     bTrimType?: true
+    bTrimTotalAutoBgt?: true
+    bTrimTotalRoughV2?: true
+    bTrimTotalVdrCost?: true
+    bTrimTotalFinalCost?: true
     mBtnAutoBgt?: true
     mBtnRoughV2?: true
     mBtnVdrCost?: true
@@ -18787,6 +18862,10 @@ export namespace Prisma {
     washingFinalCost?: true
     vaddPrintJson?: true
     vaddEmpJson?: true
+    vaddTotalAutoBgt?: true
+    vaddTotalRoughV2?: true
+    vaddTotalVendorCost?: true
+    vaddTotalFinalCost?: true
     pkgCostType?: true
     boppNetPrice?: true
     ctnNetPrice?: true
@@ -18933,9 +19012,14 @@ export namespace Prisma {
   export type ExtractionResultFlatGroupByOutputType = {
     id: string
     jobId: string | null
-    imageName: string | null
     imageUrl: string | null
     oldImageUrl: string | null
+    sourceImageUrl: string | null
+    aiCmpCostCutting: Decimal | null
+    aiCmpCostStitching: Decimal | null
+    aiCmpCostIroning: Decimal | null
+    aiCmpCostFinishing: Decimal | null
+    backImageUrl: string | null
     articleNumber: string | null
     extractionStatus: string | null
     aiModel: string | null
@@ -18949,6 +19033,8 @@ export namespace Prisma {
     apiCost: Decimal | null
     userId: number | null
     userName: string | null
+    creatorUser: JsonValue | null
+    modifyUser: JsonValue | null
     extractionDate: Date | null
     createdAt: Date
     updatedAt: Date
@@ -19053,7 +19139,15 @@ export namespace Prisma {
     finishingActPrVal: Decimal | null
     finishingVendorPrVal: Decimal | null
     finishingFinalPrVal: Decimal | null
+    totalBgtPrVal: Decimal | null
+    totalActPrVal: Decimal | null
+    totalVendorPrVal: Decimal | null
+    totalFinalPrVal: Decimal | null
     bTrimType: string | null
+    bTrimTotalAutoBgt: Decimal | null
+    bTrimTotalRoughV2: Decimal | null
+    bTrimTotalVdrCost: Decimal | null
+    bTrimTotalFinalCost: Decimal | null
     mBtnAutoBgt: Decimal | null
     mBtnRoughV2: Decimal | null
     mBtnVdrCost: Decimal | null
@@ -19218,6 +19312,10 @@ export namespace Prisma {
     washingFinalCost: Decimal | null
     vaddPrintJson: JsonValue | null
     vaddEmpJson: JsonValue | null
+    vaddTotalAutoBgt: Decimal | null
+    vaddTotalRoughV2: Decimal | null
+    vaddTotalVendorCost: Decimal | null
+    vaddTotalFinalCost: Decimal | null
     pkgCostType: string | null
     boppNetPrice: Decimal | null
     ctnNetPrice: Decimal | null
@@ -19296,9 +19394,14 @@ export namespace Prisma {
   export type ExtractionResultFlatSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     jobId?: boolean
-    imageName?: boolean
     imageUrl?: boolean
     oldImageUrl?: boolean
+    sourceImageUrl?: boolean
+    aiCmpCostCutting?: boolean
+    aiCmpCostStitching?: boolean
+    aiCmpCostIroning?: boolean
+    aiCmpCostFinishing?: boolean
+    backImageUrl?: boolean
     articleNumber?: boolean
     extractionStatus?: boolean
     aiModel?: boolean
@@ -19312,6 +19415,8 @@ export namespace Prisma {
     apiCost?: boolean
     userId?: boolean
     userName?: boolean
+    creatorUser?: boolean
+    modifyUser?: boolean
     extractionDate?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -19416,7 +19521,15 @@ export namespace Prisma {
     finishingActPrVal?: boolean
     finishingVendorPrVal?: boolean
     finishingFinalPrVal?: boolean
+    totalBgtPrVal?: boolean
+    totalActPrVal?: boolean
+    totalVendorPrVal?: boolean
+    totalFinalPrVal?: boolean
     bTrimType?: boolean
+    bTrimTotalAutoBgt?: boolean
+    bTrimTotalRoughV2?: boolean
+    bTrimTotalVdrCost?: boolean
+    bTrimTotalFinalCost?: boolean
     mBtnAutoBgt?: boolean
     mBtnRoughV2?: boolean
     mBtnVdrCost?: boolean
@@ -19581,6 +19694,10 @@ export namespace Prisma {
     washingFinalCost?: boolean
     vaddPrintJson?: boolean
     vaddEmpJson?: boolean
+    vaddTotalAutoBgt?: boolean
+    vaddTotalRoughV2?: boolean
+    vaddTotalVendorCost?: boolean
+    vaddTotalFinalCost?: boolean
     pkgCostType?: boolean
     boppNetPrice?: boolean
     ctnNetPrice?: boolean
@@ -19646,9 +19763,14 @@ export namespace Prisma {
   export type ExtractionResultFlatSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     jobId?: boolean
-    imageName?: boolean
     imageUrl?: boolean
     oldImageUrl?: boolean
+    sourceImageUrl?: boolean
+    aiCmpCostCutting?: boolean
+    aiCmpCostStitching?: boolean
+    aiCmpCostIroning?: boolean
+    aiCmpCostFinishing?: boolean
+    backImageUrl?: boolean
     articleNumber?: boolean
     extractionStatus?: boolean
     aiModel?: boolean
@@ -19662,6 +19784,8 @@ export namespace Prisma {
     apiCost?: boolean
     userId?: boolean
     userName?: boolean
+    creatorUser?: boolean
+    modifyUser?: boolean
     extractionDate?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -19766,7 +19890,15 @@ export namespace Prisma {
     finishingActPrVal?: boolean
     finishingVendorPrVal?: boolean
     finishingFinalPrVal?: boolean
+    totalBgtPrVal?: boolean
+    totalActPrVal?: boolean
+    totalVendorPrVal?: boolean
+    totalFinalPrVal?: boolean
     bTrimType?: boolean
+    bTrimTotalAutoBgt?: boolean
+    bTrimTotalRoughV2?: boolean
+    bTrimTotalVdrCost?: boolean
+    bTrimTotalFinalCost?: boolean
     mBtnAutoBgt?: boolean
     mBtnRoughV2?: boolean
     mBtnVdrCost?: boolean
@@ -19931,6 +20063,10 @@ export namespace Prisma {
     washingFinalCost?: boolean
     vaddPrintJson?: boolean
     vaddEmpJson?: boolean
+    vaddTotalAutoBgt?: boolean
+    vaddTotalRoughV2?: boolean
+    vaddTotalVendorCost?: boolean
+    vaddTotalFinalCost?: boolean
     pkgCostType?: boolean
     boppNetPrice?: boolean
     ctnNetPrice?: boolean
@@ -19993,9 +20129,14 @@ export namespace Prisma {
   export type ExtractionResultFlatSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     jobId?: boolean
-    imageName?: boolean
     imageUrl?: boolean
     oldImageUrl?: boolean
+    sourceImageUrl?: boolean
+    aiCmpCostCutting?: boolean
+    aiCmpCostStitching?: boolean
+    aiCmpCostIroning?: boolean
+    aiCmpCostFinishing?: boolean
+    backImageUrl?: boolean
     articleNumber?: boolean
     extractionStatus?: boolean
     aiModel?: boolean
@@ -20009,6 +20150,8 @@ export namespace Prisma {
     apiCost?: boolean
     userId?: boolean
     userName?: boolean
+    creatorUser?: boolean
+    modifyUser?: boolean
     extractionDate?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -20113,7 +20256,15 @@ export namespace Prisma {
     finishingActPrVal?: boolean
     finishingVendorPrVal?: boolean
     finishingFinalPrVal?: boolean
+    totalBgtPrVal?: boolean
+    totalActPrVal?: boolean
+    totalVendorPrVal?: boolean
+    totalFinalPrVal?: boolean
     bTrimType?: boolean
+    bTrimTotalAutoBgt?: boolean
+    bTrimTotalRoughV2?: boolean
+    bTrimTotalVdrCost?: boolean
+    bTrimTotalFinalCost?: boolean
     mBtnAutoBgt?: boolean
     mBtnRoughV2?: boolean
     mBtnVdrCost?: boolean
@@ -20278,6 +20429,10 @@ export namespace Prisma {
     washingFinalCost?: boolean
     vaddPrintJson?: boolean
     vaddEmpJson?: boolean
+    vaddTotalAutoBgt?: boolean
+    vaddTotalRoughV2?: boolean
+    vaddTotalVendorCost?: boolean
+    vaddTotalFinalCost?: boolean
     pkgCostType?: boolean
     boppNetPrice?: boolean
     ctnNetPrice?: boolean
@@ -20340,9 +20495,14 @@ export namespace Prisma {
   export type ExtractionResultFlatSelectScalar = {
     id?: boolean
     jobId?: boolean
-    imageName?: boolean
     imageUrl?: boolean
     oldImageUrl?: boolean
+    sourceImageUrl?: boolean
+    aiCmpCostCutting?: boolean
+    aiCmpCostStitching?: boolean
+    aiCmpCostIroning?: boolean
+    aiCmpCostFinishing?: boolean
+    backImageUrl?: boolean
     articleNumber?: boolean
     extractionStatus?: boolean
     aiModel?: boolean
@@ -20356,6 +20516,8 @@ export namespace Prisma {
     apiCost?: boolean
     userId?: boolean
     userName?: boolean
+    creatorUser?: boolean
+    modifyUser?: boolean
     extractionDate?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -20460,7 +20622,15 @@ export namespace Prisma {
     finishingActPrVal?: boolean
     finishingVendorPrVal?: boolean
     finishingFinalPrVal?: boolean
+    totalBgtPrVal?: boolean
+    totalActPrVal?: boolean
+    totalVendorPrVal?: boolean
+    totalFinalPrVal?: boolean
     bTrimType?: boolean
+    bTrimTotalAutoBgt?: boolean
+    bTrimTotalRoughV2?: boolean
+    bTrimTotalVdrCost?: boolean
+    bTrimTotalFinalCost?: boolean
     mBtnAutoBgt?: boolean
     mBtnRoughV2?: boolean
     mBtnVdrCost?: boolean
@@ -20625,6 +20795,10 @@ export namespace Prisma {
     washingFinalCost?: boolean
     vaddPrintJson?: boolean
     vaddEmpJson?: boolean
+    vaddTotalAutoBgt?: boolean
+    vaddTotalRoughV2?: boolean
+    vaddTotalVendorCost?: boolean
+    vaddTotalFinalCost?: boolean
     pkgCostType?: boolean
     boppNetPrice?: boolean
     ctnNetPrice?: boolean
@@ -20681,7 +20855,7 @@ export namespace Prisma {
     imageExtractionRawData?: boolean
   }
 
-  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageName" | "imageUrl" | "oldImageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "bTrimType" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "elasticAutoBgt" | "elasticRoughV2" | "elasticVdrCost" | "elasticFinalCost" | "fusingAutoBgt" | "fusingRoughV2" | "fusingVdrCost" | "fusingFinalCost" | "badgeAutoBgt" | "badgeRoughV2" | "badgeVdrCost" | "badgeFinalCost" | "rivetAutoBgt" | "rivetRoughV2" | "rivetVdrCost" | "rivetFinalCost" | "tapeAutoBgt" | "tapeRoughV2" | "tapeVdrCost" | "tapeFinalCost" | "otherAutoBgt" | "otherRoughV2" | "otherVdrCost" | "otherFinalCost" | "adjusterAutoBgt" | "adjusterRoughV2" | "adjusterVdrCost" | "adjusterFinalCost" | "brotchAutoBgt" | "brotchRoughV2" | "brotchVdrCost" | "brotchFinalCost" | "buckleAutoBgt" | "buckleRoughV2" | "buckleVdrCost" | "buckleFinalCost" | "eyeletsAutoBgt" | "eyeletsRoughV2" | "eyeletsVdrCost" | "eyeletsFinalCost" | "hangingDRingAutoBgt" | "hangingDRingRoughV2" | "hangingDRingVdrCost" | "hangingDRingFinalCost" | "hookAutoBgt" | "hookRoughV2" | "hookVdrCost" | "hookFinalCost" | "labelAutoBgt" | "labelRoughV2" | "labelVdrCost" | "labelFinalCost" | "laceAutoBgt" | "laceRoughV2" | "laceVdrCost" | "laceFinalCost" | "pockettingFabricAutoBgt" | "pockettingFabricRoughV2" | "pockettingFabricVdrCost" | "pockettingFabricFinalCost" | "pockettingReadymadeAutoBgt" | "pockettingReadymadeRoughV2" | "pockettingReadymadeVdrCost" | "pockettingReadymadeFinalCost" | "santaAutoBgt" | "santaRoughV2" | "santaVdrCost" | "santaFinalCost" | "stopperAutoBgt" | "stopperRoughV2" | "stopperVdrCost" | "stopperFinalCost" | "tagAutoBgt" | "tagRoughV2" | "tagVdrCost" | "tagFinalCost" | "tasselsAutoBgt" | "tasselsRoughV2" | "tasselsVdrCost" | "tasselsFinalCost" | "mBtnRate" | "mBtnQty" | "dcRate" | "dcQty" | "zipRate" | "zipQty" | "patchRate" | "patchQty" | "hTrfRate" | "hTrfQty" | "elasticRate" | "elasticQty" | "fusingRate" | "fusingQty" | "badgeRate" | "badgeQty" | "rivetRate" | "rivetQty" | "tapeRate" | "tapeQty" | "otherRate" | "otherQty" | "adjusterRate" | "adjusterQty" | "brotchRate" | "brotchQty" | "buckleRate" | "buckleQty" | "eyeletsRate" | "eyeletsQty" | "hangingDRingRate" | "hangingDRingQty" | "hookRate" | "hookQty" | "labelRate" | "labelQty" | "laceRate" | "laceQty" | "pockettingFabricRate" | "pockettingFabricQty" | "pockettingReadymadeRate" | "pockettingReadymadeQty" | "santaRate" | "santaQty" | "stopperRate" | "stopperQty" | "tagRate" | "tagQty" | "tasselsRate" | "tasselsQty" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "vaddPrintJson" | "vaddEmpJson" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "setLinkStatus" | "setLinkMessage" | "setLinkAttempts" | "setLinkedAt" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
+  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageUrl" | "oldImageUrl" | "sourceImageUrl" | "aiCmpCostCutting" | "aiCmpCostStitching" | "aiCmpCostIroning" | "aiCmpCostFinishing" | "backImageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "creatorUser" | "modifyUser" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "totalBgtPrVal" | "totalActPrVal" | "totalVendorPrVal" | "totalFinalPrVal" | "bTrimType" | "bTrimTotalAutoBgt" | "bTrimTotalRoughV2" | "bTrimTotalVdrCost" | "bTrimTotalFinalCost" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "elasticAutoBgt" | "elasticRoughV2" | "elasticVdrCost" | "elasticFinalCost" | "fusingAutoBgt" | "fusingRoughV2" | "fusingVdrCost" | "fusingFinalCost" | "badgeAutoBgt" | "badgeRoughV2" | "badgeVdrCost" | "badgeFinalCost" | "rivetAutoBgt" | "rivetRoughV2" | "rivetVdrCost" | "rivetFinalCost" | "tapeAutoBgt" | "tapeRoughV2" | "tapeVdrCost" | "tapeFinalCost" | "otherAutoBgt" | "otherRoughV2" | "otherVdrCost" | "otherFinalCost" | "adjusterAutoBgt" | "adjusterRoughV2" | "adjusterVdrCost" | "adjusterFinalCost" | "brotchAutoBgt" | "brotchRoughV2" | "brotchVdrCost" | "brotchFinalCost" | "buckleAutoBgt" | "buckleRoughV2" | "buckleVdrCost" | "buckleFinalCost" | "eyeletsAutoBgt" | "eyeletsRoughV2" | "eyeletsVdrCost" | "eyeletsFinalCost" | "hangingDRingAutoBgt" | "hangingDRingRoughV2" | "hangingDRingVdrCost" | "hangingDRingFinalCost" | "hookAutoBgt" | "hookRoughV2" | "hookVdrCost" | "hookFinalCost" | "labelAutoBgt" | "labelRoughV2" | "labelVdrCost" | "labelFinalCost" | "laceAutoBgt" | "laceRoughV2" | "laceVdrCost" | "laceFinalCost" | "pockettingFabricAutoBgt" | "pockettingFabricRoughV2" | "pockettingFabricVdrCost" | "pockettingFabricFinalCost" | "pockettingReadymadeAutoBgt" | "pockettingReadymadeRoughV2" | "pockettingReadymadeVdrCost" | "pockettingReadymadeFinalCost" | "santaAutoBgt" | "santaRoughV2" | "santaVdrCost" | "santaFinalCost" | "stopperAutoBgt" | "stopperRoughV2" | "stopperVdrCost" | "stopperFinalCost" | "tagAutoBgt" | "tagRoughV2" | "tagVdrCost" | "tagFinalCost" | "tasselsAutoBgt" | "tasselsRoughV2" | "tasselsVdrCost" | "tasselsFinalCost" | "mBtnRate" | "mBtnQty" | "dcRate" | "dcQty" | "zipRate" | "zipQty" | "patchRate" | "patchQty" | "hTrfRate" | "hTrfQty" | "elasticRate" | "elasticQty" | "fusingRate" | "fusingQty" | "badgeRate" | "badgeQty" | "rivetRate" | "rivetQty" | "tapeRate" | "tapeQty" | "otherRate" | "otherQty" | "adjusterRate" | "adjusterQty" | "brotchRate" | "brotchQty" | "buckleRate" | "buckleQty" | "eyeletsRate" | "eyeletsQty" | "hangingDRingRate" | "hangingDRingQty" | "hookRate" | "hookQty" | "labelRate" | "labelQty" | "laceRate" | "laceQty" | "pockettingFabricRate" | "pockettingFabricQty" | "pockettingReadymadeRate" | "pockettingReadymadeQty" | "santaRate" | "santaQty" | "stopperRate" | "stopperQty" | "tagRate" | "tagQty" | "tasselsRate" | "tasselsQty" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "vaddPrintJson" | "vaddEmpJson" | "vaddTotalAutoBgt" | "vaddTotalRoughV2" | "vaddTotalVendorCost" | "vaddTotalFinalCost" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "setLinkStatus" | "setLinkMessage" | "setLinkAttempts" | "setLinkedAt" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
   export type ExtractionResultFlatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     comboParent?: boolean | ExtractionResultFlat$comboParentArgs<ExtArgs>
@@ -20713,9 +20887,14 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       jobId: string | null
-      imageName: string | null
       imageUrl: string | null
       oldImageUrl: string | null
+      sourceImageUrl: string | null
+      aiCmpCostCutting: Prisma.Decimal | null
+      aiCmpCostStitching: Prisma.Decimal | null
+      aiCmpCostIroning: Prisma.Decimal | null
+      aiCmpCostFinishing: Prisma.Decimal | null
+      backImageUrl: string | null
       articleNumber: string | null
       extractionStatus: string | null
       aiModel: string | null
@@ -20729,6 +20908,8 @@ export namespace Prisma {
       apiCost: Prisma.Decimal | null
       userId: number | null
       userName: string | null
+      creatorUser: Prisma.JsonValue | null
+      modifyUser: Prisma.JsonValue | null
       extractionDate: Date | null
       createdAt: Date
       updatedAt: Date
@@ -20833,7 +21014,15 @@ export namespace Prisma {
       finishingActPrVal: Prisma.Decimal | null
       finishingVendorPrVal: Prisma.Decimal | null
       finishingFinalPrVal: Prisma.Decimal | null
+      totalBgtPrVal: Prisma.Decimal | null
+      totalActPrVal: Prisma.Decimal | null
+      totalVendorPrVal: Prisma.Decimal | null
+      totalFinalPrVal: Prisma.Decimal | null
       bTrimType: string | null
+      bTrimTotalAutoBgt: Prisma.Decimal | null
+      bTrimTotalRoughV2: Prisma.Decimal | null
+      bTrimTotalVdrCost: Prisma.Decimal | null
+      bTrimTotalFinalCost: Prisma.Decimal | null
       mBtnAutoBgt: Prisma.Decimal | null
       mBtnRoughV2: Prisma.Decimal | null
       mBtnVdrCost: Prisma.Decimal | null
@@ -20998,6 +21187,10 @@ export namespace Prisma {
       washingFinalCost: Prisma.Decimal | null
       vaddPrintJson: Prisma.JsonValue | null
       vaddEmpJson: Prisma.JsonValue | null
+      vaddTotalAutoBgt: Prisma.Decimal | null
+      vaddTotalRoughV2: Prisma.Decimal | null
+      vaddTotalVendorCost: Prisma.Decimal | null
+      vaddTotalFinalCost: Prisma.Decimal | null
       pkgCostType: string | null
       boppNetPrice: Prisma.Decimal | null
       ctnNetPrice: Prisma.Decimal | null
@@ -21482,9 +21675,14 @@ export namespace Prisma {
   interface ExtractionResultFlatFieldRefs {
     readonly id: FieldRef<"ExtractionResultFlat", 'String'>
     readonly jobId: FieldRef<"ExtractionResultFlat", 'String'>
-    readonly imageName: FieldRef<"ExtractionResultFlat", 'String'>
     readonly imageUrl: FieldRef<"ExtractionResultFlat", 'String'>
     readonly oldImageUrl: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly sourceImageUrl: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly aiCmpCostCutting: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly aiCmpCostStitching: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly aiCmpCostIroning: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly aiCmpCostFinishing: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly backImageUrl: FieldRef<"ExtractionResultFlat", 'String'>
     readonly articleNumber: FieldRef<"ExtractionResultFlat", 'String'>
     readonly extractionStatus: FieldRef<"ExtractionResultFlat", 'String'>
     readonly aiModel: FieldRef<"ExtractionResultFlat", 'String'>
@@ -21498,6 +21696,8 @@ export namespace Prisma {
     readonly apiCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly userId: FieldRef<"ExtractionResultFlat", 'Int'>
     readonly userName: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly creatorUser: FieldRef<"ExtractionResultFlat", 'Json'>
+    readonly modifyUser: FieldRef<"ExtractionResultFlat", 'Json'>
     readonly extractionDate: FieldRef<"ExtractionResultFlat", 'DateTime'>
     readonly createdAt: FieldRef<"ExtractionResultFlat", 'DateTime'>
     readonly updatedAt: FieldRef<"ExtractionResultFlat", 'DateTime'>
@@ -21602,7 +21802,15 @@ export namespace Prisma {
     readonly finishingActPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly finishingVendorPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly finishingFinalPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly totalBgtPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly totalActPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly totalVendorPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly totalFinalPrVal: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly bTrimType: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly bTrimTotalAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly bTrimTotalRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly bTrimTotalVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly bTrimTotalFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly mBtnAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly mBtnRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly mBtnVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
@@ -21767,6 +21975,10 @@ export namespace Prisma {
     readonly washingFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly vaddPrintJson: FieldRef<"ExtractionResultFlat", 'Json'>
     readonly vaddEmpJson: FieldRef<"ExtractionResultFlat", 'Json'>
+    readonly vaddTotalAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly vaddTotalRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly vaddTotalVendorCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly vaddTotalFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly pkgCostType: FieldRef<"ExtractionResultFlat", 'String'>
     readonly boppNetPrice: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly ctnNetPrice: FieldRef<"ExtractionResultFlat", 'Decimal'>
@@ -26770,6 +26982,7 @@ export namespace Prisma {
     division: number
     subDivision: number
     businessDivision: number
+    articleTypes: number
     isActive: number
     lastLogin: number
     createdAt: number
@@ -26825,6 +27038,7 @@ export namespace Prisma {
     division?: true
     subDivision?: true
     businessDivision?: true
+    articleTypes?: true
     isActive?: true
     lastLogin?: true
     createdAt?: true
@@ -26927,6 +27141,7 @@ export namespace Prisma {
     division: string | null
     subDivision: string | null
     businessDivision: string | null
+    articleTypes: string[]
     isActive: boolean
     lastLogin: Date | null
     createdAt: Date
@@ -26961,6 +27176,7 @@ export namespace Prisma {
     division?: boolean
     subDivision?: boolean
     businessDivision?: boolean
+    articleTypes?: boolean
     isActive?: boolean
     lastLogin?: boolean
     createdAt?: boolean
@@ -26981,6 +27197,7 @@ export namespace Prisma {
     division?: boolean
     subDivision?: boolean
     businessDivision?: boolean
+    articleTypes?: boolean
     isActive?: boolean
     lastLogin?: boolean
     createdAt?: boolean
@@ -26996,6 +27213,7 @@ export namespace Prisma {
     division?: boolean
     subDivision?: boolean
     businessDivision?: boolean
+    articleTypes?: boolean
     isActive?: boolean
     lastLogin?: boolean
     createdAt?: boolean
@@ -27011,13 +27229,14 @@ export namespace Prisma {
     division?: boolean
     subDivision?: boolean
     businessDivision?: boolean
+    articleTypes?: boolean
     isActive?: boolean
     lastLogin?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "password" | "name" | "role" | "division" | "subDivision" | "businessDivision" | "isActive" | "lastLogin" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "password" | "name" | "role" | "division" | "subDivision" | "businessDivision" | "articleTypes" | "isActive" | "lastLogin" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     apiKeys?: boolean | User$apiKeysArgs<ExtArgs>
     costSummary?: boolean | User$costSummaryArgs<ExtArgs>
@@ -27054,6 +27273,10 @@ export namespace Prisma {
        * confused with the existing Sub Division field.
        */
       businessDivision: string | null
+      /**
+       * Article types the user works on — any of FG / FABRIC / GM (several allowed).
+       */
+      articleTypes: string[]
       isActive: boolean
       lastLogin: Date | null
       createdAt: Date
@@ -27493,6 +27716,7 @@ export namespace Prisma {
     readonly division: FieldRef<"User", 'String'>
     readonly subDivision: FieldRef<"User", 'String'>
     readonly businessDivision: FieldRef<"User", 'String'>
+    readonly articleTypes: FieldRef<"User", 'String[]'>
     readonly isActive: FieldRef<"User", 'Boolean'>
     readonly lastLogin: FieldRef<"User", 'DateTime'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
@@ -27991,1169 +28215,6 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: UserInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model AuditLog
-   */
-
-  export type AggregateAuditLog = {
-    _count: AuditLogCountAggregateOutputType | null
-    _avg: AuditLogAvgAggregateOutputType | null
-    _sum: AuditLogSumAggregateOutputType | null
-    _min: AuditLogMinAggregateOutputType | null
-    _max: AuditLogMaxAggregateOutputType | null
-  }
-
-  export type AuditLogAvgAggregateOutputType = {
-    id: number | null
-    userId: number | null
-    statusCode: number | null
-    duration: number | null
-  }
-
-  export type AuditLogSumAggregateOutputType = {
-    id: number | null
-    userId: number | null
-    statusCode: number | null
-    duration: number | null
-  }
-
-  export type AuditLogMinAggregateOutputType = {
-    id: number | null
-    userId: number | null
-    action: string | null
-    resource: string | null
-    resourceId: string | null
-    method: string | null
-    path: string | null
-    statusCode: number | null
-    ip: string | null
-    userAgent: string | null
-    duration: number | null
-    errorMessage: string | null
-    timestamp: Date | null
-  }
-
-  export type AuditLogMaxAggregateOutputType = {
-    id: number | null
-    userId: number | null
-    action: string | null
-    resource: string | null
-    resourceId: string | null
-    method: string | null
-    path: string | null
-    statusCode: number | null
-    ip: string | null
-    userAgent: string | null
-    duration: number | null
-    errorMessage: string | null
-    timestamp: Date | null
-  }
-
-  export type AuditLogCountAggregateOutputType = {
-    id: number
-    userId: number
-    action: number
-    resource: number
-    resourceId: number
-    method: number
-    path: number
-    statusCode: number
-    ip: number
-    userAgent: number
-    requestBody: number
-    responseBody: number
-    duration: number
-    errorMessage: number
-    timestamp: number
-    _all: number
-  }
-
-
-  export type AuditLogAvgAggregateInputType = {
-    id?: true
-    userId?: true
-    statusCode?: true
-    duration?: true
-  }
-
-  export type AuditLogSumAggregateInputType = {
-    id?: true
-    userId?: true
-    statusCode?: true
-    duration?: true
-  }
-
-  export type AuditLogMinAggregateInputType = {
-    id?: true
-    userId?: true
-    action?: true
-    resource?: true
-    resourceId?: true
-    method?: true
-    path?: true
-    statusCode?: true
-    ip?: true
-    userAgent?: true
-    duration?: true
-    errorMessage?: true
-    timestamp?: true
-  }
-
-  export type AuditLogMaxAggregateInputType = {
-    id?: true
-    userId?: true
-    action?: true
-    resource?: true
-    resourceId?: true
-    method?: true
-    path?: true
-    statusCode?: true
-    ip?: true
-    userAgent?: true
-    duration?: true
-    errorMessage?: true
-    timestamp?: true
-  }
-
-  export type AuditLogCountAggregateInputType = {
-    id?: true
-    userId?: true
-    action?: true
-    resource?: true
-    resourceId?: true
-    method?: true
-    path?: true
-    statusCode?: true
-    ip?: true
-    userAgent?: true
-    requestBody?: true
-    responseBody?: true
-    duration?: true
-    errorMessage?: true
-    timestamp?: true
-    _all?: true
-  }
-
-  export type AuditLogAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which AuditLog to aggregate.
-     */
-    where?: AuditLogWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of AuditLogs to fetch.
-     */
-    orderBy?: AuditLogOrderByWithRelationInput | AuditLogOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: AuditLogWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` AuditLogs from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` AuditLogs.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned AuditLogs
-    **/
-    _count?: true | AuditLogCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to average
-    **/
-    _avg?: AuditLogAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: AuditLogSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: AuditLogMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: AuditLogMaxAggregateInputType
-  }
-
-  export type GetAuditLogAggregateType<T extends AuditLogAggregateArgs> = {
-        [P in keyof T & keyof AggregateAuditLog]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateAuditLog[P]>
-      : GetScalarType<T[P], AggregateAuditLog[P]>
-  }
-
-
-
-
-  export type AuditLogGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: AuditLogWhereInput
-    orderBy?: AuditLogOrderByWithAggregationInput | AuditLogOrderByWithAggregationInput[]
-    by: AuditLogScalarFieldEnum[] | AuditLogScalarFieldEnum
-    having?: AuditLogScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: AuditLogCountAggregateInputType | true
-    _avg?: AuditLogAvgAggregateInputType
-    _sum?: AuditLogSumAggregateInputType
-    _min?: AuditLogMinAggregateInputType
-    _max?: AuditLogMaxAggregateInputType
-  }
-
-  export type AuditLogGroupByOutputType = {
-    id: number
-    userId: number | null
-    action: string
-    resource: string
-    resourceId: string | null
-    method: string
-    path: string
-    statusCode: number
-    ip: string
-    userAgent: string | null
-    requestBody: JsonValue | null
-    responseBody: JsonValue | null
-    duration: number
-    errorMessage: string | null
-    timestamp: Date
-    _count: AuditLogCountAggregateOutputType | null
-    _avg: AuditLogAvgAggregateOutputType | null
-    _sum: AuditLogSumAggregateOutputType | null
-    _min: AuditLogMinAggregateOutputType | null
-    _max: AuditLogMaxAggregateOutputType | null
-  }
-
-  type GetAuditLogGroupByPayload<T extends AuditLogGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<AuditLogGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof AuditLogGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], AuditLogGroupByOutputType[P]>
-            : GetScalarType<T[P], AuditLogGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type AuditLogSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    userId?: boolean
-    action?: boolean
-    resource?: boolean
-    resourceId?: boolean
-    method?: boolean
-    path?: boolean
-    statusCode?: boolean
-    ip?: boolean
-    userAgent?: boolean
-    requestBody?: boolean
-    responseBody?: boolean
-    duration?: boolean
-    errorMessage?: boolean
-    timestamp?: boolean
-  }, ExtArgs["result"]["auditLog"]>
-
-  export type AuditLogSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    userId?: boolean
-    action?: boolean
-    resource?: boolean
-    resourceId?: boolean
-    method?: boolean
-    path?: boolean
-    statusCode?: boolean
-    ip?: boolean
-    userAgent?: boolean
-    requestBody?: boolean
-    responseBody?: boolean
-    duration?: boolean
-    errorMessage?: boolean
-    timestamp?: boolean
-  }, ExtArgs["result"]["auditLog"]>
-
-  export type AuditLogSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    userId?: boolean
-    action?: boolean
-    resource?: boolean
-    resourceId?: boolean
-    method?: boolean
-    path?: boolean
-    statusCode?: boolean
-    ip?: boolean
-    userAgent?: boolean
-    requestBody?: boolean
-    responseBody?: boolean
-    duration?: boolean
-    errorMessage?: boolean
-    timestamp?: boolean
-  }, ExtArgs["result"]["auditLog"]>
-
-  export type AuditLogSelectScalar = {
-    id?: boolean
-    userId?: boolean
-    action?: boolean
-    resource?: boolean
-    resourceId?: boolean
-    method?: boolean
-    path?: boolean
-    statusCode?: boolean
-    ip?: boolean
-    userAgent?: boolean
-    requestBody?: boolean
-    responseBody?: boolean
-    duration?: boolean
-    errorMessage?: boolean
-    timestamp?: boolean
-  }
-
-  export type AuditLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "action" | "resource" | "resourceId" | "method" | "path" | "statusCode" | "ip" | "userAgent" | "requestBody" | "responseBody" | "duration" | "errorMessage" | "timestamp", ExtArgs["result"]["auditLog"]>
-
-  export type $AuditLogPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "AuditLog"
-    objects: {}
-    scalars: $Extensions.GetPayloadResult<{
-      id: number
-      userId: number | null
-      action: string
-      resource: string
-      resourceId: string | null
-      method: string
-      path: string
-      statusCode: number
-      ip: string
-      userAgent: string | null
-      requestBody: Prisma.JsonValue | null
-      responseBody: Prisma.JsonValue | null
-      duration: number
-      errorMessage: string | null
-      timestamp: Date
-    }, ExtArgs["result"]["auditLog"]>
-    composites: {}
-  }
-
-  type AuditLogGetPayload<S extends boolean | null | undefined | AuditLogDefaultArgs> = $Result.GetResult<Prisma.$AuditLogPayload, S>
-
-  type AuditLogCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<AuditLogFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: AuditLogCountAggregateInputType | true
-    }
-
-  export interface AuditLogDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AuditLog'], meta: { name: 'AuditLog' } }
-    /**
-     * Find zero or one AuditLog that matches the filter.
-     * @param {AuditLogFindUniqueArgs} args - Arguments to find a AuditLog
-     * @example
-     * // Get one AuditLog
-     * const auditLog = await prisma.auditLog.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends AuditLogFindUniqueArgs>(args: SelectSubset<T, AuditLogFindUniqueArgs<ExtArgs>>): Prisma__AuditLogClient<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one AuditLog that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {AuditLogFindUniqueOrThrowArgs} args - Arguments to find a AuditLog
-     * @example
-     * // Get one AuditLog
-     * const auditLog = await prisma.auditLog.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends AuditLogFindUniqueOrThrowArgs>(args: SelectSubset<T, AuditLogFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AuditLogClient<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first AuditLog that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AuditLogFindFirstArgs} args - Arguments to find a AuditLog
-     * @example
-     * // Get one AuditLog
-     * const auditLog = await prisma.auditLog.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends AuditLogFindFirstArgs>(args?: SelectSubset<T, AuditLogFindFirstArgs<ExtArgs>>): Prisma__AuditLogClient<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first AuditLog that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AuditLogFindFirstOrThrowArgs} args - Arguments to find a AuditLog
-     * @example
-     * // Get one AuditLog
-     * const auditLog = await prisma.auditLog.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends AuditLogFindFirstOrThrowArgs>(args?: SelectSubset<T, AuditLogFindFirstOrThrowArgs<ExtArgs>>): Prisma__AuditLogClient<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more AuditLogs that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AuditLogFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all AuditLogs
-     * const auditLogs = await prisma.auditLog.findMany()
-     * 
-     * // Get first 10 AuditLogs
-     * const auditLogs = await prisma.auditLog.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const auditLogWithIdOnly = await prisma.auditLog.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends AuditLogFindManyArgs>(args?: SelectSubset<T, AuditLogFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a AuditLog.
-     * @param {AuditLogCreateArgs} args - Arguments to create a AuditLog.
-     * @example
-     * // Create one AuditLog
-     * const AuditLog = await prisma.auditLog.create({
-     *   data: {
-     *     // ... data to create a AuditLog
-     *   }
-     * })
-     * 
-     */
-    create<T extends AuditLogCreateArgs>(args: SelectSubset<T, AuditLogCreateArgs<ExtArgs>>): Prisma__AuditLogClient<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many AuditLogs.
-     * @param {AuditLogCreateManyArgs} args - Arguments to create many AuditLogs.
-     * @example
-     * // Create many AuditLogs
-     * const auditLog = await prisma.auditLog.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends AuditLogCreateManyArgs>(args?: SelectSubset<T, AuditLogCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many AuditLogs and returns the data saved in the database.
-     * @param {AuditLogCreateManyAndReturnArgs} args - Arguments to create many AuditLogs.
-     * @example
-     * // Create many AuditLogs
-     * const auditLog = await prisma.auditLog.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many AuditLogs and only return the `id`
-     * const auditLogWithIdOnly = await prisma.auditLog.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends AuditLogCreateManyAndReturnArgs>(args?: SelectSubset<T, AuditLogCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a AuditLog.
-     * @param {AuditLogDeleteArgs} args - Arguments to delete one AuditLog.
-     * @example
-     * // Delete one AuditLog
-     * const AuditLog = await prisma.auditLog.delete({
-     *   where: {
-     *     // ... filter to delete one AuditLog
-     *   }
-     * })
-     * 
-     */
-    delete<T extends AuditLogDeleteArgs>(args: SelectSubset<T, AuditLogDeleteArgs<ExtArgs>>): Prisma__AuditLogClient<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one AuditLog.
-     * @param {AuditLogUpdateArgs} args - Arguments to update one AuditLog.
-     * @example
-     * // Update one AuditLog
-     * const auditLog = await prisma.auditLog.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends AuditLogUpdateArgs>(args: SelectSubset<T, AuditLogUpdateArgs<ExtArgs>>): Prisma__AuditLogClient<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more AuditLogs.
-     * @param {AuditLogDeleteManyArgs} args - Arguments to filter AuditLogs to delete.
-     * @example
-     * // Delete a few AuditLogs
-     * const { count } = await prisma.auditLog.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends AuditLogDeleteManyArgs>(args?: SelectSubset<T, AuditLogDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more AuditLogs.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AuditLogUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many AuditLogs
-     * const auditLog = await prisma.auditLog.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends AuditLogUpdateManyArgs>(args: SelectSubset<T, AuditLogUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more AuditLogs and returns the data updated in the database.
-     * @param {AuditLogUpdateManyAndReturnArgs} args - Arguments to update many AuditLogs.
-     * @example
-     * // Update many AuditLogs
-     * const auditLog = await prisma.auditLog.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more AuditLogs and only return the `id`
-     * const auditLogWithIdOnly = await prisma.auditLog.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends AuditLogUpdateManyAndReturnArgs>(args: SelectSubset<T, AuditLogUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one AuditLog.
-     * @param {AuditLogUpsertArgs} args - Arguments to update or create a AuditLog.
-     * @example
-     * // Update or create a AuditLog
-     * const auditLog = await prisma.auditLog.upsert({
-     *   create: {
-     *     // ... data to create a AuditLog
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the AuditLog we want to update
-     *   }
-     * })
-     */
-    upsert<T extends AuditLogUpsertArgs>(args: SelectSubset<T, AuditLogUpsertArgs<ExtArgs>>): Prisma__AuditLogClient<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of AuditLogs.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AuditLogCountArgs} args - Arguments to filter AuditLogs to count.
-     * @example
-     * // Count the number of AuditLogs
-     * const count = await prisma.auditLog.count({
-     *   where: {
-     *     // ... the filter for the AuditLogs we want to count
-     *   }
-     * })
-    **/
-    count<T extends AuditLogCountArgs>(
-      args?: Subset<T, AuditLogCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], AuditLogCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a AuditLog.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AuditLogAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends AuditLogAggregateArgs>(args: Subset<T, AuditLogAggregateArgs>): Prisma.PrismaPromise<GetAuditLogAggregateType<T>>
-
-    /**
-     * Group by AuditLog.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {AuditLogGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends AuditLogGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: AuditLogGroupByArgs['orderBy'] }
-        : { orderBy?: AuditLogGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, AuditLogGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAuditLogGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the AuditLog model
-   */
-  readonly fields: AuditLogFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for AuditLog.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__AuditLogClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the AuditLog model
-   */
-  interface AuditLogFieldRefs {
-    readonly id: FieldRef<"AuditLog", 'Int'>
-    readonly userId: FieldRef<"AuditLog", 'Int'>
-    readonly action: FieldRef<"AuditLog", 'String'>
-    readonly resource: FieldRef<"AuditLog", 'String'>
-    readonly resourceId: FieldRef<"AuditLog", 'String'>
-    readonly method: FieldRef<"AuditLog", 'String'>
-    readonly path: FieldRef<"AuditLog", 'String'>
-    readonly statusCode: FieldRef<"AuditLog", 'Int'>
-    readonly ip: FieldRef<"AuditLog", 'String'>
-    readonly userAgent: FieldRef<"AuditLog", 'String'>
-    readonly requestBody: FieldRef<"AuditLog", 'Json'>
-    readonly responseBody: FieldRef<"AuditLog", 'Json'>
-    readonly duration: FieldRef<"AuditLog", 'Int'>
-    readonly errorMessage: FieldRef<"AuditLog", 'String'>
-    readonly timestamp: FieldRef<"AuditLog", 'DateTime'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * AuditLog findUnique
-   */
-  export type AuditLogFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AuditLog
-     */
-    select?: AuditLogSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AuditLog
-     */
-    omit?: AuditLogOmit<ExtArgs> | null
-    /**
-     * Filter, which AuditLog to fetch.
-     */
-    where: AuditLogWhereUniqueInput
-  }
-
-  /**
-   * AuditLog findUniqueOrThrow
-   */
-  export type AuditLogFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AuditLog
-     */
-    select?: AuditLogSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AuditLog
-     */
-    omit?: AuditLogOmit<ExtArgs> | null
-    /**
-     * Filter, which AuditLog to fetch.
-     */
-    where: AuditLogWhereUniqueInput
-  }
-
-  /**
-   * AuditLog findFirst
-   */
-  export type AuditLogFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AuditLog
-     */
-    select?: AuditLogSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AuditLog
-     */
-    omit?: AuditLogOmit<ExtArgs> | null
-    /**
-     * Filter, which AuditLog to fetch.
-     */
-    where?: AuditLogWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of AuditLogs to fetch.
-     */
-    orderBy?: AuditLogOrderByWithRelationInput | AuditLogOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for AuditLogs.
-     */
-    cursor?: AuditLogWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` AuditLogs from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` AuditLogs.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of AuditLogs.
-     */
-    distinct?: AuditLogScalarFieldEnum | AuditLogScalarFieldEnum[]
-  }
-
-  /**
-   * AuditLog findFirstOrThrow
-   */
-  export type AuditLogFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AuditLog
-     */
-    select?: AuditLogSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AuditLog
-     */
-    omit?: AuditLogOmit<ExtArgs> | null
-    /**
-     * Filter, which AuditLog to fetch.
-     */
-    where?: AuditLogWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of AuditLogs to fetch.
-     */
-    orderBy?: AuditLogOrderByWithRelationInput | AuditLogOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for AuditLogs.
-     */
-    cursor?: AuditLogWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` AuditLogs from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` AuditLogs.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of AuditLogs.
-     */
-    distinct?: AuditLogScalarFieldEnum | AuditLogScalarFieldEnum[]
-  }
-
-  /**
-   * AuditLog findMany
-   */
-  export type AuditLogFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AuditLog
-     */
-    select?: AuditLogSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AuditLog
-     */
-    omit?: AuditLogOmit<ExtArgs> | null
-    /**
-     * Filter, which AuditLogs to fetch.
-     */
-    where?: AuditLogWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of AuditLogs to fetch.
-     */
-    orderBy?: AuditLogOrderByWithRelationInput | AuditLogOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing AuditLogs.
-     */
-    cursor?: AuditLogWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` AuditLogs from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` AuditLogs.
-     */
-    skip?: number
-    distinct?: AuditLogScalarFieldEnum | AuditLogScalarFieldEnum[]
-  }
-
-  /**
-   * AuditLog create
-   */
-  export type AuditLogCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AuditLog
-     */
-    select?: AuditLogSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AuditLog
-     */
-    omit?: AuditLogOmit<ExtArgs> | null
-    /**
-     * The data needed to create a AuditLog.
-     */
-    data: XOR<AuditLogCreateInput, AuditLogUncheckedCreateInput>
-  }
-
-  /**
-   * AuditLog createMany
-   */
-  export type AuditLogCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many AuditLogs.
-     */
-    data: AuditLogCreateManyInput | AuditLogCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * AuditLog createManyAndReturn
-   */
-  export type AuditLogCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AuditLog
-     */
-    select?: AuditLogSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the AuditLog
-     */
-    omit?: AuditLogOmit<ExtArgs> | null
-    /**
-     * The data used to create many AuditLogs.
-     */
-    data: AuditLogCreateManyInput | AuditLogCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * AuditLog update
-   */
-  export type AuditLogUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AuditLog
-     */
-    select?: AuditLogSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AuditLog
-     */
-    omit?: AuditLogOmit<ExtArgs> | null
-    /**
-     * The data needed to update a AuditLog.
-     */
-    data: XOR<AuditLogUpdateInput, AuditLogUncheckedUpdateInput>
-    /**
-     * Choose, which AuditLog to update.
-     */
-    where: AuditLogWhereUniqueInput
-  }
-
-  /**
-   * AuditLog updateMany
-   */
-  export type AuditLogUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update AuditLogs.
-     */
-    data: XOR<AuditLogUpdateManyMutationInput, AuditLogUncheckedUpdateManyInput>
-    /**
-     * Filter which AuditLogs to update
-     */
-    where?: AuditLogWhereInput
-    /**
-     * Limit how many AuditLogs to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * AuditLog updateManyAndReturn
-   */
-  export type AuditLogUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AuditLog
-     */
-    select?: AuditLogSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the AuditLog
-     */
-    omit?: AuditLogOmit<ExtArgs> | null
-    /**
-     * The data used to update AuditLogs.
-     */
-    data: XOR<AuditLogUpdateManyMutationInput, AuditLogUncheckedUpdateManyInput>
-    /**
-     * Filter which AuditLogs to update
-     */
-    where?: AuditLogWhereInput
-    /**
-     * Limit how many AuditLogs to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * AuditLog upsert
-   */
-  export type AuditLogUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AuditLog
-     */
-    select?: AuditLogSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AuditLog
-     */
-    omit?: AuditLogOmit<ExtArgs> | null
-    /**
-     * The filter to search for the AuditLog to update in case it exists.
-     */
-    where: AuditLogWhereUniqueInput
-    /**
-     * In case the AuditLog found by the `where` argument doesn't exist, create a new AuditLog with this data.
-     */
-    create: XOR<AuditLogCreateInput, AuditLogUncheckedCreateInput>
-    /**
-     * In case the AuditLog was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<AuditLogUpdateInput, AuditLogUncheckedUpdateInput>
-  }
-
-  /**
-   * AuditLog delete
-   */
-  export type AuditLogDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AuditLog
-     */
-    select?: AuditLogSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AuditLog
-     */
-    omit?: AuditLogOmit<ExtArgs> | null
-    /**
-     * Filter which AuditLog to delete.
-     */
-    where: AuditLogWhereUniqueInput
-  }
-
-  /**
-   * AuditLog deleteMany
-   */
-  export type AuditLogDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which AuditLogs to delete
-     */
-    where?: AuditLogWhereInput
-    /**
-     * Limit how many AuditLogs to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * AuditLog without action
-   */
-  export type AuditLogDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AuditLog
-     */
-    select?: AuditLogSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AuditLog
-     */
-    omit?: AuditLogOmit<ExtArgs> | null
   }
 
 
@@ -44184,6 +43245,7 @@ export namespace Prisma {
     noOfColors: number | null
     price: Decimal | null
     imageUrl: string | null
+    backImageUrl: string | null
     presentationsType: string | null
     setGroupId: string | null
     setRole: string | null
@@ -44215,6 +43277,7 @@ export namespace Prisma {
     noOfColors: number | null
     price: Decimal | null
     imageUrl: string | null
+    backImageUrl: string | null
     presentationsType: string | null
     setGroupId: string | null
     setRole: string | null
@@ -44246,6 +43309,7 @@ export namespace Prisma {
     noOfColors: number
     price: number
     imageUrl: number
+    backImageUrl: number
     presentationsType: number
     setGroupId: number
     setRole: number
@@ -44292,6 +43356,7 @@ export namespace Prisma {
     noOfColors?: true
     price?: true
     imageUrl?: true
+    backImageUrl?: true
     presentationsType?: true
     setGroupId?: true
     setRole?: true
@@ -44323,6 +43388,7 @@ export namespace Prisma {
     noOfColors?: true
     price?: true
     imageUrl?: true
+    backImageUrl?: true
     presentationsType?: true
     setGroupId?: true
     setRole?: true
@@ -44354,6 +43420,7 @@ export namespace Prisma {
     noOfColors?: true
     price?: true
     imageUrl?: true
+    backImageUrl?: true
     presentationsType?: true
     setGroupId?: true
     setRole?: true
@@ -44473,6 +43540,7 @@ export namespace Prisma {
     noOfColors: number | null
     price: Decimal | null
     imageUrl: string | null
+    backImageUrl: string | null
     presentationsType: string | null
     setGroupId: string | null
     setRole: string | null
@@ -44524,6 +43592,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     presentationsType?: boolean
     setGroupId?: boolean
     setRole?: boolean
@@ -44556,6 +43625,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     presentationsType?: boolean
     setGroupId?: boolean
     setRole?: boolean
@@ -44588,6 +43658,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     presentationsType?: boolean
     setGroupId?: boolean
     setRole?: boolean
@@ -44620,6 +43691,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     presentationsType?: boolean
     setGroupId?: boolean
     setRole?: boolean
@@ -44638,7 +43710,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type RawArticleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "presentationNo" | "vendorCode" | "vendorName" | "division" | "subDivision" | "majorCategory" | "presentationReceivedDate" | "designNumber" | "fabric" | "noOfColors" | "price" | "imageUrl" | "presentationsType" | "setGroupId" | "setRole" | "setName" | "uniqueKey" | "source" | "status" | "retryCount" | "errorMessage" | "extractedData" | "extractedAt" | "flatId" | "lockedUntil" | "articleNumber" | "createdAt" | "updatedAt", ExtArgs["result"]["rawArticle"]>
+  export type RawArticleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "presentationNo" | "vendorCode" | "vendorName" | "division" | "subDivision" | "majorCategory" | "presentationReceivedDate" | "designNumber" | "fabric" | "noOfColors" | "price" | "imageUrl" | "backImageUrl" | "presentationsType" | "setGroupId" | "setRole" | "setName" | "uniqueKey" | "source" | "status" | "retryCount" | "errorMessage" | "extractedData" | "extractedAt" | "flatId" | "lockedUntil" | "articleNumber" | "createdAt" | "updatedAt", ExtArgs["result"]["rawArticle"]>
 
   export type $RawArticlePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "RawArticle"
@@ -44657,6 +43729,7 @@ export namespace Prisma {
       noOfColors: number | null
       price: Prisma.Decimal | null
       imageUrl: string | null
+      backImageUrl: string | null
       presentationsType: string | null
       setGroupId: string | null
       setRole: string | null
@@ -45109,6 +44182,7 @@ export namespace Prisma {
     readonly noOfColors: FieldRef<"RawArticle", 'Int'>
     readonly price: FieldRef<"RawArticle", 'Decimal'>
     readonly imageUrl: FieldRef<"RawArticle", 'String'>
+    readonly backImageUrl: FieldRef<"RawArticle", 'String'>
     readonly presentationsType: FieldRef<"RawArticle", 'String'>
     readonly setGroupId: FieldRef<"RawArticle", 'String'>
     readonly setRole: FieldRef<"RawArticle", 'String'>
@@ -45536,6 +44610,7 @@ export namespace Prisma {
     noOfColors: number | null
     price: Decimal | null
     imageUrl: string | null
+    backImageUrl: string | null
     source: string | null
     season: string | null
     garmentWeight: Decimal | null
@@ -45570,6 +44645,7 @@ export namespace Prisma {
     noOfColors: number | null
     price: Decimal | null
     imageUrl: string | null
+    backImageUrl: string | null
     source: string | null
     season: string | null
     garmentWeight: Decimal | null
@@ -45604,6 +44680,7 @@ export namespace Prisma {
     noOfColors: number
     price: number
     imageUrl: number
+    backImageUrl: number
     source: number
     season: number
     garmentWeight: number
@@ -45657,6 +44734,7 @@ export namespace Prisma {
     noOfColors?: true
     price?: true
     imageUrl?: true
+    backImageUrl?: true
     source?: true
     season?: true
     garmentWeight?: true
@@ -45691,6 +44769,7 @@ export namespace Prisma {
     noOfColors?: true
     price?: true
     imageUrl?: true
+    backImageUrl?: true
     source?: true
     season?: true
     garmentWeight?: true
@@ -45725,6 +44804,7 @@ export namespace Prisma {
     noOfColors?: true
     price?: true
     imageUrl?: true
+    backImageUrl?: true
     source?: true
     season?: true
     garmentWeight?: true
@@ -45847,6 +44927,7 @@ export namespace Prisma {
     noOfColors: number | null
     price: Decimal | null
     imageUrl: string | null
+    backImageUrl: string | null
     source: string | null
     season: string | null
     garmentWeight: Decimal | null
@@ -45901,6 +44982,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     source?: boolean
     season?: boolean
     garmentWeight?: boolean
@@ -45936,6 +45018,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     source?: boolean
     season?: boolean
     garmentWeight?: boolean
@@ -45971,6 +45054,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     source?: boolean
     season?: boolean
     garmentWeight?: boolean
@@ -46006,6 +45090,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     source?: boolean
     season?: boolean
     garmentWeight?: boolean
@@ -46024,7 +45109,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type FabricRawDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "presentationNo" | "uniqueKey" | "vendorCode" | "vendorName" | "vendorCity" | "division" | "subDivision" | "majorCategory" | "presentationsType" | "designNumber" | "articleNumber" | "fabric" | "noOfColors" | "price" | "imageUrl" | "source" | "season" | "garmentWeight" | "availableQty" | "approvedBy" | "notes" | "status" | "retryCount" | "errorMessage" | "extractedData" | "extractedAt" | "flatId" | "lockedUntil" | "presentationReceivedDate" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricRawData"]>
+  export type FabricRawDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "presentationNo" | "uniqueKey" | "vendorCode" | "vendorName" | "vendorCity" | "division" | "subDivision" | "majorCategory" | "presentationsType" | "designNumber" | "articleNumber" | "fabric" | "noOfColors" | "price" | "imageUrl" | "backImageUrl" | "source" | "season" | "garmentWeight" | "availableQty" | "approvedBy" | "notes" | "status" | "retryCount" | "errorMessage" | "extractedData" | "extractedAt" | "flatId" | "lockedUntil" | "presentationReceivedDate" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricRawData"]>
 
   export type $FabricRawDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "FabricRawData"
@@ -46046,6 +45131,7 @@ export namespace Prisma {
       noOfColors: number | null
       price: Prisma.Decimal | null
       imageUrl: string | null
+      backImageUrl: string | null
       source: string | null
       season: string | null
       garmentWeight: Prisma.Decimal | null
@@ -46501,6 +45587,7 @@ export namespace Prisma {
     readonly noOfColors: FieldRef<"FabricRawData", 'Int'>
     readonly price: FieldRef<"FabricRawData", 'Decimal'>
     readonly imageUrl: FieldRef<"FabricRawData", 'String'>
+    readonly backImageUrl: FieldRef<"FabricRawData", 'String'>
     readonly source: FieldRef<"FabricRawData", 'String'>
     readonly season: FieldRef<"FabricRawData", 'String'>
     readonly garmentWeight: FieldRef<"FabricRawData", 'Decimal'>
@@ -46926,6 +46013,7 @@ export namespace Prisma {
     noOfColors: number | null
     price: Decimal | null
     imageUrl: string | null
+    backImageUrl: string | null
     source: string | null
     season: string | null
     garmentWeight: Decimal | null
@@ -46959,6 +46047,7 @@ export namespace Prisma {
     noOfColors: number | null
     price: Decimal | null
     imageUrl: string | null
+    backImageUrl: string | null
     source: string | null
     season: string | null
     garmentWeight: Decimal | null
@@ -46992,6 +46081,7 @@ export namespace Prisma {
     noOfColors: number
     price: number
     imageUrl: number
+    backImageUrl: number
     source: number
     season: number
     garmentWeight: number
@@ -47041,6 +46131,7 @@ export namespace Prisma {
     noOfColors?: true
     price?: true
     imageUrl?: true
+    backImageUrl?: true
     source?: true
     season?: true
     garmentWeight?: true
@@ -47074,6 +46165,7 @@ export namespace Prisma {
     noOfColors?: true
     price?: true
     imageUrl?: true
+    backImageUrl?: true
     source?: true
     season?: true
     garmentWeight?: true
@@ -47107,6 +46199,7 @@ export namespace Prisma {
     noOfColors?: true
     price?: true
     imageUrl?: true
+    backImageUrl?: true
     source?: true
     season?: true
     garmentWeight?: true
@@ -47227,6 +46320,7 @@ export namespace Prisma {
     noOfColors: number | null
     price: Decimal | null
     imageUrl: string | null
+    backImageUrl: string | null
     source: string | null
     season: string | null
     garmentWeight: Decimal | null
@@ -47279,6 +46373,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     source?: boolean
     season?: boolean
     garmentWeight?: boolean
@@ -47312,6 +46407,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     source?: boolean
     season?: boolean
     garmentWeight?: boolean
@@ -47345,6 +46441,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     source?: boolean
     season?: boolean
     garmentWeight?: boolean
@@ -47378,6 +46475,7 @@ export namespace Prisma {
     noOfColors?: boolean
     price?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     source?: boolean
     season?: boolean
     garmentWeight?: boolean
@@ -47394,7 +46492,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type GmRawDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "presentationNo" | "uniqueKey" | "vendorCode" | "vendorName" | "vendorCity" | "division" | "subDivision" | "majorCategory" | "presentationsType" | "designNumber" | "articleNumber" | "fabric" | "noOfColors" | "price" | "imageUrl" | "source" | "season" | "garmentWeight" | "availableQty" | "approvedBy" | "notes" | "status" | "errorMessage" | "extractedAt" | "flatId" | "lockedUntil" | "presentationReceivedDate" | "createdAt" | "updatedAt", ExtArgs["result"]["gmRawData"]>
+  export type GmRawDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "presentationNo" | "uniqueKey" | "vendorCode" | "vendorName" | "vendorCity" | "division" | "subDivision" | "majorCategory" | "presentationsType" | "designNumber" | "articleNumber" | "fabric" | "noOfColors" | "price" | "imageUrl" | "backImageUrl" | "source" | "season" | "garmentWeight" | "availableQty" | "approvedBy" | "notes" | "status" | "errorMessage" | "extractedAt" | "flatId" | "lockedUntil" | "presentationReceivedDate" | "createdAt" | "updatedAt", ExtArgs["result"]["gmRawData"]>
 
   export type $GmRawDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "GmRawData"
@@ -47416,6 +46514,7 @@ export namespace Prisma {
       noOfColors: number | null
       price: Prisma.Decimal | null
       imageUrl: string | null
+      backImageUrl: string | null
       source: string | null
       season: string | null
       garmentWeight: Prisma.Decimal | null
@@ -47869,6 +46968,7 @@ export namespace Prisma {
     readonly noOfColors: FieldRef<"GmRawData", 'Int'>
     readonly price: FieldRef<"GmRawData", 'Decimal'>
     readonly imageUrl: FieldRef<"GmRawData", 'String'>
+    readonly backImageUrl: FieldRef<"GmRawData", 'String'>
     readonly source: FieldRef<"GmRawData", 'String'>
     readonly season: FieldRef<"GmRawData", 'String'>
     readonly garmentWeight: FieldRef<"GmRawData", 'Decimal'>
@@ -60087,6 +59187,7 @@ export namespace Prisma {
     sapSyncStatus: string | null
     sapSyncMessage: string | null
     imageUrl: string | null
+    backImageUrl: string | null
     fabricArticleType: string | null
     source: string | null
     userName: string | null
@@ -60133,6 +59234,7 @@ export namespace Prisma {
     sapSyncStatus: string | null
     sapSyncMessage: string | null
     imageUrl: string | null
+    backImageUrl: string | null
     fabricArticleType: string | null
     source: string | null
     userName: string | null
@@ -60179,6 +59281,7 @@ export namespace Prisma {
     sapSyncStatus: number
     sapSyncMessage: number
     imageUrl: number
+    backImageUrl: number
     fabricArticleType: number
     source: number
     userName: number
@@ -60243,6 +59346,7 @@ export namespace Prisma {
     sapSyncStatus?: true
     sapSyncMessage?: true
     imageUrl?: true
+    backImageUrl?: true
     fabricArticleType?: true
     source?: true
     userName?: true
@@ -60289,6 +59393,7 @@ export namespace Prisma {
     sapSyncStatus?: true
     sapSyncMessage?: true
     imageUrl?: true
+    backImageUrl?: true
     fabricArticleType?: true
     source?: true
     userName?: true
@@ -60335,6 +59440,7 @@ export namespace Prisma {
     sapSyncStatus?: true
     sapSyncMessage?: true
     imageUrl?: true
+    backImageUrl?: true
     fabricArticleType?: true
     source?: true
     userName?: true
@@ -60468,6 +59574,7 @@ export namespace Prisma {
     sapSyncStatus: string
     sapSyncMessage: string | null
     imageUrl: string | null
+    backImageUrl: string | null
     fabricArticleType: string | null
     source: string | null
     userName: string | null
@@ -60533,6 +59640,7 @@ export namespace Prisma {
     sapSyncStatus?: boolean
     sapSyncMessage?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     fabricArticleType?: boolean
     source?: boolean
     userName?: boolean
@@ -60579,6 +59687,7 @@ export namespace Prisma {
     sapSyncStatus?: boolean
     sapSyncMessage?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     fabricArticleType?: boolean
     source?: boolean
     userName?: boolean
@@ -60625,6 +59734,7 @@ export namespace Prisma {
     sapSyncStatus?: boolean
     sapSyncMessage?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     fabricArticleType?: boolean
     source?: boolean
     userName?: boolean
@@ -60671,6 +59781,7 @@ export namespace Prisma {
     sapSyncStatus?: boolean
     sapSyncMessage?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     fabricArticleType?: boolean
     source?: boolean
     userName?: boolean
@@ -60678,7 +59789,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type FabricArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mFabDiv" | "mYarn" | "mFabMainMvgr1" | "mFabMainMvgr2" | "mConstruction" | "mOunz" | "mWidth" | "mWeave02" | "mCount" | "mWeave01" | "mComposition" | "mFinish" | "mGsm" | "mLycra" | "fabricArticleNumber" | "fabricArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "pptNumber" | "fabricRate" | "v2FabricRate" | "valueAddCost" | "rate" | "segment" | "articleFashionType" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "fabricArticleType" | "source" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricArticleData"]>
+  export type FabricArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mFabDiv" | "mYarn" | "mFabMainMvgr1" | "mFabMainMvgr2" | "mConstruction" | "mOunz" | "mWidth" | "mWeave02" | "mCount" | "mWeave01" | "mComposition" | "mFinish" | "mGsm" | "mLycra" | "fabricArticleNumber" | "fabricArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "pptNumber" | "fabricRate" | "v2FabricRate" | "valueAddCost" | "rate" | "segment" | "articleFashionType" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "backImageUrl" | "fabricArticleType" | "source" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricArticleData"]>
 
   export type $FabricArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "FabricArticleData"
@@ -60722,6 +59833,7 @@ export namespace Prisma {
       sapSyncStatus: string
       sapSyncMessage: string | null
       imageUrl: string | null
+      backImageUrl: string | null
       fabricArticleType: string | null
       source: string | null
       userName: string | null
@@ -61188,6 +60300,7 @@ export namespace Prisma {
     readonly sapSyncStatus: FieldRef<"FabricArticleData", 'String'>
     readonly sapSyncMessage: FieldRef<"FabricArticleData", 'String'>
     readonly imageUrl: FieldRef<"FabricArticleData", 'String'>
+    readonly backImageUrl: FieldRef<"FabricArticleData", 'String'>
     readonly fabricArticleType: FieldRef<"FabricArticleData", 'String'>
     readonly source: FieldRef<"FabricArticleData", 'String'>
     readonly userName: FieldRef<"FabricArticleData", 'String'>
@@ -62862,12 +61975,18 @@ export namespace Prisma {
   export type GmArticleDataAvgAggregateOutputType = {
     rate: Decimal | null
     mrp: Decimal | null
+    roughV2: Decimal | null
+    vdrCost: Decimal | null
+    finalCost: Decimal | null
     approvedBy: number | null
   }
 
   export type GmArticleDataSumAggregateOutputType = {
     rate: Decimal | null
     mrp: Decimal | null
+    roughV2: Decimal | null
+    vdrCost: Decimal | null
+    finalCost: Decimal | null
     approvedBy: number | null
   }
 
@@ -62964,6 +62083,9 @@ export namespace Prisma {
     pptNumber: string | null
     rate: Decimal | null
     mrp: Decimal | null
+    roughV2: Decimal | null
+    vdrCost: Decimal | null
+    finalCost: Decimal | null
     segment: string | null
     articleFashionType: string | null
     approvalStatus: string | null
@@ -62972,6 +62094,7 @@ export namespace Prisma {
     sapSyncStatus: string | null
     sapSyncMessage: string | null
     imageUrl: string | null
+    backImageUrl: string | null
     gmArticleType: string | null
     source: string | null
     userName: string | null
@@ -63072,6 +62195,9 @@ export namespace Prisma {
     pptNumber: string | null
     rate: Decimal | null
     mrp: Decimal | null
+    roughV2: Decimal | null
+    vdrCost: Decimal | null
+    finalCost: Decimal | null
     segment: string | null
     articleFashionType: string | null
     approvalStatus: string | null
@@ -63080,6 +62206,7 @@ export namespace Prisma {
     sapSyncStatus: string | null
     sapSyncMessage: string | null
     imageUrl: string | null
+    backImageUrl: string | null
     gmArticleType: string | null
     source: string | null
     userName: string | null
@@ -63180,6 +62307,9 @@ export namespace Prisma {
     pptNumber: number
     rate: number
     mrp: number
+    roughV2: number
+    vdrCost: number
+    finalCost: number
     segment: number
     articleFashionType: number
     approvalStatus: number
@@ -63188,6 +62318,7 @@ export namespace Prisma {
     sapSyncStatus: number
     sapSyncMessage: number
     imageUrl: number
+    backImageUrl: number
     gmArticleType: number
     source: number
     userName: number
@@ -63200,12 +62331,18 @@ export namespace Prisma {
   export type GmArticleDataAvgAggregateInputType = {
     rate?: true
     mrp?: true
+    roughV2?: true
+    vdrCost?: true
+    finalCost?: true
     approvedBy?: true
   }
 
   export type GmArticleDataSumAggregateInputType = {
     rate?: true
     mrp?: true
+    roughV2?: true
+    vdrCost?: true
+    finalCost?: true
     approvedBy?: true
   }
 
@@ -63302,6 +62439,9 @@ export namespace Prisma {
     pptNumber?: true
     rate?: true
     mrp?: true
+    roughV2?: true
+    vdrCost?: true
+    finalCost?: true
     segment?: true
     articleFashionType?: true
     approvalStatus?: true
@@ -63310,6 +62450,7 @@ export namespace Prisma {
     sapSyncStatus?: true
     sapSyncMessage?: true
     imageUrl?: true
+    backImageUrl?: true
     gmArticleType?: true
     source?: true
     userName?: true
@@ -63410,6 +62551,9 @@ export namespace Prisma {
     pptNumber?: true
     rate?: true
     mrp?: true
+    roughV2?: true
+    vdrCost?: true
+    finalCost?: true
     segment?: true
     articleFashionType?: true
     approvalStatus?: true
@@ -63418,6 +62562,7 @@ export namespace Prisma {
     sapSyncStatus?: true
     sapSyncMessage?: true
     imageUrl?: true
+    backImageUrl?: true
     gmArticleType?: true
     source?: true
     userName?: true
@@ -63518,6 +62663,9 @@ export namespace Prisma {
     pptNumber?: true
     rate?: true
     mrp?: true
+    roughV2?: true
+    vdrCost?: true
+    finalCost?: true
     segment?: true
     articleFashionType?: true
     approvalStatus?: true
@@ -63526,6 +62674,7 @@ export namespace Prisma {
     sapSyncStatus?: true
     sapSyncMessage?: true
     imageUrl?: true
+    backImageUrl?: true
     gmArticleType?: true
     source?: true
     userName?: true
@@ -63713,6 +62862,9 @@ export namespace Prisma {
     pptNumber: string | null
     rate: Decimal | null
     mrp: Decimal | null
+    roughV2: Decimal | null
+    vdrCost: Decimal | null
+    finalCost: Decimal | null
     segment: string | null
     articleFashionType: string | null
     approvalStatus: string
@@ -63721,6 +62873,7 @@ export namespace Prisma {
     sapSyncStatus: string
     sapSyncMessage: string | null
     imageUrl: string | null
+    backImageUrl: string | null
     gmArticleType: string | null
     source: string | null
     userName: string | null
@@ -63840,6 +62993,9 @@ export namespace Prisma {
     pptNumber?: boolean
     rate?: boolean
     mrp?: boolean
+    roughV2?: boolean
+    vdrCost?: boolean
+    finalCost?: boolean
     segment?: boolean
     articleFashionType?: boolean
     approvalStatus?: boolean
@@ -63848,6 +63004,7 @@ export namespace Prisma {
     sapSyncStatus?: boolean
     sapSyncMessage?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     gmArticleType?: boolean
     source?: boolean
     userName?: boolean
@@ -63948,6 +63105,9 @@ export namespace Prisma {
     pptNumber?: boolean
     rate?: boolean
     mrp?: boolean
+    roughV2?: boolean
+    vdrCost?: boolean
+    finalCost?: boolean
     segment?: boolean
     articleFashionType?: boolean
     approvalStatus?: boolean
@@ -63956,6 +63116,7 @@ export namespace Prisma {
     sapSyncStatus?: boolean
     sapSyncMessage?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     gmArticleType?: boolean
     source?: boolean
     userName?: boolean
@@ -64056,6 +63217,9 @@ export namespace Prisma {
     pptNumber?: boolean
     rate?: boolean
     mrp?: boolean
+    roughV2?: boolean
+    vdrCost?: boolean
+    finalCost?: boolean
     segment?: boolean
     articleFashionType?: boolean
     approvalStatus?: boolean
@@ -64064,6 +63228,7 @@ export namespace Prisma {
     sapSyncStatus?: boolean
     sapSyncMessage?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     gmArticleType?: boolean
     source?: boolean
     userName?: boolean
@@ -64164,6 +63329,9 @@ export namespace Prisma {
     pptNumber?: boolean
     rate?: boolean
     mrp?: boolean
+    roughV2?: boolean
+    vdrCost?: boolean
+    finalCost?: boolean
     segment?: boolean
     articleFashionType?: boolean
     approvalStatus?: boolean
@@ -64172,6 +63340,7 @@ export namespace Prisma {
     sapSyncStatus?: boolean
     sapSyncMessage?: boolean
     imageUrl?: boolean
+    backImageUrl?: boolean
     gmArticleType?: boolean
     source?: boolean
     userName?: boolean
@@ -64179,7 +63348,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type GmArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "gmAgeGrade" | "gmApplicator" | "gmBaseType" | "gmBatteryType" | "gmBpaFree" | "gmBpcForm" | "gmBrand" | "gmBrandType" | "gmCapacityMl" | "gmCareInstruction" | "gmCertification" | "gmClosureType" | "gmCoating" | "gmColourFamily" | "gmColourShade" | "gmCompartmentCount" | "gmComposition" | "gmCosmeticFinish" | "gmDiameterCm" | "gmDimStandard" | "gmDishwasherSafe" | "gmFoldable" | "gmFoodContactSafe" | "gmFragranceConc" | "gmFragranceFamily" | "gmFreeFrom" | "gmFwHeelHtCm" | "gmFwHeelType" | "gmFwSize" | "gmFwSole" | "gmFwToe" | "gmFwUpper" | "gmGsm" | "gmHeatRetentionHr" | "gmHeightCm" | "gmInsulationType" | "gmKeyIngredient" | "gmLeakProof" | "gmLengthCm" | "gmLicence" | "gmLidType" | "gmLifestage" | "gmLiningMaterial" | "gmManufacturer" | "gmMaterial" | "gmMaterialGroup" | "gmMaterialSecondary" | "gmMicrowaveSafe" | "gmMountType" | "gmNetContent" | "gmNetContentUom" | "gmNetWeightG" | "gmPackQty" | "gmPattern" | "gmPlayPattern" | "gmPlayerCount" | "gmPowerSource" | "gmPriceTier" | "gmPrintTheme" | "gmSeason" | "gmSellUom" | "gmSetContents" | "gmShelfLifeMonths" | "gmSkinType" | "gmSpf" | "gmSport" | "gmStrapType" | "gmSurfaceFinish" | "gmTextileFabric" | "gmThreadCount" | "gmUsageOccasion" | "gmVoltageV" | "gmWarrantyMonths" | "gmWattageW" | "gmWeave" | "gmWheelCount" | "gmWidthCm" | "gmYarn" | "gmArticleNumber" | "gmArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "pptNumber" | "rate" | "mrp" | "segment" | "articleFashionType" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "gmArticleType" | "source" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["gmArticleData"]>
+  export type GmArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "gmAgeGrade" | "gmApplicator" | "gmBaseType" | "gmBatteryType" | "gmBpaFree" | "gmBpcForm" | "gmBrand" | "gmBrandType" | "gmCapacityMl" | "gmCareInstruction" | "gmCertification" | "gmClosureType" | "gmCoating" | "gmColourFamily" | "gmColourShade" | "gmCompartmentCount" | "gmComposition" | "gmCosmeticFinish" | "gmDiameterCm" | "gmDimStandard" | "gmDishwasherSafe" | "gmFoldable" | "gmFoodContactSafe" | "gmFragranceConc" | "gmFragranceFamily" | "gmFreeFrom" | "gmFwHeelHtCm" | "gmFwHeelType" | "gmFwSize" | "gmFwSole" | "gmFwToe" | "gmFwUpper" | "gmGsm" | "gmHeatRetentionHr" | "gmHeightCm" | "gmInsulationType" | "gmKeyIngredient" | "gmLeakProof" | "gmLengthCm" | "gmLicence" | "gmLidType" | "gmLifestage" | "gmLiningMaterial" | "gmManufacturer" | "gmMaterial" | "gmMaterialGroup" | "gmMaterialSecondary" | "gmMicrowaveSafe" | "gmMountType" | "gmNetContent" | "gmNetContentUom" | "gmNetWeightG" | "gmPackQty" | "gmPattern" | "gmPlayPattern" | "gmPlayerCount" | "gmPowerSource" | "gmPriceTier" | "gmPrintTheme" | "gmSeason" | "gmSellUom" | "gmSetContents" | "gmShelfLifeMonths" | "gmSkinType" | "gmSpf" | "gmSport" | "gmStrapType" | "gmSurfaceFinish" | "gmTextileFabric" | "gmThreadCount" | "gmUsageOccasion" | "gmVoltageV" | "gmWarrantyMonths" | "gmWattageW" | "gmWeave" | "gmWheelCount" | "gmWidthCm" | "gmYarn" | "gmArticleNumber" | "gmArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "pptNumber" | "rate" | "mrp" | "roughV2" | "vdrCost" | "finalCost" | "segment" | "articleFashionType" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "backImageUrl" | "gmArticleType" | "source" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["gmArticleData"]>
 
   export type $GmArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "GmArticleData"
@@ -64277,6 +63446,9 @@ export namespace Prisma {
       pptNumber: string | null
       rate: Prisma.Decimal | null
       mrp: Prisma.Decimal | null
+      roughV2: Prisma.Decimal | null
+      vdrCost: Prisma.Decimal | null
+      finalCost: Prisma.Decimal | null
       segment: string | null
       articleFashionType: string | null
       approvalStatus: string
@@ -64285,6 +63457,7 @@ export namespace Prisma {
       sapSyncStatus: string
       sapSyncMessage: string | null
       imageUrl: string | null
+      backImageUrl: string | null
       gmArticleType: string | null
       source: string | null
       userName: string | null
@@ -64805,6 +63978,9 @@ export namespace Prisma {
     readonly pptNumber: FieldRef<"GmArticleData", 'String'>
     readonly rate: FieldRef<"GmArticleData", 'Decimal'>
     readonly mrp: FieldRef<"GmArticleData", 'Decimal'>
+    readonly roughV2: FieldRef<"GmArticleData", 'Decimal'>
+    readonly vdrCost: FieldRef<"GmArticleData", 'Decimal'>
+    readonly finalCost: FieldRef<"GmArticleData", 'Decimal'>
     readonly segment: FieldRef<"GmArticleData", 'String'>
     readonly articleFashionType: FieldRef<"GmArticleData", 'String'>
     readonly approvalStatus: FieldRef<"GmArticleData", 'String'>
@@ -64813,6 +63989,7 @@ export namespace Prisma {
     readonly sapSyncStatus: FieldRef<"GmArticleData", 'String'>
     readonly sapSyncMessage: FieldRef<"GmArticleData", 'String'>
     readonly imageUrl: FieldRef<"GmArticleData", 'String'>
+    readonly backImageUrl: FieldRef<"GmArticleData", 'String'>
     readonly gmArticleType: FieldRef<"GmArticleData", 'String'>
     readonly source: FieldRef<"GmArticleData", 'String'>
     readonly userName: FieldRef<"GmArticleData", 'String'>
@@ -92841,9 +92018,14 @@ export namespace Prisma {
   export const ExtractionResultFlatScalarFieldEnum: {
     id: 'id',
     jobId: 'jobId',
-    imageName: 'imageName',
     imageUrl: 'imageUrl',
     oldImageUrl: 'oldImageUrl',
+    sourceImageUrl: 'sourceImageUrl',
+    aiCmpCostCutting: 'aiCmpCostCutting',
+    aiCmpCostStitching: 'aiCmpCostStitching',
+    aiCmpCostIroning: 'aiCmpCostIroning',
+    aiCmpCostFinishing: 'aiCmpCostFinishing',
+    backImageUrl: 'backImageUrl',
     articleNumber: 'articleNumber',
     extractionStatus: 'extractionStatus',
     aiModel: 'aiModel',
@@ -92857,6 +92039,8 @@ export namespace Prisma {
     apiCost: 'apiCost',
     userId: 'userId',
     userName: 'userName',
+    creatorUser: 'creatorUser',
+    modifyUser: 'modifyUser',
     extractionDate: 'extractionDate',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
@@ -92961,7 +92145,15 @@ export namespace Prisma {
     finishingActPrVal: 'finishingActPrVal',
     finishingVendorPrVal: 'finishingVendorPrVal',
     finishingFinalPrVal: 'finishingFinalPrVal',
+    totalBgtPrVal: 'totalBgtPrVal',
+    totalActPrVal: 'totalActPrVal',
+    totalVendorPrVal: 'totalVendorPrVal',
+    totalFinalPrVal: 'totalFinalPrVal',
     bTrimType: 'bTrimType',
+    bTrimTotalAutoBgt: 'bTrimTotalAutoBgt',
+    bTrimTotalRoughV2: 'bTrimTotalRoughV2',
+    bTrimTotalVdrCost: 'bTrimTotalVdrCost',
+    bTrimTotalFinalCost: 'bTrimTotalFinalCost',
     mBtnAutoBgt: 'mBtnAutoBgt',
     mBtnRoughV2: 'mBtnRoughV2',
     mBtnVdrCost: 'mBtnVdrCost',
@@ -93126,6 +92318,10 @@ export namespace Prisma {
     washingFinalCost: 'washingFinalCost',
     vaddPrintJson: 'vaddPrintJson',
     vaddEmpJson: 'vaddEmpJson',
+    vaddTotalAutoBgt: 'vaddTotalAutoBgt',
+    vaddTotalRoughV2: 'vaddTotalRoughV2',
+    vaddTotalVendorCost: 'vaddTotalVendorCost',
+    vaddTotalFinalCost: 'vaddTotalFinalCost',
     pkgCostType: 'pkgCostType',
     boppNetPrice: 'boppNetPrice',
     ctnNetPrice: 'ctnNetPrice',
@@ -93257,6 +92453,7 @@ export namespace Prisma {
     division: 'division',
     subDivision: 'subDivision',
     businessDivision: 'businessDivision',
+    articleTypes: 'articleTypes',
     isActive: 'isActive',
     lastLogin: 'lastLogin',
     createdAt: 'createdAt',
@@ -93264,27 +92461,6 @@ export namespace Prisma {
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
-
-
-  export const AuditLogScalarFieldEnum: {
-    id: 'id',
-    userId: 'userId',
-    action: 'action',
-    resource: 'resource',
-    resourceId: 'resourceId',
-    method: 'method',
-    path: 'path',
-    statusCode: 'statusCode',
-    ip: 'ip',
-    userAgent: 'userAgent',
-    requestBody: 'requestBody',
-    responseBody: 'responseBody',
-    duration: 'duration',
-    errorMessage: 'errorMessage',
-    timestamp: 'timestamp'
-  };
-
-  export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
 
 
   export const ApiKeyScalarFieldEnum: {
@@ -93584,6 +92760,7 @@ export namespace Prisma {
     noOfColors: 'noOfColors',
     price: 'price',
     imageUrl: 'imageUrl',
+    backImageUrl: 'backImageUrl',
     presentationsType: 'presentationsType',
     setGroupId: 'setGroupId',
     setRole: 'setRole',
@@ -93622,6 +92799,7 @@ export namespace Prisma {
     noOfColors: 'noOfColors',
     price: 'price',
     imageUrl: 'imageUrl',
+    backImageUrl: 'backImageUrl',
     source: 'source',
     season: 'season',
     garmentWeight: 'garmentWeight',
@@ -93660,6 +92838,7 @@ export namespace Prisma {
     noOfColors: 'noOfColors',
     price: 'price',
     imageUrl: 'imageUrl',
+    backImageUrl: 'backImageUrl',
     source: 'source',
     season: 'season',
     garmentWeight: 'garmentWeight',
@@ -93910,6 +93089,7 @@ export namespace Prisma {
     sapSyncStatus: 'sapSyncStatus',
     sapSyncMessage: 'sapSyncMessage',
     imageUrl: 'imageUrl',
+    backImageUrl: 'backImageUrl',
     fabricArticleType: 'fabricArticleType',
     source: 'source',
     userName: 'userName',
@@ -94043,6 +93223,9 @@ export namespace Prisma {
     pptNumber: 'pptNumber',
     rate: 'rate',
     mrp: 'mrp',
+    roughV2: 'roughV2',
+    vdrCost: 'vdrCost',
+    finalCost: 'finalCost',
     segment: 'segment',
     articleFashionType: 'articleFashionType',
     approvalStatus: 'approvalStatus',
@@ -94051,6 +93234,7 @@ export namespace Prisma {
     sapSyncStatus: 'sapSyncStatus',
     sapSyncMessage: 'sapSyncMessage',
     imageUrl: 'imageUrl',
+    backImageUrl: 'backImageUrl',
     gmArticleType: 'gmArticleType',
     source: 'source',
     userName: 'userName',
@@ -94751,9 +93935,10 @@ export namespace Prisma {
   export const ExtractionResultFlatOrderByRelevanceFieldEnum: {
     id: 'id',
     jobId: 'jobId',
-    imageName: 'imageName',
     imageUrl: 'imageUrl',
     oldImageUrl: 'oldImageUrl',
+    sourceImageUrl: 'sourceImageUrl',
+    backImageUrl: 'backImageUrl',
     articleNumber: 'articleNumber',
     extractionStatus: 'extractionStatus',
     aiModel: 'aiModel',
@@ -94924,24 +94109,11 @@ export namespace Prisma {
     name: 'name',
     division: 'division',
     subDivision: 'subDivision',
-    businessDivision: 'businessDivision'
+    businessDivision: 'businessDivision',
+    articleTypes: 'articleTypes'
   };
 
   export type UserOrderByRelevanceFieldEnum = (typeof UserOrderByRelevanceFieldEnum)[keyof typeof UserOrderByRelevanceFieldEnum]
-
-
-  export const AuditLogOrderByRelevanceFieldEnum: {
-    action: 'action',
-    resource: 'resource',
-    resourceId: 'resourceId',
-    method: 'method',
-    path: 'path',
-    ip: 'ip',
-    userAgent: 'userAgent',
-    errorMessage: 'errorMessage'
-  };
-
-  export type AuditLogOrderByRelevanceFieldEnum = (typeof AuditLogOrderByRelevanceFieldEnum)[keyof typeof AuditLogOrderByRelevanceFieldEnum]
 
 
   export const ApiKeyOrderByRelevanceFieldEnum: {
@@ -95181,6 +94353,7 @@ export namespace Prisma {
     designNumber: 'designNumber',
     fabric: 'fabric',
     imageUrl: 'imageUrl',
+    backImageUrl: 'backImageUrl',
     presentationsType: 'presentationsType',
     setGroupId: 'setGroupId',
     setRole: 'setRole',
@@ -95210,6 +94383,7 @@ export namespace Prisma {
     articleNumber: 'articleNumber',
     fabric: 'fabric',
     imageUrl: 'imageUrl',
+    backImageUrl: 'backImageUrl',
     source: 'source',
     season: 'season',
     approvedBy: 'approvedBy',
@@ -95236,6 +94410,7 @@ export namespace Prisma {
     articleNumber: 'articleNumber',
     fabric: 'fabric',
     imageUrl: 'imageUrl',
+    backImageUrl: 'backImageUrl',
     source: 'source',
     season: 'season',
     approvedBy: 'approvedBy',
@@ -95406,6 +94581,7 @@ export namespace Prisma {
     sapSyncStatus: 'sapSyncStatus',
     sapSyncMessage: 'sapSyncMessage',
     imageUrl: 'imageUrl',
+    backImageUrl: 'backImageUrl',
     fabricArticleType: 'fabricArticleType',
     source: 'source',
     userName: 'userName'
@@ -95536,6 +94712,7 @@ export namespace Prisma {
     sapSyncStatus: 'sapSyncStatus',
     sapSyncMessage: 'sapSyncMessage',
     imageUrl: 'imageUrl',
+    backImageUrl: 'backImageUrl',
     gmArticleType: 'gmArticleType',
     source: 'source',
     userName: 'userName'
@@ -96969,9 +96146,14 @@ export namespace Prisma {
     NOT?: ExtractionResultFlatWhereInput | ExtractionResultFlatWhereInput[]
     id?: StringFilter<"ExtractionResultFlat"> | string
     jobId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    imageName?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     imageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     oldImageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    sourceImageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    aiCmpCostCutting?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     articleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     extractionStatus?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     aiModel?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -96985,6 +96167,8 @@ export namespace Prisma {
     apiCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     userId?: IntNullableFilter<"ExtractionResultFlat"> | number | null
     userName?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    creatorUser?: JsonNullableFilter<"ExtractionResultFlat">
+    modifyUser?: JsonNullableFilter<"ExtractionResultFlat">
     extractionDate?: DateTimeNullableFilter<"ExtractionResultFlat"> | Date | string | null
     createdAt?: DateTimeFilter<"ExtractionResultFlat"> | Date | string
     updatedAt?: DateTimeFilter<"ExtractionResultFlat"> | Date | string
@@ -97089,7 +96273,15 @@ export namespace Prisma {
     finishingActPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bTrimType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    bTrimTotalAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -97254,6 +96446,10 @@ export namespace Prisma {
     washingFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: JsonNullableFilter<"ExtractionResultFlat">
     vaddEmpJson?: JsonNullableFilter<"ExtractionResultFlat">
+    vaddTotalAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     boppNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -97318,9 +96514,14 @@ export namespace Prisma {
   export type ExtractionResultFlatOrderByWithRelationInput = {
     id?: SortOrder
     jobId?: SortOrderInput | SortOrder
-    imageName?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
     oldImageUrl?: SortOrderInput | SortOrder
+    sourceImageUrl?: SortOrderInput | SortOrder
+    aiCmpCostCutting?: SortOrderInput | SortOrder
+    aiCmpCostStitching?: SortOrderInput | SortOrder
+    aiCmpCostIroning?: SortOrderInput | SortOrder
+    aiCmpCostFinishing?: SortOrderInput | SortOrder
+    backImageUrl?: SortOrderInput | SortOrder
     articleNumber?: SortOrderInput | SortOrder
     extractionStatus?: SortOrderInput | SortOrder
     aiModel?: SortOrderInput | SortOrder
@@ -97334,6 +96535,8 @@ export namespace Prisma {
     apiCost?: SortOrderInput | SortOrder
     userId?: SortOrderInput | SortOrder
     userName?: SortOrderInput | SortOrder
+    creatorUser?: SortOrderInput | SortOrder
+    modifyUser?: SortOrderInput | SortOrder
     extractionDate?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -97438,7 +96641,15 @@ export namespace Prisma {
     finishingActPrVal?: SortOrderInput | SortOrder
     finishingVendorPrVal?: SortOrderInput | SortOrder
     finishingFinalPrVal?: SortOrderInput | SortOrder
+    totalBgtPrVal?: SortOrderInput | SortOrder
+    totalActPrVal?: SortOrderInput | SortOrder
+    totalVendorPrVal?: SortOrderInput | SortOrder
+    totalFinalPrVal?: SortOrderInput | SortOrder
     bTrimType?: SortOrderInput | SortOrder
+    bTrimTotalAutoBgt?: SortOrderInput | SortOrder
+    bTrimTotalRoughV2?: SortOrderInput | SortOrder
+    bTrimTotalVdrCost?: SortOrderInput | SortOrder
+    bTrimTotalFinalCost?: SortOrderInput | SortOrder
     mBtnAutoBgt?: SortOrderInput | SortOrder
     mBtnRoughV2?: SortOrderInput | SortOrder
     mBtnVdrCost?: SortOrderInput | SortOrder
@@ -97603,6 +96814,10 @@ export namespace Prisma {
     washingFinalCost?: SortOrderInput | SortOrder
     vaddPrintJson?: SortOrderInput | SortOrder
     vaddEmpJson?: SortOrderInput | SortOrder
+    vaddTotalAutoBgt?: SortOrderInput | SortOrder
+    vaddTotalRoughV2?: SortOrderInput | SortOrder
+    vaddTotalVendorCost?: SortOrderInput | SortOrder
+    vaddTotalFinalCost?: SortOrderInput | SortOrder
     pkgCostType?: SortOrderInput | SortOrder
     boppNetPrice?: SortOrderInput | SortOrder
     ctnNetPrice?: SortOrderInput | SortOrder
@@ -97672,9 +96887,14 @@ export namespace Prisma {
     AND?: ExtractionResultFlatWhereInput | ExtractionResultFlatWhereInput[]
     OR?: ExtractionResultFlatWhereInput[]
     NOT?: ExtractionResultFlatWhereInput | ExtractionResultFlatWhereInput[]
-    imageName?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     imageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     oldImageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    sourceImageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    aiCmpCostCutting?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     articleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     extractionStatus?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     aiModel?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -97688,6 +96908,8 @@ export namespace Prisma {
     apiCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     userId?: IntNullableFilter<"ExtractionResultFlat"> | number | null
     userName?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    creatorUser?: JsonNullableFilter<"ExtractionResultFlat">
+    modifyUser?: JsonNullableFilter<"ExtractionResultFlat">
     extractionDate?: DateTimeNullableFilter<"ExtractionResultFlat"> | Date | string | null
     createdAt?: DateTimeFilter<"ExtractionResultFlat"> | Date | string
     updatedAt?: DateTimeFilter<"ExtractionResultFlat"> | Date | string
@@ -97792,7 +97014,15 @@ export namespace Prisma {
     finishingActPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bTrimType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    bTrimTotalAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -97957,6 +97187,10 @@ export namespace Prisma {
     washingFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: JsonNullableFilter<"ExtractionResultFlat">
     vaddEmpJson?: JsonNullableFilter<"ExtractionResultFlat">
+    vaddTotalAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     boppNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -98020,9 +97254,14 @@ export namespace Prisma {
   export type ExtractionResultFlatOrderByWithAggregationInput = {
     id?: SortOrder
     jobId?: SortOrderInput | SortOrder
-    imageName?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
     oldImageUrl?: SortOrderInput | SortOrder
+    sourceImageUrl?: SortOrderInput | SortOrder
+    aiCmpCostCutting?: SortOrderInput | SortOrder
+    aiCmpCostStitching?: SortOrderInput | SortOrder
+    aiCmpCostIroning?: SortOrderInput | SortOrder
+    aiCmpCostFinishing?: SortOrderInput | SortOrder
+    backImageUrl?: SortOrderInput | SortOrder
     articleNumber?: SortOrderInput | SortOrder
     extractionStatus?: SortOrderInput | SortOrder
     aiModel?: SortOrderInput | SortOrder
@@ -98036,6 +97275,8 @@ export namespace Prisma {
     apiCost?: SortOrderInput | SortOrder
     userId?: SortOrderInput | SortOrder
     userName?: SortOrderInput | SortOrder
+    creatorUser?: SortOrderInput | SortOrder
+    modifyUser?: SortOrderInput | SortOrder
     extractionDate?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -98140,7 +97381,15 @@ export namespace Prisma {
     finishingActPrVal?: SortOrderInput | SortOrder
     finishingVendorPrVal?: SortOrderInput | SortOrder
     finishingFinalPrVal?: SortOrderInput | SortOrder
+    totalBgtPrVal?: SortOrderInput | SortOrder
+    totalActPrVal?: SortOrderInput | SortOrder
+    totalVendorPrVal?: SortOrderInput | SortOrder
+    totalFinalPrVal?: SortOrderInput | SortOrder
     bTrimType?: SortOrderInput | SortOrder
+    bTrimTotalAutoBgt?: SortOrderInput | SortOrder
+    bTrimTotalRoughV2?: SortOrderInput | SortOrder
+    bTrimTotalVdrCost?: SortOrderInput | SortOrder
+    bTrimTotalFinalCost?: SortOrderInput | SortOrder
     mBtnAutoBgt?: SortOrderInput | SortOrder
     mBtnRoughV2?: SortOrderInput | SortOrder
     mBtnVdrCost?: SortOrderInput | SortOrder
@@ -98305,6 +97554,10 @@ export namespace Prisma {
     washingFinalCost?: SortOrderInput | SortOrder
     vaddPrintJson?: SortOrderInput | SortOrder
     vaddEmpJson?: SortOrderInput | SortOrder
+    vaddTotalAutoBgt?: SortOrderInput | SortOrder
+    vaddTotalRoughV2?: SortOrderInput | SortOrder
+    vaddTotalVendorCost?: SortOrderInput | SortOrder
+    vaddTotalFinalCost?: SortOrderInput | SortOrder
     pkgCostType?: SortOrderInput | SortOrder
     boppNetPrice?: SortOrderInput | SortOrder
     ctnNetPrice?: SortOrderInput | SortOrder
@@ -98372,9 +97625,14 @@ export namespace Prisma {
     NOT?: ExtractionResultFlatScalarWhereWithAggregatesInput | ExtractionResultFlatScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"ExtractionResultFlat"> | string
     jobId?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
-    imageName?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     imageUrl?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     oldImageUrl?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    sourceImageUrl?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    aiCmpCostCutting?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     articleNumber?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     extractionStatus?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     aiModel?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
@@ -98388,6 +97646,8 @@ export namespace Prisma {
     apiCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     userId?: IntNullableWithAggregatesFilter<"ExtractionResultFlat"> | number | null
     userName?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    creatorUser?: JsonNullableWithAggregatesFilter<"ExtractionResultFlat">
+    modifyUser?: JsonNullableWithAggregatesFilter<"ExtractionResultFlat">
     extractionDate?: DateTimeNullableWithAggregatesFilter<"ExtractionResultFlat"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"ExtractionResultFlat"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"ExtractionResultFlat"> | Date | string
@@ -98492,7 +97752,15 @@ export namespace Prisma {
     finishingActPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bTrimType?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    bTrimTotalAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -98657,6 +97925,10 @@ export namespace Prisma {
     washingFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: JsonNullableWithAggregatesFilter<"ExtractionResultFlat">
     vaddEmpJson?: JsonNullableWithAggregatesFilter<"ExtractionResultFlat">
+    vaddTotalAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     boppNetPrice?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -99042,6 +98314,7 @@ export namespace Prisma {
     division?: StringNullableFilter<"User"> | string | null
     subDivision?: StringNullableFilter<"User"> | string | null
     businessDivision?: StringNullableFilter<"User"> | string | null
+    articleTypes?: StringNullableListFilter<"User">
     isActive?: BoolFilter<"User"> | boolean
     lastLogin?: DateTimeNullableFilter<"User"> | Date | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
@@ -99061,6 +98334,7 @@ export namespace Prisma {
     division?: SortOrderInput | SortOrder
     subDivision?: SortOrderInput | SortOrder
     businessDivision?: SortOrderInput | SortOrder
+    articleTypes?: SortOrder
     isActive?: SortOrder
     lastLogin?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -99084,6 +98358,7 @@ export namespace Prisma {
     division?: StringNullableFilter<"User"> | string | null
     subDivision?: StringNullableFilter<"User"> | string | null
     businessDivision?: StringNullableFilter<"User"> | string | null
+    articleTypes?: StringNullableListFilter<"User">
     isActive?: BoolFilter<"User"> | boolean
     lastLogin?: DateTimeNullableFilter<"User"> | Date | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
@@ -99103,6 +98378,7 @@ export namespace Prisma {
     division?: SortOrderInput | SortOrder
     subDivision?: SortOrderInput | SortOrder
     businessDivision?: SortOrderInput | SortOrder
+    articleTypes?: SortOrder
     isActive?: SortOrder
     lastLogin?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -99126,115 +98402,11 @@ export namespace Prisma {
     division?: StringNullableWithAggregatesFilter<"User"> | string | null
     subDivision?: StringNullableWithAggregatesFilter<"User"> | string | null
     businessDivision?: StringNullableWithAggregatesFilter<"User"> | string | null
+    articleTypes?: StringNullableListFilter<"User">
     isActive?: BoolWithAggregatesFilter<"User"> | boolean
     lastLogin?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
-  }
-
-  export type AuditLogWhereInput = {
-    AND?: AuditLogWhereInput | AuditLogWhereInput[]
-    OR?: AuditLogWhereInput[]
-    NOT?: AuditLogWhereInput | AuditLogWhereInput[]
-    id?: IntFilter<"AuditLog"> | number
-    userId?: IntNullableFilter<"AuditLog"> | number | null
-    action?: StringFilter<"AuditLog"> | string
-    resource?: StringFilter<"AuditLog"> | string
-    resourceId?: StringNullableFilter<"AuditLog"> | string | null
-    method?: StringFilter<"AuditLog"> | string
-    path?: StringFilter<"AuditLog"> | string
-    statusCode?: IntFilter<"AuditLog"> | number
-    ip?: StringFilter<"AuditLog"> | string
-    userAgent?: StringNullableFilter<"AuditLog"> | string | null
-    requestBody?: JsonNullableFilter<"AuditLog">
-    responseBody?: JsonNullableFilter<"AuditLog">
-    duration?: IntFilter<"AuditLog"> | number
-    errorMessage?: StringNullableFilter<"AuditLog"> | string | null
-    timestamp?: DateTimeFilter<"AuditLog"> | Date | string
-  }
-
-  export type AuditLogOrderByWithRelationInput = {
-    id?: SortOrder
-    userId?: SortOrderInput | SortOrder
-    action?: SortOrder
-    resource?: SortOrder
-    resourceId?: SortOrderInput | SortOrder
-    method?: SortOrder
-    path?: SortOrder
-    statusCode?: SortOrder
-    ip?: SortOrder
-    userAgent?: SortOrderInput | SortOrder
-    requestBody?: SortOrderInput | SortOrder
-    responseBody?: SortOrderInput | SortOrder
-    duration?: SortOrder
-    errorMessage?: SortOrderInput | SortOrder
-    timestamp?: SortOrder
-    _relevance?: AuditLogOrderByRelevanceInput
-  }
-
-  export type AuditLogWhereUniqueInput = Prisma.AtLeast<{
-    id?: number
-    AND?: AuditLogWhereInput | AuditLogWhereInput[]
-    OR?: AuditLogWhereInput[]
-    NOT?: AuditLogWhereInput | AuditLogWhereInput[]
-    userId?: IntNullableFilter<"AuditLog"> | number | null
-    action?: StringFilter<"AuditLog"> | string
-    resource?: StringFilter<"AuditLog"> | string
-    resourceId?: StringNullableFilter<"AuditLog"> | string | null
-    method?: StringFilter<"AuditLog"> | string
-    path?: StringFilter<"AuditLog"> | string
-    statusCode?: IntFilter<"AuditLog"> | number
-    ip?: StringFilter<"AuditLog"> | string
-    userAgent?: StringNullableFilter<"AuditLog"> | string | null
-    requestBody?: JsonNullableFilter<"AuditLog">
-    responseBody?: JsonNullableFilter<"AuditLog">
-    duration?: IntFilter<"AuditLog"> | number
-    errorMessage?: StringNullableFilter<"AuditLog"> | string | null
-    timestamp?: DateTimeFilter<"AuditLog"> | Date | string
-  }, "id">
-
-  export type AuditLogOrderByWithAggregationInput = {
-    id?: SortOrder
-    userId?: SortOrderInput | SortOrder
-    action?: SortOrder
-    resource?: SortOrder
-    resourceId?: SortOrderInput | SortOrder
-    method?: SortOrder
-    path?: SortOrder
-    statusCode?: SortOrder
-    ip?: SortOrder
-    userAgent?: SortOrderInput | SortOrder
-    requestBody?: SortOrderInput | SortOrder
-    responseBody?: SortOrderInput | SortOrder
-    duration?: SortOrder
-    errorMessage?: SortOrderInput | SortOrder
-    timestamp?: SortOrder
-    _count?: AuditLogCountOrderByAggregateInput
-    _avg?: AuditLogAvgOrderByAggregateInput
-    _max?: AuditLogMaxOrderByAggregateInput
-    _min?: AuditLogMinOrderByAggregateInput
-    _sum?: AuditLogSumOrderByAggregateInput
-  }
-
-  export type AuditLogScalarWhereWithAggregatesInput = {
-    AND?: AuditLogScalarWhereWithAggregatesInput | AuditLogScalarWhereWithAggregatesInput[]
-    OR?: AuditLogScalarWhereWithAggregatesInput[]
-    NOT?: AuditLogScalarWhereWithAggregatesInput | AuditLogScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"AuditLog"> | number
-    userId?: IntNullableWithAggregatesFilter<"AuditLog"> | number | null
-    action?: StringWithAggregatesFilter<"AuditLog"> | string
-    resource?: StringWithAggregatesFilter<"AuditLog"> | string
-    resourceId?: StringNullableWithAggregatesFilter<"AuditLog"> | string | null
-    method?: StringWithAggregatesFilter<"AuditLog"> | string
-    path?: StringWithAggregatesFilter<"AuditLog"> | string
-    statusCode?: IntWithAggregatesFilter<"AuditLog"> | number
-    ip?: StringWithAggregatesFilter<"AuditLog"> | string
-    userAgent?: StringNullableWithAggregatesFilter<"AuditLog"> | string | null
-    requestBody?: JsonNullableWithAggregatesFilter<"AuditLog">
-    responseBody?: JsonNullableWithAggregatesFilter<"AuditLog">
-    duration?: IntWithAggregatesFilter<"AuditLog"> | number
-    errorMessage?: StringNullableWithAggregatesFilter<"AuditLog"> | string | null
-    timestamp?: DateTimeWithAggregatesFilter<"AuditLog"> | Date | string
   }
 
   export type ApiKeyWhereInput = {
@@ -100704,6 +99876,7 @@ export namespace Prisma {
     noOfColors?: IntNullableFilter<"RawArticle"> | number | null
     price?: DecimalNullableFilter<"RawArticle"> | Decimal | DecimalJsLike | number | string | null
     imageUrl?: StringNullableFilter<"RawArticle"> | string | null
+    backImageUrl?: StringNullableFilter<"RawArticle"> | string | null
     presentationsType?: StringNullableFilter<"RawArticle"> | string | null
     setGroupId?: StringNullableFilter<"RawArticle"> | string | null
     setRole?: StringNullableFilter<"RawArticle"> | string | null
@@ -100736,6 +99909,7 @@ export namespace Prisma {
     noOfColors?: SortOrderInput | SortOrder
     price?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
+    backImageUrl?: SortOrderInput | SortOrder
     presentationsType?: SortOrderInput | SortOrder
     setGroupId?: SortOrderInput | SortOrder
     setRole?: SortOrderInput | SortOrder
@@ -100773,6 +99947,7 @@ export namespace Prisma {
     noOfColors?: IntNullableFilter<"RawArticle"> | number | null
     price?: DecimalNullableFilter<"RawArticle"> | Decimal | DecimalJsLike | number | string | null
     imageUrl?: StringNullableFilter<"RawArticle"> | string | null
+    backImageUrl?: StringNullableFilter<"RawArticle"> | string | null
     presentationsType?: StringNullableFilter<"RawArticle"> | string | null
     setGroupId?: StringNullableFilter<"RawArticle"> | string | null
     setRole?: StringNullableFilter<"RawArticle"> | string | null
@@ -100804,6 +99979,7 @@ export namespace Prisma {
     noOfColors?: SortOrderInput | SortOrder
     price?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
+    backImageUrl?: SortOrderInput | SortOrder
     presentationsType?: SortOrderInput | SortOrder
     setGroupId?: SortOrderInput | SortOrder
     setRole?: SortOrderInput | SortOrder
@@ -100844,6 +100020,7 @@ export namespace Prisma {
     noOfColors?: IntNullableWithAggregatesFilter<"RawArticle"> | number | null
     price?: DecimalNullableWithAggregatesFilter<"RawArticle"> | Decimal | DecimalJsLike | number | string | null
     imageUrl?: StringNullableWithAggregatesFilter<"RawArticle"> | string | null
+    backImageUrl?: StringNullableWithAggregatesFilter<"RawArticle"> | string | null
     presentationsType?: StringNullableWithAggregatesFilter<"RawArticle"> | string | null
     setGroupId?: StringNullableWithAggregatesFilter<"RawArticle"> | string | null
     setRole?: StringNullableWithAggregatesFilter<"RawArticle"> | string | null
@@ -100882,6 +100059,7 @@ export namespace Prisma {
     noOfColors?: IntNullableFilter<"FabricRawData"> | number | null
     price?: DecimalNullableFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
     imageUrl?: StringNullableFilter<"FabricRawData"> | string | null
+    backImageUrl?: StringNullableFilter<"FabricRawData"> | string | null
     source?: StringNullableFilter<"FabricRawData"> | string | null
     season?: StringNullableFilter<"FabricRawData"> | string | null
     garmentWeight?: DecimalNullableFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
@@ -100917,6 +100095,7 @@ export namespace Prisma {
     noOfColors?: SortOrderInput | SortOrder
     price?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
+    backImageUrl?: SortOrderInput | SortOrder
     source?: SortOrderInput | SortOrder
     season?: SortOrderInput | SortOrder
     garmentWeight?: SortOrderInput | SortOrder
@@ -100956,6 +100135,7 @@ export namespace Prisma {
     noOfColors?: IntNullableFilter<"FabricRawData"> | number | null
     price?: DecimalNullableFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
     imageUrl?: StringNullableFilter<"FabricRawData"> | string | null
+    backImageUrl?: StringNullableFilter<"FabricRawData"> | string | null
     source?: StringNullableFilter<"FabricRawData"> | string | null
     season?: StringNullableFilter<"FabricRawData"> | string | null
     garmentWeight?: DecimalNullableFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
@@ -100991,6 +100171,7 @@ export namespace Prisma {
     noOfColors?: SortOrderInput | SortOrder
     price?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
+    backImageUrl?: SortOrderInput | SortOrder
     source?: SortOrderInput | SortOrder
     season?: SortOrderInput | SortOrder
     garmentWeight?: SortOrderInput | SortOrder
@@ -101034,6 +100215,7 @@ export namespace Prisma {
     noOfColors?: IntNullableWithAggregatesFilter<"FabricRawData"> | number | null
     price?: DecimalNullableWithAggregatesFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
     imageUrl?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    backImageUrl?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
     source?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
     season?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
     garmentWeight?: DecimalNullableWithAggregatesFilter<"FabricRawData"> | Decimal | DecimalJsLike | number | string | null
@@ -101072,6 +100254,7 @@ export namespace Prisma {
     noOfColors?: IntNullableFilter<"GmRawData"> | number | null
     price?: DecimalNullableFilter<"GmRawData"> | Decimal | DecimalJsLike | number | string | null
     imageUrl?: StringNullableFilter<"GmRawData"> | string | null
+    backImageUrl?: StringNullableFilter<"GmRawData"> | string | null
     source?: StringNullableFilter<"GmRawData"> | string | null
     season?: StringNullableFilter<"GmRawData"> | string | null
     garmentWeight?: DecimalNullableFilter<"GmRawData"> | Decimal | DecimalJsLike | number | string | null
@@ -101105,6 +100288,7 @@ export namespace Prisma {
     noOfColors?: SortOrderInput | SortOrder
     price?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
+    backImageUrl?: SortOrderInput | SortOrder
     source?: SortOrderInput | SortOrder
     season?: SortOrderInput | SortOrder
     garmentWeight?: SortOrderInput | SortOrder
@@ -101142,6 +100326,7 @@ export namespace Prisma {
     noOfColors?: IntNullableFilter<"GmRawData"> | number | null
     price?: DecimalNullableFilter<"GmRawData"> | Decimal | DecimalJsLike | number | string | null
     imageUrl?: StringNullableFilter<"GmRawData"> | string | null
+    backImageUrl?: StringNullableFilter<"GmRawData"> | string | null
     source?: StringNullableFilter<"GmRawData"> | string | null
     season?: StringNullableFilter<"GmRawData"> | string | null
     garmentWeight?: DecimalNullableFilter<"GmRawData"> | Decimal | DecimalJsLike | number | string | null
@@ -101175,6 +100360,7 @@ export namespace Prisma {
     noOfColors?: SortOrderInput | SortOrder
     price?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
+    backImageUrl?: SortOrderInput | SortOrder
     source?: SortOrderInput | SortOrder
     season?: SortOrderInput | SortOrder
     garmentWeight?: SortOrderInput | SortOrder
@@ -101216,6 +100402,7 @@ export namespace Prisma {
     noOfColors?: IntNullableWithAggregatesFilter<"GmRawData"> | number | null
     price?: DecimalNullableWithAggregatesFilter<"GmRawData"> | Decimal | DecimalJsLike | number | string | null
     imageUrl?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
+    backImageUrl?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
     source?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
     season?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
     garmentWeight?: DecimalNullableWithAggregatesFilter<"GmRawData"> | Decimal | DecimalJsLike | number | string | null
@@ -102250,6 +101437,7 @@ export namespace Prisma {
     sapSyncStatus?: StringFilter<"FabricArticleData"> | string
     sapSyncMessage?: StringNullableFilter<"FabricArticleData"> | string | null
     imageUrl?: StringNullableFilter<"FabricArticleData"> | string | null
+    backImageUrl?: StringNullableFilter<"FabricArticleData"> | string | null
     fabricArticleType?: StringNullableFilter<"FabricArticleData"> | string | null
     source?: StringNullableFilter<"FabricArticleData"> | string | null
     userName?: StringNullableFilter<"FabricArticleData"> | string | null
@@ -102296,6 +101484,7 @@ export namespace Prisma {
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
+    backImageUrl?: SortOrderInput | SortOrder
     fabricArticleType?: SortOrderInput | SortOrder
     source?: SortOrderInput | SortOrder
     userName?: SortOrderInput | SortOrder
@@ -102346,6 +101535,7 @@ export namespace Prisma {
     sapSyncStatus?: StringFilter<"FabricArticleData"> | string
     sapSyncMessage?: StringNullableFilter<"FabricArticleData"> | string | null
     imageUrl?: StringNullableFilter<"FabricArticleData"> | string | null
+    backImageUrl?: StringNullableFilter<"FabricArticleData"> | string | null
     fabricArticleType?: StringNullableFilter<"FabricArticleData"> | string | null
     source?: StringNullableFilter<"FabricArticleData"> | string | null
     userName?: StringNullableFilter<"FabricArticleData"> | string | null
@@ -102392,6 +101582,7 @@ export namespace Prisma {
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
+    backImageUrl?: SortOrderInput | SortOrder
     fabricArticleType?: SortOrderInput | SortOrder
     source?: SortOrderInput | SortOrder
     userName?: SortOrderInput | SortOrder
@@ -102446,6 +101637,7 @@ export namespace Prisma {
     sapSyncStatus?: StringWithAggregatesFilter<"FabricArticleData"> | string
     sapSyncMessage?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     imageUrl?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
+    backImageUrl?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     fabricArticleType?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     source?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     userName?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
@@ -102699,6 +101891,9 @@ export namespace Prisma {
     pptNumber?: StringNullableFilter<"GmArticleData"> | string | null
     rate?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
     mrp?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
+    roughV2?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
+    vdrCost?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
+    finalCost?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
     segment?: StringNullableFilter<"GmArticleData"> | string | null
     articleFashionType?: StringNullableFilter<"GmArticleData"> | string | null
     approvalStatus?: StringFilter<"GmArticleData"> | string
@@ -102707,6 +101902,7 @@ export namespace Prisma {
     sapSyncStatus?: StringFilter<"GmArticleData"> | string
     sapSyncMessage?: StringNullableFilter<"GmArticleData"> | string | null
     imageUrl?: StringNullableFilter<"GmArticleData"> | string | null
+    backImageUrl?: StringNullableFilter<"GmArticleData"> | string | null
     gmArticleType?: StringNullableFilter<"GmArticleData"> | string | null
     source?: StringNullableFilter<"GmArticleData"> | string | null
     userName?: StringNullableFilter<"GmArticleData"> | string | null
@@ -102807,6 +102003,9 @@ export namespace Prisma {
     pptNumber?: SortOrderInput | SortOrder
     rate?: SortOrderInput | SortOrder
     mrp?: SortOrderInput | SortOrder
+    roughV2?: SortOrderInput | SortOrder
+    vdrCost?: SortOrderInput | SortOrder
+    finalCost?: SortOrderInput | SortOrder
     segment?: SortOrderInput | SortOrder
     articleFashionType?: SortOrderInput | SortOrder
     approvalStatus?: SortOrder
@@ -102815,6 +102014,7 @@ export namespace Prisma {
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
+    backImageUrl?: SortOrderInput | SortOrder
     gmArticleType?: SortOrderInput | SortOrder
     source?: SortOrderInput | SortOrder
     userName?: SortOrderInput | SortOrder
@@ -102919,6 +102119,9 @@ export namespace Prisma {
     pptNumber?: StringNullableFilter<"GmArticleData"> | string | null
     rate?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
     mrp?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
+    roughV2?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
+    vdrCost?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
+    finalCost?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
     segment?: StringNullableFilter<"GmArticleData"> | string | null
     articleFashionType?: StringNullableFilter<"GmArticleData"> | string | null
     approvalStatus?: StringFilter<"GmArticleData"> | string
@@ -102927,6 +102130,7 @@ export namespace Prisma {
     sapSyncStatus?: StringFilter<"GmArticleData"> | string
     sapSyncMessage?: StringNullableFilter<"GmArticleData"> | string | null
     imageUrl?: StringNullableFilter<"GmArticleData"> | string | null
+    backImageUrl?: StringNullableFilter<"GmArticleData"> | string | null
     gmArticleType?: StringNullableFilter<"GmArticleData"> | string | null
     source?: StringNullableFilter<"GmArticleData"> | string | null
     userName?: StringNullableFilter<"GmArticleData"> | string | null
@@ -103027,6 +102231,9 @@ export namespace Prisma {
     pptNumber?: SortOrderInput | SortOrder
     rate?: SortOrderInput | SortOrder
     mrp?: SortOrderInput | SortOrder
+    roughV2?: SortOrderInput | SortOrder
+    vdrCost?: SortOrderInput | SortOrder
+    finalCost?: SortOrderInput | SortOrder
     segment?: SortOrderInput | SortOrder
     articleFashionType?: SortOrderInput | SortOrder
     approvalStatus?: SortOrder
@@ -103035,6 +102242,7 @@ export namespace Prisma {
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrderInput | SortOrder
     imageUrl?: SortOrderInput | SortOrder
+    backImageUrl?: SortOrderInput | SortOrder
     gmArticleType?: SortOrderInput | SortOrder
     source?: SortOrderInput | SortOrder
     userName?: SortOrderInput | SortOrder
@@ -103143,6 +102351,9 @@ export namespace Prisma {
     pptNumber?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
     rate?: DecimalNullableWithAggregatesFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
     mrp?: DecimalNullableWithAggregatesFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
+    roughV2?: DecimalNullableWithAggregatesFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
+    vdrCost?: DecimalNullableWithAggregatesFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
+    finalCost?: DecimalNullableWithAggregatesFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
     segment?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
     articleFashionType?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
     approvalStatus?: StringWithAggregatesFilter<"GmArticleData"> | string
@@ -103151,6 +102362,7 @@ export namespace Prisma {
     sapSyncStatus?: StringWithAggregatesFilter<"GmArticleData"> | string
     sapSyncMessage?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
     imageUrl?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    backImageUrl?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
     gmArticleType?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
     source?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
     userName?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
@@ -106809,9 +106021,14 @@ export namespace Prisma {
 
   export type ExtractionResultFlatCreateInput = {
     id?: string
-    imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -106825,6 +106042,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -106929,7 +106148,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -107094,6 +106321,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -107156,9 +106387,14 @@ export namespace Prisma {
   export type ExtractionResultFlatUncheckedCreateInput = {
     id?: string
     jobId?: string | null
-    imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -107172,6 +106408,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -107276,7 +106514,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -107441,6 +106687,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -107501,9 +106751,14 @@ export namespace Prisma {
 
   export type ExtractionResultFlatUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -107517,6 +106772,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -107621,7 +106878,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -107786,6 +107051,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -107848,9 +107117,14 @@ export namespace Prisma {
   export type ExtractionResultFlatUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     jobId?: NullableStringFieldUpdateOperationsInput | string | null
-    imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -107864,6 +107138,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -107968,7 +107244,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -108133,6 +107417,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -108194,9 +107482,14 @@ export namespace Prisma {
   export type ExtractionResultFlatCreateManyInput = {
     id?: string
     jobId?: string | null
-    imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -108210,6 +107503,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -108314,7 +107609,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -108479,6 +107782,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -108537,9 +107844,14 @@ export namespace Prisma {
 
   export type ExtractionResultFlatUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -108553,6 +107865,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -108657,7 +107971,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -108822,6 +108144,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -108879,9 +108205,14 @@ export namespace Prisma {
   export type ExtractionResultFlatUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     jobId?: NullableStringFieldUpdateOperationsInput | string | null
-    imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -108895,6 +108226,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -108999,7 +108332,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -109164,6 +108505,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -109579,6 +108924,7 @@ export namespace Prisma {
     division?: string | null
     subDivision?: string | null
     businessDivision?: string | null
+    articleTypes?: UserCreatearticleTypesInput | string[]
     isActive?: boolean
     lastLogin?: Date | string | null
     createdAt?: Date | string
@@ -109598,6 +108944,7 @@ export namespace Prisma {
     division?: string | null
     subDivision?: string | null
     businessDivision?: string | null
+    articleTypes?: UserCreatearticleTypesInput | string[]
     isActive?: boolean
     lastLogin?: Date | string | null
     createdAt?: Date | string
@@ -109616,6 +108963,7 @@ export namespace Prisma {
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    articleTypes?: UserUpdatearticleTypesInput | string[]
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -109635,6 +108983,7 @@ export namespace Prisma {
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    articleTypes?: UserUpdatearticleTypesInput | string[]
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -109654,6 +109003,7 @@ export namespace Prisma {
     division?: string | null
     subDivision?: string | null
     businessDivision?: string | null
+    articleTypes?: UserCreatearticleTypesInput | string[]
     isActive?: boolean
     lastLogin?: Date | string | null
     createdAt?: Date | string
@@ -109668,6 +109018,7 @@ export namespace Prisma {
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    articleTypes?: UserUpdatearticleTypesInput | string[]
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -109683,133 +109034,11 @@ export namespace Prisma {
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    articleTypes?: UserUpdatearticleTypesInput | string[]
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type AuditLogCreateInput = {
-    userId?: number | null
-    action: string
-    resource: string
-    resourceId?: string | null
-    method: string
-    path: string
-    statusCode: number
-    ip: string
-    userAgent?: string | null
-    requestBody?: NullableJsonNullValueInput | InputJsonValue
-    responseBody?: NullableJsonNullValueInput | InputJsonValue
-    duration: number
-    errorMessage?: string | null
-    timestamp?: Date | string
-  }
-
-  export type AuditLogUncheckedCreateInput = {
-    id?: number
-    userId?: number | null
-    action: string
-    resource: string
-    resourceId?: string | null
-    method: string
-    path: string
-    statusCode: number
-    ip: string
-    userAgent?: string | null
-    requestBody?: NullableJsonNullValueInput | InputJsonValue
-    responseBody?: NullableJsonNullValueInput | InputJsonValue
-    duration: number
-    errorMessage?: string | null
-    timestamp?: Date | string
-  }
-
-  export type AuditLogUpdateInput = {
-    userId?: NullableIntFieldUpdateOperationsInput | number | null
-    action?: StringFieldUpdateOperationsInput | string
-    resource?: StringFieldUpdateOperationsInput | string
-    resourceId?: NullableStringFieldUpdateOperationsInput | string | null
-    method?: StringFieldUpdateOperationsInput | string
-    path?: StringFieldUpdateOperationsInput | string
-    statusCode?: IntFieldUpdateOperationsInput | number
-    ip?: StringFieldUpdateOperationsInput | string
-    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
-    requestBody?: NullableJsonNullValueInput | InputJsonValue
-    responseBody?: NullableJsonNullValueInput | InputJsonValue
-    duration?: IntFieldUpdateOperationsInput | number
-    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
-    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type AuditLogUncheckedUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    userId?: NullableIntFieldUpdateOperationsInput | number | null
-    action?: StringFieldUpdateOperationsInput | string
-    resource?: StringFieldUpdateOperationsInput | string
-    resourceId?: NullableStringFieldUpdateOperationsInput | string | null
-    method?: StringFieldUpdateOperationsInput | string
-    path?: StringFieldUpdateOperationsInput | string
-    statusCode?: IntFieldUpdateOperationsInput | number
-    ip?: StringFieldUpdateOperationsInput | string
-    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
-    requestBody?: NullableJsonNullValueInput | InputJsonValue
-    responseBody?: NullableJsonNullValueInput | InputJsonValue
-    duration?: IntFieldUpdateOperationsInput | number
-    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
-    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type AuditLogCreateManyInput = {
-    id?: number
-    userId?: number | null
-    action: string
-    resource: string
-    resourceId?: string | null
-    method: string
-    path: string
-    statusCode: number
-    ip: string
-    userAgent?: string | null
-    requestBody?: NullableJsonNullValueInput | InputJsonValue
-    responseBody?: NullableJsonNullValueInput | InputJsonValue
-    duration: number
-    errorMessage?: string | null
-    timestamp?: Date | string
-  }
-
-  export type AuditLogUpdateManyMutationInput = {
-    userId?: NullableIntFieldUpdateOperationsInput | number | null
-    action?: StringFieldUpdateOperationsInput | string
-    resource?: StringFieldUpdateOperationsInput | string
-    resourceId?: NullableStringFieldUpdateOperationsInput | string | null
-    method?: StringFieldUpdateOperationsInput | string
-    path?: StringFieldUpdateOperationsInput | string
-    statusCode?: IntFieldUpdateOperationsInput | number
-    ip?: StringFieldUpdateOperationsInput | string
-    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
-    requestBody?: NullableJsonNullValueInput | InputJsonValue
-    responseBody?: NullableJsonNullValueInput | InputJsonValue
-    duration?: IntFieldUpdateOperationsInput | number
-    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
-    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type AuditLogUncheckedUpdateManyInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    userId?: NullableIntFieldUpdateOperationsInput | number | null
-    action?: StringFieldUpdateOperationsInput | string
-    resource?: StringFieldUpdateOperationsInput | string
-    resourceId?: NullableStringFieldUpdateOperationsInput | string | null
-    method?: StringFieldUpdateOperationsInput | string
-    path?: StringFieldUpdateOperationsInput | string
-    statusCode?: IntFieldUpdateOperationsInput | number
-    ip?: StringFieldUpdateOperationsInput | string
-    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
-    requestBody?: NullableJsonNullValueInput | InputJsonValue
-    responseBody?: NullableJsonNullValueInput | InputJsonValue
-    duration?: IntFieldUpdateOperationsInput | number
-    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
-    timestamp?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ApiKeyCreateInput = {
@@ -111559,6 +110788,7 @@ export namespace Prisma {
     noOfColors?: number | null
     price?: Decimal | DecimalJsLike | number | string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     presentationsType?: string | null
     setGroupId?: string | null
     setRole?: string | null
@@ -111591,6 +110821,7 @@ export namespace Prisma {
     noOfColors?: number | null
     price?: Decimal | DecimalJsLike | number | string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     presentationsType?: string | null
     setGroupId?: string | null
     setRole?: string | null
@@ -111623,6 +110854,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
@@ -111655,6 +110887,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
@@ -111687,6 +110920,7 @@ export namespace Prisma {
     noOfColors?: number | null
     price?: Decimal | DecimalJsLike | number | string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     presentationsType?: string | null
     setGroupId?: string | null
     setRole?: string | null
@@ -111719,6 +110953,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
@@ -111751,6 +110986,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
@@ -111786,6 +111022,7 @@ export namespace Prisma {
     noOfColors?: number | null
     price?: Decimal | DecimalJsLike | number | string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     source?: string | null
     season?: string | null
     garmentWeight?: Decimal | DecimalJsLike | number | string | null
@@ -111821,6 +111058,7 @@ export namespace Prisma {
     noOfColors?: number | null
     price?: Decimal | DecimalJsLike | number | string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     source?: string | null
     season?: string | null
     garmentWeight?: Decimal | DecimalJsLike | number | string | null
@@ -111856,6 +111094,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
     garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -111891,6 +111130,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
     garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -111926,6 +111166,7 @@ export namespace Prisma {
     noOfColors?: number | null
     price?: Decimal | DecimalJsLike | number | string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     source?: string | null
     season?: string | null
     garmentWeight?: Decimal | DecimalJsLike | number | string | null
@@ -111961,6 +111202,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
     garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -111996,6 +111238,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
     garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -112031,6 +111274,7 @@ export namespace Prisma {
     noOfColors?: number | null
     price?: Decimal | DecimalJsLike | number | string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     source?: string | null
     season?: string | null
     garmentWeight?: Decimal | DecimalJsLike | number | string | null
@@ -112064,6 +111308,7 @@ export namespace Prisma {
     noOfColors?: number | null
     price?: Decimal | DecimalJsLike | number | string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     source?: string | null
     season?: string | null
     garmentWeight?: Decimal | DecimalJsLike | number | string | null
@@ -112097,6 +111342,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
     garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -112130,6 +111376,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
     garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -112163,6 +111410,7 @@ export namespace Prisma {
     noOfColors?: number | null
     price?: Decimal | DecimalJsLike | number | string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     source?: string | null
     season?: string | null
     garmentWeight?: Decimal | DecimalJsLike | number | string | null
@@ -112196,6 +111444,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
     garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -112229,6 +111478,7 @@ export namespace Prisma {
     noOfColors?: NullableIntFieldUpdateOperationsInput | number | null
     price?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
     garmentWeight?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -113405,6 +112655,7 @@ export namespace Prisma {
     sapSyncStatus?: string
     sapSyncMessage?: string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     fabricArticleType?: string | null
     source?: string | null
     userName?: string | null
@@ -113451,6 +112702,7 @@ export namespace Prisma {
     sapSyncStatus?: string
     sapSyncMessage?: string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     fabricArticleType?: string | null
     source?: string | null
     userName?: string | null
@@ -113497,6 +112749,7 @@ export namespace Prisma {
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleType?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -113543,6 +112796,7 @@ export namespace Prisma {
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleType?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -113589,6 +112843,7 @@ export namespace Prisma {
     sapSyncStatus?: string
     sapSyncMessage?: string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     fabricArticleType?: string | null
     source?: string | null
     userName?: string | null
@@ -113635,6 +112890,7 @@ export namespace Prisma {
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleType?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -113681,6 +112937,7 @@ export namespace Prisma {
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleType?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -113970,6 +113227,9 @@ export namespace Prisma {
     pptNumber?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
+    roughV2?: Decimal | DecimalJsLike | number | string | null
+    vdrCost?: Decimal | DecimalJsLike | number | string | null
+    finalCost?: Decimal | DecimalJsLike | number | string | null
     segment?: string | null
     articleFashionType?: string | null
     approvalStatus?: string
@@ -113978,6 +113238,7 @@ export namespace Prisma {
     sapSyncStatus?: string
     sapSyncMessage?: string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     gmArticleType?: string | null
     source?: string | null
     userName?: string | null
@@ -114078,6 +113339,9 @@ export namespace Prisma {
     pptNumber?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
+    roughV2?: Decimal | DecimalJsLike | number | string | null
+    vdrCost?: Decimal | DecimalJsLike | number | string | null
+    finalCost?: Decimal | DecimalJsLike | number | string | null
     segment?: string | null
     articleFashionType?: string | null
     approvalStatus?: string
@@ -114086,6 +113350,7 @@ export namespace Prisma {
     sapSyncStatus?: string
     sapSyncMessage?: string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     gmArticleType?: string | null
     source?: string | null
     userName?: string | null
@@ -114186,6 +113451,9 @@ export namespace Prisma {
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
@@ -114194,6 +113462,7 @@ export namespace Prisma {
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     gmArticleType?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -114294,6 +113563,9 @@ export namespace Prisma {
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
@@ -114302,6 +113574,7 @@ export namespace Prisma {
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     gmArticleType?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -114402,6 +113675,9 @@ export namespace Prisma {
     pptNumber?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
+    roughV2?: Decimal | DecimalJsLike | number | string | null
+    vdrCost?: Decimal | DecimalJsLike | number | string | null
+    finalCost?: Decimal | DecimalJsLike | number | string | null
     segment?: string | null
     articleFashionType?: string | null
     approvalStatus?: string
@@ -114410,6 +113686,7 @@ export namespace Prisma {
     sapSyncStatus?: string
     sapSyncMessage?: string | null
     imageUrl?: string | null
+    backImageUrl?: string | null
     gmArticleType?: string | null
     source?: string | null
     userName?: string | null
@@ -114510,6 +113787,9 @@ export namespace Prisma {
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
@@ -114518,6 +113798,7 @@ export namespace Prisma {
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     gmArticleType?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -114618,6 +113899,9 @@ export namespace Prisma {
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
@@ -114626,6 +113910,7 @@ export namespace Prisma {
     sapSyncStatus?: StringFieldUpdateOperationsInput | string
     sapSyncMessage?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     gmArticleType?: NullableStringFieldUpdateOperationsInput | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -119077,9 +118362,14 @@ export namespace Prisma {
   export type ExtractionResultFlatCountOrderByAggregateInput = {
     id?: SortOrder
     jobId?: SortOrder
-    imageName?: SortOrder
     imageUrl?: SortOrder
     oldImageUrl?: SortOrder
+    sourceImageUrl?: SortOrder
+    aiCmpCostCutting?: SortOrder
+    aiCmpCostStitching?: SortOrder
+    aiCmpCostIroning?: SortOrder
+    aiCmpCostFinishing?: SortOrder
+    backImageUrl?: SortOrder
     articleNumber?: SortOrder
     extractionStatus?: SortOrder
     aiModel?: SortOrder
@@ -119093,6 +118383,8 @@ export namespace Prisma {
     apiCost?: SortOrder
     userId?: SortOrder
     userName?: SortOrder
+    creatorUser?: SortOrder
+    modifyUser?: SortOrder
     extractionDate?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -119197,7 +118489,15 @@ export namespace Prisma {
     finishingActPrVal?: SortOrder
     finishingVendorPrVal?: SortOrder
     finishingFinalPrVal?: SortOrder
+    totalBgtPrVal?: SortOrder
+    totalActPrVal?: SortOrder
+    totalVendorPrVal?: SortOrder
+    totalFinalPrVal?: SortOrder
     bTrimType?: SortOrder
+    bTrimTotalAutoBgt?: SortOrder
+    bTrimTotalRoughV2?: SortOrder
+    bTrimTotalVdrCost?: SortOrder
+    bTrimTotalFinalCost?: SortOrder
     mBtnAutoBgt?: SortOrder
     mBtnRoughV2?: SortOrder
     mBtnVdrCost?: SortOrder
@@ -119362,6 +118662,10 @@ export namespace Prisma {
     washingFinalCost?: SortOrder
     vaddPrintJson?: SortOrder
     vaddEmpJson?: SortOrder
+    vaddTotalAutoBgt?: SortOrder
+    vaddTotalRoughV2?: SortOrder
+    vaddTotalVendorCost?: SortOrder
+    vaddTotalFinalCost?: SortOrder
     pkgCostType?: SortOrder
     boppNetPrice?: SortOrder
     ctnNetPrice?: SortOrder
@@ -119419,6 +118723,10 @@ export namespace Prisma {
   }
 
   export type ExtractionResultFlatAvgOrderByAggregateInput = {
+    aiCmpCostCutting?: SortOrder
+    aiCmpCostStitching?: SortOrder
+    aiCmpCostIroning?: SortOrder
+    aiCmpCostFinishing?: SortOrder
     avgConfidence?: SortOrder
     processingTimeMs?: SortOrder
     totalAttributes?: SortOrder
@@ -119455,6 +118763,14 @@ export namespace Prisma {
     finishingActPrVal?: SortOrder
     finishingVendorPrVal?: SortOrder
     finishingFinalPrVal?: SortOrder
+    totalBgtPrVal?: SortOrder
+    totalActPrVal?: SortOrder
+    totalVendorPrVal?: SortOrder
+    totalFinalPrVal?: SortOrder
+    bTrimTotalAutoBgt?: SortOrder
+    bTrimTotalRoughV2?: SortOrder
+    bTrimTotalVdrCost?: SortOrder
+    bTrimTotalFinalCost?: SortOrder
     mBtnAutoBgt?: SortOrder
     mBtnRoughV2?: SortOrder
     mBtnVdrCost?: SortOrder
@@ -119617,6 +118933,10 @@ export namespace Prisma {
     washingRoughV2?: SortOrder
     washingVendorCost?: SortOrder
     washingFinalCost?: SortOrder
+    vaddTotalAutoBgt?: SortOrder
+    vaddTotalRoughV2?: SortOrder
+    vaddTotalVendorCost?: SortOrder
+    vaddTotalFinalCost?: SortOrder
     boppNetPrice?: SortOrder
     ctnNetPrice?: SortOrder
     barcodeNetPrice?: SortOrder
@@ -119632,9 +118952,14 @@ export namespace Prisma {
   export type ExtractionResultFlatMaxOrderByAggregateInput = {
     id?: SortOrder
     jobId?: SortOrder
-    imageName?: SortOrder
     imageUrl?: SortOrder
     oldImageUrl?: SortOrder
+    sourceImageUrl?: SortOrder
+    aiCmpCostCutting?: SortOrder
+    aiCmpCostStitching?: SortOrder
+    aiCmpCostIroning?: SortOrder
+    aiCmpCostFinishing?: SortOrder
+    backImageUrl?: SortOrder
     articleNumber?: SortOrder
     extractionStatus?: SortOrder
     aiModel?: SortOrder
@@ -119752,7 +119077,15 @@ export namespace Prisma {
     finishingActPrVal?: SortOrder
     finishingVendorPrVal?: SortOrder
     finishingFinalPrVal?: SortOrder
+    totalBgtPrVal?: SortOrder
+    totalActPrVal?: SortOrder
+    totalVendorPrVal?: SortOrder
+    totalFinalPrVal?: SortOrder
     bTrimType?: SortOrder
+    bTrimTotalAutoBgt?: SortOrder
+    bTrimTotalRoughV2?: SortOrder
+    bTrimTotalVdrCost?: SortOrder
+    bTrimTotalFinalCost?: SortOrder
     mBtnAutoBgt?: SortOrder
     mBtnRoughV2?: SortOrder
     mBtnVdrCost?: SortOrder
@@ -119915,6 +119248,10 @@ export namespace Prisma {
     washingRoughV2?: SortOrder
     washingVendorCost?: SortOrder
     washingFinalCost?: SortOrder
+    vaddTotalAutoBgt?: SortOrder
+    vaddTotalRoughV2?: SortOrder
+    vaddTotalVendorCost?: SortOrder
+    vaddTotalFinalCost?: SortOrder
     pkgCostType?: SortOrder
     boppNetPrice?: SortOrder
     ctnNetPrice?: SortOrder
@@ -119973,9 +119310,14 @@ export namespace Prisma {
   export type ExtractionResultFlatMinOrderByAggregateInput = {
     id?: SortOrder
     jobId?: SortOrder
-    imageName?: SortOrder
     imageUrl?: SortOrder
     oldImageUrl?: SortOrder
+    sourceImageUrl?: SortOrder
+    aiCmpCostCutting?: SortOrder
+    aiCmpCostStitching?: SortOrder
+    aiCmpCostIroning?: SortOrder
+    aiCmpCostFinishing?: SortOrder
+    backImageUrl?: SortOrder
     articleNumber?: SortOrder
     extractionStatus?: SortOrder
     aiModel?: SortOrder
@@ -120093,7 +119435,15 @@ export namespace Prisma {
     finishingActPrVal?: SortOrder
     finishingVendorPrVal?: SortOrder
     finishingFinalPrVal?: SortOrder
+    totalBgtPrVal?: SortOrder
+    totalActPrVal?: SortOrder
+    totalVendorPrVal?: SortOrder
+    totalFinalPrVal?: SortOrder
     bTrimType?: SortOrder
+    bTrimTotalAutoBgt?: SortOrder
+    bTrimTotalRoughV2?: SortOrder
+    bTrimTotalVdrCost?: SortOrder
+    bTrimTotalFinalCost?: SortOrder
     mBtnAutoBgt?: SortOrder
     mBtnRoughV2?: SortOrder
     mBtnVdrCost?: SortOrder
@@ -120256,6 +119606,10 @@ export namespace Prisma {
     washingRoughV2?: SortOrder
     washingVendorCost?: SortOrder
     washingFinalCost?: SortOrder
+    vaddTotalAutoBgt?: SortOrder
+    vaddTotalRoughV2?: SortOrder
+    vaddTotalVendorCost?: SortOrder
+    vaddTotalFinalCost?: SortOrder
     pkgCostType?: SortOrder
     boppNetPrice?: SortOrder
     ctnNetPrice?: SortOrder
@@ -120312,6 +119666,10 @@ export namespace Prisma {
   }
 
   export type ExtractionResultFlatSumOrderByAggregateInput = {
+    aiCmpCostCutting?: SortOrder
+    aiCmpCostStitching?: SortOrder
+    aiCmpCostIroning?: SortOrder
+    aiCmpCostFinishing?: SortOrder
     avgConfidence?: SortOrder
     processingTimeMs?: SortOrder
     totalAttributes?: SortOrder
@@ -120348,6 +119706,14 @@ export namespace Prisma {
     finishingActPrVal?: SortOrder
     finishingVendorPrVal?: SortOrder
     finishingFinalPrVal?: SortOrder
+    totalBgtPrVal?: SortOrder
+    totalActPrVal?: SortOrder
+    totalVendorPrVal?: SortOrder
+    totalFinalPrVal?: SortOrder
+    bTrimTotalAutoBgt?: SortOrder
+    bTrimTotalRoughV2?: SortOrder
+    bTrimTotalVdrCost?: SortOrder
+    bTrimTotalFinalCost?: SortOrder
     mBtnAutoBgt?: SortOrder
     mBtnRoughV2?: SortOrder
     mBtnVdrCost?: SortOrder
@@ -120510,6 +119876,10 @@ export namespace Prisma {
     washingRoughV2?: SortOrder
     washingVendorCost?: SortOrder
     washingFinalCost?: SortOrder
+    vaddTotalAutoBgt?: SortOrder
+    vaddTotalRoughV2?: SortOrder
+    vaddTotalVendorCost?: SortOrder
+    vaddTotalFinalCost?: SortOrder
     boppNetPrice?: SortOrder
     ctnNetPrice?: SortOrder
     barcodeNetPrice?: SortOrder
@@ -120822,6 +120192,7 @@ export namespace Prisma {
     division?: SortOrder
     subDivision?: SortOrder
     businessDivision?: SortOrder
+    articleTypes?: SortOrder
     isActive?: SortOrder
     lastLogin?: SortOrder
     createdAt?: SortOrder
@@ -120874,76 +120245,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumUserRoleFilter<$PrismaModel>
     _max?: NestedEnumUserRoleFilter<$PrismaModel>
-  }
-
-  export type AuditLogOrderByRelevanceInput = {
-    fields: AuditLogOrderByRelevanceFieldEnum | AuditLogOrderByRelevanceFieldEnum[]
-    sort: SortOrder
-    search: string
-  }
-
-  export type AuditLogCountOrderByAggregateInput = {
-    id?: SortOrder
-    userId?: SortOrder
-    action?: SortOrder
-    resource?: SortOrder
-    resourceId?: SortOrder
-    method?: SortOrder
-    path?: SortOrder
-    statusCode?: SortOrder
-    ip?: SortOrder
-    userAgent?: SortOrder
-    requestBody?: SortOrder
-    responseBody?: SortOrder
-    duration?: SortOrder
-    errorMessage?: SortOrder
-    timestamp?: SortOrder
-  }
-
-  export type AuditLogAvgOrderByAggregateInput = {
-    id?: SortOrder
-    userId?: SortOrder
-    statusCode?: SortOrder
-    duration?: SortOrder
-  }
-
-  export type AuditLogMaxOrderByAggregateInput = {
-    id?: SortOrder
-    userId?: SortOrder
-    action?: SortOrder
-    resource?: SortOrder
-    resourceId?: SortOrder
-    method?: SortOrder
-    path?: SortOrder
-    statusCode?: SortOrder
-    ip?: SortOrder
-    userAgent?: SortOrder
-    duration?: SortOrder
-    errorMessage?: SortOrder
-    timestamp?: SortOrder
-  }
-
-  export type AuditLogMinOrderByAggregateInput = {
-    id?: SortOrder
-    userId?: SortOrder
-    action?: SortOrder
-    resource?: SortOrder
-    resourceId?: SortOrder
-    method?: SortOrder
-    path?: SortOrder
-    statusCode?: SortOrder
-    ip?: SortOrder
-    userAgent?: SortOrder
-    duration?: SortOrder
-    errorMessage?: SortOrder
-    timestamp?: SortOrder
-  }
-
-  export type AuditLogSumOrderByAggregateInput = {
-    id?: SortOrder
-    userId?: SortOrder
-    statusCode?: SortOrder
-    duration?: SortOrder
   }
   export type JsonFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -122000,6 +121301,7 @@ export namespace Prisma {
     noOfColors?: SortOrder
     price?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     presentationsType?: SortOrder
     setGroupId?: SortOrder
     setRole?: SortOrder
@@ -122038,6 +121340,7 @@ export namespace Prisma {
     noOfColors?: SortOrder
     price?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     presentationsType?: SortOrder
     setGroupId?: SortOrder
     setRole?: SortOrder
@@ -122069,6 +121372,7 @@ export namespace Prisma {
     noOfColors?: SortOrder
     price?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     presentationsType?: SortOrder
     setGroupId?: SortOrder
     setRole?: SortOrder
@@ -122125,6 +121429,7 @@ export namespace Prisma {
     noOfColors?: SortOrder
     price?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     source?: SortOrder
     season?: SortOrder
     garmentWeight?: SortOrder
@@ -122168,6 +121473,7 @@ export namespace Prisma {
     noOfColors?: SortOrder
     price?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     source?: SortOrder
     season?: SortOrder
     garmentWeight?: SortOrder
@@ -122202,6 +121508,7 @@ export namespace Prisma {
     noOfColors?: SortOrder
     price?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     source?: SortOrder
     season?: SortOrder
     garmentWeight?: SortOrder
@@ -122250,6 +121557,7 @@ export namespace Prisma {
     noOfColors?: SortOrder
     price?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     source?: SortOrder
     season?: SortOrder
     garmentWeight?: SortOrder
@@ -122290,6 +121598,7 @@ export namespace Prisma {
     noOfColors?: SortOrder
     price?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     source?: SortOrder
     season?: SortOrder
     garmentWeight?: SortOrder
@@ -122323,6 +121632,7 @@ export namespace Prisma {
     noOfColors?: SortOrder
     price?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     source?: SortOrder
     season?: SortOrder
     garmentWeight?: SortOrder
@@ -123169,6 +122479,7 @@ export namespace Prisma {
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     fabricArticleType?: SortOrder
     source?: SortOrder
     userName?: SortOrder
@@ -123223,6 +122534,7 @@ export namespace Prisma {
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     fabricArticleType?: SortOrder
     source?: SortOrder
     userName?: SortOrder
@@ -123269,6 +122581,7 @@ export namespace Prisma {
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     fabricArticleType?: SortOrder
     source?: SortOrder
     userName?: SortOrder
@@ -123538,6 +122851,9 @@ export namespace Prisma {
     pptNumber?: SortOrder
     rate?: SortOrder
     mrp?: SortOrder
+    roughV2?: SortOrder
+    vdrCost?: SortOrder
+    finalCost?: SortOrder
     segment?: SortOrder
     articleFashionType?: SortOrder
     approvalStatus?: SortOrder
@@ -123546,6 +122862,7 @@ export namespace Prisma {
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     gmArticleType?: SortOrder
     source?: SortOrder
     userName?: SortOrder
@@ -123556,6 +122873,9 @@ export namespace Prisma {
   export type GmArticleDataAvgOrderByAggregateInput = {
     rate?: SortOrder
     mrp?: SortOrder
+    roughV2?: SortOrder
+    vdrCost?: SortOrder
+    finalCost?: SortOrder
     approvedBy?: SortOrder
   }
 
@@ -123652,6 +122972,9 @@ export namespace Prisma {
     pptNumber?: SortOrder
     rate?: SortOrder
     mrp?: SortOrder
+    roughV2?: SortOrder
+    vdrCost?: SortOrder
+    finalCost?: SortOrder
     segment?: SortOrder
     articleFashionType?: SortOrder
     approvalStatus?: SortOrder
@@ -123660,6 +122983,7 @@ export namespace Prisma {
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     gmArticleType?: SortOrder
     source?: SortOrder
     userName?: SortOrder
@@ -123760,6 +123084,9 @@ export namespace Prisma {
     pptNumber?: SortOrder
     rate?: SortOrder
     mrp?: SortOrder
+    roughV2?: SortOrder
+    vdrCost?: SortOrder
+    finalCost?: SortOrder
     segment?: SortOrder
     articleFashionType?: SortOrder
     approvalStatus?: SortOrder
@@ -123768,6 +123095,7 @@ export namespace Prisma {
     sapSyncStatus?: SortOrder
     sapSyncMessage?: SortOrder
     imageUrl?: SortOrder
+    backImageUrl?: SortOrder
     gmArticleType?: SortOrder
     source?: SortOrder
     userName?: SortOrder
@@ -123778,6 +123106,9 @@ export namespace Prisma {
   export type GmArticleDataSumOrderByAggregateInput = {
     rate?: SortOrder
     mrp?: SortOrder
+    roughV2?: SortOrder
+    vdrCost?: SortOrder
+    finalCost?: SortOrder
     approvedBy?: SortOrder
   }
 
@@ -126535,6 +125866,10 @@ export namespace Prisma {
     deleteMany?: SrmSyncRunItemScalarWhereInput | SrmSyncRunItemScalarWhereInput[]
   }
 
+  export type UserCreatearticleTypesInput = {
+    set: string[]
+  }
+
   export type ApiKeyCreateNestedManyWithoutUserInput = {
     create?: XOR<ApiKeyCreateWithoutUserInput, ApiKeyUncheckedCreateWithoutUserInput> | ApiKeyCreateWithoutUserInput[] | ApiKeyUncheckedCreateWithoutUserInput[]
     connectOrCreate?: ApiKeyCreateOrConnectWithoutUserInput | ApiKeyCreateOrConnectWithoutUserInput[]
@@ -126591,6 +125926,11 @@ export namespace Prisma {
 
   export type EnumUserRoleFieldUpdateOperationsInput = {
     set?: $Enums.UserRole
+  }
+
+  export type UserUpdatearticleTypesInput = {
+    set?: string[]
+    push?: string | string[]
   }
 
   export type ApiKeyUpdateManyWithoutUserNestedInput = {
@@ -128790,6 +128130,7 @@ export namespace Prisma {
     division?: string | null
     subDivision?: string | null
     businessDivision?: string | null
+    articleTypes?: UserCreatearticleTypesInput | string[]
     isActive?: boolean
     lastLogin?: Date | string | null
     createdAt?: Date | string
@@ -128808,6 +128149,7 @@ export namespace Prisma {
     division?: string | null
     subDivision?: string | null
     businessDivision?: string | null
+    articleTypes?: UserCreatearticleTypesInput | string[]
     isActive?: boolean
     lastLogin?: Date | string | null
     createdAt?: Date | string
@@ -128824,9 +128166,14 @@ export namespace Prisma {
 
   export type ExtractionResultFlatCreateWithoutJobInput = {
     id?: string
-    imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -128840,6 +128187,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -128944,7 +128293,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -129109,6 +128466,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -129169,9 +128530,14 @@ export namespace Prisma {
 
   export type ExtractionResultFlatUncheckedCreateWithoutJobInput = {
     id?: string
-    imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -129185,6 +128551,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -129289,7 +128657,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -129454,6 +128830,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -129582,6 +128962,7 @@ export namespace Prisma {
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    articleTypes?: UserUpdatearticleTypesInput | string[]
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -129600,6 +128981,7 @@ export namespace Prisma {
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    articleTypes?: UserUpdatearticleTypesInput | string[]
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -129622,9 +129004,14 @@ export namespace Prisma {
 
   export type ExtractionResultFlatUpdateWithoutJobInput = {
     id?: StringFieldUpdateOperationsInput | string
-    imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -129638,6 +129025,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -129742,7 +129131,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -129907,6 +129304,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -129967,9 +129368,14 @@ export namespace Prisma {
 
   export type ExtractionResultFlatUncheckedUpdateWithoutJobInput = {
     id?: StringFieldUpdateOperationsInput | string
-    imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -129983,6 +129389,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -130087,7 +129495,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -130252,6 +129668,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -130318,6 +129738,7 @@ export namespace Prisma {
     division?: string | null
     subDivision?: string | null
     businessDivision?: string | null
+    articleTypes?: UserCreatearticleTypesInput | string[]
     isActive?: boolean
     lastLogin?: Date | string | null
     createdAt?: Date | string
@@ -130336,6 +129757,7 @@ export namespace Prisma {
     division?: string | null
     subDivision?: string | null
     businessDivision?: string | null
+    articleTypes?: UserCreatearticleTypesInput | string[]
     isActive?: boolean
     lastLogin?: Date | string | null
     createdAt?: Date | string
@@ -130352,9 +129774,14 @@ export namespace Prisma {
 
   export type ExtractionResultFlatCreateWithoutComboChildrenInput = {
     id?: string
-    imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -130368,6 +129795,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -130472,7 +129901,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -130637,6 +130074,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -130698,9 +130139,14 @@ export namespace Prisma {
   export type ExtractionResultFlatUncheckedCreateWithoutComboChildrenInput = {
     id?: string
     jobId?: string | null
-    imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -130714,6 +130160,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -130818,7 +130266,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -130983,6 +130439,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -131047,9 +130507,14 @@ export namespace Prisma {
 
   export type ExtractionResultFlatCreateWithoutComboParentInput = {
     id?: string
-    imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -131063,6 +130528,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -131167,7 +130634,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -131332,6 +130807,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -131393,9 +130872,14 @@ export namespace Prisma {
   export type ExtractionResultFlatUncheckedCreateWithoutComboParentInput = {
     id?: string
     jobId?: string | null
-    imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -131409,6 +130893,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -131513,7 +130999,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -131678,6 +131172,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -131853,6 +131351,7 @@ export namespace Prisma {
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    articleTypes?: UserUpdatearticleTypesInput | string[]
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -131871,6 +131370,7 @@ export namespace Prisma {
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    articleTypes?: UserUpdatearticleTypesInput | string[]
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -131893,9 +131393,14 @@ export namespace Prisma {
 
   export type ExtractionResultFlatUpdateWithoutComboChildrenInput = {
     id?: StringFieldUpdateOperationsInput | string
-    imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -131909,6 +131414,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -132013,7 +131520,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -132178,6 +131693,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -132239,9 +131758,14 @@ export namespace Prisma {
   export type ExtractionResultFlatUncheckedUpdateWithoutComboChildrenInput = {
     id?: StringFieldUpdateOperationsInput | string
     jobId?: NullableStringFieldUpdateOperationsInput | string | null
-    imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -132255,6 +131779,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -132359,7 +131885,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -132524,6 +132058,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -132603,9 +132141,14 @@ export namespace Prisma {
     NOT?: ExtractionResultFlatScalarWhereInput | ExtractionResultFlatScalarWhereInput[]
     id?: StringFilter<"ExtractionResultFlat"> | string
     jobId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    imageName?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     imageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     oldImageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    sourceImageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    aiCmpCostCutting?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     articleNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     extractionStatus?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     aiModel?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -132619,6 +132162,8 @@ export namespace Prisma {
     apiCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     userId?: IntNullableFilter<"ExtractionResultFlat"> | number | null
     userName?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    creatorUser?: JsonNullableFilter<"ExtractionResultFlat">
+    modifyUser?: JsonNullableFilter<"ExtractionResultFlat">
     extractionDate?: DateTimeNullableFilter<"ExtractionResultFlat"> | Date | string | null
     createdAt?: DateTimeFilter<"ExtractionResultFlat"> | Date | string
     updatedAt?: DateTimeFilter<"ExtractionResultFlat"> | Date | string
@@ -132723,7 +132268,15 @@ export namespace Prisma {
     finishingActPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     bTrimType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    bTrimTotalAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -132888,6 +132441,10 @@ export namespace Prisma {
     washingFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: JsonNullableFilter<"ExtractionResultFlat">
     vaddEmpJson?: JsonNullableFilter<"ExtractionResultFlat">
+    vaddTotalAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     boppNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -133169,9 +132726,14 @@ export namespace Prisma {
 
   export type ExtractionResultFlatCreateWithoutApproverInput = {
     id?: string
-    imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -133185,6 +132747,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -133289,7 +132853,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -133454,6 +133026,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -133515,9 +133091,14 @@ export namespace Prisma {
   export type ExtractionResultFlatUncheckedCreateWithoutApproverInput = {
     id?: string
     jobId?: string | null
-    imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -133531,6 +133112,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -133635,7 +133218,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -133800,6 +133391,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -133976,6 +133571,7 @@ export namespace Prisma {
     division?: string | null
     subDivision?: string | null
     businessDivision?: string | null
+    articleTypes?: UserCreatearticleTypesInput | string[]
     isActive?: boolean
     lastLogin?: Date | string | null
     createdAt?: Date | string
@@ -133994,6 +133590,7 @@ export namespace Prisma {
     division?: string | null
     subDivision?: string | null
     businessDivision?: string | null
+    articleTypes?: UserCreatearticleTypesInput | string[]
     isActive?: boolean
     lastLogin?: Date | string | null
     createdAt?: Date | string
@@ -134027,6 +133624,7 @@ export namespace Prisma {
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    articleTypes?: UserUpdatearticleTypesInput | string[]
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -134045,6 +133643,7 @@ export namespace Prisma {
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    articleTypes?: UserUpdatearticleTypesInput | string[]
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -134062,6 +133661,7 @@ export namespace Prisma {
     division?: string | null
     subDivision?: string | null
     businessDivision?: string | null
+    articleTypes?: UserCreatearticleTypesInput | string[]
     isActive?: boolean
     lastLogin?: Date | string | null
     createdAt?: Date | string
@@ -134080,6 +133680,7 @@ export namespace Prisma {
     division?: string | null
     subDivision?: string | null
     businessDivision?: string | null
+    articleTypes?: UserCreatearticleTypesInput | string[]
     isActive?: boolean
     lastLogin?: Date | string | null
     createdAt?: Date | string
@@ -134113,6 +133714,7 @@ export namespace Prisma {
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    articleTypes?: UserUpdatearticleTypesInput | string[]
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -134131,6 +133733,7 @@ export namespace Prisma {
     division?: NullableStringFieldUpdateOperationsInput | string | null
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     businessDivision?: NullableStringFieldUpdateOperationsInput | string | null
+    articleTypes?: UserUpdatearticleTypesInput | string[]
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -135389,9 +134992,14 @@ export namespace Prisma {
 
   export type ExtractionResultFlatCreateWithoutSrmSyncRunItemsInput = {
     id?: string
-    imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -135405,6 +135013,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -135509,7 +135119,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -135674,6 +135292,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -135735,9 +135357,14 @@ export namespace Prisma {
   export type ExtractionResultFlatUncheckedCreateWithoutSrmSyncRunItemsInput = {
     id?: string
     jobId?: string | null
-    imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -135751,6 +135378,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -135855,7 +135484,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -136020,6 +135657,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -136132,9 +135773,14 @@ export namespace Prisma {
 
   export type ExtractionResultFlatUpdateWithoutSrmSyncRunItemsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -136148,6 +135794,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -136252,7 +135900,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -136417,6 +136073,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -136478,9 +136138,14 @@ export namespace Prisma {
   export type ExtractionResultFlatUncheckedUpdateWithoutSrmSyncRunItemsInput = {
     id?: StringFieldUpdateOperationsInput | string
     jobId?: NullableStringFieldUpdateOperationsInput | string | null
-    imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -136494,6 +136159,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -136598,7 +136265,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -136763,6 +136438,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -137443,9 +137122,14 @@ export namespace Prisma {
   export type ExtractionResultFlatCreateManyComboParentInput = {
     id?: string
     jobId?: string | null
-    imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -137459,6 +137143,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -137563,7 +137249,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -137728,6 +137422,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -137795,9 +137493,14 @@ export namespace Prisma {
 
   export type ExtractionResultFlatUpdateWithoutComboParentInput = {
     id?: StringFieldUpdateOperationsInput | string
-    imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -137811,6 +137514,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -137915,7 +137620,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -138080,6 +137793,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -138141,9 +137858,14 @@ export namespace Prisma {
   export type ExtractionResultFlatUncheckedUpdateWithoutComboParentInput = {
     id?: StringFieldUpdateOperationsInput | string
     jobId?: NullableStringFieldUpdateOperationsInput | string | null
-    imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138157,6 +137879,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -138261,7 +137985,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -138426,6 +138158,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -138486,9 +138222,14 @@ export namespace Prisma {
   export type ExtractionResultFlatUncheckedUpdateManyWithoutComboParentInput = {
     id?: StringFieldUpdateOperationsInput | string
     jobId?: NullableStringFieldUpdateOperationsInput | string | null
-    imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138502,6 +138243,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -138606,7 +138349,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -138771,6 +138522,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -138897,9 +138652,14 @@ export namespace Prisma {
   export type ExtractionResultFlatCreateManyApproverInput = {
     id?: string
     jobId?: string | null
-    imageName?: string | null
     imageUrl?: string | null
     oldImageUrl?: string | null
+    sourceImageUrl?: string | null
+    aiCmpCostCutting?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: string | null
     articleNumber?: string | null
     extractionStatus?: string | null
     aiModel?: string | null
@@ -138913,6 +138673,8 @@ export namespace Prisma {
     apiCost?: Decimal | DecimalJsLike | number | string | null
     userId?: number | null
     userName?: string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -139017,7 +138779,15 @@ export namespace Prisma {
     finishingActPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: Decimal | DecimalJsLike | number | string | null
     bTrimType?: string | null
+    bTrimTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: Decimal | DecimalJsLike | number | string | null
@@ -139182,6 +138952,10 @@ export namespace Prisma {
     washingFinalCost?: Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: Decimal | DecimalJsLike | number | string | null
     pkgCostType?: string | null
     boppNetPrice?: Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: Decimal | DecimalJsLike | number | string | null
@@ -139354,9 +139128,14 @@ export namespace Prisma {
 
   export type ExtractionResultFlatUpdateWithoutApproverInput = {
     id?: StringFieldUpdateOperationsInput | string
-    imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -139370,6 +139149,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -139474,7 +139255,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -139639,6 +139428,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -139700,9 +139493,14 @@ export namespace Prisma {
   export type ExtractionResultFlatUncheckedUpdateWithoutApproverInput = {
     id?: StringFieldUpdateOperationsInput | string
     jobId?: NullableStringFieldUpdateOperationsInput | string | null
-    imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -139716,6 +139514,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -139820,7 +139620,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -139985,6 +139793,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -140045,9 +139857,14 @@ export namespace Prisma {
   export type ExtractionResultFlatUncheckedUpdateManyWithoutApproverInput = {
     id?: StringFieldUpdateOperationsInput | string
     jobId?: NullableStringFieldUpdateOperationsInput | string | null
-    imageName?: NullableStringFieldUpdateOperationsInput | string | null
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     oldImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    sourceImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    aiCmpCostCutting?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostStitching?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostIroning?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aiCmpCostFinishing?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     extractionStatus?: NullableStringFieldUpdateOperationsInput | string | null
     aiModel?: NullableStringFieldUpdateOperationsInput | string | null
@@ -140061,6 +139878,8 @@ export namespace Prisma {
     apiCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     userId?: NullableIntFieldUpdateOperationsInput | number | null
     userName?: NullableStringFieldUpdateOperationsInput | string | null
+    creatorUser?: NullableJsonNullValueInput | InputJsonValue
+    modifyUser?: NullableJsonNullValueInput | InputJsonValue
     extractionDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -140165,7 +139984,15 @@ export namespace Prisma {
     finishingActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     finishingFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalBgtPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalActPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalVendorPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    totalFinalPrVal?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     bTrimType?: NullableStringFieldUpdateOperationsInput | string | null
+    bTrimTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bTrimTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -140330,6 +140157,10 @@ export namespace Prisma {
     washingFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     vaddPrintJson?: NullableJsonNullValueInput | InputJsonValue
     vaddEmpJson?: NullableJsonNullValueInput | InputJsonValue
+    vaddTotalAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    vaddTotalFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     pkgCostType?: NullableStringFieldUpdateOperationsInput | string | null
     boppNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     ctnNetPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null

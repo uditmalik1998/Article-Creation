@@ -317,6 +317,56 @@ router.get('/bulk/job/:id/download-zip', async (req: Request, res: Response) => 
   }
 });
 
+// ─── POST /bulk/check-articles — dry run of the article lookup, no generation ──
+// Lets the "From article list" screen show, per code, whether it will run (source
+// photo found + detected gender / colour / framing) before a job is started.
+// Read-only: DB + product master + R2 lookups only, no Gemini calls.
+const CHECK_MAX_CODES = 500;
+const CHECK_CONCURRENCY = 8;
+router.post('/bulk/check-articles', listUpload.single('list'), async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { codesText } = req.body as Record<string, string>;
+    let codes: string[] = [];
+    if (req.file) {
+      codes = /\.csv$/i.test(req.file.originalname)
+        ? parseArticleCodesFromText(req.file.buffer.toString('utf-8'))
+        : parseArticleCodesFromXlsx(req.file.buffer);
+    } else if (codesText) {
+      codes = parseArticleCodesFromText(codesText);
+    }
+    if (codes.length > CHECK_MAX_CODES) {
+      res.status(400).json({ success: false, error: `Check up to ${CHECK_MAX_CODES} codes at a time (got ${codes.length}).` });
+      return;
+    }
+
+    const results: Array<{
+      code: string; found: boolean; reason?: string; gender?: string; colour?: string;
+      framing?: string; colourFallback?: boolean;
+    }> = new Array(codes.length);
+    let next_ = 0;
+    const worker = async () => {
+      while (next_ < codes.length) {
+        const i = next_++;
+        const a = await resolveArticleForGeneration(codes[i]);
+        results[i] = {
+          code: codes[i],
+          found: a.found,
+          reason: a.found ? undefined : a.reason,
+          gender: a.gender,
+          colour: a.colorName,
+          framing: a.featuredGarment,
+          colourFallback: a.isColorFallback || undefined,
+        };
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(CHECK_CONCURRENCY, codes.length) }, worker));
+
+    res.json({ success: true, total: codes.length, ready: results.filter((r) => r.found).length, results });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // ─── POST /bulk/from-articles — list of article codes → generate from R2 source ──
 router.post('/bulk/from-articles', listUpload.single('list'), async (req: Request, res: Response, next: NextFunction) => {
   try {

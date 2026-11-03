@@ -1,8 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronDown, ChevronRight, ChevronUp, Plus, Save, Search, X } from 'lucide-react';
 import { Input, Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui-tw';
 import { cn } from '@/lib/utils';
 import { APP_CONFIG } from '../../../constants/app/config';
+import { useRegisterUnsavedCard } from './unsavedCards';
+import { useCardDraft, DraftRestoreBanner } from './cardDrafts';
 
 // ─── Costing grid cards (FG articles) ─────────────────────────────────────────
 // Option B layout shared by B TRIM (group 'VA ACC.') and V. ADD ('VA PRCS'):
@@ -71,6 +73,17 @@ export interface CostingGridConfig {
   repeatJsonFields?: Record<string, string>;
   /** AUTO-BGT is a typed input (V. ADD) instead of read-only text filled from the master. */
   editableAutoBgt?: boolean;
+  /**
+   * B TRIM / V. ADD: ink TOTAL row at the bottom (sticky while scrolling) summing AUTO-BGT,
+   * ROUGH-V2, VDR COST and FINAL COST over the fixed rows (+ repeat copies) + only the ticked other rows.
+   */
+  showTotal?: boolean;
+  /**
+   * Fields the TOTAL row's ROUGH-V2 / VDR COST / FINAL COST save to (tab-save mode).
+   * Those totals are editable: a typed value overrides the sum, clearing it goes back
+   * to the sum. AUTO-BGT total is always the sum (read-only) and saved to `auto`.
+   */
+  totalFields?: { auto: string; rough: string; vdr: string; fin: string };
 }
 
 /** One saved repeat copy (e.g. PRINT-2) in a repeatJsonFields column. */
@@ -131,6 +144,8 @@ export const BTRIM_CONFIG: CostingGridConfig = {
   },
   grid: 'grid grid-cols-[170px_110px_minmax(0,1.3fr)_90px_minmax(0,1.2fr)_88px_64px_88px_92px_92px_100px]',
   rateQty: true,
+  showTotal: true,
+  totalFields: { auto: 'bTrimTotalAutoBgt', rough: 'bTrimTotalRoughV2', vdr: 'bTrimTotalVdrCost', fin: 'bTrimTotalFinalCost' },
   tabField: 'bTrimType',
   costFields: {
     M_BTN:   { autoBgt: 'mBtnAutoBgt',  rough: 'mBtnRoughV2',  vdr: 'mBtnVdrCost',  fin: 'mBtnFinalCost' },
@@ -168,6 +183,8 @@ export const VADD_CONFIG: CostingGridConfig = {
   repeatable: ['PRINT', 'EMB'],
   repeatJsonFields: { PRINT: 'vaddPrintJson', EMB: 'vaddEmpJson' },
   editableAutoBgt: true,
+  showTotal: true,
+  totalFields: { auto: 'vaddTotalAutoBgt', rough: 'vaddTotalRoughV2', vdr: 'vaddTotalVendorCost', fin: 'vaddTotalFinalCost' },
   grid: 'grid grid-cols-[150px_130px_minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.4fr)_88px_92px_92px_100px]',
   costFields: {
     PRINT:   { autoBgt: 'printAutoBgt',   rough: 'printRoughV2',   vdr: 'printVendorCost',   fin: 'printFinalCost' },
@@ -179,6 +196,25 @@ export const VADD_CONFIG: CostingGridConfig = {
 /** Item fields a config's table covers (the rest of the group renders as normal rows). */
 export const gridFields = (config: CostingGridConfig) =>
   new Set(Object.values(config.cellMap).flatMap((m) => Object.values(m) as string[]));
+
+// TOTAL row overrides live in local[tab][TOTAL_ROW]; AUTO-BGT total is always the sum.
+const TOTAL_ROW = '__TOTAL__';
+const TOTAL_EDIT_COLS = ['rough', 'vdr', 'fin'] as const;
+
+/** Sum of a column over the given rows, or null when none has a number. */
+const sumCol = (rows: string[], get: (row: string) => string): number | null => {
+  let sum = 0;
+  let any = false;
+  for (const r of rows) {
+    const v = get(r);
+    const n = Number(v);
+    if (v.trim() !== '' && Number.isFinite(n)) {
+      sum += n;
+      any = true;
+    }
+  }
+  return any ? sum : null;
+};
 
 interface CostingGridCardProps {
   config: CostingGridConfig;
@@ -198,7 +234,9 @@ interface CostingGridCardProps {
   /** Reads the article fresh from the DB (the parent's copy can be stale). Needed for cost sync. */
   loadSavedRecord?: () => Promise<Record<string, unknown> | null>;
   /** Save button: persists the current tab's spec fields + costs (config.costFields) + bTrimType. */
-  onSaveTab?: (updates: Record<string, string | null>) => void;
+  onSaveTab?: (updates: Record<string, string | null>) => void | Promise<void>;
+  /** Article id for the local draft (FG New page only, tab-save mode); omitted → no draft. */
+  draftId?: string;
 }
 
 const SelectCell: React.FC<{
@@ -226,7 +264,7 @@ const SelectCell: React.FC<{
         <button
           type="button"
           disabled={disabled}
-          className="flex h-7 w-full items-center justify-between gap-1 rounded-md border border-slate-200 bg-white px-2 text-[11.5px] hover:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-700 disabled:cursor-default disabled:bg-slate-50 disabled:hover:border-slate-200"
+          className="flex h-7 w-full items-center justify-between gap-1 rounded-md border border-slate-200 bg-white px-2 text-[12.5px] hover:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-700 disabled:cursor-default disabled:bg-slate-50 disabled:hover:border-slate-200"
         >
           <span className={cn('truncate', empty ? 'text-slate-400' : 'font-medium text-slate-900')}>
             {empty ? (disabled ? '—' : 'Select') : value}
@@ -242,7 +280,7 @@ const SelectCell: React.FC<{
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search..."
-            className="flex-1 bg-transparent text-[11px] outline-none placeholder:text-muted-foreground"
+            className="flex-1 bg-transparent text-[12px] outline-none placeholder:text-muted-foreground"
           />
         </div>
         {!empty && (
@@ -252,7 +290,7 @@ const SelectCell: React.FC<{
               onPick(null);
               setOpen(false);
             }}
-            className="flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left text-[11px] font-medium text-red-600 hover:bg-red-50"
+            className="flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left text-[12px] font-medium text-red-600 hover:bg-red-50"
           >
             <X className="h-3 w-3 shrink-0" />
             Clear selection
@@ -260,7 +298,7 @@ const SelectCell: React.FC<{
         )}
         <div className="max-h-56 overflow-y-auto py-1">
           {matches.length === 0 ? (
-            <div className="px-3 py-2 text-[11px] text-muted-foreground">No options found</div>
+            <div className="px-3 py-2 text-[12px] text-muted-foreground">No options found</div>
           ) : (
             matches.map((o) => (
               <button
@@ -271,13 +309,13 @@ const SelectCell: React.FC<{
                   setOpen(false);
                 }}
                 className={cn(
-                  'flex w-full flex-col px-3 py-1.5 text-left text-[11px] hover:bg-slate-100',
+                  'flex w-full flex-col px-3 py-1.5 text-left text-[12px] hover:bg-slate-100',
                   o.shortForm === value && 'bg-slate-100',
                 )}
               >
                 <span className="font-medium">{o.shortForm}</span>
                 {o.fullForm && o.fullForm !== o.shortForm && (
-                  <span className="truncate text-[10px] text-muted-foreground">{o.fullForm}</span>
+                  <span className="truncate text-[11px] text-muted-foreground">{o.fullForm}</span>
                 )}
               </button>
             ))
@@ -303,7 +341,7 @@ export const TextCell: React.FC<{
     placeholder={disabled ? '—' : placeholder}
     onChange={(e) => onChange(numeric ? e.target.value.replace(/[^0-9.]/g, '') : e.target.value)}
     className={cn(
-      'h-7 rounded-md border-slate-200 px-2 text-[11.5px] focus-visible:ring-1 focus-visible:ring-slate-700',
+      'h-7 rounded-md border-slate-200 px-2 text-[12.5px] focus-visible:ring-1 focus-visible:ring-slate-700',
       numeric && 'text-right font-mono tabular-nums',
       strong && 'border-slate-300 font-semibold',
     )}
@@ -335,6 +373,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
   extraRows,
   loadSavedRecord,
   onSaveTab,
+  draftId,
 }) => {
   const { grid: GRID, tabs, fixedRows, other, cellMap } = config;
   const costFields = config.costFields;
@@ -348,6 +387,8 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
   const [local, setLocal] = useState<Record<string, Record<string, RowState>>>({});
   const [autoBgtLoading, setAutoBgtLoading] = useState<Record<string, boolean>>({});
   const [dirty, setDirty] = useState(false);
+  // Set by user edits only (not by master auto-fill) — drives the local draft.
+  const [edited, setEdited] = useState(false);
   const [savedTab, setSavedTab] = useState<string | null>(null);
   const basicTrimFetchedRef = useRef<Record<string, string>>({});
   // Other-block master fill: tabs already handled, and the fetched master (one call per mount).
@@ -374,9 +415,11 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
       return { ...prev, [base]: next };
     });
     setDirty(true);
+    setEdited(true);
   };
   const removeRepeat = (base: string, row: string) => {
     setDirty(true);
+    setEdited(true);
     setRepeats((prev) => ({ ...prev, [base]: (prev[base] ?? []).filter((r) => r !== row) }));
     setLocal((prev) =>
       Object.fromEntries(Object.entries(prev).map(([t, rows]) => {
@@ -394,10 +437,12 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
       return { ...prev, [tab]: next };
     });
     setDirty(true);
+    setEdited(true);
   };
   const setAllChecked = (on: boolean) => {
     setChecked((prev) => ({ ...prev, [tab]: new Set(on ? other?.rows ?? [] : []) }));
     setDirty(true);
+    setEdited(true);
   };
 
   const setTabVal = (t: string, row: string, col: Col, v: string) =>
@@ -466,24 +511,24 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
   };
 
   // Fills other-block rows on tab `tb` from config.otherMasterAttr (row name = type):
-  // RATE / AUTO-BGT for the given rows, ROUGH-V2 only where empty. Returns true if anything was set.
+  // RATE / AUTO-BGT for the given rows, ROUGH-V2 only where empty. Returns the rows that were set.
   const fillOtherFromMaster = async (
     tb: string,
     rowsToFill: string[],
     current: (row: string) => RowState | undefined,
-  ): Promise<boolean> => {
-    if (!config.otherMasterAttr) return false;
+  ): Promise<string[]> => {
+    if (!config.otherMasterAttr) return [];
     if (!otherMasterRef.current) otherMasterRef.current = await fetchBasicTrimAll(config.otherMasterAttr);
     const master = otherMasterRef.current;
-    if (!master) return false;
+    if (!master) return [];
     const idx = tabs.indexOf(tb);
-    let filled = false;
+    const filled: string[] = [];
     for (const row of rowsToFill) {
       const m = master[row.toUpperCase()];
       const v = m ? (idx === 0 ? m.bt1 : m.bt2) : '';
       if (!v) continue;
       applyMasterValue(tb, row, v, current(row), 'ifEmpty');
-      filled = true;
+      filled.push(row);
     }
     return filled;
   };
@@ -566,12 +611,23 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
         }
       }
       setRepeats(savedRepeats);
-      setLocal({ [t]: rows });
-      if (other) {
-        const saved = other.rows.filter((row) =>
-          (['rate', 'qty', 'auto', 'rough', 'vdr', 'fin'] as Col[]).some((c) => rows[row]?.[c]));
-        setChecked({ [t]: new Set(saved) });
+      const savedOther = other
+        ? other.rows.filter((row) => (['rate', 'qty', 'auto', 'rough', 'vdr', 'fin'] as Col[]).some((c) => rows[row]?.[c]))
+        : [];
+      // TOTAL overrides: a saved total that differs from the saved rows' sum was typed.
+      if (config.totalFields) {
+        const summed = [...fixedRows.flatMap((r) => [r, ...(savedRepeats[r] ?? [])]), ...savedOther];
+        const totalRow: RowState = {};
+        for (const col of TOTAL_EDIT_COLS) {
+          const saved = num(rec[config.totalFields[col]]);
+          if (!saved) continue;
+          const sum = sumCol(summed, (r) => rows[r]?.[col] ?? '');
+          if (sum === null || Math.abs(Number(saved) - sum) > 0.005) totalRow[col] = saved;
+        }
+        rows[TOTAL_ROW] = totalRow;
       }
+      setLocal({ [t]: rows });
+      if (other) setChecked({ [t]: new Set(savedOther) });
 
       // Other-block rows on the opened tab: hit the master only if some row's RATE
       // (AUTO-BGT without rateQty) is null in the DB, and fill just those rows.
@@ -579,7 +635,9 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
       otherFilledTabsRef.current.add(t);
       if (other && config.otherMasterAttr) {
         const missing = other.rows.filter((row) => needsMaster(rows[row]));
-        if (missing.length > 0 && (await fillOtherFromMaster(t, missing, (row) => rows[row]))) setDirty(true);
+        // Unticked rows are saved empty, so master rates shown on them are not unsaved changes.
+        const filled = missing.length > 0 ? await fillOtherFromMaster(t, missing, (row) => rows[row]) : [];
+        if (filled.some((row) => savedOther.includes(row))) setDirty(true);
         if (cancelled) return;
       }
 
@@ -623,6 +681,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
   const setLocalVal = (row: string, col: Col, v: string) => {
     setTabVal(tab, row, col, v);
     setDirty(true);
+    setEdited(true);
     // Typing a value into an unticked other-block row ticks it.
     if (checkable && v && other!.rows.includes(row) && !isChecked(row)) setRowChecked(row, true);
   };
@@ -640,7 +699,35 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
     return savesToSap(row, col) && a ? (getValue(a.field) ?? '').trim() : localVal(row, col).trim();
   };
 
-  const handleSaveTab = () => {
+  const draftData = useMemo(
+    () => ({
+      tab,
+      local,
+      repeats,
+      checked: Object.fromEntries(Object.entries(checked).map(([k, s]) => [k, [...s]])),
+    }),
+    [tab, local, repeats, checked],
+  );
+  const { pendingDraft, clearDraft, dismissPending } = useCardDraft(
+    tabSave && !locked ? draftId : undefined,
+    config.title,
+    edited,
+    draftData,
+  );
+  const restoreDraft = () => {
+    if (!pendingDraft) return;
+    const d = pendingDraft.data;
+    setTab(d.tab);
+    setLocal(d.local);
+    setRepeats(d.repeats);
+    setChecked(Object.fromEntries(Object.entries(d.checked).map(([k, rows]) => [k, new Set(rows)])));
+    otherFilledTabsRef.current = new Set(Object.keys(d.local));
+    setDirty(true);
+    setEdited(true);
+    dismissPending();
+  };
+
+  const handleSaveTab = async () => {
     if (!tabSave) return;
     const updates: Record<string, string | null> = config.tabField ? { [config.tabField]: tab } : {};
     for (const [row, map] of Object.entries(cellMap)) {
@@ -676,10 +763,22 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
       }));
       updates[field] = list.length > 0 ? JSON.stringify(list) : null;
     }
-    onSaveTab!(updates);
-    setSavedTab(tab);
+    if (config.totalFields) {
+      updates[config.totalFields.auto] = sumOf('auto')?.toFixed(2) ?? null;
+      for (const col of TOTAL_EDIT_COLS) updates[config.totalFields[col]] = totalValue(col) || null;
+    }
     setDirty(false);
+    try {
+      await onSaveTab!(updates);
+    } catch (e) {
+      setDirty(true);
+      throw e;
+    }
+    setSavedTab(tab);
+    setEdited(false);
+    clearDraft();
   };
+  useRegisterUnsavedCard(config.title, dirty && tabSave && !locked, handleSaveTab, clearDraft, edited);
 
   const renderSpecCell = (row: string, col: SpecCol) => {
     const a = boundAttr(row, col);
@@ -709,6 +808,26 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
   const filledCount = (rows: readonly string[]) =>
     rows.filter((r) => (['type', 'style', 'c3', 'rough', 'vdr', 'fin'] as Col[]).some((c) => cellVal(r, c))).length;
 
+  // TOTAL row: fixed rows (and their repeat copies) + other rows — only the ticked
+  // ones when the block has checkboxes.
+  const totalRows = [
+    ...fixedRows.flatMap((r) => [r, ...(repeats[r] ?? [])]),
+    ...(other ? (checkable ? other.rows.filter(isChecked) : other.rows) : []),
+  ];
+  const sumOf = (col: Col) => sumCol(totalRows, (r) => localVal(r, col));
+  const totalOf = (col: Col) => {
+    const sum = sumOf(col);
+    return sum === null ? '—' : sum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+  // Editable TOTAL (ROUGH-V2 / VDR COST / FINAL COST): the typed override, else the sum.
+  const editableTotals = !!config.totalFields && tabSave;
+  const totalValue = (col: Col) => {
+    const override = localVal(TOTAL_ROW, col);
+    if (override.trim() !== '') return override;
+    const sum = sumOf(col);
+    return sum === null ? '' : sum.toFixed(2);
+  };
+
   const renderRow = (row: string, last: boolean, withCheck = false) => {
     // DESC is auto-built: STYLE-TYPE (e.g. KUNDI_BTN-26L)
     const desc = [cellVal(row, 'style'), cellVal(row, 'type')].filter((p) => p && !/^-+$/.test(p)).join('-');
@@ -719,7 +838,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
     return (
       <div key={row} className={cn(GRID, 'items-center', !last && 'border-b border-slate-100', off && 'opacity-60')}>
         {withCheck ? (
-          <label className="flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-[11.5px] font-semibold text-slate-800">
+          <label className="flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-[12.5px] font-semibold text-slate-800">
             <input
               type="checkbox"
               checked={!off}
@@ -730,7 +849,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
             <span className="truncate">{row}</span>
           </label>
         ) : isRepeatCopy(row) ? (
-          <div className="flex items-center justify-between gap-1 py-1.5 pl-2.5 pr-1 text-[11.5px] font-semibold text-slate-700">
+          <div className="flex items-center justify-between gap-1 py-1.5 pl-2.5 pr-1 text-[12.5px] font-semibold text-slate-700">
             <span className="truncate">{row}</span>
             {!locked && (
               <button
@@ -745,19 +864,19 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
             )}
           </div>
         ) : config.repeatable?.includes(row) ? (
-          <div className="flex items-center gap-1.5 px-2.5 py-1.5 text-[11.5px] font-semibold text-slate-800">
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 text-[12.5px] font-semibold text-slate-800">
             <span className="truncate">{row}</span>
-            <span className="rounded-full bg-slate-200 px-1.5 py-px text-[10px] font-bold text-slate-700" title={`${1 + (repeats[row]?.length ?? 0)} ${row} row(s)`}>
+            <span className="rounded-full bg-slate-200 px-1.5 py-px text-[11px] font-bold text-slate-700" title={`${1 + (repeats[row]?.length ?? 0)} ${row} row(s)`}>
               ×{1 + (repeats[row]?.length ?? 0)}
             </span>
           </div>
         ) : (
-          <div className="px-2.5 py-1.5 text-[11.5px] font-semibold text-slate-800">{row}</div>
+          <div className="px-2.5 py-1.5 text-[12.5px] font-semibold text-slate-800">{row}</div>
         )}
         <div className="px-1 py-1.5">{renderSpecCell(row, 'type')}</div>
         <div className="px-1 py-1.5">{renderSpecCell(row, 'style')}</div>
         <div className="px-1 py-1.5">{renderSpecCell(row, 'c3')}</div>
-        <div className={cn('truncate px-2.5 py-1.5 font-mono text-[11px]', desc ? 'text-slate-900' : 'text-slate-400')}>
+        <div className={cn('truncate px-2.5 py-1.5 font-mono text-[12px]', desc ? 'text-slate-900' : 'text-slate-400')}>
           {desc || '—'}
         </div>
         {config.rateQty && (
@@ -777,7 +896,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
         ) : (
           <div
             className={cn(
-              'px-2.5 py-1.5 text-right font-mono text-[11px]',
+              'px-2.5 py-1.5 text-right font-mono text-[12px]',
               bgtLoading ? 'text-slate-300' : autoBgtVal ? 'font-semibold text-slate-900' : 'text-slate-400',
             )}
             title={autoBgtVal ? `AUTO-BGT (BT-${tabIdx + 1})` : 'Auto budget — select a spec value'}
@@ -799,7 +918,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
   };
 
   return (
-    <div className="col-span-full overflow-hidden rounded-lg border-2 bg-white shadow-[var(--shadow-sm)]" style={{ borderColor: style.border }}>
+    <div className="col-span-full overflow-clip rounded-lg border-2 bg-white shadow-[var(--shadow-sm)]" style={{ borderColor: style.border }}>
       {/* Header: title + collapse, then underline tabs (when more than one) */}
       <div className="border-b-2" style={{ background: style.bg, borderColor: style.bg }}>
         <div className="flex items-center">
@@ -821,7 +940,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
               )}
               <button
                 type="button"
-                onClick={handleSaveTab}
+                onClick={() => { handleSaveTab().catch(() => {}); }}
                 disabled={locked}
                 className="flex h-6 items-center gap-1 rounded-md bg-white px-2.5 text-[11px] font-bold text-slate-900 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
               >
@@ -856,7 +975,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
                     aria-selected={active}
                     onClick={() => selectTab(t)}
                     className={cn(
-                      'flex h-8 items-center gap-1.5 px-3 text-[11.5px] font-bold tracking-wide transition-colors',
+                      'flex h-8 items-center gap-1.5 px-3 text-[12.5px] font-bold tracking-wide transition-colors',
                       active ? 'rounded-t-md bg-white text-slate-900 shadow-[inset_0_-2px_0_#1e293b]' : 'opacity-80 hover:opacity-100',
                     )}
                     style={active ? undefined : { color: style.fg }}
@@ -865,7 +984,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
                     {tabSave && savedTab === t && (
                       <span
                         className={cn(
-                          'rounded px-1 py-px text-[9px] font-semibold tracking-wider',
+                          'rounded px-1 py-px text-[10px] font-semibold tracking-wider',
                           active ? 'bg-slate-200 text-slate-700' : 'bg-white/20',
                         )}
                         title="This tab's values are the ones saved"
@@ -886,9 +1005,9 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
                 )}
                 <button
                   type="button"
-                  onClick={handleSaveTab}
+                  onClick={() => { handleSaveTab().catch(() => {}); }}
                   disabled={locked}
-                  className="flex h-7 items-center gap-1.5 rounded-md bg-white px-3 text-[11.5px] font-bold text-slate-900 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-7 items-center gap-1.5 rounded-md bg-white px-3 text-[12.5px] font-bold text-slate-900 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Save className="h-3.5 w-3.5" />
                   Save {tab}
@@ -899,21 +1018,25 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
         )}
       </div>
 
+      {pendingDraft && tabSave && !locked && (
+        <DraftRestoreBanner savedAt={pendingDraft.savedAt} onRestore={restoreDraft} onDiscard={clearDraft} />
+      )}
+
       {!collapsed && (
         <>
           <div className="overflow-x-auto px-1.5 pb-2 pt-1">
             <div className={config.rateQty ? 'min-w-[1150px]' : 'min-w-[1000px]'}>
               {/* Column groups */}
               <div className={cn(GRID, 'pt-1.5')}>
-                <div className="flex h-6 items-center px-2.5 text-[9.5px] font-bold tracking-[0.1em] text-slate-500">ITEM</div>
-                <div className={cn(config.rateQty ? 'col-[2/8]' : 'col-[2/6]', 'mx-0.5 flex h-6 items-center rounded-t-md bg-slate-100 px-2.5 text-[9.5px] font-bold tracking-[0.1em] text-slate-700')}>
+                <div className="flex h-6 items-center px-2.5 text-[10.5px] font-bold tracking-[0.1em] text-slate-500">ITEM</div>
+                <div className={cn(config.rateQty ? 'col-[2/8]' : 'col-[2/6]', 'mx-0.5 flex h-6 items-center rounded-t-md bg-slate-100 px-2.5 text-[10.5px] font-bold tracking-[0.1em] text-slate-700')}>
                   SPECIFICATION
                 </div>
-                <div className={cn(config.rateQty ? 'col-[8/12]' : 'col-[6/10]', 'mx-0.5 flex h-6 items-center rounded-t-md bg-slate-800 px-2.5 text-[9.5px] font-bold tracking-[0.1em] text-slate-50')}>
+                <div className={cn(config.rateQty ? 'col-[8/12]' : 'col-[6/10]', 'mx-0.5 flex h-6 items-center rounded-t-md bg-slate-800 px-2.5 text-[10.5px] font-bold tracking-[0.1em] text-slate-50')}>
                   COSTING
                 </div>
               </div>
-              <div className={cn(GRID, 'border-b border-slate-200 text-[10px] font-semibold tracking-wider text-slate-600')}>
+              <div className={cn(GRID, 'border-b border-slate-200 text-[11px] font-semibold tracking-wider text-slate-600')}>
                 <div className="px-2.5 py-2">{config.itemLabel}</div>
                 <div className="px-2.5 py-2">TYPE</div>
                 <div className="px-2.5 py-2">STYLE</div>
@@ -948,7 +1071,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
                         <button
                           type="button"
                           onClick={() => addRepeat(r)}
-                          className="inline-flex h-7 items-center gap-1.5 rounded-md border border-dashed border-slate-400 bg-white px-3 text-[11px] font-semibold text-slate-800 hover:border-slate-600 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-700"
+                          className="inline-flex h-7 items-center gap-1.5 rounded-md border border-dashed border-slate-400 bg-white px-3 text-[12px] font-semibold text-slate-800 hover:border-slate-600 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-700"
                         >
                           <Plus className="h-3.5 w-3.5" />
                           Add {r}
@@ -972,16 +1095,16 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
                   onClick={() => setOtherOpen((o) => !o)}
                   className="flex h-full min-w-0 flex-1 items-center justify-between gap-3 px-3 text-left"
                 >
-                  <span className="flex items-center gap-2 text-[11px] font-bold tracking-wider text-slate-700">
+                  <span className="flex items-center gap-2 text-[12px] font-bold tracking-wider text-slate-700">
                     <ChevronRight className={cn('h-3.5 w-3.5 transition-transform', otherOpen && 'rotate-90')} />
                     {other.label}
-                    <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10.5px] font-medium tracking-normal text-slate-600">
+                    <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[11.5px] font-medium tracking-normal text-slate-600">
                       {checkable
                         ? `${other.rows.filter(isChecked).length} / ${other.rows.length} selected`
                         : `${filledCount(other.rows)} / ${other.rows.length} filled`}
                     </span>
                   </span>
-                  <span className="hidden truncate text-[11px] text-slate-500 sm:inline">
+                  <span className="hidden truncate text-[12px] text-slate-500 sm:inline">
                     {otherOpen ? 'Click to collapse' : other.rows.join(' · ')}
                   </span>
                 </button>
@@ -992,7 +1115,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
                       type="button"
                       onClick={() => setAllChecked(!all)}
                       disabled={locked}
-                      className="mr-2 h-7 shrink-0 rounded-md border border-slate-300 bg-white px-2.5 text-[11px] font-semibold text-slate-800 hover:border-slate-400 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="mr-2 h-7 shrink-0 rounded-md border border-slate-300 bg-white px-2.5 text-[12px] font-semibold text-slate-800 hover:border-slate-400 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {all ? 'Clear all' : 'Select all'}
                     </button>
@@ -1010,6 +1133,46 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {config.showTotal && (
+            <div className="sticky bottom-0 z-10 overflow-x-auto bg-[#1e293b] px-1.5 text-white" role="group" aria-label={`${config.title} total`}>
+              <div className={config.rateQty ? 'min-w-[1150px]' : 'min-w-[1000px]'}>
+                <div className={cn(GRID, 'items-center py-2')}>
+                  <div className={cn(config.rateQty ? 'col-[1/8]' : 'col-[1/6]', 'flex flex-col px-2.5')}>
+                    <span className="text-[13px] font-extrabold tracking-wider">TOTAL · {tab}</span>
+                    <span className="text-[11.5px] text-slate-300">
+                      {fixedRows.length} items
+                      {(() => {
+                        const copies = fixedRows.reduce((n, r) => n + (repeats[r]?.length ?? 0), 0);
+                        return copies > 0 ? ` + ${copies} ${copies === 1 ? 'copy' : 'copies'}` : '';
+                      })()}
+                      {other && (checkable ? ` + ${other.rows.filter(isChecked).length} selected ${other.label}` : ` + ${other.label}`)}
+                    </span>
+                  </div>
+                  {(['auto', 'rough', 'vdr', 'fin'] as Col[]).map((c) =>
+                    editableTotals && c !== 'auto' ? (
+                      <div key={c} className="px-1">
+                        <input
+                          value={totalValue(c)}
+                          disabled={locked}
+                          inputMode="decimal"
+                          placeholder="—"
+                          aria-label={`Total ${c === 'rough' ? 'ROUGH-V2' : c === 'vdr' ? 'VDR COST' : 'FINAL COST'}`}
+                          title="Sum of the rows — type to override, clear to go back to the sum"
+                          onChange={(e) => setLocalVal(TOTAL_ROW, c, e.target.value)}
+                          className="h-7 w-full rounded-md border border-slate-600 bg-slate-800 px-2 text-right font-mono text-[13.5px] font-extrabold tabular-nums text-white outline-none placeholder:text-slate-500 focus:border-slate-300 disabled:opacity-70"
+                        />
+                      </div>
+                    ) : (
+                      <div key={c} className="px-2.5 text-right font-mono text-[13.5px] font-extrabold tabular-nums">
+                        {totalOf(c)}
+                      </div>
+                    ),
+                  )}
+                </div>
+              </div>
             </div>
           )}
 
