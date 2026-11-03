@@ -2190,13 +2190,15 @@ export class ApproverController {
                 {
                     const fr = nextRow;
                     const widthNum = parseInt(String(a.fWidth ?? '').replace(/[^0-9.]/g, ''), 10);
-                    const cons = num(a.preciseConsumptionKg) ?? num(a.roughConsumptionKg)
-                        ?? num(a.preciseConsumptionMeter) ?? num(a.roughConsumptionMeter);
+                    // Kg wins whenever present (even alongside meters); MTR only when no Kg.
+                    const consKg = num(a.preciseConsumptionKg) ?? num(a.roughConsumptionKg);
+                    const cons = consKg ?? num(a.preciseConsumptionMeter) ?? num(a.roughConsumptionMeter);
+                    const consUom = consKg != null ? 'KG' : cons != null ? 'MTR' : 'KG';
                     const autoBgt = num(a.autoBgt);
                     const roughV2 = num(a.roughV2);
                     const wst = (rate: string) => ({ formula: `+(${rate}*J${fr})*(100+H${fr})/100` });
                     track(addRow([
-                        'FAB', 'FAB_MC', a.fabricArticleNumber || null, a.fabricArticleDescription || null, 'KG', null,
+                        'FAB', 'FAB_MC', a.fabricArticleNumber || null, a.fabricArticleDescription || null, consUom, null,
                         num(a.vendorFabricRate), 4, Number.isNaN(widthNum) ? null : widthNum, cons,
                         autoBgt != null ? wst(String(autoBgt)) : null,
                         roughV2 != null ? wst(String(roughV2)) : null,

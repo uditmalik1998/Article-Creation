@@ -67,12 +67,27 @@ export const SIMPLE_BODY_EXPORT_HEADERS = [
   'M_SLEEVES_MAIN_STYLE', 'M_SLEEVE_FOLD', 'M_BTM_FOLD',
   'M_NO_OF_POCKET', 'M_POCKET', 'M_EXTRA_POCKET',
   'M_FIT', 'M_BODY_STYLE', 'M_LENGTH', 'M_SET',
-  'CMTP Cost', 'CMP Cost', 'Fab Cost', 'Fab Cons', 'Width',
+  'CMTP Cost', 'CMP Cost', 'Fab Cost', 'Fab Cons', 'UOM', 'Width',
   'Basic Trim Cost', 'Rough CMP Cost',
   'Created Date',
 ] as const;
 
-const VARIANT_EXTRA_HEADERS = ['Row Type', 'Parent Article Number', 'Variant Size', 'Variant Color', 'SAP Article ID'] as const;
+// Fab Cons + UOM for export: Kg wins whenever any Kg value is present (even if
+// meters is also filled); meters is used only when there is no Kg. Precise is
+// preferred over rough within each unit. Zero counts as not filled.
+function pickConsumption(row: any): { value: number | undefined; uom: string } {
+  const pos = (v: unknown) => {
+    const n = v == null || v === '' ? NaN : Number(v);
+    return Number.isFinite(n) && n > 0 ? n : null;
+  };
+  const kg = pos(row.preciseConsumptionKg) ?? pos(row.consumptionKg) ?? pos(row.roughConsumptionKg);
+  if (kg != null) return { value: kg, uom: 'KG' };
+  const mtr = pos(row.preciseConsumptionMeter) ?? pos(row.consumptionMeter) ?? pos(row.roughConsumptionMeter);
+  if (mtr != null) return { value: mtr, uom: 'MTR' };
+  return { value: undefined, uom: '' };
+}
+
+const VARIANT_EXTRA_HEADERS =['Row Type', 'Parent Article Number', 'Variant Size', 'Variant Color', 'SAP Article ID'] as const;
 
 function mapExportRow(row: any): Record<string, string | number | undefined> {
   const rawDate = row.approvedAt ? new Date(row.approvedAt) : null;
@@ -116,6 +131,7 @@ function mapExportRow(row: any): Record<string, string | number | undefined> {
     M_WASH: row.wash || '', M_IMP_ATBT: row.impAtrbt2 || '',
     M_AGE_GROUP: row.ageGroup || '', 'ARTICLE FASHION TYPE': row.articleFashionType || '',
     SEGMENT: row.segment || '', 'Extracted By': row.userName || '',
+    'Fab Cons': pickConsumption(row).value, UOM: pickConsumption(row).uom,
     'Created Date': formattedDate,
     'Approved By Name': row.approver?.name || '',
     'Approved By Email': row.approver?.email || '',
@@ -333,7 +349,8 @@ export default function BodyArticleDashboard({ pathType }: BodyArticleDashboardP
         'CMTP Cost':                row.cmtpCost == null ? undefined : Number(row.cmtpCost),
         'CMP Cost':                 row.cmpCost  == null ? undefined : Number(row.cmpCost),
         'Fab Cost':                 row.fabCost  == null ? undefined : Number(row.fabCost),
-        'Fab Cons':                 row.fabCons  == null ? undefined : Number(row.fabCons),
+        'Fab Cons':                 pickConsumption(row).value,
+        UOM:                        pickConsumption(row).uom,
         Width:                      row.bodyWidth == null ? undefined : Number(row.bodyWidth),
         'Rough CMP Cost':           row.roughCmpCost  == null ? undefined : Number(row.roughCmpCost),
         'Created Date':             formattedDate,
