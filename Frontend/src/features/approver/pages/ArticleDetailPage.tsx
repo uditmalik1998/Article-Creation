@@ -72,7 +72,7 @@ const FIELD_LABELS: Record<string, string> = {
   embroidery: 'M_EMB_TYPE', embroideryType: 'M_EMBROIDERY_STYLE', embPlacement: 'M_EMB_PLACEMENT',
   wash: 'M_WASH', ageGroup: 'M_AGE_GROUP', mNoOfSize: 'M_NO_OF_SIZE', mNoOfClr: 'M_NO_OF_CLR',
   weight: 'M_FAB_WEIGHT', colour: 'Colour', fashionGrid: 'Fashion Grid',
-  articleType: 'Article Type', articleFashionType: 'M_ARTICLE_FASHION_TYPE',
+  articleFashionType: 'M_ARTICLE_FASHION_TYPE',
   articleDimension: 'Article Dimension', referenceArticleNumber: 'Reference Article No.',
   valueAddAccCostType: 'Value Add Acc. Cost Type', valueAddCost: 'Value Add Acc. Cost',
   vendorFabricRate: 'Vendor Fabric Rate',

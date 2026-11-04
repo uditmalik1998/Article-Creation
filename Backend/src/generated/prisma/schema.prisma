@@ -226,7 +226,6 @@ model ExtractionResultFlat {
   designNumber                String?   @map("design_number") @db.VarChar(100)
   pptNumber                   String?   @map("ppt_number") @db.VarChar(100)
   rate                        Decimal?  @db.Decimal(10, 2)
-  size                        String?   @db.VarChar(50)
   yarn1                       String?   @map("yarn_1") @db.VarChar(100)
   yarn2                       String?   @map("yarn_2") @db.VarChar(100)
   fabricMainMvgr              String?   @map("fabric_main_mvgr") @db.VarChar(100)
@@ -236,11 +235,8 @@ model ExtractionResultFlat {
   finish                      String?   @db.VarChar(100)
   gsm                         String?   @db.VarChar(50)
   macroMvgr                   String?   @map("macro_mvgr") @db.VarChar(100)
-  macroMvgrFullForm           String?   @map("macro_mvgr_full_form") @db.VarChar(200)
   mainMvgr                    String?   @map("main_mvgr") @db.VarChar(100)
-  mainMvgrFullForm            String?   @map("main_mvgr_full_form") @db.VarChar(200)
   mFab2                       String?   @map("m_fab2") @db.VarChar(100)
-  mFab2FullForm               String?   @map("m_fab2_full_form") @db.VarChar(200)
   shade                       String?   @db.VarChar(100)
   weight                      String?   @db.VarChar(100)
   lycra                       String?   @db.VarChar(50)
@@ -539,12 +535,10 @@ model ExtractionResultFlat {
   articleDescription String?  @map("article_description")
   fashionGrid        String?  @map("fashion_grid") @db.VarChar(100)
   year               String?  @db.VarChar(20)
-  articleType        String?  @map("article_type") @db.VarChar(100)
   presentationsType  String?  @map("Presentations_type") @db.VarChar(100)
 
   // Approval Workflow
   approvalStatus ApprovalStatus @default(PENDING) @map("approval_status")
-  pdStatus       PdStatus       @default(PENDING) @map("pd_status")
   approvedBy     Int?           @map("approved_by")
   approvedAt     DateTime?      @map("approved_at")
   approver       User?          @relation("ApproverRelation", fields: [approvedBy], references: [id])
@@ -559,11 +553,7 @@ model ExtractionResultFlat {
   isOldArticle Boolean @default(false) @map("is_old_article")
 
   // Variant fields
-  isGeneric        Boolean @default(true) @map("is_generic")
-  genericArticleId String? @map("generic_article_id")
-  variantSize      String? @map("variant_size") @db.VarChar(50)
-  variantColor     String? @map("variant_color") @db.VarChar(100)
-  variantWeight    String? @map("variant_weight") @db.VarChar(50)
+  isGeneric Boolean @default(true) @map("is_generic")
 
   // Combo/Set articles (e.g. Kurti Set, Baba Suit) — a parent article
   // assembled from multiple child pieces. The parent is created in SAP first,
@@ -614,7 +604,6 @@ model ExtractionResultFlat {
   @@index([approvalStatus])
   @@index([division])
   @@index([approvalStatus, division])
-  @@index([genericArticleId])
   @@index([isGeneric, approvalStatus])
   @@index([division, approvalStatus])
   @@index([subDivision, approvalStatus])
@@ -624,7 +613,6 @@ model ExtractionResultFlat {
   @@index([referenceArticleNumber])
   @@index([isGeneric, approvalStatus, division])
   @@index([isOldArticle, approvalStatus])
-  @@index([approvalStatus, pdStatus], map: "idx_erf_approval_pd")
   @@index([comboParentId])
   @@index([comboRole])
   @@map("extraction_results_flat")
@@ -889,14 +877,6 @@ enum ApprovalStatus {
   REJECTED
 
   @@map("approval_status")
-  @@schema("public")
-}
-
-enum PdStatus {
-  PENDING
-  COMPLETED
-
-  @@map("pd_status")
   @@schema("public")
 }
 

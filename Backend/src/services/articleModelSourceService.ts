@@ -172,8 +172,8 @@ async function resolveFramingAndGender(row: Record<string, any>): Promise<{
     ?? 'male';
   console.log(`[GenderDebug] ${artNum}: deriveGender("${effectiveRow.division}") → "${gender}"`);
 
-  let bodytype = deriveBodyFraming(effectiveRow.majorCategory, effectiveRow.articleType);
-  let featuredGarment = deriveFeaturedGarment(effectiveRow.majorCategory, effectiveRow.articleType);
+  let bodytype = deriveBodyFraming(effectiveRow.majorCategory);
+  let featuredGarment = deriveFeaturedGarment(effectiveRow.majorCategory);
 
   const code = String(effectiveRow.majorCategory || '').trim();
   if (code) {
@@ -256,9 +256,7 @@ const ARTICLE_SELECT = {
   division: true,
   subDivision: true,
   majorCategory: true,
-  articleType: true,
   colour: true,
-  variantColor: true,
   neck: true,
   neckDetails: true,
   collar: true,
@@ -413,7 +411,7 @@ export async function resolveArticleForGeneration(code: string): Promise<Resolve
   if (withImage.length > 0) {
     // Prefer APPROVED, else the latest (rows already sorted newest-first).
     const row = withImage.find((r) => r.approvalStatus === 'APPROVED') || withImage[0];
-    const colour = String(row.colour || row.variantColor || '').trim();
+    const colour = String(row.colour || '').trim();
     const { gender, bodytype, featuredGarment } = await resolveFramingAndGender(row);
 
     return {

@@ -28,10 +28,10 @@ export const COMBO_SUMMED_FIELDS = [
 export const COMBO_MIRRORED_FIELDS = [
     // Fabric
     'yarn1', 'yarn2', 'fabricMainMvgr', 'weave', 'weaveFullForm', 'composition', 'finish', 'gsm',
-    'macroMvgr', 'macroMvgrFullForm', 'mainMvgr', 'mainMvgrFullForm', 'mFab2', 'mFab2FullForm',
+    'macroMvgr', 'mainMvgr', 'mFab2',
     'shade', 'weight', 'lycra', 'fCount', 'fConstruction', 'fOunce', 'fWidth', 'fabDiv', 'fabVdr',
     // Body
-    'size', 'neck', 'neckDetails', 'collar', 'collarStyle', 'placket', 'sleeve', 'sleeveFold', 'mSet',
+    'neck', 'neckDetails', 'collar', 'collarStyle', 'placket', 'sleeve', 'sleeveFold', 'mSet',
     'bottomFold', 'frontOpenStyle', 'pocketType', 'noOfPocket', 'extraPocket', 'fit', 'pattern', 'length',
     'colour', 'secondaryColour', 'fatherBelt', 'childBelt',
     // VA accessories / processing

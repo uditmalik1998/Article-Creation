@@ -192,6 +192,11 @@ export async function submitFabricArticles(ids: string[], approvedById?: number)
 
     const url = `${SAP_RFC_PROXY_URL}/api/rfc/proxy?env=${SAP_RFC_ENV}`;
 
+    // "Approved By" line on the image watermark.
+    const approverName = approvedById
+        ? (await prisma.user.findUnique({ where: { id: approvedById }, select: { name: true } }))?.name ?? null
+        : null;
+
     const results = await Promise.all(rows.map(async (row) => {
         const majCat = str(row.majorCategory);
 
@@ -327,18 +332,38 @@ export async function submitFabricArticles(ids: string[], approvedById?: number)
             }
 
             // After successful SAP creation, mirror the image to R2 at
-            // fabric_article/<articleNumber> and update the stored URL.
+            // fabric_article/<articleNumber>, stamped with the watermark label like FG,
+            // and update the stored URL. A watermark failure uploads the original image.
             if (isSuccess && sapNumber && row.imageUrl) {
                 try {
                     const imgRes = await fetch(row.imageUrl);
                     if (imgRes.ok) {
                         const contentType = imgRes.headers.get('content-type') || 'image/jpeg';
-                        const mimeBase = contentType.split(';')[0].trim().toLowerCase();
-                        const ext = mimeBase.includes('png') ? 'png'
+                        let mimeBase = contentType.split(';')[0].trim().toLowerCase();
+                        let ext = mimeBase.includes('png') ? 'png'
                             : mimeBase.includes('webp') ? 'webp'
                             : mimeBase.includes('gif') ? 'gif'
                             : 'jpg';
-                        const buffer = Buffer.from(await imgRes.arrayBuffer());
+                        let buffer: Buffer = Buffer.from(await imgRes.arrayBuffer());
+                        const stamped = await storageService.watermarkImage(buffer, {
+                            article_number: sapNumber,
+                            presentation_no: row.pptNumber ?? null,
+                            vendor_code: row.vendorCode ?? null,
+                            vendor_name: row.vendorName ?? null,
+                            division: row.division ?? null,
+                            sub_division: row.subDivision ?? null,
+                            major_category: row.majorCategory ?? null,
+                            design_number: row.designNumber ?? null,
+                            mc_code: masterRow.mcCode ?? null,
+                            hsn_tax_code: masterRow.hsnCd ?? null,
+                            rate: row.rate != null ? Number(row.rate) : null,
+                            approved_by: approverName,
+                        }, sapNumber);
+                        if (stamped) {
+                            buffer = stamped;
+                            mimeBase = 'image/jpeg';
+                            ext = 'jpg';
+                        }
                         const key = `fabric_article/${sapNumber}.${ext}`;
                         const r2Url = await storageService.uploadToPrimaryKey(key, buffer, mimeBase);
                         await prisma.fabricArticleData.update({

@@ -71,7 +71,7 @@ export async function createVariantsForGeneric(genericId: string): Promise<void>
       id: _id, jobId: _jobId, imageUncPath: _unc, createdAt: _ca, updatedAt: _ua,
       approvalStatus: _as, approvedBy: _ab, approvedAt: _aat,
       sapSyncStatus: _sss, sapArticleId: _sai, sapSyncMessage: _ssm,
-      isGeneric: _ig, genericArticleId: _gai, variantSize: _vs, variantColor: _vc,
+      isGeneric: _ig,
       imageExtractionRawData: _ied1,
       ...rest
     } = generic;
