@@ -588,7 +588,6 @@ async function enrichSrmRowWithVlm(
 
       // Misc
       const fashionGrid   = get('fashion_grid', 'fashiongrid');                   if (fashionGrid)   updates.fashionGrid        = fashionGrid;
-      const articleType   = get('article_type', 'articletype');                   if (articleType)   updates.articleType        = articleType;
       const artFashType   = get('article_fashion_type', 'fashion_grade');         if (artFashType)   updates.articleFashionType = artFashType;
 
       // Mark as VLM-enriched

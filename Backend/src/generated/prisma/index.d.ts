@@ -476,14 +476,6 @@ export const ApprovalStatus: {
 export type ApprovalStatus = (typeof ApprovalStatus)[keyof typeof ApprovalStatus]
 
 
-export const PdStatus: {
-  PENDING: 'PENDING',
-  COMPLETED: 'COMPLETED'
-};
-
-export type PdStatus = (typeof PdStatus)[keyof typeof PdStatus]
-
-
 export const SapSyncStatus: {
   NOT_SYNCED: 'NOT_SYNCED',
   PENDING: 'PENDING',
@@ -589,10 +581,6 @@ export const GarmentType: typeof $Enums.GarmentType
 export type ApprovalStatus = $Enums.ApprovalStatus
 
 export const ApprovalStatus: typeof $Enums.ApprovalStatus
-
-export type PdStatus = $Enums.PdStatus
-
-export const PdStatus: typeof $Enums.PdStatus
 
 export type SapSyncStatus = $Enums.SapSyncStatus
 
@@ -16340,7 +16328,6 @@ export namespace Prisma {
     designNumber: string | null
     pptNumber: string | null
     rate: Decimal | null
-    size: string | null
     yarn1: string | null
     yarn2: string | null
     fabricMainMvgr: string | null
@@ -16350,11 +16337,8 @@ export namespace Prisma {
     finish: string | null
     gsm: string | null
     macroMvgr: string | null
-    macroMvgrFullForm: string | null
     mainMvgr: string | null
-    mainMvgrFullForm: string | null
     mFab2: string | null
-    mFab2FullForm: string | null
     shade: string | null
     weight: string | null
     lycra: string | null
@@ -16635,20 +16619,14 @@ export namespace Prisma {
     articleDescription: string | null
     fashionGrid: string | null
     year: string | null
-    articleType: string | null
     presentationsType: string | null
     approvalStatus: $Enums.ApprovalStatus | null
-    pdStatus: $Enums.PdStatus | null
     approvedBy: number | null
     approvedAt: Date | null
     source: string | null
     imageUncPath: string | null
     isOldArticle: boolean | null
     isGeneric: boolean | null
-    genericArticleId: string | null
-    variantSize: string | null
-    variantColor: string | null
-    variantWeight: string | null
     comboRole: $Enums.ComboRole | null
     comboParentId: string | null
     comboChildOrder: number | null
@@ -16698,7 +16676,6 @@ export namespace Prisma {
     designNumber: string | null
     pptNumber: string | null
     rate: Decimal | null
-    size: string | null
     yarn1: string | null
     yarn2: string | null
     fabricMainMvgr: string | null
@@ -16708,11 +16685,8 @@ export namespace Prisma {
     finish: string | null
     gsm: string | null
     macroMvgr: string | null
-    macroMvgrFullForm: string | null
     mainMvgr: string | null
-    mainMvgrFullForm: string | null
     mFab2: string | null
-    mFab2FullForm: string | null
     shade: string | null
     weight: string | null
     lycra: string | null
@@ -16993,20 +16967,14 @@ export namespace Prisma {
     articleDescription: string | null
     fashionGrid: string | null
     year: string | null
-    articleType: string | null
     presentationsType: string | null
     approvalStatus: $Enums.ApprovalStatus | null
-    pdStatus: $Enums.PdStatus | null
     approvedBy: number | null
     approvedAt: Date | null
     source: string | null
     imageUncPath: string | null
     isOldArticle: boolean | null
     isGeneric: boolean | null
-    genericArticleId: string | null
-    variantSize: string | null
-    variantColor: string | null
-    variantWeight: string | null
     comboRole: $Enums.ComboRole | null
     comboParentId: string | null
     comboChildOrder: number | null
@@ -17058,7 +17026,6 @@ export namespace Prisma {
     designNumber: number
     pptNumber: number
     rate: number
-    size: number
     yarn1: number
     yarn2: number
     fabricMainMvgr: number
@@ -17068,11 +17035,8 @@ export namespace Prisma {
     finish: number
     gsm: number
     macroMvgr: number
-    macroMvgrFullForm: number
     mainMvgr: number
-    mainMvgrFullForm: number
     mFab2: number
-    mFab2FullForm: number
     shade: number
     weight: number
     lycra: number
@@ -17355,20 +17319,14 @@ export namespace Prisma {
     articleDescription: number
     fashionGrid: number
     year: number
-    articleType: number
     presentationsType: number
     approvalStatus: number
-    pdStatus: number
     approvedBy: number
     approvedAt: number
     source: number
     imageUncPath: number
     isOldArticle: number
     isGeneric: number
-    genericArticleId: number
-    variantSize: number
-    variantColor: number
-    variantWeight: number
     comboRole: number
     comboParentId: number
     comboChildOrder: number
@@ -17875,7 +17833,6 @@ export namespace Prisma {
     designNumber?: true
     pptNumber?: true
     rate?: true
-    size?: true
     yarn1?: true
     yarn2?: true
     fabricMainMvgr?: true
@@ -17885,11 +17842,8 @@ export namespace Prisma {
     finish?: true
     gsm?: true
     macroMvgr?: true
-    macroMvgrFullForm?: true
     mainMvgr?: true
-    mainMvgrFullForm?: true
     mFab2?: true
-    mFab2FullForm?: true
     shade?: true
     weight?: true
     lycra?: true
@@ -18170,20 +18124,14 @@ export namespace Prisma {
     articleDescription?: true
     fashionGrid?: true
     year?: true
-    articleType?: true
     presentationsType?: true
     approvalStatus?: true
-    pdStatus?: true
     approvedBy?: true
     approvedAt?: true
     source?: true
     imageUncPath?: true
     isOldArticle?: true
     isGeneric?: true
-    genericArticleId?: true
-    variantSize?: true
-    variantColor?: true
-    variantWeight?: true
     comboRole?: true
     comboParentId?: true
     comboChildOrder?: true
@@ -18233,7 +18181,6 @@ export namespace Prisma {
     designNumber?: true
     pptNumber?: true
     rate?: true
-    size?: true
     yarn1?: true
     yarn2?: true
     fabricMainMvgr?: true
@@ -18243,11 +18190,8 @@ export namespace Prisma {
     finish?: true
     gsm?: true
     macroMvgr?: true
-    macroMvgrFullForm?: true
     mainMvgr?: true
-    mainMvgrFullForm?: true
     mFab2?: true
-    mFab2FullForm?: true
     shade?: true
     weight?: true
     lycra?: true
@@ -18528,20 +18472,14 @@ export namespace Prisma {
     articleDescription?: true
     fashionGrid?: true
     year?: true
-    articleType?: true
     presentationsType?: true
     approvalStatus?: true
-    pdStatus?: true
     approvedBy?: true
     approvedAt?: true
     source?: true
     imageUncPath?: true
     isOldArticle?: true
     isGeneric?: true
-    genericArticleId?: true
-    variantSize?: true
-    variantColor?: true
-    variantWeight?: true
     comboRole?: true
     comboParentId?: true
     comboChildOrder?: true
@@ -18593,7 +18531,6 @@ export namespace Prisma {
     designNumber?: true
     pptNumber?: true
     rate?: true
-    size?: true
     yarn1?: true
     yarn2?: true
     fabricMainMvgr?: true
@@ -18603,11 +18540,8 @@ export namespace Prisma {
     finish?: true
     gsm?: true
     macroMvgr?: true
-    macroMvgrFullForm?: true
     mainMvgr?: true
-    mainMvgrFullForm?: true
     mFab2?: true
-    mFab2FullForm?: true
     shade?: true
     weight?: true
     lycra?: true
@@ -18890,20 +18824,14 @@ export namespace Prisma {
     articleDescription?: true
     fashionGrid?: true
     year?: true
-    articleType?: true
     presentationsType?: true
     approvalStatus?: true
-    pdStatus?: true
     approvedBy?: true
     approvedAt?: true
     source?: true
     imageUncPath?: true
     isOldArticle?: true
     isGeneric?: true
-    genericArticleId?: true
-    variantSize?: true
-    variantColor?: true
-    variantWeight?: true
     comboRole?: true
     comboParentId?: true
     comboChildOrder?: true
@@ -19043,7 +18971,6 @@ export namespace Prisma {
     designNumber: string | null
     pptNumber: string | null
     rate: Decimal | null
-    size: string | null
     yarn1: string | null
     yarn2: string | null
     fabricMainMvgr: string | null
@@ -19053,11 +18980,8 @@ export namespace Prisma {
     finish: string | null
     gsm: string | null
     macroMvgr: string | null
-    macroMvgrFullForm: string | null
     mainMvgr: string | null
-    mainMvgrFullForm: string | null
     mFab2: string | null
-    mFab2FullForm: string | null
     shade: string | null
     weight: string | null
     lycra: string | null
@@ -19340,20 +19264,14 @@ export namespace Prisma {
     articleDescription: string | null
     fashionGrid: string | null
     year: string | null
-    articleType: string | null
     presentationsType: string | null
     approvalStatus: $Enums.ApprovalStatus
-    pdStatus: $Enums.PdStatus
     approvedBy: number | null
     approvedAt: Date | null
     source: string | null
     imageUncPath: string | null
     isOldArticle: boolean
     isGeneric: boolean
-    genericArticleId: string | null
-    variantSize: string | null
-    variantColor: string | null
-    variantWeight: string | null
     comboRole: $Enums.ComboRole
     comboParentId: string | null
     comboChildOrder: number | null
@@ -19425,7 +19343,6 @@ export namespace Prisma {
     designNumber?: boolean
     pptNumber?: boolean
     rate?: boolean
-    size?: boolean
     yarn1?: boolean
     yarn2?: boolean
     fabricMainMvgr?: boolean
@@ -19435,11 +19352,8 @@ export namespace Prisma {
     finish?: boolean
     gsm?: boolean
     macroMvgr?: boolean
-    macroMvgrFullForm?: boolean
     mainMvgr?: boolean
-    mainMvgrFullForm?: boolean
     mFab2?: boolean
-    mFab2FullForm?: boolean
     shade?: boolean
     weight?: boolean
     lycra?: boolean
@@ -19722,20 +19636,14 @@ export namespace Prisma {
     articleDescription?: boolean
     fashionGrid?: boolean
     year?: boolean
-    articleType?: boolean
     presentationsType?: boolean
     approvalStatus?: boolean
-    pdStatus?: boolean
     approvedBy?: boolean
     approvedAt?: boolean
     source?: boolean
     imageUncPath?: boolean
     isOldArticle?: boolean
     isGeneric?: boolean
-    genericArticleId?: boolean
-    variantSize?: boolean
-    variantColor?: boolean
-    variantWeight?: boolean
     comboRole?: boolean
     comboParentId?: boolean
     comboChildOrder?: boolean
@@ -19794,7 +19702,6 @@ export namespace Prisma {
     designNumber?: boolean
     pptNumber?: boolean
     rate?: boolean
-    size?: boolean
     yarn1?: boolean
     yarn2?: boolean
     fabricMainMvgr?: boolean
@@ -19804,11 +19711,8 @@ export namespace Prisma {
     finish?: boolean
     gsm?: boolean
     macroMvgr?: boolean
-    macroMvgrFullForm?: boolean
     mainMvgr?: boolean
-    mainMvgrFullForm?: boolean
     mFab2?: boolean
-    mFab2FullForm?: boolean
     shade?: boolean
     weight?: boolean
     lycra?: boolean
@@ -20091,20 +19995,14 @@ export namespace Prisma {
     articleDescription?: boolean
     fashionGrid?: boolean
     year?: boolean
-    articleType?: boolean
     presentationsType?: boolean
     approvalStatus?: boolean
-    pdStatus?: boolean
     approvedBy?: boolean
     approvedAt?: boolean
     source?: boolean
     imageUncPath?: boolean
     isOldArticle?: boolean
     isGeneric?: boolean
-    genericArticleId?: boolean
-    variantSize?: boolean
-    variantColor?: boolean
-    variantWeight?: boolean
     comboRole?: boolean
     comboParentId?: boolean
     comboChildOrder?: boolean
@@ -20160,7 +20058,6 @@ export namespace Prisma {
     designNumber?: boolean
     pptNumber?: boolean
     rate?: boolean
-    size?: boolean
     yarn1?: boolean
     yarn2?: boolean
     fabricMainMvgr?: boolean
@@ -20170,11 +20067,8 @@ export namespace Prisma {
     finish?: boolean
     gsm?: boolean
     macroMvgr?: boolean
-    macroMvgrFullForm?: boolean
     mainMvgr?: boolean
-    mainMvgrFullForm?: boolean
     mFab2?: boolean
-    mFab2FullForm?: boolean
     shade?: boolean
     weight?: boolean
     lycra?: boolean
@@ -20457,20 +20351,14 @@ export namespace Prisma {
     articleDescription?: boolean
     fashionGrid?: boolean
     year?: boolean
-    articleType?: boolean
     presentationsType?: boolean
     approvalStatus?: boolean
-    pdStatus?: boolean
     approvedBy?: boolean
     approvedAt?: boolean
     source?: boolean
     imageUncPath?: boolean
     isOldArticle?: boolean
     isGeneric?: boolean
-    genericArticleId?: boolean
-    variantSize?: boolean
-    variantColor?: boolean
-    variantWeight?: boolean
     comboRole?: boolean
     comboParentId?: boolean
     comboChildOrder?: boolean
@@ -20526,7 +20414,6 @@ export namespace Prisma {
     designNumber?: boolean
     pptNumber?: boolean
     rate?: boolean
-    size?: boolean
     yarn1?: boolean
     yarn2?: boolean
     fabricMainMvgr?: boolean
@@ -20536,11 +20423,8 @@ export namespace Prisma {
     finish?: boolean
     gsm?: boolean
     macroMvgr?: boolean
-    macroMvgrFullForm?: boolean
     mainMvgr?: boolean
-    mainMvgrFullForm?: boolean
     mFab2?: boolean
-    mFab2FullForm?: boolean
     shade?: boolean
     weight?: boolean
     lycra?: boolean
@@ -20823,20 +20707,14 @@ export namespace Prisma {
     articleDescription?: boolean
     fashionGrid?: boolean
     year?: boolean
-    articleType?: boolean
     presentationsType?: boolean
     approvalStatus?: boolean
-    pdStatus?: boolean
     approvedBy?: boolean
     approvedAt?: boolean
     source?: boolean
     imageUncPath?: boolean
     isOldArticle?: boolean
     isGeneric?: boolean
-    genericArticleId?: boolean
-    variantSize?: boolean
-    variantColor?: boolean
-    variantWeight?: boolean
     comboRole?: boolean
     comboParentId?: boolean
     comboChildOrder?: boolean
@@ -20855,7 +20733,7 @@ export namespace Prisma {
     imageExtractionRawData?: boolean
   }
 
-  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageUrl" | "oldImageUrl" | "sourceImageUrl" | "aiCmpCostCutting" | "aiCmpCostStitching" | "aiCmpCostIroning" | "aiCmpCostFinishing" | "backImageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "creatorUser" | "modifyUser" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "size" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "macroMvgrFullForm" | "mainMvgr" | "mainMvgrFullForm" | "mFab2" | "mFab2FullForm" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "totalBgtPrVal" | "totalActPrVal" | "totalVendorPrVal" | "totalFinalPrVal" | "bTrimType" | "bTrimTotalAutoBgt" | "bTrimTotalRoughV2" | "bTrimTotalVdrCost" | "bTrimTotalFinalCost" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "elasticAutoBgt" | "elasticRoughV2" | "elasticVdrCost" | "elasticFinalCost" | "fusingAutoBgt" | "fusingRoughV2" | "fusingVdrCost" | "fusingFinalCost" | "badgeAutoBgt" | "badgeRoughV2" | "badgeVdrCost" | "badgeFinalCost" | "rivetAutoBgt" | "rivetRoughV2" | "rivetVdrCost" | "rivetFinalCost" | "tapeAutoBgt" | "tapeRoughV2" | "tapeVdrCost" | "tapeFinalCost" | "otherAutoBgt" | "otherRoughV2" | "otherVdrCost" | "otherFinalCost" | "adjusterAutoBgt" | "adjusterRoughV2" | "adjusterVdrCost" | "adjusterFinalCost" | "brotchAutoBgt" | "brotchRoughV2" | "brotchVdrCost" | "brotchFinalCost" | "buckleAutoBgt" | "buckleRoughV2" | "buckleVdrCost" | "buckleFinalCost" | "eyeletsAutoBgt" | "eyeletsRoughV2" | "eyeletsVdrCost" | "eyeletsFinalCost" | "hangingDRingAutoBgt" | "hangingDRingRoughV2" | "hangingDRingVdrCost" | "hangingDRingFinalCost" | "hookAutoBgt" | "hookRoughV2" | "hookVdrCost" | "hookFinalCost" | "labelAutoBgt" | "labelRoughV2" | "labelVdrCost" | "labelFinalCost" | "laceAutoBgt" | "laceRoughV2" | "laceVdrCost" | "laceFinalCost" | "pockettingFabricAutoBgt" | "pockettingFabricRoughV2" | "pockettingFabricVdrCost" | "pockettingFabricFinalCost" | "pockettingReadymadeAutoBgt" | "pockettingReadymadeRoughV2" | "pockettingReadymadeVdrCost" | "pockettingReadymadeFinalCost" | "santaAutoBgt" | "santaRoughV2" | "santaVdrCost" | "santaFinalCost" | "stopperAutoBgt" | "stopperRoughV2" | "stopperVdrCost" | "stopperFinalCost" | "tagAutoBgt" | "tagRoughV2" | "tagVdrCost" | "tagFinalCost" | "tasselsAutoBgt" | "tasselsRoughV2" | "tasselsVdrCost" | "tasselsFinalCost" | "mBtnRate" | "mBtnQty" | "dcRate" | "dcQty" | "zipRate" | "zipQty" | "patchRate" | "patchQty" | "hTrfRate" | "hTrfQty" | "elasticRate" | "elasticQty" | "fusingRate" | "fusingQty" | "badgeRate" | "badgeQty" | "rivetRate" | "rivetQty" | "tapeRate" | "tapeQty" | "otherRate" | "otherQty" | "adjusterRate" | "adjusterQty" | "brotchRate" | "brotchQty" | "buckleRate" | "buckleQty" | "eyeletsRate" | "eyeletsQty" | "hangingDRingRate" | "hangingDRingQty" | "hookRate" | "hookQty" | "labelRate" | "labelQty" | "laceRate" | "laceQty" | "pockettingFabricRate" | "pockettingFabricQty" | "pockettingReadymadeRate" | "pockettingReadymadeQty" | "santaRate" | "santaQty" | "stopperRate" | "stopperQty" | "tagRate" | "tagQty" | "tasselsRate" | "tasselsQty" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "vaddPrintJson" | "vaddEmpJson" | "vaddTotalAutoBgt" | "vaddTotalRoughV2" | "vaddTotalVendorCost" | "vaddTotalFinalCost" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "articleType" | "presentationsType" | "approvalStatus" | "pdStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "genericArticleId" | "variantSize" | "variantColor" | "variantWeight" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "setLinkStatus" | "setLinkMessage" | "setLinkAttempts" | "setLinkedAt" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
+  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageUrl" | "oldImageUrl" | "sourceImageUrl" | "aiCmpCostCutting" | "aiCmpCostStitching" | "aiCmpCostIroning" | "aiCmpCostFinishing" | "backImageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "creatorUser" | "modifyUser" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "mainMvgr" | "mFab2" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "totalBgtPrVal" | "totalActPrVal" | "totalVendorPrVal" | "totalFinalPrVal" | "bTrimType" | "bTrimTotalAutoBgt" | "bTrimTotalRoughV2" | "bTrimTotalVdrCost" | "bTrimTotalFinalCost" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "elasticAutoBgt" | "elasticRoughV2" | "elasticVdrCost" | "elasticFinalCost" | "fusingAutoBgt" | "fusingRoughV2" | "fusingVdrCost" | "fusingFinalCost" | "badgeAutoBgt" | "badgeRoughV2" | "badgeVdrCost" | "badgeFinalCost" | "rivetAutoBgt" | "rivetRoughV2" | "rivetVdrCost" | "rivetFinalCost" | "tapeAutoBgt" | "tapeRoughV2" | "tapeVdrCost" | "tapeFinalCost" | "otherAutoBgt" | "otherRoughV2" | "otherVdrCost" | "otherFinalCost" | "adjusterAutoBgt" | "adjusterRoughV2" | "adjusterVdrCost" | "adjusterFinalCost" | "brotchAutoBgt" | "brotchRoughV2" | "brotchVdrCost" | "brotchFinalCost" | "buckleAutoBgt" | "buckleRoughV2" | "buckleVdrCost" | "buckleFinalCost" | "eyeletsAutoBgt" | "eyeletsRoughV2" | "eyeletsVdrCost" | "eyeletsFinalCost" | "hangingDRingAutoBgt" | "hangingDRingRoughV2" | "hangingDRingVdrCost" | "hangingDRingFinalCost" | "hookAutoBgt" | "hookRoughV2" | "hookVdrCost" | "hookFinalCost" | "labelAutoBgt" | "labelRoughV2" | "labelVdrCost" | "labelFinalCost" | "laceAutoBgt" | "laceRoughV2" | "laceVdrCost" | "laceFinalCost" | "pockettingFabricAutoBgt" | "pockettingFabricRoughV2" | "pockettingFabricVdrCost" | "pockettingFabricFinalCost" | "pockettingReadymadeAutoBgt" | "pockettingReadymadeRoughV2" | "pockettingReadymadeVdrCost" | "pockettingReadymadeFinalCost" | "santaAutoBgt" | "santaRoughV2" | "santaVdrCost" | "santaFinalCost" | "stopperAutoBgt" | "stopperRoughV2" | "stopperVdrCost" | "stopperFinalCost" | "tagAutoBgt" | "tagRoughV2" | "tagVdrCost" | "tagFinalCost" | "tasselsAutoBgt" | "tasselsRoughV2" | "tasselsVdrCost" | "tasselsFinalCost" | "mBtnRate" | "mBtnQty" | "dcRate" | "dcQty" | "zipRate" | "zipQty" | "patchRate" | "patchQty" | "hTrfRate" | "hTrfQty" | "elasticRate" | "elasticQty" | "fusingRate" | "fusingQty" | "badgeRate" | "badgeQty" | "rivetRate" | "rivetQty" | "tapeRate" | "tapeQty" | "otherRate" | "otherQty" | "adjusterRate" | "adjusterQty" | "brotchRate" | "brotchQty" | "buckleRate" | "buckleQty" | "eyeletsRate" | "eyeletsQty" | "hangingDRingRate" | "hangingDRingQty" | "hookRate" | "hookQty" | "labelRate" | "labelQty" | "laceRate" | "laceQty" | "pockettingFabricRate" | "pockettingFabricQty" | "pockettingReadymadeRate" | "pockettingReadymadeQty" | "santaRate" | "santaQty" | "stopperRate" | "stopperQty" | "tagRate" | "tagQty" | "tasselsRate" | "tasselsQty" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "vaddPrintJson" | "vaddEmpJson" | "vaddTotalAutoBgt" | "vaddTotalRoughV2" | "vaddTotalVendorCost" | "vaddTotalFinalCost" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "presentationsType" | "approvalStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "setLinkStatus" | "setLinkMessage" | "setLinkAttempts" | "setLinkedAt" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
   export type ExtractionResultFlatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     comboParent?: boolean | ExtractionResultFlat$comboParentArgs<ExtArgs>
@@ -20918,7 +20796,6 @@ export namespace Prisma {
       designNumber: string | null
       pptNumber: string | null
       rate: Prisma.Decimal | null
-      size: string | null
       yarn1: string | null
       yarn2: string | null
       fabricMainMvgr: string | null
@@ -20928,11 +20805,8 @@ export namespace Prisma {
       finish: string | null
       gsm: string | null
       macroMvgr: string | null
-      macroMvgrFullForm: string | null
       mainMvgr: string | null
-      mainMvgrFullForm: string | null
       mFab2: string | null
-      mFab2FullForm: string | null
       shade: string | null
       weight: string | null
       lycra: string | null
@@ -21215,20 +21089,14 @@ export namespace Prisma {
       articleDescription: string | null
       fashionGrid: string | null
       year: string | null
-      articleType: string | null
       presentationsType: string | null
       approvalStatus: $Enums.ApprovalStatus
-      pdStatus: $Enums.PdStatus
       approvedBy: number | null
       approvedAt: Date | null
       source: string | null
       imageUncPath: string | null
       isOldArticle: boolean
       isGeneric: boolean
-      genericArticleId: string | null
-      variantSize: string | null
-      variantColor: string | null
-      variantWeight: string | null
       comboRole: $Enums.ComboRole
       comboParentId: string | null
       comboChildOrder: number | null
@@ -21706,7 +21574,6 @@ export namespace Prisma {
     readonly designNumber: FieldRef<"ExtractionResultFlat", 'String'>
     readonly pptNumber: FieldRef<"ExtractionResultFlat", 'String'>
     readonly rate: FieldRef<"ExtractionResultFlat", 'Decimal'>
-    readonly size: FieldRef<"ExtractionResultFlat", 'String'>
     readonly yarn1: FieldRef<"ExtractionResultFlat", 'String'>
     readonly yarn2: FieldRef<"ExtractionResultFlat", 'String'>
     readonly fabricMainMvgr: FieldRef<"ExtractionResultFlat", 'String'>
@@ -21716,11 +21583,8 @@ export namespace Prisma {
     readonly finish: FieldRef<"ExtractionResultFlat", 'String'>
     readonly gsm: FieldRef<"ExtractionResultFlat", 'String'>
     readonly macroMvgr: FieldRef<"ExtractionResultFlat", 'String'>
-    readonly macroMvgrFullForm: FieldRef<"ExtractionResultFlat", 'String'>
     readonly mainMvgr: FieldRef<"ExtractionResultFlat", 'String'>
-    readonly mainMvgrFullForm: FieldRef<"ExtractionResultFlat", 'String'>
     readonly mFab2: FieldRef<"ExtractionResultFlat", 'String'>
-    readonly mFab2FullForm: FieldRef<"ExtractionResultFlat", 'String'>
     readonly shade: FieldRef<"ExtractionResultFlat", 'String'>
     readonly weight: FieldRef<"ExtractionResultFlat", 'String'>
     readonly lycra: FieldRef<"ExtractionResultFlat", 'String'>
@@ -22003,20 +21867,14 @@ export namespace Prisma {
     readonly articleDescription: FieldRef<"ExtractionResultFlat", 'String'>
     readonly fashionGrid: FieldRef<"ExtractionResultFlat", 'String'>
     readonly year: FieldRef<"ExtractionResultFlat", 'String'>
-    readonly articleType: FieldRef<"ExtractionResultFlat", 'String'>
     readonly presentationsType: FieldRef<"ExtractionResultFlat", 'String'>
     readonly approvalStatus: FieldRef<"ExtractionResultFlat", 'ApprovalStatus'>
-    readonly pdStatus: FieldRef<"ExtractionResultFlat", 'PdStatus'>
     readonly approvedBy: FieldRef<"ExtractionResultFlat", 'Int'>
     readonly approvedAt: FieldRef<"ExtractionResultFlat", 'DateTime'>
     readonly source: FieldRef<"ExtractionResultFlat", 'String'>
     readonly imageUncPath: FieldRef<"ExtractionResultFlat", 'String'>
     readonly isOldArticle: FieldRef<"ExtractionResultFlat", 'Boolean'>
     readonly isGeneric: FieldRef<"ExtractionResultFlat", 'Boolean'>
-    readonly genericArticleId: FieldRef<"ExtractionResultFlat", 'String'>
-    readonly variantSize: FieldRef<"ExtractionResultFlat", 'String'>
-    readonly variantColor: FieldRef<"ExtractionResultFlat", 'String'>
-    readonly variantWeight: FieldRef<"ExtractionResultFlat", 'String'>
     readonly comboRole: FieldRef<"ExtractionResultFlat", 'ComboRole'>
     readonly comboParentId: FieldRef<"ExtractionResultFlat", 'String'>
     readonly comboChildOrder: FieldRef<"ExtractionResultFlat", 'Int'>
@@ -92049,7 +91907,6 @@ export namespace Prisma {
     designNumber: 'designNumber',
     pptNumber: 'pptNumber',
     rate: 'rate',
-    size: 'size',
     yarn1: 'yarn1',
     yarn2: 'yarn2',
     fabricMainMvgr: 'fabricMainMvgr',
@@ -92059,11 +91916,8 @@ export namespace Prisma {
     finish: 'finish',
     gsm: 'gsm',
     macroMvgr: 'macroMvgr',
-    macroMvgrFullForm: 'macroMvgrFullForm',
     mainMvgr: 'mainMvgr',
-    mainMvgrFullForm: 'mainMvgrFullForm',
     mFab2: 'mFab2',
-    mFab2FullForm: 'mFab2FullForm',
     shade: 'shade',
     weight: 'weight',
     lycra: 'lycra',
@@ -92346,20 +92200,14 @@ export namespace Prisma {
     articleDescription: 'articleDescription',
     fashionGrid: 'fashionGrid',
     year: 'year',
-    articleType: 'articleType',
     presentationsType: 'presentationsType',
     approvalStatus: 'approvalStatus',
-    pdStatus: 'pdStatus',
     approvedBy: 'approvedBy',
     approvedAt: 'approvedAt',
     source: 'source',
     imageUncPath: 'imageUncPath',
     isOldArticle: 'isOldArticle',
     isGeneric: 'isGeneric',
-    genericArticleId: 'genericArticleId',
-    variantSize: 'variantSize',
-    variantColor: 'variantColor',
-    variantWeight: 'variantWeight',
     comboRole: 'comboRole',
     comboParentId: 'comboParentId',
     comboChildOrder: 'comboChildOrder',
@@ -93947,7 +93795,6 @@ export namespace Prisma {
     vendorName: 'vendorName',
     designNumber: 'designNumber',
     pptNumber: 'pptNumber',
-    size: 'size',
     yarn1: 'yarn1',
     yarn2: 'yarn2',
     fabricMainMvgr: 'fabricMainMvgr',
@@ -93957,11 +93804,8 @@ export namespace Prisma {
     finish: 'finish',
     gsm: 'gsm',
     macroMvgr: 'macroMvgr',
-    macroMvgrFullForm: 'macroMvgrFullForm',
     mainMvgr: 'mainMvgr',
-    mainMvgrFullForm: 'mainMvgrFullForm',
     mFab2: 'mFab2',
-    mFab2FullForm: 'mFab2FullForm',
     shade: 'shade',
     weight: 'weight',
     lycra: 'lycra',
@@ -94035,14 +93879,9 @@ export namespace Prisma {
     articleDescription: 'articleDescription',
     fashionGrid: 'fashionGrid',
     year: 'year',
-    articleType: 'articleType',
     presentationsType: 'presentationsType',
     source: 'source',
     imageUncPath: 'imageUncPath',
-    genericArticleId: 'genericArticleId',
-    variantSize: 'variantSize',
-    variantColor: 'variantColor',
-    variantWeight: 'variantWeight',
     comboParentId: 'comboParentId',
     setGroupId: 'setGroupId',
     setRole: 'setRole',
@@ -95231,20 +95070,6 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'PdStatus'
-   */
-  export type EnumPdStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PdStatus'>
-    
-
-
-  /**
-   * Reference to a field of type 'PdStatus[]'
-   */
-  export type ListEnumPdStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PdStatus[]'>
-    
-
-
-  /**
    * Reference to a field of type 'ComboRole'
    */
   export type EnumComboRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ComboRole'>
@@ -96177,7 +96002,6 @@ export namespace Prisma {
     designNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     pptNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     rate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    size?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     yarn1?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     yarn2?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     fabricMainMvgr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -96187,11 +96011,8 @@ export namespace Prisma {
     finish?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     gsm?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     macroMvgr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    macroMvgrFullForm?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     mainMvgr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    mainMvgrFullForm?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     mFab2?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    mFab2FullForm?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     shade?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     weight?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     lycra?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -96474,20 +96295,14 @@ export namespace Prisma {
     articleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     fashionGrid?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     year?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    articleType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     presentationsType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     approvalStatus?: EnumApprovalStatusFilter<"ExtractionResultFlat"> | $Enums.ApprovalStatus
-    pdStatus?: EnumPdStatusFilter<"ExtractionResultFlat"> | $Enums.PdStatus
     approvedBy?: IntNullableFilter<"ExtractionResultFlat"> | number | null
     approvedAt?: DateTimeNullableFilter<"ExtractionResultFlat"> | Date | string | null
     source?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     imageUncPath?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     isOldArticle?: BoolFilter<"ExtractionResultFlat"> | boolean
     isGeneric?: BoolFilter<"ExtractionResultFlat"> | boolean
-    genericArticleId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    variantSize?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    variantColor?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    variantWeight?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     comboRole?: EnumComboRoleFilter<"ExtractionResultFlat"> | $Enums.ComboRole
     comboParentId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     comboChildOrder?: IntNullableFilter<"ExtractionResultFlat"> | number | null
@@ -96545,7 +96360,6 @@ export namespace Prisma {
     designNumber?: SortOrderInput | SortOrder
     pptNumber?: SortOrderInput | SortOrder
     rate?: SortOrderInput | SortOrder
-    size?: SortOrderInput | SortOrder
     yarn1?: SortOrderInput | SortOrder
     yarn2?: SortOrderInput | SortOrder
     fabricMainMvgr?: SortOrderInput | SortOrder
@@ -96555,11 +96369,8 @@ export namespace Prisma {
     finish?: SortOrderInput | SortOrder
     gsm?: SortOrderInput | SortOrder
     macroMvgr?: SortOrderInput | SortOrder
-    macroMvgrFullForm?: SortOrderInput | SortOrder
     mainMvgr?: SortOrderInput | SortOrder
-    mainMvgrFullForm?: SortOrderInput | SortOrder
     mFab2?: SortOrderInput | SortOrder
-    mFab2FullForm?: SortOrderInput | SortOrder
     shade?: SortOrderInput | SortOrder
     weight?: SortOrderInput | SortOrder
     lycra?: SortOrderInput | SortOrder
@@ -96842,20 +96653,14 @@ export namespace Prisma {
     articleDescription?: SortOrderInput | SortOrder
     fashionGrid?: SortOrderInput | SortOrder
     year?: SortOrderInput | SortOrder
-    articleType?: SortOrderInput | SortOrder
     presentationsType?: SortOrderInput | SortOrder
     approvalStatus?: SortOrder
-    pdStatus?: SortOrder
     approvedBy?: SortOrderInput | SortOrder
     approvedAt?: SortOrderInput | SortOrder
     source?: SortOrderInput | SortOrder
     imageUncPath?: SortOrderInput | SortOrder
     isOldArticle?: SortOrder
     isGeneric?: SortOrder
-    genericArticleId?: SortOrderInput | SortOrder
-    variantSize?: SortOrderInput | SortOrder
-    variantColor?: SortOrderInput | SortOrder
-    variantWeight?: SortOrderInput | SortOrder
     comboRole?: SortOrder
     comboParentId?: SortOrderInput | SortOrder
     comboChildOrder?: SortOrderInput | SortOrder
@@ -96918,7 +96723,6 @@ export namespace Prisma {
     designNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     pptNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     rate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    size?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     yarn1?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     yarn2?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     fabricMainMvgr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -96928,11 +96732,8 @@ export namespace Prisma {
     finish?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     gsm?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     macroMvgr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    macroMvgrFullForm?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     mainMvgr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    mainMvgrFullForm?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     mFab2?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    mFab2FullForm?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     shade?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     weight?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     lycra?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -97215,19 +97016,13 @@ export namespace Prisma {
     articleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     fashionGrid?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     year?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    articleType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     presentationsType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     approvalStatus?: EnumApprovalStatusFilter<"ExtractionResultFlat"> | $Enums.ApprovalStatus
-    pdStatus?: EnumPdStatusFilter<"ExtractionResultFlat"> | $Enums.PdStatus
     approvedBy?: IntNullableFilter<"ExtractionResultFlat"> | number | null
     approvedAt?: DateTimeNullableFilter<"ExtractionResultFlat"> | Date | string | null
     source?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     isOldArticle?: BoolFilter<"ExtractionResultFlat"> | boolean
     isGeneric?: BoolFilter<"ExtractionResultFlat"> | boolean
-    genericArticleId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    variantSize?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    variantColor?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    variantWeight?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     comboRole?: EnumComboRoleFilter<"ExtractionResultFlat"> | $Enums.ComboRole
     comboParentId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     comboChildOrder?: IntNullableFilter<"ExtractionResultFlat"> | number | null
@@ -97285,7 +97080,6 @@ export namespace Prisma {
     designNumber?: SortOrderInput | SortOrder
     pptNumber?: SortOrderInput | SortOrder
     rate?: SortOrderInput | SortOrder
-    size?: SortOrderInput | SortOrder
     yarn1?: SortOrderInput | SortOrder
     yarn2?: SortOrderInput | SortOrder
     fabricMainMvgr?: SortOrderInput | SortOrder
@@ -97295,11 +97089,8 @@ export namespace Prisma {
     finish?: SortOrderInput | SortOrder
     gsm?: SortOrderInput | SortOrder
     macroMvgr?: SortOrderInput | SortOrder
-    macroMvgrFullForm?: SortOrderInput | SortOrder
     mainMvgr?: SortOrderInput | SortOrder
-    mainMvgrFullForm?: SortOrderInput | SortOrder
     mFab2?: SortOrderInput | SortOrder
-    mFab2FullForm?: SortOrderInput | SortOrder
     shade?: SortOrderInput | SortOrder
     weight?: SortOrderInput | SortOrder
     lycra?: SortOrderInput | SortOrder
@@ -97582,20 +97373,14 @@ export namespace Prisma {
     articleDescription?: SortOrderInput | SortOrder
     fashionGrid?: SortOrderInput | SortOrder
     year?: SortOrderInput | SortOrder
-    articleType?: SortOrderInput | SortOrder
     presentationsType?: SortOrderInput | SortOrder
     approvalStatus?: SortOrder
-    pdStatus?: SortOrder
     approvedBy?: SortOrderInput | SortOrder
     approvedAt?: SortOrderInput | SortOrder
     source?: SortOrderInput | SortOrder
     imageUncPath?: SortOrderInput | SortOrder
     isOldArticle?: SortOrder
     isGeneric?: SortOrder
-    genericArticleId?: SortOrderInput | SortOrder
-    variantSize?: SortOrderInput | SortOrder
-    variantColor?: SortOrderInput | SortOrder
-    variantWeight?: SortOrderInput | SortOrder
     comboRole?: SortOrder
     comboParentId?: SortOrderInput | SortOrder
     comboChildOrder?: SortOrderInput | SortOrder
@@ -97656,7 +97441,6 @@ export namespace Prisma {
     designNumber?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     pptNumber?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     rate?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    size?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     yarn1?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     yarn2?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     fabricMainMvgr?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
@@ -97666,11 +97450,8 @@ export namespace Prisma {
     finish?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     gsm?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     macroMvgr?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
-    macroMvgrFullForm?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     mainMvgr?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
-    mainMvgrFullForm?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     mFab2?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
-    mFab2FullForm?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     shade?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     weight?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     lycra?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
@@ -97953,20 +97734,14 @@ export namespace Prisma {
     articleDescription?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     fashionGrid?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     year?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
-    articleType?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     presentationsType?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     approvalStatus?: EnumApprovalStatusWithAggregatesFilter<"ExtractionResultFlat"> | $Enums.ApprovalStatus
-    pdStatus?: EnumPdStatusWithAggregatesFilter<"ExtractionResultFlat"> | $Enums.PdStatus
     approvedBy?: IntNullableWithAggregatesFilter<"ExtractionResultFlat"> | number | null
     approvedAt?: DateTimeNullableWithAggregatesFilter<"ExtractionResultFlat"> | Date | string | null
     source?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     imageUncPath?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     isOldArticle?: BoolWithAggregatesFilter<"ExtractionResultFlat"> | boolean
     isGeneric?: BoolWithAggregatesFilter<"ExtractionResultFlat"> | boolean
-    genericArticleId?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
-    variantSize?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
-    variantColor?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
-    variantWeight?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     comboRole?: EnumComboRoleWithAggregatesFilter<"ExtractionResultFlat"> | $Enums.ComboRole
     comboParentId?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     comboChildOrder?: IntNullableWithAggregatesFilter<"ExtractionResultFlat"> | number | null
@@ -106052,7 +105827,6 @@ export namespace Prisma {
     designNumber?: string | null
     pptNumber?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
-    size?: string | null
     yarn1?: string | null
     yarn2?: string | null
     fabricMainMvgr?: string | null
@@ -106062,11 +105836,8 @@ export namespace Prisma {
     finish?: string | null
     gsm?: string | null
     macroMvgr?: string | null
-    macroMvgrFullForm?: string | null
     mainMvgr?: string | null
-    mainMvgrFullForm?: string | null
     mFab2?: string | null
-    mFab2FullForm?: string | null
     shade?: string | null
     weight?: string | null
     lycra?: string | null
@@ -106349,19 +106120,13 @@ export namespace Prisma {
     articleDescription?: string | null
     fashionGrid?: string | null
     year?: string | null
-    articleType?: string | null
     presentationsType?: string | null
     approvalStatus?: $Enums.ApprovalStatus
-    pdStatus?: $Enums.PdStatus
     approvedAt?: Date | string | null
     source?: string | null
     imageUncPath?: string | null
     isOldArticle?: boolean
     isGeneric?: boolean
-    genericArticleId?: string | null
-    variantSize?: string | null
-    variantColor?: string | null
-    variantWeight?: string | null
     comboRole?: $Enums.ComboRole
     comboChildOrder?: number | null
     setGroupId?: string | null
@@ -106418,7 +106183,6 @@ export namespace Prisma {
     designNumber?: string | null
     pptNumber?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
-    size?: string | null
     yarn1?: string | null
     yarn2?: string | null
     fabricMainMvgr?: string | null
@@ -106428,11 +106192,8 @@ export namespace Prisma {
     finish?: string | null
     gsm?: string | null
     macroMvgr?: string | null
-    macroMvgrFullForm?: string | null
     mainMvgr?: string | null
-    mainMvgrFullForm?: string | null
     mFab2?: string | null
-    mFab2FullForm?: string | null
     shade?: string | null
     weight?: string | null
     lycra?: string | null
@@ -106715,20 +106476,14 @@ export namespace Prisma {
     articleDescription?: string | null
     fashionGrid?: string | null
     year?: string | null
-    articleType?: string | null
     presentationsType?: string | null
     approvalStatus?: $Enums.ApprovalStatus
-    pdStatus?: $Enums.PdStatus
     approvedBy?: number | null
     approvedAt?: Date | string | null
     source?: string | null
     imageUncPath?: string | null
     isOldArticle?: boolean
     isGeneric?: boolean
-    genericArticleId?: string | null
-    variantSize?: string | null
-    variantColor?: string | null
-    variantWeight?: string | null
     comboRole?: $Enums.ComboRole
     comboParentId?: string | null
     comboChildOrder?: number | null
@@ -106782,7 +106537,6 @@ export namespace Prisma {
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    size?: NullableStringFieldUpdateOperationsInput | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
     fabricMainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
@@ -106792,11 +106546,8 @@ export namespace Prisma {
     finish?: NullableStringFieldUpdateOperationsInput | string | null
     gsm?: NullableStringFieldUpdateOperationsInput | string | null
     macroMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    macroMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    mainMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mFab2?: NullableStringFieldUpdateOperationsInput | string | null
-    mFab2FullForm?: NullableStringFieldUpdateOperationsInput | string | null
     shade?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: NullableStringFieldUpdateOperationsInput | string | null
     lycra?: NullableStringFieldUpdateOperationsInput | string | null
@@ -107079,19 +106830,13 @@ export namespace Prisma {
     articleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
     year?: NullableStringFieldUpdateOperationsInput | string | null
-    articleType?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
-    pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     imageUncPath?: NullableStringFieldUpdateOperationsInput | string | null
     isOldArticle?: BoolFieldUpdateOperationsInput | boolean
     isGeneric?: BoolFieldUpdateOperationsInput | boolean
-    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
-    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
-    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
-    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
     comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
     comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -107148,7 +106893,6 @@ export namespace Prisma {
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    size?: NullableStringFieldUpdateOperationsInput | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
     fabricMainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
@@ -107158,11 +106902,8 @@ export namespace Prisma {
     finish?: NullableStringFieldUpdateOperationsInput | string | null
     gsm?: NullableStringFieldUpdateOperationsInput | string | null
     macroMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    macroMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    mainMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mFab2?: NullableStringFieldUpdateOperationsInput | string | null
-    mFab2FullForm?: NullableStringFieldUpdateOperationsInput | string | null
     shade?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: NullableStringFieldUpdateOperationsInput | string | null
     lycra?: NullableStringFieldUpdateOperationsInput | string | null
@@ -107445,20 +107186,14 @@ export namespace Prisma {
     articleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
     year?: NullableStringFieldUpdateOperationsInput | string | null
-    articleType?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
-    pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     imageUncPath?: NullableStringFieldUpdateOperationsInput | string | null
     isOldArticle?: BoolFieldUpdateOperationsInput | boolean
     isGeneric?: BoolFieldUpdateOperationsInput | boolean
-    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
-    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
-    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
-    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
     comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
     comboParentId?: NullableStringFieldUpdateOperationsInput | string | null
     comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
@@ -107513,7 +107248,6 @@ export namespace Prisma {
     designNumber?: string | null
     pptNumber?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
-    size?: string | null
     yarn1?: string | null
     yarn2?: string | null
     fabricMainMvgr?: string | null
@@ -107523,11 +107257,8 @@ export namespace Prisma {
     finish?: string | null
     gsm?: string | null
     macroMvgr?: string | null
-    macroMvgrFullForm?: string | null
     mainMvgr?: string | null
-    mainMvgrFullForm?: string | null
     mFab2?: string | null
-    mFab2FullForm?: string | null
     shade?: string | null
     weight?: string | null
     lycra?: string | null
@@ -107810,20 +107541,14 @@ export namespace Prisma {
     articleDescription?: string | null
     fashionGrid?: string | null
     year?: string | null
-    articleType?: string | null
     presentationsType?: string | null
     approvalStatus?: $Enums.ApprovalStatus
-    pdStatus?: $Enums.PdStatus
     approvedBy?: number | null
     approvedAt?: Date | string | null
     source?: string | null
     imageUncPath?: string | null
     isOldArticle?: boolean
     isGeneric?: boolean
-    genericArticleId?: string | null
-    variantSize?: string | null
-    variantColor?: string | null
-    variantWeight?: string | null
     comboRole?: $Enums.ComboRole
     comboParentId?: string | null
     comboChildOrder?: number | null
@@ -107875,7 +107600,6 @@ export namespace Prisma {
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    size?: NullableStringFieldUpdateOperationsInput | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
     fabricMainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
@@ -107885,11 +107609,8 @@ export namespace Prisma {
     finish?: NullableStringFieldUpdateOperationsInput | string | null
     gsm?: NullableStringFieldUpdateOperationsInput | string | null
     macroMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    macroMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    mainMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mFab2?: NullableStringFieldUpdateOperationsInput | string | null
-    mFab2FullForm?: NullableStringFieldUpdateOperationsInput | string | null
     shade?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: NullableStringFieldUpdateOperationsInput | string | null
     lycra?: NullableStringFieldUpdateOperationsInput | string | null
@@ -108172,19 +107893,13 @@ export namespace Prisma {
     articleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
     year?: NullableStringFieldUpdateOperationsInput | string | null
-    articleType?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
-    pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     imageUncPath?: NullableStringFieldUpdateOperationsInput | string | null
     isOldArticle?: BoolFieldUpdateOperationsInput | boolean
     isGeneric?: BoolFieldUpdateOperationsInput | boolean
-    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
-    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
-    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
-    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
     comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
     comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -108236,7 +107951,6 @@ export namespace Prisma {
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    size?: NullableStringFieldUpdateOperationsInput | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
     fabricMainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
@@ -108246,11 +107960,8 @@ export namespace Prisma {
     finish?: NullableStringFieldUpdateOperationsInput | string | null
     gsm?: NullableStringFieldUpdateOperationsInput | string | null
     macroMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    macroMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    mainMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mFab2?: NullableStringFieldUpdateOperationsInput | string | null
-    mFab2FullForm?: NullableStringFieldUpdateOperationsInput | string | null
     shade?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: NullableStringFieldUpdateOperationsInput | string | null
     lycra?: NullableStringFieldUpdateOperationsInput | string | null
@@ -108533,20 +108244,14 @@ export namespace Prisma {
     articleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
     year?: NullableStringFieldUpdateOperationsInput | string | null
-    articleType?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
-    pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     imageUncPath?: NullableStringFieldUpdateOperationsInput | string | null
     isOldArticle?: BoolFieldUpdateOperationsInput | boolean
     isGeneric?: BoolFieldUpdateOperationsInput | boolean
-    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
-    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
-    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
-    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
     comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
     comboParentId?: NullableStringFieldUpdateOperationsInput | string | null
     comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
@@ -118307,13 +118012,6 @@ export namespace Prisma {
     not?: NestedEnumApprovalStatusFilter<$PrismaModel> | $Enums.ApprovalStatus
   }
 
-  export type EnumPdStatusFilter<$PrismaModel = never> = {
-    equals?: $Enums.PdStatus | EnumPdStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.PdStatus[] | ListEnumPdStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.PdStatus[] | ListEnumPdStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumPdStatusFilter<$PrismaModel> | $Enums.PdStatus
-  }
-
   export type EnumComboRoleFilter<$PrismaModel = never> = {
     equals?: $Enums.ComboRole | EnumComboRoleFieldRefInput<$PrismaModel>
     in?: $Enums.ComboRole[] | ListEnumComboRoleFieldRefInput<$PrismaModel>
@@ -118393,7 +118091,6 @@ export namespace Prisma {
     designNumber?: SortOrder
     pptNumber?: SortOrder
     rate?: SortOrder
-    size?: SortOrder
     yarn1?: SortOrder
     yarn2?: SortOrder
     fabricMainMvgr?: SortOrder
@@ -118403,11 +118100,8 @@ export namespace Prisma {
     finish?: SortOrder
     gsm?: SortOrder
     macroMvgr?: SortOrder
-    macroMvgrFullForm?: SortOrder
     mainMvgr?: SortOrder
-    mainMvgrFullForm?: SortOrder
     mFab2?: SortOrder
-    mFab2FullForm?: SortOrder
     shade?: SortOrder
     weight?: SortOrder
     lycra?: SortOrder
@@ -118690,20 +118384,14 @@ export namespace Prisma {
     articleDescription?: SortOrder
     fashionGrid?: SortOrder
     year?: SortOrder
-    articleType?: SortOrder
     presentationsType?: SortOrder
     approvalStatus?: SortOrder
-    pdStatus?: SortOrder
     approvedBy?: SortOrder
     approvedAt?: SortOrder
     source?: SortOrder
     imageUncPath?: SortOrder
     isOldArticle?: SortOrder
     isGeneric?: SortOrder
-    genericArticleId?: SortOrder
-    variantSize?: SortOrder
-    variantColor?: SortOrder
-    variantWeight?: SortOrder
     comboRole?: SortOrder
     comboParentId?: SortOrder
     comboChildOrder?: SortOrder
@@ -118981,7 +118669,6 @@ export namespace Prisma {
     designNumber?: SortOrder
     pptNumber?: SortOrder
     rate?: SortOrder
-    size?: SortOrder
     yarn1?: SortOrder
     yarn2?: SortOrder
     fabricMainMvgr?: SortOrder
@@ -118991,11 +118678,8 @@ export namespace Prisma {
     finish?: SortOrder
     gsm?: SortOrder
     macroMvgr?: SortOrder
-    macroMvgrFullForm?: SortOrder
     mainMvgr?: SortOrder
-    mainMvgrFullForm?: SortOrder
     mFab2?: SortOrder
-    mFab2FullForm?: SortOrder
     shade?: SortOrder
     weight?: SortOrder
     lycra?: SortOrder
@@ -119276,20 +118960,14 @@ export namespace Prisma {
     articleDescription?: SortOrder
     fashionGrid?: SortOrder
     year?: SortOrder
-    articleType?: SortOrder
     presentationsType?: SortOrder
     approvalStatus?: SortOrder
-    pdStatus?: SortOrder
     approvedBy?: SortOrder
     approvedAt?: SortOrder
     source?: SortOrder
     imageUncPath?: SortOrder
     isOldArticle?: SortOrder
     isGeneric?: SortOrder
-    genericArticleId?: SortOrder
-    variantSize?: SortOrder
-    variantColor?: SortOrder
-    variantWeight?: SortOrder
     comboRole?: SortOrder
     comboParentId?: SortOrder
     comboChildOrder?: SortOrder
@@ -119339,7 +119017,6 @@ export namespace Prisma {
     designNumber?: SortOrder
     pptNumber?: SortOrder
     rate?: SortOrder
-    size?: SortOrder
     yarn1?: SortOrder
     yarn2?: SortOrder
     fabricMainMvgr?: SortOrder
@@ -119349,11 +119026,8 @@ export namespace Prisma {
     finish?: SortOrder
     gsm?: SortOrder
     macroMvgr?: SortOrder
-    macroMvgrFullForm?: SortOrder
     mainMvgr?: SortOrder
-    mainMvgrFullForm?: SortOrder
     mFab2?: SortOrder
-    mFab2FullForm?: SortOrder
     shade?: SortOrder
     weight?: SortOrder
     lycra?: SortOrder
@@ -119634,20 +119308,14 @@ export namespace Prisma {
     articleDescription?: SortOrder
     fashionGrid?: SortOrder
     year?: SortOrder
-    articleType?: SortOrder
     presentationsType?: SortOrder
     approvalStatus?: SortOrder
-    pdStatus?: SortOrder
     approvedBy?: SortOrder
     approvedAt?: SortOrder
     source?: SortOrder
     imageUncPath?: SortOrder
     isOldArticle?: SortOrder
     isGeneric?: SortOrder
-    genericArticleId?: SortOrder
-    variantSize?: SortOrder
-    variantColor?: SortOrder
-    variantWeight?: SortOrder
     comboRole?: SortOrder
     comboParentId?: SortOrder
     comboChildOrder?: SortOrder
@@ -119900,16 +119568,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumApprovalStatusFilter<$PrismaModel>
     _max?: NestedEnumApprovalStatusFilter<$PrismaModel>
-  }
-
-  export type EnumPdStatusWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.PdStatus | EnumPdStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.PdStatus[] | ListEnumPdStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.PdStatus[] | ListEnumPdStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumPdStatusWithAggregatesFilter<$PrismaModel> | $Enums.PdStatus
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumPdStatusFilter<$PrismaModel>
-    _max?: NestedEnumPdStatusFilter<$PrismaModel>
   }
 
   export type EnumComboRoleWithAggregatesFilter<$PrismaModel = never> = {
@@ -125768,10 +125426,6 @@ export namespace Prisma {
     set?: $Enums.ApprovalStatus
   }
 
-  export type EnumPdStatusFieldUpdateOperationsInput = {
-    set?: $Enums.PdStatus
-  }
-
   export type EnumComboRoleFieldUpdateOperationsInput = {
     set?: $Enums.ComboRole
   }
@@ -126921,13 +126575,6 @@ export namespace Prisma {
     not?: NestedEnumApprovalStatusFilter<$PrismaModel> | $Enums.ApprovalStatus
   }
 
-  export type NestedEnumPdStatusFilter<$PrismaModel = never> = {
-    equals?: $Enums.PdStatus | EnumPdStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.PdStatus[] | ListEnumPdStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.PdStatus[] | ListEnumPdStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumPdStatusFilter<$PrismaModel> | $Enums.PdStatus
-  }
-
   export type NestedEnumComboRoleFilter<$PrismaModel = never> = {
     equals?: $Enums.ComboRole | EnumComboRoleFieldRefInput<$PrismaModel>
     in?: $Enums.ComboRole[] | ListEnumComboRoleFieldRefInput<$PrismaModel>
@@ -126950,16 +126597,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumApprovalStatusFilter<$PrismaModel>
     _max?: NestedEnumApprovalStatusFilter<$PrismaModel>
-  }
-
-  export type NestedEnumPdStatusWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.PdStatus | EnumPdStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.PdStatus[] | ListEnumPdStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.PdStatus[] | ListEnumPdStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumPdStatusWithAggregatesFilter<$PrismaModel> | $Enums.PdStatus
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumPdStatusFilter<$PrismaModel>
-    _max?: NestedEnumPdStatusFilter<$PrismaModel>
   }
 
   export type NestedEnumComboRoleWithAggregatesFilter<$PrismaModel = never> = {
@@ -128197,7 +127834,6 @@ export namespace Prisma {
     designNumber?: string | null
     pptNumber?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
-    size?: string | null
     yarn1?: string | null
     yarn2?: string | null
     fabricMainMvgr?: string | null
@@ -128207,11 +127843,8 @@ export namespace Prisma {
     finish?: string | null
     gsm?: string | null
     macroMvgr?: string | null
-    macroMvgrFullForm?: string | null
     mainMvgr?: string | null
-    mainMvgrFullForm?: string | null
     mFab2?: string | null
-    mFab2FullForm?: string | null
     shade?: string | null
     weight?: string | null
     lycra?: string | null
@@ -128494,19 +128127,13 @@ export namespace Prisma {
     articleDescription?: string | null
     fashionGrid?: string | null
     year?: string | null
-    articleType?: string | null
     presentationsType?: string | null
     approvalStatus?: $Enums.ApprovalStatus
-    pdStatus?: $Enums.PdStatus
     approvedAt?: Date | string | null
     source?: string | null
     imageUncPath?: string | null
     isOldArticle?: boolean
     isGeneric?: boolean
-    genericArticleId?: string | null
-    variantSize?: string | null
-    variantColor?: string | null
-    variantWeight?: string | null
     comboRole?: $Enums.ComboRole
     comboChildOrder?: number | null
     setGroupId?: string | null
@@ -128561,7 +128188,6 @@ export namespace Prisma {
     designNumber?: string | null
     pptNumber?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
-    size?: string | null
     yarn1?: string | null
     yarn2?: string | null
     fabricMainMvgr?: string | null
@@ -128571,11 +128197,8 @@ export namespace Prisma {
     finish?: string | null
     gsm?: string | null
     macroMvgr?: string | null
-    macroMvgrFullForm?: string | null
     mainMvgr?: string | null
-    mainMvgrFullForm?: string | null
     mFab2?: string | null
-    mFab2FullForm?: string | null
     shade?: string | null
     weight?: string | null
     lycra?: string | null
@@ -128858,20 +128481,14 @@ export namespace Prisma {
     articleDescription?: string | null
     fashionGrid?: string | null
     year?: string | null
-    articleType?: string | null
     presentationsType?: string | null
     approvalStatus?: $Enums.ApprovalStatus
-    pdStatus?: $Enums.PdStatus
     approvedBy?: number | null
     approvedAt?: Date | string | null
     source?: string | null
     imageUncPath?: string | null
     isOldArticle?: boolean
     isGeneric?: boolean
-    genericArticleId?: string | null
-    variantSize?: string | null
-    variantColor?: string | null
-    variantWeight?: string | null
     comboRole?: $Enums.ComboRole
     comboParentId?: string | null
     comboChildOrder?: number | null
@@ -129035,7 +128652,6 @@ export namespace Prisma {
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    size?: NullableStringFieldUpdateOperationsInput | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
     fabricMainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
@@ -129045,11 +128661,8 @@ export namespace Prisma {
     finish?: NullableStringFieldUpdateOperationsInput | string | null
     gsm?: NullableStringFieldUpdateOperationsInput | string | null
     macroMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    macroMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    mainMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mFab2?: NullableStringFieldUpdateOperationsInput | string | null
-    mFab2FullForm?: NullableStringFieldUpdateOperationsInput | string | null
     shade?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: NullableStringFieldUpdateOperationsInput | string | null
     lycra?: NullableStringFieldUpdateOperationsInput | string | null
@@ -129332,19 +128945,13 @@ export namespace Prisma {
     articleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
     year?: NullableStringFieldUpdateOperationsInput | string | null
-    articleType?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
-    pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     imageUncPath?: NullableStringFieldUpdateOperationsInput | string | null
     isOldArticle?: BoolFieldUpdateOperationsInput | boolean
     isGeneric?: BoolFieldUpdateOperationsInput | boolean
-    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
-    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
-    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
-    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
     comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
     comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -129399,7 +129006,6 @@ export namespace Prisma {
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    size?: NullableStringFieldUpdateOperationsInput | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
     fabricMainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
@@ -129409,11 +129015,8 @@ export namespace Prisma {
     finish?: NullableStringFieldUpdateOperationsInput | string | null
     gsm?: NullableStringFieldUpdateOperationsInput | string | null
     macroMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    macroMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    mainMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mFab2?: NullableStringFieldUpdateOperationsInput | string | null
-    mFab2FullForm?: NullableStringFieldUpdateOperationsInput | string | null
     shade?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: NullableStringFieldUpdateOperationsInput | string | null
     lycra?: NullableStringFieldUpdateOperationsInput | string | null
@@ -129696,20 +129299,14 @@ export namespace Prisma {
     articleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
     year?: NullableStringFieldUpdateOperationsInput | string | null
-    articleType?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
-    pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     imageUncPath?: NullableStringFieldUpdateOperationsInput | string | null
     isOldArticle?: BoolFieldUpdateOperationsInput | boolean
     isGeneric?: BoolFieldUpdateOperationsInput | boolean
-    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
-    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
-    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
-    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
     comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
     comboParentId?: NullableStringFieldUpdateOperationsInput | string | null
     comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
@@ -129805,7 +129402,6 @@ export namespace Prisma {
     designNumber?: string | null
     pptNumber?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
-    size?: string | null
     yarn1?: string | null
     yarn2?: string | null
     fabricMainMvgr?: string | null
@@ -129815,11 +129411,8 @@ export namespace Prisma {
     finish?: string | null
     gsm?: string | null
     macroMvgr?: string | null
-    macroMvgrFullForm?: string | null
     mainMvgr?: string | null
-    mainMvgrFullForm?: string | null
     mFab2?: string | null
-    mFab2FullForm?: string | null
     shade?: string | null
     weight?: string | null
     lycra?: string | null
@@ -130102,19 +129695,13 @@ export namespace Prisma {
     articleDescription?: string | null
     fashionGrid?: string | null
     year?: string | null
-    articleType?: string | null
     presentationsType?: string | null
     approvalStatus?: $Enums.ApprovalStatus
-    pdStatus?: $Enums.PdStatus
     approvedAt?: Date | string | null
     source?: string | null
     imageUncPath?: string | null
     isOldArticle?: boolean
     isGeneric?: boolean
-    genericArticleId?: string | null
-    variantSize?: string | null
-    variantColor?: string | null
-    variantWeight?: string | null
     comboRole?: $Enums.ComboRole
     comboChildOrder?: number | null
     setGroupId?: string | null
@@ -130170,7 +129757,6 @@ export namespace Prisma {
     designNumber?: string | null
     pptNumber?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
-    size?: string | null
     yarn1?: string | null
     yarn2?: string | null
     fabricMainMvgr?: string | null
@@ -130180,11 +129766,8 @@ export namespace Prisma {
     finish?: string | null
     gsm?: string | null
     macroMvgr?: string | null
-    macroMvgrFullForm?: string | null
     mainMvgr?: string | null
-    mainMvgrFullForm?: string | null
     mFab2?: string | null
-    mFab2FullForm?: string | null
     shade?: string | null
     weight?: string | null
     lycra?: string | null
@@ -130467,20 +130050,14 @@ export namespace Prisma {
     articleDescription?: string | null
     fashionGrid?: string | null
     year?: string | null
-    articleType?: string | null
     presentationsType?: string | null
     approvalStatus?: $Enums.ApprovalStatus
-    pdStatus?: $Enums.PdStatus
     approvedBy?: number | null
     approvedAt?: Date | string | null
     source?: string | null
     imageUncPath?: string | null
     isOldArticle?: boolean
     isGeneric?: boolean
-    genericArticleId?: string | null
-    variantSize?: string | null
-    variantColor?: string | null
-    variantWeight?: string | null
     comboRole?: $Enums.ComboRole
     comboParentId?: string | null
     comboChildOrder?: number | null
@@ -130538,7 +130115,6 @@ export namespace Prisma {
     designNumber?: string | null
     pptNumber?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
-    size?: string | null
     yarn1?: string | null
     yarn2?: string | null
     fabricMainMvgr?: string | null
@@ -130548,11 +130124,8 @@ export namespace Prisma {
     finish?: string | null
     gsm?: string | null
     macroMvgr?: string | null
-    macroMvgrFullForm?: string | null
     mainMvgr?: string | null
-    mainMvgrFullForm?: string | null
     mFab2?: string | null
-    mFab2FullForm?: string | null
     shade?: string | null
     weight?: string | null
     lycra?: string | null
@@ -130835,19 +130408,13 @@ export namespace Prisma {
     articleDescription?: string | null
     fashionGrid?: string | null
     year?: string | null
-    articleType?: string | null
     presentationsType?: string | null
     approvalStatus?: $Enums.ApprovalStatus
-    pdStatus?: $Enums.PdStatus
     approvedAt?: Date | string | null
     source?: string | null
     imageUncPath?: string | null
     isOldArticle?: boolean
     isGeneric?: boolean
-    genericArticleId?: string | null
-    variantSize?: string | null
-    variantColor?: string | null
-    variantWeight?: string | null
     comboRole?: $Enums.ComboRole
     comboChildOrder?: number | null
     setGroupId?: string | null
@@ -130903,7 +130470,6 @@ export namespace Prisma {
     designNumber?: string | null
     pptNumber?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
-    size?: string | null
     yarn1?: string | null
     yarn2?: string | null
     fabricMainMvgr?: string | null
@@ -130913,11 +130479,8 @@ export namespace Prisma {
     finish?: string | null
     gsm?: string | null
     macroMvgr?: string | null
-    macroMvgrFullForm?: string | null
     mainMvgr?: string | null
-    mainMvgrFullForm?: string | null
     mFab2?: string | null
-    mFab2FullForm?: string | null
     shade?: string | null
     weight?: string | null
     lycra?: string | null
@@ -131200,20 +130763,14 @@ export namespace Prisma {
     articleDescription?: string | null
     fashionGrid?: string | null
     year?: string | null
-    articleType?: string | null
     presentationsType?: string | null
     approvalStatus?: $Enums.ApprovalStatus
-    pdStatus?: $Enums.PdStatus
     approvedBy?: number | null
     approvedAt?: Date | string | null
     source?: string | null
     imageUncPath?: string | null
     isOldArticle?: boolean
     isGeneric?: boolean
-    genericArticleId?: string | null
-    variantSize?: string | null
-    variantColor?: string | null
-    variantWeight?: string | null
     comboRole?: $Enums.ComboRole
     comboChildOrder?: number | null
     setGroupId?: string | null
@@ -131424,7 +130981,6 @@ export namespace Prisma {
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    size?: NullableStringFieldUpdateOperationsInput | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
     fabricMainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
@@ -131434,11 +130990,8 @@ export namespace Prisma {
     finish?: NullableStringFieldUpdateOperationsInput | string | null
     gsm?: NullableStringFieldUpdateOperationsInput | string | null
     macroMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    macroMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    mainMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mFab2?: NullableStringFieldUpdateOperationsInput | string | null
-    mFab2FullForm?: NullableStringFieldUpdateOperationsInput | string | null
     shade?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: NullableStringFieldUpdateOperationsInput | string | null
     lycra?: NullableStringFieldUpdateOperationsInput | string | null
@@ -131721,19 +131274,13 @@ export namespace Prisma {
     articleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
     year?: NullableStringFieldUpdateOperationsInput | string | null
-    articleType?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
-    pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     imageUncPath?: NullableStringFieldUpdateOperationsInput | string | null
     isOldArticle?: BoolFieldUpdateOperationsInput | boolean
     isGeneric?: BoolFieldUpdateOperationsInput | boolean
-    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
-    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
-    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
-    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
     comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
     comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -131789,7 +131336,6 @@ export namespace Prisma {
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    size?: NullableStringFieldUpdateOperationsInput | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
     fabricMainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
@@ -131799,11 +131345,8 @@ export namespace Prisma {
     finish?: NullableStringFieldUpdateOperationsInput | string | null
     gsm?: NullableStringFieldUpdateOperationsInput | string | null
     macroMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    macroMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    mainMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mFab2?: NullableStringFieldUpdateOperationsInput | string | null
-    mFab2FullForm?: NullableStringFieldUpdateOperationsInput | string | null
     shade?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: NullableStringFieldUpdateOperationsInput | string | null
     lycra?: NullableStringFieldUpdateOperationsInput | string | null
@@ -132086,20 +131629,14 @@ export namespace Prisma {
     articleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
     year?: NullableStringFieldUpdateOperationsInput | string | null
-    articleType?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
-    pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     imageUncPath?: NullableStringFieldUpdateOperationsInput | string | null
     isOldArticle?: BoolFieldUpdateOperationsInput | boolean
     isGeneric?: BoolFieldUpdateOperationsInput | boolean
-    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
-    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
-    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
-    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
     comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
     comboParentId?: NullableStringFieldUpdateOperationsInput | string | null
     comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
@@ -132172,7 +131709,6 @@ export namespace Prisma {
     designNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     pptNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     rate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
-    size?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     yarn1?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     yarn2?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     fabricMainMvgr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -132182,11 +131718,8 @@ export namespace Prisma {
     finish?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     gsm?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     macroMvgr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    macroMvgrFullForm?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     mainMvgr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    mainMvgrFullForm?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     mFab2?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    mFab2FullForm?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     shade?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     weight?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     lycra?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -132469,20 +132002,14 @@ export namespace Prisma {
     articleDescription?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     fashionGrid?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     year?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    articleType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     presentationsType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     approvalStatus?: EnumApprovalStatusFilter<"ExtractionResultFlat"> | $Enums.ApprovalStatus
-    pdStatus?: EnumPdStatusFilter<"ExtractionResultFlat"> | $Enums.PdStatus
     approvedBy?: IntNullableFilter<"ExtractionResultFlat"> | number | null
     approvedAt?: DateTimeNullableFilter<"ExtractionResultFlat"> | Date | string | null
     source?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     imageUncPath?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     isOldArticle?: BoolFilter<"ExtractionResultFlat"> | boolean
     isGeneric?: BoolFilter<"ExtractionResultFlat"> | boolean
-    genericArticleId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    variantSize?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    variantColor?: StringNullableFilter<"ExtractionResultFlat"> | string | null
-    variantWeight?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     comboRole?: EnumComboRoleFilter<"ExtractionResultFlat"> | $Enums.ComboRole
     comboParentId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     comboChildOrder?: IntNullableFilter<"ExtractionResultFlat"> | number | null
@@ -132757,7 +132284,6 @@ export namespace Prisma {
     designNumber?: string | null
     pptNumber?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
-    size?: string | null
     yarn1?: string | null
     yarn2?: string | null
     fabricMainMvgr?: string | null
@@ -132767,11 +132293,8 @@ export namespace Prisma {
     finish?: string | null
     gsm?: string | null
     macroMvgr?: string | null
-    macroMvgrFullForm?: string | null
     mainMvgr?: string | null
-    mainMvgrFullForm?: string | null
     mFab2?: string | null
-    mFab2FullForm?: string | null
     shade?: string | null
     weight?: string | null
     lycra?: string | null
@@ -133054,19 +132577,13 @@ export namespace Prisma {
     articleDescription?: string | null
     fashionGrid?: string | null
     year?: string | null
-    articleType?: string | null
     presentationsType?: string | null
     approvalStatus?: $Enums.ApprovalStatus
-    pdStatus?: $Enums.PdStatus
     approvedAt?: Date | string | null
     source?: string | null
     imageUncPath?: string | null
     isOldArticle?: boolean
     isGeneric?: boolean
-    genericArticleId?: string | null
-    variantSize?: string | null
-    variantColor?: string | null
-    variantWeight?: string | null
     comboRole?: $Enums.ComboRole
     comboChildOrder?: number | null
     setGroupId?: string | null
@@ -133122,7 +132639,6 @@ export namespace Prisma {
     designNumber?: string | null
     pptNumber?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
-    size?: string | null
     yarn1?: string | null
     yarn2?: string | null
     fabricMainMvgr?: string | null
@@ -133132,11 +132648,8 @@ export namespace Prisma {
     finish?: string | null
     gsm?: string | null
     macroMvgr?: string | null
-    macroMvgrFullForm?: string | null
     mainMvgr?: string | null
-    mainMvgrFullForm?: string | null
     mFab2?: string | null
-    mFab2FullForm?: string | null
     shade?: string | null
     weight?: string | null
     lycra?: string | null
@@ -133419,19 +132932,13 @@ export namespace Prisma {
     articleDescription?: string | null
     fashionGrid?: string | null
     year?: string | null
-    articleType?: string | null
     presentationsType?: string | null
     approvalStatus?: $Enums.ApprovalStatus
-    pdStatus?: $Enums.PdStatus
     approvedAt?: Date | string | null
     source?: string | null
     imageUncPath?: string | null
     isOldArticle?: boolean
     isGeneric?: boolean
-    genericArticleId?: string | null
-    variantSize?: string | null
-    variantColor?: string | null
-    variantWeight?: string | null
     comboRole?: $Enums.ComboRole
     comboParentId?: string | null
     comboChildOrder?: number | null
@@ -135023,7 +134530,6 @@ export namespace Prisma {
     designNumber?: string | null
     pptNumber?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
-    size?: string | null
     yarn1?: string | null
     yarn2?: string | null
     fabricMainMvgr?: string | null
@@ -135033,11 +134539,8 @@ export namespace Prisma {
     finish?: string | null
     gsm?: string | null
     macroMvgr?: string | null
-    macroMvgrFullForm?: string | null
     mainMvgr?: string | null
-    mainMvgrFullForm?: string | null
     mFab2?: string | null
-    mFab2FullForm?: string | null
     shade?: string | null
     weight?: string | null
     lycra?: string | null
@@ -135320,19 +134823,13 @@ export namespace Prisma {
     articleDescription?: string | null
     fashionGrid?: string | null
     year?: string | null
-    articleType?: string | null
     presentationsType?: string | null
     approvalStatus?: $Enums.ApprovalStatus
-    pdStatus?: $Enums.PdStatus
     approvedAt?: Date | string | null
     source?: string | null
     imageUncPath?: string | null
     isOldArticle?: boolean
     isGeneric?: boolean
-    genericArticleId?: string | null
-    variantSize?: string | null
-    variantColor?: string | null
-    variantWeight?: string | null
     comboRole?: $Enums.ComboRole
     comboChildOrder?: number | null
     setGroupId?: string | null
@@ -135388,7 +134885,6 @@ export namespace Prisma {
     designNumber?: string | null
     pptNumber?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
-    size?: string | null
     yarn1?: string | null
     yarn2?: string | null
     fabricMainMvgr?: string | null
@@ -135398,11 +134894,8 @@ export namespace Prisma {
     finish?: string | null
     gsm?: string | null
     macroMvgr?: string | null
-    macroMvgrFullForm?: string | null
     mainMvgr?: string | null
-    mainMvgrFullForm?: string | null
     mFab2?: string | null
-    mFab2FullForm?: string | null
     shade?: string | null
     weight?: string | null
     lycra?: string | null
@@ -135685,20 +135178,14 @@ export namespace Prisma {
     articleDescription?: string | null
     fashionGrid?: string | null
     year?: string | null
-    articleType?: string | null
     presentationsType?: string | null
     approvalStatus?: $Enums.ApprovalStatus
-    pdStatus?: $Enums.PdStatus
     approvedBy?: number | null
     approvedAt?: Date | string | null
     source?: string | null
     imageUncPath?: string | null
     isOldArticle?: boolean
     isGeneric?: boolean
-    genericArticleId?: string | null
-    variantSize?: string | null
-    variantColor?: string | null
-    variantWeight?: string | null
     comboRole?: $Enums.ComboRole
     comboParentId?: string | null
     comboChildOrder?: number | null
@@ -135804,7 +135291,6 @@ export namespace Prisma {
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    size?: NullableStringFieldUpdateOperationsInput | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
     fabricMainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
@@ -135814,11 +135300,8 @@ export namespace Prisma {
     finish?: NullableStringFieldUpdateOperationsInput | string | null
     gsm?: NullableStringFieldUpdateOperationsInput | string | null
     macroMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    macroMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    mainMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mFab2?: NullableStringFieldUpdateOperationsInput | string | null
-    mFab2FullForm?: NullableStringFieldUpdateOperationsInput | string | null
     shade?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: NullableStringFieldUpdateOperationsInput | string | null
     lycra?: NullableStringFieldUpdateOperationsInput | string | null
@@ -136101,19 +135584,13 @@ export namespace Prisma {
     articleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
     year?: NullableStringFieldUpdateOperationsInput | string | null
-    articleType?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
-    pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     imageUncPath?: NullableStringFieldUpdateOperationsInput | string | null
     isOldArticle?: BoolFieldUpdateOperationsInput | boolean
     isGeneric?: BoolFieldUpdateOperationsInput | boolean
-    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
-    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
-    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
-    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
     comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
     comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -136169,7 +135646,6 @@ export namespace Prisma {
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    size?: NullableStringFieldUpdateOperationsInput | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
     fabricMainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
@@ -136179,11 +135655,8 @@ export namespace Prisma {
     finish?: NullableStringFieldUpdateOperationsInput | string | null
     gsm?: NullableStringFieldUpdateOperationsInput | string | null
     macroMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    macroMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    mainMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mFab2?: NullableStringFieldUpdateOperationsInput | string | null
-    mFab2FullForm?: NullableStringFieldUpdateOperationsInput | string | null
     shade?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: NullableStringFieldUpdateOperationsInput | string | null
     lycra?: NullableStringFieldUpdateOperationsInput | string | null
@@ -136466,20 +135939,14 @@ export namespace Prisma {
     articleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
     year?: NullableStringFieldUpdateOperationsInput | string | null
-    articleType?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
-    pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     imageUncPath?: NullableStringFieldUpdateOperationsInput | string | null
     isOldArticle?: BoolFieldUpdateOperationsInput | boolean
     isGeneric?: BoolFieldUpdateOperationsInput | boolean
-    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
-    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
-    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
-    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
     comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
     comboParentId?: NullableStringFieldUpdateOperationsInput | string | null
     comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
@@ -137153,7 +136620,6 @@ export namespace Prisma {
     designNumber?: string | null
     pptNumber?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
-    size?: string | null
     yarn1?: string | null
     yarn2?: string | null
     fabricMainMvgr?: string | null
@@ -137163,11 +136629,8 @@ export namespace Prisma {
     finish?: string | null
     gsm?: string | null
     macroMvgr?: string | null
-    macroMvgrFullForm?: string | null
     mainMvgr?: string | null
-    mainMvgrFullForm?: string | null
     mFab2?: string | null
-    mFab2FullForm?: string | null
     shade?: string | null
     weight?: string | null
     lycra?: string | null
@@ -137450,20 +136913,14 @@ export namespace Prisma {
     articleDescription?: string | null
     fashionGrid?: string | null
     year?: string | null
-    articleType?: string | null
     presentationsType?: string | null
     approvalStatus?: $Enums.ApprovalStatus
-    pdStatus?: $Enums.PdStatus
     approvedBy?: number | null
     approvedAt?: Date | string | null
     source?: string | null
     imageUncPath?: string | null
     isOldArticle?: boolean
     isGeneric?: boolean
-    genericArticleId?: string | null
-    variantSize?: string | null
-    variantColor?: string | null
-    variantWeight?: string | null
     comboRole?: $Enums.ComboRole
     comboChildOrder?: number | null
     setGroupId?: string | null
@@ -137524,7 +136981,6 @@ export namespace Prisma {
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    size?: NullableStringFieldUpdateOperationsInput | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
     fabricMainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
@@ -137534,11 +136990,8 @@ export namespace Prisma {
     finish?: NullableStringFieldUpdateOperationsInput | string | null
     gsm?: NullableStringFieldUpdateOperationsInput | string | null
     macroMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    macroMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    mainMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mFab2?: NullableStringFieldUpdateOperationsInput | string | null
-    mFab2FullForm?: NullableStringFieldUpdateOperationsInput | string | null
     shade?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: NullableStringFieldUpdateOperationsInput | string | null
     lycra?: NullableStringFieldUpdateOperationsInput | string | null
@@ -137821,19 +137274,13 @@ export namespace Prisma {
     articleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
     year?: NullableStringFieldUpdateOperationsInput | string | null
-    articleType?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
-    pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     imageUncPath?: NullableStringFieldUpdateOperationsInput | string | null
     isOldArticle?: BoolFieldUpdateOperationsInput | boolean
     isGeneric?: BoolFieldUpdateOperationsInput | boolean
-    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
-    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
-    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
-    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
     comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
     comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -137889,7 +137336,6 @@ export namespace Prisma {
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    size?: NullableStringFieldUpdateOperationsInput | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
     fabricMainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
@@ -137899,11 +137345,8 @@ export namespace Prisma {
     finish?: NullableStringFieldUpdateOperationsInput | string | null
     gsm?: NullableStringFieldUpdateOperationsInput | string | null
     macroMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    macroMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    mainMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mFab2?: NullableStringFieldUpdateOperationsInput | string | null
-    mFab2FullForm?: NullableStringFieldUpdateOperationsInput | string | null
     shade?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: NullableStringFieldUpdateOperationsInput | string | null
     lycra?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138186,20 +137629,14 @@ export namespace Prisma {
     articleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
     year?: NullableStringFieldUpdateOperationsInput | string | null
-    articleType?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
-    pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     imageUncPath?: NullableStringFieldUpdateOperationsInput | string | null
     isOldArticle?: BoolFieldUpdateOperationsInput | boolean
     isGeneric?: BoolFieldUpdateOperationsInput | boolean
-    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
-    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
-    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
-    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
     comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
     comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138253,7 +137690,6 @@ export namespace Prisma {
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    size?: NullableStringFieldUpdateOperationsInput | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
     fabricMainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138263,11 +137699,8 @@ export namespace Prisma {
     finish?: NullableStringFieldUpdateOperationsInput | string | null
     gsm?: NullableStringFieldUpdateOperationsInput | string | null
     macroMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    macroMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    mainMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mFab2?: NullableStringFieldUpdateOperationsInput | string | null
-    mFab2FullForm?: NullableStringFieldUpdateOperationsInput | string | null
     shade?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: NullableStringFieldUpdateOperationsInput | string | null
     lycra?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138550,20 +137983,14 @@ export namespace Prisma {
     articleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
     year?: NullableStringFieldUpdateOperationsInput | string | null
-    articleType?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
-    pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     imageUncPath?: NullableStringFieldUpdateOperationsInput | string | null
     isOldArticle?: BoolFieldUpdateOperationsInput | boolean
     isGeneric?: BoolFieldUpdateOperationsInput | boolean
-    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
-    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
-    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
-    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
     comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
     comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138683,7 +138110,6 @@ export namespace Prisma {
     designNumber?: string | null
     pptNumber?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
-    size?: string | null
     yarn1?: string | null
     yarn2?: string | null
     fabricMainMvgr?: string | null
@@ -138693,11 +138119,8 @@ export namespace Prisma {
     finish?: string | null
     gsm?: string | null
     macroMvgr?: string | null
-    macroMvgrFullForm?: string | null
     mainMvgr?: string | null
-    mainMvgrFullForm?: string | null
     mFab2?: string | null
-    mFab2FullForm?: string | null
     shade?: string | null
     weight?: string | null
     lycra?: string | null
@@ -138980,19 +138403,13 @@ export namespace Prisma {
     articleDescription?: string | null
     fashionGrid?: string | null
     year?: string | null
-    articleType?: string | null
     presentationsType?: string | null
     approvalStatus?: $Enums.ApprovalStatus
-    pdStatus?: $Enums.PdStatus
     approvedAt?: Date | string | null
     source?: string | null
     imageUncPath?: string | null
     isOldArticle?: boolean
     isGeneric?: boolean
-    genericArticleId?: string | null
-    variantSize?: string | null
-    variantColor?: string | null
-    variantWeight?: string | null
     comboRole?: $Enums.ComboRole
     comboParentId?: string | null
     comboChildOrder?: number | null
@@ -139159,7 +138576,6 @@ export namespace Prisma {
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    size?: NullableStringFieldUpdateOperationsInput | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
     fabricMainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
@@ -139169,11 +138585,8 @@ export namespace Prisma {
     finish?: NullableStringFieldUpdateOperationsInput | string | null
     gsm?: NullableStringFieldUpdateOperationsInput | string | null
     macroMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    macroMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    mainMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mFab2?: NullableStringFieldUpdateOperationsInput | string | null
-    mFab2FullForm?: NullableStringFieldUpdateOperationsInput | string | null
     shade?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: NullableStringFieldUpdateOperationsInput | string | null
     lycra?: NullableStringFieldUpdateOperationsInput | string | null
@@ -139456,19 +138869,13 @@ export namespace Prisma {
     articleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
     year?: NullableStringFieldUpdateOperationsInput | string | null
-    articleType?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
-    pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     imageUncPath?: NullableStringFieldUpdateOperationsInput | string | null
     isOldArticle?: BoolFieldUpdateOperationsInput | boolean
     isGeneric?: BoolFieldUpdateOperationsInput | boolean
-    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
-    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
-    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
-    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
     comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
     comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -139524,7 +138931,6 @@ export namespace Prisma {
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    size?: NullableStringFieldUpdateOperationsInput | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
     fabricMainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
@@ -139534,11 +138940,8 @@ export namespace Prisma {
     finish?: NullableStringFieldUpdateOperationsInput | string | null
     gsm?: NullableStringFieldUpdateOperationsInput | string | null
     macroMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    macroMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    mainMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mFab2?: NullableStringFieldUpdateOperationsInput | string | null
-    mFab2FullForm?: NullableStringFieldUpdateOperationsInput | string | null
     shade?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: NullableStringFieldUpdateOperationsInput | string | null
     lycra?: NullableStringFieldUpdateOperationsInput | string | null
@@ -139821,19 +139224,13 @@ export namespace Prisma {
     articleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
     year?: NullableStringFieldUpdateOperationsInput | string | null
-    articleType?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
-    pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     imageUncPath?: NullableStringFieldUpdateOperationsInput | string | null
     isOldArticle?: BoolFieldUpdateOperationsInput | boolean
     isGeneric?: BoolFieldUpdateOperationsInput | boolean
-    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
-    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
-    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
-    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
     comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
     comboParentId?: NullableStringFieldUpdateOperationsInput | string | null
     comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
@@ -139888,7 +139285,6 @@ export namespace Prisma {
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
-    size?: NullableStringFieldUpdateOperationsInput | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
     fabricMainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
@@ -139898,11 +139294,8 @@ export namespace Prisma {
     finish?: NullableStringFieldUpdateOperationsInput | string | null
     gsm?: NullableStringFieldUpdateOperationsInput | string | null
     macroMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    macroMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mainMvgr?: NullableStringFieldUpdateOperationsInput | string | null
-    mainMvgrFullForm?: NullableStringFieldUpdateOperationsInput | string | null
     mFab2?: NullableStringFieldUpdateOperationsInput | string | null
-    mFab2FullForm?: NullableStringFieldUpdateOperationsInput | string | null
     shade?: NullableStringFieldUpdateOperationsInput | string | null
     weight?: NullableStringFieldUpdateOperationsInput | string | null
     lycra?: NullableStringFieldUpdateOperationsInput | string | null
@@ -140185,19 +139578,13 @@ export namespace Prisma {
     articleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     fashionGrid?: NullableStringFieldUpdateOperationsInput | string | null
     year?: NullableStringFieldUpdateOperationsInput | string | null
-    articleType?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: EnumApprovalStatusFieldUpdateOperationsInput | $Enums.ApprovalStatus
-    pdStatus?: EnumPdStatusFieldUpdateOperationsInput | $Enums.PdStatus
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     source?: NullableStringFieldUpdateOperationsInput | string | null
     imageUncPath?: NullableStringFieldUpdateOperationsInput | string | null
     isOldArticle?: BoolFieldUpdateOperationsInput | boolean
     isGeneric?: BoolFieldUpdateOperationsInput | boolean
-    genericArticleId?: NullableStringFieldUpdateOperationsInput | string | null
-    variantSize?: NullableStringFieldUpdateOperationsInput | string | null
-    variantColor?: NullableStringFieldUpdateOperationsInput | string | null
-    variantWeight?: NullableStringFieldUpdateOperationsInput | string | null
     comboRole?: EnumComboRoleFieldUpdateOperationsInput | $Enums.ComboRole
     comboParentId?: NullableStringFieldUpdateOperationsInput | string | null
     comboChildOrder?: NullableIntFieldUpdateOperationsInput | number | null
