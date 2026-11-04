@@ -2258,6 +2258,202 @@ export class ApproverController {
     }
 
 
+    // Summary Costing export — "360 REQUIRE AUTO MODIFY" format: one compact block per
+    // FG article (title, header, AFTER 10% MARGIN, TOTAL, then FAB / BODY / B TRIM /
+    // PKG. COST / VAL.ADD). AUTO-V2 / ROUGH-V2 / PR COST come from the article's
+    // saved costing cards; VDR PR PC COST from their vendor totals. Columns B..K,
+    // styled like the template (Calibri 8, thin borders, same fills and widths).
+    static async summaryCostingExport(req: Request, res: Response) {
+        const CMP_PROCESSES = ['cutting', 'stitching', 'ironing', 'finishing'];
+        const PKG_FIELDS = ['boppNetPrice', 'ctnNetPrice', 'barcodeNetPrice', 'kimbleNetPrice', 'taftaNetPrice', 'threadNetPrice'];
+
+        let rows: any[];
+        try {
+            const select: Record<string, true> = {
+                id: true, comboRole: true, comboParentId: true, comboChildOrder: true,
+                sapArticleId: true, articleNumber: true, articleDescription: true, majorCategory: true,
+                mrp: true, rate: true, vendorName: true, autoBgt: true, vendorFabricRate: true,
+                preciseConsumptionKg: true, preciseConsumptionMeter: true,
+                totalBgtPrVal: true, totalActPrVal: true, totalVendorPrVal: true, bodyArticle: true,
+                bTrimType: true, bTrimTotalAutoBgt: true, bTrimTotalRoughV2: true, bTrimTotalVdrCost: true,
+                vaddTotalAutoBgt: true, vaddTotalRoughV2: true, vaddTotalVendorCost: true,
+            };
+            select.pkgCostType = true;
+            for (const f of PKG_FIELDS) select[f] = true;
+            for (const p of CMP_PROCESSES) { select[`${p}BgtPrVal`] = true; select[`${p}ActPrVal`] = true; }
+            rows = await prisma.extractionResultFlat.findMany({
+                where: ApproverController.buildExportWhere(req),
+                orderBy: { approvedAt: { sort: 'desc', nulls: 'last' } },
+                select: select as any,
+            });
+        } catch (err) {
+            console.error('[summaryCostingExport] DB error', err);
+            return res.status(500).json({ error: 'Failed to generate summary costing report' });
+        }
+        rows = groupSetParts(rows);
+
+        // CMP COST presets, exactly as the card fills its empty PR VALs:
+        //   BGT ← rough_cmp_cost_master by major category,
+        //   ACT ← precise_body_article_consumption by body article (SAM × rate).
+        const bgtPresetByMc = new Map<string, Record<string, number | null>>();
+        const actPresetByBody = new Map<string, Record<string, number | null>>();
+        try {
+            const n = (v: any) => (v != null ? Number(v) : null);
+            const [roughRows, preciseRows] = await Promise.all([
+                prisma.roughCmpCostMaster.findMany({
+                    select: { majCat: true, cuttingVal: true, stitchingSam: true, stitchingVal: true, ironingSam: true, ironingVal: true, finishingSam: true, finishingVal: true },
+                }),
+                prisma.preciseBodyArticleConsumption.findMany({
+                    select: { microBodyArticleNumber: true, cuttingValue: true, stitchingSam: true, samVal: true, ironingSam: true, finishingSam: true },
+                }),
+            ]);
+            for (const r of roughRows) {
+                const key = String(r.majCat ?? '').trim().toUpperCase();
+                // The card ignores a master row with no cutting value and no SAMs.
+                if (!key || bgtPresetByMc.has(key) || (!n(r.cuttingVal) && !n(r.stitchingSam) && !n(r.ironingSam) && !n(r.finishingSam))) continue;
+                bgtPresetByMc.set(key, { cutting: n(r.cuttingVal), stitching: n(r.stitchingVal), ironing: n(r.ironingVal), finishing: n(r.finishingVal) });
+            }
+            for (const r of preciseRows) {
+                const key = String(r.microBodyArticleNumber ?? '').trim().toUpperCase();
+                if (!key || actPresetByBody.has(key)) continue;
+                const st = n(r.stitchingSam) ?? 0, sv = n(r.samVal) ?? 0, ir = n(r.ironingSam) ?? 0, fin = n(r.finishingSam) ?? 0;
+                actPresetByBody.set(key, {
+                    cutting: n(r.cuttingValue),
+                    stitching: st && sv ? Number((st * sv).toFixed(4)) : null,
+                    ironing: ir ? Number((ir * 2.5).toFixed(4)) : null,
+                    finishing: fin ? Number((fin * 3).toFixed(4)) : null,
+                });
+            }
+        } catch (err) {
+            console.error('[summaryCostingExport] CMP preset load failed — using saved values only', err);
+        }
+        const parentArticleNo = new Map(rows.filter((a) => a.comboRole === 'PARENT').map((a) => [a.id, a.sapArticleId || a.articleNumber || '']));
+
+        try {
+            const ExcelJS = (await import('exceljs')).default;
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            res.setHeader('Content-Disposition', `attachment; filename="Summary_Costing_${new Date().toISOString().slice(0, 10)}.xlsx"`);
+
+            const wb: any = new (ExcelJS as any).stream.xlsx.WorkbookWriter({ stream: res, useStyles: true, useSharedStrings: true });
+            const ws: any = wb.addWorksheet('Sheet1');
+            // Template widths: C 17, D/F/H 11.57, I 19; the rest default.
+            ws.columns = [
+                {}, {}, { width: 17 }, { width: 11.5703125 }, {}, { width: 11.5703125 },
+                {}, { width: 11.5703125 }, { width: 19 }, {}, {},
+            ];
+
+            const YELLOW = 'FFFFF2CC';
+            const BLUE = 'FFD6E4F0';
+            const PURPLE = 'FFE8DAEF';
+            const NA = 'FFFFC000'; // sheet legend: orange = not applicable
+            const thin = { style: 'thin' };
+            const BOX = { left: thin, right: thin, top: thin, bottom: thin };
+            const num = (v: any): number | null => (v == null || v === '' || Number.isNaN(Number(v)) ? null : Number(v));
+            const sum = (vals: any[]): number | null => {
+                const n = vals.map(num).filter((x): x is number => x != null);
+                return n.length ? Math.round(n.reduce((s, x) => s + x, 0) * 10000) / 10000 : null;
+            };
+            const fx = (formula: string) => ({ formula });
+            const cmpTotal = (a: any, stage: 'Bgt' | 'Act', preset?: Record<string, number | null>): number | null => {
+                const saved = CMP_PROCESSES.map((p) => num(a[`${p}${stage}PrVal`]));
+                const savedSum = sum(saved);
+                const savedTotal = num(a[`total${stage}PrVal`]);
+                if (savedTotal != null && (savedSum == null || Math.abs(savedTotal - savedSum) > 0.00005)) return savedTotal;
+                return sum(CMP_PROCESSES.map((p, i) => saved[i] ?? preset?.[p] ?? null));
+            };
+            type CellStyle = { fill?: string; bold?: boolean; border?: any; size?: number } | null;
+
+            // Writes columns B..K (vals[0] = B) and returns the row number. A column whose
+            // style is null keeps Excel's default font, as in the template.
+            let rowNo = 0;
+            const put = (vals: any[], style?: (col: string) => CellStyle): number => {
+                const row = ws.addRow([null, ...vals]);
+                rowNo = row.number;
+                for (let i = 0; i < 10; i++) {
+                    const col = String.fromCharCode(66 + i); // B..K
+                    const st = style?.(col);
+                    if (!st) continue;
+                    const cell = row.getCell(i + 2);
+                    cell.font = { name: 'Calibri', size: st.size ?? 8, bold: !!st.bold };
+                    if (st.fill) cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: st.fill } };
+                    if (st.border) cell.border = st.border;
+                }
+                row.commit();
+                return rowNo;
+            };
+
+            // As in the template, the first block starts on row 5.
+            for (let i = 0; i < 4; i++) put([]);
+
+            const header = (c: string): CellStyle =>
+                c === 'B' ? {} : { fill: YELLOW, bold: true, border: c === 'K' ? { left: thin, right: thin } : BOX };
+            const summary = (c: string): CellStyle =>
+                c === 'B' ? {} : c === 'K' ? { size: 11 } : { fill: YELLOW, bold: true, border: BOX };
+            // Cost rows: C carries the row colour, D..E too on FAB (orange "na" on the
+            // other rows), F..J are plain bordered cells, K is free.
+            const line = (fill?: string, bold?: boolean, deFill = NA) => (c: string): CellStyle =>
+                c === 'B' ? {} : c === 'K' ? null : c === 'C' ? { fill, bold, border: BOX }
+                    : 'DE'.includes(c) ? { fill: deFill, bold, border: BOX } : { border: BOX };
+            // Cell sources follow the sheet's own notes (360 REQUIRE AUTO MODIFY.xlsx).
+            // FINAL and DIFF are left for the user to fill in.
+            let serial = 0;
+            for (const a of rows) {
+                serial++;
+                const artNo = a.sapArticleId || a.articleNumber || '';
+                const role = a.comboRole === 'PARENT' ? 'WHOLE SET'
+                    : a.comboRole === 'CHILD' ? `PART ${a.comboChildOrder ?? ''} OF SET ${parentArticleNo.get(a.comboParentId) ?? ''}`.replace(/\s+/g, ' ').trim()
+                        : '';
+                const title = [artNo, a.articleDescription, a.majorCategory, a.vendorName,
+                    num(a.mrp) != null ? `MRP ${num(a.mrp)}` : null, role || null].filter(Boolean).join('  |  ');
+
+                const titleR = rowNo + 1;
+                const totalR = titleR + 3, fabR = titleR + 4, vaddR = titleR + 8;
+
+                put([serial, title], (c) => ('BCDE'.includes(c) ? {} : null));
+                put([null, 'MRP', 'BGT FAB PER UOM', 'BGT FAB CONS', 'AUTO -V2', 'ROUGH-V2', 'VEND PR COST', 'VDR PR PC COST', 'FINAL', 'DIFF'], header);
+                const margin = (c: string) => fx(`+${c}${totalR}*110/100`);
+                put([null, 'AFTER 10% MARGIN', null, null, margin('F'), margin('G'), margin('H'), margin('I'), null, null], summary);
+                const sub = (c: string) => fx(`+SUBTOTAL(9,${c}${fabR}:${c}${vaddR})`);
+                // H8 — "display - pr cost": the PR COST on the article's thumbnail card (its rate).
+                put([null, 'TOTAL', null, null, sub('F'), sub('G'), num(a.rate), sub('I'), null, null], summary);
+
+                // FAB — D: Fab grid AUTO-BGT rate; E: precise consumption (Kg, else meters);
+                // F = E×D and G = D×E, both as in the sheet.
+                const cons = num(a.preciseConsumptionKg) ?? num(a.preciseConsumptionMeter);
+                const fabRate = num(a.autoBgt);
+                const vdrRate = num(a.vendorFabricRate);
+                const both = fabRate != null && cons != null;
+                put([null, 'FAB', fabRate, cons, both ? fx(`+E${fabR}*D${fabR}`) : null, both ? fx(`+D${fabR}*E${fabR}`) : null, null,
+                    vdrRate != null && cons != null ? fx(`+E${fabR}*${vdrRate}`) : null, null], line(BLUE, false, BLUE));
+                // BODY — the CMP COST card's TOTAL row: BGT total cost → AUTO-V2, ACT total cost → ROUGH-V2.
+                const bgtPreset = bgtPresetByMc.get(String(a.majorCategory ?? '').trim().toUpperCase());
+                const actPreset = actPresetByBody.get(String(a.bodyArticle ?? '').trim().toUpperCase());
+                put([null, 'BODY', null, null, cmpTotal(a, 'Bgt', bgtPreset), cmpTotal(a, 'Act', actPreset), null, num(a.totalVendorPrVal), null], line(PURPLE, true));
+                // B TRIM — the card's TOTAL row, only when a tab (BT-01 / BT-02) has been saved:
+                // TOTAL AUTO-BGT → AUTO-V2, TOTAL ROUGH-V2 → ROUGH-V2.
+                const bt = a.bTrimType ? a : {};
+                put([null, 'B TRIM', null, null, num(bt.bTrimTotalAutoBgt), num(bt.bTrimTotalRoughV2), null, num(bt.bTrimTotalVdrCost), null], line());
+                // PKG. COST — the card's TOTAL NET RATE, only when a tab (PKG-1 / PKG-2) has been
+                // saved; an unsaved card only shows default rates. Same value in AUTO-V2 and ROUGH-V2.
+                const pkg = a.pkgCostType ? sum(PKG_FIELDS.map((f) => a[f])) : null;
+                put([null, 'PKG. COST', null, null, pkg, pkg, null, null, null], line(YELLOW));
+                // VAL.ADD — the V. ADD card's saved TOTAL row (written by its Save button):
+                // TOTAL AUTO-BGT → AUTO-V2, TOTAL ROUGH-V2 → ROUGH-V2.
+                put([null, 'VAL.ADD', null, null, num(a.vaddTotalAutoBgt), num(a.vaddTotalRoughV2), null, num(a.vaddTotalVendorCost), null], line());
+                if (rowNo !== vaddR) console.warn('[summaryCostingExport] block drift', a.id, rowNo, vaddR);
+                put([]);
+            }
+
+            await ws.commit();
+            await wb.commit();
+            return;
+        } catch (err) {
+            console.error('[summaryCostingExport] stream error', err);
+            if (!res.headersSent) return res.status(500).json({ error: 'Failed to generate summary costing report' });
+            return res.end();
+        }
+    }
+
     // Fetch a single item by id — used by the detail page on direct URL access
     static async getById(req: Request, res: Response) {
         try {
