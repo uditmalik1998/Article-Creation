@@ -55,6 +55,25 @@ interface VendorMasterStatus {
   lastResult?: VendorSyncResult | null;
 }
 
+interface SnowflakeSyncRun {
+  status: string; // OK | OK_COUNT_DIFF | FAIL
+  runStarted: string | null;
+  runFinished: string | null;
+  changedRows: number | null;
+  deletedRows: number | null;
+  supabaseApproved: number | null;
+  snowflakeRows: number | null;
+  message: string | null;
+  triggeredBy: string | null;
+  source: string | null;
+}
+interface SnowflakeSyncStatus {
+  configured: boolean;
+  inProgress: boolean;
+  lastRun: SnowflakeSyncRun | null;
+  lastOk: SnowflakeSyncRun | null;
+}
+
 interface MajCatGridMeta {
   uploadedAt?: string;
   fileName?: string;
@@ -256,6 +275,10 @@ export default function Admin() {
   const [vendorStatus, setVendorStatus] = useState<VendorMasterStatus | null>(null);
   const [vendorStatusLoading, setVendorStatusLoading] = useState(false);
   const [vendorSyncing, setVendorSyncing] = useState(false);
+  // Snowflake flat sync
+  const [snowflakeStatus, setSnowflakeStatus] = useState<SnowflakeSyncStatus | null>(null);
+  const [snowflakeStatusLoading, setSnowflakeStatusLoading] = useState(false);
+  const [snowflakeSyncing, setSnowflakeSyncing] = useState(false);
 
   // raw_articles pipeline (test API)
   const [testFetchMode, setTestFetchMode] = useState<'date' | 'ppt'>('date');
@@ -496,6 +519,62 @@ export default function Admin() {
     } catch (err: any) {
       message.error(err?.message || 'Vendor master sync failed');
       setVendorSyncing(false);
+    }
+  };
+
+  // ─────────────────────────────── Snowflake ───────────────────────────────
+  const loadSnowflakeStatus = useCallback(async () => {
+    setSnowflakeStatusLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/snowflake-sync/status`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load Snowflake sync status');
+      setSnowflakeStatus(data.data);
+      return data.data as SnowflakeSyncStatus;
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to load Snowflake sync status');
+      return null;
+    } finally {
+      setSnowflakeStatusLoading(false);
+    }
+  }, []);
+
+  const runSnowflakeSync = async () => {
+    setSnowflakeSyncing(true);
+    const startedAt = Date.now();
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/snowflake-sync/sync`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Snowflake sync failed');
+      message.info('Snowflake sync started — polling for completion…');
+
+      // Poll every 5s until the server reports it is no longer running.
+      const poll = async () => {
+        const status = await loadSnowflakeStatus();
+        if (status?.inProgress) {
+          setTimeout(poll, 5000);
+          return;
+        }
+        setSnowflakeSyncing(false);
+        const run = status?.lastRun;
+        if (!run || !run.runStarted || new Date(run.runStarted).getTime() < startedAt - 60_000) return;
+        if (run.status === 'FAIL') {
+          message.error(`Snowflake sync failed: ${run.message ?? 'unknown error'}`);
+        } else {
+          message.success(`Snowflake sync complete — ${(run.changedRows ?? 0).toLocaleString('en-IN')} rows sent, ${(run.deletedRows ?? 0).toLocaleString('en-IN')} removed`);
+        }
+      };
+      setTimeout(poll, 5000);
+    } catch (err: any) {
+      message.error(err?.message || 'Snowflake sync failed');
+      setSnowflakeSyncing(false);
     }
   };
 
@@ -2546,6 +2625,7 @@ export default function Admin() {
   useEffect(() => {
     loadData();
     loadVendorStatus();
+    loadSnowflakeStatus();
     loadMajCatGridStatus();
     loadMandatoryGridStatus();
     loadSizeMasterStatus();
@@ -2569,7 +2649,7 @@ export default function Admin() {
     loadBasicTrimMasterStatus();
     loadPreciseFabricArticleStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadVendorStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadSetMcMasterStatus, loadGmSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadMvgrMappingStatus, loadBasicAccessoriesStatus, loadCmpCostMasterStatus, loadNationalGridStatus, loadPipelineStatus, loadFabricRawStatus, loadGmRawStatus, loadBodyFabConsStatus, loadPreciseBodyArticleStatus, loadBasicTrimMasterStatus, loadPreciseFabricArticleStatus]);
+  }, [loadVendorStatus, loadSnowflakeStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadSetMcMasterStatus, loadGmSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadMvgrMappingStatus, loadBasicAccessoriesStatus, loadCmpCostMasterStatus, loadNationalGridStatus, loadPipelineStatus, loadFabricRawStatus, loadGmRawStatus, loadBodyFabConsStatus, loadPreciseBodyArticleStatus, loadBasicTrimMasterStatus, loadPreciseFabricArticleStatus]);
 
   const loadData = async () => {
     setLoading(true);
@@ -2670,6 +2750,7 @@ export default function Admin() {
           items={[
             { id: 'pipelines', label: 'Pipelines', count: 3 },
             { id: 'vendor', label: 'Vendor sync' },
+            { id: 'snowflake', label: 'Snowflake sync' },
             { id: 'masters', label: 'Master data', count: MASTER_DATA_COUNT },
             { id: 'analytics', label: 'Analytics' },
           ]}
@@ -3001,6 +3082,88 @@ export default function Admin() {
                 ) : (
                   <span className="text-green-800 dark:text-green-400">
                     {vendorStatus.lastResult.upserted.toLocaleString('en-IN')} records in {vendorStatus.lastResult.pages} pages ({(vendorStatus.lastResult.durationMs / 1000).toFixed(1)}s)
+                  </span>
+                )}
+              </div>
+            )}
+          </Spinner>
+        </section>
+
+        <section id="snowflake" className="scroll-mt-3 rounded-xl border border-border bg-card px-5 py-4">
+          <Spinner spinning={snowflakeStatusLoading}>
+            <div className="flex flex-wrap items-center gap-x-7 gap-y-3">
+              <div className="flex min-w-[180px] flex-col">
+                <h2 className="m-0 text-[17px] font-bold">Snowflake sync</h2>
+                <span className="text-[12.5px] text-muted-foreground">Daily at 12:00 AM IST · changed rows only</span>
+              </div>
+              {snowflakeStatus && !snowflakeStatus.configured ? (
+                <span className="text-[13px] text-muted-foreground">Not configured on this server (SNOWFLAKE_* env vars)</span>
+              ) : snowflakeStatus ? (
+                <>
+                  <div className="flex flex-col">
+                    <span className="text-[12px] text-muted-foreground">Rows</span>
+                    <strong className="text-[15px] tabular-nums">
+                      {snowflakeStatus.lastOk?.snowflakeRows != null ? snowflakeStatus.lastOk.snowflakeRows.toLocaleString('en-IN') : '—'}
+                    </strong>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[12px] text-muted-foreground">Last sync</span>
+                    <strong className="text-[15px]">
+                      {snowflakeStatus.lastOk?.runFinished
+                        ? new Date(snowflakeStatus.lastOk.runFinished).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' }) + ' IST'
+                        : 'Never'}
+                    </strong>
+                  </div>
+                  <div className="flex min-w-0 flex-col" title="Supabase extraction_results_flat (APPROVED) → Snowflake">
+                    <span className="text-[12px] text-muted-foreground">Target</span>
+                    <span className="truncate font-mono text-[12.5px]">BRONZE.ARTICLE_CREATION_EXTRACTION_RESULTS_FLAT</span>
+                  </div>
+                </>
+              ) : (
+                <span className="text-[13px] text-muted-foreground">Could not load Snowflake sync status</span>
+              )}
+              <div className="ml-auto flex flex-wrap items-center gap-2">
+                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={loadSnowflakeStatus} disabled={snowflakeStatusLoading} aria-label="Refresh Snowflake sync status" title="Refresh status">
+                  <RotateCw className={snowflakeStatusLoading ? 'animate-spin' : ''} />
+                </Button>
+                <Popconfirm
+                  title="Sync to Snowflake now?"
+                  description="Send APPROVED articles added or changed since the last sync to Snowflake, and remove ones no longer approved. Usually under a minute."
+                  onConfirm={runSnowflakeSync}
+                  okText="Yes, sync now"
+                  cancelText="Cancel"
+                  disabled={!snowflakeStatus?.configured}
+                >
+                  <Button size="sm" disabled={snowflakeSyncing || !!snowflakeStatus?.inProgress || !snowflakeStatus?.configured} className={SLATE_PRIMARY_BTN}>
+                    <RefreshCw className={snowflakeSyncing || snowflakeStatus?.inProgress ? 'animate-spin' : ''} />
+                    {snowflakeSyncing || snowflakeStatus?.inProgress ? 'Syncing...' : 'Sync Now'}
+                  </Button>
+                </Popconfirm>
+              </div>
+            </div>
+            {snowflakeStatus?.inProgress && (
+              <div className="mt-2 flex items-center gap-1.5 text-[13px] text-blue-700 dark:text-blue-300">
+                <RefreshCw className="h-3.5 w-3.5 animate-spin" /> Sync in progress…
+              </div>
+            )}
+            {snowflakeStatus?.lastRun && (
+              <div className="mt-2 text-[12.5px]">
+                <span className="text-muted-foreground">Last run: </span>
+                {snowflakeStatus.lastRun.status === 'FAIL' ? (
+                  <span className="font-mono text-red-700 dark:text-red-400">Failed — {snowflakeStatus.lastRun.message}</span>
+                ) : (
+                  <span className="text-green-800 dark:text-green-400">
+                    {(snowflakeStatus.lastRun.changedRows ?? 0).toLocaleString('en-IN')} rows sent, {(snowflakeStatus.lastRun.deletedRows ?? 0).toLocaleString('en-IN')} removed
+                    {snowflakeStatus.lastRun.runStarted && snowflakeStatus.lastRun.runFinished &&
+                      ` (${((new Date(snowflakeStatus.lastRun.runFinished).getTime() - new Date(snowflakeStatus.lastRun.runStarted).getTime()) / 1000).toFixed(1)}s)`}
+                    {snowflakeStatus.lastRun.status === 'OK_COUNT_DIFF' && ' · counts differ slightly, next run will catch up'}
+                  </span>
+                )}
+                {snowflakeStatus.lastRun.runFinished && (
+                  <span className="text-muted-foreground">
+                    {' · '}{new Date(snowflakeStatus.lastRun.runFinished).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' })} IST
+                    {snowflakeStatus.lastRun.triggeredBy && ` · by ${snowflakeStatus.lastRun.triggeredBy.replace(/^admin:/, '')}`}
+                    {snowflakeStatus.lastRun.source && ` · ${snowflakeStatus.lastRun.source}`}
                   </span>
                 )}
               </div>

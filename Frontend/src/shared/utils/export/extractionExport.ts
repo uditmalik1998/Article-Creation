@@ -504,7 +504,11 @@ export const exportToExcel = async (
   data: ExportDataItem[],
   orderedHeaders: string[],
   exportSchema: SchemaItem[],
-  categoryName?: string
+  categoryName?: string,
+  options?: {
+    /** Exact file name before "-<date>.xlsx" (no "fashion-extraction-" prefix). */
+    fileBaseName?: string;
+  }
 ) => {
   const ExcelJS = (await import('exceljs')).default;
   const workbook = new ExcelJS.Workbook();
@@ -580,7 +584,9 @@ export const exportToExcel = async (
   });
 
   const link = document.createElement('a');
-  const baseName = categoryName === 'Article Creation'
+  const baseName = options?.fileBaseName
+    ? options.fileBaseName
+    : categoryName === 'Article Creation'
     ? 'Article Creation'
     : `fashion-extraction-${categoryName?.replace(/\s+/g, '-') || 'results'}`;
   const fileName = `${baseName}-${new Date().toISOString().split('T')[0]}.xlsx`;

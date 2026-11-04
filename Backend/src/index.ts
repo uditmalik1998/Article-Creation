@@ -41,6 +41,7 @@ import testApiRoutes from './routes/testApi';
 import ksmlRoutes from './routes/ksml';
 import poolBRoutes from './routes/poolB';
 import { syncVendorMaster } from './services/vendorMasterSyncService';
+import { syncFlatToSnowflake, isSnowflakeSyncConfigured } from './services/snowflakeFlatSyncService';
 import { runRawArticleExtraction, isExtractionRunning } from './services/rawArticleExtractionService';
 import { runFabricRawDataProcessing, isFabricRawRunning } from './services/fabricRawDataService';
 import { runGmRawDataProcessing, isGmRawRunning } from './services/gmRawDataService';
@@ -449,6 +450,30 @@ app.use(errorHandler);
         }
       }
     }, 60_000);
+
+    // Snowflake flat sync — daily at 00:00 IST: changed APPROVED extraction_results_flat
+    // rows → V2RETAIL.BRONZE.ARTICLE_CREATION_EXTRACTION_RESULTS_FLAT. Needs SNOWFLAKE_* env.
+    // Explicit SNOWFLAKE_SYNC_CRON=true/false wins; otherwise ON in production only
+    // (local / dev can still run it any time from Admin › Expenses › Sync Now).
+    const snowflakeCronEnabled = process.env.SNOWFLAKE_SYNC_CRON !== undefined
+      ? process.env.SNOWFLAKE_SYNC_CRON === 'true'
+      : process.env.NODE_ENV === 'production';
+    if (snowflakeCronEnabled && isSnowflakeSyncConfigured()) {
+      let lastSnowflakeSyncKey = '';
+      setInterval(() => {
+        const istNow = new Date(Date.now() + 5.5 * 60 * 60 * 1000);
+        if (istNow.getUTCHours() === 0 && istNow.getUTCMinutes() === 0) {
+          const key = istNow.toISOString().slice(0, 10); // one run per calendar day
+          if (key !== lastSnowflakeSyncKey) {
+            lastSnowflakeSyncKey = key;
+            console.log('[Snowflake Cron] Starting scheduled sync at IST 00:00');
+            syncFlatToSnowflake('cron')
+              .then(r => console.log(`[Snowflake Cron] ${r.status} — changed:${r.changedRows} deleted:${r.deletedRows}`))
+              .catch(err => console.error('[Snowflake Cron] Sync failed:', err?.message));
+          }
+        }
+      }, 60_000);
+    }
 
     // raw_articles Extraction Cron — runs every 5 minutes AND immediately on startup.
     // Picks up PENDING / FAILED rows (up to 10 per run), runs VLM, pushes to extraction_results_flat.

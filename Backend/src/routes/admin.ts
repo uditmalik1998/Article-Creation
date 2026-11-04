@@ -144,6 +144,8 @@ router.post('/srm/failed-extractions/:id/retry',       h(adminController.retrySr
 // ═══════════════════════════════════════════════════════
 router.get('/vendor-master/status', h(adminController.getVendorMasterSyncStatus));
 router.post('/vendor-master/sync', h(adminController.triggerVendorMasterSync));
+router.get('/snowflake-sync/status', h(adminController.getSnowflakeFlatSyncStatus));
+router.post('/snowflake-sync/sync', h(adminController.triggerSnowflakeFlatSync));
 
 // ═══════════════════════════════════════════════════════
 // MAJ-CAT GRID (ADMIN)
