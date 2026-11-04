@@ -5,6 +5,17 @@
 
 ---
 
+## 2026-11-04 — Fabric article image watermark (like FG)
+
+- When SAP creates a Fabric article (`submitFabricArticles`, zmmFabArtCreationService.ts — used by the Fabric New page and
+  "Create fabric article" from FG), the image copied to `fabric_article/<SAP no>.jpg` is now stamped with the same label
+  as FG / GM: Article, PPT No., Cost (rate), Category, Design No., Vendor, Approved By (submitting user), Date.
+- New `storageService.watermarkImage()` returns the stamped JPEG or null; on a watermark failure the original image is
+  uploaded as before, so creation is never blocked. Same R2 path as before (primary bucket, `fabric_article/`).
+- Fabric variants: unchanged (no watermark, same as FG variants).
+
+---
+
 ## 2026-11-02 — extraction_results_flat.image_name removed from code
 
 - `image_name` only ever held the storage UUID (SRM rows: always null) and was used only as a label fallback.
