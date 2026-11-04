@@ -38,6 +38,8 @@ router.get('/items/export-all', h(ApproverController.exportAll));
 router.get('/items/rough-costing-export',   h(ApproverController.roughCostingExport));
 // Precise Costing Excel report — NEW-RAM SIR 360° format
 router.get('/items/precise-costing-export', h(ApproverController.preciseCostingExport));
+// Summary Costing Excel report — "360 REQUIRE AUTO MODIFY" format
+router.get('/items/summary-costing-export', h(ApproverController.summaryCostingExport));
 
 // Export ALL items with SAP-created variants interleaved (generic row then its variant rows)
 router.get('/items/export-all-with-variants', h(ApproverController.exportAllWithVariants));
