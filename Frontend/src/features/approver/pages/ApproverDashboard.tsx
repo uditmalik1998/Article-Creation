@@ -230,6 +230,7 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
   const [exportingWithVariants, setExportingWithVariants] = useState(false);
   const [exportingRoughCosting, setExportingRoughCosting] = useState(false);
   const [exportingPreciseCosting, setExportingPreciseCosting] = useState(false);
+  const [exportingSummaryCosting, setExportingSummaryCosting] = useState(false);
   // IDs of cards checked for selective export. Scoped to the current page only:
   // cleared on every fetch (pagination / filter change) so it never holds ids
   // that aren't currently rendered.
@@ -606,6 +607,45 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
     }
   }, [divisionFilter, subDivisionFilter, majorCategoryFilter, searchText, dateRangeFilter, selectedIds]);
 
+  const handleSummaryCostingExport = useCallback(async () => {
+    setExportingSummaryCosting(true);
+    const loadingId = message.loading('Generating Summary Costing report…');
+    try {
+      const token = localStorage.getItem('authToken');
+      const params = new URLSearchParams();
+      params.set('pathType', 'created');
+      if (divisionFilter !== 'ALL') params.set('division', divisionFilter);
+      if (subDivisionFilter !== 'ALL') params.set('subDivision', subDivisionFilter);
+      if (majorCategoryFilter) params.set('majorCategory', majorCategoryFilter);
+      if (searchText) params.set('search', searchText);
+      if (dateRangeFilter?.[0]) params.set('startDate', dateRangeFilter[0].startOf('day').toISOString());
+      if (dateRangeFilter?.[1]) params.set('endDate', dateRangeFilter[1].endOf('day').toISOString());
+      // Selected cards → export only those articles.
+      if (selectedIds.size > 0) params.set('ids', [...selectedIds].join(','));
+
+      const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/summary-costing-export?${params}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error('Export failed');
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Summary_Costing_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      message.dismiss(loadingId);
+      message.success('Summary Costing report downloaded');
+    } catch {
+      message.dismiss(loadingId);
+      message.error('Failed to generate Summary Costing report. Please try again.');
+    } finally {
+      setExportingSummaryCosting(false);
+    }
+  }, [divisionFilter, subDivisionFilter, majorCategoryFilter, searchText, dateRangeFilter, selectedIds]);
+
   // ─── Selective export ─────────────────────────────────────────────────────────
 
   // Stable (empty deps, functional update) so memoized ArticleCards don't
@@ -848,6 +888,7 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
               { key: 'variants', label: 'With variants', onClick: handleExportWithVariants, busy: exportingWithVariants, show: pathType === 'created' },
               { key: 'rough', label: 'Rough costing', onClick: handleRoughCostingExport, busy: exportingRoughCosting, show: pathType === 'created' },
               { key: 'precise', label: 'Precise costing', onClick: handlePreciseCostingExport, busy: exportingPreciseCosting, show: pathType === 'created' },
+              { key: 'summary', label: 'Summary costing', onClick: handleSummaryCostingExport, busy: exportingSummaryCosting, show: pathType === 'created' },
             ].filter((d) => d.show)}
           />
 
