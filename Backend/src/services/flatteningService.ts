@@ -149,7 +149,6 @@ export class FlatteningService {
             // pptNumber intentionally NOT set from AI extraction — only SRM sync populates this
             rate: parsedRate,
             mrp: finalMrp,
-            size: resultsMap.get('size'),
             yarn1: resultsMap.get('yarn_01'),
             yarn2: resultsMap.get('yarn_02'),
             fabricMainMvgr: resultsMap.get('fabric_main_mvgr'),
@@ -261,7 +260,6 @@ export class FlatteningService {
                 excludeFields: await getExcludedDescriptionFields(rawMajorCategory) as any,
             }),
             fashionGrid: resultsMap.get('fashion_grid') || resultsMap.get('fashiongrid') || null,
-            articleType: resultsMap.get('article_type') || resultsMap.get('articletype') || null,
             fabVdr: resultsMap.get('fab_vdr') || null,
         };
     }

@@ -175,6 +175,21 @@ export class StorageService {
     }
 
     /**
+     * Stamp an image with the article-creation label (same look as FG / GM).
+     * Returns the JPEG bytes, or null if the Python step failed — the caller keeps the original.
+     */
+    async watermarkImage(sourceBuffer: Buffer, labelData: WatermarkLabel, articleNumber: string): Promise<Buffer | null> {
+        try {
+            const wm = await runPythonWatermark(sourceBuffer, labelData as Record<string, unknown>, { format: 'jpeg' });
+            if (wm.success && wm.buffer && wm.buffer.length > 0) return wm.buffer;
+            console.warn(`⚠️ Watermark step failed for ${articleNumber} (${wm.durationMs}ms): ${wm.error}`);
+        } catch (err: any) {
+            console.warn(`⚠️ Watermark threw for ${articleNumber}: ${err?.message ?? err}`);
+        }
+        return null;
+    }
+
+    /**
      * Stamp the source image with article-creation data. Falls back to the
      * original bytes (and original mime/extension) if the Python step fails so
      * that approval is NEVER blocked by a watermarking glitch.

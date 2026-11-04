@@ -15,7 +15,7 @@ import { storageService, type WatermarkLabel } from '../services/storageService'
 import { ARTICLE_DESCRIPTION_SOURCE_FIELDS, buildArticleDescription } from '../utils/articleDescriptionBuilder';
 import { getExcludedDescriptionFields } from '../utils/categoryFieldVisibility';
 import { prismaClient as prisma } from '../utils/prisma';
-import { syncGenericToVariants, addColorVariants, getSizesForMajCat, isSizeAllowed, rebuildVariantsForMajCat } from '../services/variantCreationService';
+import { syncGenericToVariants, addColorVariants, getSizesForMajCat, rebuildVariantsForMajCat } from '../services/variantCreationService';
 import { hasVendorCode, isValidVendorCode, normalizeVendorCode } from '../utils/vendorCode';
 import { getSetMcIndex, setProblems, SET_PARTS_USE_SET_MC, normalMcForCategory } from '../services/setMcMasterService';
 import { linkComboGroupForRow, recomputeComboParent, syncSetsFromRaw, COMBO_PARENT_DERIVED_FIELDS, groupSetParts } from '../services/comboLinkService';
@@ -26,7 +26,7 @@ import { linkSetPart, retryPendingSetLinks } from '../services/setLinkService';
 // (ids, status, timestamps, SAP metadata) is never client-writable.
 const ITEM_UPDATE_ALLOWED_FIELDS = [
     'articleNumber', 'division', 'subDivision', 'majorCategory', 'vendorName', 'designNumber',
-    'pptNumber', 'rate', 'size', 'yarn1', 'yarn2', 'fabricMainMvgr', 'weave',
+    'pptNumber', 'rate', 'yarn1', 'yarn2', 'fabricMainMvgr', 'weave',
     'composition', 'finish', 'gsm', 'shade', 'weight', 'lycra', 'neck', 'neckDetails',
     // Body fields (full set)
     'collar', 'collarStyle', 'placket', 'sleeve', 'sleeveFold', 'mSet', 'bottomFold',
@@ -49,7 +49,7 @@ const ITEM_UPDATE_ALLOWED_FIELDS = [
     // Business / SAP fields
     'macroMvgr', 'mainMvgr', 'mFab2',
     'vendorCode', 'mrp', 'mcCode', 'segment', 'season',
-    'hsnTaxCode', 'articleDescription', 'fashionGrid', 'year', 'articleType',
+    'hsnTaxCode', 'articleDescription', 'fashionGrid', 'year',
     // Body article cost fields
     'fWidth',
     'autoBgt', 'roughV2', 'vendorFabricRate', 'finalCost',
@@ -107,8 +107,6 @@ const ITEM_UPDATE_ALLOWED_FIELDS = [
     'mcDescription',
     // Brand vendor MVGR
     'mvgrBrandVendor',
-    // Variant-specific fields
-    'variantColor', 'variantSize', 'variantWeight',
 ];
 
 // Fields never written to history_fg_article (auto-derived or explicitly excluded by product)
@@ -939,7 +937,6 @@ export class ApproverController {
                     source: true,
                     rate: true,
                     mrp: true,
-                    size: true,
                     colour: true,
                     fabricMainMvgr: true,
                     pattern: true,
@@ -1005,7 +1002,6 @@ export class ApproverController {
                     articleDescription: true,
                     fashionGrid: true,
                     year: true,
-                    articleType: true,
                     autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
                     roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
                     preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
@@ -1057,9 +1053,6 @@ export class ApproverController {
                     // Brand vendor MVGR
                     mvgrBrandVendor: true,
                     isGeneric: true,
-                    genericArticleId: true,
-                    variantSize: true,
-                    variantColor: true,
                     approvedBy: true,
                     approver: {
                         select: { name: true, email: true },
@@ -1310,7 +1303,6 @@ export class ApproverController {
                     pptNumber: true,
                     rate: true,
                     mrp: true,
-                    size: true,
                     pattern: true,
                     fit: true,
                     wash: true,
@@ -1358,7 +1350,6 @@ export class ApproverController {
                     articleDescription: true,
                     fashionGrid: true,
                     year: true,
-                    articleType: true,
                     userName: true,
                     creatorUser: true, modifyUser: true,
                     createdAt: true,
@@ -1475,7 +1466,6 @@ export class ApproverController {
                 pptNumber: true,
                 rate: true,
                 mrp: true,
-                size: true,
                 pattern: true,
                 fit: true,
                 wash: true,
@@ -1522,7 +1512,6 @@ export class ApproverController {
                 articleDescription: true,
                 fashionGrid: true,
                 year: true,
-                articleType: true,
                 userName: true,
                 createdAt: true,
                 updatedAt: true,
@@ -2426,7 +2415,7 @@ export class ApproverController {
                     referenceArticleNumber: true, referenceArticleDescription: true,
                     approvalStatus: true, sapSyncStatus: true, sapSyncMessage: true, sapArticleId: true,
                     createdAt: true, updatedAt: true, userName: true, source: true,
-                    rate: true, mrp: true, size: true, colour: true,
+                    rate: true, mrp: true, colour: true,
                     fabricMainMvgr: true, pattern: true, fit: true, neck: true, neckDetails: true,
                     sleeve: true, sleeveFold: true, mSet: true, length: true, collar: true, collarStyle: true,
                     placket: true, bottomFold: true, frontOpenStyle: true, pocketType: true,
@@ -2442,11 +2431,11 @@ export class ApproverController {
                     ageGroup: true, mNoOfSize: true, mNoOfClr: true, articleFashionType: true, articleDimension: true,
                     mcCode: true, impAtrbt2: true, segment: true, season: true,
                     hsnTaxCode: true, articleDescription: true, fashionGrid: true,
-                    year: true, articleType: true,
+                    year: true,
                     bodyArticle: true, bodyArticleDescription: true,
                     fabricArticleNumber: true, fabricArticleDescription: true,
                     attrArticleNums: true, mvgrBrandVendor: true,
-                    isGeneric: true, genericArticleId: true, variantSize: true, variantColor: true,
+                    isGeneric: true,
                     approvedBy: true, approvedAt: true,
                     autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
                     roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
@@ -2753,7 +2742,6 @@ export class ApproverController {
                     season: true,
                     year: true,
                     isGeneric: true,
-                    pdStatus: true,
                     comboRole: true,
                     comboParentId: true,
                 }
@@ -2773,10 +2761,9 @@ export class ApproverController {
             }
 
             // Prevent updating approved items, EXCEPT:
-            // - variantWeight: must be settable after approval so SAP retry can proceed
             // - fabricArticleDescription + vendorFabricRate: internal fields pre-saved before
             //   fabric article creation in modify mode; not part of SAP attribute sync
-            const APPROVED_ITEM_ALLOWED_FIELDS = new Set(['variantWeight', 'fabricArticleDescription', 'vendorFabricRate', 'fabricArticleNumber']);
+            const APPROVED_ITEM_ALLOWED_FIELDS = new Set(['fabricArticleDescription', 'vendorFabricRate', 'fabricArticleNumber']);
             const isAllowedUpdate = Object.keys(data).every((k) => APPROVED_ITEM_ALLOWED_FIELDS.has(k));
             if (existingItem.approvalStatus === 'APPROVED' && !isAllowedUpdate) {
                 return res.status(403).json({ error: 'Cannot update an approved item. It is locked for SAP sync.' });
@@ -2842,26 +2829,6 @@ export class ApproverController {
                 }
             }
 
-            // PR1 size guard: when a variant's size is edited, the new size must be
-            // valid for its Major Category (server-side backstop behind the UI dropdown).
-            if (!existingItem.isGeneric && (data.variantSize !== undefined || data.size !== undefined)) {
-                const newSize = String((data.variantSize ?? data.size) ?? '').trim();
-                if (newSize && finalMajorCategory) {
-                    let sizeOk: boolean;
-                    try {
-                        sizeOk = await isSizeAllowed(finalMajorCategory, newSize);
-                    } catch (err: any) {
-                        return res.status(500).json({ error: err?.message || 'Size validation failed' });
-                    }
-                    if (!sizeOk) {
-                        return res.status(422).json({
-                            error: 'INVALID_SIZE_FOR_CATEGORY',
-                            detail: `Size '${newSize}' is not allowed for category '${finalMajorCategory}'.`,
-                        });
-                    }
-                }
-            }
-
             // Do not force-overwrite user-edited season/year on every save.
             // Only auto-fill defaults when BOTH are absent in payload and missing in DB.
             if (data.year === undefined && data.season === undefined) {
@@ -2917,15 +2884,6 @@ export class ApproverController {
             // single-row update. We do NOT propagate to every other article in
             // the category — that previously re-stamped the whole category (incl.
             // approved/SAP-synced rows) and bumped their updated_at en masse.
-
-            // If variantColor was updated on a non-generic, sync colour field too
-            if (!existingItem.isGeneric && data.variantColor !== undefined) {
-                data.colour = data.variantColor;
-                await prisma.extractionResultFlat.update({
-                    where: { id },
-                    data: { colour: data.variantColor }
-                });
-            }
 
             if (rebuildSizes) {
                 try {
@@ -3491,7 +3449,7 @@ export class ApproverController {
             // this, a re-submit after a failed sync stays stuck PENDING until the
             // old lease expires. (sap_lock_until is maintained via raw SQL.)
             await prisma.$executeRawUnsafe(
-                'UPDATE public.extraction_results_flat SET sap_lock_until = NULL WHERE id = ANY($1::text[]) OR generic_article_id = ANY($1::text[])',
+                'UPDATE public.extraction_results_flat SET sap_lock_until = NULL WHERE id = ANY($1::text[])',
                 ids,
             );
 
@@ -3599,10 +3557,10 @@ export class ApproverController {
                     pkgCostType: true, boppNetPrice: true, ctnNetPrice: true, barcodeNetPrice: true,
                     kimbleNetPrice: true, taftaNetPrice: true, threadNetPrice: true,
                     mcCode: true, hsnTaxCode: true, articleDescription: true, fashionGrid: true,
-                    season: true, year: true, articleType: true, referenceArticleNumber: true,
+                    season: true, year: true, referenceArticleNumber: true,
                     referenceArticleDescription: true, imageUrl: true,
-                    sapArticleId: true, isGeneric: true, genericArticleId: true,
-                    colour: true, variantSize: true, variantColor: true,
+                    sapArticleId: true, isGeneric: true,
+                    colour: true,
                     attrArticleNums: true, source: true, createdAt: true,
                     srmUniqueId: true,
                     // set articles: buildRfcPayload sends their S- MC (Set MC Master)
@@ -4520,7 +4478,6 @@ export class ApproverController {
                     // Created-page source (already in SAP): the copy is a brand-new article,
                     // so drop everything tied to the original's SAP life — only attributes carry over.
                     ...(source.approvalStatus === 'APPROVED' ? {
-                        pdStatus: 'PENDING' as const,
                         bodyArticle: null,
                         attrArticleNums: null,
                         oldImageUrl: null,
@@ -6163,10 +6120,10 @@ export class ApproverController {
             pkgCostType: null, boppNetPrice: null, ctnNetPrice: null, barcodeNetPrice: null,
             kimbleNetPrice: null, taftaNetPrice: null, threadNetPrice: null,
             pptNumber: null, source: null, rate: null, mrp: null,
-            size: null, colour: null, fabricMainMvgr: null, composition: null,
+            colour: null, fabricMainMvgr: null, composition: null,
             wash: null, referenceArticleNumber: null, referenceArticleDescription: null,
             fabricArticleNumber: null, fabricArticleDescription: null, mcDescription: null,
-            segment: null, articleDescription: null, fashionGrid: null, articleType: null,
+            segment: null, articleDescription: null, fashionGrid: null,
             yarn1: null, yarn2: null, weave: null, macroMvgr: null, mainMvgr: null,
             mFab2: null, finish: null, shade: null, weight: null, lycra: null,
         }));
@@ -6278,10 +6235,10 @@ export class ApproverController {
             preciseConsumptionKg:    r.preciseConsumptionKg ?? null,
             preciseConsumptionMeter: r.preciseConsumptionMeter ?? null,
             pptNumber: null, source: null, rate: null, mrp: null,
-            size: null, colour: null, fabricMainMvgr: null, composition: null,
+            colour: null, fabricMainMvgr: null, composition: null,
             wash: null, referenceArticleNumber: null, referenceArticleDescription: null,
             fabricArticleNumber: null, fabricArticleDescription: null, mcDescription: null,
-            segment: null, articleDescription: null, fashionGrid: null, articleType: null,
+            segment: null, articleDescription: null, fashionGrid: null,
             yarn1: null, yarn2: null, weave: null, macroMvgr: null, mainMvgr: null,
             mFab2: null, finish: null, shade: null, weight: null, lycra: null,
         };
@@ -6851,10 +6808,10 @@ export class ApproverController {
             segment: r.segment ?? null,
             // Fields not present in fabric_article_data — nulled out
             rate: null,
-            size: null, colour: null, wash: null, shade: null, weight: null,
+            colour: null, wash: null, shade: null, weight: null,
             referenceArticleNumber: null, referenceArticleDescription: null,
             articleDescription: null,
-            fashionGrid: null, articleType: null,
+            fashionGrid: null,
             ageGroup: null, impAtrbt2: null,
             season: null, year: null, hsnTaxCode: null,
             collar: null, collarStyle: null, neck: null, neckDetails: null,

@@ -5,6 +5,54 @@
 
 ---
 
+## 2026-11-04 — Column drops applied in Snowflake; Supabase partly
+
+- Snowflake `V2RETAIL.ARTICLE_CREATION.EXTRACTION_RESULTS_FLAT` (one-time manual load of approved rows, no sync job,
+  no views): dropped size, article_type, macro/main/m_fab2 *_full_form, generic_article_id, variant_color,
+  variant_size, variant_weight, pd_status (363 -> 353 columns, 29,919 rows kept). image_name was never there; weight kept.
+- Supabase: image_name indexes + trigger change already applied by the user (table 248 -> 226 MB). Still pending:
+  the generic_article_id + idx_erf_approval_pd indexes, and all column drops (only after the backend is deployed).
+
+---
+
+## 2026-11-04 — extraction_results_flat: size, article_type, MVGR full forms, pd_status removed from code
+
+- At the user's request. Removed from the Prisma model (+ `PdStatus` enum, `idx_erf_approval_pd`) and all code:
+  FG list / export / getById / SAP-sync selects, ITEM_UPDATE_ALLOWED_FIELDS, extraction writers (flatteningService,
+  flatExtractionController map, SRM VLM enrichment), combo-parent mirroring (comboLinkService), the dead non-generic
+  size guard, the KIDS-duplicate pdStatus reset, FG export "Article Type" column, history label, frontend item types.
+- Model generation framing now uses major category only (article_type was the second hint).
+- `weight` kept (user decision) — it is sent to SAP (M_FAB_WEIGHT / NET_WEIGHT).
+- DB NOT changed yet: `Backend/prisma/migrations/20261104_drop_size_articletype_fullform_pdstatus_extraction_results_flat.sql`
+  (Step 1 drop index any time; Step 2 drop columns + type after the backend is deployed).
+
+---
+
+## 2026-11-04 — extraction_results_flat: unused variant columns removed from code
+
+- `generic_article_id`, `variant_size`, `variant_color`, `variant_weight` were NULL in all 79k rows (FG variants live in
+  `fg_variants_article_data` since 2026-10-16). Removed from the Prisma model and every flat select / edit whitelist
+  (ApproverController list, getById, SAP-sync select, ITEM_UPDATE_ALLOWED_FIELDS, approved-item exception), the dead
+  non-generic variantColor->colour sync, the `OR generic_article_id = ANY(...)` in the sap_lock_until reset,
+  variantCreationService and articleModelSourceService.
+- Kept: `size` and `article_type` — still written by extraction / SRM, exported, editable, `size` mirrored to combo
+  parents, `article_type` used in model-generation framing.
+- DB NOT changed yet (migration declined): `Backend/prisma/migrations/20261104_drop_unused_variant_columns_extraction_results_flat.sql`
+  — Step 1 drop the generic_article_id index (any time); Step 2 DROP the 4 columns after the backend is deployed.
+
+---
+
+## 2026-11-04 — Fabric article image watermark (like FG)
+
+- When SAP creates a Fabric article (`submitFabricArticles`, zmmFabArtCreationService.ts — used by the Fabric New page and
+  "Create fabric article" from FG), the image copied to `fabric_article/<SAP no>.jpg` is now stamped with the same label
+  as FG / GM: Article, PPT No., Cost (rate), Category, Design No., Vendor, Approved By (submitting user), Date.
+- New `storageService.watermarkImage()` returns the stamped JPEG or null; on a watermark failure the original image is
+  uploaded as before, so creation is never blocked. Same R2 path as before (primary bucket, `fabric_article/`).
+- Fabric variants: unchanged (no watermark, same as FG variants).
+
+---
+
 ## 2026-11-02 — extraction_results_flat.image_name removed from code
 
 - `image_name` only ever held the storage UUID (SRM rows: always null) and was used only as a label fallback.
@@ -229,3 +277,7 @@ Upstream `main` keeps re-committing junk that should be gitignored — `Backend/
 - 2026-11-02: AI SAM production basis changed from bulk (500+ pcs) to SINGLE-PIECE production: full spreading / marker / cutting / set-up charged to the one piece, one operator makes the whole garment (make-through). Expect higher SAM than before and higher than BGT / ACT SAM (which are bulk figures).
 - 2026-11-02: FG New article page — unsaved costing cards (CMP COST, B TRIM, V. ADD, PKG COST) are no longer lost, with no extra API calls while typing. (B) Leave popup: sidebar navigation, the header back button and ◀ ▶ go through a new leave guard (shared/utils/leaveGuard.ts — BrowserRouter has no blocker) — "Unsaved changes in …: Stay / Leave without saving / Save & leave" (saves each card; a failed save keeps you on the page). Refresh / close tab / typed URL get the browser's "Leave site?" warning. Only user-typed changes trigger it (getUserEditedCards; CMP master presets and B TRIM master auto-fill don't). (C) Local drafts: features/approver/components/cardDrafts.tsx useCardDraft — each card copies its unsaved state to localStorage (fgCardDraft:v1:<articleId>:<card>, 400 ms after typing) incl. CMP's UI-only SAM / SAM VAL cells; reopening the article shows an amber "Unsaved changes from <time> were kept on this computer — Restore / Discard" banner on the card. Drafts are removed on card Save, Save & leave, Leave without saving, Discard, article approve (Save & Submit) or reject (detail page and dashboard Reject selected), and after 7 days. Drafts only on the New page (draftId omitted on the Created page / locked articles). Browser back button is not intercepted — the draft covers it.
 - 2026-11-02: Fix GM Save & Submit error "for SELECT DISTINCT, ORDER BY expressions must appear in select list" (Postgres 42P10) in zmmGMArtCreationService — the 2026-10-29 HSN lookup combined SELECT DISTINCT with ORDER BY (hsn_cd IS NULL …). Removed DISTINCT (LIMIT 1 makes it unnecessary). Every GM submit since 29-Oct failed at this query before reaching SAP.
+- 2026-11-04: extraction_results_flat copied to Snowflake: V2RETAIL.ARTICLE_CREATION.EXTRACTION_RESULTS_FLAT (79,085 rows, 361 columns, snapshot of 2026-11-04 ~10:06 IST). Path: DuckDB export of the Supabase table to Parquet, PUT to stage V2RETAIL.ARTICLE_CREATION.FLAT_STAGE, table created with INFER_SCHEMA, COPY INTO MATCH_BY_COLUMN_NAME. Column names are lower-case and must be double-quoted ("approval_status"); JSONB columns are text (use PARSE_JSON). Role DATA_PLATFORM_ADMIN cannot create databases, only schemas in V2RETAIL. One-time copy: no sync.
+- 2026-11-04: Snowflake copy narrowed to APPROVED (Created-page) articles only: deleted 49,166 PENDING/REJECTED rows; V2RETAIL.ARTICLE_CREATION.EXTRACTION_RESULTS_FLAT now holds 29,919 APPROVED rows. Future refreshes must export with WHERE approval_status = 'APPROVED'.
+- 2026-11-04: Snowflake EXTRACTION_RESULTS_FLAT: created_at, updated_at and approved_at had loaded as NUMBER (microseconds since 1970; the Parquet held Postgres timestamp-without-time-zone as integers). The table was rebuilt with TO_TIMESTAMP_NTZ(col, 6) (SELECT * REPLACE, column order kept, then SWAP). The values match Supabase exactly. extraction_date (DATE), sap_lock_until and set_linked_at (TIMESTAMP_NTZ) were already correct.
+- 2026-11-04: Snowflake EXTRACTION_RESULTS_FLAT now has approved_by_name and approved_by_email, placed right after approved_by and filled from Supabase users (66 approvers). Rebuilt with a CTAS LEFT JOIN on a temporary user list, then SWAP. 29,429 of the 29,919 APPROVED rows have an approver; the other 490 have approved_by NULL in Supabase too.

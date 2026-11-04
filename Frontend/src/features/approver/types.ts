@@ -37,7 +37,6 @@ export interface ApproverItem {
   userName: string | null;
   source?: string | null;
   rate: number | string | null;
-  size: string | null;
   colour: string | null;
   fabricMainMvgr: string | null;
   pattern: string | null;
@@ -63,7 +62,6 @@ export interface ApproverItem {
   articleDescription: string | null;
   fashionGrid: string | null;
   year: string | null;
-  articleType: string | null;
   yarn1: string | null;
   yarn2: string | null;
   weave: string | null;
