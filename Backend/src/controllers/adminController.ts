@@ -9,6 +9,7 @@ import { prismaClient as prisma, withPrismaRetry } from '../utils/prisma';
 import { Prisma } from '../generated/prisma';
 import bcrypt from 'bcryptjs';
 import { syncVendorMaster, getVendorMasterStatus, getLastVendorSyncResult, isVendorSyncInProgress } from '../services/vendorMasterSyncService';
+import { syncFlatToSnowflake, getSnowflakeSyncStatus, isSnowflakeSyncInProgress, isSnowflakeSyncConfigured } from '../services/snowflakeFlatSyncService';
 import { invalidateMandatoryGridCache, invalidateMajCatVisibleCache } from '../services/zmmArtCreationService';
 import { invalidateFieldVisibilityCache } from '../utils/categoryFieldVisibility';
 import { invalidateAuthUserCache } from '../middleware/auth';
@@ -1961,6 +1962,52 @@ export const triggerVendorMasterSync = async (req: Request, res: Response): Prom
     console.error('Error in triggerVendorMasterSync:', error);
     res.status(500).json({ success: false, error: error.message });
   }
+};
+
+// ═══════════════════════════════════════════════════════
+// SNOWFLAKE FLAT SYNC (ADMIN)
+// ═══════════════════════════════════════════════════════
+
+/**
+ * GET /api/admin/snowflake-sync/status
+ * Last run + last successful run from Snowflake ARTICLE_CREATION_SYNC_LOG.
+ */
+export const getSnowflakeFlatSyncStatus = async (req: Request, res: Response): Promise<void> => {
+  const configured = isSnowflakeSyncConfigured();
+  if (!configured) {
+    res.json({ success: true, data: { configured, inProgress: false, lastRun: null, lastOk: null } });
+    return;
+  }
+  try {
+    const status = await getSnowflakeSyncStatus();
+    res.json({ success: true, data: { configured, inProgress: isSnowflakeSyncInProgress(), ...status } });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * POST /api/admin/snowflake-sync/sync
+ * Sends changed APPROVED rows to Snowflake now. Runs in the background — 202 Accepted.
+ */
+export const triggerSnowflakeFlatSync = async (req: Request, res: Response): Promise<void> => {
+  if (!isSnowflakeSyncConfigured()) {
+    res.status(400).json({ success: false, error: 'Snowflake sync is not configured on this server (SNOWFLAKE_* env vars)' });
+    return;
+  }
+  if (isSnowflakeSyncInProgress()) {
+    res.status(409).json({ success: false, error: 'Sync already in progress' });
+    return;
+  }
+  const user = (req as any).user;
+  const by = `admin:${user?.email ?? user?.name ?? user?.id ?? 'unknown'}`;
+  res.status(202).json({
+    success: true,
+    message: 'Snowflake sync started in background. Poll /snowflake-sync/status for progress.',
+  });
+  syncFlatToSnowflake(by)
+    .then(r => console.log(`[Admin] Snowflake sync ${r.status} — changed:${r.changedRows} deleted:${r.deletedRows}`))
+    .catch(err => console.error('[Admin] Snowflake sync failed:', err?.message));
 };
 
 // ═══════════════════════════════════════════════════════

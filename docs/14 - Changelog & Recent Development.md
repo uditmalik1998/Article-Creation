@@ -5,6 +5,36 @@
 
 ---
 
+## 2026-11-04 — Fabric Created page "All" Excel: no SAP Sync Status, Approved By at the end
+
+- FabricArticleDashboard handleExportAll on the Created tab drops the "SAP Sync Status" column and adds "Approved By"
+  (approver's name) as the last column. Other tabs / With variants / Select page unchanged.
+- Backend getFabricArticleDataExportAll now also selects approved_by and returns `approvedByName` (users lookup).
+- approved_by is only saved since 2026-10-28, so 616 of 2,910 created Fabric articles show a name; older rows are blank.
+- Fabric Article page download names: Fabric-Article-<Tab>[-Variants|-Selected][-<division>]-<date>.xlsx
+  (e.g. Fabric-Article-Created-2026-11-04.xlsx) via exportToExcel options.fileBaseName.
+
+---
+
+## 2026-11-04 — GM Created page Excel downloads use GM data
+
+- Bug: GMArticleDashboard's All / With variants / Select-page export was copied from the Fabric page — Fabric headers
+  (M_FAB_DIV, Fabric Rate, …) and the FG endpoint `/approver/items/export-all`, so the file had nothing to do with GM.
+- New `GET /approver/gm-articles/export-all` (ApproverController.exportGmArticles; same filters + GM sub-division scope as
+  the list via new `applyGmSubDivScope`): gm_article_data rows, no paging; `ids=` for ticked cards; `withVariants=1`
+  interleaves each generic with its SAP-created gm_variants_article_data rows (variant inherits the generic's attributes,
+  like FG). Approved By name looked up from users.
+- Excel columns: article / hierarchy / status / vendor / PPT / Rate, MRP, Rough V2, Vendor Cost, Final Cost / segment /
+  dates / Approved By (+ Row Type, Parent Article Number, Variant Color, Variant Size with variants), then every GM_*
+  attribute code that has a value in at least one exported row.
+- Created tab today: 299 generics; With variants adds 106 SAP variant rows (82 articles).
+- With variants layout: Parent Article Number, Variant Article Number (empty on the generic row), Variant Color,
+  Variant Size lead (row colours per group were tried and removed at the user's request). Shared `exportToExcel`
+  got an optional `options.fileBaseName` (exact name, no "fashion-extraction-" prefix).
+- GM file names: GM-Created-Article[-Variants|-Selected][-<division>]-<date>.xlsx (other tabs GM-New-Article etc.).
+
+---
+
 ## 2026-11-04 — Column drops applied in Snowflake; Supabase partly
 
 - Snowflake `V2RETAIL.ARTICLE_CREATION.EXTRACTION_RESULTS_FLAT` (one-time manual load of approved rows, no sync job,
@@ -281,3 +311,18 @@ Upstream `main` keeps re-committing junk that should be gitignored — `Backend/
 - 2026-11-04: Snowflake copy narrowed to APPROVED (Created-page) articles only: deleted 49,166 PENDING/REJECTED rows; V2RETAIL.ARTICLE_CREATION.EXTRACTION_RESULTS_FLAT now holds 29,919 APPROVED rows. Future refreshes must export with WHERE approval_status = 'APPROVED'.
 - 2026-11-04: Snowflake EXTRACTION_RESULTS_FLAT: created_at, updated_at and approved_at had loaded as NUMBER (microseconds since 1970; the Parquet held Postgres timestamp-without-time-zone as integers). The table was rebuilt with TO_TIMESTAMP_NTZ(col, 6) (SELECT * REPLACE, column order kept, then SWAP). The values match Supabase exactly. extraction_date (DATE), sap_lock_until and set_linked_at (TIMESTAMP_NTZ) were already correct.
 - 2026-11-04: Snowflake EXTRACTION_RESULTS_FLAT now has approved_by_name and approved_by_email, placed right after approved_by and filled from Supabase users (66 approvers). Rebuilt with a CTAS LEFT JOIN on a temporary user list, then SWAP. 29,429 of the 29,919 APPROVED rows have an approver; the other 490 have approved_by NULL in Supabase too.
+
+### 2026-11-04 — Nightly Snowflake sync (changed rows only)
+- `C:\jobs\snowflake-sync\sync_flat.py`, Windows task **"Article Flat to Snowflake"**, daily 00:00 IST (runs as Administrator, only while logged on; start-when-available, 2 retries).
+- Each run: watermark = last OK run in `V2RETAIL.BRONZE.ARTICLE_CREATION_SYNC_LOG` − 10 min → exports APPROVED rows with `updated_at` > watermark (+ approver name/email; filter + join run inside Postgres via `postgres_query`) and all APPROVED ids → MERGE on id into `BRONZE.ARTICLE_CREATION_EXTRACTION_RESULTS_FLAT` → deletes rows no longer APPROVED. Guards: column check, stage row counts, max 10% deleted.
+- Timestamps sent as text so Snowflake gets TIMESTAMP_NTZ (stage file format has USE_LOGICAL_TYPE=false).
+- First run 2026-11-04: full load 30,035; second run 23 changed rows, counts equal (30,040).
+- `Backend/prisma/flat_updated_at_trigger.sql`: trigger so `updated_at` changes on every write (raw SQL too, skips sap_lock_until-only). **Not applied** — execution was declined; run it in Supabase SQL editor. Until then raw-SQL changes (syncSetsFromRaw set fields, backfills) aren't picked up.
+
+### 2026-11-04 — Snowflake sync card (Admin › Expenses) + backend sync
+- New card **Snowflake sync** under Vendor master sync (`#snowflake`, nav item "Snowflake sync"): rows, last sync (IST), last run (rows sent / removed / duration / who / server), Refresh, Sync Now.
+- Backend `snowflakeFlatSyncService.ts` (Node port of the Python job, `snowflake-sdk` key-pair JWT): watermark from `BRONZE.ARTICLE_CREATION_SYNC_LOG` − 10 min → changed APPROVED rows as NDJSON (row_to_json, timestamptz → UTC) + all APPROVED ids → PUT to user stage `@~/article_flat_sync/<runId>` → per-run transient staging tables → MERGE on id + delete non-approved, in one transaction. Same guards (column check, stage counts, ≤10% deletes). Log rows now have TRIGGERED_BY (`cron` / `admin:<email>` / `windows-task`) and SOURCE (`NODE_ENV@host`); all log times UTC.
+- Endpoints: `GET /api/admin/snowflake-sync/status`, `POST /api/admin/snowflake-sync/sync` (202, poll status).
+- Cron in `index.ts`: daily 00:00 IST when `SNOWFLAKE_SYNC_CRON=true`, or by default in production; needs env.
+- Env: `SNOWFLAKE_ACCOUNT`, `SNOWFLAKE_USER`, `SNOWFLAKE_PRIVATE_KEY_B64` (base64 of unencrypted .p8), `SNOWFLAKE_ROLE`, `SNOWFLAKE_WAREHOUSE`. Without them the card shows "Not configured".
+- Windows task "Article Flat to Snowflake" stays until prod has the code + env, then disable it.

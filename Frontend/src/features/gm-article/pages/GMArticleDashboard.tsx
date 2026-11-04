@@ -55,62 +55,80 @@ const getSubDivisionOptions = (division?: string): string[] => {
   return [];
 };
 
-export const SIMPLE_APPROVER_EXPORT_HEADERS = [
-    'Fabric Article Number', 'Fabric Article Description',
-    'Division', 'Sub Division', 'Major Category', 'MC Description',
-    'Status', 'SAP Sync Status',
-    'Vendor Name', 'Vendor Code', 'Design Number',
-    'M_FAB_DIV', 'M_YARN', 'M_FAB_MAIN_MVGR_1', 'M_FAB_MAIN_MVGR_2',
-    'M_CONSTRUCTION', 'M_OUNZ', 'M_WIDTH', 'M_WEAVE_02',
-    'M_COUNT', 'M_WEAVE_01', 'M_COMPOSITION', 'M_FINISH', 'M_GSM', 'M_LYCRA',
-    'Fabric Rate', 'V2 Fabric Rate', 'Value Add Cost',
-    'Article Fashion Type', 'Source', 'Created Date',
+// GM Excel download (gm_article_data + gm_variants_article_data). GM attribute columns
+// (GM_BRAND, GM_MATERIAL, …) follow these — only the ones with a value in some exported row.
+const GM_EXPORT_HEADERS = [
+  'Article Number', 'Article Description',
+  'Division', 'Sub Division', 'Major Category', 'MC Description',
+  'Status', 'SAP Sync Status',
+  'Vendor Name', 'Vendor Code', 'Design Number', 'PPT Number',
+  'Rate', 'MRP', 'Rough V2', 'Vendor Cost', 'Final Cost',
+  'Segment', 'Article Fashion Type', 'Source',
+  'Created Date', 'Approved Date', 'Approved By',
 ] as const;
 
-const VARIANT_EXTRA_HEADERS = ['Row Type', 'Parent Fabric Article Number', 'Variant Size', 'Variant Color', 'SAP Article ID'] as const;
+// "With variants": the two article-number columns lead, then the variant's colour / size,
+// then the rest of GM_EXPORT_HEADERS (minus 'Article Number').
+const GM_VARIANT_LEAD_HEADERS = ['Parent Article Number', 'Variant Article Number', 'Variant Color', 'Variant Size'] as const;
 
-function mapVariantExportRow(row: any): Record<string, string | number | undefined> {
-  const rawDate = row.createdAt ? new Date(row.createdAt) : null;
-  const formattedDate = rawDate && !Number.isNaN(rawDate.getTime()) ? rawDate.toLocaleDateString('en-GB') : '';
-  return {
-    'Fabric Article Number':      row.fabricArticleNumber || '',
-    'Fabric Article Description': row.fabricArticleDescription || '',
-    Division:                     row.division || '',
-    'Sub Division':               row.subDivision || '',
-    'Major Category':             row.majorCategory || '',
-    'MC Description':             row.mcDescription || '',
-    Status:                       row.approvalStatus || '',
-    'SAP Sync Status':            row.sapSyncStatus || '',
-    'Vendor Name':                row.vendorName || '',
-    'Vendor Code':                row.vendorCode || '',
-    'Design Number':              row.designNumber || '',
-    M_FAB_DIV:                    row.fabDiv || '',
-    M_YARN:                       row.yarn1 || '',
-    M_FAB_MAIN_MVGR_1:            row.mainMvgr || '',
-    M_FAB_MAIN_MVGR_2:            row.fabricMainMvgr || '',
-    M_CONSTRUCTION:               row.fConstruction || '',
-    M_OUNZ:                       row.fOunce || '',
-    M_WIDTH:                      row.fWidth || '',
-    M_WEAVE_02:                   row.mFab2 || '',
-    M_COUNT:                      row.fCount || '',
-    M_WEAVE_01:                   row.weave || '',
-    M_COMPOSITION:                row.composition || '',
-    M_FINISH:                     row.finish || '',
-    M_GSM:                        row.gsm || '',
-    M_LYCRA:                      row.lycra || '',
-    'Fabric Rate':                row.fabricRate == null ? undefined : Number(row.fabricRate),
-    'V2 Fabric Rate':             row.v2FabricRate == null ? undefined : Number(row.v2FabricRate),
-    'Value Add Cost':             row.valueAddCost == null ? undefined : Number(row.valueAddCost),
-    'Article Fashion Type':       row.articleFashionType || '',
-    Source:                       row.source || '',
-    'Created Date':               formattedDate,
-    'Row Type':                   row._rowType || '',
-    'Parent Fabric Article Number': row._parentArticleNumber || '',
-    'Variant Size':               row.variantSize || '',
-    'Variant Color':              row.variantColor || '',
-    'SAP Article ID':             row.sapArticleId || '',
-  };
+const toExportDate = (v?: string | null) => {
+  const d = v ? new Date(v) : null;
+  return d && !Number.isNaN(d.getTime()) ? d.toLocaleDateString('en-GB') : '';
+};
+const toExportNum = (v: unknown) => (v == null || v === '' ? undefined : Number(v));
+
+/** GM_* attribute codes that have a value in at least one row, A→Z. */
+function gmAttrCodesWithValues(rows: any[]): string[] {
+  const codes = new Set<string>();
+  for (const r of rows) {
+    for (const [k, v] of Object.entries(r)) {
+      if (k.startsWith('GM_') && v != null && String(v).trim() !== '') codes.add(k);
+    }
+  }
+  return [...codes].sort();
 }
+
+function mapGmExportRow(row: any, attrCodes: string[]): Record<string, string | number | undefined> {
+  const out: Record<string, string | number | undefined> = {
+    'Article Number':        row.articleNumber || '',
+    // The API maps gm_article_description onto fabricArticleDescription (shared card shape).
+    'Article Description':   row.fabricArticleDescription || '',
+    Division:                row.division || '',
+    'Sub Division':          row.subDivision || '',
+    'Major Category':        row.majorCategory || '',
+    'MC Description':        row.mcDescription || '',
+    Status:                  row.approvalStatus || '',
+    'SAP Sync Status':       row.sapSyncStatus || '',
+    'Vendor Name':           row.vendorName || '',
+    'Vendor Code':           row.vendorCode || '',
+    'Design Number':         row.designNumber || '',
+    'PPT Number':            row.pptNumber || '',
+    Rate:                    toExportNum(row.rate),
+    MRP:                     toExportNum(row.mrp),
+    'Rough V2':              toExportNum(row.roughV2),
+    'Vendor Cost':           toExportNum(row.vdrCost),
+    'Final Cost':            toExportNum(row.finalCost),
+    Segment:                 row.segment || '',
+    'Article Fashion Type':  row.articleFashionType || '',
+    Source:                  row.source || '',
+    'Created Date':          toExportDate(row.createdAt),
+    'Approved Date':         toExportDate(row.approvedAt),
+    'Approved By':           row.approvedByName || '',
+    // Generic row: its own number is the parent; variant number left empty.
+    'Parent Article Number': row._rowType === 'Variant' ? row._parentArticleNumber || '' : row.articleNumber || '',
+    'Variant Article Number': row._rowType === 'Variant' ? row.articleNumber || '' : '',
+    'Variant Color':         row.variantColor || '',
+    'Variant Size':          row.variantSize || '',
+  };
+  for (const code of attrCodes) out[code] = row[code] ?? '';
+  return out;
+}
+
+// Download file names: GM-<Tab>-Article[-Variants|-Selected][-<division>]-<date>.xlsx
+const exportFileLabel = (pathType?: string) =>
+  pathType === 'old' ? 'GM-Old-Article' : pathType === 'new' ? 'GM-New-Article'
+  : pathType === 'rejected' ? 'GM-Rejected-Article' : pathType === 'created' ? 'GM-Created-Article'
+  : pathType === 'failed' ? 'GM-Failed-Article' : 'GM-Article';
 
 const PAGE_SIZE = 50;
 
@@ -300,137 +318,70 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, searchText, divisionFilter, subDivisionFilter, majorCategoryFilter, dateRangeFilter, groupBy]);
 
-  // ─── Export ──────────────────────────────────────────────────────────────────
+  // ─── Export (gm_article_data, + gm_variants_article_data for "With variants") ──
 
-  const buildApproverExportData = useCallback((rows: ApproverItem[]) => {
-    return rows.map((row: any) => {
-      const rawDate = row.createdAt ? new Date(row.createdAt) : null;
-      const formattedDate = rawDate && !Number.isNaN(rawDate.getTime()) ? rawDate.toLocaleDateString('en-GB') : '';
-      return {
-        'Fabric Article Number':      row.fabricArticleNumber || '',
-        'Fabric Article Description': row.fabricArticleDescription || '',
-        Division:                     row.division || '',
-        'Sub Division':               row.subDivision || '',
-        'Major Category':             row.majorCategory || '',
-        'MC Description':             row.mcDescription || '',
-        Status:                       row.approvalStatus || '',
-        'SAP Sync Status':            row.sapSyncStatus || '',
-        'Vendor Name':                row.vendorName || '',
-        'Vendor Code':                row.vendorCode || '',
-        'Design Number':              row.designNumber || '',
-        M_FAB_DIV:                    row.fabDiv || '',
-        M_YARN:                       row.yarn1 || '',
-        M_FAB_MAIN_MVGR_1:            row.mainMvgr || '',
-        M_FAB_MAIN_MVGR_2:            row.fabricMainMvgr || '',
-        M_CONSTRUCTION:               row.fConstruction || '',
-        M_OUNZ:                       row.fOunce || '',
-        M_WIDTH:                      row.fWidth || '',
-        M_WEAVE_02:                   row.mFab2 || '',
-        M_COUNT:                      row.fCount || '',
-        M_WEAVE_01:                   row.weave || '',
-        M_COMPOSITION:                row.composition || '',
-        M_FINISH:                     row.finish || '',
-        M_GSM:                        row.gsm || '',
-        M_LYCRA:                      row.lycra || '',
-        'Fabric Rate':                row.fabricRate == null ? undefined : Number(row.fabricRate),
-        'V2 Fabric Rate':             row.v2FabricRate == null ? undefined : Number(row.v2FabricRate),
-        'Value Add Cost':             row.valueAddCost == null ? undefined : Number(row.valueAddCost),
-        'Article Fashion Type':       row.articleFashionType || '',
-        Source:                       row.source || '',
-        'Created Date':               formattedDate,
-      } as Record<string, string | number | undefined>;
-    });
-  }, []);
+  // Ticked cards (`ids`) or every row matching the on-screen filters.
+  const downloadGmExcel = useCallback(async (opts: { withVariants: boolean; ids?: string[]; fileName: string }) => {
+    const loadingId = message.loading(opts.withVariants ? 'Fetching articles with variants…' : 'Fetching all records for export…');
+    try {
+      const token = localStorage.getItem('authToken');
+      const params = new URLSearchParams();
+      if (pathType) params.set('pathType', pathType);
+      if (opts.ids) {
+        params.set('ids', opts.ids.join(','));
+      } else {
+        if (divisionFilter !== 'ALL') params.set('division', divisionFilter);
+        if (subDivisionFilter !== 'ALL') params.set('subDivision', subDivisionFilter);
+        if (majorCategoryFilter) params.set('majorCategory', majorCategoryFilter);
+        if (sapSyncFilter !== 'ALL') params.set('sapSyncStatus', sapSyncFilter);
+        if (searchText) params.set('search', searchText);
+        if (dateRangeFilter?.[0]) params.set('startDate', dateRangeFilter[0].startOf('day').toISOString());
+        if (dateRangeFilter?.[1]) params.set('endDate', dateRangeFilter[1].endOf('day').toISOString());
+      }
+      if (opts.withVariants) params.set('withVariants', '1');
 
-  const exportHeaders = useMemo(() => [...SIMPLE_APPROVER_EXPORT_HEADERS], []);
+      const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/gm-articles/export-all?${params}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error('Export failed');
+      const rows: any[] = (await response.json()).data || [];
+      message.dismiss(loadingId);
+      if (rows.length === 0) {
+        message.warning('No records found for the current filters');
+        return;
+      }
+      const attrCodes = gmAttrCodesWithValues(rows);
+      const headers = opts.withVariants
+        ? [...GM_VARIANT_LEAD_HEADERS, ...GM_EXPORT_HEADERS.filter((h) => h !== 'Article Number'), ...attrCodes]
+        : [...GM_EXPORT_HEADERS, ...attrCodes];
+      await exportToExcel(rows.map((r) => mapGmExportRow(r, attrCodes)), headers, [], undefined, { fileBaseName: opts.fileName });
+      message.success(`Exported ${rows.length} rows`);
+    } catch {
+      message.dismiss(loadingId);
+      message.error('Export failed. Please try again.');
+    }
+  }, [pathType, divisionFilter, subDivisionFilter, majorCategoryFilter, sapSyncFilter, searchText, dateRangeFilter]);
+
+  const divLabel = divisionFilter !== 'ALL' ? `-${divisionFilter.replace(/\s+/g, '-')}` : '';
 
   const handleExportAll = useCallback(async () => {
     setExportingAll(true);
-    const loadingId = message.loading('Fetching all records for export…');
     try {
-      const token = localStorage.getItem('authToken');
-      const params = new URLSearchParams();
-      params.set('presentationsType', 'FG Article');
-      if (pathType) params.set('pathType', pathType);
-      if (divisionFilter !== 'ALL') params.set('division', divisionFilter);
-      if (subDivisionFilter !== 'ALL') params.set('subDivision', subDivisionFilter);
-      if (majorCategoryFilter) params.set('majorCategory', majorCategoryFilter);
-      if (searchText) params.set('search', searchText);
-      if (dateRangeFilter?.[0]) params.set('startDate', dateRangeFilter[0].startOf('day').toISOString());
-      if (dateRangeFilter?.[1]) params.set('endDate', dateRangeFilter[1].endOf('day').toISOString());
-
-      const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/export-all?${params}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!response.ok) throw new Error('Export failed');
-      const result = await response.json();
-      const allRows = (result.data || []).map((item: ApproverItem) => ({
-        ...item, mcCode: item.mcCode || inferMcCode(item.majorCategory),
-      }));
-      if (allRows.length === 0) {
-        message.dismiss(loadingId);
-        message.warning('No records found for the current filters');
-        return;
-      }
-      const exportData = buildApproverExportData(allRows);
-      const fileName =
-        pathType === 'old' ? 'Old Articles' : pathType === 'new' ? 'New Articles'
-        : pathType === 'rejected' ? 'Rejected Articles' : 'Articles';
-      const divLabel = divisionFilter !== 'ALL' ? ` - ${divisionFilter}` : '';
-      await exportToExcel(exportData, exportHeaders, [], `${fileName}${divLabel}`);
-      message.dismiss(loadingId);
-      message.success(`Exported ${allRows.length} records`);
-    } catch {
-      message.dismiss(loadingId);
-      message.error('Export failed. Please try again.');
+      await downloadGmExcel({ withVariants: false, fileName: `${exportFileLabel(pathType)}${divLabel}` });
     } finally {
       setExportingAll(false);
     }
-  }, [divisionFilter, subDivisionFilter, majorCategoryFilter, searchText, dateRangeFilter, pathType, buildApproverExportData, exportHeaders]);
+  }, [downloadGmExcel, pathType, divLabel]);
 
-  // ─── Export with variants (Created tab only) ──────────────────────────────────
-
+  // Created tab only: each generic followed by its SAP-created variants.
   const handleExportWithVariants = useCallback(async () => {
     setExportingWithVariants(true);
-    const loadingId = message.loading('Fetching articles with variants…');
     try {
-      const token = localStorage.getItem('authToken');
-      const params = new URLSearchParams();
-      params.set('presentationsType', 'FG Article');
-      params.set('pathType', 'created');
-      if (divisionFilter !== 'ALL') params.set('division', divisionFilter);
-      if (subDivisionFilter !== 'ALL') params.set('subDivision', subDivisionFilter);
-      if (majorCategoryFilter) params.set('majorCategory', majorCategoryFilter);
-      if (searchText) params.set('search', searchText);
-      if (dateRangeFilter?.[0]) params.set('startDate', dateRangeFilter[0].startOf('day').toISOString());
-      if (dateRangeFilter?.[1]) params.set('endDate', dateRangeFilter[1].endOf('day').toISOString());
-
-      const response = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/export-all?${params}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!response.ok) throw new Error('Export failed');
-      const result = await response.json();
-      const allRows: any[] = result.data || [];
-      if (allRows.length === 0) {
-        message.dismiss(loadingId);
-        message.warning('No records found for the current filters');
-        return;
-      }
-
-      const variantHeaders = [...exportHeaders, ...VARIANT_EXTRA_HEADERS];
-      const exportData = allRows.map(mapVariantExportRow);
-
-      const divLabel = divisionFilter !== 'ALL' ? ` - ${divisionFilter}` : '';
-      await exportToExcel(exportData, variantHeaders, [], `Created Articles - Variants${divLabel}`);
-      message.dismiss(loadingId);
-      message.success(`Exported ${allRows.length} rows`);
-    } catch {
-      message.dismiss(loadingId);
-      message.error('Export failed. Please try again.');
+      await downloadGmExcel({ withVariants: true, fileName: `GM-Created-Article-Variants${divLabel}` });
     } finally {
       setExportingWithVariants(false);
     }
-  }, [divisionFilter, subDivisionFilter, majorCategoryFilter, searchText, dateRangeFilter, exportHeaders]);
+  }, [downloadGmExcel, divLabel]);
 
   // ─── Selective export ─────────────────────────────────────────────────────────
 
@@ -483,30 +434,18 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
   }, [items]);
 
   const handleExportSelected = useCallback(async () => {
-    const rows = items.filter((i) => selectedIds.has(i.id));
-    if (rows.length === 0) {
+    const ids = items.filter((i) => selectedIds.has(i.id)).map((i) => i.id);
+    if (ids.length === 0) {
       message.warning('No cards selected');
       return;
     }
-
-    // Created tab: export selected records directly
-    if (pathType === 'created') {
-      const exportData = buildApproverExportData(rows);
-      const divLabel = divisionFilter !== 'ALL' ? ` - ${divisionFilter}` : '';
-      await exportToExcel(exportData, exportHeaders, [], `Created Articles${divLabel} - Selected`);
-      message.success(`Exported ${rows.length} selected records`);
-      return;
-    }
-
-    // All other tabs: export generics only (existing behaviour)
-    const exportData = buildApproverExportData(rows);
-    const fileName =
-      pathType === 'old' ? 'Old Articles' : pathType === 'new' ? 'New Articles'
-      : pathType === 'rejected' ? 'Rejected Articles' : 'Articles';
-    const divLabel = divisionFilter !== 'ALL' ? ` - ${divisionFilter}` : '';
-    await exportToExcel(exportData, exportHeaders, [], `${fileName}${divLabel} - Selected`);
-    message.success(`Exported ${rows.length} selected records`);
-  }, [items, selectedIds, buildApproverExportData, pathType, divisionFilter, exportHeaders]);
+    // Created tab: with their variants, like FG.
+    await downloadGmExcel({
+      withVariants: pathType === 'created',
+      ids,
+      fileName: `${exportFileLabel(pathType)}-Selected${divLabel}`,
+    });
+  }, [items, selectedIds, downloadGmExcel, pathType, divLabel]);
 
   // ─── Card click ───────────────────────────────────────────────────────────────
 

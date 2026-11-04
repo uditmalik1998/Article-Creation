@@ -5086,21 +5086,7 @@ export class ApproverController {
         const skip = (page - 1) * take;
         const pathType = query.pathType || 'new';
         const { where } = ApproverController.buildGmArticleDataWhere(query);
-
-        // Enforce GM user scope: restrict to their assigned sub-divisions
-        const reqUser = req.user as any;
-        if (ApproverController.isGmSubDivScoped(reqUser) && reqUser?.subDivision) {
-            const allowedSubDivs = String(reqUser.subDivision)
-                .split(',')
-                .map((s: string) => s.trim())
-                .filter(Boolean);
-            if (allowedSubDivs.length > 0 && !where.subDivision) {
-                where.AND = [
-                    ...(Array.isArray(where.AND) ? where.AND : []),
-                    { subDivision: { in: allowedSubDivs } },
-                ];
-            }
-        }
+        ApproverController.applyGmSubDivScope(where, req.user);
         const orderBy = pathType === 'created'
             ? ({ approvedAt: { sort: 'desc', nulls: 'last' } } as const)
             : ({ createdAt: 'desc' } as const);
@@ -5116,6 +5102,100 @@ export class ApproverController {
             ]).then(([rows, total]) => ({ rows, total }));
         const data = rows.map((r) => ApproverController.gmArticleDataRowToItem(r));
         return res.json({ data, meta: { total, page, limit: take } });
+    };
+
+    // Enforce GM user scope: restrict to their assigned sub-divisions.
+    private static applyGmSubDivScope(where: any, reqUser: any) {
+        if (!ApproverController.isGmSubDivScoped(reqUser) || !reqUser?.subDivision) return;
+        const allowedSubDivs = String(reqUser.subDivision)
+            .split(',')
+            .map((s: string) => s.trim())
+            .filter(Boolean);
+        if (allowedSubDivs.length > 0 && !where.subDivision) {
+            where.AND = [
+                ...(Array.isArray(where.AND) ? where.AND : []),
+                { subDivision: { in: allowedSubDivs } },
+            ];
+        }
+    }
+
+    // GET /api/approver/gm-articles/export-all — every gm_article_data row matching the list
+    // filters (no paging) for the GM Excel download. `ids=a,b` scopes to ticked cards.
+    // `withVariants=1` puts each generic's SAP-created variants (gm_variants_article_data)
+    // right after it; a variant row inherits the generic's attributes, like the FG export.
+    static exportGmArticles = async (req: Request, res: Response) => {
+        const query = req.query as Record<string, string>;
+        const pathType = query.pathType || 'new';
+        const { where } = ApproverController.buildGmArticleDataWhere(query);
+        ApproverController.applyGmSubDivScope(where, req.user);
+        const idList = String(query.ids || '').split(',').map((s) => s.trim()).filter(Boolean);
+        if (idList.length > 0) where.id = { in: idList };
+
+        const rows = await prisma.gmArticleData.findMany({
+            where,
+            orderBy: pathType === 'created'
+                ? ({ approvedAt: { sort: 'desc', nulls: 'last' } } as const)
+                : ({ createdAt: 'desc' } as const),
+            select: ApproverController.GM_ARTICLE_DATA_SELECT,
+        });
+
+        const approverIds = [...new Set(rows.map((r) => r.approvedBy).filter((v): v is number => v != null))];
+        const approverNames = new Map(
+            (approverIds.length > 0
+                ? await prisma.user.findMany({ where: { id: { in: approverIds } }, select: { id: true, name: true } })
+                : []
+            ).map((u) => [u.id, u.name]),
+        );
+        const generics = rows.map((r) => ({
+            ...ApproverController.gmArticleDataRowToItem(r),
+            approvedByName: r.approvedBy != null ? approverNames.get(r.approvedBy) ?? null : null,
+            _rowType: 'Generic',
+            _parentArticleNumber: '',
+        }));
+
+        if (query.withVariants !== '1') return res.json({ data: generics });
+
+        // SAP-created variants only (own article number), chunked to bound the IN clause.
+        const variantsByGeneric = new Map<string, any[]>();
+        const ids = generics.map((g) => g.id);
+        for (let i = 0; i < ids.length; i += 1000) {
+            const vs = await prisma.gmVariantArticleData.findMany({
+                where: {
+                    genericArticleId: { in: ids.slice(i, i + 1000) },
+                    variantArticleNumber: { not: null },
+                    NOT: { variantArticleNumber: '' },
+                },
+                orderBy: [{ variantColor: 'asc' }, { variantSize: 'asc' }],
+            });
+            for (const v of vs) {
+                const key = v.genericArticleId as string;
+                if (!variantsByGeneric.has(key)) variantsByGeneric.set(key, []);
+                variantsByGeneric.get(key)!.push(v);
+            }
+        }
+
+        const data: any[] = [];
+        for (const g of generics) {
+            data.push(g);
+            for (const v of variantsByGeneric.get(g.id) || []) {
+                data.push({
+                    ...g,
+                    id: v.id,
+                    articleNumber: v.variantArticleNumber,
+                    variantColor: v.variantColor ?? null,
+                    variantSize: v.variantSize ?? null,
+                    rate: v.rate != null ? Number(v.rate) : g.rate,
+                    mrp: v.mrp != null ? Number(v.mrp) : g.mrp,
+                    approvalStatus: v.approvalStatus,
+                    sapSyncStatus: v.sapSyncStatus,
+                    approvedAt: v.approvedAt?.toISOString() ?? g.approvedAt,
+                    createdAt: v.createdAt.toISOString(),
+                    _rowType: 'Variant',
+                    _parentArticleNumber: g.articleNumber || '',
+                });
+            }
+        }
+        return res.json({ data, meta: { total: data.length, generics: generics.length } });
     };
 
     static getGmArticleById = async (req: Request, res: Response) => {
@@ -6397,8 +6477,21 @@ export class ApproverController {
             ? ({ approvedAt: { sort: 'desc', nulls: 'last' } } as const)
             : ({ createdAt: 'desc' } as const);
 
-        const rows = await prisma.fabricArticleData.findMany({ where, orderBy, select: ApproverController.FABRIC_ARTICLE_DATA_SELECT });
-        const data = rows.map((r) => ApproverController.fabricArticleDataRowToItem(r));
+        const rows = await prisma.fabricArticleData.findMany({
+            where, orderBy, select: { ...ApproverController.FABRIC_ARTICLE_DATA_SELECT, approvedBy: true },
+        });
+        // "Approved By" column in the Excel download: approver's name from users.
+        const approverIds = [...new Set(rows.map((r) => r.approvedBy).filter((v): v is number => v != null))];
+        const approverNames = new Map(
+            (approverIds.length > 0
+                ? await prisma.user.findMany({ where: { id: { in: approverIds } }, select: { id: true, name: true } })
+                : []
+            ).map((u) => [u.id, u.name]),
+        );
+        const data = rows.map((r) => ({
+            ...ApproverController.fabricArticleDataRowToItem(r),
+            approvedByName: r.approvedBy != null ? approverNames.get(r.approvedBy) ?? null : null,
+        }));
         return res.json({ data });
     };
 

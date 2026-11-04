@@ -112,6 +112,14 @@ function mapVariantExportRow(row: any): Record<string, string | number | undefin
   };
 }
 
+// Download file names: Fabric-Article-<Tab>[-Variants|-Selected][-<division>]-<date>.xlsx
+const fabricExportFileLabel = (pathType?: string) =>
+  pathType === 'old' ? 'Fabric-Article-Old' : pathType === 'new' ? 'Fabric-Article-New'
+  : pathType === 'rejected' ? 'Fabric-Article-Rejected' : pathType === 'created' ? 'Fabric-Article-Created'
+  : pathType === 'failed' ? 'Fabric-Article-Failed' : 'Fabric-Article';
+const fabricExportDivLabel = (division: string) =>
+  division !== 'ALL' ? `-${division.replace(/\s+/g, '-')}` : '';
+
 const PAGE_SIZE = 50;
 
 interface ApproverDashboardProps {
@@ -330,6 +338,7 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
         'Article Fashion Type':       row.articleFashionType || '',
         Source:                       row.source || '',
         'Created Date':               formattedDate,
+        'Approved By':                row.approvedByName || '',
       } as Record<string, string | number | undefined>;
     });
   }, []);
@@ -365,11 +374,13 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
         return;
       }
       const exportData = buildApproverExportData(allRows);
-      const fileName =
-        pathType === 'old' ? 'Old Articles' : pathType === 'new' ? 'New Articles'
-        : pathType === 'rejected' ? 'Rejected Articles' : 'Articles';
-      const divLabel = divisionFilter !== 'ALL' ? ` - ${divisionFilter}` : '';
-      await exportToExcel(exportData, exportHeaders, [], `${fileName}${divLabel}`);
+      const fileName = fabricExportFileLabel(pathType);
+      const divLabel = fabricExportDivLabel(divisionFilter);
+      // Created tab: no SAP Sync Status column; Approved By (approver's name) at the end.
+      const headers = pathType === 'created'
+        ? [...exportHeaders.filter((h) => h !== 'SAP Sync Status'), 'Approved By']
+        : exportHeaders;
+      await exportToExcel(exportData, headers, [], undefined, { fileBaseName: `${fileName}${divLabel}` });
       message.dismiss(loadingId);
       message.success(`Exported ${allRows.length} records`);
     } catch {
@@ -412,8 +423,8 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
       const variantHeaders = [...exportHeaders, ...VARIANT_EXTRA_HEADERS];
       const exportData = allRows.map(mapVariantExportRow);
 
-      const divLabel = divisionFilter !== 'ALL' ? ` - ${divisionFilter}` : '';
-      await exportToExcel(exportData, variantHeaders, [], `Created Articles - Variants${divLabel}`);
+      const divLabel = fabricExportDivLabel(divisionFilter);
+      await exportToExcel(exportData, variantHeaders, [], undefined, { fileBaseName: `Fabric-Article-Created-Variants${divLabel}` });
       message.dismiss(loadingId);
       message.success(`Exported ${allRows.length} rows`);
     } catch {
@@ -484,19 +495,17 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
     // Created tab: export selected records directly
     if (pathType === 'created') {
       const exportData = buildApproverExportData(rows);
-      const divLabel = divisionFilter !== 'ALL' ? ` - ${divisionFilter}` : '';
-      await exportToExcel(exportData, exportHeaders, [], `Created Articles${divLabel} - Selected`);
+      const divLabel = fabricExportDivLabel(divisionFilter);
+      await exportToExcel(exportData, exportHeaders, [], undefined, { fileBaseName: `Fabric-Article-Created-Selected${divLabel}` });
       message.success(`Exported ${rows.length} selected records`);
       return;
     }
 
     // All other tabs: export generics only (existing behaviour)
     const exportData = buildApproverExportData(rows);
-    const fileName =
-      pathType === 'old' ? 'Old Articles' : pathType === 'new' ? 'New Articles'
-      : pathType === 'rejected' ? 'Rejected Articles' : 'Articles';
-    const divLabel = divisionFilter !== 'ALL' ? ` - ${divisionFilter}` : '';
-    await exportToExcel(exportData, exportHeaders, [], `${fileName}${divLabel} - Selected`);
+    await exportToExcel(exportData, exportHeaders, [], undefined, {
+      fileBaseName: `${fabricExportFileLabel(pathType)}-Selected${fabricExportDivLabel(divisionFilter)}`,
+    });
     message.success(`Exported ${rows.length} selected records`);
   }, [items, selectedIds, buildApproverExportData, pathType, divisionFilter, exportHeaders]);
 

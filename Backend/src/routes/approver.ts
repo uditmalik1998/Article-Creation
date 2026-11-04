@@ -190,6 +190,8 @@ router.get('/gm-description-format', h(ApproverController.getGmDescriptionFormat
 
 // GM Article data list — paginated list from gm_article_data
 router.get('/gm-articles', requireArticleType('GM'), h(ApproverController.getGmArticleItems));
+// Excel download (All / With variants / ticked cards) — before /gm-articles/:id so "export-all" isn't read as an id
+router.get('/gm-articles/export-all', requireArticleType('GM'), h(ApproverController.exportGmArticles));
 
 // Get / Update a single gm_article_data record
 router.get('/gm-articles/:id', h(ApproverController.getGmArticleById));
