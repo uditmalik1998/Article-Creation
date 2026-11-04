@@ -1903,7 +1903,7 @@ export class ApproverController {
     // Precise Costing export — one block per FG article, laid out like the
     // "OUT FORMAT- RAM SIR" Sheet2: article header, cost summary, then a
     // material table (FAB / B TRIM / PKG. COST / VAL. ADD. / BODY). AUTO-BGT and
-    // ROUGH-V2 come from the saved costing cards; VDR PR PC COST and FINAL are
+    // ROUGH-V2 and VDR PR PC COST come from the saved costing cards; FINAL is
     // left blank for the user. Totals and DIFF (= FINAL − ROUGH-V2) are formulas.
     static async preciseCostingExport(req: Request, res: Response) {
         // Phase 1 — fetch all data before touching the response stream
@@ -1963,6 +1963,14 @@ export class ApproverController {
                     washingAutoBgt: true, washingRoughV2: true,
                     boppNetPrice: true, ctnNetPrice: true, barcodeNetPrice: true,
                     kimbleNetPrice: true, taftaNetPrice: true, threadNetPrice: true,
+                    // Vendor cost (VDR PR PC COST) — the FG costing grid's VDR column
+                    mBtnVdrCost: true, patchVdrCost: true, zipVdrCost: true, dcVdrCost: true, hTrfVdrCost: true,
+                    otherVdrCost: true, adjusterVdrCost: true, badgeVdrCost: true, brotchVdrCost: true, buckleVdrCost: true,
+                    elasticVdrCost: true, eyeletsVdrCost: true, fusingVdrCost: true, hangingDRingVdrCost: true, hookVdrCost: true,
+                    labelVdrCost: true, laceVdrCost: true, pockettingFabricVdrCost: true, pockettingReadymadeVdrCost: true, rivetVdrCost: true,
+                    santaVdrCost: true, stopperVdrCost: true, tagVdrCost: true, tapeVdrCost: true, tasselsVdrCost: true,
+                    printVendorCost: true, embVendorCost: true, washingVendorCost: true,
+                    cuttingVendorPrVal: true, stitchingVendorPrVal: true, ironingVendorPrVal: true, finishingVendorPrVal: true,
                 },
             });
         } catch (err) {
@@ -1986,10 +1994,10 @@ export class ApproverController {
             const wb: any = new (ExcelJS as any).stream.xlsx.WorkbookWriter({ stream: res, useStyles: true, useSharedStrings: true });
             const ws: any = wb.addWorksheet('PRECISE COSTING');
 
-            // A..Q — widths must be declared before any rows in streaming mode
+            // A..P — widths must be declared before any rows in streaming mode
             ws.columns = [
                 { width: 14 }, { width: 22 }, { width: 16 }, { width: 32 }, { width: 7 }, { width: 8 },
-                { width: 8 }, { width: 7 }, { width: 10 }, { width: 11 }, { width: 11 }, { width: 11 },
+                { width: 8 }, { width: 10 }, { width: 11 }, { width: 11 }, { width: 11 },
                 { width: 15 }, { width: 11 }, { width: 10 }, { width: 8 }, { width: 16 },
             ];
 
@@ -1999,7 +2007,7 @@ export class ApproverController {
             const AMBER      = 'FFFFF2CC';
             const LT_GREEN   = 'FFE2EFDA';
             const GREY       = 'FFF2F2F2';
-            const COLS = 17; // A..Q
+            const COLS = 16; // A..P
 
             const num = (v: any) => (v == null || v === '' ? null : Number(v));
             const fill = (argb: string) => ({ type: 'pattern', pattern: 'solid', fgColor: { argb } });
@@ -2015,28 +2023,29 @@ export class ApproverController {
                         if (style.bold || style.white) cell.font = { bold: !!style.bold, color: style.white ? { argb: 'FFFFFFFF' } : undefined };
                     }
                 }
-                for (let c = 11; c <= 15; c++) row.getCell(c).numFmt = '0.00';
+                for (let c = 10; c <= 14; c++) row.getCell(c).numFmt = '0.00';
                 const n = row.number;
                 row.commit();
                 return n;
             };
             const blank = () => addRow([]);
 
-            // Material row: A..Q, with K/L values and DIFF (O) = FINAL − ROUGH-V2 once FINAL is filled.
+            // Material row: A..P, with J/K values and DIFF (N) = FINAL − ROUGH-V2 once FINAL is filled.
             // rowNo is predicted (addRow returns it) so the DIFF formula can reference its own row.
             let nextRow = 0;
             const matRow = (r: {
                 type: string; mc: string; artNo?: any; artDesc?: any; uom?: string; qty?: any;
-                dash?: boolean; k?: any; l?: any; m?: any; n?: any; kFormula?: string; lFormula?: string;
+                dash?: boolean; k?: any; l?: any; m?: any; n?: any; kFormula?: string; lFormula?: string; mFormula?: string;
             }, style?: { fill?: string; bold?: boolean }) => {
                 const rn = nextRow;
                 const d = r.dash ? '-' : null;
                 const k = r.kFormula ? { formula: r.kFormula } : r.k;
                 const l = r.lFormula ? { formula: r.lFormula } : r.l;
+                const m = r.mFormula ? { formula: r.mFormula } : r.m;
                 const n = addRow([
                     r.type, r.mc, r.artNo ?? null, r.artDesc ?? null, r.uom ?? null, r.qty ?? null,
-                    null, d, d, d, k ?? null, l ?? null, r.m ?? null, r.n ?? null,
-                    { formula: `IF(N${rn}="","",N${rn}-L${rn})` }, null, null,
+                    null, d, d, k ?? null, l ?? null, m ?? null, r.n ?? null,
+                    { formula: `IF(M${rn}="","",M${rn}-K${rn})` }, null, null,
                 ], style);
                 nextRow = n + 1;
                 return n;
@@ -2062,7 +2071,7 @@ export class ApproverController {
                 ['CUTTING', 'cutting'], ['STITCHING', 'stitching'], ['IRONING', 'ironing'], ['FINISHING', 'finishing'],
             ];
             const MAT_HDR = [
-                'MATERIAL TYPE', 'MATERIAL_MC', 'ART. NO.', 'ART. DES', 'UOM', 'TTL QTY', 'RATE', 'WST %',
+                'MATERIAL TYPE', 'MATERIAL_MC', 'ART. NO.', 'ART. DES', 'UOM', 'TTL QTY', 'RATE',
                 'FAB WIDTH', 'PR PC CONS.', 'AUTO -BGT', 'ROUGH-V2', 'VDR PR PC COST', 'FINAL', 'DIFF', 'RATIO', 'REMARKS',
             ];
 
@@ -2074,17 +2083,17 @@ export class ApproverController {
             const hasCost = (...v: any[]) => v.some((x) => x != null);
             const materialPlan = (a: any) => {
                 const btrimKeep = BTRIM_ROWS
-                    .map(([name, key]) => ({ name, k: key ? num(a[`${key}AutoBgt`]) : null, l: key ? num(a[`${key}RoughV2`]) : null }))
-                    .filter((r) => hasCost(r.k, r.l));
+                    .map(([name, key]) => ({ name, k: key ? num(a[`${key}AutoBgt`]) : null, l: key ? num(a[`${key}RoughV2`]) : null, m: key ? num(a[`${key}VdrCost`]) : null }))
+                    .filter((r) => hasCost(r.k, r.l, r.m));
                 const pkgKeep = PKG_ROWS
                     .map(([name, field]) => ({ name, rate: num(a[field]) }))
                     .filter((r) => hasCost(r.rate));
                 const vaddKeep = VADD_ROWS
-                    .map(([name, key]) => ({ name, k: num(a[`${key}AutoBgt`]), l: num(a[`${key}RoughV2`]) }))
-                    .filter((r) => hasCost(r.k, r.l));
+                    .map(([name, key]) => ({ name, k: num(a[`${key}AutoBgt`]), l: num(a[`${key}RoughV2`]), m: num(a[`${key}VendorCost`]) }))
+                    .filter((r) => hasCost(r.k, r.l, r.m));
                 const bodyKeep = BODY_ROWS
-                    .map(([name, key]) => ({ name, k: num(a[`${key}BgtPrVal`]), l: num(a[`${key}ActPrVal`]) }))
-                    .filter((r) => hasCost(r.k, r.l));
+                    .map(([name, key]) => ({ name, k: num(a[`${key}BgtPrVal`]), l: num(a[`${key}ActPrVal`]), m: num(a[`${key}VendorPrVal`]) }))
+                    .filter((r) => hasCost(r.k, r.l, r.m));
                 return { btrimKeep, pkgKeep, vaddKeep, bodyKeep };
             };
             // Rows one article's block takes. Full block: 2 blank, header, values, blank,
@@ -2144,14 +2153,14 @@ export class ApproverController {
                 // which sits 5 rows below the summary value row.
                 const sv = ws.addRow([
                     num(a.mrp),
-                    { formula: `K${totRow}` }, { formula: `L${totRow}` }, { formula: `M${totRow}` }, { formula: `N${totRow}` },
+                    { formula: `J${totRow}` }, { formula: `K${totRow}` }, { formula: `L${totRow}` }, { formula: `M${totRow}` },
                 ]);
                 for (let c = 1; c <= 5; c++) sv.getCell(c).numFmt = '0.00';
                 track(sv.number);
                 sv.commit();
 
                 track(blank());
-                track(addRow([null, null, null, null, null, null, null, null, null, null, 'COST'], { bold: true, from: 11, to: 11 }));
+                track(addRow([null, null, null, null, null, null, null, null, null, 'COST'], { bold: true, from: 10, to: 10 }));
                 track(addRow(MAT_HDR, { fill: DARK_BLUE, bold: true, white: true }));
 
                 const { btrimKeep, pkgKeep, vaddKeep, bodyKeep } = materialPlan(a);
@@ -2168,25 +2177,25 @@ export class ApproverController {
                 const sumCol = (c: string) =>
                     `SUM(${c}${firstMat}:${c}${lastNonBody})` + (hasBody ? `+${c}${cmpRow}` : '');
                 const tr = ws.addRow([
-                    'TOTAL', null, null, null, null, null, null, null, null, null,
-                    { formula: sumCol('K') }, { formula: sumCol('L') }, { formula: sumCol('M') }, { formula: sumCol('N') },
-                    { formula: `IF(N${totRow}=0,"",N${totRow}-L${totRow})` },
+                    'TOTAL', null, null, null, null, null, null, null, null,
+                    { formula: sumCol('J') }, { formula: sumCol('K') }, { formula: sumCol('L') }, { formula: sumCol('M') },
+                    { formula: `IF(M${totRow}=0,"",M${totRow}-K${totRow})` },
                 ]);
                 for (let c = 1; c <= COLS; c++) {
                     tr.getCell(c).fill = fill(GREY);
                     tr.getCell(c).font = { bold: true };
                 }
-                for (let c = 11; c <= 15; c++) tr.getCell(c).numFmt = '0.00';
+                for (let c = 10; c <= 14; c++) tr.getCell(c).numFmt = '0.00';
                 if (tr.number !== totRow) console.warn('[preciseCostingExport] total row drift', tr.number, totRow);
                 track(tr.number);
                 tr.commit();
                 track(blank());
 
-                // FAB — RATE = Fab card VENDOR COST, WST % = 4, FAB WIDTH = M_WIDTH as a
+                // FAB — RATE = Fab card VENDOR COST, FAB WIDTH = M_WIDTH as a
                 // number (38" → 38), PR PC CONS. = first of precise kg, rough kg,
                 // precise meter, rough meter.
-                // AUTO-BGT / ROUGH-V2 / VDR = (rate × cons) × (100 + WST%) / 100,
-                // with the Fab card's AUTO-BGT / ROUGH-V2 / RATE cell. FINAL left blank.
+                // AUTO-BGT / ROUGH-V2 / VDR = rate × cons, with the Fab card's AUTO-BGT /
+                // ROUGH-V2 / RATE cell. FINAL left blank.
                 {
                     const fr = nextRow;
                     const widthNum = parseInt(String(a.fWidth ?? '').replace(/[^0-9.]/g, ''), 10);
@@ -2196,21 +2205,21 @@ export class ApproverController {
                     const consUom = consKg != null ? 'KG' : cons != null ? 'MTR' : 'KG';
                     const autoBgt = num(a.autoBgt);
                     const roughV2 = num(a.roughV2);
-                    const wst = (rate: string) => ({ formula: `+(${rate}*J${fr})*(100+H${fr})/100` });
+                    const cost = (rate: string) => ({ formula: `+${rate}*I${fr}` });
                     track(addRow([
                         'FAB', 'FAB_MC', a.fabricArticleNumber || null, a.fabricArticleDescription || null, consUom, null,
-                        num(a.vendorFabricRate), 4, Number.isNaN(widthNum) ? null : widthNum, cons,
-                        autoBgt != null ? wst(String(autoBgt)) : null,
-                        roughV2 != null ? wst(String(roughV2)) : null,
-                        wst(`G${fr}`),
+                        num(a.vendorFabricRate), Number.isNaN(widthNum) ? null : widthNum, cons,
+                        autoBgt != null ? cost(String(autoBgt)) : null,
+                        roughV2 != null ? cost(String(roughV2)) : null,
+                        cost(`G${fr}`),
                         null,
-                        { formula: `IF(N${fr}="","",N${fr}-L${fr})` }, null, null,
+                        { formula: `IF(M${fr}="","",M${fr}-K${fr})` }, null, null,
                     ], { fill: LIGHT_BLUE }));
                 }
                 if (btrimKeep.length > 0) {
                     track(blank());
                     for (const r of btrimKeep) {
-                        matRow({ type: 'B TRIM', mc: r.name, artDesc: r.name, uom: 'EA', qty: 1, dash: true, k: r.k, l: r.l });
+                        matRow({ type: 'B TRIM', mc: r.name, artDesc: r.name, uom: 'EA', qty: 1, dash: true, k: r.k, l: r.l, m: r.m });
                     }
                 }
 
@@ -2224,7 +2233,7 @@ export class ApproverController {
                 if (vaddKeep.length > 0) {
                     track(blank());
                     for (const r of vaddKeep) {
-                        matRow({ type: 'VAL. ADD.', mc: r.name, k: r.k, l: r.l }, { fill: LT_GREEN });
+                        matRow({ type: 'VAL. ADD.', mc: r.name, k: r.k, l: r.l, m: r.m }, { fill: LT_GREEN });
                     }
                 }
 
@@ -2235,11 +2244,12 @@ export class ApproverController {
                     const procLast = cmpRow + bodyKeep.length;
                     const cmpN = matRow({
                         type: 'BODY', mc: 'CMP COST', artNo: a.bodyArticle || null, artDesc: a.bodyArticleDescription || null, uom: 'EA',
-                        kFormula: `SUM(K${procFirst}:K${procLast})`, lFormula: `SUM(L${procFirst}:L${procLast})`,
+                        kFormula: `SUM(J${procFirst}:J${procLast})`, lFormula: `SUM(K${procFirst}:K${procLast})`,
+                        mFormula: `SUM(L${procFirst}:L${procLast})`,
                     }, { fill: PURPLE, bold: true });
                     if (cmpN !== cmpRow) console.warn('[preciseCostingExport] cmp row drift', cmpN, cmpRow);
                     for (const r of bodyKeep) {
-                        matRow({ type: 'BODY', mc: r.name, k: r.k, l: r.l }, { fill: PURPLE });
+                        matRow({ type: 'BODY', mc: r.name, k: r.k, l: r.l, m: r.m }, { fill: PURPLE });
                     }
                 }
                 // A set parent's summary points at its parts' rows by this height.
