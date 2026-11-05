@@ -67,9 +67,10 @@ interface CmpCostCardProps {
   collapsed: boolean;
   onToggleCollapse: () => void;
   locked: boolean;
-  /** ACT PR VAL auto-filled from precise_body_article_consumption. Presets only apply if no saved value exists. */
+  /** ACT preset (no longer passed by the FG page — ACT is typed by the user). */
   actPreset?: Record<string, string>;
-  /** BGT PR VAL auto-filled from rough_cmp_cost_master by major category. Presets only apply if no saved value exists. */
+  /** BGT preset: the body article's precise_body_article_consumption values (replace all BGT cells when a body
+   *  article is picked), else rough_cmp_cost_master by major category. On open, saved values win. */
   bgtPreset?: Record<string, string>;
   /** Persisted PR VAL values loaded from the article record. Keyed by cell key, e.g. 'CUTTING|BGT|PR VAL'. */
   savedPrVals?: Record<string, string>;

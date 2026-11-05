@@ -5,6 +5,41 @@
 
 ---
 
+## 2026-11-05 — Rough Consumption meter from the picked body article's exact width
+
+- FG Rough Consumption card: when the article has a body article, Consumption in Meter = that body article's
+  precise_body_article_consumption value at the width's own column (e.g. width48); if that cell is empty (or the body
+  article isn't in the same major category) it falls back to the existing body_fabric_consumption logic
+  (major category + width, else the category's lowest). Kg recomputed as before.
+- Runs when M_WIDTH changes or a body article is picked (effect key now majCat:width:bodyArticle). Opening an article
+  still never overwrites a saved meter — re-pick the body article to refresh an old one.
+- Backend: GET /approver/precise-body-article/by-width?exact=1 → own width column only (no earlier-column fallback).
+- e.g. 12273faf… (48", body 2176014819001): 0.245 (M_W_SHIRT_FS rough) → 1 (width_48) after re-picking.
+
+---
+
+## 2026-11-05 — Precise consumption by width: empty width falls back to the earlier column
+
+- GET /approver/precise-body-article/by-width (getPreciseConsumptionByWidth, fills the FG Consumption in Meter from
+  precise_body_article_consumption): the width's own column, else the nearest EARLIER (narrower) column with a value
+  (48 → 46 → 44 → 43 …), else the nearest later one. Was: minimum value across all 39 width columns.
+  Response also returns `widthUsed`. e.g. 2176021922001 at 48": 0.822 (old min) → 0.988 (width 46).
+- 2,166 of 2,169 rows have no 48" value; 43 of them get a value from an earlier column.
+
+---
+
+## 2026-11-05 — CMP COST: picking a body article fills BGT (not ACT)
+
+- User: picking BODY ARTICLE NO. / DESC must fill BGT only, overwriting every BGT cell; ACT is no longer auto-filled.
+- ApproverArticleList: fetchCmpBodyBgtPreset (precise_body_article_consumption → BGT SAM / SAM VAL / PR VAL);
+  refreshCmpBgtFromBody on both body pickers (all BGT cells replaced, card shows Unsaved changes until Save).
+  On open, empty BGT cells fill from the article's body article, else rough_cmp_cost_master by major category; saved
+  values win. ACT preset effect, state and prop removed.
+- Summary Costing export (ApproverController) follows the card: BGT preset = body article, else major category;
+  ACT uses saved values only.
+
+---
+
 ## 2026-11-05 — FG OTH GRID-1: MRP from 30% markdown, rounded up to 25; markdown limit 15–50%
 
 - RATE now fills MRP = rate ÷ (1 − 0.30), rounded UP to the next multiple of 25 (rate 100 → 142.86 → 150;

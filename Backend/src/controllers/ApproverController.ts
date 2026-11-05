@@ -2293,11 +2293,11 @@ export class ApproverController {
         rows = groupSetParts(rows);
 
         // CMP COST presets, exactly as the card fills its empty PR VALs:
-        //   BGT ← rough_cmp_cost_master by major category,
-        //   ACT ← precise_body_article_consumption by body article (SAM × rate).
+        //   BGT ← precise_body_article_consumption by body article (SAM × rate), else
+        //         rough_cmp_cost_master by major category. ACT is never preset (saved values only).
         const bgtPresetByMc = new Map<string, Record<string, number | null>>();
-        const actPresetByBody = new Map<string, Record<string, number | null>>();
-        try {
+        const bgtPresetByBody = new Map<string, Record<string, number | null>>();
+        try {           
             const n = (v: any) => (v != null ? Number(v) : null);
             const [roughRows, preciseRows] = await Promise.all([
                 prisma.roughCmpCostMaster.findMany({
@@ -2315,9 +2315,9 @@ export class ApproverController {
             }
             for (const r of preciseRows) {
                 const key = String(r.microBodyArticleNumber ?? '').trim().toUpperCase();
-                if (!key || actPresetByBody.has(key)) continue;
+                if (!key || bgtPresetByBody.has(key)) continue;
                 const st = n(r.stitchingSam) ?? 0, sv = n(r.samVal) ?? 0, ir = n(r.ironingSam) ?? 0, fin = n(r.finishingSam) ?? 0;
-                actPresetByBody.set(key, {
+                bgtPresetByBody.set(key, {
                     cutting: n(r.cuttingValue),
                     stitching: st && sv ? Number((st * sv).toFixed(4)) : null,
                     ironing: ir ? Number((ir * 2.5).toFixed(4)) : null,
@@ -2426,9 +2426,9 @@ export class ApproverController {
                 put([null, 'FAB', fabRate, cons, both ? fx(`+E${fabR}*D${fabR}`) : null, both ? fx(`+D${fabR}*E${fabR}`) : null, null,
                     vdrRate != null && cons != null ? fx(`+E${fabR}*${vdrRate}`) : null, null], line(BLUE, false, BLUE));
                 // BODY — the CMP COST card's TOTAL row: BGT total cost → AUTO-V2, ACT total cost → ROUGH-V2.
-                const bgtPreset = bgtPresetByMc.get(String(a.majorCategory ?? '').trim().toUpperCase());
-                const actPreset = actPresetByBody.get(String(a.bodyArticle ?? '').trim().toUpperCase());
-                put([null, 'BODY', null, null, cmpTotal(a, 'Bgt', bgtPreset), cmpTotal(a, 'Act', actPreset), null, num(a.totalVendorPrVal), null], line(PURPLE, true));
+                const bgtPreset = bgtPresetByBody.get(String(a.bodyArticle ?? '').trim().toUpperCase())
+                    ?? bgtPresetByMc.get(String(a.majorCategory ?? '').trim().toUpperCase());
+                put([null, 'BODY', null, null, cmpTotal(a, 'Bgt', bgtPreset), cmpTotal(a, 'Act', undefined), null, num(a.totalVendorPrVal), null], line(PURPLE, true));
                 // B TRIM — the card's TOTAL row, only when a tab (BT-01 / BT-02) has been saved:
                 // TOTAL AUTO-BGT → AUTO-V2, TOTAL ROUGH-V2 → ROUGH-V2.
                 const bt = a.bTrimType ? a : {};
@@ -5841,7 +5841,8 @@ export class ApproverController {
 
     // Returns the fabric consumption for a given major category + fabric width from
     // precise_body_article_consumption. Width columns are named width15, width66, etc.
-    // If no exact column match, falls back to the minimum non-null value across all width columns.
+    // Uses the width's own column; if that is empty (or the width has no column), the nearest
+    // EARLIER (narrower) column with a value — 48 → 46 → 44 … — and only if none, the nearest later one.
     static getPreciseConsumptionByWidth = async (req: Request, res: Response) => {
         const majorCategory          = String(req.query.majorCategory          ?? '').trim();
         const fabWidthRaw            = String(req.query.fabWidth               ?? '').trim().replace(/"/g, '');
@@ -5859,29 +5860,33 @@ export class ApproverController {
         const row = await prisma.preciseBodyArticleConsumption.findFirst({ where } as any);
         if (!row) return res.json({ consumption: null });
 
-        // Try exact width column first (e.g. width66)
-        const exactKey = `width${fabWidthNum}` as keyof typeof row;
-        const exactVal = row[exactKey];
-        if (exactVal != null) return res.json({ consumption: Number(exactVal) });
-
-        // Fallback: minimum non-null value across all width columns
-        const WIDTH_KEYS: (keyof typeof row)[] = [
-            'width15','width16','width17','width18','width19',
-            'width42','width43','width44','width46','width48','width50',
-            'width53','width54','width55','width56','width57','width58','width59','width60',
-            'width61','width62','width63','width64','width65','width66','width67','width68',
-            'width69','width70','width71','width72','width73','width74','width76','width78',
-            'width82','width92','width94','width96',
+        // Width columns in ascending order.
+        const WIDTHS = [
+            15, 16, 17, 18, 19, 42, 43, 44, 46, 48, 50,
+            53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68,
+            69, 70, 71, 72, 73, 74, 76, 78, 82, 92, 94, 96,
         ];
-        let minVal: number | null = null;
-        for (const k of WIDTH_KEYS) {
-            const v = row[k];
-            if (v != null) {
-                const n = Number(v);
-                if (minVal === null || n < minVal) minVal = n;
-            }
+        const valueAt = (w: number): number | null => {
+            const v = row[`width${w}` as keyof typeof row];
+            return v != null ? Number(v) : null;
+        };
+        // exact=1 (Rough Consumption card): the width's own column only — the caller falls back
+        // to body_fabric_consumption when it's empty.
+        if (String(req.query.exact ?? '') === '1') {
+            const v = WIDTHS.includes(fabWidthNum) ? valueAt(fabWidthNum) : null;
+            return res.json({ consumption: v, widthUsed: v != null ? fabWidthNum : null });
         }
-        return res.json({ consumption: minVal });
+        // Own column, then earlier (narrower) columns, nearest first.
+        for (const w of WIDTHS.filter((w) => w <= fabWidthNum).reverse()) {
+            const v = valueAt(w);
+            if (v != null) return res.json({ consumption: v, widthUsed: w });
+        }
+        // Nothing at or below this width — nearest later column instead.
+        for (const w of WIDTHS.filter((w) => w > fabWidthNum)) {
+            const v = valueAt(w);
+            if (v != null) return res.json({ consumption: v, widthUsed: w });
+        }
+        return res.json({ consumption: null });
     };
 
     // basic_trim_master lookup — returns bt_1 / bt_2 for a given attribute_name + type combination.
