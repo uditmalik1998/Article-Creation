@@ -341,6 +341,12 @@ router.get('/fabric-article-master/template', h(adminController.downloadFabricAr
 router.get('/fabric-article-master/download', h(adminController.downloadFabricArticleMasterData));
 router.post('/fabric-article-master/upload',  excelUpload.single('file'), h(adminController.uploadFabricArticleMaster));
 
+// Fabric Grid Values (fabric_maj_cat_grid_values) — Fabric FAB dropdown codes + full forms
+router.get('/fabric-grid-values/status',   h(adminController.getFabricGridValuesStatus));
+router.get('/fabric-grid-values/template', h(adminController.downloadFabricGridValuesTemplate));
+router.get('/fabric-grid-values/download', h(adminController.downloadFabricGridValuesData));
+router.post('/fabric-grid-values/upload',  excelUpload.single('file'), h(adminController.uploadFabricGridValues));
+
 // ═══════════════════════════════════════════════════════════════
 // PRECISE BODY ARTICLE CONSUMPTION — precise_body_article_consumption
 // ═══════════════════════════════════════════════════════════════

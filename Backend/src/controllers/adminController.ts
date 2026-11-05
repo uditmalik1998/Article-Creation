@@ -6596,7 +6596,7 @@ export const downloadFabricArticleMasterTemplate = async (_req: Request, res: Re
     noteRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } };
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', 'attachment; filename="FABRIC_ARTICLE_MASTER_TEMPLATE.xlsx"');
+    res.setHeader('Content-Disposition', 'attachment; filename="FABRIC_MAJOR_CATEGORY_TEMPLATE.xlsx"');
     await wb.xlsx.write(res);
     res.end();
   } catch (error: any) {
@@ -6641,7 +6641,7 @@ export const downloadFabricArticleMasterData = async (_req: Request, res: Respon
       { width: 14 }, { width: 30 }, { width: 10 }, { width: 12 }, { width: 12 },
     ];
 
-    const filename = `FABRIC_ARTICLE_MASTER_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    const filename = `FABRIC_MAJOR_CATEGORY_${new Date().toISOString().slice(0, 10)}.xlsx`;
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     await wb.xlsx.write(res);
@@ -6742,6 +6742,210 @@ export const uploadFabricArticleMaster = async (req: Request, res: Response): Pr
     });
   } catch (error: any) {
     console.error('[FabricArticleMaster] Upload error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// ═══════════════════════════════════════════════════════
+// FABRIC GRID VALUES (fabric_maj_cat_grid_values)
+// One row per (characteristic, code) + full form — the Fabric FAB dropdowns (M_FAB_DIV, M_YARN, …).
+// Template, download and upload share one layout (title row 1, headers row 3, data from row 5),
+// so a downloaded file can be edited and uploaded again.
+// ═══════════════════════════════════════════════════════
+
+const FABRIC_GRID_SHEET = 'FABRIC GRID VALUES';
+const FABRIC_GRID_HEADERS = ['CHARACTERISTIC', 'CODE', 'FULL FORM'];
+
+const buildFabricGridWorkbook = (rows: { characteristic: string; code: string; full_form: string }[], title: string) => {
+  const ExcelJS = require('exceljs');
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet(FABRIC_GRID_SHEET);
+
+  ws.mergeCells('A1:C1');
+  const titleCell = ws.getCell('A1');
+  titleCell.value = title;
+  titleCell.font = { bold: true, size: 13 };
+  titleCell.alignment = { horizontal: 'center' };
+  ws.getRow(1).height = 22;
+  ws.addRow([]);
+
+  const headerRow = ws.addRow(FABRIC_GRID_HEADERS);
+  headerRow.eachCell((cell: any) => {
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+    cell.alignment = { horizontal: 'center' };
+  });
+  ws.addRow([]);
+
+  rows.forEach((r) => ws.addRow([r.characteristic, r.code, r.full_form]));
+  ws.columns = [{ width: 22 }, { width: 18 }, { width: 50 }];
+  return { wb, ws };
+};
+
+/**
+ * GET /api/admin/fabric-grid-values/status
+ */
+export const getFabricGridValuesStatus = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.$queryRaw<{ total: bigint; characteristics: bigint; updated_at: Date | null }[]>`
+      SELECT COUNT(*)::bigint                       AS total,
+             COUNT(DISTINCT characteristic)::bigint AS characteristics,
+             MAX(updated_at)                        AS updated_at
+      FROM fabric_maj_cat_grid_values
+    `;
+    const r = rows[0];
+    res.json({
+      success: true,
+      data: {
+        total: Number(r?.total ?? 0),
+        characteristics: Number(r?.characteristics ?? 0),
+        uploadedAt: r?.updated_at ? new Date(r.updated_at).toISOString() : undefined,
+      },
+    });
+  } catch (error: any) {
+    console.error('[FabricGridValues] Status error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * GET /api/admin/fabric-grid-values/template
+ */
+export const downloadFabricGridValuesTemplate = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const { wb, ws } = buildFabricGridWorkbook([
+      { characteristic: 'M_FAB_DIV', code: 'K', full_form: 'KNIT' },
+      { characteristic: 'M_FAB_DIV', code: 'W', full_form: 'WOVEN' },
+      { characteristic: 'M_YARN', code: 'C', full_form: 'COTTON' },
+    ], 'FABRIC GRID VALUES UPLOAD');
+
+    ws.addRow([]);
+    const noteRow = ws.addRow([
+      '⚠ NOTE: Headers in Row 3, data from Row 5. Keep CHARACTERISTIC names exactly as today '
+      + '(M_FAB_DIV, M_YARN, FAB_MAIN_MVGR-1, FAB-MAIN-MVGR-2, WEAVE-01, WEAVE 02, M_COMPOSITION, …). '
+      + 'Upload replaces the whole table.',
+    ]);
+    ws.mergeCells(`A${noteRow.number}:C${noteRow.number}`);
+    noteRow.getCell(1).font = { italic: true, size: 10 };
+    noteRow.getCell(1).alignment = { wrapText: true };
+    noteRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } };
+    noteRow.height = 42;
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="FABRIC_GRID_VALUES_TEMPLATE.xlsx"');
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[FabricGridValues] Template error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * GET /api/admin/fabric-grid-values/download
+ * All rows, in the upload layout.
+ */
+export const downloadFabricGridValuesData = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const rows = await prisma.$queryRaw<{ characteristic: string; code: string; full_form: string }[]>`
+      SELECT characteristic, code, full_form
+      FROM fabric_maj_cat_grid_values
+      ORDER BY characteristic, id
+    `;
+    const { wb } = buildFabricGridWorkbook(rows, 'FABRIC GRID VALUES');
+
+    const filename = `FABRIC_GRID_VALUES_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    await wb.xlsx.write(res);
+    res.end();
+  } catch (error: any) {
+    console.error('[FabricGridValues] Download error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+/**
+ * POST /api/admin/fabric-grid-values/upload
+ * Sheet "FABRIC GRID VALUES" (or first sheet), headers row 3, data from row 5:
+ * A=CHARACTERISTIC, B=CODE, C=FULL FORM. Replaces the whole table. A file with no
+ * valid rows is rejected so the dropdowns are never wiped by a wrong file.
+ */
+export const uploadFabricGridValues = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ success: false, error: 'No file uploaded. Send a .xlsx file as "file" field.' });
+      return;
+    }
+
+    const ExcelJS = (await import('exceljs')).default;
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(req.file.buffer as any);
+    const ws = wb.getWorksheet(FABRIC_GRID_SHEET) ?? wb.worksheets[0];
+    if (!ws) {
+      res.status(400).json({ success: false, error: 'No worksheets found in the uploaded Excel file.' });
+      return;
+    }
+
+    const cell = (row: any, c: number): string => {
+      let v = row.getCell(c).value;
+      if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
+      if (v && typeof v === 'object' && 'text' in v) v = (v as any).text;
+      return v == null ? '' : String(v).trim();
+    };
+
+    const rows: { characteristic: string; code: string; full_form: string }[] = [];
+    const seen = new Set<string>();
+    let skipped = 0;
+    let duplicates = 0;
+
+    for (let r = 5; r <= ws.rowCount; r++) {
+      const row = ws.getRow(r);
+      const characteristic = cell(row, 1);
+      const code = cell(row, 2);
+      const fullForm = cell(row, 3);
+      if (!characteristic && !code && !fullForm) continue;            // blank line
+      if (characteristic.startsWith('⚠')) continue;                    // template note
+      if (!characteristic || !code || !fullForm
+        || characteristic.length > 50 || code.length > 100 || fullForm.length > 500) { skipped++; continue; }
+      const key = `${characteristic}||${code}`;
+      if (seen.has(key)) { duplicates++; continue; }
+      seen.add(key);
+      rows.push({ characteristic, code, full_form: fullForm });
+    }
+
+    if (rows.length === 0) {
+      res.status(400).json({
+        success: false,
+        error: 'No valid rows found (need CHARACTERISTIC, CODE and FULL FORM from row 5). The table was not changed.',
+      });
+      return;
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`TRUNCATE TABLE fabric_maj_cat_grid_values RESTART IDENTITY`;
+      await tx.$executeRaw`
+        INSERT INTO fabric_maj_cat_grid_values (characteristic, code, full_form, created_at, updated_at)
+        SELECT v.characteristic, v.code, v.full_form, NOW(), NOW()
+        FROM jsonb_to_recordset(${JSON.stringify(rows)}::jsonb)
+          AS v(characteristic text, code text, full_form text)
+      `;
+    }, { timeout: 60 * 1000 });
+
+    const characteristics = new Set(rows.map((r) => r.characteristic)).size;
+    console.log(`[FabricGridValues] Replaced — ${rows.length} rows, ${characteristics} characteristics; ${skipped} skipped, ${duplicates} duplicates.`);
+
+    res.json({
+      success: true,
+      message: `Fabric grid values uploaded. ${rows.length} values across ${characteristics} characteristics`
+        + (skipped || duplicates ? ` (${skipped} incomplete and ${duplicates} duplicate rows skipped).` : '.'),
+      data: {
+        uploadedAt: new Date().toISOString(), fileName: req.file.originalname,
+        total: rows.length, characteristics, skipped: skipped + duplicates,
+      },
+    });
+  } catch (error: any) {
+    console.error('[FabricGridValues] Upload error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -8088,6 +8292,23 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
     searchColumns: ['seg', 'div', 'subDiv', 'majCat', 'mcCode', 'mcDes', 'status', 'hsnCd', 'artType'],
     displayColumns: ['majCat', 'mcCode', 'mcDes'],
     defaultSort: { field: 'createdAt', dir: 'desc' },
+  },
+  'fabric-grid-values': {
+    kind: 'prisma',
+    delegateName: 'fabricMajCatGridValue',
+    idColumn: 'id',
+    idIsNumeric: true,
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'characteristic', label: 'Characteristic' },
+      { key: 'code', label: 'Code' },
+      { key: 'fullForm', label: 'Full Form' },
+      { key: 'createdAt', label: 'Created At', type: 'date', editable: false },
+      { key: 'updatedAt', label: 'Updated At', type: 'date', editable: false },
+    ],
+    searchColumns: ['characteristic', 'code', 'fullForm'],
+    displayColumns: ['characteristic', 'code', 'fullForm'],
+    defaultSort: { field: 'characteristic', dir: 'asc' },
   },
   'national-grid': {
     kind: 'prisma',

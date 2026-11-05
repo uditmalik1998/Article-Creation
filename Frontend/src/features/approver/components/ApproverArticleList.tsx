@@ -54,7 +54,7 @@ import {
   Tooltip,
   type AutocompleteOption,
 } from '@/shared/components/ui-tw';
-import { message } from '@/lib/message';
+import { message, notification } from '@/lib/message';
 import { cn } from '@/lib/utils';
 import { useDragToPan } from '@/shared/hooks/ui/useDragToPan';
 import type { ApproverItem } from '../types';
@@ -94,9 +94,32 @@ import { variantCreatingIds } from '../../fabric-article/variantCreationState';
 // Alias so the combobox trigger can use a distinct name from the plain icon
 const ChevronDownIcon = ChevronDown;
 
-// FG MRP rule (OTH GRID-1): RATE fills MRP = rate + 30%; the user can change MRP freely.
+// FG MRP rule (OTH GRID-1): RATE fills MRP so the markdown ((MRP − rate) ÷ MRP) is 30%,
+// rounded UP to the next multiple of 25 (rate 100 → 142.86 → 150). The markdown must always
+// stay between 15% and 50% — for the auto MRP and for an MRP the user types.
 const round2 = (n: number) => Math.round(n * 100) / 100;
-const calcFgMrpFromRate = (rate: number): number => round2(rate * 1.3);
+const FG_MRP_TARGET_MARKDOWN = 0.3;
+const FG_MRP_STEP = 25;
+const FG_MARKDOWN_MIN = 15;
+const FG_MARKDOWN_MAX = 50;
+const calcFgMrpFromRate = (rate: number): number => {
+  // round2 first so float noise (105 / 0.7 = 150.000…03) doesn't push it up a whole step.
+  const target = round2(rate / (1 - FG_MRP_TARGET_MARKDOWN));
+  const minMrp = rate / (1 - FG_MARKDOWN_MIN / 100);
+  const maxMrp = rate / (1 - FG_MARKDOWN_MAX / 100);
+  const up = Math.ceil(target / FG_MRP_STEP) * FG_MRP_STEP;
+  if (up <= maxMrp) return up;
+  // Small rates: the next 25 overshoots 50% — take the lower 25 if it's still ≥ 15%,
+  // else the unrounded 30% MRP (rate 1 → 1.43).
+  const down = Math.floor(target / FG_MRP_STEP) * FG_MRP_STEP;
+  return down > 0 && down >= minMrp ? down : target;
+};
+/** Allowed MRP for a rate: markdown 15% (min MRP, rounded up to the paisa) to 50% (max MRP). */
+const fgMrpRange = (rate: number) => ({
+  min: Math.ceil((rate / (1 - FG_MARKDOWN_MIN / 100)) * 100) / 100,
+  max: round2(rate / (1 - FG_MARKDOWN_MAX / 100)),
+});
+const fmtRs = (n: number) => `₹${n.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
 
 // Module-level national grid cache — body article dropdown values from national_grid_master
 type NationalGridValues = Record<string, { code: string; fullForm: string }[]>;
@@ -562,7 +585,6 @@ const ArticleCard = React.memo(
       mComposition: string | null; mFinish: string | null; mGsm: string | null; mLycra: string | null;
     }[]>([]);
     const [fabNoLoading, setFabNoLoading] = useState(false);
-    const [cmpActPreset, setCmpActPreset] = useState<Record<string, string>>({});
     const [cmpBgtPreset, setCmpBgtPreset] = useState<Record<string, string>>({});
     const [cmpPresetUnsaved, setCmpPresetUnsaved] = useState(false);
     const cmpSavedPrVals = useMemo<Record<string, string>>(() => {
@@ -1044,8 +1066,8 @@ const ArticleCard = React.memo(
       if (preset) applyCmpPreset(preset, dbVals, setPreset);
     };
 
-    // ACT preset from precise_body_article_consumption (by body article).
-    const fetchCmpActPreset = async (bodyArticleNumber: string): Promise<Record<string, string> | null> => {
+    // BGT preset from precise_body_article_consumption (by body article).
+    const fetchCmpBodyBgtPreset = async (bodyArticleNumber: string): Promise<Record<string, string> | null> => {
       try {
         const token = localStorage.getItem('authToken');
         const r = await fetch(
@@ -1060,16 +1082,16 @@ const ArticleCard = React.memo(
         const irSam = d.ironingSam ?? 0;
         const finSam = d.finishingSam ?? 0;
         return {
-          'CUTTING|ACT|PR VAL':    fmt(d.cuttingValue),
-          'STITCHING|ACT|SAM':     fmt(d.stitchingSam),
-          'STITCHING|ACT|SAM VAL': fmt(d.samVal),
-          'STITCHING|ACT|PR VAL':  stSam && stVal ? (stSam * stVal).toFixed(4) : '',
-          'IRONING|ACT|SAM':       fmt(d.ironingSam),
-          'IRONING|ACT|SAM VAL':   '2.5',
-          'IRONING|ACT|PR VAL':    irSam ? (irSam * 2.5).toFixed(4) : '',
-          'FINISHING|ACT|SAM':     fmt(d.finishingSam),
-          'FINISHING|ACT|SAM VAL': '3',
-          'FINISHING|ACT|PR VAL':  finSam ? (finSam * 3).toFixed(4) : '',
+          'CUTTING|BGT|PR VAL':    fmt(d.cuttingValue),
+          'STITCHING|BGT|SAM':     fmt(d.stitchingSam),
+          'STITCHING|BGT|SAM VAL': fmt(d.samVal),
+          'STITCHING|BGT|PR VAL':  stSam && stVal ? (stSam * stVal).toFixed(4) : '',
+          'IRONING|BGT|SAM':       fmt(d.ironingSam),
+          'IRONING|BGT|SAM VAL':   '2.5',
+          'IRONING|BGT|PR VAL':    irSam ? (irSam * 2.5).toFixed(4) : '',
+          'FINISHING|BGT|SAM':     fmt(d.finishingSam),
+          'FINISHING|BGT|SAM VAL': '3',
+          'FINISHING|BGT|PR VAL':  finSam ? (finSam * 3).toFixed(4) : '',
         };
       } catch {
         return null;
@@ -1112,46 +1134,46 @@ const ArticleCard = React.memo(
       }
     };
 
-    // User explicitly picked a new body article — its ACT values replace the saved ones.
-    const refreshCmpAct = async (bodyArticleNumber: string) => {
-      const preset = await fetchCmpActPreset(bodyArticleNumber);
+    // User explicitly picked a body article — its values replace every BGT cell (ACT is
+    // left for the user). Shown as unsaved until the card's Save.
+    const refreshCmpBgtFromBody = async (bodyArticleNumber: string) => {
+      const preset = await fetchCmpBodyBgtPreset(bodyArticleNumber);
       if (!preset) return;
       const allEmpty = Object.fromEntries(
-        ['CUTTING', 'STITCHING', 'IRONING', 'FINISHING'].map((p) => [`${p}|ACT|PR VAL`, '']),
+        ['CUTTING', 'STITCHING', 'IRONING', 'FINISHING'].map((p) => [`${p}|BGT|PR VAL`, '']),
       );
-      applyCmpPreset(preset, allEmpty, setCmpActPreset);
+      applyCmpPreset(preset, allEmpty, setCmpBgtPreset);
     };
 
-    // Auto-fill CMP ACT column when body article number is set or changes.
+    // Auto-fill the CMP COST card's empty BGT cells on open: from the body article
+    // (precise_body_article_consumption) when there is one, else rough_cmp_cost_master by
+    // major category. Saved values win. Fires once per major category + body article (FG only).
     const currentBodyArticle = String(localValues['bodyArticle'] ?? item.bodyArticle ?? '').trim();
-    const cmpActFetchedRef = React.useRef('');
-    useEffect(() => {
-      if (isBodyArticle || !currentBodyArticle) return;
-      if (cmpActFetchedRef.current === currentBodyArticle) return;
-      cmpActFetchedRef.current = currentBodyArticle;
-      loadCmpStage('ACT', () => fetchCmpActPreset(currentBodyArticle), setCmpActPreset);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentBodyArticle, isBodyArticle]);
-
-    // Auto-fill CMP COST card BGT column from rough_cmp_cost_master by major category.
-    // Fires once per unique major category (FG articles only).
     const cmpBgtFetchedRef = React.useRef('');
     useEffect(() => {
       if (isBodyArticle || !effectiveMajCat) return;
-      if (cmpBgtFetchedRef.current === effectiveMajCat) return;
-      cmpBgtFetchedRef.current = effectiveMajCat;
-      loadCmpStage('BGT', () => fetchCmpBgtPreset(effectiveMajCat), setCmpBgtPreset);
+      const key = `${effectiveMajCat}|${currentBodyArticle}`;
+      if (cmpBgtFetchedRef.current === key) return;
+      cmpBgtFetchedRef.current = key;
+      loadCmpStage(
+        'BGT',
+        async () => (currentBodyArticle ? await fetchCmpBodyBgtPreset(currentBodyArticle) : null)
+          ?? fetchCmpBgtPreset(effectiveMajCat),
+        setCmpBgtPreset,
+      );
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isBodyArticle, effectiveMajCat]);
+    }, [isBodyArticle, effectiveMajCat, currentBodyArticle]);
 
     // fWidth effect: fetches on every genuine M_WIDTH change for rough consumption.
     // Uses a "last applied" ref so re-renders from onSave don't re-trigger the fetch.
     // On first run: skips fetch if meter exists, backfills Kg only if missing.
     // Fallback: if no exact width match, uses the lowest fab_consumption for that major category.
+    // With a body article, its precise_body_article_consumption value at this exact width wins;
+    // picking a different body article re-runs it (the key includes the body article).
     const roughAppliedKeyRef = React.useRef('');
     useEffect(() => {
       if (isBodyArticle || !effectiveMajCat || !currentFWidth) return;
-      const key = `${effectiveMajCat}:${currentFWidth}`;
+      const key = `${effectiveMajCat}:${currentFWidth}:${currentBodyArticle}`;
       const isFirstRun = roughAppliedKeyRef.current === '';
       if (isFirstRun) {
         roughAppliedKeyRef.current = key;
@@ -1183,31 +1205,50 @@ const ArticleCard = React.memo(
       }
       const token = localStorage.getItem('authToken');
       const headers = { Authorization: `Bearer ${token}` };
-      getJsonShared(
-        `${APP_CONFIG.api.baseURL}/approver/body-fabric-consumption/by-width?majorCategory=${encodeURIComponent(effectiveMajCat)}&fabWidth=${encodeURIComponent(currentFWidth)}`,
-      )
-        .then((d: { fabConsumption: number | null }) => {
-          if (d.fabConsumption != null) {
-            applyRoughUpdates(d.fabConsumption, currentFWidth);
-            return;
-          }
-          // No exact width match — fall back to lowest fab_consumption for this major category
-          fetch(
-            `${APP_CONFIG.api.baseURL}/approver/body-fabric-consumption?majorCategory=${encodeURIComponent(effectiveMajCat)}`,
-            { headers },
-          )
-            .then((r2) => r2.json())
-            .then((opts: { fabWidth: number; fabConsumption: number }[]) => {
-              const valid = opts.filter((o) => o.fabConsumption != null);
-              if (valid.length === 0) return;
-              const lowest = valid.reduce((min, o) => o.fabConsumption < min.fabConsumption ? o : min, valid[0]);
-              applyRoughUpdates(lowest.fabConsumption, currentFWidth);
-            })
-            .catch(() => {});
+      const fromMajorCategory = () =>
+        getJsonShared(
+          `${APP_CONFIG.api.baseURL}/approver/body-fabric-consumption/by-width?majorCategory=${encodeURIComponent(effectiveMajCat)}&fabWidth=${encodeURIComponent(currentFWidth)}`,
+        )
+          .then((d: { fabConsumption: number | null }) => {
+            if (d.fabConsumption != null) {
+              applyRoughUpdates(d.fabConsumption, currentFWidth);
+              return;
+            }
+            // No exact width match — fall back to lowest fab_consumption for this major category
+            fetch(
+              `${APP_CONFIG.api.baseURL}/approver/body-fabric-consumption?majorCategory=${encodeURIComponent(effectiveMajCat)}`,
+              { headers },
+            )
+              .then((r2) => r2.json())
+              .then((opts: { fabWidth: number; fabConsumption: number }[]) => {
+                const valid = opts.filter((o) => o.fabConsumption != null);
+                if (valid.length === 0) return;
+                const lowest = valid.reduce((min, o) => o.fabConsumption < min.fabConsumption ? o : min, valid[0]);
+                applyRoughUpdates(lowest.fabConsumption, currentFWidth);
+              })
+              .catch(() => {});
+          })
+          .catch(() => {});
+      if (!currentBodyArticle) {
+        fromMajorCategory();
+        return;
+      }
+      // Body article picked: its precise consumption at this exact width (e.g. width48);
+      // empty → the major-category rough value above.
+      const preciseUrl = new URL(`${APP_CONFIG.api.baseURL}/approver/precise-body-article/by-width`, window.location.origin);
+      preciseUrl.searchParams.set('majorCategory', effectiveMajCat);
+      preciseUrl.searchParams.set('fabWidth', currentFWidth);
+      preciseUrl.searchParams.set('microBodyArticleNumber', currentBodyArticle);
+      preciseUrl.searchParams.set('exact', '1');
+      fetch(preciseUrl.toString(), { headers })
+        .then((r) => r.json())
+        .then((d: { consumption: number | null }) => {
+          if (d.consumption != null) applyRoughUpdates(d.consumption, currentFWidth);
+          else fromMajorCategory();
         })
-        .catch(() => {});
+        .catch(() => fromMajorCategory());
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentFWidth, isBodyArticle, effectiveMajCat]);
+    }, [currentFWidth, isBodyArticle, effectiveMajCat, currentBodyArticle]);
 
     // When M_GSM changes on an FG article, recompute roughConsumptionKg using existing meter.
     // Skips first mount (fWidth effect handles initial Kg); only fires on genuine GSM changes.
@@ -2057,6 +2098,26 @@ const ArticleCard = React.memo(
         message.error('Vendor Name is required');
         setEditingField(null);
         return;
+      }
+      // FG MRP typed by hand: markdown ((MRP − rate) ÷ MRP) must be 15–50%.
+      if (field === 'mrp' && !isBodyArticle && value) {
+        const mrp = parseFloat(value);
+        const rate = parseFloat(String(getValue('rate') ?? ''));
+        if (!isNaN(mrp) && !isNaN(rate) && rate > 0) {
+          const md = mrp > 0 ? ((mrp - rate) / mrp) * 100 : -Infinity;
+          if (md < FG_MARKDOWN_MIN || md > FG_MARKDOWN_MAX) {
+            const { min, max } = fgMrpRange(rate);
+            const tooHigh = md > FG_MARKDOWN_MAX;
+            notification.error({
+              message: `MRP ${fmtRs(mrp)} not saved — markdown ${isFinite(md) ? md.toFixed(1) : '—'}% is too ${tooHigh ? 'high' : 'low'}`,
+              description:
+                `Markdown must be between ${FG_MARKDOWN_MIN}% (min) and ${FG_MARKDOWN_MAX}% (max). `
+                + `For Rate ${fmtRs(rate)}, enter an MRP from ${fmtRs(min)} to ${fmtRs(max)}.`,
+            });
+            setEditingField(null);
+            return;
+          }
+        }
       }
       const updates: Record<string, string | null> = { [field]: value, ...(extra ?? {}) };
       // Auto-compute roughConsumptionKg for FG articles when roughConsumptionMeter or gsm is edited.
@@ -4282,8 +4343,8 @@ const ArticleCard = React.memo(
                                   setPreciseBodyResults([]);
                                   setPreciseBodySearched(false);
                                   if (r.microBodyArticleNumber) {
-                                    cmpActFetchedRef.current = r.microBodyArticleNumber;
-                                    refreshCmpAct(r.microBodyArticleNumber);
+                                    cmpBgtFetchedRef.current = `${effectiveMajCat}|${r.microBodyArticleNumber}`;
+                                    refreshCmpBgtFromBody(r.microBodyArticleNumber);
                                   }
                                   if (isModifyMode) {
                                     setPendingChanges((prev) => ({ ...prev, ...updates }));
@@ -4317,8 +4378,8 @@ const ArticleCard = React.memo(
                                   setPreciseBodyNoResults([]);
                                   setPreciseBodyNoSearched(false);
                                   if (r.microBodyArticleNumber) {
-                                    cmpActFetchedRef.current = r.microBodyArticleNumber;
-                                    refreshCmpAct(r.microBodyArticleNumber);
+                                    cmpBgtFetchedRef.current = `${effectiveMajCat}|${r.microBodyArticleNumber}`;
+                                    refreshCmpBgtFromBody(r.microBodyArticleNumber);
                                   }
                                   if (isModifyMode) {
                                     setPendingChanges((prev) => ({ ...prev, ...updates }));
@@ -4697,6 +4758,13 @@ const ArticleCard = React.memo(
                             >
                               {bom.mandatory && <span className="mr-0.5 text-red-500">*</span>}
                               {bom.label}
+                              {/* While typing an FG MRP, show the range that will be accepted. */}
+                              {isEditingBom && bom.field === 'mrp' && !isBodyArticle && !isNaN(rateNum) && rateNum > 0 && (
+                                <span className="ml-2 text-[11px] font-normal text-slate-500">
+                                  Allowed {fmtRs(fgMrpRange(rateNum).min)} – {fmtRs(fgMrpRange(rateNum).max)}
+                                  {' '}(markdown {FG_MARKDOWN_MIN}–{FG_MARKDOWN_MAX}%)
+                                </span>
+                              )}
                             </span>
                             <div className="w-[100px] shrink-0 text-right">
                               {bom.field === 'width' && isBodyArticle && fabricConsumptionOptions.length > 0 ? (
@@ -4989,7 +5057,6 @@ const ArticleCard = React.memo(
                         IRONING: item.aiCmpCostIroning != null ? String(Number(item.aiCmpCostIroning)) : undefined,
                         FINISHING: item.aiCmpCostFinishing != null ? String(Number(item.aiCmpCostFinishing)) : undefined,
                       }}
-                      actPreset={cmpActPreset}
                       savedPrVals={cmpSavedPrVals}
                       hasUnsavedPreset={cmpPresetUnsaved}
                       draftId={isModifyMode ? undefined : item.id}

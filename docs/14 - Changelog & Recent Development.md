@@ -5,6 +5,79 @@
 
 ---
 
+## 2026-11-05 — Rough Consumption meter from the picked body article's exact width
+
+- FG Rough Consumption card: when the article has a body article, Consumption in Meter = that body article's
+  precise_body_article_consumption value at the width's own column (e.g. width48); if that cell is empty (or the body
+  article isn't in the same major category) it falls back to the existing body_fabric_consumption logic
+  (major category + width, else the category's lowest). Kg recomputed as before.
+- Runs when M_WIDTH changes or a body article is picked (effect key now majCat:width:bodyArticle). Opening an article
+  still never overwrites a saved meter — re-pick the body article to refresh an old one.
+- Backend: GET /approver/precise-body-article/by-width?exact=1 → own width column only (no earlier-column fallback).
+- e.g. 12273faf… (48", body 2176014819001): 0.245 (M_W_SHIRT_FS rough) → 1 (width_48) after re-picking.
+
+---
+
+## 2026-11-05 — Precise consumption by width: empty width falls back to the earlier column
+
+- GET /approver/precise-body-article/by-width (getPreciseConsumptionByWidth, fills the FG Consumption in Meter from
+  precise_body_article_consumption): the width's own column, else the nearest EARLIER (narrower) column with a value
+  (48 → 46 → 44 → 43 …), else the nearest later one. Was: minimum value across all 39 width columns.
+  Response also returns `widthUsed`. e.g. 2176021922001 at 48": 0.822 (old min) → 0.988 (width 46).
+- 2,166 of 2,169 rows have no 48" value; 43 of them get a value from an earlier column.
+
+---
+
+## 2026-11-05 — CMP COST: picking a body article fills BGT (not ACT)
+
+- User: picking BODY ARTICLE NO. / DESC must fill BGT only, overwriting every BGT cell; ACT is no longer auto-filled.
+- ApproverArticleList: fetchCmpBodyBgtPreset (precise_body_article_consumption → BGT SAM / SAM VAL / PR VAL);
+  refreshCmpBgtFromBody on both body pickers (all BGT cells replaced, card shows Unsaved changes until Save).
+  On open, empty BGT cells fill from the article's body article, else rough_cmp_cost_master by major category; saved
+  values win. ACT preset effect, state and prop removed.
+- Summary Costing export (ApproverController) follows the card: BGT preset = body article, else major category;
+  ACT uses saved values only.
+
+---
+
+## 2026-11-05 — FG OTH GRID-1: MRP from 30% markdown, rounded up to 25; markdown limit 15–50%
+
+- RATE now fills MRP = rate ÷ (1 − 0.30), rounded UP to the next multiple of 25 (rate 100 → 142.86 → 150;
+  105 → 150; 110 → 175; 999 → 1450). Was rate × 1.3. Same on page load when no MRP is saved.
+- A hand-typed MRP is rejected (toast, not saved) unless its markdown (MRP − rate) ÷ MRP is 15–50%
+  (rate 100 → MRP 117.65–200). Check runs on save (blur / Enter), FG only (ApproverArticleList handleSave).
+- Not changed: MRPs already saved, GM BOM card (still rate × 1.3), backend (no server-side check).
+- Auto MRP also obeys 15–50% (user found rate 1 → MRP 25 = 96%): next 25 if markdown ≤ 50%, else the lower 25 if
+  ≥ 15%, else the unrounded rate ÷ 0.70 (rate 1 → 1.43, 20 → 25, 22 → 31.43, 40 → 75). Checked 1–999: all in range.
+- Friendlier rejection: notification "MRP ₹3 not saved — markdown 66.7% is too high" + "Markdown must be between 15% (min)
+  and 50% (max). For Rate ₹1, enter an MRP from ₹1.18 to ₹2." While editing MRP the label shows
+  "Allowed ₹117.65 – ₹200 (markdown 15–50%)" (helpers fgMrpRange / fmtRs).
+
+---
+
+## 2026-11-05 — Admin › Expenses › Fabric & body: new "Fabric Grid Values" card
+
+- New card for `fabric_maj_cat_grid_values` (529 values, 14 characteristics — the Fabric FAB dropdowns M_FAB_DIV,
+  M_YARN, M_COMPOSITION, WEAVE-01 …): Download, Template, Upload, View Data, Refresh. Group count 5 -> 6.
+- Backend (adminController): GET /admin/fabric-grid-values/status|template|download, POST /upload. One Excel layout for
+  all three (sheet FABRIC GRID VALUES, title row 1, headers CHARACTERISTIC | CODE | FULL FORM in row 3, data from row 5),
+  so a downloaded file can be edited and re-uploaded (verified: 529 rows read back).
+- Upload replaces the whole table in a transaction; incomplete / too-long rows and duplicate (characteristic, code)
+  pairs are skipped and counted; a file with no valid rows is rejected without touching the table.
+- View Data config `fabric-grid-values` added on both sides (adminController table config + expenseTables.ts).
+
+---
+
+## 2026-11-05 — Admin › Expenses: "Fabric Article Master" card renamed "Fabric Major Category"
+
+- User asked for a new Fabric Major Category card (Download / Template / Upload) on fabric_article_master; the existing
+  "Fabric Article Master" card in the Fabric & body group already does exactly that (142 major categories), so it was
+  renamed instead of duplicated (user's choice). Card title, empty-state text, upload heading, View Data title
+  (expenseTables.ts) and download names (FABRIC_MAJOR_CATEGORY_<date>.xlsx / FABRIC_MAJOR_CATEGORY_TEMPLATE.xlsx).
+- Endpoints (/admin/fabric-article-master/*), upload format and sheet names unchanged.
+
+---
+
 ## 2026-11-04 — Fabric Created page "All" Excel: no SAP Sync Status, Approved By at the end
 
 - FabricArticleDashboard handleExportAll on the Created tab drops the "SAP Sync Status" column and adds "Approved By"
