@@ -150,6 +150,14 @@ interface FabricArticleMasterMeta {
   skipped?: number;
 }
 
+interface FabricGridMeta {
+  uploadedAt?: string;
+  fileName?: string;
+  total?: number;
+  characteristics?: number;
+  skipped?: number;
+}
+
 interface BodyArticleDataMeta {
   uploadedAt?: string;
   fileName?: string;
@@ -356,6 +364,13 @@ export default function Admin() {
   const [fabricArticleMasterUploading, setFabricArticleMasterUploading] = useState(false);
   const [fabricArticleMasterProgress, setFabricArticleMasterProgress] = useState<number>(0);
   const fabricArticleFileRef = useRef<HTMLInputElement | null>(null);
+
+  // Fabric Grid Values (fabric_maj_cat_grid_values)
+  const [fabricGridMeta, setFabricGridMeta] = useState<FabricGridMeta | null>(null);
+  const [fabricGridStatusLoading, setFabricGridStatusLoading] = useState(false);
+  const [fabricGridUploading, setFabricGridUploading] = useState(false);
+  const [fabricGridProgress, setFabricGridProgress] = useState<number>(0);
+  const fabricGridFileRef = useRef<HTMLInputElement | null>(null);
 
   // Body Article Data (body_article_data)
   const [bodyArticleDataMeta, setBodyArticleDataMeta] = useState<BodyArticleDataMeta | null>(null);
@@ -1554,10 +1569,10 @@ export default function Admin() {
         const today = new Date().toISOString().slice(0, 10);
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `FABRIC_ARTICLE_MASTER_${today}.xlsx`;
+        a.download = `FABRIC_MAJOR_CATEGORY_${today}.xlsx`;
         a.click();
       })
-      .catch(() => message.error('Failed to download fabric article master data'));
+      .catch(() => message.error('Failed to download fabric major category data'));
   };
 
   const downloadFabricArticleMasterTemplate = () => {
@@ -1568,7 +1583,7 @@ export default function Admin() {
       .then((blob) => {
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = 'FABRIC_ARTICLE_MASTER_TEMPLATE.xlsx';
+        a.download = 'FABRIC_MAJOR_CATEGORY_TEMPLATE.xlsx';
         a.click();
       })
       .catch(() => message.error('Failed to download template'));
@@ -1601,6 +1616,75 @@ export default function Admin() {
       setFabricArticleMasterUploading(false);
       setTimeout(() => setFabricArticleMasterProgress(0), 1500);
       if (fabricArticleFileRef.current) fabricArticleFileRef.current.value = '';
+    }
+  };
+
+  // ─────────────────────────────── Fabric Grid Values ─────────────────────────
+  const loadFabricGridStatus = useCallback(async () => {
+    setFabricGridStatusLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/fabric-grid-values/status`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to load fabric grid values status');
+      setFabricGridMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to load fabric grid values status');
+    } finally {
+      setFabricGridStatusLoading(false);
+    }
+  }, []);
+
+  const downloadFabricGridFile = (path: 'download' | 'template', fileName: string) => {
+    const token = localStorage.getItem('authToken');
+    return fetch(`${APP_CONFIG.api.baseURL}/admin/fabric-grid-values/${path}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+      .then((r) => {
+        if (!r.ok) throw new Error('Download failed');
+        return r.blob();
+      })
+      .then((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = fileName;
+        a.click();
+      })
+      .catch(() => message.error(path === 'template' ? 'Failed to download template' : 'Failed to download fabric grid values'));
+  };
+  const downloadFabricGridData = () =>
+    downloadFabricGridFile('download', `FABRIC_GRID_VALUES_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  const downloadFabricGridTemplate = () => downloadFabricGridFile('template', 'FABRIC_GRID_VALUES_TEMPLATE.xlsx');
+
+  const handleFabricGridUpload = async (file: File) => {
+    setFabricGridUploading(true);
+    setFabricGridProgress(0);
+    const progressInterval = setInterval(() => {
+      setFabricGridProgress((prev) => Math.min(prev + 10, 90));
+    }, 300);
+    try {
+      const token = localStorage.getItem('authToken');
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch(`${APP_CONFIG.api.baseURL}/admin/fabric-grid-values/upload`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      setFabricGridProgress(100);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      message.success(data.message);
+      setFabricGridMeta(data.data);
+    } catch (err: any) {
+      message.error(err?.message || 'Upload failed');
+    } finally {
+      clearInterval(progressInterval);
+      setFabricGridUploading(false);
+      setTimeout(() => setFabricGridProgress(0), 1500);
+      if (fabricGridFileRef.current) fabricGridFileRef.current.value = '';
     }
   };
 
@@ -2634,6 +2718,7 @@ export default function Admin() {
     loadColorMasterStatus();
     loadFabricArticleDataStatus();
     loadFabricArticleMasterStatus();
+    loadFabricGridStatus();
     loadBodyArticleDataStatus();
     loadBroaderMenuStatus();
     loadSegmentMasterStatus();
@@ -2649,7 +2734,7 @@ export default function Admin() {
     loadBasicTrimMasterStatus();
     loadPreciseFabricArticleStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadVendorStatus, loadSnowflakeStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadSetMcMasterStatus, loadGmSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadMvgrMappingStatus, loadBasicAccessoriesStatus, loadCmpCostMasterStatus, loadNationalGridStatus, loadPipelineStatus, loadFabricRawStatus, loadGmRawStatus, loadBodyFabConsStatus, loadPreciseBodyArticleStatus, loadBasicTrimMasterStatus, loadPreciseFabricArticleStatus]);
+  }, [loadVendorStatus, loadSnowflakeStatus, loadMajCatGridStatus, loadMandatoryGridStatus, loadSizeMasterStatus, loadSetMcMasterStatus, loadGmSizeMasterStatus, loadColorMasterStatus, loadFabricArticleDataStatus, loadFabricArticleMasterStatus, loadFabricGridStatus, loadBodyArticleDataStatus, loadBroaderMenuStatus, loadSegmentMasterStatus, loadMvgrMappingStatus, loadBasicAccessoriesStatus, loadCmpCostMasterStatus, loadNationalGridStatus, loadPipelineStatus, loadFabricRawStatus, loadGmRawStatus, loadBodyFabConsStatus, loadPreciseBodyArticleStatus, loadBasicTrimMasterStatus, loadPreciseFabricArticleStatus]);
 
   const loadData = async () => {
     setLoading(true);
@@ -4279,7 +4364,7 @@ export default function Admin() {
               }
             />
           </MasterGroup>
-          <MasterGroup title="Fabric & body" count={5} notUploaded={((fabricArticleDataMeta ? (fabricArticleDataMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((fabricArticleMasterMeta ? (fabricArticleMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((bodyFabConsTotal ? bodyFabConsTotal.total : null) === 0 ? 1 : 0) + ((bodyArticleDataMeta ? (bodyArticleDataMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((cmpCostMasterMeta ? (cmpCostMasterMeta.total ?? 0) : null) === 0 ? 1 : 0)}>
+          <MasterGroup title="Fabric & body" count={6} notUploaded={((fabricArticleDataMeta ? (fabricArticleDataMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((fabricArticleMasterMeta ? (fabricArticleMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((fabricGridMeta ? (fabricGridMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((bodyFabConsTotal ? bodyFabConsTotal.total : null) === 0 ? 1 : 0) + ((bodyArticleDataMeta ? (bodyArticleDataMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((cmpCostMasterMeta ? (cmpCostMasterMeta.total ?? 0) : null) === 0 ? 1 : 0)}>
             <MasterDataCard
               title="Fabric Article Data"
               description="Bulk Insert"
@@ -4381,7 +4466,7 @@ export default function Admin() {
               }
             />
             <MasterDataCard
-              title="Fabric Article Master"
+              title="Fabric Major Category"
               description="Fabric Hierarchy"
               rows={fabricArticleMasterMeta ? (fabricArticleMasterMeta.total ?? 0) : null}
               lastUpload={fabricArticleMasterMeta?.uploadedAt ?? null}
@@ -4425,8 +4510,8 @@ export default function Admin() {
                     <Alert
                       type="warning"
                       showIcon
-                      message="No fabric article master uploaded yet"
-                      description="Upload the Fabric Article Master Excel (columns: SEG, DIV, SUB DIV, MAJ CAT, MC CODE, MC DES, STATUS, HSN CD, ART_TYPE) to populate fabric hierarchy dropdowns."
+                      message="No fabric major categories uploaded yet"
+                      description="Upload the Fabric Major Category Excel (columns: SEG, DIV, SUB DIV, MAJ CAT, MC CODE, MC DES, STATUS, HSN CD, ART_TYPE) to populate fabric hierarchy dropdowns."
                     />
                   )}
 
@@ -4435,7 +4520,7 @@ export default function Admin() {
               upload={
                 <>
                   <div className="rounded-md border border-border p-4">
-                    <div className="mb-1 font-semibold">Upload Fabric Article Master Excel</div>
+                    <div className="mb-1 font-semibold">Upload Fabric Major Category Excel</div>
                     <div className="mb-3 text-xs text-muted-foreground">
                       Sheet <strong>HIERARCHY MASTER</strong> (or first sheet), headers in row 3, data from row 5 —
                       columns: SEG, DIV, SUB DIV, MAJ CAT, MC CODE, MC DES, STATUS, HSN CD, ART_TYPE. Replaces the entire table.
@@ -4475,6 +4560,102 @@ export default function Admin() {
                     )}
                   </div>
 
+                </>
+              }
+            />
+            <MasterDataCard
+              title="Fabric Grid Values"
+              description="FAB Dropdown Values"
+              rows={fabricGridMeta ? (fabricGridMeta.total ?? 0) : null}
+              lastUpload={fabricGridMeta?.uploadedAt ?? null}
+              loading={fabricGridStatusLoading}
+              busy={fabricGridUploading}
+              onView={() => navigate('/admin/expense/fabric-grid-values')}
+              onDownload={downloadFabricGridData}
+              onTemplate={downloadFabricGridTemplate}
+              onRefresh={loadFabricGridStatus}
+              details={
+                <>
+                  {fabricGridMeta && (fabricGridMeta.total ?? 0) > 0 ? (
+                    <Descriptions bordered>
+                      {fabricGridMeta.uploadedAt && (
+                        <Descriptions.Item label="Last Upload">
+                          {new Date(fabricGridMeta.uploadedAt).toLocaleString('en-IN', {
+                            timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',
+                          }) + ' IST'}
+                        </Descriptions.Item>
+                      )}
+                      {fabricGridMeta.fileName && (
+                        <Descriptions.Item label="File">
+                          <span className="font-mono text-xs">{fabricGridMeta.fileName}</span>
+                        </Descriptions.Item>
+                      )}
+                      <Descriptions.Item label="Characteristics">
+                        <Badge variant="info">{(fabricGridMeta.characteristics ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Total Values">
+                        <Badge variant="secondary">{(fabricGridMeta.total ?? 0).toLocaleString()}</Badge>
+                      </Descriptions.Item>
+                      {fabricGridMeta.skipped != null && (
+                        <Descriptions.Item label="Rows Skipped">
+                          <Badge variant={(fabricGridMeta.skipped ?? 0) > 0 ? 'warning' : 'secondary'}>
+                            {(fabricGridMeta.skipped ?? 0).toLocaleString()}
+                          </Badge>
+                        </Descriptions.Item>
+                      )}
+                    </Descriptions>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="No fabric grid values uploaded yet"
+                      description="Upload the Fabric Grid Values Excel (columns: CHARACTERISTIC, CODE, FULL FORM) to fill the Fabric FAB dropdowns (M_FAB_DIV, M_YARN, M_COMPOSITION, …)."
+                    />
+                  )}
+                </>
+              }
+              upload={
+                <>
+                  <div className="rounded-md border border-border p-4">
+                    <div className="mb-1 font-semibold">Upload Fabric Grid Values Excel</div>
+                    <div className="mb-3 text-xs text-muted-foreground">
+                      Sheet <strong>FABRIC GRID VALUES</strong> (or first sheet), headers in row 3, data from row 5 —
+                      columns: CHARACTERISTIC, CODE, FULL FORM. Replaces the entire table; a file with no valid rows is rejected.
+                    </div>
+
+                    <input
+                      ref={fabricGridFileRef}
+                      type="file"
+                      accept=".xlsx,.xls"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFabricGridUpload(file);
+                      }}
+                    />
+
+                    {fabricGridUploading ? (
+                      <div>
+                        <div className="mb-2 text-[13px] text-slate-600 dark:text-slate-300">
+                          <RefreshCw className="mr-1.5 inline-block h-3.5 w-3.5 animate-spin" />
+                          Parsing Excel & replacing table...
+                        </div>
+                        <Progress value={fabricGridProgress} />
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => fabricGridFileRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/30 px-4 py-6 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-500/10"
+                      >
+                        <Inbox className="mb-2 h-8 w-8 text-slate-600 dark:text-slate-300" />
+                        <p className="text-[13px]">
+                          Click to upload <strong>.xlsx</strong> file
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
+                      </button>
+                    )}
+                  </div>
                 </>
               }
             />

@@ -54,7 +54,7 @@ import {
   Tooltip,
   type AutocompleteOption,
 } from '@/shared/components/ui-tw';
-import { message } from '@/lib/message';
+import { message, notification } from '@/lib/message';
 import { cn } from '@/lib/utils';
 import { useDragToPan } from '@/shared/hooks/ui/useDragToPan';
 import type { ApproverItem } from '../types';
@@ -94,9 +94,32 @@ import { variantCreatingIds } from '../../fabric-article/variantCreationState';
 // Alias so the combobox trigger can use a distinct name from the plain icon
 const ChevronDownIcon = ChevronDown;
 
-// FG MRP rule (OTH GRID-1): RATE fills MRP = rate + 30%; the user can change MRP freely.
+// FG MRP rule (OTH GRID-1): RATE fills MRP so the markdown ((MRP − rate) ÷ MRP) is 30%,
+// rounded UP to the next multiple of 25 (rate 100 → 142.86 → 150). The markdown must always
+// stay between 15% and 50% — for the auto MRP and for an MRP the user types.
 const round2 = (n: number) => Math.round(n * 100) / 100;
-const calcFgMrpFromRate = (rate: number): number => round2(rate * 1.3);
+const FG_MRP_TARGET_MARKDOWN = 0.3;
+const FG_MRP_STEP = 25;
+const FG_MARKDOWN_MIN = 15;
+const FG_MARKDOWN_MAX = 50;
+const calcFgMrpFromRate = (rate: number): number => {
+  // round2 first so float noise (105 / 0.7 = 150.000…03) doesn't push it up a whole step.
+  const target = round2(rate / (1 - FG_MRP_TARGET_MARKDOWN));
+  const minMrp = rate / (1 - FG_MARKDOWN_MIN / 100);
+  const maxMrp = rate / (1 - FG_MARKDOWN_MAX / 100);
+  const up = Math.ceil(target / FG_MRP_STEP) * FG_MRP_STEP;
+  if (up <= maxMrp) return up;
+  // Small rates: the next 25 overshoots 50% — take the lower 25 if it's still ≥ 15%,
+  // else the unrounded 30% MRP (rate 1 → 1.43).
+  const down = Math.floor(target / FG_MRP_STEP) * FG_MRP_STEP;
+  return down > 0 && down >= minMrp ? down : target;
+};
+/** Allowed MRP for a rate: markdown 15% (min MRP, rounded up to the paisa) to 50% (max MRP). */
+const fgMrpRange = (rate: number) => ({
+  min: Math.ceil((rate / (1 - FG_MARKDOWN_MIN / 100)) * 100) / 100,
+  max: round2(rate / (1 - FG_MARKDOWN_MAX / 100)),
+});
+const fmtRs = (n: number) => `₹${n.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
 
 // Module-level national grid cache — body article dropdown values from national_grid_master
 type NationalGridValues = Record<string, { code: string; fullForm: string }[]>;
@@ -2057,6 +2080,26 @@ const ArticleCard = React.memo(
         message.error('Vendor Name is required');
         setEditingField(null);
         return;
+      }
+      // FG MRP typed by hand: markdown ((MRP − rate) ÷ MRP) must be 15–50%.
+      if (field === 'mrp' && !isBodyArticle && value) {
+        const mrp = parseFloat(value);
+        const rate = parseFloat(String(getValue('rate') ?? ''));
+        if (!isNaN(mrp) && !isNaN(rate) && rate > 0) {
+          const md = mrp > 0 ? ((mrp - rate) / mrp) * 100 : -Infinity;
+          if (md < FG_MARKDOWN_MIN || md > FG_MARKDOWN_MAX) {
+            const { min, max } = fgMrpRange(rate);
+            const tooHigh = md > FG_MARKDOWN_MAX;
+            notification.error({
+              message: `MRP ${fmtRs(mrp)} not saved — markdown ${isFinite(md) ? md.toFixed(1) : '—'}% is too ${tooHigh ? 'high' : 'low'}`,
+              description:
+                `Markdown must be between ${FG_MARKDOWN_MIN}% (min) and ${FG_MARKDOWN_MAX}% (max). `
+                + `For Rate ${fmtRs(rate)}, enter an MRP from ${fmtRs(min)} to ${fmtRs(max)}.`,
+            });
+            setEditingField(null);
+            return;
+          }
+        }
       }
       const updates: Record<string, string | null> = { [field]: value, ...(extra ?? {}) };
       // Auto-compute roughConsumptionKg for FG articles when roughConsumptionMeter or gsm is edited.
@@ -4697,6 +4740,13 @@ const ArticleCard = React.memo(
                             >
                               {bom.mandatory && <span className="mr-0.5 text-red-500">*</span>}
                               {bom.label}
+                              {/* While typing an FG MRP, show the range that will be accepted. */}
+                              {isEditingBom && bom.field === 'mrp' && !isBodyArticle && !isNaN(rateNum) && rateNum > 0 && (
+                                <span className="ml-2 text-[11px] font-normal text-slate-500">
+                                  Allowed {fmtRs(fgMrpRange(rateNum).min)} – {fmtRs(fgMrpRange(rateNum).max)}
+                                  {' '}(markdown {FG_MARKDOWN_MIN}–{FG_MARKDOWN_MAX}%)
+                                </span>
+                              )}
                             </span>
                             <div className="w-[100px] shrink-0 text-right">
                               {bom.field === 'width' && isBodyArticle && fabricConsumptionOptions.length > 0 ? (

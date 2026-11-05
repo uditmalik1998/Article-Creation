@@ -5,6 +5,44 @@
 
 ---
 
+## 2026-11-05 — FG OTH GRID-1: MRP from 30% markdown, rounded up to 25; markdown limit 15–50%
+
+- RATE now fills MRP = rate ÷ (1 − 0.30), rounded UP to the next multiple of 25 (rate 100 → 142.86 → 150;
+  105 → 150; 110 → 175; 999 → 1450). Was rate × 1.3. Same on page load when no MRP is saved.
+- A hand-typed MRP is rejected (toast, not saved) unless its markdown (MRP − rate) ÷ MRP is 15–50%
+  (rate 100 → MRP 117.65–200). Check runs on save (blur / Enter), FG only (ApproverArticleList handleSave).
+- Not changed: MRPs already saved, GM BOM card (still rate × 1.3), backend (no server-side check).
+- Auto MRP also obeys 15–50% (user found rate 1 → MRP 25 = 96%): next 25 if markdown ≤ 50%, else the lower 25 if
+  ≥ 15%, else the unrounded rate ÷ 0.70 (rate 1 → 1.43, 20 → 25, 22 → 31.43, 40 → 75). Checked 1–999: all in range.
+- Friendlier rejection: notification "MRP ₹3 not saved — markdown 66.7% is too high" + "Markdown must be between 15% (min)
+  and 50% (max). For Rate ₹1, enter an MRP from ₹1.18 to ₹2." While editing MRP the label shows
+  "Allowed ₹117.65 – ₹200 (markdown 15–50%)" (helpers fgMrpRange / fmtRs).
+
+---
+
+## 2026-11-05 — Admin › Expenses › Fabric & body: new "Fabric Grid Values" card
+
+- New card for `fabric_maj_cat_grid_values` (529 values, 14 characteristics — the Fabric FAB dropdowns M_FAB_DIV,
+  M_YARN, M_COMPOSITION, WEAVE-01 …): Download, Template, Upload, View Data, Refresh. Group count 5 -> 6.
+- Backend (adminController): GET /admin/fabric-grid-values/status|template|download, POST /upload. One Excel layout for
+  all three (sheet FABRIC GRID VALUES, title row 1, headers CHARACTERISTIC | CODE | FULL FORM in row 3, data from row 5),
+  so a downloaded file can be edited and re-uploaded (verified: 529 rows read back).
+- Upload replaces the whole table in a transaction; incomplete / too-long rows and duplicate (characteristic, code)
+  pairs are skipped and counted; a file with no valid rows is rejected without touching the table.
+- View Data config `fabric-grid-values` added on both sides (adminController table config + expenseTables.ts).
+
+---
+
+## 2026-11-05 — Admin › Expenses: "Fabric Article Master" card renamed "Fabric Major Category"
+
+- User asked for a new Fabric Major Category card (Download / Template / Upload) on fabric_article_master; the existing
+  "Fabric Article Master" card in the Fabric & body group already does exactly that (142 major categories), so it was
+  renamed instead of duplicated (user's choice). Card title, empty-state text, upload heading, View Data title
+  (expenseTables.ts) and download names (FABRIC_MAJOR_CATEGORY_<date>.xlsx / FABRIC_MAJOR_CATEGORY_TEMPLATE.xlsx).
+- Endpoints (/admin/fabric-article-master/*), upload format and sheet names unchanged.
+
+---
+
 ## 2026-11-04 — Fabric Created page "All" Excel: no SAP Sync Status, Approved By at the end
 
 - FabricArticleDashboard handleExportAll on the Created tab drops the "SAP Sync Status" column and adds "Approved By"
