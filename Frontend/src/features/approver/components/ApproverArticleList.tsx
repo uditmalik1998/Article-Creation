@@ -114,6 +114,22 @@ const calcFgMrpFromRate = (rate: number): number => {
   const down = Math.floor(target / FG_MRP_STEP) * FG_MRP_STEP;
   return down > 0 && down >= minMrp ? down : target;
 };
+/**
+ * A typed MRP snapped to the 25 grid: the next multiple up (310 → 325); if that passes 50% markdown,
+ * the multiple below (if it's still ≥ 15%). When neither fits (small rates) the typed MRP is kept
+ * as is and the 15–50% check decides.
+ */
+const snapFgMrp = (mrp: number, rate: number): number => {
+  const ok = (m: number) => {
+    const md = ((m - rate) / m) * 100;
+    return m > 0 && md >= FG_MARKDOWN_MIN && md <= FG_MARKDOWN_MAX;
+  };
+  const up = Math.ceil(round2(mrp) / FG_MRP_STEP) * FG_MRP_STEP;
+  if (ok(up)) return up;
+  const down = Math.floor(round2(mrp) / FG_MRP_STEP) * FG_MRP_STEP;
+  if (ok(down)) return down;
+  return mrp;
+};
 /** Allowed MRP for a rate: markdown 15% (min MRP, rounded up to the paisa) to 50% (max MRP). */
 const fgMrpRange = (rate: number) => ({
   min: Math.ceil((rate / (1 - FG_MARKDOWN_MIN / 100)) * 100) / 100,
@@ -2099,11 +2115,18 @@ const ArticleCard = React.memo(
         setEditingField(null);
         return;
       }
-      // FG MRP typed by hand: markdown ((MRP − rate) ÷ MRP) must be 15–50%.
+      // FG MRP typed by hand: snapped to a multiple of 25 — up (310 → 325), or down if up would
+      // pass 50% markdown — then the markdown ((MRP − rate) ÷ MRP) must be 15–50%.
       if (field === 'mrp' && !isBodyArticle && value) {
-        const mrp = parseFloat(value);
+        let mrp = parseFloat(value);
         const rate = parseFloat(String(getValue('rate') ?? ''));
         if (!isNaN(mrp) && !isNaN(rate) && rate > 0) {
+          // Silent: the field just shows the rounded MRP.
+          const snapped = snapFgMrp(mrp, rate);
+          if (snapped !== mrp) {
+            mrp = snapped;
+            value = String(snapped);
+          }
           const md = mrp > 0 ? ((mrp - rate) / mrp) * 100 : -Infinity;
           if (md < FG_MARKDOWN_MIN || md > FG_MARKDOWN_MAX) {
             const { min, max } = fgMrpRange(rate);

@@ -5,6 +5,15 @@
 
 ---
 
+## 2026-11-06 — FG typed MRP snaps to a multiple of 25
+
+- ApproverArticleList handleSave (mrp, FG): a typed MRP is snapped by `snapFgMrp` before the 15–50% check — next
+  multiple of 25 up (310 → 325); if that passes 50% markdown, the multiple below (rate 211: 420 → 400); if neither fits
+  (small rates) the typed value is kept and the check decides. Silent — no toast (user request), the field just shows it.
+  Segment is derived from the snapped MRP.
+
+---
+
 ## 2026-11-05 — Rough Consumption meter from the picked body article's exact width
 
 - FG Rough Consumption card: when the article has a body article, Consumption in Meter = that body article's
