@@ -1584,7 +1584,7 @@ const ArticleCard = React.memo(
                 <div className="grid grid-cols-2 gap-x-2.5 gap-y-2">
                   {renderPickField({
                     id: 'division',
-                    label: 'Division',
+                    label: <>Division<RequiredMark /></>,
                     value: currentDivision,
                     placeholder: 'Choose division',
                     options: divisionOptions,
@@ -1594,7 +1594,7 @@ const ArticleCard = React.memo(
                   })}
                   {renderPickField({
                     id: 'subDivision',
-                    label: 'Sub-division',
+                    label: <>Sub-division<RequiredMark /></>,
                     value: currentSubDiv,
                     placeholder: 'Choose sub-division',
                     options: subDivOptions,
@@ -1604,7 +1604,7 @@ const ArticleCard = React.memo(
                   })}
                 {renderPickField({
                   id: 'majorCategory',
-                  label: 'Major category',
+                  label: <>Major category<RequiredMark /></>,
                   value: currentMajCat,
                   placeholder: 'Choose major category',
                   options: majCatOptions,
@@ -1614,7 +1614,7 @@ const ArticleCard = React.memo(
                 })}
                 {renderPickField({
                   id: 'mcDescription',
-                  label: 'MC description',
+                  label: <>MC description<RequiredMark /></>,
                   value: readField('mcDescription'),
                   placeholder: 'Choose MC description',
                   options: mcDesOptions,
@@ -1622,7 +1622,7 @@ const ArticleCard = React.memo(
                   onPick: (v) => v && pickAndSave('mcDescription')(v),
                   disabled: isFieldLocked('mcDescription'),
                 })}
-                {renderTextField('designNumber', 'Design number', {
+                {renderTextField('designNumber', <>Design number<RequiredMark /></>, {
                   disabled: designLocked,
                   placeholder: 'Type design number',
                   mono: true,
