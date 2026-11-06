@@ -5,6 +5,16 @@
 
 ---
 
+## 2026-11-06 — FG Precise Consumption in Meter: manual only (no auto-fill)
+
+- User request: the Precise Consumption card's Consumption in Meter is no longer fetched from
+  precise_body_article_consumption on M_WIDTH change / open. The user types it; Kg is still derived
+  (width × GSM × meter × 2.54 / 100000) — on typing, on GSM change, on width change, and backfilled on open if missing.
+- Removed the precise by-width fetch effect + applyPreciseUpdates (ApproverArticleList). The backend by-width endpoint
+  stays (the Rough card uses it with exact=1). Saved meters are unchanged.
+
+---
+
 ## 2026-11-06 — FG typed MRP snaps to a multiple of 25
 
 - ApproverArticleList handleSave (mrp, FG): a typed MRP is snapped by `snapFgMrp` before the 15–50% check — next

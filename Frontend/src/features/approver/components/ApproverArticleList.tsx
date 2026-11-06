@@ -1291,8 +1291,7 @@ const ArticleCard = React.memo(
     }, [currentGsm, isBodyArticle]);
 
     // ── PRECISE CONSUMPTION (FG articles) ─────────────────────────────────────
-    // Mirrors rough consumption logic but reads from precise_body_article_consumption.
-    // Table stores consumption as width columns (width66, width58, …) per major category.
+    // The meter is entered by the user; Kg = width × GSM × meter × 2.54 / 100000.
     const computePreciseKg = (meter: number, widthStr: string, gsmStr?: string) => {
       const w = parseFloat(widthStr) || 0;
       const rawGsm = gsmStr !== undefined ? gsmStr : currentGsm;
@@ -1305,70 +1304,36 @@ const ArticleCard = React.memo(
       })();
       return w > 0 && gsmMid > 0 ? ((w * gsmMid * meter * 2.54) / 100000).toFixed(4) : null;
     };
-    const applyPreciseUpdates = (meter: number, widthStr: string, gsmStr?: string) => {
-      const kg = computePreciseKg(meter, widthStr, gsmStr);
-      const updates: Record<string, string> = {
-        preciseConsumptionMeter: String(meter),
-        ...(kg != null ? { preciseConsumptionKg: kg } : {}),
-      };
+    // Precise Consumption in Meter is typed by the user — never auto-filled. Only Kg is derived:
+    // on open it's backfilled if missing, and an M_WIDTH change recomputes it from the typed meter.
+    const preciseAppliedKeyRef = React.useRef('');
+    useEffect(() => {
+      if (isBodyArticle || !currentFWidth) return;
+      const isFirstRun = preciseAppliedKeyRef.current === '';
+      if (preciseAppliedKeyRef.current === currentFWidth) return;
+      preciseAppliedKeyRef.current = currentFWidth;
+      const existingMeter = String(
+        (localValues['preciseConsumptionMeter'] !== undefined
+          ? localValues['preciseConsumptionMeter']
+          : (item as any).preciseConsumptionMeter) ?? '',
+      ).trim();
+      if (existingMeter === '') return;
+      if (isFirstRun) {
+        const existingKg = String(
+          (localValues['preciseConsumptionKg'] !== undefined
+            ? localValues['preciseConsumptionKg']
+            : (item as any).preciseConsumptionKg) ?? '',
+        ).trim();
+        if (existingKg !== '') return;
+      }
+      const kg = computePreciseKg(parseFloat(existingMeter), currentFWidth);
+      if (kg == null) return;
+      const updates: Record<string, string> = { preciseConsumptionKg: kg };
       setLocalValues((prev) => ({ ...prev, ...updates }));
       if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
       else queueAutoSave(updates);
-    };
-
-    // fWidth effect: fetches on every genuine M_WIDTH change for precise consumption.
-    // Uses a "last applied" ref so re-renders from onSave don't re-trigger the fetch.
-    const preciseAppliedKeyRef = React.useRef('');
-    useEffect(() => {
-      if (isBodyArticle || !effectiveMajCat || !currentFWidth) return;
-      const key = `${effectiveMajCat}:${currentFWidth}`;
-      const isFirstRun = preciseAppliedKeyRef.current === '';
-      if (isFirstRun) {
-        preciseAppliedKeyRef.current = key;
-        const existingMeter = String(
-          (localValues['preciseConsumptionMeter'] !== undefined
-            ? localValues['preciseConsumptionMeter']
-            : (item as any).preciseConsumptionMeter) ?? '',
-        ).trim();
-        if (existingMeter !== '') {
-          const existingKg = String(
-            (localValues['preciseConsumptionKg'] !== undefined
-              ? localValues['preciseConsumptionKg']
-              : (item as any).preciseConsumptionKg) ?? '',
-          ).trim();
-          if (existingKg !== '') return;
-          const kg = computePreciseKg(parseFloat(existingMeter), currentFWidth);
-          if (kg == null) return;
-          const updates: Record<string, string> = { preciseConsumptionKg: kg };
-          setLocalValues((prev) => ({ ...prev, ...updates }));
-          if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
-          else queueAutoSave(updates);
-          return;
-        }
-      } else {
-        if (preciseAppliedKeyRef.current === key) return;
-        preciseAppliedKeyRef.current = key;
-      }
-      const token = localStorage.getItem('authToken');
-      const headers = { Authorization: `Bearer ${token}` };
-      const bodyArticleNo = String(
-        (localValues['bodyArticle'] !== undefined ? localValues['bodyArticle'] : (item as any).bodyArticle) ?? '',
-      ).trim();
-      // Base is needed in production, where baseURL is the relative '/api'.
-      const preciseUrl = new URL(`${APP_CONFIG.api.baseURL}/approver/precise-body-article/by-width`, window.location.origin);
-      preciseUrl.searchParams.set('majorCategory', effectiveMajCat);
-      preciseUrl.searchParams.set('fabWidth', currentFWidth);
-      if (bodyArticleNo) preciseUrl.searchParams.set('microBodyArticleNumber', bodyArticleNo);
-      fetch(preciseUrl.toString(), { headers })
-        .then((r) => r.json())
-        .then((d: { consumption: number | null }) => {
-          if (d.consumption != null) {
-            applyPreciseUpdates(d.consumption, currentFWidth);
-          }
-        })
-        .catch(() => {});
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentFWidth, isBodyArticle, effectiveMajCat]);
+    }, [currentFWidth, isBodyArticle]);
 
     // When M_GSM changes on an FG article, recompute preciseConsumptionKg using existing meter.
     const preciseGsmMountRef = React.useRef(true);
