@@ -2012,7 +2012,9 @@ const ArticleCard = React.memo(
     };
 
     // Picking a vendor from either dropdown (name or code) fills both fields.
+    const vendorJustPickedRef = React.useRef(false);
     const pickVendor = (val: string, option: AutocompleteOption) => {
+      vendorJustPickedRef.current = true;
       // option.vendorName is the clean name (no code suffix)
       const cleanName = (option as any).vendorName || String(val ?? '').split('||')[0];
       const updates: Record<string, string | null> = { vendorName: cleanName };
@@ -2025,6 +2027,19 @@ const ArticleCard = React.memo(
       }
       // The pick also fired onChange with the option value — drop that pending search.
       if (vendorDebounceRef.current) clearTimeout(vendorDebounceRef.current);
+      setEditingField(null);
+      setVendorOptions([]);
+      setVendorQuery(null);
+    };
+
+    // Vendor name / code are only set by picking from the vendor-master dropdown (pickVendor
+    // saves both together). Leaving the box with typed text keeps the old vendor.
+    const dropTypedVendor = (typed: string, current: string | null | undefined) => {
+      const justPicked = vendorJustPickedRef.current;
+      vendorJustPickedRef.current = false;
+      if (!justPicked && typed.trim() && typed.trim() !== String(current ?? '').trim()) {
+        message.warning('Pick a vendor from the list — typed text is not saved.');
+      }
       setEditingField(null);
       setVendorOptions([]);
       setVendorQuery(null);
@@ -2499,14 +2514,7 @@ const ArticleCard = React.memo(
                   placeholder="Type 2+ digits of the vendor code"
                   notFoundContent={vendorSearching ? <span className="flex items-center gap-2"><Spinner size="sm" /> Searching vendors…</span> : null}
                   onSelect={pickVendor}
-                  onBlur={(e) => {
-                    // A typed code (not picked) is saved as-is; handleSave checks it is 6 digits.
-                    const val = (e.target as HTMLInputElement).value.trim();
-                    if (val && val !== (displayVal ?? '')) handleSave('vendorCode', val);
-                    else setEditingField(null);
-                    setVendorOptions([]);
-                    setVendorQuery(null);
-                  }}
+                  onBlur={(e) => dropTypedVendor((e.target as HTMLInputElement).value, displayVal)}
                   className={isFgCard ? 'text-sm' : 'text-xs'}
                 />
               ) : isEditingThis && field === 'vendorName' ? (
@@ -2519,15 +2527,7 @@ const ArticleCard = React.memo(
                   placeholder="Type 2+ letters of the vendor name"
                   notFoundContent={vendorSearching ? <span className="flex items-center gap-2"><Spinner size="sm" /> Searching vendors…</span> : null}
                   onSelect={pickVendor}
-                  onBlur={(e) => {
-                    const val = (e.target as HTMLInputElement).value;
-                    // Modify mode: the vendor must be picked from the list (code + name
-                    // from the vendor master) — a typed name alone is not kept.
-                    if (val && !isModifyMode) handleSave('vendorName', val);
-                    else setEditingField(null);
-                    setVendorOptions([]);
-                    setVendorQuery(null);
-                  }}
+                  onBlur={(e) => dropTypedVendor((e.target as HTMLInputElement).value, displayVal)}
                   className={isFgCard ? 'text-sm' : 'text-xs'}
                 />
               ) : isEditingThis ? (

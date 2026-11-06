@@ -440,13 +440,18 @@ export default function ArticleDetailPage({
     const pendingItems = items.filter(i => pendingSelectedKeys.includes(i.id));
     return pendingItems.reduce<{ articleId: string; missing: string[] }[]>((acc, item) => {
       const missing: string[] = [];
+      // Article details: the hierarchy is mandatory for Save & Submit.
+      if (!(item.division || '').trim()) missing.push('DIVISION');
+      if (!(item.subDivision || '').trim()) missing.push('SUB-DIVISION');
+      if (!(item.majorCategory || '').trim()) missing.push('MAJOR CATEGORY');
+      if (!(item.mcDescription || '').trim()) missing.push('MC DESCRIPTION');
+      if (!(item.designNumber || '').trim()) missing.push('DESIGN NUMBER');
       if (!item.vendorCode) missing.push('VENDOR CODE');
       // Color is mandatory on New Articles — skipped in FG and SRM Fabric Article mode.
       if (pathType === 'new' && !isFGMode && item.source !== 'SRM' && !item.colour) missing.push('COLOUR');
-      // Fabric Article Desc and MC Description are mandatory in FG mode.
+      // Fabric Article Desc is mandatory in FG mode (MC Description is checked above for every article).
       if (isFGMode) {
         if (!(item.fabricArticleDescription || '').trim()) missing.push('FABRIC ARTICLE DESC.');
-        if (!(item.mcDescription || '').trim()) missing.push('MC DESCRIPTION');
       }
       // Segment and Article Fashion Type are mandatory for SRM Fabric Articles.
       if (item.source === 'SRM') {

@@ -5,6 +5,26 @@
 
 ---
 
+## 2026-11-06 — FG Reference & vendor card: vendor only from the dropdown
+
+- Bug: typed VENDOR NAME was saved as-is on blur (New page), and any 6-digit VENDOR CODE too — e.g. aa8618e1…
+  has vendor_name "abc" (not in master_vendor_details) with code 200681.
+- ApproverArticleList: both Autocompletes now only save through pickVendor (name + code together from the vendor
+  master). Leaving the box with typed text keeps the old vendor (`dropTypedVendor`) and warns "Pick a vendor from the
+  list — typed text is not saved." (no warning right after a pick). New and Created (modify) pages alike.
+- Existing typed names aren't changed — re-pick the vendor to fix them.
+
+---
+
+## 2026-11-06 — GM Save & Submit: Division, Sub-division, Major category, MC description mandatory
+
+- GMArticleDetailPage approveBlockedReasons: DIVISION, SUB-DIVISION, MAJOR CATEGORY, MC DESCRIPTION, DESIGN NUMBER are now checked for
+  every GM article (MC DESCRIPTION was FG-mode only); a missing one opens the "mandatory fields missing" popup and
+  nothing goes to SAP. GMArticleList Article details card shows the red * on those four labels.
+- Save & Submit on the detail page is the only GM submit path (/approver/gm-articles/submit).
+
+---
+
 ## 2026-11-06 — FG Precise Consumption in Meter: manual only (no auto-fill)
 
 - User request: the Precise Consumption card's Consumption in Meter is no longer fetched from
