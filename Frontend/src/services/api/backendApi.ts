@@ -396,9 +396,19 @@ export class BackendApiService {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
-    if (!resp.ok) throw new Error(`Login failed: ${resp.status}`);
-    const json = await resp.json();
-    if (!json.success) throw new Error(json.error || 'Login failed');
+    // Show the server's reason (wrong password, disabled account, …) instead of a bare status code.
+    const json = await resp.json().catch(() => null);
+    if (!resp.ok || !json?.success) {
+      const serverMsg: string | undefined = json?.error;
+      if (resp.status === 401) throw new Error(serverMsg || 'Wrong email or password.');
+      if (resp.status === 403) throw new Error(`${serverMsg || 'Your account is disabled'} — contact the admin.`);
+      if (resp.status === 400) throw new Error(serverMsg || 'Enter your email and password.');
+      if (resp.status === 429) throw new Error('Too many login attempts. Wait a minute and try again.');
+      if (resp.status >= 500 || !json) {
+        throw new Error(`Server error (${resp.status}) — please try again in a moment.${serverMsg ? ` (${serverMsg})` : ''}`);
+      }
+      throw new Error(serverMsg || `Login failed (${resp.status}).`);
+    }
     return json.data;
   }
 
