@@ -792,7 +792,7 @@ export default function ArticleDetailPage({
       const liveAct = getLiveCmpActTotal(item.id);
       const savedAct = [item.totalActPrVal, item.cuttingActPrVal, item.stitchingActPrVal, item.ironingActPrVal, item.finishingActPrVal]
         .some((v) => v != null && String(v).trim() !== '');
-      if (liveAct !== undefined ? !liveAct.trim() : !savedAct) missing.push('CMP COST: ACT TOTAL PR VAL');
+      if (liveAct !== undefined ? !liveAct.trim() : !savedAct) missing.push('CMP COST: ACT-V2 TOTAL PR VAL');
       missing.push(...getMissingMandatoryFields(item, isComboItem && item.id === currentItem?.id ? setTopCategory : null));
       // Readable name: SAP / article number once it exists, else category + design
       // number (a new set article has neither SAP number nor image name).

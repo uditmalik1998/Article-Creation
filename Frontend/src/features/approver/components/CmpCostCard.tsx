@@ -15,6 +15,8 @@ import { useCardDraft, DraftRestoreBanner } from './cardDrafts';
 
 const PROCESSES = ['CUTTING', 'STITCHING', 'IRONING', 'FINISHING'] as const;
 const STAGES = ['BGT', 'ACT', 'VENDOR', 'FINAL'] as const;
+// Header text per stage — the stage keys above stay as they are (cell keys / saved fields).
+const STAGE_LABEL: Record<string, string> = { BGT: 'AUTO-BGT', ACT: 'ACT-V2' };
 const MEASURES = ['SAM', 'SAM VAL', 'PR VAL'] as const;
 
 const isNotApplicable = (process: string, measure: string) => process === 'CUTTING' && measure !== 'PR VAL';
@@ -308,7 +310,7 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
                           : 'border-l-2 border-l-slate-300 bg-slate-100',
                       )}
                     >
-                      {stage}
+                      {STAGE_LABEL[stage] ?? stage}
                     </th>
                   ))}
                 </tr>
@@ -356,7 +358,7 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
                 {/* data-field-label: the Save & Submit "missing fields" popup jumps here. */}
                 <tr
                   className="border-t-2 border-slate-300 bg-slate-50/60"
-                  data-field-label="CMP COST: ACT TOTAL PR VAL"
+                  data-field-label="CMP COST: ACT-V2 TOTAL PR VAL"
                   data-item-id={articleId}
                 >
                   <td className="px-2.5 py-1.5 font-bold text-slate-900">TOTAL</td>

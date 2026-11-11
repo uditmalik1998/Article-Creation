@@ -5,6 +5,27 @@
 
 ---
 
+## 2026-11-11 — M_FAB_VDR now sent to SAP for FG generics
+
+- It was never in the payload: buildRfcPayload sends a characteristic only if it's in a grid for the major category
+  (maj_cat_mandatory_grid / maj_cat_grid_values have no M_FAB_VDR) or in RFC_ALWAYS_SEND_IF_PRESENT. Added 'M_FAB_VDR'
+  to RFC_ALWAYS_SEND_IF_PRESENT (zmmArtCreationService) → sent whenever set (always, with the NON-NOMINATED default).
+- Created-page Modify (buildModifyChangesPayload) sends it only when it has a value (no "" for older articles).
+- Variants use their own payload — unchanged. Risk: if an FG SAP class doesn't have characteristic M_FAB_VDR, SAP may
+  reject that article — test one article per class family after deploy.
+
+---
+
+## 2026-11-11 — "ACT" → "ACT-V2" on the FG article page
+
+- FAB card row (CARD_LABEL_OVERRIDES rough_v2), B TRIM + V. ADD cost column (roughLabel), CMP COST stage header
+  (STAGE_LABEL — stage key 'ACT' / cell keys / saved fields unchanged), OTH GRID-1 Cost Summary column + row tooltips,
+  Save & Submit missing-field text "CMP COST: ACT-V2 TOTAL PR VAL" (+ matching data-field-label). Labels only.
+- Then: Actual Consumption card → "ACT-V2 CONSUMPTION"; CMP COST BGT header → "AUTO-BGT" (STAGE_LABEL; key 'BGT' unchanged).
+- FG FAB card: M_FAB_VDR moved to just below M_LYCRA (ApproverArticleList ATTRIBUTE_GROUPS; Fabric page order unchanged).
+
+---
+
 ## 2026-11-11 — Prod fix: "Failed to update item" (fab_vdr rename) + M_FAB_VDR leaking into FABRIC ARTICLE DESC
 
 - Commit 72b55e6 (Prisma fabVdr @map("m_fab_vdr")) went live before the DB rename → every PUT /approver/items/:id with

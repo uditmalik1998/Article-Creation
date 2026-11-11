@@ -261,7 +261,7 @@ const BOM_ONLY_SCHEMA_KEYS = new Set([
 // from the card on all approver pages by request.
 // Card-only row labels (SCHEMA_KEY_TO_EXCEL_ATTR keeps the grid / export names).
 const CARD_LABEL_OVERRIDES: Record<string, string> = {
-  rough_v2: 'ACT', // FAB card ROUGH-V2 row
+  rough_v2: 'ACT-V2', // FAB card ROUGH-V2 row
 };
 
 // M_FAB_VDR (FG FAB card): fixed options, always shown, mandatory; empty → NON-NOMINATED.
@@ -282,7 +282,6 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
       { field: 'yarn1', schemaKey: 'yarn_01' },
       { field: 'mainMvgr', schemaKey: 'main_mvgr' },
       { field: 'fabricMainMvgr', schemaKey: 'fabric_main_mvgr' },
-      { field: 'fabVdr', schemaKey: 'fab_vdr' },
       { field: 'weave', schemaKey: 'weave' },
       { field: 'mFab2', schemaKey: 'm_fab2' },
       { field: 'fCount', schemaKey: 'f_count' },
@@ -293,6 +292,7 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
       { field: 'finish', schemaKey: 'finish' },
       { field: 'fWidth', schemaKey: 'f_width' },
       { field: 'lycra', schemaKey: 'lycra_non_lycra' },
+      { field: 'fabVdr', schemaKey: 'fab_vdr' }, // M_FAB_VDR right below M_LYCRA (FG only)
       { field: 'shade', schemaKey: 'shade', freeText: true },
       { field: 'autoBgt', schemaKey: 'auto_bgt', freeText: true },
       { field: 'roughV2', schemaKey: 'rough_v2', freeText: true },
@@ -4985,12 +4985,12 @@ const ArticleCard = React.memo(
                       {/* FG: cost summary under SEGMENT — read-only, from each card's saved values.
                           FAB = the Fab card's per-unit costs on a per-piece basis, same formula as the
                           Precise Costing export's FAB row: cost × PR PC CONS. × (100 + WST 4%) / 100;
-                          BODY = the CMP COST TOTAL row (BGT / ACT / VENDOR / FINAL PR VAL);
+                          BODY = the CMP COST TOTAL row (AUTO-BGT / ACT-V2 / VENDOR / FINAL PR VAL);
                           PKG COST = sum of its saved NET RATEs, in AUTO-BGT and ROUGH-V2 only. */}
                       {!allowGroups && (() => {
                         const COST_SOURCES: { label: string; title: string; fields: [string, string, string, string] }[] = [
-                          { label: 'FAB', title: 'FAB card: AUTO-BGT / ACT / VENDOR COST / FINAL COST', fields: ['autoBgt', 'roughV2', 'vendorFabricRate', 'finalCost'] },
-                          { label: 'BODY', title: 'CMP COST total: BGT / ACT / VENDOR / FINAL PR VAL', fields: ['totalBgtPrVal', 'totalActPrVal', 'totalVendorPrVal', 'totalFinalPrVal'] },
+                          { label: 'FAB', title: 'FAB card: AUTO-BGT / ACT-V2 / VENDOR COST / FINAL COST', fields: ['autoBgt', 'roughV2', 'vendorFabricRate', 'finalCost'] },
+                          { label: 'BODY', title: 'CMP COST total: AUTO-BGT / ACT-V2 / VENDOR / FINAL PR VAL', fields: ['totalBgtPrVal', 'totalActPrVal', 'totalVendorPrVal', 'totalFinalPrVal'] },
                           { label: 'B TRIM', title: 'B TRIM card TOTAL', fields: ['bTrimTotalAutoBgt', 'bTrimTotalRoughV2', 'bTrimTotalVdrCost', 'bTrimTotalFinalCost'] },
                           { label: 'V. ADD', title: 'V. ADD card TOTAL', fields: ['vaddTotalAutoBgt', 'vaddTotalRoughV2', 'vaddTotalVendorCost', 'vaddTotalFinalCost'] },
                         ];
@@ -5029,7 +5029,7 @@ const ArticleCard = React.memo(
                             </div>
                             <div role="row" className={cn(COLS, 'px-2.5 py-1.5 text-[11px] font-bold tracking-wider text-slate-500')}>
                               <span role="columnheader">COST SOURCE</span>
-                              {['AUTO-BGT', 'ACT', 'VDR COST', 'FINAL COST'].map((h) => (
+                              {['AUTO-BGT', 'ACT-V2', 'VDR COST', 'FINAL COST'].map((h) => (
                                 <span key={h} role="columnheader" className="text-right">{h}</span>
                               ))}
                             </div>
@@ -5137,10 +5137,10 @@ const ArticleCard = React.memo(
                     </div>
                   )}
 
-                  {/* ACTUAL CONSUMPTION card (was PRECISE CONSUMPTION; precise_consumption_* fields) — FG Articles, BODY tab only */}
+                  {/* ACT-V2 CONSUMPTION card (was PRECISE CONSUMPTION; precise_consumption_* fields) — FG Articles, BODY tab only */}
                   {!isBodyArticle && selectedGroupKeys.has('BODY') && (
                     <div className="overflow-hidden rounded-lg border bg-white" style={{ borderColor: CARD_THEME.border }}>
-                      {renderCollapsibleHeader('PRECISE', 'ACTUAL CONSUMPTION')}
+                      {renderCollapsibleHeader('PRECISE', 'ACT-V2 CONSUMPTION')}
                       <div className={cn('space-y-0 p-1', isGroupCollapsed('PRECISE') && 'hidden')}>
                         {([
                           { label: 'Ratio',               field: 'preciseRatio' },
