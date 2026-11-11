@@ -5,6 +5,16 @@
 
 ---
 
+## 2026-11-11 — Login page shows the real reason instead of "Login failed: 401"
+
+- backendApi.login threw `Login failed: <status>` before reading the body. Now it reads the server's error and shows:
+  401 → "Invalid email or password", 403 → "Account is disabled — contact the admin", 400 → missing fields,
+  429 → too many attempts, 5xx / non-JSON (proxy down) → "Server error (<code>) — please try again in a moment",
+  network failure → existing "Unable to connect to server" (Login.tsx). The global 401 interceptor skips /login, so
+  the toast isn't lost.
+
+---
+
 ## 2026-11-11 — M_FAB_VDR now sent to SAP for FG generics
 
 - It was never in the payload: buildRfcPayload sends a characteristic only if it's in a grid for the major category
