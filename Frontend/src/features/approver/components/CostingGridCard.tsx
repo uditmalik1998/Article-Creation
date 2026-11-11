@@ -37,7 +37,7 @@ export interface CostingGridConfig {
   itemLabel: string;
   /** Header of the 3rd specification column (CLR / PLACEMENT). */
   c3Label: string;
-  /** Header of the ROUGH-V2 cost column (B TRIM and V. ADD show "ACT"); default "ROUGH-V2". */
+  /** Header of the ROUGH-V2 cost column (B TRIM and V. ADD show "ACT-V2"); default "ROUGH-V2". */
   roughLabel?: string;
   /** Tabs; one entry = no tab strip. The first tab is the one saved to SAP. */
   tabs: readonly string[];
@@ -124,7 +124,7 @@ export const BTRIM_CONFIG: CostingGridConfig = {
   title: 'B TRIM',
   itemLabel: 'BT DESCRIPTION',
   c3Label: 'CLR',
-  roughLabel: 'ACT',
+  roughLabel: 'ACT-V2',
   tabs: ['BT-01', 'BT-02'],
   fixedRows: ['M_BTN', 'DC', 'ZIP', 'PATCH', 'H-TRF'],
   other: {
@@ -175,7 +175,7 @@ export const VADD_CONFIG: CostingGridConfig = {
   title: 'V. ADD',
   itemLabel: 'V. ADD',
   c3Label: 'PLACEMENT',
-  roughLabel: 'ACT',
+  roughLabel: 'ACT-V2',
   tabs: ['V. ADD'],
   fixedRows: ['PRINT', 'EMB', 'WASHING'],
   cellMap: {
