@@ -26812,6 +26812,7 @@ export namespace Prisma {
     businessDivision: string | null
     isActive: boolean | null
     lastLogin: Date | null
+    passwordChangedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -26827,6 +26828,7 @@ export namespace Prisma {
     businessDivision: string | null
     isActive: boolean | null
     lastLogin: Date | null
+    passwordChangedAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -26843,6 +26845,7 @@ export namespace Prisma {
     articleTypes: number
     isActive: number
     lastLogin: number
+    passwordChangedAt: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -26868,6 +26871,7 @@ export namespace Prisma {
     businessDivision?: true
     isActive?: true
     lastLogin?: true
+    passwordChangedAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -26883,6 +26887,7 @@ export namespace Prisma {
     businessDivision?: true
     isActive?: true
     lastLogin?: true
+    passwordChangedAt?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -26899,6 +26904,7 @@ export namespace Prisma {
     articleTypes?: true
     isActive?: true
     lastLogin?: true
+    passwordChangedAt?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -27002,6 +27008,7 @@ export namespace Prisma {
     articleTypes: string[]
     isActive: boolean
     lastLogin: Date | null
+    passwordChangedAt: Date | null
     createdAt: Date
     updatedAt: Date
     _count: UserCountAggregateOutputType | null
@@ -27037,6 +27044,7 @@ export namespace Prisma {
     articleTypes?: boolean
     isActive?: boolean
     lastLogin?: boolean
+    passwordChangedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     apiKeys?: boolean | User$apiKeysArgs<ExtArgs>
@@ -27058,6 +27066,7 @@ export namespace Prisma {
     articleTypes?: boolean
     isActive?: boolean
     lastLogin?: boolean
+    passwordChangedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["user"]>
@@ -27074,6 +27083,7 @@ export namespace Prisma {
     articleTypes?: boolean
     isActive?: boolean
     lastLogin?: boolean
+    passwordChangedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["user"]>
@@ -27090,11 +27100,12 @@ export namespace Prisma {
     articleTypes?: boolean
     isActive?: boolean
     lastLogin?: boolean
+    passwordChangedAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "password" | "name" | "role" | "division" | "subDivision" | "businessDivision" | "articleTypes" | "isActive" | "lastLogin" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "password" | "name" | "role" | "division" | "subDivision" | "businessDivision" | "articleTypes" | "isActive" | "lastLogin" | "passwordChangedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     apiKeys?: boolean | User$apiKeysArgs<ExtArgs>
     costSummary?: boolean | User$costSummaryArgs<ExtArgs>
@@ -27137,6 +27148,10 @@ export namespace Prisma {
       articleTypes: string[]
       isActive: boolean
       lastLogin: Date | null
+      /**
+       * Set when the password changes; tokens issued before it are refused (logs out every device).
+       */
+      passwordChangedAt: Date | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["user"]>
@@ -27577,6 +27592,7 @@ export namespace Prisma {
     readonly articleTypes: FieldRef<"User", 'String[]'>
     readonly isActive: FieldRef<"User", 'Boolean'>
     readonly lastLogin: FieldRef<"User", 'DateTime'>
+    readonly passwordChangedAt: FieldRef<"User", 'DateTime'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
   }
@@ -92304,6 +92320,7 @@ export namespace Prisma {
     articleTypes: 'articleTypes',
     isActive: 'isActive',
     lastLogin: 'lastLogin',
+    passwordChangedAt: 'passwordChangedAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -98092,6 +98109,7 @@ export namespace Prisma {
     articleTypes?: StringNullableListFilter<"User">
     isActive?: BoolFilter<"User"> | boolean
     lastLogin?: DateTimeNullableFilter<"User"> | Date | string | null
+    passwordChangedAt?: DateTimeNullableFilter<"User"> | Date | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     apiKeys?: ApiKeyListRelationFilter
@@ -98112,6 +98130,7 @@ export namespace Prisma {
     articleTypes?: SortOrder
     isActive?: SortOrder
     lastLogin?: SortOrderInput | SortOrder
+    passwordChangedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     apiKeys?: ApiKeyOrderByRelationAggregateInput
@@ -98136,6 +98155,7 @@ export namespace Prisma {
     articleTypes?: StringNullableListFilter<"User">
     isActive?: BoolFilter<"User"> | boolean
     lastLogin?: DateTimeNullableFilter<"User"> | Date | string | null
+    passwordChangedAt?: DateTimeNullableFilter<"User"> | Date | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     apiKeys?: ApiKeyListRelationFilter
@@ -98156,6 +98176,7 @@ export namespace Prisma {
     articleTypes?: SortOrder
     isActive?: SortOrder
     lastLogin?: SortOrderInput | SortOrder
+    passwordChangedAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: UserCountOrderByAggregateInput
@@ -98180,6 +98201,7 @@ export namespace Prisma {
     articleTypes?: StringNullableListFilter<"User">
     isActive?: BoolWithAggregatesFilter<"User"> | boolean
     lastLogin?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+    passwordChangedAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
   }
@@ -108632,6 +108654,7 @@ export namespace Prisma {
     articleTypes?: UserCreatearticleTypesInput | string[]
     isActive?: boolean
     lastLogin?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     apiKeys?: ApiKeyCreateNestedManyWithoutUserInput
@@ -108652,6 +108675,7 @@ export namespace Prisma {
     articleTypes?: UserCreatearticleTypesInput | string[]
     isActive?: boolean
     lastLogin?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     apiKeys?: ApiKeyUncheckedCreateNestedManyWithoutUserInput
@@ -108671,6 +108695,7 @@ export namespace Prisma {
     articleTypes?: UserUpdatearticleTypesInput | string[]
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     apiKeys?: ApiKeyUpdateManyWithoutUserNestedInput
@@ -108691,6 +108716,7 @@ export namespace Prisma {
     articleTypes?: UserUpdatearticleTypesInput | string[]
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     apiKeys?: ApiKeyUncheckedUpdateManyWithoutUserNestedInput
@@ -108711,6 +108737,7 @@ export namespace Prisma {
     articleTypes?: UserCreatearticleTypesInput | string[]
     isActive?: boolean
     lastLogin?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -108726,6 +108753,7 @@ export namespace Prisma {
     articleTypes?: UserUpdatearticleTypesInput | string[]
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -108742,6 +108770,7 @@ export namespace Prisma {
     articleTypes?: UserUpdatearticleTypesInput | string[]
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -119853,6 +119882,7 @@ export namespace Prisma {
     articleTypes?: SortOrder
     isActive?: SortOrder
     lastLogin?: SortOrder
+    passwordChangedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -119872,6 +119902,7 @@ export namespace Prisma {
     businessDivision?: SortOrder
     isActive?: SortOrder
     lastLogin?: SortOrder
+    passwordChangedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -119887,6 +119918,7 @@ export namespace Prisma {
     businessDivision?: SortOrder
     isActive?: SortOrder
     lastLogin?: SortOrder
+    passwordChangedAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -127770,6 +127802,7 @@ export namespace Prisma {
     articleTypes?: UserCreatearticleTypesInput | string[]
     isActive?: boolean
     lastLogin?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     apiKeys?: ApiKeyCreateNestedManyWithoutUserInput
@@ -127789,6 +127822,7 @@ export namespace Prisma {
     articleTypes?: UserCreatearticleTypesInput | string[]
     isActive?: boolean
     lastLogin?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     apiKeys?: ApiKeyUncheckedCreateNestedManyWithoutUserInput
@@ -128582,6 +128616,7 @@ export namespace Prisma {
     articleTypes?: UserUpdatearticleTypesInput | string[]
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     apiKeys?: ApiKeyUpdateManyWithoutUserNestedInput
@@ -128601,6 +128636,7 @@ export namespace Prisma {
     articleTypes?: UserUpdatearticleTypesInput | string[]
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     apiKeys?: ApiKeyUncheckedUpdateManyWithoutUserNestedInput
@@ -129338,6 +129374,7 @@ export namespace Prisma {
     articleTypes?: UserCreatearticleTypesInput | string[]
     isActive?: boolean
     lastLogin?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     apiKeys?: ApiKeyCreateNestedManyWithoutUserInput
@@ -129357,6 +129394,7 @@ export namespace Prisma {
     articleTypes?: UserCreatearticleTypesInput | string[]
     isActive?: boolean
     lastLogin?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     apiKeys?: ApiKeyUncheckedCreateNestedManyWithoutUserInput
@@ -130911,6 +130949,7 @@ export namespace Prisma {
     articleTypes?: UserUpdatearticleTypesInput | string[]
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     apiKeys?: ApiKeyUpdateManyWithoutUserNestedInput
@@ -130930,6 +130969,7 @@ export namespace Prisma {
     articleTypes?: UserUpdatearticleTypesInput | string[]
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     apiKeys?: ApiKeyUncheckedUpdateManyWithoutUserNestedInput
@@ -133081,6 +133121,7 @@ export namespace Prisma {
     articleTypes?: UserCreatearticleTypesInput | string[]
     isActive?: boolean
     lastLogin?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     costSummary?: CostSummaryCreateNestedOneWithoutUserInput
@@ -133100,6 +133141,7 @@ export namespace Prisma {
     articleTypes?: UserCreatearticleTypesInput | string[]
     isActive?: boolean
     lastLogin?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     costSummary?: CostSummaryUncheckedCreateNestedOneWithoutUserInput
@@ -133134,6 +133176,7 @@ export namespace Prisma {
     articleTypes?: UserUpdatearticleTypesInput | string[]
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     costSummary?: CostSummaryUpdateOneWithoutUserNestedInput
@@ -133153,6 +133196,7 @@ export namespace Prisma {
     articleTypes?: UserUpdatearticleTypesInput | string[]
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     costSummary?: CostSummaryUncheckedUpdateOneWithoutUserNestedInput
@@ -133171,6 +133215,7 @@ export namespace Prisma {
     articleTypes?: UserCreatearticleTypesInput | string[]
     isActive?: boolean
     lastLogin?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     apiKeys?: ApiKeyCreateNestedManyWithoutUserInput
@@ -133190,6 +133235,7 @@ export namespace Prisma {
     articleTypes?: UserCreatearticleTypesInput | string[]
     isActive?: boolean
     lastLogin?: Date | string | null
+    passwordChangedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     apiKeys?: ApiKeyUncheckedCreateNestedManyWithoutUserInput
@@ -133224,6 +133270,7 @@ export namespace Prisma {
     articleTypes?: UserUpdatearticleTypesInput | string[]
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     apiKeys?: ApiKeyUpdateManyWithoutUserNestedInput
@@ -133243,6 +133290,7 @@ export namespace Prisma {
     articleTypes?: UserUpdatearticleTypesInput | string[]
     isActive?: BoolFieldUpdateOperationsInput | boolean
     lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passwordChangedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     apiKeys?: ApiKeyUncheckedUpdateManyWithoutUserNestedInput

@@ -285,7 +285,7 @@ model ExtractionResultFlat {
   fOunce             String? @map("f_ounce") @db.VarChar(100)
   fWidth             String? @map("f_width") @db.VarChar(100)
   fabDiv             String? @map("fab_div") @db.VarChar(100)
-  fabVdr             String? @map("fab_vdr") @db.VarChar(100)
+  fabVdr             String? @map("m_fab_vdr") @db.VarChar(100)
   htrfType           String? @map("htrf_type") @db.VarChar(100)
   htrfStyle          String? @map("htrf_style") @db.VarChar(100)
   embPlacement       String? @map("emb_placement") @db.VarChar(100)
@@ -704,13 +704,13 @@ model MasterVendorDetail {
 
 /// User: Admin and regular users
 model User {
-  id               Int                    @id @default(autoincrement())
-  email            String                 @unique @db.VarChar(255)
-  password         String                 @db.VarChar(255)
-  name             String                 @db.VarChar(100)
-  role             UserRole               @default(CREATOR)
-  division         String?                @db.VarChar(200) // Linked to Department.name
-  subDivision      String?                @map("sub_division") @db.VarChar(500) // Linked to SubDepartment.code
+  id                Int                    @id @default(autoincrement())
+  email             String                 @unique @db.VarChar(255)
+  password          String                 @db.VarChar(255)
+  name              String                 @db.VarChar(100)
+  role              UserRole               @default(CREATOR)
+  division          String?                @db.VarChar(200) // Linked to Department.name
+  subDivision       String?                @map("sub_division") @db.VarChar(500) // Linked to SubDepartment.code
   /// Coarse business-unit tag, independent of `division`/`subDivision` above
   /// (those are tied to the Department/SubDepartment hierarchy for
   /// extraction routing, and `division` can hold several comma-separated
@@ -718,17 +718,19 @@ model User {
   /// admin-editable from the Users page, and every user is meant to end up
   /// with one — shown in the UI as "Business Division" to avoid being
   /// confused with the existing Sub Division field.
-  businessDivision String?                @map("business_division") @db.VarChar(20)
+  businessDivision  String?                @map("business_division") @db.VarChar(20)
   /// Article types the user works on — any of FG / FABRIC / GM (several allowed).
-  articleTypes     String[]               @default([]) @map("article_types")
-  isActive         Boolean                @default(true) @map("is_active")
-  lastLogin        DateTime?              @map("last_login")
-  createdAt        DateTime               @default(now()) @map("created_at")
-  updatedAt        DateTime               @updatedAt @map("updated_at")
-  apiKeys          ApiKey[]
-  costSummary      CostSummary?
-  extractionJobs   ExtractionJob[]
-  approvedItems    ExtractionResultFlat[] @relation("ApproverRelation")
+  articleTypes      String[]               @default([]) @map("article_types")
+  isActive          Boolean                @default(true) @map("is_active")
+  lastLogin         DateTime?              @map("last_login")
+  /// Set when the password changes; tokens issued before it are refused (logs out every device).
+  passwordChangedAt DateTime?              @map("password_changed_at")
+  createdAt         DateTime               @default(now()) @map("created_at")
+  updatedAt         DateTime               @updatedAt @map("updated_at")
+  apiKeys           ApiKey[]
+  costSummary       CostSummary?
+  extractionJobs    ExtractionJob[]
+  approvedItems     ExtractionResultFlat[] @relation("ApproverRelation")
 
   @@index([email])
   @@index([role])

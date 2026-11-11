@@ -219,10 +219,17 @@ export const verifyToken = async (req: Request, res: Response): Promise<void> =>
         role: true,
         isActive: true,
         lastLogin: true,
+        passwordChangedAt: true,
       },
     });
     if (!user || !user.isActive) {
       res.status(401).json({ success: false, error: 'Invalid token' });
+      return;
+    }
+
+    const issuedAtMs = Number(decoded?.sessionIssuedAt || 0) || (Number(decoded?.iat || 0) * 1000);
+    if (user.passwordChangedAt && issuedAtMs > 0 && user.passwordChangedAt.getTime() > issuedAtMs) {
+      res.status(401).json({ success: false, error: 'Your password was changed. Please login again.' });
       return;
     }
 
@@ -240,7 +247,8 @@ export const verifyToken = async (req: Request, res: Response): Promise<void> =>
       }
     }
 
-    res.json({ success: true, data: { user } });
+    const { passwordChangedAt: _pwChangedAt, ...publicUser } = user;
+    res.json({ success: true, data: { user: publicUser } });
   } catch (error: any) {
     res.status(401).json({ success: false, error: 'Invalid token' });
   }
@@ -268,6 +276,7 @@ export const getCurrentUser = async (req: Request, res: Response): Promise<void>
         role: true,
         division: true,
         subDivision: true,
+        businessDivision: true,
         articleTypes: true,
         isActive: true,
         createdAt: true,
@@ -289,7 +298,9 @@ export const getCurrentUser = async (req: Request, res: Response): Promise<void>
         role: user.role,
         division: user.division,
         subDivision: user.subDivision,
+        businessDivision: user.businessDivision,
         articleTypes: user.articleTypes ?? [],
+        isActive: user.isActive,
         createdAt: user.createdAt.toISOString(),
         lastLogin: user.lastLogin?.toISOString(),
       }
@@ -297,5 +308,61 @@ export const getCurrentUser = async (req: Request, res: Response): Promise<void>
   } catch (error: any) {
     console.error('Get current user error:', error);
     res.status(500).json({ success: false, error: 'Failed to get user info' });
+  }
+};
+
+/**
+ * Change the signed-in user's own password (protected route).
+ * Body: { currentPassword, newPassword }. New password: 8+ characters, at least one number,
+ * different from the current one.
+ */
+export const changePassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ success: false, error: 'Not authenticated' });
+      return;
+    }
+
+    const currentPassword = String(req.body?.currentPassword ?? '');
+    const newPassword = String(req.body?.newPassword ?? '');
+
+    if (!currentPassword || !newPassword) {
+      res.status(400).json({ success: false, error: 'Current and new password are required' });
+      return;
+    }
+    if (newPassword.length < 8 || !/\d/.test(newPassword)) {
+      res.status(400).json({ success: false, error: 'New password must be at least 8 characters and contain a number' });
+      return;
+    }
+    if (newPassword === currentPassword) {
+      res.status(400).json({ success: false, error: 'New password must be different from the current one' });
+      return;
+    }
+
+    const user = await withPrismaRetry(() =>
+      prisma.user.findUnique({ where: { id: req.user!.id }, select: { id: true, password: true } })
+    );
+    if (!user) {
+      res.status(404).json({ success: false, error: 'User not found' });
+      return;
+    }
+
+    const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+    if (!isValidPassword) {
+      res.status(400).json({ success: false, error: 'Current password is incorrect' });
+      return;
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await withPrismaRetry(() =>
+      // passwordChangedAt logs out every device, this one included (middleware/auth.ts).
+      prisma.user.update({ where: { id: user.id }, data: { password: hashedPassword, passwordChangedAt: new Date() } })
+    );
+    invalidateAuthUserCache(user.id);
+
+    res.json({ success: true });
+  } catch (error: any) {
+    console.error('Change password error:', error);
+    res.status(500).json({ success: false, error: 'Failed to change password' });
   }
 };

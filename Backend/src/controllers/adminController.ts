@@ -1013,6 +1013,8 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
     // Only update password if provided
     if (validated.password) {
       updateData.password = await bcrypt.hash(validated.password, 10);
+      // Logs the user out of every device (middleware/auth.ts).
+      updateData.passwordChangedAt = new Date();
     }
 
     // Remove undefined fields
