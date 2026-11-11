@@ -1714,8 +1714,10 @@ const ArticleCard = React.memo(
 
     const FAB_FIELDS = useMemo(
       () =>
+        // Fields that make up FABRIC ARTICLE DESC (in card order). M_FAB_VDR is left out — it
+        // always has a value (NOMINATED / NON-NOMINATED) and isn't part of the fabric description.
         (cardGroups.find((g) => g.group === 'FAB' || g.group === 'FABRIC')?.fields ?? []).filter(
-          (f) => !f.freeText && f.field !== 'mainMvgr',
+          (f) => !f.freeText && f.field !== 'mainMvgr' && f.field !== 'fabVdr',
         ),
       [cardGroups],
     );

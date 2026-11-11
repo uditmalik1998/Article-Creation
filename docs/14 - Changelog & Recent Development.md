@@ -5,7 +5,19 @@
 
 ---
 
-## 2026-11-11 — extraction_results_flat.fab_vdr → m_fab_vdr (code ready, DB NOT renamed yet)
+## 2026-11-11 — Prod fix: "Failed to update item" (fab_vdr rename) + M_FAB_VDR leaking into FABRIC ARTICLE DESC
+
+- Commit 72b55e6 (Prisma fabVdr @map("m_fab_vdr")) went live before the DB rename → every PUT /approver/items/:id with
+  fabVdr failed ("Failed to update item"). Ran `ALTER TABLE extraction_results_flat RENAME COLUMN fab_vdr TO m_fab_vdr`
+  on Supabase (verified: column is m_fab_vdr) — saves work again.
+- Bug from the M_FAB_VDR default: FG FAB_FIELDS (FABRIC ARTICLE DESC parts) included fabVdr, so descriptions got
+  "-NON-NOMINATED-". Excluded fabVdr (also no longer clears Fabric Article No. on change). Fixed the one saved row
+  (95ff0c75…, pending, no fabric number): "K-CP-E_STP-NOMINATED-SJ-…" → "K-CP-E_STP-SJ-…". Needs a frontend deploy;
+  until then the live frontend keeps adding it.
+
+---
+
+## 2026-11-11 — extraction_results_flat.fab_vdr → m_fab_vdr (DB renamed same day, see prod fix above)
 
 - Prisma ExtractionResultFlat.fabVdr now @map("m_fab_vdr"); field name unchanged so no code changes. No views,
   functions, indexes or raw SQL use the column (the other "fab_vdr" hits are Gemini attribute keys).
