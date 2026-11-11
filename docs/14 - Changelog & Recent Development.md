@@ -5,6 +5,27 @@
 
 ---
 
+## 2026-11-11 — OTH GRID-1 text 1 px bigger (Cost Summary unchanged)
+
+- Fixed rows (RATE / COST, MRP, colours, MARKDOWN, AFTER TAX): 12 → 13 px; MRP range hint 11 → 12 px. Body article Rough Consumption card unchanged (11 px).
+- Business attr rows (M_AGE_GROUP … SEGMENT): new `plus1 = 2` level in `renderAttributeRow` (values 13 px, names 12.5 px); B TRIM extra rows keep `plus1 = true`.
+- COST SUMMARY inside OTH GRID-1 deliberately **not** changed.
+- Labels "Base Color" / "Secondary Color" → BASE COLOR / SECONDARY COLOR (FG card only).
+- Secondary Color / MARKDOWN / AFTER TAX names now semibold (600) like M_AGE_GROUP (were 400; mandatory ones already 600). Body article card unchanged.
+- File: `Frontend/src/features/approver/components/ApproverArticleList.tsx`.
+
+## 2026-11-11 — OTH GRID-1 Cost Summary: 10% margin on TOTAL
+
+- New **MARGIN 10%** row above TOTAL = 10% of each column's cost sum (FAB + BODY + B TRIM + V. ADD + PKG COST).
+- TOTAL = cost sum × 1.10 in all 4 columns (AUTO-BGT / ACT-V2 / VDR COST / FINAL COST); empty column stays "—".
+- UI only, nothing saved. File: `Frontend/src/features/approver/components/ApproverArticleList.tsx` (`MARGIN_PCT`).
+
+## 2026-11-11 — OTH GRID-1 Cost Summary: FAB row no longer adds 4% wastage
+
+- FAB row = FAB card cost × PR PC CONS. (was × 1.04). Applies to all 4 columns (AUTO-BGT / ACT-V2 / VDR COST / FINAL COST).
+- Precise Costing Excel export still adds WST 4% — the two now differ by design.
+- File: `Frontend/src/features/approver/components/ApproverArticleList.tsx` (cost summary block).
+
 ## 2026-11-11 — Login page shows the real reason instead of "Login failed: 401"
 
 - backendApi.login threw `Login failed: <status>` before reading the body. Now it reads the server's error and shows:

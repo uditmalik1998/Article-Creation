@@ -2620,10 +2620,11 @@ const ArticleCard = React.memo(
       group: string;
       isMandatory?: boolean;
       mandatory?: boolean;
-    }, big = false, plus1 = false) => {
-      // plus1 = FG OTH GRID-1 / B TRIM extra rows: everything 1 px bigger than the default.
+    }, big = false, plus1: boolean | 2 = false) => {
+      // plus1 = B TRIM extra rows: everything 1 px bigger than the default;
+      // plus1 = 2 = FG OTH GRID-1 rows: 2 px bigger.
       // big = FG FAB and BODY cards (design "Option A", -1 px): 13 px names, 14 px values, 30 px rows.
-      const valueText = big ? 'text-[14px]' : plus1 ? 'text-[12px]' : 'text-[11px]';
+      const valueText = big ? 'text-[14px]' : plus1 === 2 ? 'text-[13px]' : plus1 ? 'text-[12px]' : 'text-[11px]';
       _attrCounter += 1;
       const num = _attrCounter;
       const currentValue = getValue(attr.field);
@@ -2657,11 +2658,11 @@ const ArticleCard = React.memo(
             if (!attrLocked && !isEditing) setEditingField(attr.field);
           }}
         >
-          <span className={cn('shrink-0 text-right font-bold tabular-nums text-muted-foreground', big ? 'w-6 text-[12px]' : plus1 ? 'w-4 text-[11px]' : 'w-4 text-[10px]')}>{num}.</span>
+          <span className={cn('shrink-0 text-right font-bold tabular-nums text-muted-foreground', big ? 'w-6 text-[12px]' : plus1 === 2 ? 'w-5 text-[12px]' : plus1 ? 'w-4 text-[11px]' : 'w-4 text-[10px]')}>{num}.</span>
           <span
             className={cn(
               'flex-1 truncate leading-snug',
-              big ? 'text-[13px]' : plus1 ? 'text-[11.5px]' : 'text-[10.5px]',
+              big ? 'text-[13px]' : plus1 === 2 ? 'text-[12.5px]' : plus1 ? 'text-[11.5px]' : 'text-[10.5px]',
               isMandatory ? 'key-field text-foreground' : 'font-semibold text-foreground/80',
             )}
           >
@@ -2674,7 +2675,7 @@ const ArticleCard = React.memo(
                 <Input
                   autoFocus
                   defaultValue={isEffectivelyEmpty ? '' : currentValue || ''}
-                  className={big ? 'h-7 px-2 text-[13px]' : plus1 ? 'h-6 px-1 text-[12px]' : 'h-6 px-1 text-[11px]'}
+                  className={big ? 'h-7 px-2 text-[13px]' : plus1 === 2 ? 'h-6 px-1 text-[13px]' : plus1 ? 'h-6 px-1 text-[12px]' : 'h-6 px-1 text-[11px]'}
                   onKeyDown={(e) =>
                     e.key === 'Enter' && handleSave(attr.field, (e.target as HTMLInputElement).value || null)
                   }
@@ -2713,7 +2714,7 @@ const ArticleCard = React.memo(
                     type="button"
                     className={cn(
                       'flex w-full items-center justify-between rounded border border-input bg-background hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring',
-                      big ? 'h-7 px-2 text-[13px]' : plus1 ? 'h-6 px-1.5 text-[12px]' : 'h-6 px-1.5 text-[11px]',
+                      big ? 'h-7 px-2 text-[13px]' : plus1 === 2 ? 'h-6 px-1.5 text-[13px]' : plus1 ? 'h-6 px-1.5 text-[12px]' : 'h-6 px-1.5 text-[11px]',
                     )}
                   >
                     <span className="truncate text-left">
@@ -4729,8 +4730,8 @@ const ArticleCard = React.memo(
                         : [
                             { label: 'RATE / COST', field: 'rate', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
                             { label: 'MRP', field: 'mrp', editable: true, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false },
-                            { label: 'Base Color', field: 'colour', editable: true, mandatory: true, isDropdown: true, isColor: true, isMarkdown: false },
-                            { label: 'Secondary Color', field: 'secondaryColour', editable: true, mandatory: false, isDropdown: true, isColor: true, isMarkdown: false },
+                            { label: 'BASE COLOR', field: 'colour', editable: true, mandatory: true, isDropdown: true, isColor: true, isMarkdown: false },
+                            { label: 'SECONDARY COLOR', field: 'secondaryColour', editable: true, mandatory: false, isDropdown: true, isColor: true, isMarkdown: false },
                             { label: 'MARKDOWN', field: '_markdown', editable: false, mandatory: false, isDropdown: false, isColor: false, isMarkdown: true, isAfterTax: false },
                             { label: 'AFTER TAX', field: '_afterTax', editable: false, mandatory: false, isDropdown: false, isColor: false, isMarkdown: false, isAfterTax: true },
                           ]
@@ -4777,17 +4778,18 @@ const ArticleCard = React.memo(
                             }}
                           >
                             <span
-                              className={cn('flex-1 truncate', isBodyArticle ? 'text-[11px]' : 'text-[12px]')}
+                              className={cn('flex-1 truncate', isBodyArticle ? 'text-[11px]' : 'text-[13px]')}
                               style={{
                                 color: bom.mandatory && isEmpty && !isLocked ? '#dc2626' : '#374151',
-                                fontWeight: bom.mandatory ? 600 : 400,
+                                // FG: every name semibold, like the M_AGE_GROUP … SEGMENT rows below.
+                                fontWeight: bom.mandatory || !isBodyArticle ? 600 : 400,
                               }}
                             >
                               {bom.mandatory && <span className="mr-0.5 text-red-500">*</span>}
                               {bom.label}
                               {/* While typing an FG MRP, show the range that will be accepted. */}
                               {isEditingBom && bom.field === 'mrp' && !isBodyArticle && !isNaN(rateNum) && rateNum > 0 && (
-                                <span className="ml-2 text-[11px] font-normal text-slate-500">
+                                <span className="ml-2 text-[12px] font-normal text-slate-500">
                                   Allowed {fmtRs(fgMrpRange(rateNum).min)} – {fmtRs(fgMrpRange(rateNum).max)}
                                   {' '}(markdown {FG_MARKDOWN_MIN}–{FG_MARKDOWN_MAX}%)
                                 </span>
@@ -4801,7 +4803,7 @@ const ArticleCard = React.memo(
                                 >
                                   <PopoverAnchor asChild>
                                     <span
-                                      className={cn('flex items-center justify-end gap-1 text-right', isBodyArticle ? 'text-[11px]' : 'text-[12px]')}
+                                      className={cn('flex items-center justify-end gap-1 text-right', isBodyArticle ? 'text-[11px]' : 'text-[13px]')}
                                       style={{
                                         color: isEmpty ? '#9ca3af' : '#111827',
                                         fontStyle: isEmpty ? 'italic' : 'normal',
@@ -4866,7 +4868,7 @@ const ArticleCard = React.memo(
                                 >
                                   <PopoverAnchor asChild>
                                     <span
-                                      className={cn('flex items-center justify-end gap-1 text-right', isBodyArticle ? 'text-[11px]' : 'text-[12px]')}
+                                      className={cn('flex items-center justify-end gap-1 text-right', isBodyArticle ? 'text-[11px]' : 'text-[13px]')}
                                       style={{
                                         color: isEmpty ? '#9ca3af' : '#111827',
                                         fontStyle: isEmpty ? 'italic' : 'normal',
@@ -4923,7 +4925,7 @@ const ArticleCard = React.memo(
                                   defaultValue={val === '—' ? undefined : val}
                                   onValueChange={(v) => handleSave(bom.field, v ?? null)}
                                 >
-                                  <SelectTrigger className={cn('h-6 w-full', isBodyArticle ? 'text-[11px]' : 'text-[12px]')}>
+                                  <SelectTrigger className={cn('h-6 w-full', isBodyArticle ? 'text-[11px]' : 'text-[13px]')}>
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -4938,7 +4940,7 @@ const ArticleCard = React.memo(
                                 <Input
                                   autoFocus
                                   defaultValue={val === '—' ? '' : val}
-                                  className={cn('h-6 px-1', isBodyArticle ? 'text-[11px]' : 'text-[12px]')}
+                                  className={cn('h-6 px-1', isBodyArticle ? 'text-[11px]' : 'text-[13px]')}
                                   onKeyDown={(e) =>
                                     e.key === 'Enter' &&
                                     handleSave(bom.field, (e.target as HTMLInputElement).value || null)
@@ -4947,7 +4949,7 @@ const ArticleCard = React.memo(
                                 />
                               ) : (
                                 <span
-                                  className={cn('block truncate', isBodyArticle ? 'text-[11px]' : 'text-[12px]')}
+                                  className={cn('block truncate', isBodyArticle ? 'text-[11px]' : 'text-[13px]')}
                                   style={{
                                     color: bom.isMarkdown
                                       ? '#7c3aed'
@@ -4980,11 +4982,11 @@ const ArticleCard = React.memo(
                             };
                             return rank(a.schemaKey) - rank(b.schemaKey);
                           })
-                          .map((a) => renderAttributeRow(a, false, true))}
+                          .map((a) => renderAttributeRow(a, false, 2))}
 
                       {/* FG: cost summary under SEGMENT — read-only, from each card's saved values.
-                          FAB = the Fab card's per-unit costs on a per-piece basis, same formula as the
-                          Precise Costing export's FAB row: cost × PR PC CONS. × (100 + WST 4%) / 100;
+                          FAB = the Fab card's per-unit costs on a per-piece basis: cost × PR PC CONS.
+                          (no wastage — unlike the Precise Costing export's FAB row, which adds WST 4%);
                           BODY = the CMP COST TOTAL row (AUTO-BGT / ACT-V2 / VENDOR / FINAL PR VAL);
                           PKG COST = sum of its saved NET RATEs, in AUTO-BGT and ROUGH-V2 only. */}
                       {!allowGroups && (() => {
@@ -5004,23 +5006,26 @@ const ArticleCard = React.memo(
                         const rows = COST_SOURCES.map((s) => ({ label: s.label, title: s.title, vals: s.fields.map(numOf) }));
                         // FAB per piece: PR PC CONS. = first of precise kg, rough kg, precise meter, rough meter
                         // (as in the export); no consumption → no FAB cost.
-                        const FAB_WST_PCT = 4;
                         const fabCons = ['preciseConsumptionKg', 'roughConsumptionKg', 'preciseConsumptionMeter', 'roughConsumptionMeter']
                           .map(numOf)
                           .find((v): v is number => v != null) ?? null;
                         rows[0] = {
                           ...rows[0],
-                          title: 'FAB card cost × PR PC CONS. × (100 + 4% WST) / 100 — as in Precise Costing',
-                          vals: rows[0].vals.map((v) => (v == null || fabCons == null ? null : (v * fabCons * (100 + FAB_WST_PCT)) / 100)),
+                          title: 'FAB card cost × PR PC CONS. (no wastage)',
+                          vals: rows[0].vals.map((v) => (v == null || fabCons == null ? null : v * fabCons)),
                         };
                         // PKG COST: saved NET RATE total goes to AUTO-BGT and ROUGH-V2; no VDR / FINAL.
                         const pkgRates = Object.values(PKG_RATE_FIELDS).map(numOf).filter((v): v is number => v != null);
                         const pkgTotal = pkgRates.length ? pkgRates.reduce((a, b) => a + b, 0) : null;
                         rows.push({ label: 'PKG COST', title: 'PKG COST: TOTAL NET RATE (saved tab)', vals: [pkgTotal, pkgTotal, null, null] });
-                        const totals = [0, 1, 2, 3].map((i) => {
+                        const subtotals = [0, 1, 2, 3].map((i) => {
                           const vs = rows.map((r) => r.vals[i]).filter((v): v is number => v != null);
                           return vs.length ? vs.reduce((a, b) => a + b, 0) : null;
                         });
+                        // MARGIN: 10% on top of each column's cost sum; TOTAL = cost sum + margin.
+                        const MARGIN_PCT = 10;
+                        const margins = subtotals.map((v) => (v == null ? null : (v * MARGIN_PCT) / 100));
+                        const totals = subtotals.map((v, i) => (v == null ? null : v + (margins[i] as number)));
                         const COLS = 'grid grid-cols-[110px_repeat(4,minmax(0,1fr))] gap-2';
                         return (
                           <div className="mx-1 mb-1 mt-2 overflow-hidden rounded-lg border border-slate-200" role="table" aria-label="Cost summary">
@@ -5043,7 +5048,15 @@ const ArticleCard = React.memo(
                                 ))}
                               </div>
                             ))}
-                            <div role="row" className={cn(COLS, 'items-center bg-[#1e293b] px-2.5 py-2 text-white')}>
+                            <div role="row" className={cn(COLS, 'items-center border-t border-slate-200 bg-slate-50 px-2.5 py-1.5')} title={`${MARGIN_PCT}% of the sum of the rows above`}>
+                              <span role="rowheader" className="text-[13px] font-bold text-slate-700">MARGIN {MARGIN_PCT}%</span>
+                              {margins.map((v, i) => (
+                                <span key={i} role="cell" className={cn('text-right font-mono text-[13px] font-semibold tabular-nums', v == null ? 'text-slate-400' : 'text-slate-700')}>
+                                  {fmt(v)}
+                                </span>
+                              ))}
+                            </div>
+                            <div role="row" className={cn(COLS, 'items-center bg-[#1e293b] px-2.5 py-2 text-white')} title={`Sum of costs + ${MARGIN_PCT}% margin`}>
                               <span role="rowheader" className="text-[13px] font-extrabold tracking-wider">TOTAL</span>
                               {totals.map((v, i) => (
                                 <span key={i} role="cell" className="text-right font-mono text-[13.5px] font-extrabold tabular-nums">{fmt(v)}</span>
