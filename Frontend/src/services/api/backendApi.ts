@@ -425,4 +425,15 @@ export class BackendApiService {
     return json.data;
   }
 
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    const token = localStorage.getItem('authToken');
+    const resp = await fetch(`${this.baseURL}/auth/change-password`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+    const json = await resp.json().catch(() => null);
+    if (!resp.ok || !json?.success) throw new Error(json?.error || 'Failed to change password');
+  }
+
 }

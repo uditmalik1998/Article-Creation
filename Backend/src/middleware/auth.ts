@@ -23,6 +23,7 @@ type CachedAuthUser = {
   articleTypes: string[];
   isActive: boolean;
   lastLogin: Date | null;
+  passwordChangedAt: Date | null;
 };
 
 const authUserCache = new Map<number, { user: CachedAuthUser; expiresAt: number }>();
@@ -68,6 +69,7 @@ async function fetchAuthUserById(userId: number): Promise<CachedAuthUser | null>
         articleTypes: true,
         isActive: true,
         lastLogin: true,
+        passwordChangedAt: true,
       },
     })
   ).then((user) => {
@@ -205,14 +207,24 @@ export const authenticate = async (
       return;
     }
 
+    const tokenSessionIssuedAt = Number((decoded as any)?.sessionIssuedAt || 0);
+    const tokenIatMs = Number((decoded as any)?.iat || 0) > 0 ? Number((decoded as any).iat) * 1000 : 0;
+    const tokenIssuedAtMs = tokenSessionIssuedAt > 0 ? tokenSessionIssuedAt : tokenIatMs;
+
+    // A password change logs out every device: tokens issued before it are refused.
+    if (user.passwordChangedAt && tokenIssuedAtMs > 0 && new Date(user.passwordChangedAt).getTime() > tokenIssuedAtMs) {
+      res.status(401).json({
+        success: false,
+        error: 'Your password was changed. Please login again.',
+        code: 'SESSION_REVOKED'
+      });
+      return;
+    }
+
     if (ENABLE_SINGLE_SESSION) {
       // Optional single-session enforcement:
       // A new login updates user.lastLogin and issues a token with sessionIssuedAt.
       // Older tokens become invalid after a later login.
-      const tokenSessionIssuedAt = Number((decoded as any)?.sessionIssuedAt || 0);
-      const tokenIatMs = Number((decoded as any)?.iat || 0) > 0 ? Number((decoded as any).iat) * 1000 : 0;
-      const tokenIssuedAtMs = tokenSessionIssuedAt > 0 ? tokenSessionIssuedAt : tokenIatMs;
-
       if (tokenIssuedAtMs > 0 && user.lastLogin) {
         const dbLastLoginMs = new Date(user.lastLogin).getTime();
         if (dbLastLoginMs > tokenIssuedAtMs) {

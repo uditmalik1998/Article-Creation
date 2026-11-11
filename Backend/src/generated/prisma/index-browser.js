@@ -651,6 +651,7 @@ exports.Prisma.UserScalarFieldEnum = {
   articleTypes: 'articleTypes',
   isActive: 'isActive',
   lastLogin: 'lastLogin',
+  passwordChangedAt: 'passwordChangedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
