@@ -5,6 +5,65 @@
 
 ---
 
+## 2026-11-11 — extraction_results_flat.fab_vdr → m_fab_vdr (code ready, DB NOT renamed yet)
+
+- Prisma ExtractionResultFlat.fabVdr now @map("m_fab_vdr"); field name unchanged so no code changes. No views,
+  functions, indexes or raw SQL use the column (the other "fab_vdr" hits are Gemini attribute keys).
+- SQL: Backend/prisma/migrations/20261111_rename_fab_vdr_to_m_fab_vdr_extraction_results_flat.sql — run it together
+  with the backend deploy (old backend reads fab_vdr, new one m_fab_vdr; either side breaks FG pages until both match).
+- Not touched: Article360Flat.fab_vdr, reference_article_data.fab_vdr, Snowflake copy.
+
+---
+
+## 2026-11-11 — B TRIM card: ROUGH-V2 column header → ACT
+
+- CostingGridConfig.roughLabel (default "ROUGH-V2"); BTRIM_CONFIG sets "ACT". Header + TOTAL cell label only —
+  same fields (*RoughV2, b_trim_total_rough_v2), fill rules and exports. V. ADD renamed to ACT the same day (roughLabel).
+- FG FAB card row ROUGH-V2 → ACT too: ApproverArticleList CARD_LABEL_OVERRIDES { rough_v2: 'ACT' } (card label only;
+  SCHEMA_KEY_TO_EXCEL_ATTR keeps 'ROUGH-V2' for grid lookups / exports). OTH GRID-1 Cost Summary column ROUGH-V2 → ACT too.
+
+---
+
+## 2026-11-11 — FG BODY tab: "Rough Consumption" → "AUTO-BGT Consumption", "Precise Consumption" → "Actual Consumption"
+
+- Card titles only (ApproverArticleList, FG BODY tab). Fields / DB columns (rough_consumption_*, precise_consumption_*),
+  fill rules and exports unchanged. Body Article page cards keep their old titles.
+
+---
+
+## 2026-11-11 — FG FAB card: M_FAB_VDR always shown, mandatory, NOMINATED / NON-NOMINATED (default NON-NOMINATED)
+
+- No grid had any M_FAB_VDR values, so the row was hidden on FG cards. ApproverArticleList now always shows it on FG
+  (not body pages) with fixed options NOMINATED / NON-NOMINATED (user's exact spelling, sent to SAP as M_FAB_VDR).
+- Default: a PENDING FG article opened with M_FAB_VDR empty (or "-") gets NON-NOMINATED set and auto-saved (not in
+  Created/modify mode, not on approved articles). The user can switch to NOMINATED.
+- ArticleDetailPage Save & Submit: "M_FAB_VDR" required (skipped for a set parent — it copies the Top piece's value).
+
+---
+
+## 2026-11-11 — Fabric Article FAB card: same row order as the FG FAB card
+
+- FabricArticleList ATTRIBUTE_GROUPS FAB order now matches ApproverArticleList: FAB_DIV, YARN, MVGR_1, MVGR_2, fab vendor,
+  WEAVE_01, WEAVE_02, COUNT, GSM, OUNZ, CONSTRUCTION, COMPOSITION, FINISH, WIDTH, LYCRA (shade/weight hidden).
+  Was FAB_DIV, YARN, MVGR_1, MVGR_2, CONSTRUCTION, WIDTH, WEAVE_02, COUNT, WEAVE_01, COMPOSITION, FINISH, GSM, LYCRA, VDR, OUNZ.
+- Display only: Fabric Article Desc keeps its own FAB_DESC_SEQUENCE_KNITS / _WOVEN_DENIM order; visibility / mandatory
+  still from the grids.
+
+---
+
+## 2026-11-11 — FG Save & Submit requires CMP COST ACT TOTAL PR VAL
+
+- User choice: only ACT TOTAL PR VAL (sum of the ACT PR VALs, or a typed TOTAL) is required; it blocks Save & Submit
+  only — the card's own Save still works with ACT empty. Other "Req." cells stay hints.
+- ArticleDetailPage approveBlockedReasons checks every pending item (set parent + pieces): the card's live ACT TOTAL
+  (CmpCostCard publishes it — getLiveCmpActTotal + useLiveCmpActVersion (useSyncExternalStore) re-runs the check on
+  every change, so typed-but-unsaved values count; Save & Submit saves them first) or, when the card isn't on screen,
+  the saved total / ACT PR VALs. Missing → "CMP COST: ACT TOTAL PR VAL" in the ⚠ badge, its hover list and the
+  popup; clicking it jumps to the card's TOTAL row (data-field-label).
+- First version checked only at click time, so the ⚠ hover list didn't show it (user report) — fixed same day.
+
+---
+
 ## 2026-11-06 — FG Reference & vendor card: vendor only from the dropdown
 
 - Bug: typed VENDOR NAME was saved as-is on blur (New page), and any 6-digit VENDOR CODE too — e.g. aa8618e1…

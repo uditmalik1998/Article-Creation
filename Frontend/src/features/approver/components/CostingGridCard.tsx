@@ -37,6 +37,8 @@ export interface CostingGridConfig {
   itemLabel: string;
   /** Header of the 3rd specification column (CLR / PLACEMENT). */
   c3Label: string;
+  /** Header of the ROUGH-V2 cost column (B TRIM and V. ADD show "ACT"); default "ROUGH-V2". */
+  roughLabel?: string;
   /** Tabs; one entry = no tab strip. The first tab is the one saved to SAP. */
   tabs: readonly string[];
   fixedRows: readonly string[];
@@ -122,6 +124,7 @@ export const BTRIM_CONFIG: CostingGridConfig = {
   title: 'B TRIM',
   itemLabel: 'BT DESCRIPTION',
   c3Label: 'CLR',
+  roughLabel: 'ACT',
   tabs: ['BT-01', 'BT-02'],
   fixedRows: ['M_BTN', 'DC', 'ZIP', 'PATCH', 'H-TRF'],
   other: {
@@ -172,6 +175,7 @@ export const VADD_CONFIG: CostingGridConfig = {
   title: 'V. ADD',
   itemLabel: 'V. ADD',
   c3Label: 'PLACEMENT',
+  roughLabel: 'ACT',
   tabs: ['V. ADD'],
   fixedRows: ['PRINT', 'EMB', 'WASHING'],
   cellMap: {
@@ -1051,7 +1055,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
                   </>
                 )}
                 <div className="px-2.5 py-2 text-right">AUTO-BGT</div>
-                <div className="px-2.5 py-2 text-right">ROUGH-V2</div>
+                <div className="px-2.5 py-2 text-right">{config.roughLabel ?? 'ROUGH-V2'}</div>
                 <div className="px-2.5 py-2 text-right">VDR COST</div>
                 <div className="px-2.5 py-2 text-right">FINAL COST</div>
               </div>
@@ -1159,7 +1163,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
                           disabled={locked}
                           inputMode="decimal"
                           placeholder="—"
-                          aria-label={`Total ${c === 'rough' ? 'ROUGH-V2' : c === 'vdr' ? 'VDR COST' : 'FINAL COST'}`}
+                          aria-label={`Total ${c === 'rough' ? config.roughLabel ?? 'ROUGH-V2' : c === 'vdr' ? 'VDR COST' : 'FINAL COST'}`}
                           title="Sum of the rows — type to override, clear to go back to the sum"
                           onChange={(e) => setLocalVal(TOTAL_ROW, c, e.target.value)}
                           className="h-7 w-full rounded-md border border-slate-600 bg-slate-800 px-2 text-right font-mono text-[13.5px] font-extrabold tabular-nums text-white outline-none placeholder:text-slate-500 focus:border-slate-300 disabled:opacity-70"

@@ -25,6 +25,7 @@ import { toast } from 'sonner';
 import { ApproverArticleList } from '../components/ApproverArticleList';
 import { getUnsavedCards, getUserEditedCards } from '../components/unsavedCards';
 import { clearArticleDrafts } from '../components/cardDrafts';
+import { getLiveCmpActTotal, useLiveCmpActVersion } from '../components/CmpCostCard';
 import { guardLeave, registerLeaveGuard } from '../../../shared/utils/leaveGuard';
 import type { ApproverItem } from '../types';
 import { APP_CONFIG } from '../../../constants/app/config';
@@ -759,6 +760,8 @@ export default function ArticleDetailPage({
     [isComboItem, pendingSelectedKeys, currentItem?.id, comboChildren],
   );
 
+  // Re-check when a CMP card's live ACT TOTAL changes (typed values aren't in `items` yet).
+  const liveCmpActVersion = useLiveCmpActVersion();
   const approveBlockedReasons = useMemo(() => {
     const selectedPending = [...items, ...comboChildren].filter(i => pendingSelectedKeys.includes(i.id));
     const pendingItems = [...selectedPending, ...pendingComboChildren.filter(c => !selectedPending.some(s => s.id === c.id))];
@@ -780,6 +783,16 @@ export default function ArticleDetailPage({
         missing.push('BODY ARTICLE NO. (must be exactly 10 digits)');
       }
       if (!(item.bodyArticleDescription || '').trim()) missing.push('BODY ARTICLE DESC.');
+      // M_FAB_VDR is mandatory (NOMINATED / NON-NOMINATED; the card fills NON-NOMINATED by default).
+      // A set parent copies it from its Top piece, which is checked itself.
+      const fabVdr = String(item.fabVdr ?? '').trim();
+      if (item.comboRole !== 'PARENT' && (!fabVdr || /^-+$/.test(fabVdr))) missing.push('M_FAB_VDR');
+      // CMP COST: ACT TOTAL PR VAL is required — the card's live value when it's on screen
+      // (typed values are saved by Save & Submit first), else the saved total / ACT PR VALs.
+      const liveAct = getLiveCmpActTotal(item.id);
+      const savedAct = [item.totalActPrVal, item.cuttingActPrVal, item.stitchingActPrVal, item.ironingActPrVal, item.finishingActPrVal]
+        .some((v) => v != null && String(v).trim() !== '');
+      if (liveAct !== undefined ? !liveAct.trim() : !savedAct) missing.push('CMP COST: ACT TOTAL PR VAL');
       missing.push(...getMissingMandatoryFields(item, isComboItem && item.id === currentItem?.id ? setTopCategory : null));
       // Readable name: SAP / article number once it exists, else category + design
       // number (a new set article has neither SAP number nor image name).
@@ -792,7 +805,7 @@ export default function ArticleDetailPage({
       return acc;
     }, comboBlock);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingSelectedKeys, items, gridVersion, pathType, pendingComboChildren, comboChildren, isComboItem, setTopCategory]);
+  }, [pendingSelectedKeys, items, gridVersion, pathType, pendingComboChildren, comboChildren, isComboItem, setTopCategory, liveCmpActVersion]);
 
   // Jump to a missing field: open the right set tab, scroll its row into view and
   // flash it. Rows carry data-field-label / data-item-id (ApproverArticleList).

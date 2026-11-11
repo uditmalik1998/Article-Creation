@@ -259,6 +259,15 @@ const BOM_ONLY_SCHEMA_KEYS = new Set([
 // Schema keys hidden from the article card entirely (display-only — the values
 // are still extracted, stored, and sent to SAP). Shade & Weight were removed
 // from the card on all approver pages by request.
+// Card-only row labels (SCHEMA_KEY_TO_EXCEL_ATTR keeps the grid / export names).
+const CARD_LABEL_OVERRIDES: Record<string, string> = {
+  rough_v2: 'ACT', // FAB card ROUGH-V2 row
+};
+
+// M_FAB_VDR (FG FAB card): fixed options, always shown, mandatory; empty → NON-NOMINATED.
+const FAB_VDR_OPTIONS = ['NOMINATED', 'NON-NOMINATED'];
+const FAB_VDR_DEFAULT = 'NON-NOMINATED';
+
 const HIDDEN_CARD_SCHEMA_KEYS = new Set([
   'shade',
   'weight',
@@ -1266,6 +1275,17 @@ const ArticleCard = React.memo(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentFWidth, isBodyArticle, effectiveMajCat, currentBodyArticle]);
 
+    // M_FAB_VDR defaults to NON-NOMINATED: a pending FG article opened with it empty gets it saved.
+    useEffect(() => {
+      if (isBodyArticle || allowGroups || isModifyMode || item.approvalStatus !== 'PENDING') return;
+      const cur = String(localValues['fabVdr'] ?? item.fabVdr ?? '').trim();
+      if (cur && !/^-+$/.test(cur)) return;
+      const updates: Record<string, string> = { fabVdr: FAB_VDR_DEFAULT };
+      setLocalValues((prev) => ({ ...prev, ...updates }));
+      queueAutoSave(updates);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [item.id]);
+
     // When M_GSM changes on an FG article, recompute roughConsumptionKg using existing meter.
     // Skips first mount (fWidth effect handles initial Kg); only fires on genuine GSM changes.
     const roughGsmMountRef = React.useRef(true);
@@ -1406,7 +1426,7 @@ const ArticleCard = React.memo(
     const attributeFields = useMemo(
       () =>
         cardGroups.flatMap((g) =>
-          g.fields.map((a) => ({ ...a, label: f(a.schemaKey), group: g.group, groupColor: g.color, freeText: a.freeText ?? false })),
+          g.fields.map((a) => ({ ...a, label: CARD_LABEL_OVERRIDES[a.schemaKey] ?? f(a.schemaKey), group: g.group, groupColor: g.color, freeText: a.freeText ?? false })),
         ),
       [cardGroups],
     );
@@ -1479,6 +1499,23 @@ const ArticleCard = React.memo(
             freeText: true,
             isMandatory,
             mandatory: af.mandatory,
+          });
+          continue;
+        }
+
+        // M_FAB_VDR on FG cards: always visible + mandatory, two fixed values (no grid has any).
+        if (af.schemaKey === 'fab_vdr' && !allowGroups) {
+          mandatory.add(af.schemaKey);
+          visible.push({
+            field: af.field,
+            label: af.label,
+            schemaKey: af.schemaKey,
+            group: af.group,
+            groupColor: af.groupColor,
+            values: FAB_VDR_OPTIONS.map((v) => ({ shortForm: v, fullForm: v })),
+            freeText: false,
+            isMandatory: true,
+            mandatory: true,
           });
           continue;
         }
@@ -4950,7 +4987,7 @@ const ArticleCard = React.memo(
                           PKG COST = sum of its saved NET RATEs, in AUTO-BGT and ROUGH-V2 only. */}
                       {!allowGroups && (() => {
                         const COST_SOURCES: { label: string; title: string; fields: [string, string, string, string] }[] = [
-                          { label: 'FAB', title: 'FAB card: AUTO-BGT / ROUGH-V2 / VENDOR COST / FINAL COST', fields: ['autoBgt', 'roughV2', 'vendorFabricRate', 'finalCost'] },
+                          { label: 'FAB', title: 'FAB card: AUTO-BGT / ACT / VENDOR COST / FINAL COST', fields: ['autoBgt', 'roughV2', 'vendorFabricRate', 'finalCost'] },
                           { label: 'BODY', title: 'CMP COST total: BGT / ACT / VENDOR / FINAL PR VAL', fields: ['totalBgtPrVal', 'totalActPrVal', 'totalVendorPrVal', 'totalFinalPrVal'] },
                           { label: 'B TRIM', title: 'B TRIM card TOTAL', fields: ['bTrimTotalAutoBgt', 'bTrimTotalRoughV2', 'bTrimTotalVdrCost', 'bTrimTotalFinalCost'] },
                           { label: 'V. ADD', title: 'V. ADD card TOTAL', fields: ['vaddTotalAutoBgt', 'vaddTotalRoughV2', 'vaddTotalVendorCost', 'vaddTotalFinalCost'] },
@@ -4990,7 +5027,7 @@ const ArticleCard = React.memo(
                             </div>
                             <div role="row" className={cn(COLS, 'px-2.5 py-1.5 text-[11px] font-bold tracking-wider text-slate-500')}>
                               <span role="columnheader">COST SOURCE</span>
-                              {['AUTO-BGT', 'ROUGH-V2', 'VDR COST', 'FINAL COST'].map((h) => (
+                              {['AUTO-BGT', 'ACT', 'VDR COST', 'FINAL COST'].map((h) => (
                                 <span key={h} role="columnheader" className="text-right">{h}</span>
                               ))}
                             </div>
@@ -5048,6 +5085,7 @@ const ArticleCard = React.memo(
                       savedPrVals={cmpSavedPrVals}
                       hasUnsavedPreset={cmpPresetUnsaved}
                       draftId={isModifyMode ? undefined : item.id}
+                      articleId={item.id}
                       onSave={async (updates) => {
                         setLocalValues((prev) => ({ ...prev, ...updates }));
                         if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
@@ -5057,10 +5095,10 @@ const ArticleCard = React.memo(
                     />
                   )}
 
-                  {/* ROUGH CONSUMPTION card — FG Articles, BODY tab only */}
+                  {/* AUTO-BGT CONSUMPTION card (was ROUGH CONSUMPTION; rough_consumption_* fields) — FG Articles, BODY tab only */}
                   {!isBodyArticle && selectedGroupKeys.has('BODY') && (
                     <div className="overflow-hidden rounded-lg border bg-white" style={{ borderColor: CARD_THEME.border }}>
-                      {renderCollapsibleHeader('ROUGH', 'ROUGH CONSUMPTION')}
+                      {renderCollapsibleHeader('ROUGH', 'AUTO-BGT CONSUMPTION')}
                       <div className={cn('space-y-0 p-1', isGroupCollapsed('ROUGH') && 'hidden')}>
                         {([
                           { label: 'Ratio',               field: 'roughRatio' },
@@ -5097,10 +5135,10 @@ const ArticleCard = React.memo(
                     </div>
                   )}
 
-                  {/* PRECISE CONSUMPTION card — FG Articles, BODY tab only */}
+                  {/* ACTUAL CONSUMPTION card (was PRECISE CONSUMPTION; precise_consumption_* fields) — FG Articles, BODY tab only */}
                   {!isBodyArticle && selectedGroupKeys.has('BODY') && (
                     <div className="overflow-hidden rounded-lg border bg-white" style={{ borderColor: CARD_THEME.border }}>
-                      {renderCollapsibleHeader('PRECISE', 'PRECISE CONSUMPTION')}
+                      {renderCollapsibleHeader('PRECISE', 'ACTUAL CONSUMPTION')}
                       <div className={cn('space-y-0 p-1', isGroupCollapsed('PRECISE') && 'hidden')}>
                         {([
                           { label: 'Ratio',               field: 'preciseRatio' },
