@@ -285,7 +285,7 @@ model ExtractionResultFlat {
   fOunce                      String?       @map("f_ounce") @db.VarChar(100)
   fWidth                      String?       @map("f_width") @db.VarChar(100)
   fabDiv                      String?       @map("fab_div") @db.VarChar(100)
-  fabVdr                      String?       @map("fab_vdr") @db.VarChar(100)
+  fabVdr                      String?       @map("m_fab_vdr") @db.VarChar(100)
   htrfType                    String?       @map("htrf_type") @db.VarChar(100)
   htrfStyle                   String?       @map("htrf_style") @db.VarChar(100)
   embPlacement                String?       @map("emb_placement") @db.VarChar(100)

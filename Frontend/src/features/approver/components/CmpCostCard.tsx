@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useSyncExternalStore } from 'react';
 import { ChevronDown, ChevronUp, Save, Scissors, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TextCell } from './CostingGridCard';
@@ -82,7 +82,26 @@ interface CmpCostCardProps {
   aiSam?: Partial<Record<(typeof PROCESSES)[number], string>>;
   /** Article id for the local draft (FG New page only); omitted → no draft. */
   draftId?: string;
+  /** Article id the live ACT TOTAL is published under (Save & Submit requires it). */
+  articleId?: string;
 }
+
+// Live ACT TOTAL PR VAL per article while its card is on screen — includes values typed but
+// not saved yet (Save & Submit saves them first). Read by the FG Save & Submit check, which
+// re-runs through useLiveCmpActVersion whenever a value changes.
+const liveActTotals = new Map<string, string>();
+let liveActVersion = 0;
+const liveActListeners = new Set<() => void>();
+const bumpLiveAct = () => {
+  liveActVersion += 1;
+  liveActListeners.forEach((l) => l());
+};
+export const getLiveCmpActTotal = (articleId: string): string | undefined => liveActTotals.get(articleId);
+export const useLiveCmpActVersion = () =>
+  useSyncExternalStore(
+    (l) => { liveActListeners.add(l); return () => { liveActListeners.delete(l); }; },
+    () => liveActVersion,
+  );
 
 const CmpCostCard: React.FC<CmpCostCardProps> = ({
   collapsed,
@@ -95,6 +114,7 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
   hasUnsavedPreset,
   aiSam,
   draftId,
+  articleId,
 }) => {
   const style = CARD_THEME;
   const [values, setValues] = useState<Record<string, string>>({});
@@ -168,6 +188,14 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
   // TOTAL shown for a stage: the user's override, else the live sum.
   const totalFor = (stage: string) =>
     manualTotals.has(stage) ? values[cellKey('TOTAL', stage, 'PR VAL')] ?? '' : sumPrVal(values, stage);
+
+  const actTotal = totalFor('ACT');
+  useEffect(() => {
+    if (!articleId) return;
+    liveActTotals.set(articleId, actTotal);
+    bumpLiveAct();
+    return () => { liveActTotals.delete(articleId); bumpLiveAct(); };
+  }, [articleId, actTotal]);
 
   const handleTotalChange = (stage: string, v: string) => {
     const key = cellKey('TOTAL', stage, 'PR VAL');
@@ -325,7 +353,12 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
                     )}
                   </tr>
                 ))}
-                <tr className="border-t-2 border-slate-300 bg-slate-50/60">
+                {/* data-field-label: the Save & Submit "missing fields" popup jumps here. */}
+                <tr
+                  className="border-t-2 border-slate-300 bg-slate-50/60"
+                  data-field-label="CMP COST: ACT TOTAL PR VAL"
+                  data-item-id={articleId}
+                >
                   <td className="px-2.5 py-1.5 font-bold text-slate-900">TOTAL</td>
                   <td className={cn(AI_COL, 'px-1 py-1')}>{aiCell(aiSamTotal, true)}</td>
                   {STAGES.map((stage, si) =>
