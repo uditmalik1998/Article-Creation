@@ -128,7 +128,7 @@ async function processRow(row: {
         designNumber:      row.designNumber,
         pptNumber:         row.presentationNo ?? null,
         fabricRate:        row.price ?? null,
-        fabricArticleType: row.presentationsType ?? null,
+        fabricArticleType: row.presentationsType || 'Fabric Article', // SRM rows: default when SRM sends none
         source:            'SRM',
         imageUrl:          finalImageUrl,
         backImageUrl:      finalBackImageUrl,
