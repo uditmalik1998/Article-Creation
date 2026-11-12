@@ -164,6 +164,7 @@ function getMissingMandatoryFields(item: any, majorCatOverride?: string | null):
   if (!item.segment) missing.push('SEGMENT');
   if (!item.fabricArticleNumber) missing.push('FABRIC ARTICLE NO.');
   if (!item.vendorFabricRate) missing.push('VENDOR FABRIC RATE');
+  if (item.roughV2 == null || String(item.roughV2).trim() === '') missing.push('ACT-V2');
   // Always required by the SAP creation step (zmmArtCreationService MANDATORY), whatever the category grid says.
   if (!item.impAtrbt2) missing.push('M_IMP_ATBT');
   const majorCat = majorCatOverride || item.majorCategory || '';

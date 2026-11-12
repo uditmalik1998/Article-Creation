@@ -159,6 +159,10 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
   const [majorCategoryFilter, setMajorCategoryFilter] = useState<string>(() => seed('majorCategory', ''));
   // SAP sync-status filter (Created tab): ALL | SYNCED | PENDING | FAILED
   const [sapSyncFilter, setSapSyncFilter] = useState<string>('ALL');
+  // Created tab "Uploader" toggle: on → fabric_article_type = UPLOADER rows (copied fabric
+  // master); off → the normal SRM fabric articles.
+  const [uploaderOn, setUploaderOn] = useState(() => searchParams.get('uploader') === '1');
+  const dataSource = pathType === 'created' && uploaderOn ? 'UPLOADER' : 'SRM';
   const [dateRangeFilter, setDateRangeFilter] = useState<[Dayjs | null, Dayjs | null] | null>(() => {
     const start = searchParams.get('startDate') ?? restoredFilters?.startDate;
     const end = searchParams.get('endDate') ?? restoredFilters?.endDate;
@@ -236,7 +240,7 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
         params.set('page', String(page));
         params.set('limit', String(PAGE_SIZE));
         if (groupBy !== 'none') params.set('groupBy', groupBy);
-        params.set('source', 'SRM');
+        params.set('source', dataSource);
         if (pathType) params.set('pathType', pathType);
         if (divisionFilter !== 'ALL') params.set('division', divisionFilter);
         if (subDivisionFilter !== 'ALL') params.set('subDivision', subDivisionFilter);
@@ -263,7 +267,7 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
         setLoading(false);
       }
     },
-    [divisionFilter, subDivisionFilter, majorCategoryFilter, sapSyncFilter, searchText, dateRangeFilter, pathType, groupBy],
+    [divisionFilter, subDivisionFilter, majorCategoryFilter, sapSyncFilter, searchText, dateRangeFilter, pathType, groupBy, dataSource],
   );
 
   useEffect(() => {
@@ -351,7 +355,7 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
     try {
       const token = localStorage.getItem('authToken');
       const params = new URLSearchParams();
-      params.set('source', 'SRM');
+      params.set('source', dataSource);
       if (pathType) params.set('pathType', pathType);
       if (divisionFilter !== 'ALL') params.set('division', divisionFilter);
       if (subDivisionFilter !== 'ALL') params.set('subDivision', subDivisionFilter);
@@ -389,7 +393,7 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
     } finally {
       setExportingAll(false);
     }
-  }, [divisionFilter, subDivisionFilter, majorCategoryFilter, searchText, dateRangeFilter, pathType, buildApproverExportData, exportHeaders]);
+  }, [divisionFilter, subDivisionFilter, majorCategoryFilter, searchText, dateRangeFilter, pathType, buildApproverExportData, exportHeaders, dataSource]);
 
   // ─── Export with variants (Created tab only) ──────────────────────────────────
 
@@ -399,7 +403,7 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
     try {
       const token = localStorage.getItem('authToken');
       const params = new URLSearchParams();
-      params.set('source', 'SRM');
+      params.set('source', dataSource);
       params.set('pathType', 'created');
       if (divisionFilter !== 'ALL') params.set('division', divisionFilter);
       if (subDivisionFilter !== 'ALL') params.set('subDivision', subDivisionFilter);
@@ -514,7 +518,7 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
   // Keep the ref pointed at the latest values every render (cheap, render-safe).
   cardClickDataRef.current = {
     items, currentPage, totalCount, divisionFilter, subDivisionFilter,
-    majorCategoryFilter, searchText, dateRangeFilter, pathType,
+    majorCategoryFilter, searchText, dateRangeFilter, pathType, dataSource,
   };
 
   // Stable handler (deps: [navigate]) so memoized ArticleCards never re-render
@@ -529,7 +533,7 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
       division: d.divisionFilter,
       subDivision: d.subDivisionFilter,
       majorCategory: d.majorCategoryFilter,
-      source: 'SRM',
+      source: d.dataSource,
       search: d.searchText,
       startDate: d.dateRangeFilter?.[0]?.toISOString(),
       endDate: d.dateRangeFilter?.[1]?.toISOString(),
@@ -733,6 +737,24 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
               <GroupByControl value={groupBy} onChange={setGroupBy} />
               <div className="flex basis-full flex-wrap items-center gap-2">
                 {pathType === 'created' && <SapSyncChips value={sapSyncFilter} onChange={setSapSyncFilter} />}
+                {pathType === 'created' && (
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={uploaderOn}
+                    title="On: show UPLOADER fabric articles (copied fabric master). Off: normal SRM fabric articles."
+                    onClick={() => setUploaderOn((v) => !v)}
+                    className={cn(
+                      'flex h-9 items-center gap-2 rounded-full border px-3 text-[13px] font-semibold transition-colors',
+                      uploaderOn ? 'border-slate-800 bg-slate-800 text-white' : 'border-input bg-background text-slate-700 hover:border-slate-400',
+                    )}
+                  >
+                    <span className={cn('relative h-4 w-7 rounded-full transition-colors', uploaderOn ? 'bg-white/30' : 'bg-slate-300')}>
+                      <span className={cn('absolute top-0.5 h-3 w-3 rounded-full bg-white shadow transition-all', uploaderOn ? 'left-3.5' : 'left-0.5')} />
+                    </span>
+                    Uploader
+                  </button>
+                )}
                 <div className="flex-1" />
                 {hasActiveFilters && <ResetFiltersButton onClick={resetFilters} />}
                 {items.length > 0 && (

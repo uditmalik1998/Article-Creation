@@ -5,6 +5,74 @@
 
 ---
 
+## 2026-11-12 — FG Created page: M_FAB_VDR showed "Required" although the DB had a value
+
+- Cause: `ApproverController.getItems` and `getById` use explicit Prisma `select` lists that never included `fabVdr` (column `m_fab_vdr`), so the page got `undefined`.
+- New page hid it: the PENDING-only default effect fills NON-NOMINATED locally. Created (APPROVED) articles have no such default, so the mandatory row showed Required.
+- Fix: added `fabVdr: true` to both selects (Backend/src/controllers/ApproverController.ts). Backend-only deploy.
+
+## 2026-11-12 — Fabric Article › Created: "Uploader" toggle
+
+- New switch next to the SAP SYNC chips (Created page only). On → list shows `fabric_article_type = 'UPLOADER'` rows (12,553 copied fabric master rows); off → normal SRM fabric articles. Starts off (or on with `?uploader=1`).
+- Same source applies to the list, All / With variants exports and card → detail navigation (`source=UPLOADER`). Division tabs, filters, SAP SYNC chips and user scoping still apply.
+- Backend: `buildFabricArticleDataWhere` — `source=UPLOADER` → `{ fabricArticleType: 'UPLOADER' }`.
+- Files: `Frontend/src/features/fabric-article/pages/FabricArticleDashboard.tsx`, `Backend/src/controllers/ApproverController.ts`.
+
+## 2026-11-12 — precise_fabric_article_data copied into fabric_article_data as UPLOADER (data only)
+
+- INSERT … SELECT DISTINCT ON (fabric_article_number) from precise_fabric_article_data (latest id per number), skipping numbers already in fabric_article_data → **12,553 rows**.
+- Set: fabric_article_type='UPLOADER', approval_status='APPROVED', approved_at=now(), sap_sync_status='SYNCED' (real SAP fabrics). number / vendor_code cast to text; all 14 m_* + desc, div, sub-div, MC, vendor, fabric_rate copied.
+- Not shown on any page (FG pages = type FG, Fabric pages = source SRM). Effects: FG "Create Fabric Article" now finds these APPROVED descriptions and fills the existing number (409); fabric SAP creation blocks a new fabric whose description matches one of them.
+- One-off copy: later Admin uploads of precise_fabric_article_data do not update these rows.
+- Table now: UPLOADER APPROVED 12,553 · FG APPROVED 3,237 · FG PENDING 31 · Fabric Article PENDING 1,017 · Fabric Article APPROVED 194.
+
+## 2026-11-12 — fabric_article_data: 346 orphan PENDING rows deleted (data only)
+
+- User ran `DELETE … WHERE source IS NULL AND fabric_article_type IS NULL AND approval_status='PENDING'` — 346 rows (16 Sep–6 Oct 2026), shown on no page (not SRM, not FG). No variants; 14 FG articles keep the fabric numbers as text.
+- Then the user also deleted the 406 broken rows (NULL source/type, approval_status holding attribute values like N_LYC / 2W_LYC — columns shifted by an old upload).
+- Table now: FG APPROVED 3,230 · FG PENDING 31 · SRM Fabric Article PENDING 1,023 · SRM Fabric Article APPROVED 188 — every row is shown on a page.
+
+## 2026-11-12 — fabric_article_data: SRM rows with NULL type → 'Fabric Article'
+
+- `UPDATE fabric_article_data SET fabric_article_type='Fabric Article' WHERE fabric_article_type IS NULL AND source='SRM'` — 583 rows.
+- Now: FG 3,260 (source NULL) · Fabric Article 1,211 (all SRM) · NULL 752 (source NULL, old rows, untouched).
+- Code: `fabricRawDataService.ts` — new SRM fabric rows default to 'Fabric Article' when SRM sends no presentationsType (was NULL).
+
+## 2026-11-12 — fabric_article_data: 'uploader' rows deleted (data only)
+
+- User ran `DELETE FROM fabric_article_data WHERE fabric_article_type = 'uploader'` — 148 rows (22 APPROVED), no backup. Last written 2026-09-11 by an old Excel upload.
+- Remaining types: FG 3,260 · NULL 1,335 · Fabric Article (SRM) 628.
+- 11 FG articles in extraction_results_flat still hold those fabric article numbers (text only, no FK). precise_fabric_article_data (FABRIC ARTICLE DESC search) untouched.
+
+## 2026-11-12 — fabric_article_master.div: Denim/Knits/Woven → D/K/W (data only)
+
+- `UPDATE fabric_article_master` (run in Supabase): Denim → D (9 rows), Knits → K (72), Woven → W (61). No code change.
+- Effect: Fabric Article Division dropdown now shows D / K / W, and new fabric articles store D / K / W (matches most of `fabric_article_data`, which already used single letters). Fabric user scoping matches on the first letter, so unaffected.
+- Existing `fabric_article_data.division` values (Knits 464, Woven 650, Denim 1, KNITS 2, WOVEN 5) not changed.
+- Note: Admin › Fabric Major Category upload replaces the whole table — a re-upload with full words brings them back.
+
+## 2026-11-12 — FG FAB card: ACT-V2 mandatory + fills empty AUTO-BGT
+
+- ACT-V2 (`roughV2`) row now has the red * on the FG FAB card; Save & Submit blocked with "ACT-V2" in the ⚠ list / popup when empty (`getMissingMandatoryFields` in ArticleDetailPage).
+- Typing an ACT-V2 value while AUTO-BGT is empty saves the same value into AUTO-BGT in the same request (`handleSave`). AUTO-BGT with a value is never overwritten. Automatic ACT-V2 rate lookups don't trigger it.
+- Files: `Frontend/src/features/approver/components/ApproverArticleList.tsx`, `Frontend/src/features/approver/pages/ArticleDetailPage.tsx`.
+
+## 2026-11-12 — FG FAB card: VENDOR COST no longer auto-fills empty AUTO-BGT / ACT-V2
+
+- Removed the "vendor-cost fallback" effect that copied VENDOR COST into AUTO-BGT and ACT-V2 (roughV2) when they were empty.
+- AUTO-BGT / ACT-V2 still fill from their own lookups (fabric pick / attribute rate). Values already saved by the old fallback are left as they are.
+- File: `Frontend/src/features/approver/components/ApproverArticleList.tsx`.
+
+## 2026-11-12 — FG FAB card: FABRIC ARTICLE DESC dropdown searches by card attribute values
+
+- Problem: the page rebuilds FABRIC ARTICLE DESC from the FAB values in its own order, while `precise_fabric_article_data.fabric_article_description` stores them in another order (e.g. 2111076553) → clicking the field showed "No Fabric Article found".
+- Now: opening the field calls `GET /approver/fabric-article-data/search?byAttrs=1&mFabDiv=…` — rows whose columns **exactly** (case-insensitive) equal every filled FAB card value; empty card values skipped; up to 15 rows. User chose exact match only.
+- Columns: m_fab_div, m_yarn, m_fab_main_mvgr_1/2, m_construction, m_ounz, m_width, m_weave_01/02, m_count, m_composition, m_finish, m_gsm, m_lycra.
+- No card values yet → old text search on open. Typing still does the text search (desc contains / exact number); Enter fallback for AUTO-BGT unchanged.
+- Update (same day): compares **every FAB row shown on the card** for the major category — an empty card value (e.g. M_FAB_DIV) only matches a NULL / '' column; rows hidden by the grid (e.g. M_GSM for M_W_TRSR) are not compared. Example d586e003…: card had M_FAB_DIV / M_WEAVE_01 empty but 2111078800 has K / JAQ → no longer listed.
+- Picking a row from this dropdown now fills **only** FABRIC ARTICLE NO., FABRIC ARTICLE DESC and AUTO-BGT — FAB attributes (M_FAB_DIV, M_YARN, …) are no longer overwritten. FABRIC ARTICLE NO. dropdown still fills all attributes (unchanged).
+- Files: `Backend/src/controllers/ApproverController.ts` (`searchFabricArticleData`, `FABRIC_ATTR_COLUMNS`), `Frontend/src/features/approver/components/ApproverArticleList.tsx` (`runFabAttrSearch`).
+
 ## 2026-11-11 — OTH GRID-1 text 1 px bigger (Cost Summary unchanged)
 
 - Fixed rows (RATE / COST, MRP, colours, MARKDOWN, AFTER TAX): 12 → 13 px; MRP range hint 11 → 12 px. Body article Rough Consumption card unchanged (11 px).

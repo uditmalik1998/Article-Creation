@@ -966,7 +966,7 @@ export class ApproverController {
                     macroMvgr: true,
                     mainMvgr: true,
                     mFab2: true,
-                    fabDiv: true,
+                    fabDiv: true, fabVdr: true,
                     fCount: true,
                     fConstruction: true,
                     fOunce: true,
@@ -2473,7 +2473,7 @@ export class ApproverController {
                     placket: true, bottomFold: true, frontOpenStyle: true, pocketType: true,
                     noOfPocket: true, extraPocket: true, composition: true, gsm: true, weight: true,
                     finish: true, shade: true, lycra: true, yarn1: true, yarn2: true, weave: true,
-                    macroMvgr: true, mainMvgr: true, mFab2: true, fabDiv: true,
+                    macroMvgr: true, mainMvgr: true, mFab2: true, fabDiv: true, fabVdr: true,
                     fCount: true, fConstruction: true, fOunce: true, fWidth: true, wash: true,
                     drawcord: true, dcShape: true, button: true, btnColour: true,
                     zipper: true, zipColour: true, fatherBelt: true, childBelt: true,
@@ -5667,12 +5667,37 @@ export class ApproverController {
         return res.json(ApproverController.gmArticleDataRowToItem(row));
     };
 
+    // FAB card attribute → precise_fabric_article_data column, for ?byAttrs=1 searches.
+    private static readonly FABRIC_ATTR_COLUMNS = [
+        'mFabDiv', 'mYarn', 'mFabMainMvgr1', 'mFabMainMvgr2', 'mConstruction', 'mOunz', 'mWidth',
+        'mWeave01', 'mWeave02', 'mCount', 'mComposition', 'mFinish', 'mGsm', 'mLycra',
+    ] as const;
+
     static async searchFabricArticleData(req: Request, res: Response) {
         const q = String(req.query.q ?? '').trim();
-        if (!q) return res.json({ results: [], attributeFallbackRate: null });
+        // byAttrs=1: rows whose columns exactly equal every FAB card value sent. A param sent
+        // empty (card row shown but blank) matches only a NULL / '' column; params not sent are ignored.
+        const byAttrs = req.query.byAttrs === '1';
+        const attrConds: Record<string, unknown>[] = [];
+        if (byAttrs) {
+            let anyValue = false;
+            for (const col of ApproverController.FABRIC_ATTR_COLUMNS) {
+                if (req.query[col] === undefined) continue;
+                const v = String(req.query[col] ?? '').trim();
+                if (v) {
+                    anyValue = true;
+                    attrConds.push({ [col]: { equals: v, mode: 'insensitive' } });
+                } else {
+                    attrConds.push({ OR: [{ [col]: null }, { [col]: '' }] });
+                }
+            }
+            if (!anyValue) return res.json({ results: [], attributeFallbackRate: null });
+        } else if (!q) {
+            return res.json({ results: [], attributeFallbackRate: null });
+        }
 
         const descResults = await prisma.preciseFabricArticleData.findMany({
-            where: {
+            where: byAttrs ? { AND: attrConds } : {
                 OR: [
                     { fabricArticleDescription: { contains: q, mode: 'insensitive' } },
                     ...(isNaN(Number(q)) ? [] : [{ fabricArticleNumber: { equals: BigInt(q) } }]),
@@ -5707,7 +5732,7 @@ export class ApproverController {
             fabricRate: r.fabricRate ? Number(r.fabricRate) : null,
         }));
 
-        if (results.length > 0) return res.json({ results, attributeFallbackRate: null });
+        if (results.length > 0 || byAttrs) return res.json({ results, attributeFallbackRate: null });
 
         // Attribute-based fallback — exact match on 8 fabric attributes
         const mFabDiv      = String(req.query.mFabDiv      ?? '').trim() || undefined;
@@ -6571,8 +6596,11 @@ export class ApproverController {
 
         // SRM mode: query fabric_article_data by source='SRM'
         // FG mode (default): query by fabricArticleType='FG'
+        // UPLOADER mode (Fabric Article › Created "Uploader" toggle): the fabric master rows
+        // copied from precise_fabric_article_data (fabric_article_type = 'UPLOADER').
         const isSrmMode = source === 'SRM';
-        const where: any = isSrmMode ? { source: 'SRM' } : { fabricArticleType: 'FG' };
+        const where: any = source === 'UPLOADER' ? { fabricArticleType: 'UPLOADER' }
+            : isSrmMode ? { source: 'SRM' } : { fabricArticleType: 'FG' };
 
         if (pathType === 'new') {
             where.approvalStatus = 'PENDING';

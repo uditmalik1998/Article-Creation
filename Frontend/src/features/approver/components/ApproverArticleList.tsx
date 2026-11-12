@@ -295,7 +295,7 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
       { field: 'fabVdr', schemaKey: 'fab_vdr' }, // M_FAB_VDR right below M_LYCRA (FG only)
       { field: 'shade', schemaKey: 'shade', freeText: true },
       { field: 'autoBgt', schemaKey: 'auto_bgt', freeText: true },
-      { field: 'roughV2', schemaKey: 'rough_v2', freeText: true },
+      { field: 'roughV2', schemaKey: 'rough_v2', freeText: true, mandatory: true }, // ACT-V2 — required for Save & Submit
       { field: 'vendorFabricRate', schemaKey: 'vendor_fabric_rate', freeText: true, mandatory: true },
       { field: 'finalCost', schemaKey: 'final_cost', freeText: true },
     ],
@@ -745,32 +745,6 @@ const ArticleCard = React.memo(
         .finally(() => setRoughV2Loading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
-    // Vendor-cost fallback: whenever VENDOR COST gets a value, fill any of
-    // ROUGH-V2 / AUTO-BGT that are still empty (independently of each other).
-    const currentVendorRate = String(
-      (localValues['vendorFabricRate'] !== undefined ? localValues['vendorFabricRate'] : (item as any).vendorFabricRate) ?? '',
-    ).trim();
-    useEffect(() => {
-      if (currentVendorRate === '') return;
-      const roughV2Val = String(
-        (localValues['roughV2'] !== undefined ? localValues['roughV2'] : (item as any).roughV2) ?? '',
-      ).trim();
-      const autoBgtVal = String(
-        (localValues['autoBgt'] !== undefined ? localValues['autoBgt'] : (item as any).autoBgt) ?? '',
-      ).trim();
-      const updates: Record<string, string> = {};
-      if (roughV2Val === '') updates['roughV2'] = currentVendorRate;
-      if (autoBgtVal === '') updates['autoBgt'] = currentVendorRate;
-      if (Object.keys(updates).length === 0) return;
-      setLocalValues((prev) => ({ ...prev, ...updates }));
-      if (isModifyMode) {
-        setPendingChanges((prev) => ({ ...prev, ...updates }));
-      } else {
-        queueAutoSave(updates);
-      }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentVendorRate]);
 
     const autoSavedFabDescRef = React.useRef<string | null>(null);
     const [imgZoom, setImgZoom] = useState(1);
@@ -2085,6 +2059,11 @@ const ArticleCard = React.memo(
     };
 
     const handleSave = (field: string, value: string | null, extra?: Record<string, string | null>) => {
+      // ACT-V2 typed while AUTO-BGT is empty → AUTO-BGT gets the same value (one save).
+      if (field === 'roughV2' && extra === undefined && value?.trim() && !String(getValue('autoBgt') ?? '').trim()) {
+        handleSave(field, value, { autoBgt: value.trim() });
+        return;
+      }
       // M_FAB_MAIN_MVGR_2 change: fetch its M_FAB_MAIN_MVGR_1 from the mapping and
       // save both together. Cleared MVGR-2 or no mapping row → MVGR-1 cleared.
       // Major category change: load the new category's segment ranges first so the
@@ -4089,6 +4068,36 @@ const ArticleCard = React.memo(
                                           .catch(() => { setFabDescResults([]); setFabDescSearched(true); })
                                           .finally(() => setFabDescLoading(false));
                                       };
+                                      // On open: rows whose columns exactly equal every FAB row shown on the card —
+                                      // an empty card value only matches an empty column; rows hidden for this
+                                      // major category are not compared. Returns false when the card has no values yet.
+                                      const runFabAttrSearch = () => {
+                                        const getVal = (key: string) =>
+                                          String((localValues[key] !== undefined ? localValues[key] : (item as any)[key]) ?? '').trim();
+                                        const ATTR_PARAMS: [string, string][] = [
+                                          ['mFabDiv', 'fabDiv'], ['mYarn', 'yarn1'], ['mFabMainMvgr1', 'mainMvgr'],
+                                          ['mFabMainMvgr2', 'fabricMainMvgr'], ['mConstruction', 'fConstruction'], ['mOunz', 'fOunce'],
+                                          ['mWidth', 'fWidth'], ['mWeave01', 'weave'], ['mWeave02', 'mFab2'], ['mCount', 'fCount'],
+                                          ['mComposition', 'composition'], ['mFinish', 'finish'], ['mGsm', 'gsm'], ['mLycra', 'lycra'],
+                                        ];
+                                        const shownFields = new Set((groupMap['FAB']?.attrs ?? []).map((a) => a.field));
+                                        const params: Record<string, string> = { byAttrs: '1' };
+                                        for (const [param, field] of ATTR_PARAMS) {
+                                          if (shownFields.has(field)) params[param] = getVal(field);
+                                        }
+                                        if (!Object.entries(params).some(([k, v]) => k !== 'byAttrs' && v)) return false;
+                                        setFabDescLoading(true);
+                                        setFabDescSearched(false);
+                                        fetch(
+                                          `${APP_CONFIG.api.baseURL}/approver/fabric-article-data/search?${new URLSearchParams(params).toString()}`,
+                                          { headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` } },
+                                        )
+                                          .then((r) => r.json())
+                                          .then((d) => { setFabDescResults(d.results ?? []); setFabDescSearched(true); })
+                                          .catch(() => { setFabDescResults([]); setFabDescSearched(true); })
+                                          .finally(() => setFabDescLoading(false));
+                                        return true;
+                                      };
                                       return (
                                         <div
                                           key="fabricArticleDescription"
@@ -4099,6 +4108,8 @@ const ArticleCard = React.memo(
                                               setEditingField('bot_fabricArticleDescription');
                                               setFabDescQuery(fabDescDisplayVal || '');
                                               setFabDescSearched(false);
+                                              // Card values first (exact match); else fall back to the text.
+                                              if (runFabAttrSearch()) return;
                                               if (fabDescDisplayVal) runFabDescSearch(fabDescDisplayVal);
                                               else setFabDescResults([]);
                                             }
@@ -4190,24 +4201,12 @@ const ArticleCard = React.memo(
                                                           className="flex w-full flex-col gap-0.5 px-3 py-1.5 text-left hover:bg-[#FF6F61]/10"
                                                           onMouseDown={(e) => {
                                                             e.preventDefault();
+                                                            // Picking a row fills only number / desc / AUTO-BGT — the FAB
+                                                            // attributes (M_FAB_DIV, M_YARN, …) stay as the user set them.
                                                             const gridUpdates: Record<string, string | null> = {
                                                               fabricArticleNumber:      r.fabricArticleNumber,
                                                               fabricArticleDescription: r.fabricArticleDescription,
                                                               autoBgt:                  r.fabricRate != null ? String(r.fabricRate) : null,
-                                                              fabDiv:                   r.mFabDiv,
-                                                              yarn1:                    r.mYarn,
-                                                              mainMvgr:                 r.mFabMainMvgr1,
-                                                              fabricMainMvgr:           r.mFabMainMvgr2,
-                                                              fConstruction:            r.mConstruction,
-                                                              fOunce:                   r.mOunz,
-                                                              fWidth:                   r.mWidth,
-                                                              weave:                    r.mWeave01,
-                                                              mFab2:                    r.mWeave02,
-                                                              fCount:                   r.mCount,
-                                                              composition:              r.mComposition,
-                                                              finish:                   r.mFinish,
-                                                              gsm:                      r.mGsm,
-                                                              lycra:                    r.mLycra,
                                                             };
                                                             setLocalValues((prev) => ({ ...prev, ...gridUpdates }));
                                                             setEditingField(null);
