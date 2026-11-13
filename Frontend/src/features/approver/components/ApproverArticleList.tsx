@@ -268,6 +268,10 @@ const CARD_LABEL_OVERRIDES: Record<string, string> = {
 const FAB_VDR_OPTIONS = ['NOMINATED', 'NON-NOMINATED'];
 const FAB_VDR_DEFAULT = 'NON-NOMINATED';
 
+// FAB card "Create Fabric Article" button: hidden for now (not needed). The create flow
+// (onCreateFabricArticle, fabConfirmItem dialog) is kept — set true to bring the button back.
+const SHOW_CREATE_FABRIC_ARTICLE_BTN = true;
+
 const HIDDEN_CARD_SCHEMA_KEYS = new Set([
   'shade',
   'weight',
@@ -3966,25 +3970,11 @@ const ArticleCard = React.memo(
                                                     className="flex w-full flex-col gap-0.5 px-3 py-1.5 text-left hover:bg-[#FF6F61]/10"
                                                     onMouseDown={(e) => {
                                                       e.preventDefault();
-                                                      // Map fabric_article_data fields → article item field names
-                                                      // Always include all fields (even null) so existing values are cleared when fabric article has no value
+                                                      // Picking a row fills only number / desc — the FAB attributes
+                                                      // (M_FAB_DIV, M_YARN, …) stay as the user set them.
                                                       const gridUpdates: Record<string, string | null> = {
                                                         fabricArticleNumber:    r.fabricArticleNumber,
                                                         fabricArticleDescription: r.fabricArticleDescription,
-                                                        fabDiv:                 r.mFabDiv,
-                                                        yarn1:                  r.mYarn,
-                                                        mainMvgr:               r.mFabMainMvgr1,
-                                                        fabricMainMvgr:         r.mFabMainMvgr2,
-                                                        fConstruction:          r.mConstruction,
-                                                        fOunce:                 r.mOunz,
-                                                        fWidth:                 r.mWidth,
-                                                        weave:                  r.mWeave01,
-                                                        mFab2:                  r.mWeave02,
-                                                        fCount:                 r.mCount,
-                                                        composition:            r.mComposition,
-                                                        finish:                 r.mFinish,
-                                                        gsm:                    r.mGsm,
-                                                        lycra:                  r.mLycra,
                                                       };
                                                       setLocalValues((prev) => ({ ...prev, ...gridUpdates }));
                                                       setEditingField(null);
@@ -4245,6 +4235,7 @@ const ArticleCard = React.memo(
                                         </div>
                                       );
                                     })()}
+                                    {SHOW_CREATE_FABRIC_ARTICLE_BTN && (
                                     <div className="border-t border-border px-2 py-1.5">
                                       <Button
                                         size="sm"
@@ -4282,6 +4273,7 @@ const ArticleCard = React.memo(
                                         {fabricCreating ? 'Creating...' : 'Create Fabric Article'}
                                       </Button>
                                     </div>
+                                    )}
                                   </>
                                 );
                               })()}

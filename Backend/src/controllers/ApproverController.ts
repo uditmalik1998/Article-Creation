@@ -5696,12 +5696,18 @@ export class ApproverController {
             return res.json({ results: [], attributeFallbackRate: null });
         }
 
-        const descResults = await prisma.preciseFabricArticleData.findMany({
-            where: byAttrs ? { AND: attrConds } : {
-                OR: [
-                    { fabricArticleDescription: { contains: q, mode: 'insensitive' } },
-                    ...(isNaN(Number(q)) ? [] : [{ fabricArticleNumber: { equals: BigInt(q) } }]),
-                ],
+        // Searches the Fabric Article › Created rows: fabric_article_data with
+        // fabric_article_type = 'Fabric Article' and approval_status = 'APPROVED'.
+        const descResults = await prisma.fabricArticleData.findMany({
+            where: {
+                fabricArticleType: 'Fabric Article',
+                approvalStatus: 'APPROVED',
+                ...(byAttrs ? { AND: attrConds } : {
+                    OR: [
+                        { fabricArticleDescription: { contains: q, mode: 'insensitive' } },
+                        ...(/^\d+$/.test(q) ? [{ fabricArticleNumber: { startsWith: q } }] : []),
+                    ],
+                }),
             },
             select: {
                 fabricArticleNumber: true,
