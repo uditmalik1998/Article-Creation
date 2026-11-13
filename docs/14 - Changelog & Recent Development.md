@@ -5,6 +5,12 @@
 
 ---
 
+## 2026-11-13 — CMP COST card: AI SAM → AUTO-BGT toggle
+
+- New switch under the AI SAM column header (no text label; tooltip explains it). ON fills AUTO-BGT PR VAL from AI SAM: CUTTING = AI SAM, STITCHING = AI SAM × 3.25, IRONING × 2.50, FINISHING × 3.00 (`AI_SAM_BGT_RATE`). Processes with no AI SAM are left as they are. OFF puts back the AUTO-BGT PR VALs from before it was switched ON.
+- Marks the card unsaved; values are stored by the card's Save (or Save & Submit's unsaved-card save) into the existing `*_bgt_pr_val` / `total_bgt_pr_val` columns. The toggle state itself is UI-only (OFF after reload). Disabled when locked or the article has no AI SAM.
+- Frontend only (CmpCostCard.tsx).
+
 ## 2026-11-13 — FAB card: "Create Fabric Article" button hidden
 
 - The button under FABRIC ARTICLE DESC is no longer rendered (flag `SHOW_CREATE_FABRIC_ARTICLE_BTN = false` in ApproverArticleList.tsx). All its logic is kept: click handler, `onCreateFabricArticle`, the modify-mode confirm dialog (`fabConfirmItem`), `fabricCreating`. Set the flag to `true` to bring it back.

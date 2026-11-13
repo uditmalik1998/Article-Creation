@@ -20,6 +20,14 @@ const STAGE_LABEL: Record<string, string> = { BGT: 'AUTO-BGT', ACT: 'ACT-V2' };
 const MEASURES = ['SAM', 'SAM VAL', 'PR VAL'] as const;
 
 const isNotApplicable = (process: string, measure: string) => process === 'CUTTING' && measure !== 'PR VAL';
+
+// AI SAM toggle: ON fills AUTO-BGT PR VAL = AI SAM × rate per process (CUTTING = AI SAM as-is).
+const AI_SAM_BGT_RATE: Record<(typeof PROCESSES)[number], number> = {
+  CUTTING: 1,
+  STITCHING: 3.25,
+  IRONING: 2.5,
+  FINISHING: 3,
+};
 const cellKey = (process: string, stage: string, measure: string) => `${process}|${stage}|${measure}`;
 
 // Maps PR VAL cell keys → ApproverItem field names (also used as the update key sent to onSave).
@@ -125,6 +133,10 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
   const [edited, setEdited] = useState(false);
   // Stages whose TOTAL was typed by the user (otherwise TOTAL = live sum of PR VAL).
   const [manualTotals, setManualTotals] = useState<Set<string>>(new Set());
+  // AI SAM → AUTO-BGT toggle (UI-only, starts OFF). `aiBgtBackup` holds the BGT PR VALs from
+  // before it was switched ON, so switching OFF puts them back.
+  const [aiBgtOn, setAiBgtOn] = useState(false);
+  const [aiBgtBackup, setAiBgtBackup] = useState<Record<string, string>>({});
 
   // Initialize from saved DB values on mount / when the article changes.
   // Only apply non-empty saved values so preset-filled cells aren't wiped when
@@ -186,6 +198,30 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
     setEdited(true);
     if (PR_VAL_FIELD[key] || TOTAL_PR_VAL_FIELD[key]) setDirty(true);
   }, []);
+
+  const hasAiSam = PROCESSES.some((p) => toNum(aiSam?.[p]) !== null);
+  const toggleAiBgt = () => {
+    if (locked || (!aiBgtOn && !hasAiSam)) return;
+    if (!aiBgtOn) {
+      const backup: Record<string, string> = {};
+      const updates: Record<string, string> = {};
+      for (const p of PROCESSES) {
+        const sam = toNum(aiSam?.[p]);
+        if (sam === null) continue; // no AI SAM for this process → leave its BGT as is
+        const key = cellKey(p, 'BGT', 'PR VAL');
+        backup[key] = values[key] ?? '';
+        updates[key] = fmtNum(sam * AI_SAM_BGT_RATE[p]);
+      }
+      setAiBgtBackup(backup);
+      setValues((prev) => ({ ...prev, ...updates }));
+    } else {
+      setValues((prev) => ({ ...prev, ...aiBgtBackup }));
+      setAiBgtBackup({});
+    }
+    setAiBgtOn((on) => !on);
+    setEdited(true);
+    setDirty(true);
+  };
 
   // TOTAL shown for a stage: the user's override, else the live sum.
   const totalFor = (stage: string) =>
@@ -298,6 +334,20 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
                       AI SAM
                     </span>
                     <span className="block text-[9.5px] font-medium normal-case tracking-normal text-slate-500">read-only</span>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={aiBgtOn}
+                      aria-label="Fill AUTO-BGT PR VAL from AI SAM"
+                      title="ON: AUTO-BGT PR VAL = AI SAM (CUTTING), × 3.25 (STITCHING), × 2.50 (IRONING), × 3.00 (FINISHING). OFF: back to the previous values."
+                      onClick={toggleAiBgt}
+                      disabled={locked || (!aiBgtOn && !hasAiSam)}
+                      className="mx-auto mt-1 flex items-center gap-1 text-[9.5px] font-semibold normal-case tracking-normal text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <span className={cn('relative h-3.5 w-6 rounded-full transition-colors', aiBgtOn ? 'bg-slate-800' : 'bg-slate-300')}>
+                        <span className={cn('absolute top-0.5 h-2.5 w-2.5 rounded-full bg-white shadow transition-all', aiBgtOn ? 'left-3' : 'left-0.5')} />
+                      </span>
+                    </button>
                   </th>
                   {STAGES.map((stage) => (
                     <th
@@ -388,7 +438,7 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
             </table>
           </div>
           <div className="border-t border-slate-100 px-2.5 py-1.5 text-[11.5px] text-slate-500">
-            Cutting has no SAM — only PR VAL. AI SAM is for reference only. All other cells are required. TOTAL = sum of PR VAL (type to override, clear to go back to the sum).
+            Cutting has no SAM — only PR VAL. AI SAM toggle ON fills AUTO-BGT PR VAL: CUTTING = AI SAM, STITCHING × 3.25, IRONING × 2.50, FINISHING × 3.00 (OFF puts the old values back). All other cells are required. TOTAL = sum of PR VAL (type to override, clear to go back to the sum).
           </div>
         </>
       )}
