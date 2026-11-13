@@ -3665,6 +3665,7 @@ const ArticleCard = React.memo(
                             .map((a) => renderAttributeRow(a, false, true))}
                           loadSavedRecord={loadFreshItem}
                           draftId={isModifyMode ? undefined : item.id}
+                          articleId={item.id}
                           onSaveTab={(updates) => {
                             setLocalValues((prev) => ({ ...prev, ...updates }));
                             if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
@@ -5075,6 +5076,7 @@ const ArticleCard = React.memo(
                       locked={isLocked}
                       loadSavedRecord={loadFreshItem}
                       draftId={isModifyMode ? undefined : item.id}
+                      articleId={item.id}
                       onSaveTab={(updates) => {
                         setLocalValues((prev) => ({ ...prev, ...updates }));
                         if (isModifyMode) setPendingChanges((prev) => ({ ...prev, ...updates }));
