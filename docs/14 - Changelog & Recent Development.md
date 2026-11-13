@@ -5,6 +5,11 @@
 
 ---
 
+## 2026-11-13 — FAB card: "Create Fabric Article" button hidden
+
+- The button under FABRIC ARTICLE DESC is no longer rendered (flag `SHOW_CREATE_FABRIC_ARTICLE_BTN = false` in ApproverArticleList.tsx). All its logic is kept: click handler, `onCreateFabricArticle`, the modify-mode confirm dialog (`fabConfirmItem`), `fabricCreating`. Set the flag to `true` to bring it back.
+- Frontend only.
+
 ## 2026-11-13 — FG FAB card: picking FABRIC ARTICLE NO. no longer changes the FAB attributes
 
 - Selecting a row in the FABRIC ARTICLE NO. dropdown now sets only `fabricArticleNumber` + `fabricArticleDescription`. M_FAB_DIV, M_YARN, MVGR 1/2, CONSTRUCTION, OUNZ, WIDTH, WEAVE 1/2, COUNT, COMPOSITION, FINISH, GSM, LYCRA stay as the user set them (was: all overwritten, empty values cleared). Same as the DESC dropdown (which also sets AUTO-BGT).
