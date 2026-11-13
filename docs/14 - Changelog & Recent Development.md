@@ -5,6 +5,18 @@
 
 ---
 
+## 2026-11-13 — FG Save & Submit requires PKG COST saved first
+
+- Save & Submit is blocked with "PKG COST: not saved (click Save on the PKG COST card)" until the user saves PKG COST with the card's own Save button. The default rates the card shows don't count, and typed-but-unsaved values block too (the mandatory check runs before the unsaved-cards popup, so PKG is never auto-saved by Save & Submit).
+- `PkgCostCard` publishes a live saved flag per article (`getLivePkgSaved` / `useLivePkgSavedVersion`, new `articleId` prop): saved tab and no unsaved edits. Card off screen → saved `pkgCostType` present.
+- Files: PkgCostCard.tsx, ApproverArticleList.tsx, ArticleDetailPage.tsx. Frontend only.
+
+## 2026-11-13 — FG Save & Submit requires B TRIM + V. ADD TOTAL ACT-V2
+
+- Save & Submit is blocked with "B TRIM: TOTAL ACT-V2" / "V. ADD: TOTAL ACT-V2" when that card's TOTAL row ACT-V2 is empty (the typed override, else the sum of the row ACT-V2 values).
+- Same pattern as CMP COST: `CostingGridCard` publishes the live total per article + card (`getLiveCostActTotal(articleId, totalField)` / `useLiveCostActVersion`, via the new `articleId` prop), so unsaved typed values count — Save & Submit saves the card first. When the card is not on screen, the saved `bTrimTotalRoughV2` / `vaddTotalRoughV2` is used.
+- Files: CostingGridCard.tsx, ApproverArticleList.tsx (passes `articleId`), ArticleDetailPage.tsx (approveBlockedReasons). Frontend only.
+
 ## 2026-11-12 — FG Created page: M_FAB_VDR showed "Required" although the DB had a value
 
 - Cause: `ApproverController.getItems` and `getById` use explicit Prisma `select` lists that never included `fabVdr` (column `m_fab_vdr`), so the page got `undefined`.

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { ChevronDown, ChevronUp, Package, Save } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TextCell } from './CostingGridCard';
@@ -53,9 +53,28 @@ interface PkgCostCardProps {
   onSaveTab?: (updates: Record<string, string | null>) => void | Promise<void>;
   /** Article id for the local draft (FG New page only); omitted → no draft. */
   draftId?: string;
+  /** Article id the live saved state is published under (Save & Submit requires PKG COST saved). */
+  articleId?: string;
 }
 
-const PkgCostCard: React.FC<PkgCostCardProps> = ({ collapsed, onToggleCollapse, locked, loadSavedRecord, onSaveTab, draftId }) => {
+// Live "PKG COST saved" per article while its card is on screen: true only when a tab has been
+// saved with the card's own Save button and nothing typed since. The shown default rates don't
+// count until saved. Read by the FG Save & Submit check (re-runs via useLivePkgSavedVersion).
+const livePkgSaved = new Map<string, boolean>();
+let livePkgSavedVersion = 0;
+const livePkgSavedListeners = new Set<() => void>();
+const bumpLivePkgSaved = () => {
+  livePkgSavedVersion += 1;
+  livePkgSavedListeners.forEach((l) => l());
+};
+export const getLivePkgSaved = (articleId: string): boolean | undefined => livePkgSaved.get(articleId);
+export const useLivePkgSavedVersion = () =>
+  useSyncExternalStore(
+    (l) => { livePkgSavedListeners.add(l); return () => { livePkgSavedListeners.delete(l); }; },
+    () => livePkgSavedVersion,
+  );
+
+const PkgCostCard: React.FC<PkgCostCardProps> = ({ collapsed, onToggleCollapse, locked, loadSavedRecord, onSaveTab, draftId, articleId }) => {
   const style = CARD_THEME;
   const [tab, setTab] = useState<string>(TABS[0]);
   const [local, setLocal] = useState<LocalState>(INITIAL_LOCAL);
@@ -124,6 +143,14 @@ const PkgCostCard: React.FC<PkgCostCardProps> = ({ collapsed, onToggleCollapse, 
     clearDraft();
   };
   useRegisterUnsavedCard('PKG COST', dirty && !!onSaveTab && !locked, handleSave, clearDraft);
+
+  const isSaved = savedTab != null && !dirty;
+  useEffect(() => {
+    if (!articleId) return;
+    livePkgSaved.set(articleId, isSaved);
+    bumpLivePkgSaved();
+    return () => { livePkgSaved.delete(articleId); bumpLivePkgSaved(); };
+  }, [articleId, isSaved]);
 
   const total = ROWS.reduce((sum, r) => sum + (parseFloat(val(r, 'rate')) || 0), 0);
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { ChevronDown, ChevronRight, ChevronUp, Plus, Save, Search, X } from 'lucide-react';
 import { Input, Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui-tw';
 import { cn } from '@/lib/utils';
@@ -201,6 +201,25 @@ export const VADD_CONFIG: CostingGridConfig = {
 export const gridFields = (config: CostingGridConfig) =>
   new Set(Object.values(config.cellMap).flatMap((m) => Object.values(m) as string[]));
 
+// Live TOTAL ACT-V2 per article + card (keyed by the card's totalFields.rough, e.g.
+// bTrimTotalRoughV2 / vaddTotalRoughV2) while the card is on screen — includes values typed
+// but not saved yet (Save & Submit saves them first). Read by the FG Save & Submit check,
+// which re-runs through useLiveCostActVersion whenever a value changes.
+const liveCostActTotals = new Map<string, string>();
+let liveCostActVersion = 0;
+const liveCostActListeners = new Set<() => void>();
+const bumpLiveCostAct = () => {
+  liveCostActVersion += 1;
+  liveCostActListeners.forEach((l) => l());
+};
+export const getLiveCostActTotal = (articleId: string, totalField: string): string | undefined =>
+  liveCostActTotals.get(`${articleId}|${totalField}`);
+export const useLiveCostActVersion = () =>
+  useSyncExternalStore(
+    (l) => { liveCostActListeners.add(l); return () => { liveCostActListeners.delete(l); }; },
+    () => liveCostActVersion,
+  );
+
 // TOTAL row overrides live in local[tab][TOTAL_ROW]; AUTO-BGT total is always the sum.
 const TOTAL_ROW = '__TOTAL__';
 const TOTAL_EDIT_COLS = ['rough', 'vdr', 'fin'] as const;
@@ -241,6 +260,8 @@ interface CostingGridCardProps {
   onSaveTab?: (updates: Record<string, string | null>) => void | Promise<void>;
   /** Article id for the local draft (FG New page only, tab-save mode); omitted → no draft. */
   draftId?: string;
+  /** B TRIM / V. ADD: article id the live TOTAL ACT-V2 is published under (Save & Submit requires it). */
+  articleId?: string;
 }
 
 const SelectCell: React.FC<{
@@ -378,6 +399,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
   loadSavedRecord,
   onSaveTab,
   draftId,
+  articleId,
 }) => {
   const { grid: GRID, tabs, fixedRows, other, cellMap } = config;
   const costFields = config.costFields;
@@ -831,6 +853,14 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
     const sum = sumOf(col);
     return sum === null ? '' : sum.toFixed(2);
   };
+  const liveActTotal = editableTotals ? totalValue('rough') : '';
+  const liveActKey = articleId && config.totalFields ? `${articleId}|${config.totalFields.rough}` : '';
+  useEffect(() => {
+    if (!liveActKey || !editableTotals) return;
+    liveCostActTotals.set(liveActKey, liveActTotal);
+    bumpLiveCostAct();
+    return () => { liveCostActTotals.delete(liveActKey); bumpLiveCostAct(); };
+  }, [liveActKey, editableTotals, liveActTotal]);
 
   const renderRow = (row: string, last: boolean, withCheck = false) => {
     // DESC is auto-built: STYLE-TYPE (e.g. KUNDI_BTN-26L)

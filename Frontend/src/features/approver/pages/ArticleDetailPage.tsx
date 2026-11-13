@@ -26,6 +26,8 @@ import { ApproverArticleList } from '../components/ApproverArticleList';
 import { getUnsavedCards, getUserEditedCards } from '../components/unsavedCards';
 import { clearArticleDrafts } from '../components/cardDrafts';
 import { getLiveCmpActTotal, useLiveCmpActVersion } from '../components/CmpCostCard';
+import { getLiveCostActTotal, useLiveCostActVersion } from '../components/CostingGridCard';
+import { getLivePkgSaved, useLivePkgSavedVersion } from '../components/PkgCostCard';
 import { guardLeave, registerLeaveGuard } from '../../../shared/utils/leaveGuard';
 import type { ApproverItem } from '../types';
 import { APP_CONFIG } from '../../../constants/app/config';
@@ -763,6 +765,8 @@ export default function ArticleDetailPage({
 
   // Re-check when a CMP card's live ACT TOTAL changes (typed values aren't in `items` yet).
   const liveCmpActVersion = useLiveCmpActVersion();
+  const liveCostActVersion = useLiveCostActVersion();
+  const livePkgSavedVersion = useLivePkgSavedVersion();
   const approveBlockedReasons = useMemo(() => {
     const selectedPending = [...items, ...comboChildren].filter(i => pendingSelectedKeys.includes(i.id));
     const pendingItems = [...selectedPending, ...pendingComboChildren.filter(c => !selectedPending.some(s => s.id === c.id))];
@@ -794,6 +798,18 @@ export default function ArticleDetailPage({
       const savedAct = [item.totalActPrVal, item.cuttingActPrVal, item.stitchingActPrVal, item.ironingActPrVal, item.finishingActPrVal]
         .some((v) => v != null && String(v).trim() !== '');
       if (liveAct !== undefined ? !liveAct.trim() : !savedAct) missing.push('CMP COST: ACT-V2 TOTAL PR VAL');
+      // B TRIM / V. ADD: TOTAL ACT-V2 is required — the card's live total when it's on screen,
+      // else the saved one.
+      for (const [card, field] of [['B TRIM', 'bTrimTotalRoughV2'], ['V. ADD', 'vaddTotalRoughV2']] as const) {
+        const live = getLiveCostActTotal(item.id, field);
+        const act = live !== undefined ? live : String((item as any)[field] ?? '');
+        if (!act.trim()) missing.push(`${card}: TOTAL ACT-V2`);
+      }
+      // PKG COST must be saved with its own Save button first (the default rates shown and
+      // typed-but-unsaved values don't count). Card off screen → a saved PKG tab.
+      const livePkg = getLivePkgSaved(item.id);
+      const pkgSaved = livePkg !== undefined ? livePkg : String((item as any).pkgCostType ?? '').trim() !== '';
+      if (!pkgSaved) missing.push('PKG COST: not saved (click Save on the PKG COST card)');
       missing.push(...getMissingMandatoryFields(item, isComboItem && item.id === currentItem?.id ? setTopCategory : null));
       // Readable name: SAP / article number once it exists, else category + design
       // number (a new set article has neither SAP number nor image name).
@@ -806,7 +822,7 @@ export default function ArticleDetailPage({
       return acc;
     }, comboBlock);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingSelectedKeys, items, gridVersion, pathType, pendingComboChildren, comboChildren, isComboItem, setTopCategory, liveCmpActVersion]);
+  }, [pendingSelectedKeys, items, gridVersion, pathType, pendingComboChildren, comboChildren, isComboItem, setTopCategory, liveCmpActVersion, liveCostActVersion, livePkgSavedVersion]);
 
   // Jump to a missing field: open the right set tab, scroll its row into view and
   // flash it. Rows carry data-field-label / data-item-id (ApproverArticleList).
