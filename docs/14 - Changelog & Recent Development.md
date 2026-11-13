@@ -5,6 +5,18 @@
 
 ---
 
+## 2026-11-13 — FG FAB card: picking FABRIC ARTICLE NO. no longer changes the FAB attributes
+
+- Selecting a row in the FABRIC ARTICLE NO. dropdown now sets only `fabricArticleNumber` + `fabricArticleDescription`. M_FAB_DIV, M_YARN, MVGR 1/2, CONSTRUCTION, OUNZ, WIDTH, WEAVE 1/2, COUNT, COMPOSITION, FINISH, GSM, LYCRA stay as the user set them (was: all overwritten, empty values cleared). Same as the DESC dropdown (which also sets AUTO-BGT).
+- Typing a number + Enter is unchanged (saves the number only). Frontend only (ApproverArticleList.tsx).
+
+## 2026-11-13 — FG FAB card: FABRIC ARTICLE NO. / DESC search Fabric Article › Created rows
+
+- `searchFabricArticleData` (`/approver/fabric-article-data/search`) now reads `fabric_article_data` where `fabric_article_type = 'Fabric Article'` and `approval_status = 'APPROVED'` (the Fabric Article › Created page rows, 205 today) instead of `precise_fabric_article_data`.
+- Text search: description contains the text, or the fabric article number starts with the typed digits (was: exact number). Attribute search (`byAttrs=1`) unchanged, same filter applied.
+- Unchanged (still `precise_fabric_article_data`): the no-result attribute rate fallback inside the same endpoint and `/fabric-article-data/rough-v2-rate`.
+- Backend only.
+
 ## 2026-11-13 — FG Save & Submit requires PKG COST saved first
 
 - Save & Submit is blocked with "PKG COST: not saved (click Save on the PKG COST card)" until the user saves PKG COST with the card's own Save button. The default rates the card shows don't count, and typed-but-unsaved values block too (the mandatory check runs before the unsaved-cards popup, so PKG is never auto-saved by Save & Submit).
