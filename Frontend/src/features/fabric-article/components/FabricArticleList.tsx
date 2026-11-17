@@ -719,8 +719,9 @@ const ArticleCard = React.memo(
       'vendorCode', 'vendorName', 'mrp', 'rate', 'colour',
       'designNumber', 'division', 'subDivision', 'majorCategory', 'segment',
     ]);
+    // FG Created (isFGMode) Modify sends FAB only, so fashion type stays locked there.
     const isFieldLocked = (field: string) =>
-      isLocked || (isModifyMode && MODIFY_LOCKED_FIELDS.has(field));
+      isLocked || (isModifyMode && (MODIFY_LOCKED_FIELDS.has(field) || (isFGMode && field === 'articleFashionType')));
 
     // Division is non-editable for APPROVER/CATEGORY_HEAD users locked to a specific division
     const canEditDivision = useMemo(() => {

@@ -96,6 +96,7 @@ const MODIFY_FIELDS: { field: string; sapName: string }[] = [
   { field: 'finish',            sapName: 'M_FINISH' },
   { field: 'fWidth',            sapName: 'M_WIDTH' },
   { field: 'lycra',             sapName: 'M_LYCRA' },
+  // ── end of FAB (first 15 rows) — fabric articles send only these to SAP ──
   // BODY
   { field: 'collar',            sapName: 'M_COLLAR_TYPE' },
   { field: 'collarStyle',       sapName: 'M_COLLAR_STYLE' },
@@ -137,6 +138,26 @@ const MODIFY_FIELDS: { field: string; sapName: string }[] = [
   { field: 'ageGroup',          sapName: 'M_AGE_GROUP' },
   { field: 'impAtrbt2',         sapName: 'M_IMP_ATBT' },
 ];
+
+// Fabric articles (fabric_article_data) live in a fabric SAP class that has only
+// the FAB characteristics — sending BODY/VA/BUSINESS ones makes the patch FM
+// answer ok:false (NOT_IN_CLASS), so the fabric Modify sends just these 15,
+// plus the MARA header field ARTICLE FASHION TYPE → FASHGRD.
+// Fabric Article › FG Created (isFGMode) sends FAB only.
+const FAB_ONLY_MODIFY_FIELDS = MODIFY_FIELDS.slice(0, MODIFY_FIELDS.findIndex(f => f.sapName === 'M_LYCRA') + 1);
+const FABRIC_MODIFY_FIELDS = [
+  ...FAB_ONLY_MODIFY_FIELDS,
+  { field: 'articleFashionType', sapName: 'FASHGRD' },
+  // SEGMENT (PLGTP) is NOT modifiable: it follows the rate, and rate is locked.
+];
+
+// Readable reason from a patch-FM EV_JSON that came back ok:false.
+function patchFailureReason(evJson: any): string | null {
+  const rows: any[] = evJson?.results ?? evJson?.plan ?? [];
+  const bad = rows.filter(r => r?.status && !['PLANNED', 'APPLIED'].includes(String(r.status)));
+  if (bad.length === 0) return evJson?.msg || evJson?.error || null;
+  return bad.map(r => `${r.fn}: ${r.status}${r.msg ? ` (${r.msg})` : ''}`).join('; ');
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -821,8 +842,19 @@ export default function ArticleDetailPage({
               throw new Error('Mandatory fields missing');
             }
 
+            const isFabricData = itemsBaseEndpoint === '/approver/fabric-article-data';
+            // FG Created (isFGMode): FAB only — no FASHGRD / PLGTP.
+            const fabricFields = isFGMode ? FAB_ONLY_MODIFY_FIELDS : FABRIC_MODIFY_FIELDS;
+            if (isFabricData && !fabricFields.some(({ field }) => field in changes)) {
+              const errMsg = isFGMode
+                ? 'Only FAB attributes can be modified on a created fabric article.'
+                : 'Only FAB attributes and Article Fashion Type can be modified on a created fabric article.';
+              message.error(errMsg);
+              throw new Error(errMsg);
+            }
             const ivMatnr = String(row.articleNumber ?? '').padStart(18, '0');
-            const ivChanges = MODIFY_FIELDS
+            // Fabric: only the attributes the user actually changed go to SAP.
+            const ivChanges = (isFabricData ? fabricFields.filter(({ field }) => field in changes) : MODIFY_FIELDS)
               .map(({ field, sapName }) => {
                 const val = field in changes ? changes[field] : (row as any)[field];
                 return `${sapName}=${val != null ? String(val) : ''}`;
@@ -875,12 +907,19 @@ export default function ArticleDetailPage({
               }
               const exReturn = body.EX_RETURN ?? {};
               if (evJson.ok === false || exReturn.TYPE === 'E' || exReturn.TYPE === 'A') {
-                const errMsg = exReturn.MESSAGE || 'SAP modification failed';
+                const reason = evJson.ok === false ? patchFailureReason(evJson) : null;
+                const errMsg = reason
+                  ? `SAP modification failed — ${reason}`
+                  : (exReturn.TYPE === 'E' || exReturn.TYPE === 'A') && exReturn.MESSAGE ? exReturn.MESSAGE : 'SAP modification failed';
                 message.error(errMsg);
                 throw new Error(errMsg);
               }
               // SAP succeeded via RFC proxy — now persist the changes to the DB only.
-              const dbRes = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${row.id}/modify`, {
+              // Fabric rows are in fabric_article_data → own endpoint; others keep the flat-table one.
+              const modifyUrl = isFabricData
+                ? `${APP_CONFIG.api.baseURL}/approver/fabric-article-data/${row.id}/modify`
+                : `${APP_CONFIG.api.baseURL}/approver/items/${row.id}/modify`;
+              const dbRes = await fetch(modifyUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                 body: JSON.stringify({ changes, skipSap: true }),

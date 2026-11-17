@@ -249,6 +249,8 @@ const MODIFY_FIELDS: { field: string; sapName: string }[] = [
   // BUSINESS
   { field: 'ageGroup',          sapName: 'M_AGE_GROUP' },
   { field: 'impAtrbt2',         sapName: 'M_IMP_ATBT' },
+  // ARTICLE FASHION TYPE (OTH GRID-1) — MARA header field, patch FM key FASHGRD
+  { field: 'articleFashionType', sapName: 'FASHGRD' },
   { field: 'weight',            sapName: 'M_FAB_WEIGHT' },
 ];
 

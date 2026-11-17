@@ -5,6 +5,20 @@
 
 ---
 
+## 2026-11-17 — Fabric Article › Created: Modify works (SAP + DB)
+
+Modify on the Fabric Created page failed for two reasons:
+- **SAP said no.** The page sent the full FG attribute list (FAB + BODY + VA + BUSINESS, ~55 keys) to `Z_ART_PATCH_RFC_V69`. The fabric class (e.g. 920501011) holds only the FAB characteristics, so M_COLLAR_TYPE / M_NECK_TYPE / M_AGE_GROUP / M_IMP_ATBT came back `NOT_IN_CLASS` and the FM answered `ok:false`. The toast showed SAP's generic "RFC executed successfully…" text. A test-mode dry run on 2111083026 with only the 15 FAB keys returns `ok:true`.
+- **The DB save used the FG table.** After SAP, the page called `/approver/items/:id/modify`, which looks the id up in `extraction_results_flat` → 404 for fabric rows.
+
+Fix:
+- `FabricArticleDetailPage.tsx` — when `itemsBaseEndpoint` is `/approver/fabric-article-data` (Fabric + FG New pages), only the FAB attributes the user actually changed (out of M_FAB_DIV … M_LYCRA) go into `IV_CHANGES`; nothing to send → "Only FAB attributes can be modified". On `ok:false` the toast lists the failing attributes and their SAP status. DB save goes to the new endpoint. Body Article pages are unchanged.
+- New `POST /approver/fabric-article-data/:id/modify` (`modifyFabricArticleData`, `requireModifyRights` + FABRIC article type) — APPROVED rows with an article number only; saves the FAB fields + `fabricArticleDescription`; everything else is ignored.
+- Deploy backend first.
+- Later the same day: ARTICLE FASHION TYPE and SEGMENT can also be modified. The user added two MARA keys to `Z_ART_PATCH_RFC_V69`: **FASHGRD** (fashion type) and **PLGTP** (segment). On the Created page SEGMENT is now a dropdown (E / V / P / SP); ARTICLE FASHION TYPE was already editable. Both go into `IV_CHANGES` only when changed, and the backend modify endpoint saves them. Test-mode check: QA (2111076569) plans both on route MARA; **prod V69 does not know them yet** ("attr not found in ZCT04 nor CABN") — transport the FM before using it in prod.
+- Then (user request): **FG Articles › Created** Modify also sends ARTICLE FASHION TYPE as `FASHGRD=<value>` when it changes (`ArticleDetailPage.tsx` MODIFY_FIELDS; segment stays locked there). **Fabric Article › FG Created** (isFGMode) does NOT send FASHGRD/PLGTP — FAB attributes only; fashion type is locked in its Modify and the backend ignores fashionType/segment for `fabric_article_type = 'FG'` rows. FASHGRD/PLGTP stay on the Fabric Article › Created page.
+- Final (user request): **SEGMENT is not modifiable anywhere** — it follows RATE + division (Woven 80/125/200, Knits 300/400/500, Denim 225/275/350 → E/V/P/SP) and RATE is locked on Created pages. The E/V/P/SP dropdown was removed, SEGMENT is read-only again, PLGTP is never sent, and the backend no longer accepts `segment` on fabric modify. Only FASHGRD remains.
+
 ## 2026-11-17 — Precise Costing export: CMP COST row falls back to the saved CMP totals
 
 - BODY › CMP COST row, per column (AUTO -BGT / ROUGH-V2 / VDR PR PC COST / FINAL): `SUM` of the process rows (CUTTING … FINISHING) when any of them has a value in that column; otherwise the DB total `total_bgt_pr_val` / `total_act_pr_val` / `total_vendor_pr_val` / `total_final_pr_val`. (User choice: process sum wins when both exist.)

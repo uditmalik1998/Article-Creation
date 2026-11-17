@@ -6849,6 +6849,48 @@ export class ApproverController {
         return res.json(ApproverController.fabricArticleDataRowToItem(row));
     };
 
+    // Fabric Created page "Modify": the page has already patched SAP (FAB
+    // characteristics only, via the RFC proxy); this saves the same changes to
+    // fabric_article_data. Unlike PUT /fabric-article-data/:id it is allowed on
+    // APPROVED rows, but only for the 15 FAB attributes + the description built
+    // from them — everything else on a created fabric article stays locked.
+    private static FABRIC_MODIFY_FIELDS = new Set<string>([
+        'fabDiv', 'yarn1', 'mainMvgr', 'fabricMainMvgr', 'fabVdr', 'weave', 'mFab2',
+        'fCount', 'gsm', 'fOunce', 'fConstruction', 'composition', 'finish', 'fWidth', 'lycra',
+        'fabricArticleDescription', 'articleFashionType',
+    ]);
+
+    static modifyFabricArticleData = async (req: Request, res: Response) => {
+        const { id } = req.params;
+        const changes = req.body?.changes;
+        if (!changes || typeof changes !== 'object' || Array.isArray(changes)) {
+            return res.status(400).json({ error: 'changes object is required' });
+        }
+
+        const existing = await prisma.fabricArticleData.findUnique({ where: { id } });
+        if (!existing) return res.status(404).json({ error: 'Item not found' });
+        if (existing.approvalStatus !== 'APPROVED' || !existing.fabricArticleNumber) {
+            return res.status(400).json({ error: 'Only created (approved) fabric articles with an article number can be modified.' });
+        }
+
+        const data: Record<string, unknown> = {};
+        for (const [clientKey, value] of Object.entries(changes as Record<string, unknown>)) {
+            if (!ApproverController.FABRIC_MODIFY_FIELDS.has(clientKey)) continue;
+            // FG Created rows (type 'FG'): FAB only — fashion type isn't sent to SAP there.
+            if (existing.fabricArticleType === 'FG' && clientKey === 'articleFashionType') continue;
+            const dbKey = ApproverController.FABRIC_ARTICLE_DATA_FIELD_MAP[clientKey];
+            if (!dbKey) continue;
+            data[dbKey] = value === undefined || value === '' ? null : String(value);
+        }
+        if (Object.keys(data).length === 0) {
+            return res.status(400).json({ error: 'Only FAB attributes and Article Fashion Type can be modified on a created fabric article.' });
+        }
+
+        const row = await prisma.fabricArticleData.update({ where: { id }, data });
+        console.log(`[fabric-modify] ${existing.fabricArticleNumber} by ${req.user?.email ?? '?'}: ${Object.keys(data).join(', ')}`);
+        return res.json(ApproverController.fabricArticleDataRowToItem(row));
+    };
+
     private static fabricVariantRowToItem(r: any) {
         return {
             id:                  r.id,
