@@ -152,6 +152,8 @@ router.delete('/fabric-article-variant/:id', h(ApproverController.deleteFabricAr
 // Get / Update a single fabric_article_data record (used by FG New Articles detail page)
 router.get('/fabric-article-data/:id', h(ApproverController.getFabricArticleDataById));
 router.put('/fabric-article-data/:id', h(ApproverController.updateFabricArticleData));
+// Fabric Created page "Modify" — saves FAB attribute changes after the page patched SAP
+router.post('/fabric-article-data/:id/modify', requireModifyRights, requireArticleType('FABRIC'), h(ApproverController.modifyFabricArticleData));
 
 // Delete body articles (used on reject in Body Article New Articles page)
 router.post('/body-articles/bulk-delete', requireBodyApprovalRights, h(ApproverController.deleteBodyArticles));
