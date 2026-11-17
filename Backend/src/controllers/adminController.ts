@@ -60,7 +60,7 @@ const AdminCreateUserSchema = z.object({
   email: z.string().email().max(255),
   password: z.string().min(6).max(128),
   name: z.string().min(1).max(100),
-  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'PLANNING', 'GM_APPROVER', 'GM_CREATOR']).optional().default('USER'),
+  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'GM_APPROVER', 'GM_CREATOR']).optional().default('USER'),
   division: z.union([z.string(), z.array(z.string())]).optional().nullable(),
   subDivision: z.union([z.string(), z.array(z.string())]).optional().nullable(),
   // Coarse business-unit tag — independent of division/subDivision above,
@@ -81,7 +81,7 @@ const AdminUpdateUserSchema = AdminCreateUserSchema.partial().extend({
   // here with no default so an omitted role truly stays undefined, and
   // `updateUser`'s `validated.role ?? existingUser.role` correctly keeps
   // whatever role the user already had.
-  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'PLANNING', 'GM_APPROVER', 'GM_CREATOR']).optional(),
+  role: z.enum(['ADMIN', 'USER', 'CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'GM_APPROVER', 'GM_CREATOR']).optional(),
 });
 
 const normalizeSubDivisionInput = (value: unknown): string | null => {
@@ -6061,8 +6061,57 @@ export const getFabricArticleDataStatus = async (_req: Request, res: Response): 
 };
 
 /**
+ * Fabric Article Data uploader columns — the "Final Report Sequencing" format
+ * (same order as the Fabric Article Excel download). Row 3 marks mandatory
+ * columns with "mand", headers in row 4, data from row 5.
+ *   key   → fabric_article_data column
+ *   grid  → characteristic in fabric_maj_cat_grid_values the value must exist in
+ */
+const FAD_UPLOAD_COLUMNS: Array<{
+  header: string; key: string; mand?: boolean; numeric?: boolean; grid?: string;
+}> = [
+  { header: 'Division',                   key: 'division' },
+  { header: 'Sub Division',               key: 'sub_division' },
+  { header: 'Major Category',             key: 'major_category', mand: true },
+  { header: 'Fabric Article Number',      key: 'fabric_article_number', mand: true },
+  { header: 'Fabric Article Description', key: 'fabric_article_description', mand: true },
+  { header: 'MC Description',             key: 'mc_description' },
+  { header: 'Vendor Name',                key: 'vendor_name', mand: true },
+  { header: 'Vendor Code',                key: 'vendor_code', mand: true },
+  { header: 'Design Number',              key: 'design_number', mand: true },
+  { header: 'segment',                    key: 'segment', mand: true },
+  { header: 'Status',                     key: 'approval_status' },
+  { header: 'M_FAB_DIV',                  key: 'm_fab_div', mand: true, grid: 'M_FAB_DIV' },
+  { header: 'M_YARN',                     key: 'm_yarn', mand: true, grid: 'M_YARN' },
+  { header: 'M_FAB_MAIN_MVGR_1',          key: 'm_fab_main_mvgr_1', mand: true, grid: 'FAB_MAIN_MVGR_1' },
+  { header: 'M_FAB_MAIN_MVGR_2',          key: 'm_fab_main_mvgr_2', mand: true, grid: 'FAB_MAIN_MVGR_2' },
+  { header: 'M_CONSTRUCTION',             key: 'm_construction', grid: 'M_CONSTRUCTION' },
+  { header: 'M_OUNZ',                     key: 'm_ounz', grid: 'M_OUNZ' },
+  { header: 'M_WIDTH',                    key: 'm_width', mand: true, grid: 'M_WIDTH' },
+  { header: 'M_WEAVE_02',                 key: 'm_weave_02', grid: 'WEAVE_02' },
+  { header: 'M_COUNT',                    key: 'm_count', grid: 'M_COUNT' },
+  { header: 'M_WEAVE_01',                 key: 'm_weave_01', mand: true, grid: 'WEAVE_01' },
+  { header: 'M_COMPOSITION',              key: 'm_composition', grid: 'M_COMPOSITION' },
+  { header: 'M_FINISH',                   key: 'm_finish', grid: 'M_FINISH' },
+  { header: 'M_GSM',                      key: 'm_gsm', mand: true, grid: 'M_GSM' },
+  { header: 'M_LYCRA',                    key: 'm_lycra', mand: true, grid: 'M_LYCRA' },
+  { header: 'Fabric Rate',                key: 'fabric_rate', mand: true, numeric: true },
+  { header: 'V2 Fabric Rate',             key: 'v2_fabric_rate', numeric: true },
+  { header: 'Value Add Cost',             key: 'value_add_cost', numeric: true },
+  { header: 'Article Fashion Type',       key: 'article_fashion_type', mand: true },
+];
+
+// Row values keyed by template header (for the not-uploaded error Excel).
+const fadHeaderValues = (raw: Record<string, string>): Record<string, string> =>
+  Object.fromEntries(FAD_UPLOAD_COLUMNS.map((c) => [c.header, raw[c.key] ?? '']));
+
+// "FAB-MAIN-MVGR-2", "FAB_MAIN_MVGR-1", "WEAVE 02", "M_WEAVE_02" → comparable keys.
+const fadNormHeader = (s: string) => s.toUpperCase().replace(/[^A-Z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+
+/**
  * GET /api/admin/fabric-article-data/template
- * Returns a blank .xlsx template with all uploadable columns.
+ * Blank template in the upload format: title row 1, "mand" markers row 3,
+ * headers row 4, one sample row 5.
  */
 export const downloadFabricArticleDataTemplate = async (_req: Request, res: Response): Promise<void> => {
   try {
@@ -6070,50 +6119,43 @@ export const downloadFabricArticleDataTemplate = async (_req: Request, res: Resp
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet('FABRIC ARTICLE DATA');
 
-    ws.mergeCells('A1:Y1');
-    const titleCell = ws.getCell('A1');
-    titleCell.value = 'FABRIC ARTICLE DATA UPLOAD';
-    titleCell.font = { bold: true, size: 13 };
-    titleCell.alignment = { horizontal: 'center' };
-    ws.getRow(1).height = 22;
+    ws.getCell('A1').value = 'Final Report Sequencing';
+    ws.getCell('A1').font = { bold: true, size: 13 };
+    ws.getCell('A1').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFF00' } };
+    ws.getCell('C1').value = 'Rows with a blank "mand" column or a value not in Fabric Grid Values are not uploaded. An existing UPLOADER Fabric Article Number is updated.';
+    ws.getCell('C1').font = { italic: true, size: 10 };
 
-    ws.addRow([]);
-
-    const headers = [
-      'FABRIC_ARTICLE_NUMBER', 'FABRIC_ARTICLE_DESC',
-      'DIVISION', 'SUB_DIVISION', 'MAJOR_CATEGORY', 'VENDOR_NAME', 'VENDOR_CODE', 'FABRIC_RATE',
-      'M_FAB_DIV', 'M_YARN', 'M_FAB_MAIN_MVGR_1', 'M_FAB_MAIN_MVGR_2',
-      'M_CONSTRUCTION', 'M_OUNZ', 'M_WIDTH', 'M_WEAVE_01', 'M_WEAVE_02',
-      'M_COUNT', 'M_GSM', 'M_COMPOSITION', 'M_FINISH', 'M_LYCRA',
-      'APPROVAL_STATUS', 'SAP_SYNC_STATUS', 'USER_NAME',
-    ];
-    const headerRow = ws.addRow(headers);
-    headerRow.eachCell((cell: any) => {
-      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
-      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1565C0' } };
+    FAD_UPLOAD_COLUMNS.forEach((c, i) => {
+      if (!c.mand) return;
+      const cell = ws.getRow(3).getCell(i + 1);
+      cell.value = 'mand';
+      cell.font = { bold: true, color: { argb: 'FFC00000' } };
       cell.alignment = { horizontal: 'center' };
     });
 
-    ws.addRow([]);
+    const headerRow = ws.getRow(4);
+    FAD_UPLOAD_COLUMNS.forEach((c, i) => {
+      const cell = headerRow.getCell(i + 1);
+      cell.value = c.header;
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: c.mand ? 'FF1E293B' : 'FF64748B' } };
+      cell.alignment = { horizontal: 'center' };
+    });
 
-    // Sample row
-    ws.addRow([
-      'FAB-001', 'KNIT FABRIC SLD',
-      'K', 'K_PC', 'K_PC_FLC', 'Sample Vendor', 'V001', '250.50',
-      'KNT', 'CTO', 'FAB01', '', 'PLAIN', '180', '', 'P/W', '',
-      '30S', '180', '100% COTTON', 'NONE', 'N',
-      'PENDING', 'NOT_SYNCED', 'admin',
-    ]);
+    const sample: Record<string, string | number> = {
+      division: 'Woven', sub_division: 'W_P', major_category: 'W_P_DBY',
+      fabric_article_number: '2111082825', fabric_article_description: 'W-P-DBY-N_LYC-SLD-58"-100%_P',
+      mc_description: 'W_P_DBY', vendor_name: 'KHAZANA SYNTEX', vendor_code: '0000700253',
+      design_number: 'NS MESH', segment: 'V', approval_status: 'APPROVED',
+      m_fab_div: 'W', m_yarn: 'P', m_fab_main_mvgr_1: 'SLD', m_fab_main_mvgr_2: 'SLD',
+      m_width: '58"', m_weave_02: 'STRT', m_weave_01: 'DBY', m_composition: '100%_P',
+      m_gsm: '100-120', m_lycra: 'N_LYC', fabric_rate: 110, article_fashion_type: 'C',
+    };
+    const sampleRow = ws.getRow(5);
+    FAD_UPLOAD_COLUMNS.forEach((c, i) => { if (sample[c.key] != null) sampleRow.getCell(i + 1).value = sample[c.key]; });
 
-    ws.columns = headers.map(() => ({ width: 22 }));
-
-    ws.addRow([]);
-    const noteRow = ws.addRow([
-      '⚠ NOTE: Headers in Row 3, data from Row 5. APPROVAL_STATUS: PENDING/APPROVED/REJECTED. SAP_SYNC_STATUS: NOT_SYNCED/SYNCED/FAILED. Each row is inserted as a new record.',
-    ]);
-    ws.mergeCells(`A${noteRow.number}:Y${noteRow.number}`);
-    noteRow.getCell(1).font = { italic: true, size: 10 };
-    noteRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } };
+    ws.columns = FAD_UPLOAD_COLUMNS.map(() => ({ width: 20 }));
+    ws.views = [{ state: 'frozen', ySplit: 4 }];
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', 'attachment; filename="FABRIC_ARTICLE_DATA_TEMPLATE.xlsx"');
@@ -6127,8 +6169,13 @@ export const downloadFabricArticleDataTemplate = async (_req: Request, res: Resp
 
 /**
  * POST /api/admin/fabric-article-data/upload
- * Parses rows from row 5 and bulk-inserts into fabric_article_data.
- * Each row gets a fresh UUID. Upserts on fabric_article_number when provided.
+ * Reads the template format (header row found by name in the first 10 rows,
+ * data below it). A row is uploaded only when every mandatory column is
+ * filled, numbers are numbers, every M_ value exists in Fabric Grid Values,
+ * and its Fabric Article Number isn't used by a non-UPLOADER row. Uploaded
+ * rows are fabric_article_type = 'UPLOADER': a number that already exists as
+ * UPLOADER is updated (blank optional cells keep the old value), otherwise a
+ * new row is inserted. Rows that fail come back with their reasons.
  */
 export const uploadFabricArticleData = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -6147,126 +6194,214 @@ export const uploadFabricArticleData = async (req: Request, res: Response): Prom
       return;
     }
 
-    const cell = (row: any, c: number): string => {
+    const cellText = (row: any, c: number): string => {
       let v = row.getCell(c).value;
       if (v && typeof v === 'object' && 'result' in v) v = (v as any).result;
+      if (v && typeof v === 'object' && 'richText' in v) v = (v as any).richText.map((t: any) => t.text).join('');
       if (v && typeof v === 'object' && 'text' in v) v = (v as any).text;
       return v == null ? '' : String(v).trim();
     };
 
-    // Column index map (1-based, matching template headers)
-    const C = {
-      fabNo: 1, fabDesc: 2,
-      div: 3, subDiv: 4, majCat: 5, vendorName: 6, vendorCode: 7, fabricRate: 8,
-      fabDiv: 9, yarn: 10, mvgr1: 11, mvgr2: 12,
-      construction: 13, ounz: 14, width: 15, weave01: 16, weave02: 17,
-      count: 18, gsm: 19, composition: 20, finish: 21, lycra: 22,
-      approvalStatus: 23, sapSyncStatus: 24, userName: 25,
-    };
-
-    type DataRow = {
-      fabric_article_number: string | null; fabric_article_description: string | null;
-      division: string | null; sub_division: string | null; major_category: string | null;
-      vendor_name: string | null; vendor_code: string | null; fabric_rate: number | null;
-      m_fab_div: string | null; m_yarn: string | null;
-      m_fab_main_mvgr_1: string | null; m_fab_main_mvgr_2: string | null;
-      m_construction: string | null; m_ounz: string | null; m_width: string | null;
-      m_weave_01: string | null; m_weave_02: string | null;
-      m_count: string | null; m_gsm: string | null;
-      m_composition: string | null; m_finish: string | null; m_lycra: string | null;
-      approval_status: string; sap_sync_status: string; user_name: string | null;
-    };
-
-    const rows: DataRow[] = [];
-    let skipped = 0;
-
-    for (let r = 5; r <= ws.rowCount; r++) {
+    // Header row = the first row (of 10) with a "Fabric Article Number" cell.
+    const wanted = new Map(FAD_UPLOAD_COLUMNS.map((c) => [fadNormHeader(c.header), c]));
+    let headerRowNo = 0;
+    const colIndex = new Map<string, number>(); // column key → 1-based Excel column
+    for (let r = 1; r <= Math.min(10, ws.rowCount) && !headerRowNo; r++) {
       const row = ws.getRow(r);
-      const fabNo = cell(row, C.fabNo);
-      const fabDesc = cell(row, C.fabDesc);
-      const div = cell(row, C.div);
-      const majCat = cell(row, C.majCat);
-
-      // Skip fully blank rows
-      if (!fabNo && !fabDesc && !div && !majCat) { skipped++; continue; }
-
-      const approvalStatus = cell(row, C.approvalStatus).toUpperCase() || 'PENDING';
-      const sapSyncStatus  = cell(row, C.sapSyncStatus).toUpperCase()  || 'NOT_SYNCED';
-      const fabricRateRaw  = cell(row, C.fabricRate);
-      const fabricRate     = fabricRateRaw ? Number(fabricRateRaw) : NaN;
-
-      rows.push({
-        fabric_article_number:      fabNo      || null,
-        fabric_article_description: fabDesc    || null,
-        division:                   div        || null,
-        sub_division:               cell(row, C.subDiv)      || null,
-        major_category:             majCat     || null,
-        vendor_name:                cell(row, C.vendorName)  || null,
-        vendor_code:                cell(row, C.vendorCode)  || null,
-        fabric_rate:                Number.isFinite(fabricRate) ? fabricRate : null,
-        m_fab_div:                  cell(row, C.fabDiv)      || null,
-        m_yarn:                     cell(row, C.yarn)        || null,
-        m_fab_main_mvgr_1:          cell(row, C.mvgr1)       || null,
-        m_fab_main_mvgr_2:          cell(row, C.mvgr2)       || null,
-        m_construction:             cell(row, C.construction)|| null,
-        m_ounz:                     cell(row, C.ounz)        || null,
-        m_width:                    cell(row, C.width)       || null,
-        m_weave_01:                 cell(row, C.weave01)     || null,
-        m_weave_02:                 cell(row, C.weave02)     || null,
-        m_count:                    cell(row, C.count)       || null,
-        m_gsm:                      cell(row, C.gsm)         || null,
-        m_composition:              cell(row, C.composition) || null,
-        m_finish:                   cell(row, C.finish)      || null,
-        m_lycra:                    cell(row, C.lycra)       || null,
-        approval_status:            approvalStatus,
-        sap_sync_status:            sapSyncStatus,
-        user_name:                  cell(row, C.userName)    || null,
-      });
+      const found = new Map<string, number>();
+      for (let c = 1; c <= Math.max(row.cellCount, FAD_UPLOAD_COLUMNS.length); c++) {
+        const col = wanted.get(fadNormHeader(cellText(row, c)));
+        if (col && !found.has(col.key)) found.set(col.key, c);
+      }
+      if (found.has('fabric_article_number')) {
+        headerRowNo = r;
+        found.forEach((v, k) => colIndex.set(k, v));
+      }
+    }
+    if (!headerRowNo) {
+      res.status(400).json({ success: false, error: 'Header row not found: no "Fabric Article Number" column in the first 10 rows. Use the Template.' });
+      return;
+    }
+    const missingCols = FAD_UPLOAD_COLUMNS.filter((c) => c.mand && !colIndex.has(c.key)).map((c) => c.header);
+    if (missingCols.length) {
+      res.status(400).json({ success: false, error: `Mandatory column(s) missing from the sheet: ${missingCols.join(', ')}` });
+      return;
     }
 
-    const total = rows.length;
-    const BATCH = 1000;
-    console.log(`[FabricArticleData] Inserting ${total} rows in batches of ${BATCH}...`);
+    // Valid grid codes per characteristic (case-insensitive).
+    const gridRows = await prisma.fabricMajCatGridValue.findMany({ select: { characteristic: true, code: true } });
+    const grid = new Map<string, Set<string>>();
+    const gridExamples = new Map<string, string[]>(); // a few real codes, shown in the error text
+    for (const g of gridRows) {
+      const k = fadNormHeader(g.characteristic);
+      if (!grid.has(k)) { grid.set(k, new Set()); gridExamples.set(k, []); }
+      grid.get(k)!.add(g.code.trim().toUpperCase());
+      const ex = gridExamples.get(k)!;
+      if (ex.length < 5 && g.code.trim() && g.code.trim() !== '-') ex.push(g.code.trim());
+    }
+
+    type Parsed = { rowNo: number; values: Record<string, string | number | null> };
+    const valid: Parsed[] = [];
+    // Not-uploaded rows: plain-language reasons, the columns to fix (red in the
+    // error Excel) and the row's original values (so the error file can be fixed
+    // and uploaded again).
+    const rejected: Array<{
+      row: number; fabricArticleNumber: string; reasons: string[];
+      badColumns: string[]; values: Record<string, string>;
+    }> = [];
+    const rawByRow = new Map<number, Record<string, string>>();
+    let blankRows = 0;
+    const seenInFile = new Map<string, number>();
+
+    for (let r = headerRowNo + 1; r <= ws.rowCount; r++) {
+      const row = ws.getRow(r);
+      const raw: Record<string, string> = {};
+      for (const c of FAD_UPLOAD_COLUMNS) raw[c.key] = colIndex.has(c.key) ? cellText(row, colIndex.get(c.key)!) : '';
+      if (Object.values(raw).every((v) => v === '')) { blankRows++; continue; }
+
+      rawByRow.set(r, raw);
+      const reasons: string[] = [];
+      const badColumns: string[] = [];
+      const values: Record<string, string | number | null> = {};
+      const blanks: string[] = [];
+      for (const c of FAD_UPLOAD_COLUMNS) {
+        const v = raw[c.key];
+        values[c.key] = null;
+        if (!v) {
+          if (c.mand) { blanks.push(c.header); badColumns.push(c.header); }
+          continue;
+        }
+        if (c.numeric) {
+          const num = Number(v.replace(/,/g, ''));
+          if (!Number.isFinite(num)) {
+            reasons.push(`${c.header} must be a number (you entered "${v}").`);
+            badColumns.push(c.header);
+          } else values[c.key] = num;
+          continue;
+        }
+        if (c.grid) {
+          const codes = grid.get(c.grid);
+          if (codes && codes.size > 0 && !codes.has(v.toUpperCase())) {
+            const ex = gridExamples.get(c.grid) ?? [];
+            reasons.push(`${c.header} "${v}" is not a valid value. Use a value from Fabric Grid Values${ex.length ? ` (e.g. ${ex.join(', ')})` : ''}.`);
+            badColumns.push(c.header);
+            continue;
+          }
+        }
+        values[c.key] = v;
+      }
+      if (blanks.length) reasons.unshift(`Fill in: ${blanks.join(', ')}.`);
+
+      const status = String(values.approval_status ?? '').toUpperCase() || 'APPROVED';
+      if (!['APPROVED', 'PENDING', 'REJECTED'].includes(status)) {
+        reasons.push(`Status must be APPROVED, PENDING or REJECTED (you entered "${values.approval_status}").`);
+        badColumns.push('Status');
+      }
+      values.approval_status = status;
+
+      const fabNo = raw.fabric_article_number;
+      if (fabNo) {
+        const first = seenInFile.get(fabNo);
+        if (first) {
+          reasons.push(`This Fabric Article Number is also on row ${first} of the file. Keep it only once.`);
+          badColumns.push('Fabric Article Number');
+        } else seenInFile.set(fabNo, r);
+      }
+
+      if (reasons.length) {
+        rejected.push({ row: r, fabricArticleNumber: fabNo, reasons, badColumns, values: fadHeaderValues(raw) });
+      } else valid.push({ rowNo: r, values });
+    }
+
+    // Existing rows with these numbers: UPLOADER → update; any other type → not uploaded.
+    const nums = valid.map((v) => String(v.values.fabric_article_number));
+    const existing = nums.length
+      ? await prisma.fabricArticleData.findMany({
+          where: { fabricArticleNumber: { in: nums } },
+          select: { fabricArticleNumber: true, fabricArticleType: true },
+        })
+      : [];
+    const uploaderNums = new Set<string>();
+    const otherType = new Map<string, string>();
+    for (const e of existing) {
+      if (!e.fabricArticleNumber) continue;
+      if (e.fabricArticleType === 'UPLOADER') uploaderNums.add(e.fabricArticleNumber);
+      else otherType.set(e.fabricArticleNumber, e.fabricArticleType || 'another type');
+    }
+
+    const toInsert: Parsed[] = [];
+    const toUpdate: Parsed[] = [];
+    for (const v of valid) {
+      const no = String(v.values.fabric_article_number);
+      if (otherType.has(no)) {
+        const type = otherType.get(no);
+        const where = type === 'Fabric Article' ? 'a Fabric Article on the Created/New page'
+          : type === 'FG' ? 'an FG fabric article' : `a "${type}" row`;
+        rejected.push({
+          row: v.rowNo, fabricArticleNumber: no,
+          reasons: [`This Fabric Article Number already exists as ${where}. It can't be changed from this upload. Remove the row or use a new number.`],
+          badColumns: ['Fabric Article Number'],
+          values: fadHeaderValues(rawByRow.get(v.rowNo) ?? {}),
+        });
+      } else if (uploaderNums.has(no)) toUpdate.push(v);
+      else toInsert.push(v);
+    }
+    rejected.sort((a, b) => a.row - b.row);
+
+    const userName = (req as any).user?.name || (req as any).user?.email || null;
+    const dataCols = FAD_UPLOAD_COLUMNS.map((c) => c.key);
+    const recordType = FAD_UPLOAD_COLUMNS.map((c) => `${c.key} ${c.numeric ? 'numeric' : 'text'}`).join(', ');
+    const BATCH = 500;
+    // Excel "Fabric Rate" fills both fabric_rate and rate.
 
     await prisma.$transaction(async (tx) => {
-      for (let i = 0; i < rows.length; i += BATCH) {
-        const batch = rows.slice(i, i + BATCH);
-        await tx.$executeRaw`
-          INSERT INTO fabric_article_data (
-            id, fabric_article_number, fabric_article_description,
-            division, sub_division, major_category, vendor_name, vendor_code, fabric_rate,
-            m_fab_div, m_yarn, m_fab_main_mvgr_1, m_fab_main_mvgr_2,
-            m_construction, m_ounz, m_width, m_weave_01, m_weave_02,
-            m_count, m_gsm, m_composition, m_finish, m_lycra,
-            approval_status, sap_sync_status, user_name,
-            created_at, updated_at
-          )
-          SELECT
-            gen_random_uuid(), v.fabric_article_number, v.fabric_article_description,
-            v.division, v.sub_division, v.major_category, v.vendor_name, v.vendor_code, v.fabric_rate,
-            v.m_fab_div, v.m_yarn, v.m_fab_main_mvgr_1, v.m_fab_main_mvgr_2,
-            v.m_construction, v.m_ounz, v.m_width, v.m_weave_01, v.m_weave_02,
-            v.m_count, v.m_gsm, v.m_composition, v.m_finish, v.m_lycra,
-            v.approval_status, v.sap_sync_status, v.user_name,
-            NOW(), NOW()
-          FROM jsonb_to_recordset(${JSON.stringify(batch)}::jsonb) AS v(
-            fabric_article_number text, fabric_article_description text,
-            division text, sub_division text, major_category text, vendor_name text, vendor_code text, fabric_rate numeric,
-            m_fab_div text, m_yarn text, m_fab_main_mvgr_1 text, m_fab_main_mvgr_2 text,
-            m_construction text, m_ounz text, m_width text, m_weave_01 text, m_weave_02 text,
-            m_count text, m_gsm text, m_composition text, m_finish text, m_lycra text,
-            approval_status text, sap_sync_status text, user_name text
-          )
-        `;
+      for (let i = 0; i < toInsert.length; i += BATCH) {
+        const batch = toInsert.slice(i, i + BATCH).map((p) => p.values);
+        await tx.$executeRawUnsafe(
+          `INSERT INTO fabric_article_data (
+             id, ${dataCols.join(', ')}, rate,
+             fabric_article_type, sap_sync_status, approved_at, user_name, created_at, updated_at
+           )
+           SELECT gen_random_uuid(), ${dataCols.map((k) => `v.${k}`).join(', ')}, v.fabric_rate,
+             'UPLOADER',
+             CASE WHEN v.approval_status = 'APPROVED' THEN 'SYNCED' ELSE 'NOT_SYNCED' END,
+             CASE WHEN v.approval_status = 'APPROVED' THEN NOW() END,
+             $2::text, NOW(), NOW()
+           FROM jsonb_to_recordset($1::jsonb) AS v(${recordType})`,
+          JSON.stringify(batch), userName,
+        );
+      }
+      const sets = dataCols
+        .filter((k) => k !== 'fabric_article_number')
+        .map((k) => `${k} = COALESCE(v.${k}, f.${k})`)
+        .join(', ');
+      for (let i = 0; i < toUpdate.length; i += BATCH) {
+        const batch = toUpdate.slice(i, i + BATCH).map((p) => p.values);
+        await tx.$executeRawUnsafe(
+          `UPDATE fabric_article_data f SET ${sets},
+             rate = COALESCE(v.fabric_rate, f.rate),
+             approved_at = CASE WHEN v.approval_status = 'APPROVED' THEN COALESCE(f.approved_at, NOW()) ELSE f.approved_at END,
+             updated_at = NOW()
+           FROM jsonb_to_recordset($1::jsonb) AS v(${recordType})
+           WHERE f.fabric_article_type = 'UPLOADER' AND f.fabric_article_number = v.fabric_article_number`,
+          JSON.stringify(batch),
+        );
       }
     }, { timeout: 5 * 60 * 1000 });
 
-    console.log(`[FabricArticleData] Done — ${total} rows inserted, ${skipped} skipped.`);
+    const inserted = toInsert.length;
+    const updated = toUpdate.length;
+    console.log(`[FabricArticleData] Upload: ${inserted} inserted, ${updated} updated, ${rejected.length} not uploaded, ${blankRows} blank rows.`);
 
     res.json({
       success: true,
-      message: `Fabric article data uploaded. Inserted ${total} rows.`,
-      data: { uploadedAt: new Date().toISOString(), fileName: req.file.originalname, total, skipped },
+      message: `Inserted ${inserted}, updated ${updated}, not uploaded ${rejected.length}.`,
+      data: {
+        uploadedAt: new Date().toISOString(), fileName: req.file.originalname,
+        inserted, updated, notUploaded: rejected.length, rejected,
+        // Template layout for the error Excel (header order + mandatory flags).
+        columns: FAD_UPLOAD_COLUMNS.map((c) => ({ header: c.header, mand: !!c.mand })),
+      },
     });
   } catch (error: any) {
     console.error('[FabricArticleData] Upload error:', error);

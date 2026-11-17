@@ -25,7 +25,7 @@ import { ArticleListHeader } from '@/shared/components/articles/ArticleListHeade
 import { APP_CONFIG } from '../../../constants/app/config';
 import { SIMPLIFIED_HIERARCHY } from '../../extraction/components/SimplifiedCategorySelector';
 import { getMcCodeByMajorCategory, MAJOR_CATEGORY_ALLOWED_VALUES } from '../../../data/majorCategoryMcCodeMap';
-import { exportToExcel } from '../../../shared/utils/export/extractionExport';
+import { exportToExcel, excelLink, type ExportDataItem } from '../../../shared/utils/export/extractionExport';
 import { formatDivisionLabel } from '../../../shared/utils/ui/formatters';
 import type { DetailFilters, DetailNavigationState } from './FabricArticleDetailPage';
 
@@ -56,10 +56,10 @@ const getSubDivisionOptions = (division?: string): string[] => {
 };
 
 export const SIMPLE_APPROVER_EXPORT_HEADERS = [
-    'Fabric Article Number', 'Fabric Article Description',
+    'Fabric Article Number', 'Fabric Article Description', 'Photo HL',
     'Division', 'Sub Division', 'Major Category', 'MC Description',
     'Status', 'SAP Sync Status',
-    'Vendor Name', 'Vendor Code', 'Design Number',
+    'Vendor Name', 'Vendor Code', 'Design Number', 'SEGMENT',
     'M_FAB_DIV', 'M_YARN', 'M_FAB_MAIN_MVGR_1', 'M_FAB_MAIN_MVGR_2',
     'M_CONSTRUCTION', 'M_OUNZ', 'M_WIDTH', 'M_WEAVE_02',
     'M_COUNT', 'M_WEAVE_01', 'M_COMPOSITION', 'M_FINISH', 'M_GSM', 'M_LYCRA',
@@ -67,14 +67,28 @@ export const SIMPLE_APPROVER_EXPORT_HEADERS = [
     'Article Fashion Type', 'Source', 'Created Date',
 ] as const;
 
-const VARIANT_EXTRA_HEADERS = ['Row Type', 'Parent Fabric Article Number', 'Variant Size', 'Variant Color', 'SAP Article ID'] as const;
+// Created › All download: column order of the Ram sir article-master sheet (row 4), with
+// Photo HL kept after the description; columns not in that sheet go at the end.
+const CREATED_ALL_EXPORT_HEADERS = [
+    'Division', 'Sub Division', 'Major Category',
+    'Fabric Article Number', 'Fabric Article Description', 'Photo HL',
+    'MC Description', 'Vendor Name', 'Vendor Code', 'Design Number', 'SEGMENT', 'Status',
+    'M_FAB_DIV', 'M_YARN', 'M_FAB_MAIN_MVGR_1', 'M_FAB_MAIN_MVGR_2',
+    'M_CONSTRUCTION', 'M_OUNZ', 'M_WIDTH', 'M_WEAVE_02',
+    'M_COUNT', 'M_WEAVE_01', 'M_COMPOSITION', 'M_FINISH', 'M_GSM', 'M_LYCRA',
+    'Fabric Rate', 'V2 Fabric Rate', 'Value Add Cost', 'Article Fashion Type',
+    'Source', 'Created Date', 'Approved By',
+];
 
-function mapVariantExportRow(row: any): Record<string, string | number | undefined> {
+const VARIANT_EXTRA_HEADERS =['Row Type', 'Parent Fabric Article Number', 'Variant Size', 'Variant Color', 'SAP Article ID'] as const;
+
+function mapVariantExportRow(row: any): ExportDataItem {
   const rawDate = row.createdAt ? new Date(row.createdAt) : null;
   const formattedDate = rawDate && !Number.isNaN(rawDate.getTime()) ? rawDate.toLocaleDateString('en-GB') : '';
   return {
     'Fabric Article Number':      row.fabricArticleNumber || '',
     'Fabric Article Description': row.fabricArticleDescription || '',
+    'Photo HL':                   excelLink(row.imageUrl),
     Division:                     row.division || '',
     'Sub Division':               row.subDivision || '',
     'Major Category':             row.majorCategory || '',
@@ -84,6 +98,7 @@ function mapVariantExportRow(row: any): Record<string, string | number | undefin
     'Vendor Name':                row.vendorName || '',
     'Vendor Code':                row.vendorCode || '',
     'Design Number':              row.designNumber || '',
+    SEGMENT:                      row.segment || '',
     M_FAB_DIV:                    row.fabDiv || '',
     M_YARN:                       row.yarn1 || '',
     M_FAB_MAIN_MVGR_1:            row.mainMvgr || '',
@@ -313,6 +328,7 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
       return {
         'Fabric Article Number':      row.fabricArticleNumber || '',
         'Fabric Article Description': row.fabricArticleDescription || '',
+        'Photo HL':                   excelLink(row.imageUrl),
         Division:                     row.division || '',
         'Sub Division':               row.subDivision || '',
         'Major Category':             row.majorCategory || '',
@@ -322,6 +338,7 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
         'Vendor Name':                row.vendorName || '',
         'Vendor Code':                row.vendorCode || '',
         'Design Number':              row.designNumber || '',
+        SEGMENT:                      row.segment || '',
         M_FAB_DIV:                    row.fabDiv || '',
         M_YARN:                       row.yarn1 || '',
         M_FAB_MAIN_MVGR_1:            row.mainMvgr || '',
@@ -343,7 +360,7 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
         Source:                       row.source || '',
         'Created Date':               formattedDate,
         'Approved By':                row.approvedByName || '',
-      } as Record<string, string | number | undefined>;
+      } as ExportDataItem;
     });
   }, []);
 
@@ -380,10 +397,8 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
       const exportData = buildApproverExportData(allRows);
       const fileName = fabricExportFileLabel(pathType);
       const divLabel = fabricExportDivLabel(divisionFilter);
-      // Created tab: no SAP Sync Status column; Approved By (approver's name) at the end.
-      const headers = pathType === 'created'
-        ? [...exportHeaders.filter((h) => h !== 'SAP Sync Status'), 'Approved By']
-        : exportHeaders;
+      // Created tab: Ram sir column order (no SAP Sync Status), Approved By at the end.
+      const headers = pathType === 'created' ? CREATED_ALL_EXPORT_HEADERS : exportHeaders;
       await exportToExcel(exportData, headers, [], undefined, { fileBaseName: `${fileName}${divLabel}` });
       message.dismiss(loadingId);
       message.success(`Exported ${allRows.length} records`);
@@ -500,7 +515,8 @@ export default function ApproverDashboard({ pathType }: ApproverDashboardProps =
     if (pathType === 'created') {
       const exportData = buildApproverExportData(rows);
       const divLabel = fabricExportDivLabel(divisionFilter);
-      await exportToExcel(exportData, exportHeaders, [], undefined, { fileBaseName: `Fabric-Article-Created-Selected${divLabel}` });
+      // Approved By (approver's name) after Created Date, as in the All download.
+      await exportToExcel(exportData, [...exportHeaders, 'Approved By'], [], undefined, { fileBaseName: `Fabric-Article-Created-Selected${divLabel}` });
       message.success(`Exported ${rows.length} selected records`);
       return;
     }

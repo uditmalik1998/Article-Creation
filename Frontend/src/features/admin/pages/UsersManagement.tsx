@@ -85,7 +85,6 @@ const ROLE_TONE_CLASSES = {
   approver: 'bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-300',
   creator: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300',
   committee: 'bg-violet-100 text-violet-800 dark:bg-violet-500/15 dark:text-violet-300',
-  planning: 'bg-amber-100 text-amber-900 dark:bg-amber-500/15 dark:text-amber-300',
   pd: 'bg-pink-100 text-pink-800 dark:bg-pink-500/15 dark:text-pink-300',
 } as const;
 
@@ -95,7 +94,6 @@ const ROLE_TONE: Record<AdminUser['role'], keyof typeof ROLE_TONE_CLASSES> = {
   BODY_APPROVER: 'approver', GM_APPROVER: 'approver',
   CREATOR: 'creator', GM_CREATOR: 'creator',
   PO_COMMITTEE: 'committee',
-  PLANNING: 'planning',
   PD: 'pd', PD_DESIGNER: 'pd',
 };
 
@@ -397,7 +395,7 @@ const userSchema = z.object({
   name: z.string().min(1, 'Please enter name'),
   email: z.string().email('Enter a valid email').min(1, 'Please enter email'),
   password: z.string().optional(),
-  role: z.enum(['CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'PLANNING', 'GM_APPROVER', 'GM_CREATOR']),
+  role: z.enum(['CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'GM_APPROVER', 'GM_CREATOR']),
   divisionIds: z.array(z.string()).optional(),
   subDivision: z.array(z.string()).optional(),
   businessDivision: z.enum(BUSINESS_DIVISIONS).optional().nullable(),
@@ -738,7 +736,7 @@ export default function UsersManagement() {
       usersSheet.addRow(['John Creator', 'john.creator@company.com', 'Temp@123', 'CREATOR', 'MENS', 'ML', 'MENS']);
       usersSheet.addRow(['Rita CategoryHead', 'rita.head@company.com', 'Temp@123', 'CATEGORY_HEAD', 'LADIES', '', 'LADIES']);
 
-      const roleOptions = ['CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'PLANNING', 'GM_APPROVER', 'GM_CREATOR'];
+      const roleOptions = ['CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'GM_APPROVER', 'GM_CREATOR'];
       const divisionOptions = divisionNames;
       const subDivisionOptions = Array.from(
         new Set(departments.flatMap((d) => (d.subDepartments || []).map((s) => s.code).filter(Boolean))),
@@ -804,7 +802,7 @@ export default function UsersManagement() {
 
       const toRole = (roleRaw: string): AdminUser['role'] | null => {
         const role = roleRaw.toUpperCase();
-        if (['CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'PLANNING', 'GM_APPROVER', 'GM_CREATOR'].includes(role))
+        if (['CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'GM_APPROVER', 'GM_CREATOR'].includes(role))
           return role as AdminUser['role'];
         return null;
       };
@@ -871,9 +869,9 @@ export default function UsersManagement() {
             email,
             password,
             role,
-            division: role === 'PO_COMMITTEE' || role === 'PD' || role === 'BODY_APPROVER' || role === 'PLANNING' || role === 'GM_APPROVER' || role === 'GM_CREATOR' ? undefined : division,
+            division: role === 'PO_COMMITTEE' || role === 'PD' || role === 'BODY_APPROVER' || role === 'GM_APPROVER' || role === 'GM_CREATOR' ? undefined : division,
             subDivision:
-              role === 'CATEGORY_HEAD' || role === 'PO_COMMITTEE' || role === 'ADMIN' || role === 'PD' || role === 'BODY_APPROVER' || role === 'PLANNING'
+              role === 'CATEGORY_HEAD' || role === 'PO_COMMITTEE' || role === 'ADMIN' || role === 'PD' || role === 'BODY_APPROVER'
                 ? undefined
                 : subDivision,
             businessDivision,
@@ -1269,7 +1267,7 @@ export default function UsersManagement() {
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                {(['CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'PLANNING', 'GM_APPROVER', 'GM_CREATOR'] as const)
+                                {(['CREATOR', 'PO_COMMITTEE', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD', 'ADMIN', 'PD_DESIGNER', 'PD', 'BODY_APPROVER', 'GM_APPROVER', 'GM_CREATOR'] as const)
                                   .map((r) => (
                                   <SelectItem key={r} value={r}>
                                     {roleLabel(r)}

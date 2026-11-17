@@ -1960,6 +1960,9 @@ export class ApproverController {
                     santaVdrCost: true, stopperVdrCost: true, tagVdrCost: true, tapeVdrCost: true, tasselsVdrCost: true,
                     printVendorCost: true, embVendorCost: true, washingVendorCost: true,
                     cuttingVendorPrVal: true, stitchingVendorPrVal: true, ironingVendorPrVal: true, finishingVendorPrVal: true,
+                    cuttingFinalPrVal: true, stitchingFinalPrVal: true, ironingFinalPrVal: true, finishingFinalPrVal: true,
+                    // CMP COST card totals — used when that column has no process values
+                    totalBgtPrVal: true, totalActPrVal: true, totalVendorPrVal: true, totalFinalPrVal: true,
                 },
             });
         } catch (err) {
@@ -2024,16 +2027,17 @@ export class ApproverController {
             let nextRow = 0;
             const matRow = (r: {
                 type: string; mc: string; artNo?: any; artDesc?: any; uom?: string; qty?: any;
-                dash?: boolean; k?: any; l?: any; m?: any; n?: any; kFormula?: string; lFormula?: string; mFormula?: string;
+                dash?: boolean; k?: any; l?: any; m?: any; n?: any; kFormula?: string; lFormula?: string; mFormula?: string; nFormula?: string;
             }, style?: { fill?: string; bold?: boolean }) => {
                 const rn = nextRow;
                 const d = r.dash ? '-' : null;
                 const k = r.kFormula ? { formula: r.kFormula } : r.k;
                 const l = r.lFormula ? { formula: r.lFormula } : r.l;
                 const m = r.mFormula ? { formula: r.mFormula } : r.m;
+                const fin = r.nFormula ? { formula: r.nFormula } : r.n;
                 const n = addRow([
                     r.type, r.mc, r.artNo ?? null, r.artDesc ?? null, r.uom ?? null, r.qty ?? null,
-                    null, d, d, k ?? null, l ?? null, m ?? null, r.n ?? null,
+                    null, d, d, k ?? null, l ?? null, m ?? null, fin ?? null,
                     { formula: `IF(M${rn}="","",M${rn}-K${rn})` }, null, null,
                 ], style);
                 nextRow = n + 1;
@@ -2081,9 +2085,19 @@ export class ApproverController {
                     .map(([name, key]) => ({ name, k: num(a[`${key}AutoBgt`]), l: num(a[`${key}RoughV2`]), m: num(a[`${key}VendorCost`]) }))
                     .filter((r) => hasCost(r.k, r.l, r.m));
                 const bodyKeep = BODY_ROWS
-                    .map(([name, key]) => ({ name, k: num(a[`${key}BgtPrVal`]), l: num(a[`${key}ActPrVal`]), m: num(a[`${key}VendorPrVal`]) }))
-                    .filter((r) => hasCost(r.k, r.l, r.m));
-                return { btrimKeep, pkgKeep, vaddKeep, bodyKeep };
+                    .map(([name, key]) => ({
+                        name, k: num(a[`${key}BgtPrVal`]), l: num(a[`${key}ActPrVal`]),
+                        m: num(a[`${key}VendorPrVal`]), f: num(a[`${key}FinalPrVal`]),
+                    }))
+                    .filter((r) => hasCost(r.k, r.l, r.m, r.f));
+                // CMP COST card totals (BGT / ACT / VENDOR / FINAL) — the CMP COST row falls back
+                // to these for a column whose process values are all empty.
+                const bodyTotals = {
+                    k: num(a.totalBgtPrVal), l: num(a.totalActPrVal),
+                    m: num(a.totalVendorPrVal), f: num(a.totalFinalPrVal),
+                };
+                const hasBody = bodyKeep.length > 0 || hasCost(bodyTotals.k, bodyTotals.l, bodyTotals.m, bodyTotals.f);
+                return { btrimKeep, pkgKeep, vaddKeep, bodyKeep, bodyTotals, hasBody };
             };
             // Rows one article's block takes. Full block: 2 blank, header, values, blank,
             // summary header, summary values (7), blank, COST, table header, TOTAL, blank,
@@ -2095,7 +2109,7 @@ export class ApproverController {
                 const pl = materialPlan(a);
                 let h = 13;
                 for (const n of [pl.btrimKeep.length, pl.pkgKeep.length, pl.vaddKeep.length]) if (n > 0) h += 1 + n;
-                if (pl.bodyKeep.length > 0) h += 2 + pl.bodyKeep.length;
+                if (pl.hasBody) h += 2 + pl.bodyKeep.length;
                 return h;
             };
             const partsInExport = (parentId: string) =>
@@ -2152,8 +2166,7 @@ export class ApproverController {
                 track(addRow([null, null, null, null, null, null, null, null, null, 'COST'], { bold: true, from: 10, to: 10 }));
                 track(addRow(MAT_HDR, { fill: DARK_BLUE, bold: true, white: true }));
 
-                const { btrimKeep, pkgKeep, vaddKeep, bodyKeep } = materialPlan(a);
-                const hasBody = bodyKeep.length > 0;
+                const { btrimKeep, pkgKeep, vaddKeep, bodyKeep, bodyTotals, hasBody } = materialPlan(a);
 
                 // Total row — rows are predicted: FAB starts 2 rows after it, then
                 // each non-empty section follows a blank row.
@@ -2163,8 +2176,9 @@ export class ApproverController {
                     if (n > 0) lastNonBody += 1 + n;
                 }
                 const cmpRow = lastNonBody + 2;
+                // TOTAL = (materials + CMP COST) + 10% margin, for AUTO -BGT / ROUGH-V2 / VDR PR PC COST / FINAL.
                 const sumCol = (c: string) =>
-                    `SUM(${c}${firstMat}:${c}${lastNonBody})` + (hasBody ? `+${c}${cmpRow}` : '');
+                    `(SUM(${c}${firstMat}:${c}${lastNonBody})` + (hasBody ? `+${c}${cmpRow}` : '') + `)*1.1`;
                 const tr = ws.addRow([
                     'TOTAL', null, null, null, null, null, null, null, null,
                     { formula: sumCol('J') }, { formula: sumCol('K') }, { formula: sumCol('L') }, { formula: sumCol('M') },
@@ -2231,14 +2245,23 @@ export class ApproverController {
                     track(blank());
                     const procFirst = cmpRow + 1;
                     const procLast = cmpRow + bodyKeep.length;
+                    // Each column: SUM of the process rows when any of them has a value,
+                    // else the CMP COST card total from the DB (e.g. only total_act_pr_val saved).
+                    const cmpCol = (col: string, key: 'k' | 'l' | 'm' | 'f') =>
+                        bodyKeep.some((r) => r[key] != null)
+                            ? { formula: `SUM(${col}${procFirst}:${col}${procLast})` }
+                            : { value: bodyTotals[key] };
+                    const cJ = cmpCol('J', 'k'), cK = cmpCol('K', 'l'), cL = cmpCol('L', 'm'), cM = cmpCol('M', 'f');
                     const cmpN = matRow({
                         type: 'BODY', mc: 'CMP COST', artNo: a.bodyArticle || null, artDesc: a.bodyArticleDescription || null, uom: 'EA',
-                        kFormula: `SUM(J${procFirst}:J${procLast})`, lFormula: `SUM(K${procFirst}:K${procLast})`,
-                        mFormula: `SUM(L${procFirst}:L${procLast})`,
+                        kFormula: cJ.formula, k: cJ.value,
+                        lFormula: cK.formula, l: cK.value,
+                        mFormula: cL.formula, m: cL.value,
+                        nFormula: cM.formula, n: cM.value,
                     }, { fill: PURPLE, bold: true });
                     if (cmpN !== cmpRow) console.warn('[preciseCostingExport] cmp row drift', cmpN, cmpRow);
                     for (const r of bodyKeep) {
-                        matRow({ type: 'BODY', mc: r.name, k: r.k, l: r.l, m: r.m }, { fill: PURPLE });
+                        matRow({ type: 'BODY', mc: r.name, k: r.k, l: r.l, m: r.m, n: r.f }, { fill: PURPLE });
                     }
                 }
                 // A set parent's summary points at its parts' rows by this height.
@@ -3183,7 +3206,7 @@ export class ApproverController {
                 const mergedItem = { ...(existingItem as any), ...data };
                 const sapChanges = await buildModifyChangesPayload(mergedItem);
 
-                for (const k of ['HSN_CODE', 'SUB_DIV', 'MC_CD', 'SEASON', 'PRICE_BAND_CATEGORY', 'PURCH_PRICE', 'NET_WEIGHT', 'VENDOR', 'MRP', 'DSG_NO', 'ARTICLE_DES1']) {
+                for (const k of ['HSN_CODE', 'SUB_DIV', 'MC_CD', 'SEASON', 'PRICE_BAND_CATEGORY', 'FASHION_GRADE', 'PURCH_PRICE', 'NET_WEIGHT', 'VENDOR', 'MRP', 'DSG_NO', 'ARTICLE_DES1']) {
                     delete (sapChanges as any)[k];
                 }
                 // Vendor code on an existing article is the EXTWG attribute in SAP.
@@ -5696,11 +5719,16 @@ export class ApproverController {
             return res.json({ results: [], attributeFallbackRate: null });
         }
 
-        // Searches the Fabric Article › Created rows: fabric_article_data with
-        // fabric_article_type = 'Fabric Article' and approval_status = 'APPROVED'.
+        // fabVdr = the FG card's M_FAB_VDR. NON-NOMINATED searches the Fabric Article › FG Created
+        // rows (fabric_article_type 'FG'); NOMINATED or not sent searches the Fabric Article › Created
+        // rows ('Fabric Article' from SRM + 'UPLOADER'). Always APPROVED only.
+        const fabVdr = String(req.query.fabVdr ?? '').trim().toUpperCase();
+        const typeFilter = fabVdr === 'NON-NOMINATED'
+            ? 'FG'
+            : { in: ['Fabric Article', 'UPLOADER'] };
         const descResults = await prisma.fabricArticleData.findMany({
             where: {
-                fabricArticleType: 'Fabric Article',
+                fabricArticleType: typeFilter,
                 approvalStatus: 'APPROVED',
                 ...(byAttrs ? { AND: attrConds } : {
                     OR: [
@@ -6673,6 +6701,14 @@ export class ApproverController {
         rate: true, segment: true,
     } as const;
 
+    // users.name per approved_by id — the "Approved By" Excel column (All + Export selected).
+    private static async fabricApproverNames(rows: Array<{ approvedBy?: number | null }>): Promise<Map<number, string>> {
+        const ids = [...new Set(rows.map((r) => r.approvedBy).filter((v): v is number => v != null))];
+        if (ids.length === 0) return new Map();
+        const users = await prisma.user.findMany({ where: { id: { in: ids } }, select: { id: true, name: true } });
+        return new Map(users.map((u) => [u.id, u.name]));
+    }
+
     static getFabricArticleDataItems = async (req: Request, res: Response) => {
         const query = req.query as Record<string, string>;
         const page = parseInt(query.page || '1', 10);
@@ -6686,7 +6722,7 @@ export class ApproverController {
         const orderBy = pathType === 'created'
             ? ({ approvedAt: { sort: 'desc', nulls: 'last' } } as const)
             : ({ createdAt: 'desc' } as const);
-        const select = ApproverController.FABRIC_ARTICLE_DATA_SELECT;
+        const select = { ...ApproverController.FABRIC_ARTICLE_DATA_SELECT, approvedBy: true } as const;
 
         const { rows, total } = ApproverController.isCardGroupBy(query.groupBy)
             ? await ApproverController.findGroupedPage(prisma.fabricArticleData, {
@@ -6698,7 +6734,11 @@ export class ApproverController {
                 prisma.fabricArticleData.count({ where }),
             ]).then(([rows, total]) => ({ rows, total }));
 
-        const data = rows.map((r) => ApproverController.fabricArticleDataRowToItem(r));
+        const approverNames = await ApproverController.fabricApproverNames(rows as Array<{ approvedBy?: number | null }>);
+        const data = rows.map((r: any) => ({
+            ...ApproverController.fabricArticleDataRowToItem(r),
+            approvedByName: r.approvedBy != null ? approverNames.get(r.approvedBy) ?? null : null,
+        }));
         return res.json({ data, meta: { total, page, limit: take } });
     };
 
@@ -6716,13 +6756,7 @@ export class ApproverController {
             where, orderBy, select: { ...ApproverController.FABRIC_ARTICLE_DATA_SELECT, approvedBy: true },
         });
         // "Approved By" column in the Excel download: approver's name from users.
-        const approverIds = [...new Set(rows.map((r) => r.approvedBy).filter((v): v is number => v != null))];
-        const approverNames = new Map(
-            (approverIds.length > 0
-                ? await prisma.user.findMany({ where: { id: { in: approverIds } }, select: { id: true, name: true } })
-                : []
-            ).map((u) => [u.id, u.name]),
-        );
+        const approverNames = await ApproverController.fabricApproverNames(rows);
         const data = rows.map((r) => ({
             ...ApproverController.fabricArticleDataRowToItem(r),
             approvedByName: r.approvedBy != null ? approverNames.get(r.approvedBy) ?? null : null,

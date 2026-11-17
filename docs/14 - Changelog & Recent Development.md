@@ -5,6 +5,127 @@
 
 ---
 
+## 2026-11-17 — Precise Costing export: CMP COST row falls back to the saved CMP totals
+
+- BODY › CMP COST row, per column (AUTO -BGT / ROUGH-V2 / VDR PR PC COST / FINAL): `SUM` of the process rows (CUTTING … FINISHING) when any of them has a value in that column; otherwise the DB total `total_bgt_pr_val` / `total_act_pr_val` / `total_vendor_pr_val` / `total_final_pr_val`. (User choice: process sum wins when both exist.)
+- FINAL is now filled for BODY: process rows show `*_final_pr_val`, CMP COST sums them or uses `total_final_pr_val`.
+- The BODY section now also appears when only totals are saved (no process values).
+- Example 1112133989: ACT process values all NULL, total_act_pr_val 190 → CMP COST ROUGH-V2 = 190 (was 0). ~472 approved FG articles have an ACT total with no ACT process values.
+- Backend only (ApproverController.ts `preciseCostingExport`: select, `materialPlan` bodyTotals/hasBody, `matRow` nFormula, CMP row).
+
+## 2026-11-17 — Precise Costing export: 10% margin in the TOTAL row
+
+- FG Created › Precise download: the MATERIAL TYPE **TOTAL** row formulas for AUTO -BGT, ROUGH-V2, VDR PR PC COST and FINAL are now `=(SUM(materials)+CMP COST)*1.1` (was without margin). The top summary (AUTO -V2 / ROUGH-V2 / VDR PR PC COST / FINAL, which reference the TOTAL row) and DIFF (FINAL − ROUGH-V2) follow automatically. Material rows unchanged.
+- Backend only (ApproverController.ts precise costing export, `sumCol`). Matches the OTH GRID-1 Cost Summary 10% margin (2026-11-11).
+
+## 2026-11-17 — FG FAB card: FABRIC ARTICLE NO. dropdown scrolls
+
+- The NO. result list was an absolutely-positioned div inside the card with no height limit, so the card clipped it and it couldn't scroll. It now opens in a portalled Popover (like FABRIC ARTICLE DESC), max height 240px with its own scroll; clicking the scrollbar keeps focus so the list stays open. Closing still happens on input blur / Escape / pick.
+- Frontend only (ApproverArticleList.tsx).
+
+## 2026-11-17 — FG FAB card: NOMINATED pick writes the fabric rate into ACT-V2
+
+- When M_FAB_VDR = NOMINATED, picking a row in **FABRIC ARTICLE NO.** or **FABRIC ARTICLE DESC** also sets **ACT-V2** (`roughV2`) to that fabric article's `fabric_rate`, overwriting the old value. A row with no rate leaves ACT-V2 unchanged.
+- NON-NOMINATED: unchanged (no ACT-V2 change). DESC pick still fills AUTO-BGT with the rate in both cases; NO. pick still fills no AUTO-BGT.
+- Frontend only (ApproverArticleList.tsx, `isFabVdrNominated`).
+
+## 2026-11-17 — Fabric Article › Created: All download uses the Ram sir column order
+
+- The **All** button on the Created page now writes columns in the order of row 4 of "Fabric-Article-Ram sir points in article master.xlsx" (Division, Sub Division, Major Category, Fabric Article Number, Fabric Article Description, MC Description, Vendor Name, Vendor Code, Design Number, SEGMENT, Status, M_FAB_DIV … M_LYCRA, Fabric Rate, V2 Fabric Rate, Value Add Cost, Article Fashion Type).
+- Photo HL stays right after Fabric Article Description (user choice). Columns not in that sheet go at the end: Source, Created Date, Approved By. SAP Sync Status still left out.
+- Only Created › All (`CREATED_ALL_EXPORT_HEADERS` in FabricArticleDashboard.tsx). Export selected, With variants and other pages keep the old order. Frontend only.
+
+## 2026-11-16 — SAP payloads: SEGMENT and ARTICLE FASHION TYPE lined up for FG and Fabric
+
+- Before: FG sent `segment → PRICE_BAND_CATEGORY` but never ARTICLE FASHION TYPE; Fabric sent `articleFashionType → FASHION_GRADE` but `PRICE_BAND_CATEGORY` was hard-coded `''`.
+- **FG** (`ZMM_ART_CREATION_RFC`): `flatToRfcMap.ts` adds `{ rfc: 'FASHION_GRADE', flat: 'articleFashionType' }`; `FASHION_GRADE` added to `RFC_ALWAYS_SEND_IF_PRESENT` (sent on create when non-empty, any major category). On **modify** it is removed from the patch payload like `PRICE_BAND_CATEGORY` (header field, not a characteristic) — ApproverController modify delete list.
+- **Fabric** (`ZMM_FAB_ART_CREATION_RFC`, zmmFabArtCreationService.ts): `PRICE_BAND_CATEGORY: str(row.segment)`.
+- Not verified against SAP: the FG create endpoint's structure could not be read (FUPARAREF has no ZMM_ART_CREATION_RFC). Test one FG create with a fashion type after deploy. ~21k approved FG rows have a value (F / RF / C / RC).
+- Backend only.
+
+## 2026-11-16 — Fabric Article: ARTICLE FASHION TYPE options from Fabric Grid Values
+
+- The ARTICLE FASHION TYPE dropdown (Fabric Article New / Created / FG pages, FabricArticleList.tsx) was hard-coded to `['C']`. It now uses the same source as M_FAB_DIV: `fabric_maj_cat_grid_values` rows with `characteristic = 'ARTICLE_FASHION_TYPE'` (today C, H, HH), returned by `/approver/fabric-grid-values`. Falls back to `['C']` if the table has none.
+- Frontend only. The Fabric Article Data uploader does not yet validate Article Fashion Type against this table.
+- Same day: the plain Select was replaced with the FAB attribute dropdown design (title + "N options", "Search code or name…", Clear selection, code + full name — C CORE / H HERO / HH DOUBLE HERO — slate highlight + check).
+
+## 2026-11-16 — SRM fabric rows: price also fills `rate`
+
+- `fabric_raw_data → fabric_article_data` worker now copies SRM `price` into both `fabric_rate` (as before) and `rate`. Backend only (fabricRawDataService.ts `processRow`). Applies to new rows only; existing rows not backfilled (411 SRM rows had rate NULL, 25 had a different rate on 2026-11-16).
+
+## 2026-11-16 — Admin › Users: Planning removed from the Role dropdown
+
+- **Planning** removed from the Users page completely: Add/Edit role dropdown, form validation, bulk-upload template role list + parser, role badge colour. Also removed from frontend role types (adminApi.ts, types/auth) and from the backend create/update user validation (adminController.ts), so the API rejects role PLANNING.
+- Only Planning user was id 106, an inactive test account (left as-is in DB).
+- **Not changed:** DB `user_role` enum + Prisma enum still have PLANNING; the Expense Change Request chain for Segment Master / Size Master had an active PLANNING stage (Category Head → Planning → MDM) in `expense_approval_stages`, and expenseAccessService still handles it. Those two PLANNING stage rows were then **deactivated** (`is_active=false`, DB change 2026-11-16), so Segment/Size Master now go Category Head → MDM. No requests were at that stage. Rows kept, can be re-activated.
+
+## 2026-11-16 — FG article pages: attribute dropdown text +2px
+
+- The attribute value dropdowns on the FG article cards (search box, Clear selection, options, "No options found", option sub-text) went from 11px → 13px (sub-text 10px → 12px). Body Article pages (same component, `allowGroups` set) keep the old sizes. The fabric/body article number search lists are unchanged.
+- Frontend only (ApproverArticleList.tsx).
+
+## 2026-11-16 — FG FAB card: M_FAB_VDR decides the fabric article search source
+
+- FABRIC ARTICLE NO. and FABRIC ARTICLE DESC (typed + open-time exact-attribute search) now send `fabVdr` (the card's M_FAB_VDR; blank counts as NON-NOMINATED, the card default) to `/approver/fabric-article-data/search`.
+  - **NON-NOMINATED** → `fabric_article_data` where `fabric_article_type = 'FG'` AND APPROVED (Fabric Article › FG Created page).
+  - **NOMINATED** (or param not sent, e.g. cards without the M_FAB_VDR row) → `fabric_article_type IN ('Fabric Article','UPLOADER')` AND APPROVED (unchanged flow).
+- AUTO-BGT fallback from `precise_fabric_article_data` unchanged for both (user choice).
+- **Create Fabric Article** button is disabled when M_FAB_VDR = NOMINATED.
+- Files: ApproverController.ts (`searchFabricArticleData`), ApproverArticleList.tsx (`fabVdrVal` / `fabVdrParam` / `isFabVdrNominated`). Backend + frontend deploy; old frontend without `fabVdr` keeps the old search.
+
+## 2026-11-16 — Fabric Article Data uploader: Fabric Rate also fills `rate`
+
+- The Excel "Fabric Rate" column is now saved to both `fabric_rate` and `rate` in `fabric_article_data` (insert and update). Template unchanged. Backend only (`uploadFabricArticleData`, adminController.ts).
+
+## 2026-11-16 — FG FAB card: FABRIC ARTICLE NO. / DESC dropdowns include UPLOADER rows
+
+- `searchFabricArticleData` (`/approver/fabric-article-data/search`) now reads `fabric_article_data` where `fabric_article_type IN ('Fabric Article', 'UPLOADER')` and `approval_status = 'APPROVED'` (was 'Fabric Article' only). Applies to the NO. text search, DESC text search and DESC open-time exact-attribute search. Rate fallback still uses `precise_fabric_article_data`.
+- Backend only (ApproverController.ts).
+
+## 2026-11-16 — FG FAB card: picking FABRIC ARTICLE NO. fills the FAB grid again (reverts 2026-11-13)
+
+- User asked to bring back the old behaviour: choosing a row in the FABRIC ARTICLE NO. dropdown sets number + description **and** M_FAB_DIV, M_YARN, M_FAB_MAIN_MVGR_1/2, M_CONSTRUCTION, M_OUNZ, M_WIDTH, M_WEAVE_01/02, M_COUNT, M_COMPOSITION, M_FINISH, M_GSM, M_LYCRA from that fabric article (blank values clear the field). Mapping restored from commit 18906cb.
+- Frontend only (ApproverArticleList.tsx). The 2026-11-13 entry "picking FABRIC ARTICLE NO. no longer changes the FAB attributes" is superseded.
+
+## 2026-11-16 — Fabric Article Data uploader: Download errors Excel
+
+- After an upload with failed rows, the card shows **Download errors (N)**. The Excel has the template layout (mand row 3, headers row 4) plus two leading columns, **Row in your file** and **What to fix**; each row keeps the values the user uploaded and the cells to fix are red. Fix and upload the same file again (the extra columns are ignored).
+- Reasons rewritten in plain language: "Fill in: segment, M_GSM.", "M_FAB_DIV \"UDIT\" is not a valid value. Use a value from Fabric Grid Values (e.g. DNM, K, …).", "Fabric Rate must be a number…", "…also on row 12 of the file. Keep it only once.", "…already exists as a Fabric Article on the Created/New page. It can't be changed from this upload…".
+- Backend `uploadFabricArticleData` now returns per rejected row `badColumns` + `values` (by header) and `columns` (template headers + mand). Frontend builds the file with ExcelJS (`downloadFabricArticleDataErrors` in Admin.tsx). This card only.
+
+## 2026-11-16 — Admin › Expenses › Fabric Article Data uploader: new format, validation, upsert
+
+- **Template** now matches the "Final Report Sequencing" sheet: title row 1, `mand` markers in row 3, headers in row 4 (Division … Article Fashion Type, same order as the Fabric Article download), sample row 5.
+- **Mandatory:** Major Category, Fabric Article Number, Fabric Article Description, Vendor Name, Vendor Code, Design Number, segment, M_FAB_DIV, M_YARN, M_FAB_MAIN_MVGR_1/2, M_WIDTH, M_WEAVE_01, M_GSM, M_LYCRA, Fabric Rate, Article Fashion Type.
+- **Per-row validation** (row is not uploaded, the rest still go in): blank mandatory column; non-numeric Fabric Rate / V2 Fabric Rate / Value Add Cost; any M_ value not in `fabric_maj_cat_grid_values` (characteristic names matched loosely, e.g. `WEAVE-01` = M_WEAVE_01; case-insensitive); Status not APPROVED/PENDING/REJECTED; number repeated in the file; number already used by a non-UPLOADER row (SRM "Fabric Article" / FG).
+- **Save:** `fabric_article_type = 'UPLOADER'`. Existing UPLOADER number → UPDATE (blank optional cells keep the old value); new number → INSERT. Status from the Excel, default APPROVED; APPROVED rows get `sap_sync_status = SYNCED` + `approved_at`, others NOT_SYNCED. `user_name` = uploader. One transaction.
+- Headers are found by name (first 10 rows), so column order can vary.
+- **Card** shows Inserted / Updated / Not uploaded and a table of not-uploaded rows (Excel row, Fabric Article Number, reasons).
+- Note: the shared sample file (230 rows) would upload 0 rows: segment is blank in all of them and all 230 numbers already exist as SRM "Fabric Article" rows.
+- Files: `adminController.ts` (`FAD_UPLOAD_COLUMNS`, `downloadFabricArticleDataTemplate`, `uploadFabricArticleData`), `Admin.tsx`.
+
+## 2026-11-16 — fabric_article_data: delete UPLOADER rows (SQL handed over)
+
+- Requested: remove all 12,553 rows with `fabric_article_type = 'UPLOADER'`. No foreign keys reference `fabric_article_data`. SQL given to the user to run: `DELETE FROM fabric_article_data WHERE fabric_article_type = 'UPLOADER';`
+- After it runs, the Fabric › Created "Uploader" switch shows no rows, and UPLOADER rows no longer count in the fabric description duplicate checks. Code unchanged.
+
+## 2026-11-16 — Fabric Article Excel download: Photo HL hyperlink column
+
+- New **Photo HL** column after Fabric Article Description in the Fabric Article downloads (All, With variants, Export selected; all tabs). Each cell reads "View photo" and links to `fabric_article_data.image_url` (public R2 URL); blank when there's no image.
+- Shared export helper `extractionExport.ts`: `ExportDataItem` values may now be an `ExcelLink` `{ text, hyperlink }` (built with `excelLink(url)`); `exportToExcel` writes it as a real Excel hyperlink, blue + underlined. Other exports unaffected.
+- Frontend only.
+
+## 2026-11-16 — Fabric Article › Created: Export selected gets Approved By
+
+- **Export selected** on the Created tab now has an **Approved By** column (approver's name) after Created Date, like the All download.
+- Backend: `getFabricArticleDataItems` (card list) now selects `approvedBy` and returns `approvedByName`; the users lookup is shared with export-all via `fabricApproverNames`.
+- Frontend: FabricArticleDashboard.tsx `handleExportSelected` (Created branch) adds the header.
+
+## 2026-11-16 — Fabric Article Excel download: SEGMENT column
+
+- New **SEGMENT** column right after Design Number in the Fabric Article downloads (All, With variants, Selected) on every Fabric tab. Value is `fabric_article_data.segment` (already returned by `/fabric-article-data/export-all`).
+- Frontend only (FabricArticleDashboard.tsx: `SIMPLE_APPROVER_EXPORT_HEADERS`, `buildApproverExportData`, `mapVariantExportRow`).
+
 ## 2026-11-13 — CMP COST card: AI SAM → AUTO-BGT toggle
 
 - New switch under the AI SAM column header (no text label; tooltip explains it). ON fills AUTO-BGT PR VAL from AI SAM: CUTTING = AI SAM, STITCHING = AI SAM × 3.25, IRONING × 2.50, FINISHING × 3.00 (`AI_SAM_BGT_RATE`). Processes with no AI SAM are left as they are. OFF puts back the AUTO-BGT PR VALs from before it was switched ON.
@@ -613,6 +734,7 @@ Upstream `main` keeps re-committing junk that should be gitignored — `Backend/
 - 2026-10-29: FG New article page Save & Submit: cards with their own Save button (B TRIM, V. ADD, PKG COST, CMP COST) that hold unsaved changes register in a small shared list (features/approver/components/unsavedCards.ts, useRegisterUnsavedCard). The Approve confirm popup names them ("You have unsaved changes in: V. ADD, CMP COST") and its button becomes "Save & Approve"; on click each card is saved first, then /approver/approve runs. If a card save fails, the popup closes with "Could not save <card>. Nothing was sent to SAP" and nothing is submitted. CMP COST counts as unsaved when master presets (BGT/ACT PR VAL) were filled but not saved. Card saves now await the PUT and keep "Unsaved changes" if it fails (onSave option throwOnError, SaveFailedError in ArticleDetailPage). Locked (approved) articles are skipped. Frontend only.
 - 2026-10-29: FG New article Confirm Approval popup redesigned (design option A, ArticleDetailPage.tsx): dark ink header "APPROVE & SEND TO SAP · Approve 1 article?" with an article chip (number · major category · vendor), a small "Unsaved changes — saved first" list (one row per unsaved card), a "can't be undone" note, and a slate footer with Cancel + Save & Approve (ink button, not coral). While approving, Cancel/close/Esc/outside-click are blocked. Reject/create popups unchanged. Frontend only.
 - 2026-10-29: FG Duplicate popup (KIDS Duplicate button, ApproverArticleList.tsx) redesigned — design option C: compact popup titled "Duplicate <design no.>" with one Design Number field (no red "required" error before typing; Duplicate button stays grey until filled; Enter submits), "What gets copied?" folded away on the Created page, slate buttons. A failed duplicate keeps the popup open with the server error under the field. On success the popup turns into "Copy created — <design no.> is now in New Articles as PENDING" with Stay here / Open the copy (navigates to /approver/<new id>, from the duplicate endpoint's { id }). The old "Article duplicated successfully" toast is gone. Frontend only.
+- 2026-11-13: FG Add Color Variants popup redesigned — design option A with a search dropdown (VariantSubTable.tsx AddColorModal): ink header "ADD COLOUR VARIANTS · <article>" + 2-step stepper (Colours → Images). Step 1: searchable multi-select dropdown (name or code, grouped by colour family = last word of the name, already-added colours greyed at the bottom, ↑↓/Enter/Esc), a Selected tray with removable chips, footer "N colours × S sizes = V variants". Step 2: grid of upload cards, one per colour (click or drop an image), "x of N images ready", button "Create V variants". Close is blocked while uploading/saving. Same /approver/colors, upload-image and add-color endpoints. Frontend only; Fabric/GM add-colour popups unchanged.
 - 2026-11-11: User Profile page redesigned — design option A (features/dashboard/pages/Profile.tsx): ink header with initials, name, email, role + business-division chips, Refresh / Log out; Account card (user ID, member since, email, status) and Work scope card (business division, division, sub-divisions, article types); Security card with last sign-in and a new **Change password** button. Change password popup: current / new / confirm (show-hide eye), live rules (8+ chars, a number, different from current), mismatch check, server error shown under the current-password field. Backend: new POST /api/auth/change-password (authenticated; bcrypt-checks current, same rules server-side, hashes new, invalidates auth cache); /auth/me now also returns businessDivision and isActive.
 - 2026-11-11: Changing a password now logs the user out of every device. New column users.password_changed_at (Prisma passwordChangedAt; SQL in Backend/prisma/add_password_changed_at.sql — applied to the Supabase DB on 2026-11-11, nullable, empty for everyone until they change password). Set by POST /auth/change-password and by an admin password reset (adminController update user). middleware/auth.ts and /auth/verify refuse any token issued before it (401 SESSION_REVOKED, "Your password was changed"); other devices hit the existing 401 → /login redirect. The Profile popup says so up front and, after success, logs this device out too and goes to /login.
 - 2026-11-02: FG article page "Unsaved changes" leave popup (sidebar, back, ◀ ▶) redesigned — design option A (ArticleDetailPage.tsx): ink header "UNSAVED CHANGES · Save before leaving?" with the article number, a list of the cards with changes (amber dot → spinner → tick while saving), red-text "Leave without saving" on the far left, Stay + slate Save & leave on the right. If a card fails to save the popup now stays open (was: closed with a toast), marks that card "save failed", and the button becomes Try again (only cards still unsaved are retried). Closing is blocked while saving. Frontend only.

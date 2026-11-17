@@ -41,7 +41,7 @@ function buildImData(
         YEAR:                '',
         ZUOM:                'KG',
         FASHION_GRADE:       str(row.articleFashionType),
-        PRICE_BAND_CATEGORY: '',
+        PRICE_BAND_CATEGORY: str(row.segment), // segment — same SAP key as FG articles
         WEIGHT_NET_G:        '0',
         F_MAIN_MVGR:         '',
         F_COMPOSITION:       '',
