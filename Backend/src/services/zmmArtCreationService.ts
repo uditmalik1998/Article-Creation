@@ -247,6 +247,7 @@ const RFC_ALWAYS_SEND_IF_PRESENT = new Set([
     'M_SHADE',             // shade
     'M_FAB_WEIGHT',        // weight (Supabase: weight column, SAP key: M_FAB_WEIGHT)
     'PRICE_BAND_CATEGORY', // segment
+    'FASHION_GRADE',       // articleFashionType (ARTICLE FASHION TYPE)
     // FG FAB card M_FAB_VDR — always shown (NOMINATED / NON-NOMINATED, default NON-NOMINATED);
     // in no grid, so without this it would be skipped as a Tier-3 field.
     'M_FAB_VDR',
@@ -475,8 +476,7 @@ export async function buildModifyChangesPayload(item: FlatItem): Promise<Record<
             RFC_ALWAYS_SEND_IF_PRESENT.has(rfc) ||
             visibleKeys.has(rfc);
         // M_FAB_VDR only when set: older created articles have none, and sending "" adds nothing.
-        if (rfc === 'M_FAB_VDR' && !visibleKeys.has(rfc) && !toStr(item[flat])) continue;
-        if (include) payload[rfc] = toStr(item[flat]); // empties intentionally included
+        if (rfc === 'M_FAB_VDR' && !visibleKeys.has(rfc) && !toStr(item[flat])) continue;        if (include) payload[rfc] = toStr(item[flat]); // empties intentionally included
     }
 
     // Re-derive MC_CD / HSN_CODE from major_category_details table (source of truth).

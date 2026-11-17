@@ -3,8 +3,18 @@
 // "Export" / "Download CSV". Both libs are cached after first call.
 import type { ExtractedRowEnhanced, SchemaItem } from '../../types/extraction/ExtractionTypes';
 
+/** A clickable cell in the Excel export: shows `text`, opens `hyperlink`. */
+export interface ExcelLink {
+  text: string;
+  hyperlink: string;
+}
+
+/** Builds a link cell, or '' when there's no URL. */
+export const excelLink = (url: string | null | undefined, text = 'View photo'): ExcelLink | '' =>
+  url ? { text, hyperlink: url } : '';
+
 export interface ExportDataItem {
-  [key: string]: string | number | undefined;
+  [key: string]: string | number | ExcelLink | undefined;
 }
 
 export const ORDERED_EXPORT_HEADERS = [
@@ -534,6 +544,12 @@ export const exportToExcel = async (
     const rowValues = headers.map(h => row[h]);
     const excelRow = worksheet.addRow(rowValues);
     excelRow.font = { size: 10 };
+    // Link cells: blue + underlined so they look clickable.
+    rowValues.forEach((v, i) => {
+      if (v && typeof v === 'object' && 'hyperlink' in v) {
+        excelRow.getCell(i + 1).font = { size: 10, color: { argb: 'FF0563C1' }, underline: true };
+      }
+    });
   });
 
   if (data.length > 0) {

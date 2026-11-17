@@ -26,6 +26,7 @@ export const FLAT_TO_RFC: Array<{ rfc: string; flat: string }> = [
   { rfc: 'SEASON', flat: 'season' },
   { rfc: 'ARTICLE_DES1', flat: 'articleDescription' },
   { rfc: 'PRICE_BAND_CATEGORY', flat: 'segment' },
+  { rfc: 'FASHION_GRADE', flat: 'articleFashionType' }, // ARTICLE FASHION TYPE — same SAP key as Fabric articles
 
   // Fabric – macro / main MVGR
   { rfc: 'M_IMP_ATBT', flat: 'impAtrbt2' }, // IMPORTANT ATTRIBUTE

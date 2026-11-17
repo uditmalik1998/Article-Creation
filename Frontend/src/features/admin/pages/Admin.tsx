@@ -357,6 +357,15 @@ export default function Admin() {
   const [fabricArticleDataUploading, setFabricArticleDataUploading] = useState(false);
   const [fabricArticleDataProgress, setFabricArticleDataProgress] = useState<number>(0);
   const fabricArticleDataFileRef = useRef<HTMLInputElement | null>(null);
+  // Result of the last upload: counts + the rows that were not uploaded (with reasons).
+  const [fabricArticleDataResult, setFabricArticleDataResult] = useState<{
+    fileName: string; inserted: number; updated: number;
+    rejected: Array<{
+      row: number; fabricArticleNumber: string; reasons: string[];
+      badColumns?: string[]; values?: Record<string, string>;
+    }>;
+    columns: Array<{ header: string; mand: boolean }>;
+  } | null>(null);
 
   // Fabric Article Master (fabric_article_master)
   const [fabricArticleMasterMeta, setFabricArticleMasterMeta] = useState<FabricArticleMasterMeta | null>(null);
@@ -1509,6 +1518,77 @@ export default function Admin() {
       .catch(() => message.error('Failed to download template'));
   };
 
+  // Error Excel for the not-uploaded rows: "Row in your file" + "What to fix",
+  // then the template columns with the row's values. Cells to fix are red, so
+  // the user can correct them and upload this same file again.
+  const downloadFabricArticleDataErrors = async () => {
+    const result = fabricArticleDataResult;
+    if (!result || result.rejected.length === 0) return;
+    try {
+      const ExcelJS = (await import('exceljs')).default;
+      const wb = new ExcelJS.Workbook();
+      const ws = wb.addWorksheet('FABRIC ARTICLE DATA');
+      const cols = result.columns.length
+        ? result.columns
+        : Object.keys(result.rejected[0]?.values ?? {}).map((h) => ({ header: h, mand: false }));
+      const LEAD = 2; // "Row in your file", "What to fix"
+
+      ws.getCell('A1').value = `Rows not uploaded — ${result.rejected.length} of them. Fix the red cells and upload this file again.`;
+      ws.getCell('A1').font = { bold: true, size: 13, color: { argb: 'FFC00000' } };
+      ws.getCell('A2').value = `From: ${result.fileName}`;
+      ws.getCell('A2').font = { italic: true, size: 10, color: { argb: 'FF64748B' } };
+
+      cols.forEach((c, i) => {
+        if (!c.mand) return;
+        const cell = ws.getRow(3).getCell(LEAD + i + 1);
+        cell.value = 'mand';
+        cell.font = { bold: true, color: { argb: 'FFC00000' } };
+        cell.alignment = { horizontal: 'center' };
+      });
+
+      const header = ws.getRow(4);
+      ['Row in your file', 'What to fix', ...cols.map((c) => c.header)].forEach((h, i) => {
+        const cell = header.getCell(i + 1);
+        cell.value = h;
+        cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: i < LEAD ? 'FFC00000' : 'FF1E293B' } };
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      });
+
+      result.rejected.forEach((r, idx) => {
+        const row = ws.getRow(5 + idx);
+        row.getCell(1).value = r.row;
+        row.getCell(2).value = r.reasons.map((x, k) => (r.reasons.length > 1 ? `${k + 1}. ${x}` : x)).join('\n');
+        row.getCell(2).alignment = { wrapText: true, vertical: 'top' };
+        row.getCell(2).font = { color: { argb: 'FFC00000' } };
+        const bad = new Set(r.badColumns ?? []);
+        cols.forEach((c, i) => {
+          const cell = row.getCell(LEAD + i + 1);
+          cell.value = r.values?.[c.header] ?? '';
+          cell.alignment = { vertical: 'top' };
+          if (bad.has(c.header)) {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFC7CE' } };
+            cell.font = { bold: true, color: { argb: 'FF9C0006' } };
+          }
+        });
+      });
+
+      ws.columns = [{ width: 10 }, { width: 60 }, ...cols.map(() => ({ width: 20 }))];
+      ws.views = [{ state: 'frozen', xSplit: 2, ySplit: 4 }];
+
+      const buf = await wb.xlsx.writeBuffer();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+      const base = result.fileName.replace(/\.xlsx?$/i, '');
+      a.download = `${base}-NOT-UPLOADED-${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch {
+      message.error('Failed to build the error Excel');
+    }
+  };
+
   const handleFabricArticleDataUpload = async (file: File) => {
     setFabricArticleDataUploading(true);
     setFabricArticleDataProgress(0);
@@ -1528,8 +1608,15 @@ export default function Admin() {
       setFabricArticleDataProgress(100);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Upload failed');
-      message.success(data.message);
-      setFabricArticleDataMeta(data.data);
+      const d = data.data || {};
+      setFabricArticleDataResult({
+        fileName: d.fileName || file.name, inserted: d.inserted ?? 0, updated: d.updated ?? 0,
+        rejected: Array.isArray(d.rejected) ? d.rejected : [],
+        columns: Array.isArray(d.columns) ? d.columns : [],
+      });
+      if ((d.notUploaded ?? 0) > 0) message.warning(data.message);
+      else message.success(data.message);
+      loadFabricArticleDataStatus();
     } catch (err: any) {
       message.error(err?.message || 'Upload failed');
     } finally {
@@ -4413,7 +4500,7 @@ export default function Admin() {
                       type="warning"
                       showIcon
                       message="No fabric article data uploaded yet"
-                      description="Upload an Excel with columns: FABRIC_ARTICLE_NUMBER, FABRIC_ARTICLE_DESC, DIVISION, SUB_DIVISION, MAJOR_CATEGORY, VENDOR_NAME, VENDOR_CODE, plus fabric attribute columns. Each row is inserted as a new record."
+                      description="Download the Template, fill it (columns marked mand are required) and upload. Rows are saved as UPLOADER fabric articles."
                     />
                   )}
 
@@ -4424,8 +4511,9 @@ export default function Admin() {
                   <div className="rounded-md border border-border p-4">
                     <div className="mb-1 font-semibold">Upload Fabric Article Data Excel</div>
                     <div className="mb-3 text-xs text-muted-foreground">
-                      Sheet <strong>FABRIC ARTICLE DATA</strong> (or first sheet), headers in row 3, data from row 5.
-                      Each row is <strong>inserted as a new record</strong> with a fresh ID.
+                      Use the <strong>Template</strong> format (headers in row 4, data from row 5). Rows are saved as
+                      type <strong>UPLOADER</strong>; an existing UPLOADER Fabric Article Number is <strong>updated</strong>.
+                      Rows with a blank mandatory column or a value not in Fabric Grid Values are <strong>not uploaded</strong>.
                     </div>
 
                     <input
@@ -4459,6 +4547,51 @@ export default function Admin() {
                         </p>
                         <p className="text-[11px] text-muted-foreground">Only Excel files. Max 50 MB.</p>
                       </button>
+                    )}
+
+                    {fabricArticleDataResult && !fabricArticleDataUploading && (
+                      <div className="mt-3 rounded-md border border-border">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-border px-3 py-2 text-[12.5px]">
+                          <span className="truncate font-mono text-[11px] text-muted-foreground">{fabricArticleDataResult.fileName}</span>
+                          <span>Inserted <strong>{fabricArticleDataResult.inserted}</strong></span>
+                          <span>Updated <strong>{fabricArticleDataResult.updated}</strong></span>
+                          <span className={fabricArticleDataResult.rejected.length ? 'font-semibold text-red-700 dark:text-red-400' : ''}>
+                            Not uploaded <strong>{fabricArticleDataResult.rejected.length}</strong>
+                          </span>
+                          {fabricArticleDataResult.rejected.length > 0 && (
+                            <button
+                              type="button"
+                              onClick={downloadFabricArticleDataErrors}
+                              className="ml-auto flex h-7 items-center gap-1.5 rounded-md bg-slate-900 px-3 text-[12px] font-semibold text-white transition-colors hover:bg-slate-700"
+                            >
+                              <Download className="h-3.5 w-3.5" />
+                              Download errors ({fabricArticleDataResult.rejected.length})
+                            </button>
+                          )}
+                        </div>
+                        {fabricArticleDataResult.rejected.length > 0 && (
+                          <div className="max-h-72 overflow-auto">
+                            <table className="w-full text-left text-[12px]">
+                              <thead className="sticky top-0 bg-slate-50 text-[11px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                                <tr>
+                                  <th className="px-3 py-1.5">Excel row</th>
+                                  <th className="px-3 py-1.5">Fabric Article Number</th>
+                                  <th className="px-3 py-1.5">Why not uploaded</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {fabricArticleDataResult.rejected.map((r) => (
+                                  <tr key={r.row} className="border-t border-border align-top">
+                                    <td className="px-3 py-1.5 font-mono">{r.row}</td>
+                                    <td className="px-3 py-1.5 font-mono">{r.fabricArticleNumber || '—'}</td>
+                                    <td className="px-3 py-1.5">{r.reasons.join('; ')}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
 

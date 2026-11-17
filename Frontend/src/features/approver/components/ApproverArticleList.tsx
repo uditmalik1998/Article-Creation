@@ -611,6 +611,7 @@ const ArticleCard = React.memo(
     const [fabNoResults, setFabNoResults] = useState<{
       fabricArticleNumber: string;
       fabricArticleDescription: string | null;
+      fabricRate: number | null;
       mFabDiv: string | null; mYarn: string | null;
       mFabMainMvgr1: string | null; mFabMainMvgr2: string | null;
       mConstruction: string | null; mOunz: string | null; mWidth: string | null;
@@ -2347,6 +2348,15 @@ const ArticleCard = React.memo(
     const showPkgCard = !allowGroups && selectedGroupKeys.has('PKG');
     // CMP COST has no tab of its own — it shows with the BODY tab (FG articles only).
     const showCmpCard = !allowGroups && !isBodyArticle && selectedGroupKeys.has('BODY');
+    // M_FAB_VDR decides where the FABRIC ARTICLE NO. / DESC dropdowns search: NON-NOMINATED
+    // (also the default when blank) → Fabric Article › FG Created; NOMINATED → Fabric Article › Created.
+    // Only sent when the card shows the M_FAB_VDR row; otherwise the backend keeps the Created search.
+    const fabVdrShown = (groupMap['FAB']?.attrs ?? []).some((a) => a.field === 'fabVdr');
+    const fabVdrVal = fabVdrShown
+      ? (String(getValue('fabVdr') ?? '').trim().toUpperCase().replace(/^-+$/, '') || FAB_VDR_DEFAULT)
+      : '';
+    const fabVdrParam = fabVdrVal ? `&fabVdr=${encodeURIComponent(fabVdrVal)}` : '';
+    const isFabVdrNominated = fabVdrVal === 'NOMINATED';
 
     const rateVal = String(getValue('rate') ?? '').trim();
     const mrpVal = String(getValue('mrp') ?? '').trim();
@@ -2722,7 +2732,7 @@ const ArticleCard = React.memo(
                       value={attrSearch}
                       onChange={(e) => setAttrSearch(e.target.value)}
                       placeholder="Search..."
-                      className="flex-1 bg-transparent text-[11px] outline-none placeholder:text-muted-foreground"
+                      className={`flex-1 bg-transparent ${allowGroups ? 'text-[11px]' : 'text-[13px]'} outline-none placeholder:text-muted-foreground`}
                     />
                   </div>
                   {!isEffectivelyEmpty && (
@@ -2732,7 +2742,7 @@ const ArticleCard = React.memo(
                         handleSave(attr.field, null);
                         setAttrSearch('');
                       }}
-                      className="flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left text-[11px] font-medium text-red-600 hover:bg-red-50"
+                      className={`flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left ${allowGroups ? 'text-[11px]' : 'text-[13px]'} font-medium text-red-600 hover:bg-red-50`}
                     >
                       <X className="h-3 w-3 shrink-0" />
                       Clear selection
@@ -2748,7 +2758,7 @@ const ArticleCard = React.memo(
                       );
                       if (matches.length === 0) {
                         return (
-                          <div className="px-3 py-2 text-[11px] text-muted-foreground">
+                          <div className={`px-3 py-2 ${allowGroups ? 'text-[11px]' : 'text-[13px]'} text-muted-foreground`}>
                             No options found
                           </div>
                         );
@@ -2762,13 +2772,13 @@ const ArticleCard = React.memo(
                             setAttrSearch('');
                           }}
                           className={cn(
-                            'flex w-full flex-col px-3 py-1.5 text-left text-[11px] hover:bg-accent hover:text-accent-foreground',
+                            `flex w-full flex-col px-3 py-1.5 text-left ${allowGroups ? 'text-[11px]' : 'text-[13px]'} hover:bg-accent hover:text-accent-foreground`,
                             v.shortForm === currentValue && 'bg-accent/60',
                           )}
                         >
                           <span className="font-medium">{v.shortForm}</span>
                           {v.fullForm && v.fullForm !== v.shortForm && (
-                            <span className="truncate text-[10px] text-muted-foreground">
+                            <span className={`truncate ${allowGroups ? 'text-[10px]' : 'text-[12px]'} text-muted-foreground`}>
                               {v.fullForm}
                             </span>
                           )}
@@ -3770,7 +3780,7 @@ const ArticleCard = React.memo(
                                                   <button
                                                     type="button"
                                                     onClick={() => { handleSave(field, null); setEditingField(null); }}
-                                                    className="flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left text-[11px] font-medium text-red-600 hover:bg-red-50"
+                                                    className={`flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left ${allowGroups ? 'text-[11px]' : 'text-[13px]'} font-medium text-red-600 hover:bg-red-50`}
                                                   >
                                                     <X className="h-3 w-3 shrink-0" />
                                                     Clear selection
@@ -3783,7 +3793,7 @@ const ArticleCard = React.memo(
                                                       type="button"
                                                       onClick={() => { handleSave(field, opt); setEditingField(null); }}
                                                       className={cn(
-                                                        'flex w-full px-3 py-1.5 text-left text-[11px] hover:bg-accent hover:text-accent-foreground',
+                                                        `flex w-full px-3 py-1.5 text-left ${allowGroups ? 'text-[11px]' : 'text-[13px]'} hover:bg-accent hover:text-accent-foreground`,
                                                         String(displayVal) === opt && 'bg-accent/60',
                                                       )}
                                                     >
@@ -3924,6 +3934,10 @@ const ArticleCard = React.memo(
                                       </div>
                                       {isFabNoEditing ? (
                                         <div className="relative" onClick={(e) => e.stopPropagation()}>
+                                          {/* List is portalled (Popover) so the card can't clip it; the input's
+                                              onBlur still closes it. */}
+                                          <Popover open>
+                                          <PopoverAnchor asChild>
                                           <Input
                                             autoFocus
                                             value={fabNoQuery}
@@ -3936,7 +3950,7 @@ const ArticleCard = React.memo(
                                               setFabNoLoading(true);
                                               const token = localStorage.getItem('authToken');
                                               fetch(
-                                                `${APP_CONFIG.api.baseURL}/approver/fabric-article-data/search?q=${encodeURIComponent(q)}&type=FG,uploader`,
+                                                `${APP_CONFIG.api.baseURL}/approver/fabric-article-data/search?q=${encodeURIComponent(q)}${fabVdrParam}`,
                                                 { headers: { Authorization: `Bearer ${token}` } },
                                               )
                                                 .then((r) => r.json())
@@ -3962,8 +3976,21 @@ const ArticleCard = React.memo(
                                               }
                                             }}
                                           />
+                                          </PopoverAnchor>
                                           {(fabNoResults.length > 0 || fabNoLoading) && (
-                                            <div className="absolute left-0 top-full z-50 mt-0.5 w-full rounded-md border border-border bg-white shadow-lg">
+                                            <PopoverContent
+                                              align="start"
+                                              sideOffset={2}
+                                              className="w-[var(--radix-popover-trigger-width)] min-w-[260px] p-0"
+                                              onOpenAutoFocus={(e) => e.preventDefault()}
+                                              onCloseAutoFocus={(e) => e.preventDefault()}
+                                              onClick={(e) => e.stopPropagation()}
+                                            >
+                                            <div
+                                              className="max-h-60 overflow-y-auto overscroll-contain py-1"
+                                              // Keep focus in the input so clicking the scrollbar doesn't close the list.
+                                              onMouseDown={(e) => e.preventDefault()}
+                                            >
                                               {fabNoLoading ? (
                                                 <div className="px-3 py-2 text-[11px] text-muted-foreground">Searching…</div>
                                               ) : (
@@ -3974,12 +4001,31 @@ const ArticleCard = React.memo(
                                                     className="flex w-full flex-col gap-0.5 px-3 py-1.5 text-left hover:bg-[#FF6F61]/10"
                                                     onMouseDown={(e) => {
                                                       e.preventDefault();
-                                                      // Picking a row fills only number / desc — the FAB attributes
-                                                      // (M_FAB_DIV, M_YARN, …) stay as the user set them.
+                                                      // Picking a row fills number / desc AND the FAB grid (M_FAB_DIV, M_YARN, …)
+                                                      // from that fabric article. All fields are included (even null) so old
+                                                      // values are cleared when the fabric article has none.
                                                       const gridUpdates: Record<string, string | null> = {
                                                         fabricArticleNumber:    r.fabricArticleNumber,
                                                         fabricArticleDescription: r.fabricArticleDescription,
+                                                        fabDiv:                 r.mFabDiv,
+                                                        yarn1:                  r.mYarn,
+                                                        mainMvgr:               r.mFabMainMvgr1,
+                                                        fabricMainMvgr:         r.mFabMainMvgr2,
+                                                        fConstruction:          r.mConstruction,
+                                                        fOunce:                 r.mOunz,
+                                                        fWidth:                 r.mWidth,
+                                                        weave:                  r.mWeave01,
+                                                        mFab2:                  r.mWeave02,
+                                                        fCount:                 r.mCount,
+                                                        composition:            r.mComposition,
+                                                        finish:                 r.mFinish,
+                                                        gsm:                    r.mGsm,
+                                                        lycra:                  r.mLycra,
                                                       };
+                                                      // M_FAB_VDR = NOMINATED: the picked fabric article's rate overwrites ACT-V2.
+                                                      if (isFabVdrNominated && r.fabricRate != null) {
+                                                        gridUpdates.roughV2 = String(r.fabricRate);
+                                                      }
                                                       setLocalValues((prev) => ({ ...prev, ...gridUpdates }));
                                                       setEditingField(null);
                                                       setFabNoResults([]);
@@ -3998,7 +4044,9 @@ const ArticleCard = React.memo(
                                                 ))
                                               )}
                                             </div>
+                                            </PopoverContent>
                                           )}
+                                          </Popover>
                                         </div>
                                       ) : (
                                         <div
@@ -4027,6 +4075,7 @@ const ArticleCard = React.memo(
                                         const getVal = (key: string) =>
                                           (localValues[key] !== undefined ? localValues[key] : (item as any)[key]) ?? '';
                                         const params: Record<string, string> = { q };
+                                        if (fabVdrVal) params.fabVdr = fabVdrVal;
                                         if (withAttrFallback) {
                                           params.mFabDiv       = getVal('fabDiv');
                                           params.mYarn         = getVal('yarn1');
@@ -4081,6 +4130,7 @@ const ArticleCard = React.memo(
                                           if (shownFields.has(field)) params[param] = getVal(field);
                                         }
                                         if (!Object.entries(params).some(([k, v]) => k !== 'byAttrs' && v)) return false;
+                                        if (fabVdrVal) params.fabVdr = fabVdrVal;
                                         setFabDescLoading(true);
                                         setFabDescSearched(false);
                                         fetch(
@@ -4203,6 +4253,10 @@ const ArticleCard = React.memo(
                                                               fabricArticleDescription: r.fabricArticleDescription,
                                                               autoBgt:                  r.fabricRate != null ? String(r.fabricRate) : null,
                                                             };
+                                                            // M_FAB_VDR = NOMINATED: the rate also overwrites ACT-V2.
+                                                            if (isFabVdrNominated && r.fabricRate != null) {
+                                                              gridUpdates.roughV2 = String(r.fabricRate);
+                                                            }
                                                             setLocalValues((prev) => ({ ...prev, ...gridUpdates }));
                                                             setEditingField(null);
                                                             setFabDescResults([]);
@@ -4243,9 +4297,10 @@ const ArticleCard = React.memo(
                                     <div className="border-t border-border px-2 py-1.5">
                                       <Button
                                         size="sm"
-                                        disabled={fabricCreating}
+                                        disabled={fabricCreating || isFabVdrNominated}
+                                        title={isFabVdrNominated ? 'Not available for a NOMINATED fabric vendor' : undefined}
                                         onClick={() => {
-                                          if (fabricCreating) return;
+                                          if (fabricCreating || isFabVdrNominated) return;
                                           const mergedItem = {
                                             ...item,
                                             ...Object.fromEntries(
@@ -4820,7 +4875,7 @@ const ArticleCard = React.memo(
                                         <button
                                           type="button"
                                           onClick={() => { handleSave('width', null); setEditingField(null); }}
-                                          className="flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left text-[11px] font-medium text-red-600 hover:bg-red-50"
+                                          className={`flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left ${allowGroups ? 'text-[11px]' : 'text-[13px]'} font-medium text-red-600 hover:bg-red-50`}
                                         >
                                           <X className="h-3 w-3 shrink-0" />
                                           Clear selection
@@ -4845,12 +4900,12 @@ const ArticleCard = React.memo(
                                               onSave({ ...item, ...updates } as any, updates);
                                             }}
                                             className={cn(
-                                              'flex w-full items-center justify-between px-3 py-1.5 text-left text-[11px] hover:bg-accent hover:text-accent-foreground',
+                                              `flex w-full items-center justify-between px-3 py-1.5 text-left ${allowGroups ? 'text-[11px]' : 'text-[13px]'} hover:bg-accent hover:text-accent-foreground`,
                                               val === String(opt.fabWidth) && 'bg-accent/60',
                                             )}
                                           >
                                             <span className="font-medium">{opt.fabWidth}</span>
-                                            <span className="text-[10px] text-muted-foreground">→ {opt.fabConsumption}</span>
+                                            <span className={`${allowGroups ? 'text-[10px]' : 'text-[12px]'} text-muted-foreground`}>→ {opt.fabConsumption}</span>
                                           </button>
                                         ))}
                                       </div>
@@ -4885,7 +4940,7 @@ const ArticleCard = React.memo(
                                         <button
                                           type="button"
                                           onClick={() => { handleSave(bom.field, null); setEditingField(null); }}
-                                          className="flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left text-[11px] font-medium text-red-600 hover:bg-red-50"
+                                          className={`flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left ${allowGroups ? 'text-[11px]' : 'text-[13px]'} font-medium text-red-600 hover:bg-red-50`}
                                         >
                                           <X className="h-3 w-3 shrink-0" />
                                           Clear selection
@@ -4898,7 +4953,7 @@ const ArticleCard = React.memo(
                                             type="button"
                                             onClick={() => { handleSave(bom.field, opt); setEditingField(null); }}
                                             className={cn(
-                                              'flex w-full px-3 py-1.5 text-left text-[11px] hover:bg-accent hover:text-accent-foreground',
+                                              `flex w-full px-3 py-1.5 text-left ${allowGroups ? 'text-[11px]' : 'text-[13px]'} hover:bg-accent hover:text-accent-foreground`,
                                               val === opt && 'bg-accent/60',
                                             )}
                                           >

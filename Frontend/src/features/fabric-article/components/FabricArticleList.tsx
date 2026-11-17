@@ -2144,9 +2144,14 @@ const ArticleCard = React.memo(
                         const bomLocked = isFieldLocked(bom.field);
                         const val = String(getValue(bom.field) ?? '').trim() || '—';
                         const isEmpty = val === '—';
-                        const dropdownOptions: string[] = bom.isDropdown
+                        const dropdownOptions: { code: string; fullForm: string }[] = bom.isDropdown
                           ? bom.field === 'articleFashionType'
-                            ? ['C']
+                            // Same source as M_FAB_DIV: fabric_maj_cat_grid_values
+                            // (characteristic ARTICLE_FASHION_TYPE) via /approver/fabric-grid-values.
+                            ? (() => {
+                                const opts = (fabricGrid['ARTICLE_FASHION_TYPE'] ?? []).filter((g) => g.code);
+                                return opts.length > 0 ? opts : [{ code: 'C', fullForm: '' }];
+                              })()
                             : []
                           : [];
                         return (
@@ -2184,23 +2189,104 @@ const ArticleCard = React.memo(
                                   onClose={() => setEditingField(null)}
                                 />
                               ) : isEditingBom && bom.isDropdown ? (
-                                <Select
-                                  defaultOpen
-                                  defaultValue={val === '—' ? undefined : val}
-                                  onValueChange={(v) => handleSave(bom.field, v ?? null)}
-                                  onOpenChange={(open) => { if (!open) setEditingField(null); }}
+                                // Same dropdown design as the FAB attributes (M_FAB_DIV, M_LYCRA ...).
+                                <Popover
+                                  open
+                                  onOpenChange={(o) => {
+                                    if (!o) {
+                                      setEditingField(null);
+                                      setAttrSearch('');
+                                    }
+                                  }}
                                 >
-                                  <SelectTrigger className="h-7 w-full text-[13px]">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {dropdownOptions.map((v) => (
-                                      <SelectItem key={v} value={v}>
-                                        {v}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
+                                  <PopoverTrigger asChild>
+                                    <button
+                                      type="button"
+                                      className="flex h-7 w-full items-center justify-between rounded border border-input bg-background px-2 text-[13px] hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                    >
+                                      <span className="truncate text-left">{isEmpty ? 'Select' : val}</span>
+                                      <ChevronDown className="ml-1 h-3 w-3 shrink-0 text-muted-foreground" />
+                                    </button>
+                                  </PopoverTrigger>
+                                  <PopoverContent
+                                    className="w-64 overflow-hidden rounded-xl border-slate-200 p-0 shadow-xl dark:border-slate-700"
+                                    align="end"
+                                    sideOffset={6}
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <div className="flex items-center justify-between gap-2 border-b border-slate-100 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-900">
+                                      <span className="truncate text-[12px] font-bold uppercase tracking-wide text-slate-700 dark:text-slate-200">{bom.label}</span>
+                                      <span className="shrink-0 text-[11px] text-slate-500">{dropdownOptions.length} options</span>
+                                    </div>
+                                    <div className="flex h-10 items-center gap-2 border-b border-slate-200 px-3 dark:border-slate-700">
+                                      <Search className="h-4 w-4 shrink-0 text-slate-500" />
+                                      <input
+                                        autoFocus
+                                        value={attrSearch}
+                                        onChange={(e) => setAttrSearch(e.target.value)}
+                                        placeholder="Search code or name…"
+                                        aria-label={`Search ${bom.label}`}
+                                        className="flex-1 bg-transparent text-[12.5px] outline-none placeholder:text-slate-400"
+                                      />
+                                    </div>
+                                    {!isEmpty && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          handleSave(bom.field, null);
+                                          setAttrSearch('');
+                                        }}
+                                        className="flex w-full items-center gap-2 border-b border-slate-100 px-3 py-2 text-left text-[12px] font-semibold text-red-700 hover:bg-red-50 dark:border-slate-800"
+                                      >
+                                        <X className="h-3.5 w-3.5 shrink-0" />
+                                        Clear selection
+                                        <span className="ml-auto truncate font-mono text-[11.5px] font-medium text-slate-500">{val}</span>
+                                      </button>
+                                    )}
+                                    <div className="max-h-64 overflow-y-auto p-1.5">
+                                      {(() => {
+                                        const q = attrSearch.trim().toLowerCase();
+                                        const matches = dropdownOptions.filter(
+                                          (o) => o.code.toLowerCase().includes(q) || (o.fullForm ?? '').toLowerCase().includes(q),
+                                        );
+                                        if (matches.length === 0) {
+                                          return (
+                                            <div className="px-3 py-3 text-[12px] text-slate-500">
+                                              No options match “{attrSearch.trim()}”
+                                            </div>
+                                          );
+                                        }
+                                        return matches.map((o) => {
+                                          const selected = o.code === val;
+                                          return (
+                                            <button
+                                              key={o.code}
+                                              type="button"
+                                              onClick={() => {
+                                                handleSave(bom.field, o.code);
+                                                setAttrSearch('');
+                                              }}
+                                              className={cn(
+                                                'flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left transition-colors',
+                                                selected ? 'bg-slate-100 dark:bg-slate-800' : 'hover:bg-slate-50 dark:hover:bg-slate-800/60',
+                                              )}
+                                            >
+                                              <span className="flex min-w-0 flex-1 flex-col">
+                                                <span className={cn('truncate text-[12.5px] text-slate-900 dark:text-slate-100', selected ? 'font-bold' : 'font-semibold')}>
+                                                  {o.code}
+                                                </span>
+                                                {o.fullForm && o.fullForm !== o.code && (
+                                                  <span className="truncate text-[11px] text-slate-500 dark:text-slate-400">{o.fullForm}</span>
+                                                )}
+                                              </span>
+                                              {selected && <Check className="h-4 w-4 shrink-0 text-slate-800 dark:text-slate-200" />}
+                                            </button>
+                                          );
+                                        });
+                                      })()}
+                                    </div>
+                                  </PopoverContent>
+                                </Popover>
                               ) : isEditingBom ? (
                                 <Input
                                   autoFocus
