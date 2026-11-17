@@ -530,6 +530,8 @@ export interface ApproverArticleListProps {
   readOnly?: boolean;
   /** Set parent: take attribute visibility / required fields from this category (its Top part). */
   attributeMajorCategory?: string;
+  /** Set parent: the COST SUMMARY FAB row (AUTO-BGT / ACT-V2 / VDR / FINAL) = sum over its parts of cost x PR PC CONS. */
+  fabCostSummary?: (number | null)[];
   serverPagination: {
     total: number;
     current: number;
@@ -566,6 +568,7 @@ const ArticleCard = React.memo(
     joinTop,
     readOnly,
     attributeMajorCategory,
+    fabCostSummary,
   }: {
     item: ApproverItem;
     isSelected: boolean;
@@ -584,6 +587,7 @@ const ArticleCard = React.memo(
     joinTop?: boolean;
     readOnly?: boolean;
     attributeMajorCategory?: string;
+    fabCostSummary?: (number | null)[];
   }) => {
     const [showVariants, setShowVariants] = useState(true);
     const [imgModalOpen, setImgModalOpen] = useState(false);
@@ -5001,11 +5005,14 @@ const ArticleCard = React.memo(
                         const fabCons = ['preciseConsumptionKg', 'roughConsumptionKg', 'preciseConsumptionMeter', 'roughConsumptionMeter']
                           .map(numOf)
                           .find((v): v is number => v != null) ?? null;
-                        rows[0] = {
-                          ...rows[0],
-                          title: 'FAB card cost × PR PC CONS. (no wastage)',
-                          vals: rows[0].vals.map((v) => (v == null || fabCons == null ? null : v * fabCons)),
-                        };
+                        rows[0] = fabCostSummary
+                          // Set parent: no consumption of its own — the parts' FAB (cost × PR PC CONS.) added up.
+                          ? { ...rows[0], title: 'FAB: sum of the parts (cost × PR PC CONS., no wastage)', vals: fabCostSummary }
+                          : {
+                            ...rows[0],
+                            title: 'FAB card cost × PR PC CONS. (no wastage)',
+                            vals: rows[0].vals.map((v) => (v == null || fabCons == null ? null : v * fabCons)),
+                          };
                         // PKG COST: saved NET RATE total goes to AUTO-BGT and ROUGH-V2; no VDR / FINAL.
                         const pkgRates = Object.values(PKG_RATE_FIELDS).map(numOf).filter((v): v is number => v != null);
                         const pkgTotal = pkgRates.length ? pkgRates.reduce((a, b) => a + b, 0) : null;
@@ -5649,6 +5656,7 @@ export const ApproverArticleList: React.FC<ApproverArticleListProps> = ({
   joinTop,
   readOnly,
   attributeMajorCategory,
+  fabCostSummary,
   serverPagination,
 }) => {
   const visibleCardGroups = allowGroups
@@ -5726,6 +5734,7 @@ export const ApproverArticleList: React.FC<ApproverArticleListProps> = ({
           joinTop={joinTop}
           readOnly={readOnly}
           attributeMajorCategory={attributeMajorCategory}
+          fabCostSummary={fabCostSummary}
         />
       ))}
     </div>

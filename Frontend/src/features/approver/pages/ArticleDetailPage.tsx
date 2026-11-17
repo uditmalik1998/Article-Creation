@@ -663,6 +663,23 @@ export default function ArticleDetailPage({
   // so the parent shows and requires that part's attribute grid, not the set category's.
   const setTopCategory = comboChildren[0]?.majorCategory || null;
 
+  // COST SUMMARY FAB row of the set: each part's FAB cost × its own PR PC CONS. (first of
+  // precise kg, rough kg, precise meter, rough meter — as the summary does per article), added up.
+  const setFabCostSummary = useMemo(() => {
+    if (!isComboItem || comboChildren.length === 0) return undefined;
+    const num = (v: unknown) => (v == null || String(v).trim() === '' ? null : Number.isFinite(Number(v)) ? Number(v) : null);
+    return ['autoBgt', 'roughV2', 'vendorFabricRate', 'finalCost'].map((field) => {
+      let sum: number | null = null;
+      for (const c of comboChildren as any[]) {
+        const cost = num(c[field]);
+        const cons = ['preciseConsumptionKg', 'roughConsumptionKg', 'preciseConsumptionMeter', 'roughConsumptionMeter']
+          .map((f) => num(c[f])).find((v): v is number => v != null) ?? null;
+        if (cost != null && cons != null) sum = (sum ?? 0) + cost * cons;
+      }
+      return sum;
+    });
+  }, [isComboItem, comboChildren]);
+
   const addComboChild = async () => {
     if (!currentItem) return;
     const token = localStorage.getItem('authToken');
@@ -792,24 +809,28 @@ export default function ArticleDetailPage({
       // A set parent copies it from its Top piece, which is checked itself.
       const fabVdr = String(item.fabVdr ?? '').trim();
       if (item.comboRole !== 'PARENT' && (!fabVdr || /^-+$/.test(fabVdr))) missing.push('M_FAB_VDR');
-      // CMP COST: ACT TOTAL PR VAL is required — the card's live value when it's on screen
-      // (typed values are saved by Save & Submit first), else the saved total / ACT PR VALs.
-      const liveAct = getLiveCmpActTotal(item.id);
-      const savedAct = [item.totalActPrVal, item.cuttingActPrVal, item.stitchingActPrVal, item.ironingActPrVal, item.finishingActPrVal]
-        .some((v) => v != null && String(v).trim() !== '');
-      if (liveAct !== undefined ? !liveAct.trim() : !savedAct) missing.push('CMP COST: ACT-V2 TOTAL PR VAL');
-      // B TRIM / V. ADD: TOTAL ACT-V2 is required — the card's live total when it's on screen,
-      // else the saved one.
-      for (const [card, field] of [['B TRIM', 'bTrimTotalRoughV2'], ['V. ADD', 'vaddTotalRoughV2']] as const) {
-        const live = getLiveCostActTotal(item.id, field);
-        const act = live !== undefined ? live : String((item as any)[field] ?? '');
-        if (!act.trim()) missing.push(`${card}: TOTAL ACT-V2`);
+      // Costing cards. A set parent's costs are the sum of its parts (recomputeComboParent),
+      // and every part is checked here itself — so the parent is not.
+      if (item.comboRole !== 'PARENT') {
+        // CMP COST: ACT TOTAL PR VAL is required — the card's live value when it's on screen
+        // (typed values are saved by Save & Submit first), else the saved total / ACT PR VALs.
+        const liveAct = getLiveCmpActTotal(item.id);
+        const savedAct = [item.totalActPrVal, item.cuttingActPrVal, item.stitchingActPrVal, item.ironingActPrVal, item.finishingActPrVal]
+          .some((v) => v != null && String(v).trim() !== '');
+        if (liveAct !== undefined ? !liveAct.trim() : !savedAct) missing.push('CMP COST: ACT-V2 TOTAL PR VAL');
+        // B TRIM / V. ADD: TOTAL ACT-V2 is required — the card's live total when it's on screen,
+        // else the saved one.
+        for (const [card, field] of [['B TRIM', 'bTrimTotalRoughV2'], ['V. ADD', 'vaddTotalRoughV2']] as const) {
+          const live = getLiveCostActTotal(item.id, field);
+          const act = live !== undefined ? live : String((item as any)[field] ?? '');
+          if (!act.trim()) missing.push(`${card}: TOTAL ACT-V2`);
+        }
+        // PKG COST must be saved with its own Save button first (the default rates shown and
+        // typed-but-unsaved values don't count). Card off screen → a saved PKG tab.
+        const livePkg = getLivePkgSaved(item.id);
+        const pkgSaved = livePkg !== undefined ? livePkg : String((item as any).pkgCostType ?? '').trim() !== '';
+        if (!pkgSaved) missing.push('PKG COST: not saved (click Save on the PKG COST card)');
       }
-      // PKG COST must be saved with its own Save button first (the default rates shown and
-      // typed-but-unsaved values don't count). Card off screen → a saved PKG tab.
-      const livePkg = getLivePkgSaved(item.id);
-      const pkgSaved = livePkg !== undefined ? livePkg : String((item as any).pkgCostType ?? '').trim() !== '';
-      if (!pkgSaved) missing.push('PKG COST: not saved (click Save on the PKG COST card)');
       missing.push(...getMissingMandatoryFields(item, isComboItem && item.id === currentItem?.id ? setTopCategory : null));
       // Readable name: SAP / article number once it exists, else category + design
       // number (a new set article has neither SAP number nor image name).
@@ -1351,6 +1372,7 @@ export default function ArticleDetailPage({
           majorCategory={displayedItem?.majorCategory || ''}
           readOnly={isComboItem && !activeComboChild}
           attributeMajorCategory={isComboItem && !activeComboChild ? setTopCategory || undefined : undefined}
+          fabCostSummary={isComboItem && !activeComboChild ? setFabCostSummary : undefined}
           loading={false}
           selectedRowKeys={selectedRowKeys}
           onSelectionChange={setSelectedRowKeys}
