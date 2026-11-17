@@ -20,9 +20,30 @@ import { getSegmentFromMaster } from './segmentMasterService';
 // (tests/comboFieldsExist.test.ts checks it): these are written with prisma.update, which
 // rejects an unknown field. cmtpCost / cmpCost / fabCost / valueAddCost / valueAddProcessCost
 // were dropped from the model (15-Oct cost refactor on main).
-export const COMBO_SUMMED_FIELDS = [
+// The costing cards' values (FAB, CMP, B TRIM, VAL. ADD., PKG. COST) are summed too;
+// per-unit trim rates / quantities are not (a sum of rates means nothing).
+const BTRIM_KEYS = [
+    'mBtn', 'dc', 'zip', 'patch', 'hTrf', 'elastic', 'fusing', 'badge', 'rivet', 'tape', 'other',
+    'adjuster', 'brotch', 'buckle', 'eyelets', 'hangingDRing', 'hook', 'label', 'lace',
+    'pockettingFabric', 'pockettingReadymade', 'santa', 'stopper', 'tag', 'tassels',
+];
+const CMP_KEYS = ['cutting', 'stitching', 'ironing', 'finishing', 'total'];
+const VADD_KEYS = ['print', 'emb', 'washing', 'vaddTotal'];
+const PKG_KEYS = ['bopp', 'ctn', 'barcode', 'kimble', 'tafta', 'thread'];
+
+export const COMBO_SUMMED_FIELDS: readonly string[] = [
     'rate', 'mrp', 'vendorFabricRate',
-] as const;
+    // FAB card
+    'autoBgt', 'roughV2', 'finalCost',
+    // CMP card (body processes + their total)
+    ...CMP_KEYS.flatMap((k) => [`${k}BgtPrVal`, `${k}ActPrVal`, `${k}VendorPrVal`, `${k}FinalPrVal`]),
+    // B TRIM card (each row + the card total)
+    ...[...BTRIM_KEYS, 'bTrimTotal'].flatMap((k) => [`${k}AutoBgt`, `${k}RoughV2`, `${k}VdrCost`, `${k}FinalCost`]),
+    // VAL. ADD. card (each row + the card total)
+    ...VADD_KEYS.flatMap((k) => [`${k}AutoBgt`, `${k}RoughV2`, `${k}VendorCost`, `${k}FinalCost`]),
+    // PKG. COST card
+    ...PKG_KEYS.map((k) => `${k}NetPrice`),
+];
 
 // Parent value = primary (Top) child's value.
 export const COMBO_MIRRORED_FIELDS = [

@@ -3260,6 +3260,9 @@ export class ApproverController {
 
         // Lazily link sets imported before linking existed.
         await linkComboGroupForRow(parentId);
+        // Re-derive the set from its parts on every open: a part can change outside the
+        // part tab's save (e.g. its fabric / body article created, costing filled elsewhere).
+        await recomputeComboParent(parentId);
 
         const parent = await prisma.extractionResultFlat.findUnique({ where: { id: parentId } });
         const children = await prisma.extractionResultFlat.findMany({
