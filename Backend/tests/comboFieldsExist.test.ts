@@ -33,3 +33,19 @@ test('every summed set field is a column of ExtractionResultFlat', () => {
 test('every mirrored set field is a column of ExtractionResultFlat', () => {
     assert.deepEqual(COMBO_MIRRORED_FIELDS.filter((f) => !columns.has(f)), []);
 });
+
+test('a set adds up every costing-card value of its parts', () => {
+    // one field of each card, plus a card total
+    for (const f of ['autoBgt', 'roughV2', 'finalCost', 'cuttingBgtPrVal', 'totalFinalPrVal',
+        'labelAutoBgt', 'bTrimTotalRoughV2', 'printVendorCost', 'vaddTotalFinalCost', 'boppNetPrice']) {
+        assert.ok(COMBO_SUMMED_FIELDS.includes(f), `${f} is not summed`);
+    }
+    // a per-unit rate is not summed
+    assert.ok(!COMBO_SUMMED_FIELDS.includes('labelRate'));
+});
+
+test('every costing column of ExtractionResultFlat is summed for a set', () => {
+    const costing = /(AutoBgt|RoughV2|VdrCost|FinalCost|VendorCost|NetPrice|BgtPrVal|ActPrVal|VendorPrVal|FinalPrVal)$/;
+    const missing = [...columns].filter((c) => costing.test(c) && !COMBO_SUMMED_FIELDS.includes(c));
+    assert.deepEqual(missing, []);
+});
