@@ -70,7 +70,8 @@ export interface PoolBReport {
 // Matnr / article column detection (first column that looks like an article no.)
 const MATNR_HEADER = /^(matnr|article|article[_ ]?no|article[_ ]?number|material|material[_ ]?no)$/i;
 // A characteristic column looks like a SAP attribute name (M_*, NET_WEIGHT, DSG_NO, ...)
-const CHAR_HEADER = /^(m_|net_weight$|dsg_no$)/i;
+// plus the V69 MARA keys FASHGRD (article fashion type) and PLGTP (segment).
+const CHAR_HEADER = /^(m_|net_weight$|dsg_no$|fashgrd$|plgtp$)/i;
 
 export async function parsePoolBExcel(buffer: Buffer): Promise<PoolBParseResult> {
   const ExcelJS = (await import('exceljs')).default;
@@ -91,7 +92,10 @@ export async function parsePoolBExcel(buffer: Buffer): Promise<PoolBParseResult>
   const headerRow = ws.getRow(headerRowIdx);
   const headers: string[] = [];
   headerRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
-    headers[colNumber - 1] = String(cell.value ?? '').trim();
+    // "LABEL : SAPKEY" headers (e.g. "ARTICLE FASHION TYPE : FASHGRD") → use the SAP key after the colon.
+    const raw = String(cell.value ?? '').trim();
+    const colon = raw.lastIndexOf(':');
+    headers[colNumber - 1] = colon >= 0 ? raw.slice(colon + 1).trim() : raw;
   });
 
   // Find the Matnr column (prefer explicit header, else first column).

@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react';
-import { ChevronRight, Tag } from 'lucide-react';
+import { ChevronRight, LayoutGrid, List, Tag } from 'lucide-react';
 import { Button } from '@/shared/components/ui-tw';
 import { cn } from '@/lib/utils';
 import { formatRupees, toAmount, type ArticleCardItem } from './ArticleSpecCard';
@@ -14,6 +14,101 @@ const GROUP_BY_OPTIONS: { value: ArticleGroupBy; label: string }[] = [
 ];
 
 const isGroupBy = (v: unknown): v is ArticleGroupBy => v === 'none' || v === 'vendor' || v === 'category';
+
+export type ArticleView = 'cards' | 'rows';
+
+const isView = (v: unknown): v is ArticleView => v === 'cards' || v === 'rows';
+const VIEW_STORAGE_KEY = 'articleDashboardView';
+
+/**
+ * Cards or Rows. One choice for all article dashboards, remembered per browser
+ * (localStorage); defaults to cards.
+ */
+export function useArticleView() {
+  const [view, setViewState] = useState<ArticleView>(() => {
+    try {
+      const stored = localStorage.getItem(VIEW_STORAGE_KEY);
+      if (isView(stored)) return stored;
+    } catch { /* storage unavailable */ }
+    return 'cards';
+  });
+  const setView = useCallback((value: ArticleView) => {
+    setViewState(value);
+    try { localStorage.setItem(VIEW_STORAGE_KEY, value); } catch { /* storage unavailable */ }
+  }, []);
+  return [view, setView] as const;
+}
+
+/** Segmented "View: Cards | Rows" switch, styled like GroupByControl. */
+export function ViewControl({ value, onChange }: { value: ArticleView; onChange: (value: ArticleView) => void }) {
+  const opts: { value: ArticleView; label: string; Icon: typeof List }[] = [
+    { value: 'cards', label: 'Cards', Icon: LayoutGrid },
+    { value: 'rows', label: 'Rows', Icon: List },
+  ];
+  return (
+    <div role="group" aria-label="View" className="flex h-9 items-center gap-0.5 rounded-md border border-input bg-background p-0.5 text-[13px]">
+      <span className="px-1.5 text-muted-foreground">View</span>
+      {opts.map(({ value: v, label, Icon }) => (
+        <button
+          key={v}
+          type="button"
+          aria-pressed={value === v}
+          onClick={() => onChange(v)}
+          className={cn(
+            'inline-flex h-full items-center gap-1.5 rounded-sm px-2.5 font-medium transition-colors',
+            value === v ? ACTIVE_SEGMENT_CLASS : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+          )}
+        >
+          <Icon className="h-3.5 w-3.5" />
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Table frame for the Rows view; its columns match ArticleSpecRow's cells. */
+function ArticleRowsTable({ ids, selectedIds, onSetSelection, dateLabel, children, framed = true }: {
+  ids: string[];
+  selectedIds: Set<string>;
+  onSetSelection: (ids: string[], selected: boolean) => void;
+  dateLabel: string;
+  children: ReactNode;
+  framed?: boolean;
+}) {
+  const allSelected = ids.length > 0 && ids.every((id) => selectedIds.has(id));
+  const th = 'border-b border-border bg-muted/60 px-3 py-2.5 text-left text-[11.5px] font-bold uppercase tracking-[0.06em] text-muted-foreground whitespace-nowrap';
+  return (
+    <div className={cn('overflow-x-auto', framed && 'rounded-xl border border-border bg-card shadow-sm')}>
+      <table className="w-full min-w-[980px] table-fixed border-collapse">
+        <thead>
+          <tr>
+            <th className={cn(th, 'w-10 pr-0')}>
+              <label className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md hover:bg-muted">
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={() => onSetSelection(ids, !allSelected)}
+                  aria-label={allSelected ? 'Deselect all rows' : 'Select all rows'}
+                  className="h-4 w-4 cursor-pointer accent-slate-800"
+                />
+              </label>
+            </th>
+            <th className={cn(th, 'w-[52px] px-2')}><span className="sr-only">Photo</span></th>
+            <th className={cn(th, 'w-[24%]')}>Article</th>
+            <th className={cn(th, 'w-[13%]')}>Design no.</th>
+            <th className={cn(th, 'w-[26%]')}>Vendor</th>
+            <th className={cn(th, 'w-[10%]')}>{dateLabel}</th>
+            <th className={cn(th, 'w-[9%] text-right')}>PR cost</th>
+            <th className={cn(th, 'w-[9%] text-right')}>PR MRP</th>
+            <th className={cn(th, 'w-[9%] pl-6')}>Margin</th>
+          </tr>
+        </thead>
+        <tbody>{children}</tbody>
+      </table>
+    </div>
+  );
+}
 
 /** Responsive card columns; shared with the loading skeleton so nothing jumps. */
 export const ARTICLE_CARD_GRID_CLASS = 'grid gap-3 grid-cols-[repeat(auto-fill,minmax(min(380px,100%),1fr))]';
@@ -105,6 +200,11 @@ export interface ArticleCardGridProps<T extends ArticleCardItem> {
   onSetSelection: (ids: string[], selected: boolean) => void;
   /** `index` is the item's position in `items`, as the detail page navigation expects. */
   renderCard: (item: T, index: number) => ReactNode;
+  /** 'rows' lays the articles out as a table using `renderRow` (an ArticleSpecRow). */
+  view?: ArticleView;
+  renderRow?: (item: T, index: number) => ReactNode;
+  /** Which date the rows show — sets the date column's header. */
+  dateField?: 'createdAt' | 'approvedAt';
 }
 
 /**
@@ -113,8 +213,10 @@ export interface ArticleCardGridProps<T extends ArticleCardItem> {
  * together across pages; grouping here only splits the current page.
  */
 export function ArticleCardGrid<T extends ArticleCardItem>({
-  items, groupBy, selectedIds, onSetSelection, renderCard,
+  items, groupBy, selectedIds, onSetSelection, renderCard, view = 'cards', renderRow, dateField = 'createdAt',
 }: ArticleCardGridProps<T>) {
+  const asRows = view === 'rows' && !!renderRow;
+  const dateLabel = dateField === 'approvedAt' ? 'Approved' : 'Added';
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const groups = useMemo(() => (groupBy === 'none' ? [] : buildGroups(items, groupBy)), [items, groupBy]);
 
@@ -127,6 +229,15 @@ export function ArticleCardGrid<T extends ArticleCardItem>({
   }, []);
 
   if (groupBy === 'none') {
+    if (asRows) {
+      return (
+        <div className="p-3">
+          <ArticleRowsTable ids={items.map((i) => i.id)} selectedIds={selectedIds} onSetSelection={onSetSelection} dateLabel={dateLabel}>
+            {items.map((item, index) => renderRow!(item, index))}
+          </ArticleRowsTable>
+        </div>
+      );
+    }
     return (
       <div className={cn(ARTICLE_CARD_GRID_CLASS, 'p-3')}>
         {items.map((item, index) => renderCard(item, index))}
@@ -177,7 +288,14 @@ export function ArticleCardGrid<T extends ArticleCardItem>({
                 {allSelected ? 'Deselect all' : `Select all ${ids.length}`}
               </Button>
             </div>
-            {open && (
+            {open && asRows && (
+              <div className="border-t border-border">
+                <ArticleRowsTable ids={ids} selectedIds={selectedIds} onSetSelection={onSetSelection} dateLabel={dateLabel} framed={false}>
+                  {group.entries.map(({ item, index }) => renderRow!(item, index))}
+                </ArticleRowsTable>
+              </div>
+            )}
+            {open && !asRows && (
               <div className={cn(ARTICLE_CARD_GRID_CLASS, 'border-t border-border bg-muted/30 p-3')}>
                 {group.entries.map(({ item, index }) => renderCard(item, index))}
               </div>
