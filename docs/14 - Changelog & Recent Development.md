@@ -5,6 +5,23 @@
 
 ---
 
+## 2026-11-19 — Pool B Uploader: FASHGRD + PLGTP columns
+
+- **Template** (Admin › Pool B Uploader › Template) now ends with two more columns: `FASHGRD` (ARTICLE FASHION TYPE) and `PLGTP` (SEGMENT). Drop-zone hint lists them too. File: `Frontend/src/features/admin/pages/PoolBUploaderPage.tsx`.
+- **Parser** `Backend/src/services/poolBPatchService.ts`: `CHAR_HEADER` only took `M_*`, `NET_WEIGHT`, `DSG_NO`, so the new columns would have been silently ignored — regex now also accepts `FASHGRD` and `PLGTP`. Values go into `IV_CHANGES` like any other column (BLANK clears).
+- Template headers are readable labels: `ARTICLE FASHION TYPE : FASHGRD` and `SEGMENT : PLGTP` (wider columns). Parser takes the SAP key after the last `:` in any header, so plain `FASHGRD` / `PLGTP` still work too.
+- Needs `SAP_ART_PATCH_FM=Z_ART_PATCH_RFC_V69` (local .env has it). Prod V69 still lacks the two keys (UNKNOWN "attr not found in ZCT04 nor CABN") until the SAP transport; QA works.
+- Deploy: backend + frontend together (frontend-only = columns ignored).
+
+## 2026-11-17 — Article dashboards: Cards / Rows view
+
+User picked **option A** from a 4-option canvas (https://claude.ai/artifact/VkTUWXzkBB4dr32ieZZFKg): a "View: Cards | Rows" segmented control next to Group by on all 5 card dashboards (FG, Fabric, FG-Fabric, Body, GM).
+- `ArticleCardGrid.tsx` — `useArticleView()` (one choice for all dashboards, localStorage `articleDashboardView`, default cards), `ViewControl`, `ArticleRowsTable` (fixed column widths so grouped tables line up; header checkbox selects/deselects the rows shown). New grid props `view`, `renderRow`, `dateField` (sets the Added / Approved column header).
+- `ArticleSpecCard.tsx` — new `ArticleSpecRow` (same props as the card): checkbox, photo thumb (click zooms), division › sub-div + MC with status / article no. / SAP badges, design no., vendor + code, date, PR cost, PR MRP, margin badge. Row click / Enter opens the article.
+- Column widths are percentages (Article 24 · Design 13 · Vendor 26 · Date 10 · Cost/MRP/Margin 9 each) so wide screens spread the space evenly — the first build left a big empty gap after the Article column (user feedback).
+- Row text ~1px bigger on user request (MC 15px, design/vendor/date 13.5px, cost/MRP 14px, header 11.5px).
+- Group by, filters, paging, selection and Export/Reject work the same in both views. No column sorting (paging is server-side). Frontend only; checked in a test page with sample data, not with live data.
+
 ## 2026-11-17 — Fabric Article › Created: Modify works (SAP + DB)
 
 Modify on the Fabric Created page failed for two reasons:

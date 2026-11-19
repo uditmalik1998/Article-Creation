@@ -24,8 +24,8 @@ import { message } from '@/lib/message';
 import { cn } from '@/lib/utils';
 import type { ApproverItem } from '../types';
 import { clearArticleDrafts } from '../components/cardDrafts';
-import { ArticleSpecCard } from '@/shared/components/articles/ArticleSpecCard';
-import { ArticleCardGrid, ARTICLE_CARD_GRID_CLASS, GroupByControl, useArticleGroupBy } from '@/shared/components/articles/ArticleCardGrid';
+import { ArticleSpecCard, ArticleSpecRow } from '@/shared/components/articles/ArticleSpecCard';
+import { ArticleCardGrid, ARTICLE_CARD_GRID_CLASS, GroupByControl, useArticleGroupBy, useArticleView, ViewControl } from '@/shared/components/articles/ArticleCardGrid';
 import { DatePresetFilter, DivisionTabs, divisionOption, ResetFiltersButton, SapSyncChips } from '@/shared/components/articles/ArticleFilters';
 import { ArticleListHeader } from '@/shared/components/articles/ArticleListHeader';
 import { APP_CONFIG } from '../../../constants/app/config';
@@ -235,6 +235,7 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
   // that aren't currently rendered.
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [groupBy, setGroupBy] = useArticleGroupBy(`articleGroupBy:${baseRoute}`, searchParams.get('groupBy'));
+  const [view, setView] = useArticleView();
   // Bumped by Reset to remount the (uncontrolled) search input empty.
   const [searchKey, setSearchKey] = useState(0);
 
@@ -1072,6 +1073,7 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
                 onChange={setDateRangeFilter}
               />
               <div className="flex-1" />
+              <ViewControl value={view} onChange={setView} />
               <GroupByControl value={groupBy} onChange={setGroupBy} />
               <div className="flex basis-full flex-wrap items-center gap-2">
                 {pathType === 'created' && <SapSyncChips value={sapSyncFilter} onChange={setSapSyncFilter} />}
@@ -1115,6 +1117,11 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
             onSetSelection={setSelection}
             renderCard={(item, index) => (
               <ArticleSpecCard key={item.id} item={item} index={index} onClick={handleCardClick} dateField={pathType === 'created' ? 'approvedAt' : 'createdAt'} selected={selectedIds.has(item.id)} onToggleSelect={toggleSelect} />
+            )}
+            view={view}
+            dateField={pathType === 'created' ? 'approvedAt' : 'createdAt'}
+            renderRow={(item, index) => (
+              <ArticleSpecRow key={item.id} item={item} index={index} onClick={handleCardClick} dateField={pathType === 'created' ? 'approvedAt' : 'createdAt'} selected={selectedIds.has(item.id)} onToggleSelect={toggleSelect} />
             )}
           />
           {totalCount > PAGE_SIZE && (

@@ -42,6 +42,9 @@ const TEMPLATE_HEADERS = [
   'M_PRINT_PLACEMENT', 'M_PRINT_STYLE', 'M_PRINT_TYPE', 'M_EMB_TYPE', 'M_EMBROIDERY_STYLE',
   'M_EMB_PLACEMENT', 'M_WASH', 'M_AGE_GROUP', 'M_NO_OF_SIZE', 'M_NO_OF_CLR', 'M_IMP_ATBT',
   'M_FAB_VDR', 'M_REF_ARTICLE', 'M_BODY_ART',
+  // "LABEL : SAPKEY" — the backend uses the key after the colon.
+  'ARTICLE FASHION TYPE : FASHGRD',
+  'SEGMENT : PLGTP',
 ];
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -566,7 +569,7 @@ export default function PoolBUploaderPage() {
       const ws = wb.addWorksheet('ART');
       ws.addRow(TEMPLATE_HEADERS);
       ws.getRow(1).font = { bold: true };
-      ws.columns.forEach((c) => { c.width = 18; });
+      ws.columns.forEach((c, i) => { c.width = String(TEMPLATE_HEADERS[i] ?? '').includes(':') ? 32 : 18; });
       ws.views = [{ state: 'frozen', ySplit: 1 }];
       const buf = await wb.xlsx.writeBuffer();
       const blob = new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -793,7 +796,7 @@ export default function PoolBUploaderPage() {
           </span>
           <span className="text-base font-semibold">Drop the Excel here, or browse</span>
           <span className="text-[13px] text-muted-foreground">
-            .xlsx or .xls · first column Matnr, then one column per characteristic (M_FAB_DIV, M_WASH…). Type BLANK to clear a value.
+            .xlsx or .xls · first column Matnr, then one column per characteristic (M_FAB_DIV, M_WASH…, FASHGRD, PLGTP). Type BLANK to clear a value.
           </span>
           <input
             ref={fileInputRef}

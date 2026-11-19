@@ -273,6 +273,134 @@ function ArticleSpecCardComponent<T extends ArticleCardItem>({
  */
 export const ArticleSpecCard = memo(ArticleSpecCardComponent) as typeof ArticleSpecCardComponent;
 
+/**
+ * One article as a table row — the "Rows" view of the dashboards. Same props and
+ * behaviour as ArticleSpecCard (click opens, checkbox selects, photo zooms).
+ * Rendered inside ArticleRowsTable (ArticleCardGrid.tsx), whose header matches these cells.
+ */
+function ArticleSpecRowComponent<T extends ArticleCardItem>({
+  item, index, onClick, dateField = 'createdAt', selected = false, onToggleSelect,
+}: ArticleSpecCardProps<T>) {
+  const statusKey = String(item.approvalStatus ?? 'PENDING');
+  const statusClass = STATUS_STYLES[statusKey];
+  const [imgFailed, setImgFailed] = useState(false);
+  const [thumbFailed, setThumbFailed] = useState(false);
+  const [imgModalOpen, setImgModalOpen] = useState(false);
+
+  const cost = toAmount(item.rate);
+  const mrp = toAmount(item.mrp);
+  const margin = cost !== null && mrp !== null && mrp > 0 ? Math.round(((mrp - cost) / mrp) * 100) : null;
+  const mrpMissing = cost !== null && mrp === null;
+  const crumb = [item.division, item.subDivision].filter(Boolean).join(' › ') || '—';
+  const dateValue = dateField === 'approvedAt' ? item.approvedAt : item.createdAt;
+  const td = 'border-b border-border px-3 py-2 align-middle';
+
+  return (
+    <>
+      <tr
+        tabIndex={0}
+        aria-label={`Open ${[item.majorCategory, item.designNumber].filter(Boolean).join(' ') || 'article'}`}
+        onClick={() => onClick(item, index)}
+        onKeyDown={(e) => {
+          if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault();
+            onClick(item, index);
+          }
+        }}
+        className={cn(
+          'cursor-pointer outline-none transition-colors hover:bg-slate-50 focus-visible:bg-slate-100 focus-visible:shadow-[inset_3px_0_0_#1e293b] dark:hover:bg-slate-800/50 dark:focus-visible:bg-slate-800',
+          selected && 'bg-slate-100 dark:bg-slate-800/70',
+        )}
+      >
+        <td className={cn(td, 'w-10 pr-0')} onClick={(e) => e.stopPropagation()}>
+          {onToggleSelect && (
+            <label className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md hover:bg-muted">
+              <input
+                type="checkbox"
+                checked={selected}
+                onChange={() => onToggleSelect(item)}
+                aria-label={`Select ${item.designNumber || item.articleNumber || 'article'} for export`}
+                className="h-4 w-4 cursor-pointer accent-slate-800"
+              />
+            </label>
+          )}
+        </td>
+        <td className={cn(td, 'w-[52px] px-2')}>
+          {item.imageUrl && !imgFailed ? (
+            <button
+              type="button"
+              aria-label={`Enlarge photo${item.designNumber ? ` of ${item.designNumber}` : ''}`}
+              onClick={(e) => { e.stopPropagation(); setImgModalOpen(true); }}
+              className="block h-12 w-9 cursor-zoom-in overflow-hidden rounded-md border border-border bg-muted"
+            >
+              <img
+                src={thumbFailed ? item.imageUrl : cardThumbUrl(item.imageUrl)}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="h-full w-full object-cover"
+                onError={() => (thumbFailed ? setImgFailed(true) : setThumbFailed(true))}
+              />
+            </button>
+          ) : (
+            <span className="flex h-12 w-9 items-center justify-center rounded-md border border-dashed border-border bg-muted text-muted-foreground" title="No image">
+              <ImageOff className="h-3.5 w-3.5" />
+            </span>
+          )}
+        </td>
+        <td className={td}>
+          <div className="truncate text-[11.5px] font-bold uppercase tracking-wider text-muted-foreground">{crumb}</div>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-[15px] font-extrabold tracking-tight text-foreground">{item.majorCategory || '—'}</span>
+            {statusClass && (
+              <span className={cn('rounded-full px-1.5 py-px text-[10.5px] font-bold uppercase tracking-wide', statusClass)}>{statusKey}</span>
+            )}
+            {item.articleNumber && (
+              <span className="rounded bg-blue-50 px-1.5 py-px text-[11.5px] font-semibold text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">{item.articleNumber}</span>
+            )}
+            {item.sapSyncStatus === 'SYNCED' && (
+              <span className="rounded-full bg-blue-100 px-1.5 py-px text-[10.5px] font-semibold text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">SAP ✓</span>
+            )}
+            {item.sapSyncStatus === 'PENDING' && item.approvalStatus === 'APPROVED' && (
+              <span className="rounded-full bg-amber-100 px-1.5 py-px text-[10.5px] font-semibold text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">SAP …</span>
+            )}
+            {item.sapSyncStatus === 'FAILED' && (
+              <span className="rounded-full bg-red-100 px-1.5 py-px text-[10.5px] font-semibold text-red-700 dark:bg-red-500/15 dark:text-red-300">SAP ✗</span>
+            )}
+          </div>
+        </td>
+        <td className={cn(td, 'truncate whitespace-nowrap font-mono text-[13.5px] font-semibold text-foreground')}>{item.designNumber || '—'}</td>
+        <td className={td}>
+          <div className="truncate text-[13.5px] font-medium text-foreground" title={item.vendorName || undefined}>{item.vendorName || '—'}</div>
+          {item.vendorCode && <div className="font-mono text-[12px] font-semibold text-slate-600 dark:text-slate-300">{item.vendorCode}</div>}
+        </td>
+        <td className={cn(td, 'whitespace-nowrap text-[13.5px] text-foreground')}>{formatDate(dateValue)}</td>
+        <td className={cn(td, 'whitespace-nowrap text-right text-[14px] font-bold tabular-nums')}>{formatRupees(cost)}</td>
+        <td className={cn(td, 'whitespace-nowrap text-right text-[14px] font-bold tabular-nums')}>{formatRupees(mrp)}</td>
+        <td className={cn(td, 'whitespace-nowrap pl-6')}>
+          {margin !== null ? (
+            <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[13px] font-bold text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-300">{margin}%</span>
+          ) : mrpMissing ? (
+            <span className="rounded-md bg-amber-50 px-2 py-0.5 text-[13px] font-bold text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">No MRP</span>
+          ) : (
+            <span className="text-muted-foreground">—</span>
+          )}
+        </td>
+      </tr>
+      {imgModalOpen && item.imageUrl && (
+        <ImagePreviewDialog
+          src={item.imageUrl}
+          title={item.designNumber || 'Image Preview'}
+          onClose={() => setImgModalOpen(false)}
+        />
+      )}
+    </>
+  );
+}
+
+/** Memoized for the same reason as ArticleSpecCard; needs a stable `onClick`. */
+export const ArticleSpecRow = memo(ArticleSpecRowComponent) as typeof ArticleSpecRowComponent;
+
 function Field({ label, className, wrap = false, children }: { label: string; className?: string; wrap?: boolean; children: React.ReactNode }) {
   return (
     <div className={cn('flex min-w-0 flex-col', className)}>
