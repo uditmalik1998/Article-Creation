@@ -3989,6 +3989,10 @@ const ArticleCard = React.memo(
                                                         gsm:                    r.mGsm,
                                                         lycra:                  r.mLycra,
                                                       };
+                                                      // AUTO-BGT = the picked fabric article's rate (as the DESC pick does), 2026-11-19.
+                                                      if (r.fabricRate != null) {
+                                                        gridUpdates.autoBgt = String(r.fabricRate);
+                                                      }
                                                       // M_FAB_VDR = NOMINATED: the picked fabric article's rate overwrites ACT-V2.
                                                       if (isFabVdrNominated && r.fabricRate != null) {
                                                         gridUpdates.roughV2 = String(r.fabricRate);

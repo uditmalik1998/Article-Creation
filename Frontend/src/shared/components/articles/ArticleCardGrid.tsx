@@ -68,16 +68,18 @@ export function ViewControl({ value, onChange }: { value: ArticleView; onChange:
 }
 
 /** Table frame for the Rows view; its columns match ArticleSpecRow's cells. */
-function ArticleRowsTable({ ids, selectedIds, onSetSelection, dateLabel, children, framed = true }: {
+function ArticleRowsTable({ ids, selectedIds, onSetSelection, dateLabel, showSapStatus = false, children, framed = true }: {
   ids: string[];
   selectedIds: Set<string>;
   onSetSelection: (ids: string[], selected: boolean) => void;
   dateLabel: string;
+  /** Created pages: a SAP column at the right (Synced / Queued / Failed). */
+  showSapStatus?: boolean;
   children: ReactNode;
   framed?: boolean;
 }) {
   const allSelected = ids.length > 0 && ids.every((id) => selectedIds.has(id));
-  const th = 'border-b border-border bg-muted/60 px-3 py-2.5 text-left text-[11.5px] font-bold uppercase tracking-[0.06em] text-muted-foreground whitespace-nowrap';
+  const th = 'border-b border-border bg-muted/60 px-3 py-2.5 text-center text-[11.5px] font-bold uppercase tracking-[0.06em] text-muted-foreground whitespace-nowrap';
   return (
     <div className={cn('overflow-x-auto', framed && 'rounded-xl border border-border bg-card shadow-sm')}>
       <table className="w-full min-w-[980px] table-fixed border-collapse">
@@ -94,14 +96,16 @@ function ArticleRowsTable({ ids, selectedIds, onSetSelection, dateLabel, childre
                 />
               </label>
             </th>
-            <th className={cn(th, 'w-[52px] px-2')}><span className="sr-only">Photo</span></th>
-            <th className={cn(th, 'w-[24%]')}>Article</th>
-            <th className={cn(th, 'w-[13%]')}>Design no.</th>
-            <th className={cn(th, 'w-[26%]')}>Vendor</th>
-            <th className={cn(th, 'w-[10%]')}>{dateLabel}</th>
-            <th className={cn(th, 'w-[9%] text-right')}>PR cost</th>
-            <th className={cn(th, 'w-[9%] text-right')}>PR MRP</th>
-            <th className={cn(th, 'w-[9%] pl-6')}>Margin</th>
+            <th className={cn(th, 'w-16 px-2')}><span className="sr-only">Photo</span></th>
+            <th className={cn(th, 'w-[18%]')}>Article</th>
+            <th className={cn(th, 'w-[11%]')}>Article no.</th>
+            <th className={cn(th, 'w-[10%]')}>Design no.</th>
+            <th className={cn(th, 'w-[21%]')}>Vendor</th>
+            <th className={cn(th, 'w-[9%]')}>{dateLabel}</th>
+            <th className={cn(th, 'w-[8%]')}>PR cost</th>
+            <th className={cn(th, 'w-[8%]')}>PR MRP</th>
+            <th className={cn(th, 'w-[8%]')}>Margin</th>
+            {showSapStatus && <th className={cn(th, 'w-[8%]')}>SAP status</th>}
           </tr>
         </thead>
         <tbody>{children}</tbody>
@@ -232,7 +236,7 @@ export function ArticleCardGrid<T extends ArticleCardItem>({
     if (asRows) {
       return (
         <div className="p-3">
-          <ArticleRowsTable ids={items.map((i) => i.id)} selectedIds={selectedIds} onSetSelection={onSetSelection} dateLabel={dateLabel}>
+          <ArticleRowsTable ids={items.map((i) => i.id)} selectedIds={selectedIds} onSetSelection={onSetSelection} dateLabel={dateLabel} showSapStatus={dateField === 'approvedAt'}>
             {items.map((item, index) => renderRow!(item, index))}
           </ArticleRowsTable>
         </div>
@@ -290,7 +294,7 @@ export function ArticleCardGrid<T extends ArticleCardItem>({
             </div>
             {open && asRows && (
               <div className="border-t border-border">
-                <ArticleRowsTable ids={ids} selectedIds={selectedIds} onSetSelection={onSetSelection} dateLabel={dateLabel} framed={false}>
+                <ArticleRowsTable ids={ids} selectedIds={selectedIds} onSetSelection={onSetSelection} dateLabel={dateLabel} showSapStatus={dateField === 'approvedAt'} framed={false}>
                   {group.entries.map(({ item, index }) => renderRow!(item, index))}
                 </ArticleRowsTable>
               </div>
