@@ -12,7 +12,12 @@ User picked **option A** from a 4-option canvas (https://claude.ai/artifact/CtSw
 - APPROVED / SAP ✓ / SAP … / SAP ✗ badges removed from the Article cell (card view keeps them).
 - New **SAP** column at the far right on Created pages only (`dateField === 'approvedAt'`): amber "Queued" (APPROVED + sap PENDING) or red "Failed", grey "Synced" when synced (user follow-up); Article no. text and Synced pill use the header grey (text-muted-foreground), header renamed "SAP status".
 - All headers and cells centred. Widths: Article 18 · Article no. 11 · Design 10 · Vendor 21 · Date 9 · Cost/MRP/Margin 8 · SAP 8 (%).
+- All row-view text +2px on user request (headers 13.5px, MC 17px, cells 15.5px, cost/MRP 16px) — shared, so FG, Fabric, FG-Fabric, Body and GM dashboards all change.
 - Files: `ArticleSpecCard.tsx` (ArticleSpecRow), `ArticleCardGrid.tsx` (ArticleRowsTable `showSapStatus`). Checked in a test page, not with live data.
+
+## 2026-11-19 — Fabric Article Save & Submit: Division + Sub-Division + Major Category required
+
+- `FabricArticleDetailPage.tsx` `approveBlockedReasons`: Save & Submit is blocked when **DIVISION**, **SUB-DIVISION** or **MAJOR CATEGORY** is empty (Major Category wasn't required before, and with it empty the category's mandatory-attribute checks were skipped too) (listed in the missing-fields popup after VENDOR CODE). Applies to every page on this detail component (Fabric Article › New articles, FG New Articles). Modify not affected (division is locked there). Frontend only.
 
 ## 2026-11-19 — Dashboard Rows view: Article no. column
 

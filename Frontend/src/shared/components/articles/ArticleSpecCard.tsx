@@ -350,26 +350,26 @@ function ArticleSpecRowComponent<T extends ArticleCardItem>({
           )}
         </td>
         <td className={td}>
-          <div className="truncate text-[11.5px] font-bold uppercase tracking-wider text-muted-foreground">{crumb}</div>
-          <div className="truncate text-[15px] font-extrabold tracking-tight text-foreground" title={item.majorCategory || undefined}>{item.majorCategory || '—'}</div>
+          <div className="truncate text-[13.5px] font-bold uppercase tracking-wider text-muted-foreground">{crumb}</div>
+          <div className="truncate text-[17px] font-extrabold tracking-tight text-foreground" title={item.majorCategory || undefined}>{item.majorCategory || '—'}</div>
         </td>
         {/* Article no. — its own column (was a badge next to the major category). */}
-        <td className={cn(td, 'truncate whitespace-nowrap font-mono text-[13.5px] font-semibold text-muted-foreground')} title={item.articleNumber || undefined}>
+        <td className={cn(td, 'truncate whitespace-nowrap font-mono text-[15.5px] font-semibold text-muted-foreground')} title={item.articleNumber || undefined}>
           {item.articleNumber || <span className="text-muted-foreground">—</span>}
         </td>
-        <td className={cn(td, 'truncate whitespace-nowrap font-mono text-[13.5px] font-semibold text-foreground')}>{item.designNumber || '—'}</td>
+        <td className={cn(td, 'truncate whitespace-nowrap font-mono text-[15.5px] font-semibold text-foreground')}>{item.designNumber || '—'}</td>
         <td className={td}>
-          <div className="truncate text-[13.5px] font-medium text-foreground" title={item.vendorName || undefined}>{item.vendorName || '—'}</div>
-          {item.vendorCode && <div className="font-mono text-[12px] font-semibold text-slate-600 dark:text-slate-300">{item.vendorCode}</div>}
+          <div className="truncate text-[15.5px] font-medium text-foreground" title={item.vendorName || undefined}>{item.vendorName || '—'}</div>
+          {item.vendorCode && <div className="font-mono text-[14px] font-semibold text-slate-600 dark:text-slate-300">{item.vendorCode}</div>}
         </td>
-        <td className={cn(td, 'whitespace-nowrap text-[13.5px] text-foreground')}>{formatDate(dateValue)}</td>
-        <td className={cn(td, 'whitespace-nowrap text-[14px] font-bold tabular-nums')}>{formatRupees(cost)}</td>
-        <td className={cn(td, 'whitespace-nowrap text-[14px] font-bold tabular-nums')}>{formatRupees(mrp)}</td>
+        <td className={cn(td, 'whitespace-nowrap text-[15.5px] text-foreground')}>{formatDate(dateValue)}</td>
+        <td className={cn(td, 'whitespace-nowrap text-[16px] font-bold tabular-nums')}>{formatRupees(cost)}</td>
+        <td className={cn(td, 'whitespace-nowrap text-[16px] font-bold tabular-nums')}>{formatRupees(mrp)}</td>
         <td className={cn(td, 'whitespace-nowrap')}>
           {margin !== null ? (
-            <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[13px] font-bold text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-300">{margin}%</span>
+            <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[15px] font-bold text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-300">{margin}%</span>
           ) : mrpMissing ? (
-            <span className="rounded-md bg-amber-50 px-2 py-0.5 text-[13px] font-bold text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">No MRP</span>
+            <span className="rounded-md bg-amber-50 px-2 py-0.5 text-[15px] font-bold text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">No MRP</span>
           ) : (
             <span className="text-muted-foreground">—</span>
           )}
@@ -377,17 +377,17 @@ function ArticleSpecRowComponent<T extends ArticleCardItem>({
         {showSapStatus && (
           <td className={cn(td, 'whitespace-nowrap')}>
             {sapQueued && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-0.5 text-[12px] font-bold text-amber-800 dark:bg-amber-500/15 dark:text-amber-300">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-0.5 text-[14px] font-bold text-amber-800 dark:bg-amber-500/15 dark:text-amber-300">
                 <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />Queued
               </span>
             )}
             {item.sapSyncStatus === 'SYNCED' && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-0.5 text-[12px] font-bold text-muted-foreground dark:bg-slate-800">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-0.5 text-[14px] font-bold text-muted-foreground dark:bg-slate-800">
                 <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />Synced
               </span>
             )}
             {sapFailed && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-red-100 px-2.5 py-0.5 text-[12px] font-bold text-red-700 dark:bg-red-500/15 dark:text-red-300">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-red-100 px-2.5 py-0.5 text-[14px] font-bold text-red-700 dark:bg-red-500/15 dark:text-red-300">
                 <span className="h-1.5 w-1.5 rounded-full bg-red-500" />Failed
               </span>
             )}
