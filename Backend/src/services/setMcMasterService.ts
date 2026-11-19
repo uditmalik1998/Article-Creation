@@ -37,6 +37,13 @@ const toSetMc = (r: SetMcRow): SetMc => ({
     mcCode: r.sMcCode, mcDes: r.sMcDes, div: r.div, subDiv: r.subDiv, hsnCode: r.hsnCode,
 });
 
+/**
+ * Sets of these divisions take ANY category of their division as a part (business
+ * rule, 19-Nov-2026); the master's PART rows apply to the other divisions (LADIES).
+ * A part keeps its normal MC in SAP either way (SET_PARTS_USE_SET_MC).
+ */
+export const OPEN_PART_DIVISIONS: ReadonlySet<string> = new Set(['KIDS', 'MENS']);
+
 /** In-memory lookups over the ACT rows of the master. */
 export class SetMcIndex {
     private readonly parents = new Map<string, SetMcRow>();
@@ -61,6 +68,12 @@ export class SetMcIndex {
 
     setCategories(): string[] {
         return [...this.parents.keys()].sort();
+    }
+
+    /** True when the set takes any category of its division as a part (KIDS / MENS sets). */
+    partsOpen(setCategory?: string | null): boolean {
+        const r = this.parents.get(norm(setCategory));
+        return !!r && OPEN_PART_DIVISIONS.has(norm(r.div));
     }
 
     parentMc(setCategory?: string | null): SetMc | null {
@@ -114,7 +127,14 @@ export function setProblems(index: SetMcIndex, setCategory: string | null | unde
     if (!parent) return [notASet(setCategory)];
     const problems: string[] = [];
     if (!parent.hsnCode) problems.push(`${parent.mcDes} has no HSN code in the Set MC Master.`);
+    const open = index.partsOpen(setCategory);
     for (const p of parts) {
+        if (open) {
+            // KIDS / MENS: any category is a part — it goes to SAP under its own normal MC + HSN.
+            if (!p.majorCategory?.trim()) problems.push(`${p.label}: the part has no major category.`);
+            else if (index.isSetCategory(p.majorCategory)) problems.push(`${p.label}: ${p.majorCategory.trim()} is a set category, not a part.`);
+            continue;
+        }
         const mc = index.partMc(setCategory, p.majorCategory);
         if (!mc) problems.push(`${p.label}: ${notAPart(index, setCategory, p.majorCategory)}`);
         else if (!mc.hsnCode) problems.push(`${p.label}: ${mc.mcDes} has no HSN code in the Set MC Master.`);

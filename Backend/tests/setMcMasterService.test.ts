@@ -27,6 +27,10 @@ const ROWS: SetMcRow[] = [
     row({ partMajCat: 'JB_T_BERMUDA', partPosition: 'LOWER', sMcCode: '131830104', sMcDes: 'S-JB_T_BERMUDA', status: 'INACT' }),
     row({ setMajCat: 'S-L_N_SUIT', rowType: 'PARENT', partPosition: null, sMcCode: '124120101', sMcDes: 'S-L_N_SUIT', status: 'INACT', hsnCode: '1' }),
     row({ setMajCat: 'S-L_N_SUIT', partMajCat: 'L_SHIRT', sMcCode: '124120102', sMcDes: 'S-L_SHIRT', hsnCode: '1' }),
+    row({ setMajCat: 'S-L_KURTI_ST', rowType: 'PARENT', partPosition: null, sMcCode: '124130101', sMcDes: 'S-L_KURTI_ST', div: 'LADIES', hsnCode: '6204' }),
+    row({ setMajCat: 'S-L_KURTI_ST', partMajCat: 'L_KURTI_FS', sMcCode: '124130102', sMcDes: 'S-L_KURTI_FS', div: 'LADIES', hsnCode: '6104' }),
+    row({ setMajCat: 'S-L_KURTI_ST', partMajCat: 'L_PALAZZO', partPosition: 'LOWER', sMcCode: '124130103', sMcDes: 'S-L_PALAZZO', div: 'LADIES' }),
+    row({ setMajCat: 'S-M_KURTA_ST', rowType: 'PARENT', partPosition: null, sMcCode: '111130101', sMcDes: 'S-M_KURTA_ST', div: 'MENS', hsnCode: '6203' }),
 ];
 const IDX = new SetMcIndex(ROWS);
 
@@ -35,7 +39,7 @@ test('a set category has an ACT parent row; case and spaces do not matter', () =
     assert.equal(IDX.isSetCategory('S-L_N_SUIT'), false); // INACT
     assert.equal(IDX.isSetCategory('JB_TEES_SL'), false); // a part, not a set
     assert.equal(IDX.isSetCategory(null), false);
-    assert.deepEqual(IDX.setCategories(), ['S-JB_B_SUIT_SL']);
+    assert.deepEqual(IDX.setCategories(), ['S-JB_B_SUIT_SL', 'S-L_KURTI_ST', 'S-M_KURTA_ST']);
 });
 
 test('the plain category is not a set: only its S- copy gets the set flow', () => {
@@ -75,16 +79,36 @@ test('setMcForArticle: a set part keeps its normal MC (parts do not use S- MCs)'
     assert.equal(await setMcForArticle({ comboRole: 'NONE', majorCategory: 'L_KURTI_FS' }), null);
 });
 
-test('setProblems lists every part that cannot be created, and a missing HSN', () => {
-    assert.deepEqual(setProblems(IDX, 'S-JB_B_SUIT_SL', [{ label: 'KS-1-T', majorCategory: 'JB_TEES_SL' }]), []);
-    assert.deepEqual(setProblems(IDX, 'S-JB_B_SUIT_SL', [
-        { label: 'KS-1-B', majorCategory: 'JB_H_BERMUDA' },
-        { label: 'KS-1-O', majorCategory: 'L_LEGGING' },
+test('setProblems (LADIES set): every part must be in the master for that set, with an HSN', () => {
+    assert.equal(IDX.partsOpen('S-L_KURTI_ST'), false);
+    assert.deepEqual(setProblems(IDX, 'S-L_KURTI_ST', [{ label: 'LK-1-T', majorCategory: 'L_KURTI_FS' }]), []);
+    assert.deepEqual(setProblems(IDX, 'S-L_KURTI_ST', [
+        { label: 'LK-1-B', majorCategory: 'L_PALAZZO' },
+        { label: 'LK-1-O', majorCategory: 'L_LEGGING' },
     ]), [
-        'KS-1-B: S-JB_H_BERMUDA has no HSN code in the Set MC Master.',
-        'KS-1-O: L_LEGGING is not a part of S-JB_B_SUIT_SL in the Set MC Master.',
+        'LK-1-B: S-L_PALAZZO has no HSN code in the Set MC Master.',
+        'LK-1-O: L_LEGGING is not a part of S-L_KURTI_ST in the Set MC Master.',
     ]);
     assert.deepEqual(setProblems(IDX, 'S-L_N_SUIT', []), ['S-L_N_SUIT is not an active set category in the Set MC Master.']);
+});
+
+test('setProblems (KIDS / MENS set): any category is a part, but not a set category or a blank one', () => {
+    assert.equal(IDX.partsOpen('S-JB_B_SUIT_SL'), true); // KIDS
+    assert.equal(IDX.partsOpen(' s-m_kurta_st '), true); // MENS, no PART rows at all
+    assert.equal(IDX.partsOpen('S-L_N_SUIT'), false); // INACT set
+    assert.equal(IDX.partsOpen('JB_B_SUIT_SL'), false); // plain category
+    assert.deepEqual(setProblems(IDX, 'S-JB_B_SUIT_SL', [
+        { label: 'KS-1-T', majorCategory: 'JB_SHIRT_FS' }, // not in the master's part list
+        { label: 'KS-1-B', majorCategory: 'JB_H_BERMUDA' }, // in the list, no HSN there: fine, SAP uses its normal MC
+    ]), []);
+    assert.deepEqual(setProblems(IDX, 'S-M_KURTA_ST', [
+        { label: 'MK-1-T', majorCategory: 'M_KURTA_FS' },
+        { label: 'MK-1-B', majorCategory: 'S-JB_B_SUIT_SL' },
+        { label: 'MK-1-O', majorCategory: '  ' },
+    ]), [
+        'MK-1-B: S-JB_B_SUIT_SL is a set category, not a part.',
+        'MK-1-O: the part has no major category.',
+    ]);
 });
 
 test('parseSetMcMasterRows: reads the template columns and normalises them', () => {
