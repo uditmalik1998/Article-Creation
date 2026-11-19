@@ -5,10 +5,26 @@
 
 ---
 
+## 2026-11-19 — Rows view: centred columns, bigger photo, SAP column
+
+User picked **option A** from a 4-option canvas (https://claude.ai/artifact/CtSwVA2QwHVYe1oohpGaC8), with every column centred like Vendor.
+- Photo 44×58 (was 36×48).
+- APPROVED / SAP ✓ / SAP … / SAP ✗ badges removed from the Article cell (card view keeps them).
+- New **SAP** column at the far right on Created pages only (`dateField === 'approvedAt'`): amber "Queued" (APPROVED + sap PENDING) or red "Failed", grey "Synced" when synced (user follow-up); Article no. text and Synced pill use the header grey (text-muted-foreground), header renamed "SAP status".
+- All headers and cells centred. Widths: Article 18 · Article no. 11 · Design 10 · Vendor 21 · Date 9 · Cost/MRP/Margin 8 · SAP 8 (%).
+- Files: `ArticleSpecCard.tsx` (ArticleSpecRow), `ArticleCardGrid.tsx` (ArticleRowsTable `showSapStatus`). Checked in a test page, not with live data.
+
+## 2026-11-19 — Dashboard Rows view: Article no. column
+
+- Rows view (all 5 dashboards, shared `ArticleRowsTable` + `ArticleSpecRow`): new **Article no.** column between Article and Design no. (blue mono, `—` when the article has no number yet). The blue number badge next to the major category in the Article cell is removed (moved to the column). Cards view unchanged.
+- Widths: Article 24→20%, Article no. 11%, Design no. 13→11%, Vendor 26→21%.
+- Files: `Frontend/src/shared/components/articles/ArticleCardGrid.tsx`, `ArticleSpecCard.tsx`. Frontend only.
+
 ## 2026-11-19 — FG FAB card: rough-v2-rate API fills AUTO-BGT too
 
 - Why AUTO-BGT was empty on FG › New: the on-open API `/approver/fabric-article-data/rough-v2-rate` (cheapest `precise_fabric_article_data` rate matching M_YARN, M_FAB_DIV, M_FAB_MAIN_MVGR_1, M_WEAVE_01, M_LYCRA) only filled ACT-V2 (`roughV2`, ex ROUGH-V2), and it bypasses `handleSave`, so the ACT-V2 → AUTO-BGT copy never ran. The old VENDOR COST → AUTO-BGT/ROUGH-V2 fallback was removed in commit 18906cb (2026-11-12).
 - Now (user option A): on open, the API runs when ACT-V2 **or** AUTO-BGT is empty and fills whichever is empty with the same rate. AUTO-BGT is only auto-filled outside Modify mode (Created page), so opening a created article doesn't stage a change. Same in the (currently unused) `lookupRoughV2Rate`.
+- FABRIC ARTICLE NO. pick now also sets AUTO-BGT = the picked row's `fabricRate` (overwrites, like the DESC pick; left as is when the row has no rate). NOMINATED → ACT-V2 rule unchanged.
 - File: `Frontend/src/features/approver/components/ApproverArticleList.tsx`. Frontend only.
 
 ## 2026-11-19 — Precise Costing Excel: AUTO-BGT / ACT-V2 PR PC CONS. columns
