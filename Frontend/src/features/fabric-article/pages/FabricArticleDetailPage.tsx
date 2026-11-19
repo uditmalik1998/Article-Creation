@@ -471,6 +471,11 @@ export default function ArticleDetailPage({
     return pendingItems.reduce<{ articleId: string; missing: string[] }[]>((acc, item) => {
       const missing: string[] = [];
       if (!item.vendorCode) missing.push('VENDOR CODE');
+      // Division and Sub-Division are mandatory for Save & Submit (2026-11-19).
+      if (!String(item.division ?? '').trim()) missing.push('DIVISION');
+      if (!String(item.subDivision ?? '').trim()) missing.push('SUB-DIVISION');
+      // Major Category too — without it the category's mandatory-attribute checks are skipped.
+      if (!String(item.majorCategory ?? '').trim()) missing.push('MAJOR CATEGORY');
       // Color is mandatory on New Articles — skipped in FG and SRM Fabric Article mode.
       if (pathType === 'new' && !isFGMode && item.source !== 'SRM' && !item.colour) missing.push('COLOUR');
       // Fabric Article Desc and MC Description are mandatory in FG mode.

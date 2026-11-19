@@ -79,7 +79,7 @@ function ArticleRowsTable({ ids, selectedIds, onSetSelection, dateLabel, showSap
   framed?: boolean;
 }) {
   const allSelected = ids.length > 0 && ids.every((id) => selectedIds.has(id));
-  const th = 'border-b border-border bg-muted/60 px-3 py-2.5 text-center text-[11.5px] font-bold uppercase tracking-[0.06em] text-muted-foreground whitespace-nowrap';
+  const th = 'border-b border-border bg-muted/60 px-3 py-2.5 text-center text-[13.5px] font-bold uppercase tracking-[0.06em] text-muted-foreground whitespace-nowrap';
   return (
     <div className={cn('overflow-x-auto', framed && 'rounded-xl border border-border bg-card shadow-sm')}>
       <table className="w-full min-w-[980px] table-fixed border-collapse">
