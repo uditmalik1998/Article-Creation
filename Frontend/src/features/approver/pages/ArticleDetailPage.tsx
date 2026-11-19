@@ -22,7 +22,7 @@ import {
 } from '@/shared/components/ui-tw';
 import { message } from '@/lib/message';
 import { toast } from 'sonner';
-import { ApproverArticleList } from '../components/ApproverArticleList';
+import { ApproverArticleList, FAB_CONS_FIELDS } from '../components/ApproverArticleList';
 import { getUnsavedCards, getUserEditedCards } from '../components/unsavedCards';
 import { clearArticleDrafts } from '../components/cardDrafts';
 import { getLiveCmpActTotal, useLiveCmpActVersion } from '../components/CmpCostCard';
@@ -665,17 +665,16 @@ export default function ArticleDetailPage({
   // so the parent shows and requires that part's attribute grid, not the set category's.
   const setTopCategory = comboChildren[0]?.majorCategory || null;
 
-  // COST SUMMARY FAB row of the set: each part's FAB cost × its own PR PC CONS. (first of
-  // precise kg, rough kg, precise meter, rough meter — as the summary does per article), added up.
+  // COST SUMMARY FAB row of the set: each part's FAB cost × its own consumption for that
+  // column (FAB_CONS_FIELDS — same rule as the per-article summary), added up.
   const setFabCostSummary = useMemo(() => {
     if (!isComboItem || comboChildren.length === 0) return undefined;
     const num = (v: unknown) => (v == null || String(v).trim() === '' ? null : Number.isFinite(Number(v)) ? Number(v) : null);
-    return ['autoBgt', 'roughV2', 'vendorFabricRate', 'finalCost'].map((field) => {
+    return ['autoBgt', 'roughV2', 'vendorFabricRate', 'finalCost'].map((field, i) => {
       let sum: number | null = null;
       for (const c of comboChildren as any[]) {
         const cost = num(c[field]);
-        const cons = ['preciseConsumptionKg', 'roughConsumptionKg', 'preciseConsumptionMeter', 'roughConsumptionMeter']
-          .map((f) => num(c[f])).find((v): v is number => v != null) ?? null;
+        const cons = FAB_CONS_FIELDS[i].map((f) => num(c[f])).find((v): v is number => v != null) ?? null;
         if (cost != null && cons != null) sum = (sum ?? 0) + cost * cons;
       }
       return sum;
@@ -832,6 +831,10 @@ export default function ArticleDetailPage({
         const livePkg = getLivePkgSaved(item.id);
         const pkgSaved = livePkg !== undefined ? livePkg : String((item as any).pkgCostType ?? '').trim() !== '';
         if (!pkgSaved) missing.push('PKG COST: not saved (click Save on the PKG COST card)');
+        // AUTO-BGT / ACT-V2 CONSUMPTION cards: Consumption in Meter is required (saved on blur).
+        for (const [card, field] of [['AUTO-BGT', 'roughConsumptionMeter'], ['ACT-V2', 'preciseConsumptionMeter']] as const) {
+          if (!String((item as any)[field] ?? '').trim()) missing.push(`${card} CONSUMPTION: Consumption in Meter`);
+        }
       }
       missing.push(...getMissingMandatoryFields(item, isComboItem && item.id === currentItem?.id ? setTopCategory : null));
       // Readable name: SAP / article number once it exists, else category + design

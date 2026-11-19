@@ -5,6 +5,44 @@
 
 ---
 
+## 2026-11-19 — FG FAB card: rough-v2-rate API fills AUTO-BGT too
+
+- Why AUTO-BGT was empty on FG › New: the on-open API `/approver/fabric-article-data/rough-v2-rate` (cheapest `precise_fabric_article_data` rate matching M_YARN, M_FAB_DIV, M_FAB_MAIN_MVGR_1, M_WEAVE_01, M_LYCRA) only filled ACT-V2 (`roughV2`, ex ROUGH-V2), and it bypasses `handleSave`, so the ACT-V2 → AUTO-BGT copy never ran. The old VENDOR COST → AUTO-BGT/ROUGH-V2 fallback was removed in commit 18906cb (2026-11-12).
+- Now (user option A): on open, the API runs when ACT-V2 **or** AUTO-BGT is empty and fills whichever is empty with the same rate. AUTO-BGT is only auto-filled outside Modify mode (Created page), so opening a created article doesn't stage a change. Same in the (currently unused) `lookupRoughV2Rate`.
+- File: `Frontend/src/features/approver/components/ApproverArticleList.tsx`. Frontend only.
+
+## 2026-11-19 — Precise Costing Excel: AUTO-BGT / ACT-V2 PR PC CONS. columns
+
+- FG Articles › Created › Precise Costing export (`preciseCostingExport`), MATERIAL TYPE table: `PR PC CONS.` renamed **AUTO-BGT PR PC CONS.** (col I) and a new **ACT-V2 PR PC CONS.** column (col J) added right after it. Everything after moved one column right: AUTO -BGT K, ROUGH-V2 L, VDR PR PC COST M, FINAL N, DIFF O, RATIO P, REMARKS Q (sheet is now A..Q).
+- FAB row: I = AUTO-BGT consumption (Kg, else Meter), J = ACT-V2 consumption (Kg, else Meter); AUTO -BGT = `Fab AUTO-BGT * I`, ROUGH-V2 = `Fab ACT-V2 * J`, VDR PR PC COST = `RATE * J` (user: VDR uses ACT-V2). UOM follows the ACT-V2 consumption, else AUTO-BGT (user choice). Formulas reference the cells again (no literal numbers).
+- Other rows (B TRIM, PKG, VAL. ADD., BODY) show `-` in both consumption columns. TOTAL row, DIFF, COST label, top summary (MRP / AUTO -V2 / ROUGH-V2 / VDR / FINAL) and CMP COST SUM formulas re-pointed to the new letters. Backend only.
+- **Summary Costing export** (`summaryCostingExport`) same change: `BGT FAB CONS` renamed **AUTO-BGT PR PC CONS.** (E), new **ACT-V2 PR PC CONS.** (F); AUTO -V2 G, ROUGH-V2 H, VEND PR COST I (TOTAL = article rate), VDR PR PC COST J, FINAL K, DIFF L (block is now B..L). FAB: G = `E*D`, H = `<Fab ACT-V2>*F`, J = `F*<vendor rate>`. Other rows leave E/F empty (orange na). 10% margin + SUBTOTAL formulas, widths and header/summary/line styles moved with the columns.
+
+## 2026-11-19 — OTH GRID-1 COST SUMMARY: FAB row uses its own column's consumption
+
+- FAB **AUTO-BGT** = FAB card AUTO-BGT × AUTO-BGT CONSUMPTION (Consumption in Kg, else Consumption in Meter).
+- FAB **ACT-V2** = FAB card ACT-V2 × ACT-V2 CONSUMPTION (Consumption in Kg, else Consumption in Meter).
+- VDR COST / FINAL COST unchanged: first of ACT-V2 Kg, AUTO-BGT Kg, ACT-V2 Meter, AUTO-BGT Meter. Still no wastage.
+- Before: every column used that one fallback chain, so AUTO-BGT could be multiplied by the ACT-V2 consumption.
+- **Precise Costing Excel export** (`preciseCostingExport`, ApproverController) follows the same rule on the FAB row: AUTO -BGT cell = `+<Fab AUTO-BGT>*<AUTO-BGT cons>` (rough Kg, else Meter), ROUGH-V2 cell = `+<Fab ACT-V2>*<ACT-V2 cons>` (precise Kg, else Meter); a missing consumption leaves the cell blank. PR PC CONS. (col I) + UOM unchanged (old chain), VDR PR PC COST still = RATE × I. Backend change.
+- **Summary Costing export** (`summaryCostingExport`) FAB row too: E (BGT FAB CONS) = AUTO-BGT consumption (rough Kg, else Meter), F (AUTO -V2) = E×D (Fab AUTO-BGT); G (ROUGH-V2) = `+<Fab ACT-V2>*<ACT-V2 cons>` (was Fab AUTO-BGT × precise cons); I (VDR PR PC COST) = vendor rate × ACT-V2 cons (unchanged values).
+- Rule is `FAB_CONS_FIELDS` (exported from `ApproverArticleList.tsx`); the set parent's sum of parts (`setFabCostSummary` in `ArticleDetailPage.tsx`) uses it too. Frontend + backend (export).
+- Also: `ApproverArticleList.tsx` working copy back to all-LF (stray CR bytes from earlier edits removed); its diff is now only the real changes.
+
+## 2026-11-19 — FG Save & Submit: Consumption in Meter required (AUTO-BGT + ACT-V2)
+
+- FG Articles pages: Save & Submit now blocks when **AUTO-BGT CONSUMPTION › Consumption in Meter** (`roughConsumptionMeter`) or **ACT-V2 CONSUMPTION › Consumption in Meter** (`preciseConsumptionMeter`) is empty. Popup items: `AUTO-BGT CONSUMPTION: Consumption in Meter` / `ACT-V2 CONSUMPTION: Consumption in Meter`; clicking one jumps to the row.
+- Same scope as the other costing-card checks: not on a set parent (each part is checked). Body Article pages untouched (their consumption card is different).
+- Both cards' text +1px (12.5px → 13.5px: labels, values, edit input); card headings 10px → 11px (new optional `titleSize` arg on `renderCollapsibleHeader`, other cards unchanged).
+- Files: `ArticleDetailPage.tsx` (check in the approve-blocked list), `ApproverArticleList.tsx` (red `*` on both Meter labels + `data-field-label`/`data-item-id` on the consumption rows). Frontend only.
+
+## 2026-11-19 — Article detail pages: photo opens the new card viewer
+
+- Clicking the ARTICLE IMAGE on the FG, Fabric and GM detail pages (New + Created, and Body, which shares the FG list) used the old modal (title bar with − 100% + ⟳ Reset). It now opens the same viewer as the dashboard cards: `ImagePreviewDialog` (ink header, 3:4 skeleton frame, floating zoom/fit/rotate toolbar, drag to pan).
+- `ImagePreviewDialog` is now exported from `Frontend/src/shared/components/articles/ArticleSpecCard.tsx`; used in `ApproverArticleList.tsx`, `FabricArticleList.tsx`, `GMArticleList.tsx` (mounted only while open). Old zoom/rotate/pan/frame-size state and unused icon imports removed from those three files.
+- Old modal was inline JSX in those three files (no separate component); after removal no copy remains in the frontend. `useDragToPan` kept — the new viewer uses it.
+- Frontend only.
+
 ## 2026-11-19 — Pool B Uploader: FASHGRD + PLGTP columns
 
 - **Template** (Admin › Pool B Uploader › Template) now ends with two more columns: `FASHGRD` (ARTICLE FASHION TYPE) and `PLGTP` (SEGMENT). Drop-zone hint lists them too. File: `Frontend/src/features/admin/pages/PoolBUploaderPage.tsx`.

@@ -427,7 +427,7 @@ function Stat({ label, value, className, labelClassName, valueClassName }: {
  * toolbar under the photo. The frame is sized before the photo arrives, so the
  * dialog never opens as an empty strip and doesn't jump when the image lands.
  */
-function ImagePreviewDialog({ src, title, onClose }: { src: string; title: string; onClose: () => void }) {
+export function ImagePreviewDialog({ src, title, onClose }: { src: string; title: string; onClose: () => void }) {
   const [imgZoom, setImgZoom] = useState(1);
   const [imgRotation, setImgRotation] = useState(0);
   // The image's real (natural) pixel size, captured on load. `transform: scale()`

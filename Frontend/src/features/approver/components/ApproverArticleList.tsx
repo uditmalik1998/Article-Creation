@@ -16,9 +16,6 @@ import {
   Wand2,
   Briefcase,
   DollarSign,
-  Plus,
-  Minus,
-  RotateCw,
   Search,
   X,
   Upload,
@@ -56,7 +53,6 @@ import {
 } from '@/shared/components/ui-tw';
 import { message, notification } from '@/lib/message';
 import { cn } from '@/lib/utils';
-import { useDragToPan } from '@/shared/hooks/ui/useDragToPan';
 import type { ApproverItem } from '../types';
 import CostingGridCard, { BTRIM_CONFIG, VADD_CONFIG, gridFields } from './CostingGridCard';
 import PkgCostCard, { PKG_RATE_FIELDS } from './PkgCostCard';
@@ -90,6 +86,7 @@ import { formatDivisionLabel } from '../../../shared/utils/ui/formatters';
 import { SIMPLIFIED_HIERARCHY } from '../../extraction/components/SimplifiedCategorySelector';
 import VariantSubTable from './VariantSubTable';
 import { variantCreatingIds } from '../../fabric-article/variantCreationState';
+import { ImagePreviewDialog } from '@/shared/components/articles/ArticleSpecCard';
 
 // Alias so the combobox trigger can use a distinct name from the plain icon
 const ChevronDownIcon = ChevronDown;
@@ -276,6 +273,16 @@ const HIDDEN_CARD_SCHEMA_KEYS = new Set([
   'shade',
   'weight',
 ]);
+
+// COST SUMMARY FAB row: which consumption each FAB column multiplies by (first filled wins).
+// AUTO-BGT uses the AUTO-BGT CONSUMPTION card, ACT-V2 the ACT-V2 CONSUMPTION card (Kg, then Meter);
+// VDR COST / FINAL COST keep the old fallback chain.
+export const FAB_CONS_FIELDS: string[][] = [
+  ['roughConsumptionKg', 'roughConsumptionMeter'],     // AUTO-BGT
+  ['preciseConsumptionKg', 'preciseConsumptionMeter'], // ACT-V2
+  ['preciseConsumptionKg', 'roughConsumptionKg', 'preciseConsumptionMeter', 'roughConsumptionMeter'], // VDR COST
+  ['preciseConsumptionKg', 'roughConsumptionKg', 'preciseConsumptionMeter', 'roughConsumptionMeter'], // FINAL COST
+];
 
 const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string; schemaKey: string; freeText?: boolean; mandatory?: boolean }[] }[] = [
   {
@@ -718,10 +725,14 @@ const ArticleCard = React.memo(
     );
     useEffect(() => flushAutoSave, [flushAutoSave]);
 
-    // Auto-fill Rough-V2 on mount if not already set — exact match on 5 attrs
+    // Auto-fill ACT-V2 (roughV2) and AUTO-BGT on mount — whichever is still empty —
+    // from the rough-v2-rate API (exact match on 5 attrs). AUTO-BGT added 2026-11-19.
     useEffect(() => {
-      const existingRoughV2 = (item as any).roughV2;
-      if (existingRoughV2 != null && String(existingRoughV2).trim() !== '') return;
+      const isBlank = (v: unknown) => v == null || String(v).trim() === '';
+      const needRoughV2 = isBlank((item as any).roughV2);
+      // Created page (Modify mode): don't stage an AUTO-BGT change just by opening an article.
+      const needAutoBgt = !isModifyMode && isBlank((item as any).autoBgt);
+      if (!needRoughV2 && !needAutoBgt) return;
       if (roughV2FetchedRef.current) return;
       roughV2FetchedRef.current = true;
       const getV = (key: string) => String((item as any)[key] ?? '').trim();
@@ -742,11 +753,14 @@ const ArticleCard = React.memo(
         .then((d) => {
           if (d.rate != null) {
             const rateStr = String(d.rate);
-            setLocalValues((prev) => ({ ...prev, roughV2: rateStr }));
+            const updates: Record<string, string> = {};
+            if (needRoughV2) updates.roughV2 = rateStr;
+            if (needAutoBgt) updates.autoBgt = rateStr;
+            setLocalValues((prev) => ({ ...prev, ...updates }));
             if (isModifyMode) {
-              setPendingChanges((prev) => ({ ...prev, roughV2: rateStr }));
+              setPendingChanges((prev) => ({ ...prev, ...updates }));
             } else {
-              queueAutoSave({ roughV2: rateStr });
+              queueAutoSave(updates);
             }
           }
         })
@@ -756,14 +770,6 @@ const ArticleCard = React.memo(
     }, []);
 
     const autoSavedFabDescRef = React.useRef<string | null>(null);
-    const [imgZoom, setImgZoom] = useState(1);
-    const [imgRotation, setImgRotation] = useState(0);
-    // The image's real (natural) pixel size, captured on load. `transform: scale()`
-    // alone is purely visual — it never grows the parent's scrollable area, which is
-    // why zooming in previously left no real room to scroll/drag to the far edges.
-    // Sizing the <img> with actual width/height (computed from this) instead makes
-    // the browser's own overflow/scroll math account for the true zoomed size.
-    const [naturalSize, setNaturalSize] = useState<{ w: number; h: number } | null>(null);
     const [catOpen, setCatOpen] = useState(false);
     const [catSearch, setCatSearch] = useState('');
     // Search term for the attribute-value dropdown. A single shared term is
@@ -812,23 +818,6 @@ const ArticleCard = React.memo(
     const isModifyMode = pathType === 'created' && !!onModify && !isBodyArticle;
     const [pendingChanges, setPendingChanges] = useState<Record<string, string | null>>({});
     const [modifying, setModifying] = useState(false);
-
-    const resetImageView = useCallback(() => {
-      setImgZoom(1);
-      setImgRotation(0);
-    }, []);
-
-    // Click-and-drag panning once zoomed in — an alternative to relying on the
-    // mouse wheel/scrollbars to see different parts of a zoomed-in image.
-    const { containerRef: panRef, onMouseDown: onPanMouseDown, isDragging: isImgPanning } = useDragToPan<HTMLDivElement>(imgZoom > 1);
-
-    const [imgViewportSize, setImgViewportSize] = useState({ w: window.innerWidth, h: window.innerHeight });
-    useEffect(() => {
-      if (!imgModalOpen) return;
-      const onResize = () => setImgViewportSize({ w: window.innerWidth, h: window.innerHeight });
-      window.addEventListener('resize', onResize);
-      return () => window.removeEventListener('resize', onResize);
-    }, [imgModalOpen]);
 
     const prevItemRef = React.useRef<ApproverItem>(item);
     // Set when Create Body / Create Fabric Article is clicked: the next number the
@@ -2828,11 +2817,13 @@ const ArticleCard = React.memo(
         .then((d) => {
           if (d.rate != null) {
             const rateStr = String(d.rate);
-            setLocalValues((prev) => ({ ...prev, roughV2: rateStr }));
+            const updates: Record<string, string> = { roughV2: rateStr };
+            if (!isModifyMode && !getV('autoBgt')) updates.autoBgt = rateStr; // AUTO-BGT too when empty (not on Created)
+            setLocalValues((prev) => ({ ...prev, ...updates }));
             if (isModifyMode) {
-              setPendingChanges((prev) => ({ ...prev, roughV2: rateStr }));
+              setPendingChanges((prev) => ({ ...prev, ...updates }));
             } else {
-              onSave({ ...item, roughV2: rateStr } as any, { roughV2: rateStr });
+              onSave({ ...item, ...updates } as any, updates);
             }
           }
         })
@@ -2854,7 +2845,8 @@ const ArticleCard = React.memo(
 
     // Clickable header for the non-attribute cards (OTH GRID-1, Rough/Precise
     // Consumption) — collapses like the group cards and follows Collapse All.
-    const renderCollapsibleHeader = (key: string, title: string) => {
+    // titleSize: optional Tailwind text size for the title (default 10px).
+    const renderCollapsibleHeader = (key: string, title: string, titleSize = 'text-[10px]') => {
       const collapsed = isGroupCollapsed(key);
       return (
         <button
@@ -2864,7 +2856,7 @@ const ArticleCard = React.memo(
           className="flex w-full items-center justify-between border-b px-2 py-1.5 transition-colors hover:brightness-110"
           style={{ background: CARD_THEME.bg, borderColor: CARD_THEME.bg, color: CARD_THEME.fg }}
         >
-          <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider">
+          <span className={cn('flex items-center gap-1 font-bold uppercase tracking-wider', titleSize)}>
             <DollarSign className="h-3 w-3" />
             {title}
           </span>
@@ -2975,31 +2967,6 @@ const ArticleCard = React.memo(
       },
       { label: pathType === 'created' ? 'Last updated' : 'Created', value: createdOrUpdatedLabel },
     ];
-
-    // Base (100%-zoom) display size, fit to the same 85vw/75vh box the old
-    // maxWidth/maxHeight CSS used — then scaled up by the zoom factor. Rotation at
-    // 90/270° swaps which axis is width vs height so the post-rotation footprint
-    // (what the scroll container needs to accommodate) is what actually gets laid out.
-    const isImgSideways = imgRotation === 90 || imgRotation === 270;
-    // `imgFrame*` is the viewing window: the image's footprint at 100% zoom. It stays put
-    // as you zoom so the dialog doesn't grow with every step — only `imgBox*` (the image
-    // itself) scales, overflowing the frame and becoming scrollable/draggable.
-    const IMG_VIEWER_PADDING = 16; // matches the `p-4` on the preview container
-    let imgFrameWidth: number | undefined;
-    let imgFrameHeight: number | undefined;
-    let imgBoxWidth: number | undefined;
-    let imgBoxHeight: number | undefined;
-    if (naturalSize) {
-      const maxW = imgViewportSize.w * 0.85 - IMG_VIEWER_PADDING * 2;
-      const maxH = imgViewportSize.h * 0.75 - IMG_VIEWER_PADDING * 2;
-      const fitScale = Math.min(1, maxW / naturalSize.w, maxH / naturalSize.h);
-      const baseW = naturalSize.w * fitScale;
-      const baseH = naturalSize.h * fitScale;
-      imgFrameWidth = isImgSideways ? baseH : baseW;
-      imgFrameHeight = isImgSideways ? baseW : baseH;
-      imgBoxWidth = imgFrameWidth * imgZoom;
-      imgBoxHeight = imgFrameHeight * imgZoom;
-    }
 
     return (
       <>
@@ -5055,18 +5022,19 @@ const ArticleCard = React.memo(
                         const fmt = (n: number | null) =>
                           n == null ? '—' : n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                         const rows = COST_SOURCES.map((s) => ({ label: s.label, title: s.title, vals: s.fields.map(numOf) }));
-                        // FAB per piece: PR PC CONS. = first of precise kg, rough kg, precise meter, rough meter
-                        // (as in the export); no consumption → no FAB cost.
-                        const fabCons = ['preciseConsumptionKg', 'roughConsumptionKg', 'preciseConsumptionMeter', 'roughConsumptionMeter']
-                          .map(numOf)
-                          .find((v): v is number => v != null) ?? null;
+                        // FAB per piece = cost × that column's consumption (FAB_CONS_FIELDS: AUTO-BGT ← AUTO-BGT
+                        // CONSUMPTION, ACT-V2 ← ACT-V2 CONSUMPTION, Kg then Meter); no consumption → no FAB cost.
+                        const fabConsFor = (i: number) => FAB_CONS_FIELDS[i].map(numOf).find((v): v is number => v != null) ?? null;
                         rows[0] = fabCostSummary
                           // Set parent: no consumption of its own — the parts' FAB (cost × PR PC CONS.) added up.
                           ? { ...rows[0], title: 'FAB: sum of the parts (cost × PR PC CONS., no wastage)', vals: fabCostSummary }
                           : {
                             ...rows[0],
-                            title: 'FAB card cost × PR PC CONS. (no wastage)',
-                            vals: rows[0].vals.map((v) => (v == null || fabCons == null ? null : v * fabCons)),
+                            title: 'FAB card cost × consumption (AUTO-BGT ← AUTO-BGT CONSUMPTION, ACT-V2 ← ACT-V2 CONSUMPTION; Kg, else Meter; no wastage)',
+                            vals: rows[0].vals.map((v, i) => {
+                              const cons = fabConsFor(i);
+                              return v == null || cons == null ? null : v * cons;
+                            }),
                           };
                         // PKG COST: saved NET RATE total goes to AUTO-BGT and ROUGH-V2; no VDR / FINAL.
                         const pkgRates = Object.values(PKG_RATE_FIELDS).map(numOf).filter((v): v is number => v != null);
@@ -5168,7 +5136,7 @@ const ArticleCard = React.memo(
                   {/* AUTO-BGT CONSUMPTION card (was ROUGH CONSUMPTION; rough_consumption_* fields) — FG Articles, BODY tab only */}
                   {!isBodyArticle && selectedGroupKeys.has('BODY') && (
                     <div className="overflow-hidden rounded-lg border bg-white" style={{ borderColor: CARD_THEME.border }}>
-                      {renderCollapsibleHeader('ROUGH', 'AUTO-BGT CONSUMPTION')}
+                      {renderCollapsibleHeader('ROUGH', 'AUTO-BGT CONSUMPTION', 'text-[11px]')}
                       <div className={cn('space-y-0 p-1', isGroupCollapsed('ROUGH') && 'hidden')}>
                         {([
                           { label: 'Ratio',               field: 'roughRatio' },
@@ -5182,21 +5150,24 @@ const ArticleCard = React.memo(
                           return (
                             <div
                               key={field}
+                              // data-field-label: the Save & Submit "missing fields" popup jumps here.
+                              data-field-label={`AUTO-BGT CONSUMPTION: ${label}`}
+                              data-item-id={item.id}
                               className="flex cursor-pointer items-center justify-between rounded px-1.5 py-1 hover:bg-muted/40"
                               onClick={() => { if (!isEditingR) setEditingField(`rough_${field}`); }}
                             >
-                              <span className="text-[12.5px] text-slate-600">{label}</span>
+                              <span className="text-[13.5px] text-slate-600">{label}{label === 'Consumption in Meter' && <span className="mandatory-mark">*</span>}</span>
                               {isEditingR ? (
                                 <input
                                   autoFocus
                                   type="number"
-                                  className="w-24 rounded border border-border px-1 text-right text-[12.5px]"
+                                  className="w-24 rounded border border-border px-1 text-right text-[13.5px]"
                                   defaultValue={isEmpty ? '' : displayVal}
                                   onBlur={(e) => { handleSave(field, e.target.value || null); setEditingField(null); }}
                                   onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingField(null); }}
                                 />
                               ) : (
-                                <span className="text-[12.5px]" style={{ color: isEmpty ? '#9ca3af' : '#111827' }}>{displayVal}</span>
+                                <span className="text-[13.5px]" style={{ color: isEmpty ? '#9ca3af' : '#111827' }}>{displayVal}</span>
                               )}
                             </div>
                           );
@@ -5208,7 +5179,7 @@ const ArticleCard = React.memo(
                   {/* ACT-V2 CONSUMPTION card (was PRECISE CONSUMPTION; precise_consumption_* fields) — FG Articles, BODY tab only */}
                   {!isBodyArticle && selectedGroupKeys.has('BODY') && (
                     <div className="overflow-hidden rounded-lg border bg-white" style={{ borderColor: CARD_THEME.border }}>
-                      {renderCollapsibleHeader('PRECISE', 'ACT-V2 CONSUMPTION')}
+                      {renderCollapsibleHeader('PRECISE', 'ACT-V2 CONSUMPTION', 'text-[11px]')}
                       <div className={cn('space-y-0 p-1', isGroupCollapsed('PRECISE') && 'hidden')}>
                         {([
                           { label: 'Ratio',               field: 'preciseRatio' },
@@ -5222,21 +5193,24 @@ const ArticleCard = React.memo(
                           return (
                             <div
                               key={field}
+                              // data-field-label: the Save & Submit "missing fields" popup jumps here.
+                              data-field-label={`ACT-V2 CONSUMPTION: ${label}`}
+                              data-item-id={item.id}
                               className="flex cursor-pointer items-center justify-between rounded px-1.5 py-1 hover:bg-muted/40"
                               onClick={() => { if (!isEditingP) setEditingField(`fgprecise_${field}`); }}
                             >
-                              <span className="text-[12.5px] text-slate-600">{label}</span>
+                              <span className="text-[13.5px] text-slate-600">{label}{label === 'Consumption in Meter' && <span className="mandatory-mark">*</span>}</span>
                               {isEditingP ? (
                                 <input
                                   autoFocus
                                   type="number"
-                                  className="w-24 rounded border border-border px-1 text-right text-[12.5px]"
+                                  className="w-24 rounded border border-border px-1 text-right text-[13.5px]"
                                   defaultValue={isEmpty ? '' : displayVal}
                                   onBlur={(e) => { handleSave(field, e.target.value || null); setEditingField(null); }}
                                   onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingField(null); }}
                                 />
                               ) : (
-                                <span className="text-[12.5px]" style={{ color: isEmpty ? '#9ca3af' : '#111827' }}>{displayVal}</span>
+                                <span className="text-[13.5px]" style={{ color: isEmpty ? '#9ca3af' : '#111827' }}>{displayVal}</span>
                               )}
                             </div>
                           );
@@ -5364,122 +5338,14 @@ const ArticleCard = React.memo(
           </div>
         </div>
 
-        {/* Image preview */}
-        <Dialog
-          open={imgModalOpen}
-          onOpenChange={(o) => {
-            setImgModalOpen(o);
-            if (!o) resetImageView();
-          }}
-        >
-          <DialogContent className="w-auto max-w-[92vw] p-0">
-            <DialogHeader className="flex flex-row items-center justify-between border-b border-border px-4 py-2">
-              <DialogTitle className="truncate text-sm">{item.designNumber || 'Image Preview'}</DialogTitle>
-              {/* Zoom + rotate controls */}
-              <div className="mr-8 flex items-center gap-1">
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="h-7 w-7"
-                  onClick={() => setImgZoom((z) => Math.max(0.25, Number((z - 0.25).toFixed(2))))}
-                  aria-label="Zoom out"
-                  disabled={imgZoom <= 0.25}
-                >
-                  <Minus />
-                </Button>
-                <span className="w-12 text-center text-xs tabular-nums text-muted-foreground">
-                  {Math.round(imgZoom * 100)}%
-                </span>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="h-7 w-7"
-                  onClick={() => setImgZoom((z) => Math.min(4, Number((z + 0.25).toFixed(2))))}
-                  aria-label="Zoom in"
-                  disabled={imgZoom >= 4}
-                >
-                  <Plus />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="ml-1 h-7 w-7"
-                  onClick={() => setImgRotation((r) => (r + 90) % 360)}
-                  aria-label="Rotate 90°"
-                >
-                  <RotateCw />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="ml-1 h-7 px-2 text-xs"
-                  onClick={resetImageView}
-                  disabled={imgZoom === 1 && imgRotation === 0}
-                >
-                  Reset
-                </Button>
-              </div>
-            </DialogHeader>
-            <div
-              ref={panRef}
-              onMouseDown={onPanMouseDown}
-              className={`flex overflow-auto p-4 ${
-                imgZoom > 1 ? (isImgPanning ? 'cursor-grabbing' : 'cursor-grab') : ''
-              }`}
-              // Fixed to the image's 100%-zoom footprint (plus padding, via border-box)
-              // so the dialog stays the same size at every zoom level — zooming scrolls
-              // within this frame instead of growing it.
-              //
-              // "safe center" degrades to plain "center" in browsers that don't support
-              // it — but plain centering of overflowing flex content can make the start
-              // edge unreachable by scroll, which is the other half of the "can't reach
-              // the top" bug. "safe" keeps it centered until it overflows, then falls
-              // back to start-aligned so every edge stays reachable.
-              style={{
-                width: imgFrameWidth ? imgFrameWidth + IMG_VIEWER_PADDING * 2 : undefined,
-                height: imgFrameHeight ? imgFrameHeight + IMG_VIEWER_PADDING * 2 : undefined,
-                maxWidth: '85vw',
-                maxHeight: '80vh',
-                alignItems: 'safe center',
-                justifyContent: 'safe center',
-              } as React.CSSProperties}
-            >
-              <img
-                src={shownImgUrl || ''}
-                alt={item.designNumber || 'preview'}
-                draggable={false}
-                onLoad={(e) => {
-                  const t = e.currentTarget;
-                  setNaturalSize({ w: t.naturalWidth, h: t.naturalHeight });
-                }}
-                className="block shrink-0 transition-[width,height,transform] duration-200 will-change-transform"
-                style={
-                  imgBoxWidth && imgBoxHeight
-                    ? {
-                        width: imgBoxWidth,
-                        height: imgBoxHeight,
-                        // Tailwind Preflight sets `img { max-width: 100% }`, which would
-                        // cap the zoomed width at the dialog's width while the height grew
-                        // freely — distorting the box so `object-fit: contain` letterboxed
-                        // the image with empty bands instead of actually zooming it.
-                        maxWidth: 'none',
-                        maxHeight: 'none',
-                        objectFit: 'contain',
-                        transform: `rotate(${imgRotation}deg)`,
-                        transformOrigin: 'center',
-                      }
-                    : {
-                        maxWidth: '85vw',
-                        maxHeight: '75vh',
-                        objectFit: 'contain',
-                        transform: `scale(${imgZoom}) rotate(${imgRotation}deg)`,
-                        transformOrigin: 'center',
-                      }
-                }
-              />
-            </div>
-          </DialogContent>
-        </Dialog>
+        {/* Image preview — same viewer as the dashboard cards (ImagePreviewDialog) */}
+        {imgModalOpen && shownImgUrl && (
+          <ImagePreviewDialog
+            src={shownImgUrl}
+            title={item.designNumber || 'Image Preview'}
+            onClose={() => setImgModalOpen(false)}
+          />
+        )}
 
         {/* Duplicate — asks for Design Number, then offers to open the new copy */}
         <Dialog
