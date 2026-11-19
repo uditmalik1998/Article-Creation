@@ -1986,10 +1986,11 @@ export class ApproverController {
             const wb: any = new (ExcelJS as any).stream.xlsx.WorkbookWriter({ stream: res, useStyles: true, useSharedStrings: true });
             const ws: any = wb.addWorksheet('PRECISE COSTING');
 
-            // A..P — widths must be declared before any rows in streaming mode
+            // A..Q — widths must be declared before any rows in streaming mode.
+            // I = AUTO-BGT PR PC CONS., J = ACT-V2 PR PC CONS. (added 2026-11-19, later columns moved right).
             ws.columns = [
                 { width: 14 }, { width: 22 }, { width: 16 }, { width: 32 }, { width: 7 }, { width: 8 },
-                { width: 8 }, { width: 10 }, { width: 11 }, { width: 11 }, { width: 11 },
+                { width: 8 }, { width: 10 }, { width: 13 }, { width: 13 }, { width: 11 }, { width: 11 },
                 { width: 15 }, { width: 11 }, { width: 10 }, { width: 8 }, { width: 16 },
             ];
 
@@ -1999,7 +2000,7 @@ export class ApproverController {
             const AMBER      = 'FFFFF2CC';
             const LT_GREEN   = 'FFE2EFDA';
             const GREY       = 'FFF2F2F2';
-            const COLS = 16; // A..P
+            const COLS = 17; // A..Q
 
             const num = (v: any) => (v == null || v === '' ? null : Number(v));
             const fill = (argb: string) => ({ type: 'pattern', pattern: 'solid', fgColor: { argb } });
@@ -2015,14 +2016,14 @@ export class ApproverController {
                         if (style.bold || style.white) cell.font = { bold: !!style.bold, color: style.white ? { argb: 'FFFFFFFF' } : undefined };
                     }
                 }
-                for (let c = 10; c <= 14; c++) row.getCell(c).numFmt = '0.00';
+                for (let c = 11; c <= 15; c++) row.getCell(c).numFmt = '0.00';
                 const n = row.number;
                 row.commit();
                 return n;
             };
             const blank = () => addRow([]);
 
-            // Material row: A..P, with J/K values and DIFF (N) = FINAL − ROUGH-V2 once FINAL is filled.
+            // Material row: A..Q, cost values in K..N and DIFF (O) = FINAL − ROUGH-V2 once FINAL is filled.
             // rowNo is predicted (addRow returns it) so the DIFF formula can reference its own row.
             let nextRow = 0;
             const matRow = (r: {
@@ -2037,8 +2038,8 @@ export class ApproverController {
                 const fin = r.nFormula ? { formula: r.nFormula } : r.n;
                 const n = addRow([
                     r.type, r.mc, r.artNo ?? null, r.artDesc ?? null, r.uom ?? null, r.qty ?? null,
-                    null, d, d, k ?? null, l ?? null, m ?? null, fin ?? null,
-                    { formula: `IF(M${rn}="","",M${rn}-K${rn})` }, null, null,
+                    null, d, d, d, k ?? null, l ?? null, m ?? null, fin ?? null,
+                    { formula: `IF(N${rn}="","",N${rn}-L${rn})` }, null, null,
                 ], style);
                 nextRow = n + 1;
                 return n;
@@ -2065,7 +2066,7 @@ export class ApproverController {
             ];
             const MAT_HDR = [
                 'MATERIAL TYPE', 'MATERIAL_MC', 'ART. NO.', 'ART. DES', 'UOM', 'TTL QTY', 'RATE',
-                'FAB WIDTH', 'PR PC CONS.', 'AUTO -BGT', 'ROUGH-V2', 'VDR PR PC COST', 'FINAL', 'DIFF', 'RATIO', 'REMARKS',
+                'FAB WIDTH', 'AUTO-BGT PR PC CONS.', 'ACT-V2 PR PC CONS.', 'AUTO -BGT', 'ROUGH-V2', 'VDR PR PC COST', 'FINAL', 'DIFF', 'RATIO', 'REMARKS',
             ];
 
             track(addRow([null, 'Detailed 360 Degree Format'], { bold: true, from: 2, to: 2 }));
@@ -2156,14 +2157,14 @@ export class ApproverController {
                 // which sits 5 rows below the summary value row.
                 const sv = ws.addRow([
                     num(a.mrp),
-                    { formula: `J${totRow}` }, { formula: `K${totRow}` }, { formula: `L${totRow}` }, { formula: `M${totRow}` },
+                    { formula: `K${totRow}` }, { formula: `L${totRow}` }, { formula: `M${totRow}` }, { formula: `N${totRow}` },
                 ]);
                 for (let c = 1; c <= 5; c++) sv.getCell(c).numFmt = '0.00';
                 track(sv.number);
                 sv.commit();
 
                 track(blank());
-                track(addRow([null, null, null, null, null, null, null, null, null, 'COST'], { bold: true, from: 10, to: 10 }));
+                track(addRow([null, null, null, null, null, null, null, null, null, null, 'COST'], { bold: true, from: 11, to: 11 }));
                 track(addRow(MAT_HDR, { fill: DARK_BLUE, bold: true, white: true }));
 
                 const { btrimKeep, pkgKeep, vaddKeep, bodyKeep, bodyTotals, hasBody } = materialPlan(a);
@@ -2180,43 +2181,45 @@ export class ApproverController {
                 const sumCol = (c: string) =>
                     `(SUM(${c}${firstMat}:${c}${lastNonBody})` + (hasBody ? `+${c}${cmpRow}` : '') + `)*1.1`;
                 const tr = ws.addRow([
-                    'TOTAL', null, null, null, null, null, null, null, null,
-                    { formula: sumCol('J') }, { formula: sumCol('K') }, { formula: sumCol('L') }, { formula: sumCol('M') },
-                    { formula: `IF(M${totRow}=0,"",M${totRow}-K${totRow})` },
+                    'TOTAL', null, null, null, null, null, null, null, null, null,
+                    { formula: sumCol('K') }, { formula: sumCol('L') }, { formula: sumCol('M') }, { formula: sumCol('N') },
+                    { formula: `IF(N${totRow}=0,"",N${totRow}-L${totRow})` },
                 ]);
                 for (let c = 1; c <= COLS; c++) {
                     tr.getCell(c).fill = fill(GREY);
                     tr.getCell(c).font = { bold: true };
                 }
-                for (let c = 10; c <= 14; c++) tr.getCell(c).numFmt = '0.00';
+                for (let c = 11; c <= 15; c++) tr.getCell(c).numFmt = '0.00';
                 if (tr.number !== totRow) console.warn('[preciseCostingExport] total row drift', tr.number, totRow);
                 track(tr.number);
                 tr.commit();
                 track(blank());
 
-                // FAB — RATE = Fab card VENDOR COST, FAB WIDTH = M_WIDTH as a
-                // number (38" → 38), PR PC CONS. = first of precise kg, rough kg,
-                // precise meter, rough meter.
-                // AUTO-BGT / ROUGH-V2 / VDR = rate × cons, with the Fab card's AUTO-BGT /
-                // ROUGH-V2 / RATE cell. FINAL left blank.
+                // FAB — RATE = Fab card VENDOR COST, FAB WIDTH = M_WIDTH as a number (38" → 38).
+                // I = AUTO-BGT PR PC CONS. (AUTO-BGT CONSUMPTION: Kg, else Meter);
+                // J = ACT-V2 PR PC CONS. (ACT-V2 CONSUMPTION: Kg, else Meter).
+                // K AUTO -BGT = Fab AUTO-BGT × I; L ROUGH-V2 = Fab ACT-V2 × J; M VDR = RATE × J
+                // (same rule as the OTH GRID-1 COST SUMMARY). FINAL left blank.
+                // UOM follows the ACT-V2 consumption, else the AUTO-BGT one (Kg → KG, Meter → MTR).
                 {
                     const fr = nextRow;
                     const widthNum = parseInt(String(a.fWidth ?? '').replace(/[^0-9.]/g, ''), 10);
-                    // Kg wins whenever present (even alongside meters); MTR only when no Kg.
-                    const consKg = num(a.preciseConsumptionKg) ?? num(a.roughConsumptionKg);
-                    const cons = consKg ?? num(a.preciseConsumptionMeter) ?? num(a.roughConsumptionMeter);
-                    const consUom = consKg != null ? 'KG' : cons != null ? 'MTR' : 'KG';
                     const autoBgt = num(a.autoBgt);
                     const roughV2 = num(a.roughV2);
-                    const cost = (rate: string) => ({ formula: `+${rate}*I${fr}` });
+                    const bgtKg = num(a.roughConsumptionKg), bgtM = num(a.roughConsumptionMeter);
+                    const actKg = num(a.preciseConsumptionKg), actM = num(a.preciseConsumptionMeter);
+                    const autoBgtCons = bgtKg ?? bgtM;
+                    const actV2Cons = actKg ?? actM;
+                    const consUom = actKg != null ? 'KG' : actM != null ? 'MTR' : bgtKg != null ? 'KG' : bgtM != null ? 'MTR' : 'KG';
+                    const costOf = (rate: string, consCol: string) => ({ formula: `+${rate}*${consCol}${fr}` });
                     track(addRow([
                         'FAB', 'FAB_MC', a.fabricArticleNumber || null, a.fabricArticleDescription || null, consUom, null,
-                        num(a.vendorFabricRate), Number.isNaN(widthNum) ? null : widthNum, cons,
-                        autoBgt != null ? cost(String(autoBgt)) : null,
-                        roughV2 != null ? cost(String(roughV2)) : null,
-                        cost(`G${fr}`),
+                        num(a.vendorFabricRate), Number.isNaN(widthNum) ? null : widthNum, autoBgtCons, actV2Cons,
+                        autoBgt != null && autoBgtCons != null ? costOf(String(autoBgt), 'I') : null,
+                        roughV2 != null && actV2Cons != null ? costOf(String(roughV2), 'J') : null,
+                        costOf(`G${fr}`, 'J'),
                         null,
-                        { formula: `IF(M${fr}="","",M${fr}-K${fr})` }, null, null,
+                        { formula: `IF(N${fr}="","",N${fr}-L${fr})` }, null, null,
                     ], { fill: LIGHT_BLUE }));
                 }
                 if (btrimKeep.length > 0) {
@@ -2251,7 +2254,7 @@ export class ApproverController {
                         bodyKeep.some((r) => r[key] != null)
                             ? { formula: `SUM(${col}${procFirst}:${col}${procLast})` }
                             : { value: bodyTotals[key] };
-                    const cJ = cmpCol('J', 'k'), cK = cmpCol('K', 'l'), cL = cmpCol('L', 'm'), cM = cmpCol('M', 'f');
+                    const cJ = cmpCol('K', 'k'), cK = cmpCol('L', 'l'), cL = cmpCol('M', 'm'), cM = cmpCol('N', 'f');
                     const cmpN = matRow({
                         type: 'BODY', mc: 'CMP COST', artNo: a.bodyArticle || null, artDesc: a.bodyArticleDescription || null, uom: 'EA',
                         kFormula: cJ.formula, k: cJ.value,
@@ -2359,10 +2362,11 @@ export class ApproverController {
 
             const wb: any = new (ExcelJS as any).stream.xlsx.WorkbookWriter({ stream: res, useStyles: true, useSharedStrings: true });
             const ws: any = wb.addWorksheet('Sheet1');
-            // Template widths: C 17, D/F/H 11.57, I 19; the rest default.
+            // Template widths: C 17, D/G/I 11.57, J 19; the rest default. E = AUTO-BGT PR PC CONS.,
+            // F = ACT-V2 PR PC CONS. (added 2026-11-19, later columns moved one right).
             ws.columns = [
-                {}, {}, { width: 17 }, { width: 11.5703125 }, {}, { width: 11.5703125 },
-                {}, { width: 11.5703125 }, { width: 19 }, {}, {},
+                {}, {}, { width: 17 }, { width: 11.5703125 }, { width: 13 }, { width: 13 },
+                { width: 11.5703125 }, {}, { width: 11.5703125 }, { width: 19 }, {}, {},
             ];
 
             const YELLOW = 'FFFFF2CC';
@@ -2386,14 +2390,14 @@ export class ApproverController {
             };
             type CellStyle = { fill?: string; bold?: boolean; border?: any; size?: number } | null;
 
-            // Writes columns B..K (vals[0] = B) and returns the row number. A column whose
+            // Writes columns B..L (vals[0] = B) and returns the row number. A column whose
             // style is null keeps Excel's default font, as in the template.
             let rowNo = 0;
             const put = (vals: any[], style?: (col: string) => CellStyle): number => {
                 const row = ws.addRow([null, ...vals]);
                 rowNo = row.number;
-                for (let i = 0; i < 10; i++) {
-                    const col = String.fromCharCode(66 + i); // B..K
+                for (let i = 0; i < 11; i++) {
+                    const col = String.fromCharCode(66 + i); // B..L
                     const st = style?.(col);
                     if (!st) continue;
                     const cell = row.getCell(i + 2);
@@ -2409,14 +2413,14 @@ export class ApproverController {
             for (let i = 0; i < 4; i++) put([]);
 
             const header = (c: string): CellStyle =>
-                c === 'B' ? {} : { fill: YELLOW, bold: true, border: c === 'K' ? { left: thin, right: thin } : BOX };
+                c === 'B' ? {} : { fill: YELLOW, bold: true, border: c === 'L' ? { left: thin, right: thin } : BOX };
             const summary = (c: string): CellStyle =>
-                c === 'B' ? {} : c === 'K' ? { size: 11 } : { fill: YELLOW, bold: true, border: BOX };
-            // Cost rows: C carries the row colour, D..E too on FAB (orange "na" on the
-            // other rows), F..J are plain bordered cells, K is free.
+                c === 'B' ? {} : c === 'L' ? { size: 11 } : { fill: YELLOW, bold: true, border: BOX };
+            // Cost rows: C carries the row colour, D..F too on FAB (orange "na" on the
+            // other rows), G..K are plain bordered cells, L is free.
             const line = (fill?: string, bold?: boolean, deFill = NA) => (c: string): CellStyle =>
-                c === 'B' ? {} : c === 'K' ? null : c === 'C' ? { fill, bold, border: BOX }
-                    : 'DE'.includes(c) ? { fill: deFill, bold, border: BOX } : { border: BOX };
+                c === 'B' ? {} : c === 'L' ? null : c === 'C' ? { fill, bold, border: BOX }
+                    : 'DEF'.includes(c) ? { fill: deFill, bold, border: BOX } : { border: BOX };
             // Cell sources follow the sheet's own notes (360 REQUIRE AUTO MODIFY.xlsx).
             // FINAL and DIFF are left for the user to fill in.
             let serial = 0;
@@ -2433,36 +2437,41 @@ export class ApproverController {
                 const totalR = titleR + 3, fabR = titleR + 4, vaddR = titleR + 8;
 
                 put([serial, title], (c) => ('BCDE'.includes(c) ? {} : null));
-                put([null, 'MRP', 'BGT FAB PER UOM', 'BGT FAB CONS', 'AUTO -V2', 'ROUGH-V2', 'VEND PR COST', 'VDR PR PC COST', 'FINAL', 'DIFF'], header);
+                put([null, 'MRP', 'BGT FAB PER UOM', 'AUTO-BGT PR PC CONS.', 'ACT-V2 PR PC CONS.', 'AUTO -V2', 'ROUGH-V2', 'VEND PR COST', 'VDR PR PC COST', 'FINAL', 'DIFF'], header);
                 const margin = (c: string) => fx(`+${c}${totalR}*110/100`);
-                put([null, 'AFTER 10% MARGIN', null, null, margin('F'), margin('G'), margin('H'), margin('I'), null, null], summary);
+                put([null, 'AFTER 10% MARGIN', null, null, null, margin('G'), margin('H'), margin('I'), margin('J'), null, null], summary);
                 const sub = (c: string) => fx(`+SUBTOTAL(9,${c}${fabR}:${c}${vaddR})`);
-                // H8 — "display - pr cost": the PR COST on the article's thumbnail card (its rate).
-                put([null, 'TOTAL', null, null, sub('F'), sub('G'), num(a.rate), sub('I'), null, null], summary);
+                // I (VEND PR COST) — "display - pr cost": the PR COST on the article's thumbnail card (its rate).
+                put([null, 'TOTAL', null, null, null, sub('G'), sub('H'), num(a.rate), sub('J'), null, null], summary);
 
-                // FAB — D: Fab grid AUTO-BGT rate; E: precise consumption (Kg, else meters);
-                // F = E×D and G = D×E, both as in the sheet.
-                const cons = num(a.preciseConsumptionKg) ?? num(a.preciseConsumptionMeter);
+                // FAB — same rule as the OTH GRID-1 COST SUMMARY / Precise Costing export:
+                // D: Fab card AUTO-BGT rate; E: AUTO-BGT PR PC CONS. (AUTO-BGT CONSUMPTION, Kg else Meter);
+                // F: ACT-V2 PR PC CONS. (ACT-V2 CONSUMPTION, Kg else Meter);
+                // G (AUTO -V2) = E×D; H (ROUGH-V2) = Fab card ACT-V2 × F; J (VDR PR PC COST) = VENDOR rate × F.
+                const bgtCons = num(a.roughConsumptionKg) ?? num(a.roughConsumptionMeter);
+                const actCons = num(a.preciseConsumptionKg) ?? num(a.preciseConsumptionMeter);
                 const fabRate = num(a.autoBgt);
+                const actRate = num(a.roughV2);
                 const vdrRate = num(a.vendorFabricRate);
-                const both = fabRate != null && cons != null;
-                put([null, 'FAB', fabRate, cons, both ? fx(`+E${fabR}*D${fabR}`) : null, both ? fx(`+D${fabR}*E${fabR}`) : null, null,
-                    vdrRate != null && cons != null ? fx(`+E${fabR}*${vdrRate}`) : null, null], line(BLUE, false, BLUE));
+                put([null, 'FAB', fabRate, bgtCons, actCons,
+                    fabRate != null && bgtCons != null ? fx(`+E${fabR}*D${fabR}`) : null,
+                    actRate != null && actCons != null ? fx(`+${actRate}*F${fabR}`) : null, null,
+                    vdrRate != null && actCons != null ? fx(`+F${fabR}*${vdrRate}`) : null, null], line(BLUE, false, BLUE));
                 // BODY — the CMP COST card's TOTAL row: BGT total cost → AUTO-V2, ACT total cost → ROUGH-V2.
                 const bgtPreset = bgtPresetByBody.get(String(a.bodyArticle ?? '').trim().toUpperCase())
                     ?? bgtPresetByMc.get(String(a.majorCategory ?? '').trim().toUpperCase());
-                put([null, 'BODY', null, null, cmpTotal(a, 'Bgt', bgtPreset), cmpTotal(a, 'Act', undefined), null, num(a.totalVendorPrVal), null], line(PURPLE, true));
+                put([null, 'BODY', null, null, null, cmpTotal(a, 'Bgt', bgtPreset), cmpTotal(a, 'Act', undefined), null, num(a.totalVendorPrVal), null], line(PURPLE, true));
                 // B TRIM — the card's TOTAL row, only when a tab (BT-01 / BT-02) has been saved:
                 // TOTAL AUTO-BGT → AUTO-V2, TOTAL ROUGH-V2 → ROUGH-V2.
                 const bt = a.bTrimType ? a : {};
-                put([null, 'B TRIM', null, null, num(bt.bTrimTotalAutoBgt), num(bt.bTrimTotalRoughV2), null, num(bt.bTrimTotalVdrCost), null], line());
+                put([null, 'B TRIM', null, null, null, num(bt.bTrimTotalAutoBgt), num(bt.bTrimTotalRoughV2), null, num(bt.bTrimTotalVdrCost), null], line());
                 // PKG. COST — the card's TOTAL NET RATE, only when a tab (PKG-1 / PKG-2) has been
                 // saved; an unsaved card only shows default rates. Same value in AUTO-V2 and ROUGH-V2.
                 const pkg = a.pkgCostType ? sum(PKG_FIELDS.map((f) => a[f])) : null;
-                put([null, 'PKG. COST', null, null, pkg, pkg, null, null, null], line(YELLOW));
+                put([null, 'PKG. COST', null, null, null, pkg, pkg, null, null, null], line(YELLOW));
                 // VAL.ADD — the V. ADD card's saved TOTAL row (written by its Save button):
                 // TOTAL AUTO-BGT → AUTO-V2, TOTAL ROUGH-V2 → ROUGH-V2.
-                put([null, 'VAL.ADD', null, null, num(a.vaddTotalAutoBgt), num(a.vaddTotalRoughV2), null, num(a.vaddTotalVendorCost), null], line());
+                put([null, 'VAL.ADD', null, null, null, num(a.vaddTotalAutoBgt), num(a.vaddTotalRoughV2), null, num(a.vaddTotalVendorCost), null], line());
                 if (rowNo !== vaddR) console.warn('[summaryCostingExport] block drift', a.id, rowNo, vaddR);
                 put([]);
             }

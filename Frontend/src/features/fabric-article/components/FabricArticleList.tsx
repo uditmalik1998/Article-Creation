@@ -14,9 +14,6 @@ import {
   ChevronDown,
   Shirt,
   DollarSign,
-  Plus,
-  Minus,
-  RotateCw,
   Search,
   Wand2,
   X,
@@ -73,6 +70,7 @@ import { formatDivisionLabel } from '../../../shared/utils/ui/formatters';
 import { SIMPLIFIED_HIERARCHY } from '../../extraction/components/SimplifiedCategorySelector';
 import FabricVariantSubTable from './FabricVariantSubTable';
 import FabricArticleVariantSubTable from './FabricArticleVariantSubTable';
+import { ImagePreviewDialog } from '@/shared/components/articles/ArticleSpecCard';
 
 // Alias so the combobox trigger can use a distinct name from the plain icon
 const ChevronDownIcon = ChevronDown;
@@ -370,8 +368,6 @@ const ArticleCard = React.memo(
     const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
     // Left rail: Article Information / Reference & Vendor are collapsible, open by default.
     const [openLeftCards, setOpenLeftCards] = useState<Set<string>>(() => new Set(['info', 'reference']));
-    const [imgZoom, setImgZoom] = useState(1);
-    const [imgRotation, setImgRotation] = useState(0);
     const [catOpen, setCatOpen] = useState(false);
     const [catSearch, setCatSearch] = useState('');
     const [mcDesOpen, setMcDesOpen] = useState(false);
@@ -388,11 +384,6 @@ const ArticleCard = React.memo(
     const isModifyMode = pathType === 'created' && !!onModify;
     const [pendingChanges, setPendingChanges] = useState<Record<string, string | null>>({});
     const [modifying, setModifying] = useState(false);
-
-    const resetImageView = useCallback(() => {
-      setImgZoom(1);
-      setImgRotation(0);
-    }, []);
 
     const prevItemRef = React.useRef<ApproverItem>(item);
     React.useEffect(() => {
@@ -2402,78 +2393,14 @@ const ArticleCard = React.memo(
           </div>
         </div>
 
-        {/* Image preview */}
-        <Dialog
-          open={imgModalOpen}
-          onOpenChange={(o) => {
-            setImgModalOpen(o);
-            if (!o) resetImageView();
-          }}
-        >
-          <DialogContent className="w-auto max-w-[92vw] p-0">
-            <DialogHeader className="flex flex-row items-center justify-between border-b border-border px-4 py-2">
-              <DialogTitle className="truncate text-sm">{item.designNumber || 'Image Preview'}</DialogTitle>
-              {/* Zoom + rotate controls */}
-              <div className="mr-8 flex items-center gap-1">
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="h-7 w-7"
-                  onClick={() => setImgZoom((z) => Math.max(0.25, Number((z - 0.25).toFixed(2))))}
-                  aria-label="Zoom out"
-                  disabled={imgZoom <= 0.25}
-                >
-                  <Minus />
-                </Button>
-                <span className="w-12 text-center text-xs tabular-nums text-muted-foreground">
-                  {Math.round(imgZoom * 100)}%
-                </span>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="h-7 w-7"
-                  onClick={() => setImgZoom((z) => Math.min(4, Number((z + 0.25).toFixed(2))))}
-                  aria-label="Zoom in"
-                  disabled={imgZoom >= 4}
-                >
-                  <Plus />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  className="ml-1 h-7 w-7"
-                  onClick={() => setImgRotation((r) => (r + 90) % 360)}
-                  aria-label="Rotate 90°"
-                >
-                  <RotateCw />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="ml-1 h-7 px-2 text-xs"
-                  onClick={resetImageView}
-                  disabled={imgZoom === 1 && imgRotation === 0}
-                >
-                  Reset
-                </Button>
-              </div>
-            </DialogHeader>
-            <div className="flex items-center justify-center overflow-auto p-4" style={{ maxHeight: '80vh' }}>
-              <img
-                src={shownImgUrl || ''}
-                alt={item.designNumber || 'preview'}
-                className="block transition-transform duration-200 will-change-transform"
-                style={{
-                  maxWidth: '85vw',
-                  maxHeight: '75vh',
-                  objectFit: 'contain',
-                  transform: `scale(${imgZoom}) rotate(${imgRotation}deg)`,
-                  transformOrigin: 'center',
-                }}
-              />
-            </div>
-          </DialogContent>
-        </Dialog>
+        {/* Image preview — same viewer as the dashboard cards (ImagePreviewDialog) */}
+        {imgModalOpen && shownImgUrl && (
+          <ImagePreviewDialog
+            src={shownImgUrl}
+            title={item.designNumber || 'Image Preview'}
+            onClose={() => setImgModalOpen(false)}
+          />
+        )}
 
         {/* Duplicate confirmation */}
         <Dialog open={dupConfirmOpen} onOpenChange={(o) => !duplicating && setDupConfirmOpen(o)}>
