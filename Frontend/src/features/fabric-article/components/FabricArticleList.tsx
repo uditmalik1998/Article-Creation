@@ -72,6 +72,25 @@ import FabricVariantSubTable from './FabricVariantSubTable';
 import FabricArticleVariantSubTable from './FabricArticleVariantSubTable';
 import { ImagePreviewDialog } from '@/shared/components/articles/ArticleSpecCard';
 
+// localStorage key for the folded left panel (Option A dark rail).
+const LEFT_PANEL_KEY = 'fabricLeftPanelCollapsed';
+// FAB row field → key in fabric_article_data.fabric_ai_attributes ({"M_FAB_DIV":"K", ...}).
+const FAB_AI_KEY: Record<string, string> = {
+  fabDiv: 'M_FAB_DIV',
+  yarn1: 'M_YARN',
+  mainMvgr: 'M_FAB_MAIN_MVGR_1',
+  fabricMainMvgr: 'M_FAB_MAIN_MVGR_2',
+  fConstruction: 'M_CONSTRUCTION',
+  fOunce: 'M_OUNZ',
+  fWidth: 'M_WIDTH',
+  mFab2: 'M_WEAVE_02',
+  fCount: 'M_COUNT',
+  weave: 'M_WEAVE_01',
+  composition: 'M_COMPOSITION',
+  finish: 'M_FINISH',
+  gsm: 'M_GSM',
+  lycra: 'M_LYCRA',
+};
 // Alias so the combobox trigger can use a distinct name from the plain icon
 const ChevronDownIcon = ChevronDown;
 
@@ -118,6 +137,13 @@ const computeFabricSegment = (rate: string | null | undefined, division: string 
 };
 
 const f = (schemaKey: string) => SCHEMA_KEY_TO_EXCEL_ATTR[schemaKey] ?? schemaKey;
+// FAB card display names that differ from the SAP name (UI only — keys, SAP names and
+// grid lookups are unchanged). 2026-11-20: MVGR rows shortened on the Fabric pages.
+const FAB_CARD_LABELS: Record<string, string> = {
+  M_FAB_MAIN_MVGR_1: 'M_MVGR_1',
+  M_FAB_MAIN_MVGR_2: 'M_MVGR_2',
+};
+const cardLabel = (schemaKey: string) => { const l = f(schemaKey); return FAB_CARD_LABELS[l] ?? l; };
 
 // FABRIC ARTICLE DESC order per division ("FABRIC ARTICLE SEQUENCE.xlsx"):
 // M_FAB_DIV, M_YARN, M_WEAVE_01, M_LYCRA, M_FAB_MAIN_MVGR_2, M_WIDTH, M_GSM (Knits) /
@@ -169,7 +195,7 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
       { field: 'yarn1', schemaKey: 'yarn_01' },
       { field: 'mainMvgr', schemaKey: 'main_mvgr' },
       { field: 'fabricMainMvgr', schemaKey: 'fabric_main_mvgr' },
-      { field: 'fabVdr', schemaKey: 'fab_vdr' },
+      // M_FAB_VDR removed from the Fabric FAB card (2026-11-20, user request); FG card keeps it.
       { field: 'weave', schemaKey: 'weave' },
       { field: 'mFab2', schemaKey: 'm_fab2' },
       { field: 'fCount', schemaKey: 'f_count' },
@@ -368,6 +394,22 @@ const ArticleCard = React.memo(
     const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
     // Left rail: Article Information / Reference & Vendor are collapsible, open by default.
     const [openLeftCards, setOpenLeftCards] = useState<Set<string>>(() => new Set(['info', 'reference']));
+    // Whole left panel folds sideways into a dark rail (lg+); remembered per browser.
+    const [leftPanelCollapsed, setLeftPanelCollapsed] = useState<boolean>(() => {
+      try {
+        return localStorage.getItem(LEFT_PANEL_KEY) === '1';
+      } catch {
+        return false;
+      }
+    });
+    const setLeftPanel = (collapsed: boolean) => {
+      setLeftPanelCollapsed(collapsed);
+      try {
+        localStorage.setItem(LEFT_PANEL_KEY, collapsed ? '1' : '0');
+      } catch {
+        /* storage blocked — state still works for this page */
+      }
+    };
     const [catOpen, setCatOpen] = useState(false);
     const [catSearch, setCatSearch] = useState('');
     const [mcDesOpen, setMcDesOpen] = useState(false);
@@ -441,7 +483,7 @@ const ArticleCard = React.memo(
     const attributeFields = useMemo(
       () =>
         cardGroups.flatMap((g) =>
-          g.fields.map((a) => ({ ...a, label: f(a.schemaKey), group: g.group, groupColor: g.color, freeText: a.freeText ?? false })),
+          g.fields.map((a) => ({ ...a, label: cardLabel(a.schemaKey), group: g.group, groupColor: g.color, freeText: a.freeText ?? false })),
         ),
       [cardGroups],
     );
@@ -1222,6 +1264,24 @@ const ArticleCard = React.memo(
       );
     };
 
+    // AI value for a FAB field from fabric_ai_attributes (JSON object keyed by SAP name, case-insensitive).
+    const aiAttrs: Record<string, unknown> = (() => {
+      const raw = (item as any).fabricAiAttributes;
+      if (!raw) return {};
+      if (typeof raw === 'object') return raw as Record<string, unknown>;
+      try {
+        return JSON.parse(String(raw)) ?? {};
+      } catch {
+        return {};
+      }
+    })();
+    const aiValueFor = (field: string): string => {
+      const key = FAB_AI_KEY[field];
+      if (!key) return '';
+      const hit = Object.keys(aiAttrs).find((k) => k.toUpperCase() === key);
+      const v = hit ? aiAttrs[hit] : null;
+      return v == null ? '' : String(v).trim();
+    };
     const renderAttributeRow = (attr: {
       field: string;
       label: string;
@@ -1231,8 +1291,8 @@ const ArticleCard = React.memo(
       group: string;
       isMandatory?: boolean;
     }, big = false) => {
-      // big = Fabric FAB card (matches the FG FAB card): 13 px names, 14 px values, 26 px rows.
-      const valueText = big ? 'text-[14px]' : 'text-[11px]';
+      // big = Fabric FAB card: 15 px names, 16 px values (+2 px, 2026-11-20) and a read-only AI column.
+      const valueText = big ? 'text-[16px]' : 'text-[11px]';
       _attrCounter += 1;
       const num = _attrCounter;
       const currentValue = getValue(attr.field);
@@ -1263,24 +1323,35 @@ const ArticleCard = React.memo(
             if (!attrLocked && !isEditing) setEditingField(attr.field);
           }}
         >
-          <span className={cn('shrink-0 text-right font-bold tabular-nums text-muted-foreground', big ? 'w-6 text-[12px]' : 'w-4 text-[10px]')}>{num}.</span>
+          <span className={cn('shrink-0 text-right font-bold tabular-nums text-muted-foreground', big ? 'w-7 text-[14px]' : 'w-4 text-[10px]')}>{num}.</span>
           <span
             className={cn(
               'flex-1 truncate leading-snug',
-              big ? 'text-[13px]' : 'text-[10.5px]',
+              big ? 'basis-0 text-[15px]' : 'text-[10.5px]',
               isMandatory ? 'key-field text-foreground' : 'font-semibold text-foreground/80',
             )}
           >
             {isMandatory && <span className="mandatory-mark">*</span>}
             {attr.label}
           </span>
-          <div className={cn('shrink-0', big ? 'w-[180px]' : 'w-[110px]')}>
+          {big && (
+            // AI extraction result — read-only, never saved from here.
+            <span
+              className="w-[110px] shrink-0 truncate text-center font-mono text-[15px] font-semibold text-slate-500"
+              title={aiValueFor(attr.field) ? `AI result: ${aiValueFor(attr.field)}` : 'No AI result'}
+            >
+              {aiValueFor(attr.field) || <span className="text-slate-300">—</span>}
+            </span>
+          )}
+          {/* FAB card: name and value halves are equal, so AI result sits in the middle of the row. */}
+          <div className={cn(big ? 'flex min-w-0 flex-1 basis-0 justify-end' : 'w-[110px] shrink-0')}>
+          <div className={big ? 'w-[180px] max-w-full' : 'contents'}>
             {attr.freeText ? (
               isEditing ? (
                 <Input
                   autoFocus
                   defaultValue={isEffectivelyEmpty ? '' : currentValue || ''}
-                  className={big ? 'h-7 px-2 text-[13px]' : 'h-6 px-1 text-[11px]'}
+                  className={big ? 'h-8 px-2 text-[15px]' : 'h-6 px-1 text-[11px]'}
                   onKeyDown={(e) =>
                     e.key === 'Enter' && handleSave(attr.field, (e.target as HTMLInputElement).value || null)
                   }
@@ -1319,7 +1390,7 @@ const ArticleCard = React.memo(
                     type="button"
                     className={cn(
                       'flex w-full items-center justify-between rounded border border-input bg-background hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring',
-                      big ? 'h-7 px-2 text-[13px]' : 'h-6 px-1.5 text-[11px]',
+                      big ? 'h-8 px-2 text-[15px]' : 'h-6 px-1.5 text-[11px]',
                     )}
                   >
                     <span className="truncate text-left">
@@ -1426,6 +1497,7 @@ const ArticleCard = React.memo(
                 <ChevronDown className={cn('shrink-0 opacity-40', big ? 'h-4 w-4' : 'h-3 w-3')} />
               </span>
             )}
+          </div>
           </div>
         </div>
       );
@@ -1807,7 +1879,13 @@ const ArticleCard = React.memo(
           </div>
 
           {/* ─── MAIN GRID — image+info | attribute groups ─── */}
-          <div className="grid items-start gap-3 p-3 lg:grid-cols-[minmax(320px,40%)_1fr] xl:grid-cols-[minmax(360px,40%)_1fr] 2xl:grid-cols-[minmax(400px,40%)_1fr]">
+          <div
+            className={`grid items-start gap-3 p-3 ${
+              leftPanelCollapsed
+                ? 'lg:grid-cols-[44px_minmax(0,1fr)]'
+                : 'lg:grid-cols-[minmax(320px,40%)_1fr] xl:grid-cols-[minmax(360px,40%)_1fr] 2xl:grid-cols-[minmax(400px,40%)_1fr]'
+            }`}
+          >
             {/* ─── LEFT: Image + Article Info + Reference ───
              *
              * Sticky rail: image + identity stay anchored to the viewport
@@ -1815,6 +1893,35 @@ const ArticleCard = React.memo(
              * height of the dashboard's sticky brand+filter chrome (~120px).
              */}
             <aside className="sticky top-[120px] flex min-w-0 flex-col gap-3 self-start">
+              {/* Collapsed (lg+): 44px ink rail with the card names written vertically. */}
+              {leftPanelCollapsed && (
+                <button
+                  type="button"
+                  onClick={() => setLeftPanel(false)}
+                  aria-label="Show Article Image, Article Information and Reference & Vendor"
+                  title="Show panel"
+                  className="hidden w-11 flex-col items-center gap-1 rounded-xl py-2.5 transition-[filter] hover:brightness-125 lg:flex"
+                  style={{ background: CARD_THEME.bg, color: CARD_THEME.fg }}
+                >
+                  <ChevronRight className="mb-1 h-4 w-4" />
+                  {['Article Image', 'Article Information', 'Reference & Vendor'].map((name) => (
+                    <span key={name} className="flex w-full justify-center border-t border-white/15 py-3">
+                      <span className="rotate-180 whitespace-nowrap text-[11px] font-bold uppercase tracking-[0.08em] [writing-mode:vertical-rl]">
+                        {name}
+                      </span>
+                    </span>
+                  ))}
+                </button>
+              )}
+              <div className={`flex min-w-0 flex-col gap-3 ${leftPanelCollapsed ? 'lg:hidden' : ''}`}>
+              <button
+                type="button"
+                onClick={() => setLeftPanel(true)}
+                className="hidden items-center gap-1.5 self-start rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 lg:inline-flex"
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+                Collapse panel
+              </button>
               {/* Same design as the FG page ("Option A · Ink headers") */}
               <div className="overflow-hidden rounded-xl border border-slate-300 bg-white">
                 {renderInkCardHeader('Article Image', {
@@ -1825,13 +1932,14 @@ const ArticleCard = React.memo(
                   ),
                 })}
                 <div className="flex flex-col gap-2 p-3">
-                  <div className="relative h-[420px] w-full overflow-hidden rounded-lg bg-slate-100">
+                  {/* Height follows the photo so it fills the card width (no empty side bands). */}
+                  <div className="relative w-full overflow-hidden rounded-lg bg-slate-100">
                     {shownImgUrl ? (
                       <>
                         <img
                           src={shownImgUrl}
                           alt=""
-                          className="block h-full w-full cursor-zoom-in object-contain p-2"
+                          className="block h-auto max-h-[680px] w-full cursor-zoom-in object-contain"
                           onError={showingBack ? () => setBackImgFailed(true) : handleImgError}
                           onClick={() => setImgModalOpen(true)}
                         />
@@ -1845,7 +1953,7 @@ const ArticleCard = React.memo(
                         </button>
                       </>
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center text-xs text-slate-500">
+                      <div className="flex h-[420px] w-full items-center justify-center text-xs text-slate-500">
                         {showingBack ? 'Back photo unavailable' : 'No image'}
                       </div>
                     )}
@@ -1922,6 +2030,7 @@ const ArticleCard = React.memo(
                     ),
                 })}
                 {isLeftCardOpen('reference') && <div className="py-1">{HEADER_FIELDS.map((f) => renderHeaderField(f as any))}</div>}
+              </div>
               </div>
             </aside>
 
@@ -2013,7 +2122,25 @@ const ArticleCard = React.memo(
                         </button>
                         {!collapsed && (
                           <div className="space-y-0 p-1">
-                            {groupMap[g.group].attrs.map((attr) => renderAttributeRow(attr, g.group === 'FAB'))}
+                            {/* Panel collapsed → attributes have room for two columns. */}
+                            <div className={leftPanelCollapsed ? 'grid gap-x-3 lg:grid-cols-2' : ''}>
+                              {g.group === 'FAB' &&
+                                [0, 1].map((n) => (
+                                  <div
+                                    key={`fab-head-${n}`}
+                                    className={cn(
+                                      'items-center gap-2 border-b border-slate-200 px-2 pb-1 pt-0.5 text-[11.5px] font-bold uppercase tracking-[0.07em] text-slate-500',
+                                      n === 0 ? 'flex' : leftPanelCollapsed ? 'hidden lg:flex' : 'hidden',
+                                    )}
+                                  >
+                                    <span className="w-7 shrink-0" />
+                                    <span className="flex-1 basis-0">Attribute</span>
+                                    <span className="w-[110px] shrink-0 text-center">AI result</span>
+                                    <span className="flex-1 basis-0 text-right">Value</span>
+                                  </div>
+                                ))}
+                              {groupMap[g.group].attrs.map((attr) => renderAttributeRow(attr, g.group === 'FAB'))}
+                            </div>
 
                             {/* FAB: fabric article number + description + button */}
                             {g.group === 'FAB' &&

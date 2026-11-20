@@ -1708,6 +1708,9 @@ model FabricArticleData {
   mGsm                     String?   @map("m_gsm")              @db.VarChar(50)
   mLycra                   String?   @map("m_lycra")            @db.VarChar(50)
 
+  // AI extraction result for the FAB attributes, keyed by SAP name: {"M_FAB_DIV":"K", ...}. Read-only in the UI.
+  fabricAiAttributes       Json?     @map("fabric_ai_attributes")
+
   // Fabric article output fields
   fabricArticleNumber      String?   @map("fabric_article_number")      @db.VarChar(100)
   fabricArticleDescription String?   @map("fabric_article_description") @db.VarChar(255)

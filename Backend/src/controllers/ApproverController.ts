@@ -6710,7 +6710,7 @@ export class ApproverController {
         mCount: true, mWeave01: true, mComposition: true, mFinish: true,
         mGsm: true, mLycra: true, fabricRate: true, v2FabricRate: true, valueAddCost: true, articleFashionType: true,
         designNumber: true, pptNumber: true, mcDescription: true, source: true,
-        rate: true, segment: true,
+        rate: true, segment: true, fabricAiAttributes: true,
     } as const;
 
     // users.name per approved_by id — the "Approved By" Excel column (All + Export selected).
@@ -7078,6 +7078,8 @@ export class ApproverController {
             pptNumber: r.pptNumber ?? null,
             mrp: r.rate != null ? Number(r.rate) : null,
             segment: r.segment ?? null,
+            // AI extraction result {"M_FAB_DIV":"K", ...} — shown read-only next to the FAB values.
+            fabricAiAttributes: r.fabricAiAttributes ?? null,
             // Fields not present in fabric_article_data — nulled out
             rate: null,
             colour: null, wash: null, shade: null, weight: null,

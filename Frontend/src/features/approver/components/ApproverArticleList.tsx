@@ -90,6 +90,8 @@ import { ImagePreviewDialog } from '@/shared/components/articles/ArticleSpecCard
 
 // Alias so the combobox trigger can use a distinct name from the plain icon
 const ChevronDownIcon = ChevronDown;
+// localStorage key for the folded left panel (Option A dark rail).
+const LEFT_PANEL_KEY = 'fgLeftPanelCollapsed';
 
 // FG MRP rule (OTH GRID-1): RATE fills MRP so the markdown ((MRP − rate) ÷ MRP) is 30%,
 // rounded UP to the next multiple of 25 (rate 100 → 142.86 → 150). The markdown must always
@@ -614,6 +616,22 @@ const ArticleCard = React.memo(
     const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
     // FG left rail: Article Information / Reference & Vendor start closed.
     const [openLeftCards, setOpenLeftCards] = useState<Set<string>>(new Set());
+    // Whole left panel folds sideways into a dark rail (lg+); remembered per browser.
+    const [leftPanelCollapsed, setLeftPanelCollapsed] = useState<boolean>(() => {
+      try {
+        return localStorage.getItem(LEFT_PANEL_KEY) === '1';
+      } catch {
+        return false;
+      }
+    });
+    const setLeftPanel = (collapsed: boolean) => {
+      setLeftPanelCollapsed(collapsed);
+      try {
+        localStorage.setItem(LEFT_PANEL_KEY, collapsed ? '1' : '0');
+      } catch {
+        /* storage blocked — state still works for this page */
+      }
+    };
     const [fabNoQuery, setFabNoQuery] = useState('');
     const [fabNoResults, setFabNoResults] = useState<{
       fabricArticleNumber: string;
@@ -3175,7 +3193,7 @@ const ArticleCard = React.memo(
           </div>
 
           {/* ─── MAIN GRID — image+info | attribute groups ─── */}
-          <div className={`grid items-start gap-3 p-3 ${allowGroups ? 'lg:grid-cols-[minmax(320px,40%)_1fr] xl:grid-cols-[minmax(360px,40%)_1fr] 2xl:grid-cols-[minmax(400px,40%)_1fr]' : 'lg:grid-cols-[minmax(320px,28%)_1fr] xl:grid-cols-[minmax(360px,26%)_1fr] 2xl:grid-cols-[minmax(400px,24%)_1fr]'}`}>
+          <div className={`grid items-start gap-3 p-3 ${leftPanelCollapsed ? 'lg:grid-cols-[44px_minmax(0,1fr)]' : allowGroups ? 'lg:grid-cols-[minmax(320px,40%)_1fr] xl:grid-cols-[minmax(360px,40%)_1fr] 2xl:grid-cols-[minmax(400px,40%)_1fr]' : 'lg:grid-cols-[minmax(320px,28%)_1fr] xl:grid-cols-[minmax(360px,26%)_1fr] 2xl:grid-cols-[minmax(400px,24%)_1fr]'}`}>
             {/* ─── LEFT: Image + Article Info + Reference ───
              *
              * Sticky rail: image + identity stay anchored to the viewport
@@ -3183,6 +3201,35 @@ const ArticleCard = React.memo(
              * height of the dashboard's sticky brand+filter chrome (~120px).
              */}
             <aside className="sticky top-[120px] flex min-w-0 flex-col gap-3 self-start">
+              {/* Collapsed (lg+): 44px ink rail with the card names written vertically. */}
+              {leftPanelCollapsed && (
+                <button
+                  type="button"
+                  onClick={() => setLeftPanel(false)}
+                  aria-label="Show Article Image, Article Information and Reference & Vendor"
+                  title="Show panel"
+                  className="hidden w-11 flex-col items-center gap-1 rounded-xl py-2.5 transition-[filter] hover:brightness-125 lg:flex"
+                  style={{ background: CARD_THEME.bg, color: CARD_THEME.fg }}
+                >
+                  <ChevronRight className="mb-1 h-4 w-4" />
+                  {['Article Image', 'Article Information', 'Reference & Vendor'].map((name) => (
+                    <span key={name} className="flex w-full justify-center border-t border-white/15 py-3">
+                      <span className="rotate-180 whitespace-nowrap text-[11px] font-bold uppercase tracking-[0.08em] [writing-mode:vertical-rl]">
+                        {name}
+                      </span>
+                    </span>
+                  ))}
+                </button>
+              )}
+              <div className={`flex min-w-0 flex-col gap-3 ${leftPanelCollapsed ? 'lg:hidden' : ''}`}>
+              <button
+                type="button"
+                onClick={() => setLeftPanel(true)}
+                className="hidden items-center gap-1.5 self-start rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 lg:inline-flex"
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+                Collapse panel
+              </button>
               {!allowGroups ? (
                 <>
                   {/* FG pages — design "Option A": ink headers matching the attribute cards */}
@@ -3290,13 +3337,14 @@ const ArticleCard = React.memo(
                         </>
                       ) : (
                         <>
-                          <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-slate-100">
+                          {/* Height follows the photo so it fills the card width (no empty side bands). */}
+                          <div className="relative w-full overflow-hidden rounded-lg bg-slate-100">
                             {shownImgUrl ? (
                               <>
                                 <img
                                   src={shownImgUrl}
                                   alt=""
-                                  className="block h-full w-full cursor-zoom-in object-contain p-2"
+                                  className="block h-auto max-h-[680px] w-full cursor-zoom-in object-contain"
                                   onError={
                                     activeImgView.key === 'old'
                                       ? () => setOldImgFailed(true)
@@ -3316,7 +3364,7 @@ const ArticleCard = React.memo(
                                 </button>
                               </>
                             ) : (
-                              <div className="flex h-full w-full items-center justify-center text-xs text-slate-500">
+                              <div className="flex aspect-square w-full items-center justify-center text-xs text-slate-500">
                                 {activeImgView.key === 'front' ? 'No image' : `${activeImgView.label} image unavailable`}
                               </div>
                             )}
@@ -3521,6 +3569,7 @@ const ArticleCard = React.memo(
               </div>
                 </>
               )}
+              </div>
             </aside>
 
             {/* ─── RIGHT: Attribute groups + BOM + Fabric/Body + Proceed FG ─── */}

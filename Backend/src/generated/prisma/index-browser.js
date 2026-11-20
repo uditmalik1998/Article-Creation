@@ -1184,6 +1184,7 @@ exports.Prisma.FabricArticleDataScalarFieldEnum = {
   mFinish: 'mFinish',
   mGsm: 'mGsm',
   mLycra: 'mLycra',
+  fabricAiAttributes: 'fabricAiAttributes',
   fabricArticleNumber: 'fabricArticleNumber',
   fabricArticleDescription: 'fabricArticleDescription',
   flatId: 'flatId',

@@ -15,6 +15,7 @@ import {
   getRawArticles,
   getFabricRawStatus,
   runFabricRawProcessing,
+  extractFabricVlmOne,
   getGmRawStatus,
   runGmRawProcessing,
 } from '../controllers/testApiController';
@@ -64,6 +65,13 @@ router.get('/fabric-raw-pipeline-status', asyncHandler(getFabricRawStatus));
  * Triggers the fabric_raw_data → fabric_article_data processing worker.
  */
 router.post('/run-fabric-raw-processing', asyncHandler(runFabricRawProcessing));
+
+/**
+ * POST /api/test-api/fabric-vlm/extract/:id?overwrite=1
+ * Gemini FAB extraction for one fabric_article_data row (fills empty m_* columns).
+ */
+router.post('/fabric-vlm/extract/:id', asyncHandler(extractFabricVlmOne));
+
 
 /**
  * GET /api/test-api/gm-raw-pipeline-status
