@@ -61,6 +61,8 @@ function getMissingMandatoryFields(item: any, isFGMode = false): string[] {
   const majorCat = item.majorCategory || '';
   if (!majorCat) return missing;
   for (const [schemaKey, dbField] of Object.entries(SCHEMA_KEY_TO_DB_FIELD)) {
+    // M_FAB_VDR isn't on the Fabric FAB card (removed 2026-11-20) — never require it here.
+    if (schemaKey === 'fab_vdr') continue;
     const sapKeys = SCHEMA_KEY_TO_ALL_SAP_KEYS[schemaKey] ?? [];
     if (sapKeys.length === 0) continue;
     // Only validate when mandatory in the grid AND has dropdown values (i.e. visible in UI)

@@ -5,6 +5,26 @@
 
 ---
 
+## 2026-11-20 — Fabric Article Image card: photo fills the width
+
+- `FabricArticleList.tsx`: the photo box no longer has a fixed 420px height with `object-contain` (left big empty side bands for landscape photos). Height now follows the photo (`w-full h-auto`, capped at 680px); inner padding removed. "No image" placeholder keeps 420px.
+- Same day ported to FG (`ApproverArticleList.tsx`, FG pages only — the Body branch keeps its own image box): square box removed, photo `w-full h-auto` capped at 680px; "No image" placeholder stays square.
+
+## 2026-11-20 — FG Article pages: same left-panel fold (Option A)
+
+- `ApproverArticleList.tsx` (FG New / Created / Rejected / Old, and Body Article pages that reuse it): same "Collapse panel" button + 44px ink rail with vertical card names as the Fabric pages.
+- Collapsed, the grid is `44px | 1fr`; FG cards already sit 2 columns, so they just get wider (no 2-column rows inside a card).
+- Remembered in localStorage `fgLeftPanelCollapsed` (separate from Fabric's `fabricLeftPanelCollapsed`).
+- Type-checks; not checked on the live page (no login).
+
+## 2026-11-20 — Fabric Article pages: left panel folds into a dark rail (Option A)
+
+- Canvas with 5 designs: https://claude.ai/artifact/DDNRxggJiyEqXGnW8GmtPw — user picked **A · Dark rail, vertical names**.
+- `FabricArticleList.tsx`: "Collapse panel" button above Article Image / Article Information / Reference & Vendor (lg+ only). Collapsed, the left column becomes a 44px ink rail (CARD_THEME) with the three card names written vertically; clicking it opens the panel again.
+- While collapsed the grid is `44px | 1fr` and attribute rows inside each group show in 2 columns (lg+); FAB extra fields (fabric article no./desc) stay full width.
+- State remembered per browser in localStorage `fabricLeftPanelCollapsed`. Below lg the panel always shows (stacked layout).
+- Checked the rail in a harness page only; not checked on the live page (no login).
+
 ## 2026-11-19 — Rows view: centred columns, bigger photo, SAP column
 
 User picked **option A** from a 4-option canvas (https://claude.ai/artifact/CtSwVA2QwHVYe1oohpGaC8), with every column centred like Vendor.
@@ -14,6 +34,15 @@ User picked **option A** from a 4-option canvas (https://claude.ai/artifact/CtSw
 - All headers and cells centred. Widths: Article 18 · Article no. 11 · Design 10 · Vendor 21 · Date 9 · Cost/MRP/Margin 8 · SAP 8 (%).
 - All row-view text +2px on user request (headers 13.5px, MC 17px, cells 15.5px, cost/MRP 16px) — shared, so FG, Fabric, FG-Fabric, Body and GM dashboards all change.
 - Files: `ArticleSpecCard.tsx` (ArticleSpecRow), `ArticleCardGrid.tsx` (ArticleRowsTable `showSapStatus`). Checked in a test page, not with live data.
+
+## 2026-11-20 — Fabric FAB card: M_MVGR_1 / M_MVGR_2 labels
+
+- Fabric Article pages (FabricArticleList FAB card): rows **M_FAB_MAIN_MVGR_1** / **M_FAB_MAIN_MVGR_2** now display as **M_MVGR_1** / **M_MVGR_2**. Display only (`FAB_CARD_LABELS` + `cardLabel()`); field keys, SAP names (Modify IV_CHANGES, create payload), grid lookups and MVGR-2 → MVGR-1 mapping unchanged. FG FAB card unchanged. Frontend only.
+
+## 2026-11-20 — Fabric Article pages: M_FAB_VDR removed from the FAB card
+
+- `FabricArticleList.tsx` FAB group no longer lists `fabVdr` (M_FAB_VDR) — gone from every page on that card (Fabric New / Created, FG New / FG Created). FG Articles' FAB card keeps it.
+- `FabricArticleDetailPage.tsx` `getMissingMandatoryFields` skips `fab_vdr`, so a category grid can't block Save & Submit on a field that isn't shown. Values already stored are untouched; Modify still only sends changed fields (M_FAB_VDR can no longer change there). Frontend only.
 
 ## 2026-11-19 — Fabric Article Save & Submit: Division + Sub-Division + Major Category required
 

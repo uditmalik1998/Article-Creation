@@ -72,6 +72,8 @@ import FabricVariantSubTable from './FabricVariantSubTable';
 import FabricArticleVariantSubTable from './FabricArticleVariantSubTable';
 import { ImagePreviewDialog } from '@/shared/components/articles/ArticleSpecCard';
 
+// localStorage key for the folded left panel (Option A dark rail).
+const LEFT_PANEL_KEY = 'fabricLeftPanelCollapsed';
 // Alias so the combobox trigger can use a distinct name from the plain icon
 const ChevronDownIcon = ChevronDown;
 
@@ -118,6 +120,13 @@ const computeFabricSegment = (rate: string | null | undefined, division: string 
 };
 
 const f = (schemaKey: string) => SCHEMA_KEY_TO_EXCEL_ATTR[schemaKey] ?? schemaKey;
+// FAB card display names that differ from the SAP name (UI only — keys, SAP names and
+// grid lookups are unchanged). 2026-11-20: MVGR rows shortened on the Fabric pages.
+const FAB_CARD_LABELS: Record<string, string> = {
+  M_FAB_MAIN_MVGR_1: 'M_MVGR_1',
+  M_FAB_MAIN_MVGR_2: 'M_MVGR_2',
+};
+const cardLabel = (schemaKey: string) => { const l = f(schemaKey); return FAB_CARD_LABELS[l] ?? l; };
 
 // FABRIC ARTICLE DESC order per division ("FABRIC ARTICLE SEQUENCE.xlsx"):
 // M_FAB_DIV, M_YARN, M_WEAVE_01, M_LYCRA, M_FAB_MAIN_MVGR_2, M_WIDTH, M_GSM (Knits) /
@@ -169,7 +178,7 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
       { field: 'yarn1', schemaKey: 'yarn_01' },
       { field: 'mainMvgr', schemaKey: 'main_mvgr' },
       { field: 'fabricMainMvgr', schemaKey: 'fabric_main_mvgr' },
-      { field: 'fabVdr', schemaKey: 'fab_vdr' },
+      // M_FAB_VDR removed from the Fabric FAB card (2026-11-20, user request); FG card keeps it.
       { field: 'weave', schemaKey: 'weave' },
       { field: 'mFab2', schemaKey: 'm_fab2' },
       { field: 'fCount', schemaKey: 'f_count' },
@@ -368,6 +377,22 @@ const ArticleCard = React.memo(
     const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
     // Left rail: Article Information / Reference & Vendor are collapsible, open by default.
     const [openLeftCards, setOpenLeftCards] = useState<Set<string>>(() => new Set(['info', 'reference']));
+    // Whole left panel folds sideways into a dark rail (lg+); remembered per browser.
+    const [leftPanelCollapsed, setLeftPanelCollapsed] = useState<boolean>(() => {
+      try {
+        return localStorage.getItem(LEFT_PANEL_KEY) === '1';
+      } catch {
+        return false;
+      }
+    });
+    const setLeftPanel = (collapsed: boolean) => {
+      setLeftPanelCollapsed(collapsed);
+      try {
+        localStorage.setItem(LEFT_PANEL_KEY, collapsed ? '1' : '0');
+      } catch {
+        /* storage blocked — state still works for this page */
+      }
+    };
     const [catOpen, setCatOpen] = useState(false);
     const [catSearch, setCatSearch] = useState('');
     const [mcDesOpen, setMcDesOpen] = useState(false);
@@ -441,7 +466,7 @@ const ArticleCard = React.memo(
     const attributeFields = useMemo(
       () =>
         cardGroups.flatMap((g) =>
-          g.fields.map((a) => ({ ...a, label: f(a.schemaKey), group: g.group, groupColor: g.color, freeText: a.freeText ?? false })),
+          g.fields.map((a) => ({ ...a, label: cardLabel(a.schemaKey), group: g.group, groupColor: g.color, freeText: a.freeText ?? false })),
         ),
       [cardGroups],
     );
@@ -1807,7 +1832,13 @@ const ArticleCard = React.memo(
           </div>
 
           {/* ─── MAIN GRID — image+info | attribute groups ─── */}
-          <div className="grid items-start gap-3 p-3 lg:grid-cols-[minmax(320px,40%)_1fr] xl:grid-cols-[minmax(360px,40%)_1fr] 2xl:grid-cols-[minmax(400px,40%)_1fr]">
+          <div
+            className={`grid items-start gap-3 p-3 ${
+              leftPanelCollapsed
+                ? 'lg:grid-cols-[44px_minmax(0,1fr)]'
+                : 'lg:grid-cols-[minmax(320px,40%)_1fr] xl:grid-cols-[minmax(360px,40%)_1fr] 2xl:grid-cols-[minmax(400px,40%)_1fr]'
+            }`}
+          >
             {/* ─── LEFT: Image + Article Info + Reference ───
              *
              * Sticky rail: image + identity stay anchored to the viewport
@@ -1815,6 +1846,35 @@ const ArticleCard = React.memo(
              * height of the dashboard's sticky brand+filter chrome (~120px).
              */}
             <aside className="sticky top-[120px] flex min-w-0 flex-col gap-3 self-start">
+              {/* Collapsed (lg+): 44px ink rail with the card names written vertically. */}
+              {leftPanelCollapsed && (
+                <button
+                  type="button"
+                  onClick={() => setLeftPanel(false)}
+                  aria-label="Show Article Image, Article Information and Reference & Vendor"
+                  title="Show panel"
+                  className="hidden w-11 flex-col items-center gap-1 rounded-xl py-2.5 transition-[filter] hover:brightness-125 lg:flex"
+                  style={{ background: CARD_THEME.bg, color: CARD_THEME.fg }}
+                >
+                  <ChevronRight className="mb-1 h-4 w-4" />
+                  {['Article Image', 'Article Information', 'Reference & Vendor'].map((name) => (
+                    <span key={name} className="flex w-full justify-center border-t border-white/15 py-3">
+                      <span className="rotate-180 whitespace-nowrap text-[11px] font-bold uppercase tracking-[0.08em] [writing-mode:vertical-rl]">
+                        {name}
+                      </span>
+                    </span>
+                  ))}
+                </button>
+              )}
+              <div className={`flex min-w-0 flex-col gap-3 ${leftPanelCollapsed ? 'lg:hidden' : ''}`}>
+              <button
+                type="button"
+                onClick={() => setLeftPanel(true)}
+                className="hidden items-center gap-1.5 self-start rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 lg:inline-flex"
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+                Collapse panel
+              </button>
               {/* Same design as the FG page ("Option A · Ink headers") */}
               <div className="overflow-hidden rounded-xl border border-slate-300 bg-white">
                 {renderInkCardHeader('Article Image', {
@@ -1825,13 +1885,14 @@ const ArticleCard = React.memo(
                   ),
                 })}
                 <div className="flex flex-col gap-2 p-3">
-                  <div className="relative h-[420px] w-full overflow-hidden rounded-lg bg-slate-100">
+                  {/* Height follows the photo so it fills the card width (no empty side bands). */}
+                  <div className="relative w-full overflow-hidden rounded-lg bg-slate-100">
                     {shownImgUrl ? (
                       <>
                         <img
                           src={shownImgUrl}
                           alt=""
-                          className="block h-full w-full cursor-zoom-in object-contain p-2"
+                          className="block h-auto max-h-[680px] w-full cursor-zoom-in object-contain"
                           onError={showingBack ? () => setBackImgFailed(true) : handleImgError}
                           onClick={() => setImgModalOpen(true)}
                         />
@@ -1845,7 +1906,7 @@ const ArticleCard = React.memo(
                         </button>
                       </>
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center text-xs text-slate-500">
+                      <div className="flex h-[420px] w-full items-center justify-center text-xs text-slate-500">
                         {showingBack ? 'Back photo unavailable' : 'No image'}
                       </div>
                     )}
@@ -1922,6 +1983,7 @@ const ArticleCard = React.memo(
                     ),
                 })}
                 {isLeftCardOpen('reference') && <div className="py-1">{HEADER_FIELDS.map((f) => renderHeaderField(f as any))}</div>}
+              </div>
               </div>
             </aside>
 
@@ -2013,7 +2075,10 @@ const ArticleCard = React.memo(
                         </button>
                         {!collapsed && (
                           <div className="space-y-0 p-1">
-                            {groupMap[g.group].attrs.map((attr) => renderAttributeRow(attr, g.group === 'FAB'))}
+                            {/* Panel collapsed → attributes have room for two columns. */}
+                            <div className={leftPanelCollapsed ? 'grid gap-x-3 lg:grid-cols-2' : ''}>
+                              {groupMap[g.group].attrs.map((attr) => renderAttributeRow(attr, g.group === 'FAB'))}
+                            </div>
 
                             {/* FAB: fabric article number + description + button */}
                             {g.group === 'FAB' &&
