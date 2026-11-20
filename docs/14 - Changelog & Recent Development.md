@@ -5,6 +5,15 @@
 
 ---
 
+## 2026-11-20 — Fabric FAB card: read-only AI result column + 2px bigger text
+
+- Canvas (4 designs): https://claude.ai/artifact/XgPqFPZyNRBbW5f9WYHEMQ — user picked **A · plain grey AI column, without the tick**.
+- DB: new column `fabric_article_data.fabric_ai_attributes JSONB` (applied 2026-11-20), e.g. `{"M_FAB_DIV":"K","M_YARN":"P"}`. Nothing writes it yet.
+- Backend: Prisma `FabricArticleData.fabricAiAttributes Json?`; added to `FABRIC_ARTICLE_DATA_SELECT` and `fabricArticleDataRowToItem` → item field `fabricAiAttributes`. Not in `FABRIC_ARTICLE_DATA_FIELD_MAP`, so the page can't overwrite it. Backend must be restarted (new Prisma client).
+- Frontend `FabricArticleList.tsx`: FAB card has headings Attribute | AI result | Value; the AI result column (110px, mono, grey, read-only, "—" when missing) reads `FAB_AI_KEY` (fabDiv→M_FAB_DIV, mainMvgr→M_FAB_MAIN_MVGR_1, fabricMainMvgr→M_FAB_MAIN_MVGR_2, mFab2→M_WEAVE_02, weave→M_WEAVE_01 …), keys matched case-insensitively. FAB text +2px: names 15px, values 16px, numbers 14px, inputs/dropdown triggers 15px.
+- Follow-up: AI result centred in the row — name and value halves are both `flex-1 basis-0` (value right-aligned in a 180px box).
+- Type-checks (frontend + backend); not checked on the live page (no login).
+
 ## 2026-11-20 — Fabric Article Image card: photo fills the width
 
 - `FabricArticleList.tsx`: the photo box no longer has a fixed 420px height with `object-contain` (left big empty side bands for landscape photos). Height now follows the photo (`w-full h-auto`, capped at 680px); inner padding removed. "No image" placeholder keeps 420px.
@@ -34,6 +43,15 @@ User picked **option A** from a 4-option canvas (https://claude.ai/artifact/CtSw
 - All headers and cells centred. Widths: Article 18 · Article no. 11 · Design 10 · Vendor 21 · Date 9 · Cost/MRP/Margin 8 · SAP 8 (%).
 - All row-view text +2px on user request (headers 13.5px, MC 17px, cells 15.5px, cost/MRP 16px) — shared, so FG, Fabric, FG-Fabric, Body and GM dashboards all change.
 - Files: `ArticleSpecCard.tsx` (ArticleSpecRow), `ArticleCardGrid.tsx` (ArticleRowsTable `showSapStatus`). Checked in a test page, not with live data.
+
+## 2026-11-20 — Fabric VLM: Gemini fills the FAB attributes of fabric articles
+
+- **Why:** FG articles go raw_articles → Gemini → extraction_results_flat, but fabric went fabric_raw_data → fabric_article_data with every `m_*` FAB column left empty (979 of 1,272 SRM fabric articles had no FAB values).
+- **New service** `Backend/src/services/fabricVlmService.ts`: fabric-specific Gemini call (`GEMINI_MODEL`, default gemini-2.5-flash, `GOOGLE_API_KEY`). Prompt = textile rules + every allowed code from `fabric_maj_cat_grid_values` (same list as the Fabric FAB card); `responseSchema` enums so Gemini can only answer a valid code or null; reads the swatch label first (GSM 190 → 180-200, width 63" → 62"); major category code used as a hint (K_P_JAQ = knit/poly/jacquard). Answers under confidence 40 are dropped (`FABRIC_VLM_MIN_CONFIDENCE`). MVGR-1 follows MVGR-2 via `m_fabric_main_mvgr_mapping`. Fills only EMPTY m_* columns (never overwrites user values).
+- **Pipeline** `fabricRawDataService`: after creating the fabric_article_data row, runs the extraction (4 rows in parallel, lock 10 → 20 min) and stores the full result (values, label text, confidence, tokens, cost, raw JSON) in `fabric_raw_data.extracted_data.vlm`. A Gemini/image failure never fails the row. Off switch: `FABRIC_VLM_ENABLED=false`.
+- **fabric_ai_attributes** (2026-11-20, user spec): on a successful extraction the AI values are saved as a FLAT JSON of all 14 SAP keys, e.g. {"M_FAB_DIV":"K","M_YARN":"P","M_GSM":null,…} — exactly what the Fabric FAB card AI RESULT column reads (FAB_AI_KEY). Empty VALUE (m_*) fields are still filled with the same values (user chose both). On failure nothing is written to the article. Label text / confidence / tokens / cost / raw answer stay in fabric_raw_data.extracted_data. No backfill.
+- **Admin endpoint** (test-api, Admin JWT): `POST /api/test-api/fabric-vlm/extract/:id?overwrite=1` (one article, returns the result). **No backfill** — user decision: existing fabric articles are not processed; only new rows from the cron. Batch = FG: 40 rows claimed per run, 4 Gemini calls in parallel. No retry at all: one Gemini call per article; on failure the FAB fields stay empty.
+- Dry run (no DB write) on 2 K_P_JAQ swatches: ~4 s and ~$0.002 each; label read correctly. No DB migration. Backend only — deploy backend.
 
 ## 2026-11-20 — Fabric FAB card: M_MVGR_1 / M_MVGR_2 labels
 

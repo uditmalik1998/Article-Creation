@@ -12,6 +12,7 @@
 
 import { Request, Response } from 'express';
 import { prismaClient as prisma } from '../utils/prisma';
+import { extractIntoFabricArticle, extractionToJson } from '../services/fabricVlmService';
 import {
   runRawArticleExtraction,
   getRawArticlePipelineStatus,
@@ -489,4 +490,20 @@ export const runGmRawProcessing = async (_req: Request, res: Response): Promise<
     success: true,
     message: 'GM raw processing started in background. Check pipeline status in a few seconds.',
   });
+};
+
+// ── Fabric VLM (Gemini FAB extraction for fabric_article_data) ─────────────
+
+/**
+ * POST /api/test-api/fabric-vlm/extract/:id?overwrite=1
+ * Runs the fabric Gemini extraction for ONE fabric_article_data row and returns the
+ * result (values, label text, confidence, tokens, cost). Fills only empty FAB
+ * columns unless overwrite=1.
+ */
+export const extractFabricVlmOne = async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+  const overwrite = req.query.overwrite === '1' || req.query.overwrite === 'true';
+  const result = await extractIntoFabricArticle(id, { overwrite });
+  await prisma.fabricRawData.updateMany({ where: { flatId: id }, data: { extractedData: extractionToJson(result) as any } });
+  res.status(result.ok ? 200 : 502).json({ success: result.ok, data: result });
 };

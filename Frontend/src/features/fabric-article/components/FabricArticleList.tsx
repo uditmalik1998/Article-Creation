@@ -74,6 +74,23 @@ import { ImagePreviewDialog } from '@/shared/components/articles/ArticleSpecCard
 
 // localStorage key for the folded left panel (Option A dark rail).
 const LEFT_PANEL_KEY = 'fabricLeftPanelCollapsed';
+// FAB row field → key in fabric_article_data.fabric_ai_attributes ({"M_FAB_DIV":"K", ...}).
+const FAB_AI_KEY: Record<string, string> = {
+  fabDiv: 'M_FAB_DIV',
+  yarn1: 'M_YARN',
+  mainMvgr: 'M_FAB_MAIN_MVGR_1',
+  fabricMainMvgr: 'M_FAB_MAIN_MVGR_2',
+  fConstruction: 'M_CONSTRUCTION',
+  fOunce: 'M_OUNZ',
+  fWidth: 'M_WIDTH',
+  mFab2: 'M_WEAVE_02',
+  fCount: 'M_COUNT',
+  weave: 'M_WEAVE_01',
+  composition: 'M_COMPOSITION',
+  finish: 'M_FINISH',
+  gsm: 'M_GSM',
+  lycra: 'M_LYCRA',
+};
 // Alias so the combobox trigger can use a distinct name from the plain icon
 const ChevronDownIcon = ChevronDown;
 
@@ -1247,6 +1264,24 @@ const ArticleCard = React.memo(
       );
     };
 
+    // AI value for a FAB field from fabric_ai_attributes (JSON object keyed by SAP name, case-insensitive).
+    const aiAttrs: Record<string, unknown> = (() => {
+      const raw = (item as any).fabricAiAttributes;
+      if (!raw) return {};
+      if (typeof raw === 'object') return raw as Record<string, unknown>;
+      try {
+        return JSON.parse(String(raw)) ?? {};
+      } catch {
+        return {};
+      }
+    })();
+    const aiValueFor = (field: string): string => {
+      const key = FAB_AI_KEY[field];
+      if (!key) return '';
+      const hit = Object.keys(aiAttrs).find((k) => k.toUpperCase() === key);
+      const v = hit ? aiAttrs[hit] : null;
+      return v == null ? '' : String(v).trim();
+    };
     const renderAttributeRow = (attr: {
       field: string;
       label: string;
@@ -1256,8 +1291,8 @@ const ArticleCard = React.memo(
       group: string;
       isMandatory?: boolean;
     }, big = false) => {
-      // big = Fabric FAB card (matches the FG FAB card): 13 px names, 14 px values, 26 px rows.
-      const valueText = big ? 'text-[14px]' : 'text-[11px]';
+      // big = Fabric FAB card: 15 px names, 16 px values (+2 px, 2026-11-20) and a read-only AI column.
+      const valueText = big ? 'text-[16px]' : 'text-[11px]';
       _attrCounter += 1;
       const num = _attrCounter;
       const currentValue = getValue(attr.field);
@@ -1288,24 +1323,35 @@ const ArticleCard = React.memo(
             if (!attrLocked && !isEditing) setEditingField(attr.field);
           }}
         >
-          <span className={cn('shrink-0 text-right font-bold tabular-nums text-muted-foreground', big ? 'w-6 text-[12px]' : 'w-4 text-[10px]')}>{num}.</span>
+          <span className={cn('shrink-0 text-right font-bold tabular-nums text-muted-foreground', big ? 'w-7 text-[14px]' : 'w-4 text-[10px]')}>{num}.</span>
           <span
             className={cn(
               'flex-1 truncate leading-snug',
-              big ? 'text-[13px]' : 'text-[10.5px]',
+              big ? 'basis-0 text-[15px]' : 'text-[10.5px]',
               isMandatory ? 'key-field text-foreground' : 'font-semibold text-foreground/80',
             )}
           >
             {isMandatory && <span className="mandatory-mark">*</span>}
             {attr.label}
           </span>
-          <div className={cn('shrink-0', big ? 'w-[180px]' : 'w-[110px]')}>
+          {big && (
+            // AI extraction result — read-only, never saved from here.
+            <span
+              className="w-[110px] shrink-0 truncate text-center font-mono text-[15px] font-semibold text-slate-500"
+              title={aiValueFor(attr.field) ? `AI result: ${aiValueFor(attr.field)}` : 'No AI result'}
+            >
+              {aiValueFor(attr.field) || <span className="text-slate-300">—</span>}
+            </span>
+          )}
+          {/* FAB card: name and value halves are equal, so AI result sits in the middle of the row. */}
+          <div className={cn(big ? 'flex min-w-0 flex-1 basis-0 justify-end' : 'w-[110px] shrink-0')}>
+          <div className={big ? 'w-[180px] max-w-full' : 'contents'}>
             {attr.freeText ? (
               isEditing ? (
                 <Input
                   autoFocus
                   defaultValue={isEffectivelyEmpty ? '' : currentValue || ''}
-                  className={big ? 'h-7 px-2 text-[13px]' : 'h-6 px-1 text-[11px]'}
+                  className={big ? 'h-8 px-2 text-[15px]' : 'h-6 px-1 text-[11px]'}
                   onKeyDown={(e) =>
                     e.key === 'Enter' && handleSave(attr.field, (e.target as HTMLInputElement).value || null)
                   }
@@ -1344,7 +1390,7 @@ const ArticleCard = React.memo(
                     type="button"
                     className={cn(
                       'flex w-full items-center justify-between rounded border border-input bg-background hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring',
-                      big ? 'h-7 px-2 text-[13px]' : 'h-6 px-1.5 text-[11px]',
+                      big ? 'h-8 px-2 text-[15px]' : 'h-6 px-1.5 text-[11px]',
                     )}
                   >
                     <span className="truncate text-left">
@@ -1451,6 +1497,7 @@ const ArticleCard = React.memo(
                 <ChevronDown className={cn('shrink-0 opacity-40', big ? 'h-4 w-4' : 'h-3 w-3')} />
               </span>
             )}
+          </div>
           </div>
         </div>
       );
@@ -2077,6 +2124,21 @@ const ArticleCard = React.memo(
                           <div className="space-y-0 p-1">
                             {/* Panel collapsed → attributes have room for two columns. */}
                             <div className={leftPanelCollapsed ? 'grid gap-x-3 lg:grid-cols-2' : ''}>
+                              {g.group === 'FAB' &&
+                                [0, 1].map((n) => (
+                                  <div
+                                    key={`fab-head-${n}`}
+                                    className={cn(
+                                      'items-center gap-2 border-b border-slate-200 px-2 pb-1 pt-0.5 text-[11.5px] font-bold uppercase tracking-[0.07em] text-slate-500',
+                                      n === 0 ? 'flex' : leftPanelCollapsed ? 'hidden lg:flex' : 'hidden',
+                                    )}
+                                  >
+                                    <span className="w-7 shrink-0" />
+                                    <span className="flex-1 basis-0">Attribute</span>
+                                    <span className="w-[110px] shrink-0 text-center">AI result</span>
+                                    <span className="flex-1 basis-0 text-right">Value</span>
+                                  </div>
+                                ))}
                               {groupMap[g.group].attrs.map((attr) => renderAttributeRow(attr, g.group === 'FAB'))}
                             </div>
 

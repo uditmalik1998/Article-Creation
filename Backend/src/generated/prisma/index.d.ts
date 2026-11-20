@@ -59132,6 +59132,7 @@ export namespace Prisma {
     mFinish: number
     mGsm: number
     mLycra: number
+    fabricAiAttributes: number
     fabricArticleNumber: number
     fabricArticleDescription: number
     flatId: number
@@ -59291,6 +59292,7 @@ export namespace Prisma {
     mFinish?: true
     mGsm?: true
     mLycra?: true
+    fabricAiAttributes?: true
     fabricArticleNumber?: true
     fabricArticleDescription?: true
     flatId?: true
@@ -59425,6 +59427,7 @@ export namespace Prisma {
     mFinish: string | null
     mGsm: string | null
     mLycra: string | null
+    fabricAiAttributes: JsonValue | null
     fabricArticleNumber: string | null
     fabricArticleDescription: string | null
     flatId: string | null
@@ -59491,6 +59494,7 @@ export namespace Prisma {
     mFinish?: boolean
     mGsm?: boolean
     mLycra?: boolean
+    fabricAiAttributes?: boolean
     fabricArticleNumber?: boolean
     fabricArticleDescription?: boolean
     flatId?: boolean
@@ -59538,6 +59542,7 @@ export namespace Prisma {
     mFinish?: boolean
     mGsm?: boolean
     mLycra?: boolean
+    fabricAiAttributes?: boolean
     fabricArticleNumber?: boolean
     fabricArticleDescription?: boolean
     flatId?: boolean
@@ -59585,6 +59590,7 @@ export namespace Prisma {
     mFinish?: boolean
     mGsm?: boolean
     mLycra?: boolean
+    fabricAiAttributes?: boolean
     fabricArticleNumber?: boolean
     fabricArticleDescription?: boolean
     flatId?: boolean
@@ -59632,6 +59638,7 @@ export namespace Prisma {
     mFinish?: boolean
     mGsm?: boolean
     mLycra?: boolean
+    fabricAiAttributes?: boolean
     fabricArticleNumber?: boolean
     fabricArticleDescription?: boolean
     flatId?: boolean
@@ -59663,7 +59670,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type FabricArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mFabDiv" | "mYarn" | "mFabMainMvgr1" | "mFabMainMvgr2" | "mConstruction" | "mOunz" | "mWidth" | "mWeave02" | "mCount" | "mWeave01" | "mComposition" | "mFinish" | "mGsm" | "mLycra" | "fabricArticleNumber" | "fabricArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "pptNumber" | "fabricRate" | "v2FabricRate" | "valueAddCost" | "rate" | "segment" | "articleFashionType" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "backImageUrl" | "fabricArticleType" | "source" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricArticleData"]>
+  export type FabricArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mFabDiv" | "mYarn" | "mFabMainMvgr1" | "mFabMainMvgr2" | "mConstruction" | "mOunz" | "mWidth" | "mWeave02" | "mCount" | "mWeave01" | "mComposition" | "mFinish" | "mGsm" | "mLycra" | "fabricAiAttributes" | "fabricArticleNumber" | "fabricArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "pptNumber" | "fabricRate" | "v2FabricRate" | "valueAddCost" | "rate" | "segment" | "articleFashionType" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "backImageUrl" | "fabricArticleType" | "source" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricArticleData"]>
 
   export type $FabricArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "FabricArticleData"
@@ -59684,6 +59691,7 @@ export namespace Prisma {
       mFinish: string | null
       mGsm: string | null
       mLycra: string | null
+      fabricAiAttributes: Prisma.JsonValue | null
       fabricArticleNumber: string | null
       fabricArticleDescription: string | null
       flatId: string | null
@@ -60151,6 +60159,7 @@ export namespace Prisma {
     readonly mFinish: FieldRef<"FabricArticleData", 'String'>
     readonly mGsm: FieldRef<"FabricArticleData", 'String'>
     readonly mLycra: FieldRef<"FabricArticleData", 'String'>
+    readonly fabricAiAttributes: FieldRef<"FabricArticleData", 'Json'>
     readonly fabricArticleNumber: FieldRef<"FabricArticleData", 'String'>
     readonly fabricArticleDescription: FieldRef<"FabricArticleData", 'String'>
     readonly flatId: FieldRef<"FabricArticleData", 'String'>
@@ -92931,6 +92940,7 @@ export namespace Prisma {
     mFinish: 'mFinish',
     mGsm: 'mGsm',
     mLycra: 'mLycra',
+    fabricAiAttributes: 'fabricAiAttributes',
     fabricArticleNumber: 'fabricArticleNumber',
     fabricArticleDescription: 'fabricArticleDescription',
     flatId: 'flatId',
@@ -101211,6 +101221,7 @@ export namespace Prisma {
     mFinish?: StringNullableFilter<"FabricArticleData"> | string | null
     mGsm?: StringNullableFilter<"FabricArticleData"> | string | null
     mLycra?: StringNullableFilter<"FabricArticleData"> | string | null
+    fabricAiAttributes?: JsonNullableFilter<"FabricArticleData">
     fabricArticleNumber?: StringNullableFilter<"FabricArticleData"> | string | null
     fabricArticleDescription?: StringNullableFilter<"FabricArticleData"> | string | null
     flatId?: StringNullableFilter<"FabricArticleData"> | string | null
@@ -101258,6 +101269,7 @@ export namespace Prisma {
     mFinish?: SortOrderInput | SortOrder
     mGsm?: SortOrderInput | SortOrder
     mLycra?: SortOrderInput | SortOrder
+    fabricAiAttributes?: SortOrderInput | SortOrder
     fabricArticleNumber?: SortOrderInput | SortOrder
     fabricArticleDescription?: SortOrderInput | SortOrder
     flatId?: SortOrderInput | SortOrder
@@ -101309,6 +101321,7 @@ export namespace Prisma {
     mFinish?: StringNullableFilter<"FabricArticleData"> | string | null
     mGsm?: StringNullableFilter<"FabricArticleData"> | string | null
     mLycra?: StringNullableFilter<"FabricArticleData"> | string | null
+    fabricAiAttributes?: JsonNullableFilter<"FabricArticleData">
     fabricArticleNumber?: StringNullableFilter<"FabricArticleData"> | string | null
     fabricArticleDescription?: StringNullableFilter<"FabricArticleData"> | string | null
     flatId?: StringNullableFilter<"FabricArticleData"> | string | null
@@ -101356,6 +101369,7 @@ export namespace Prisma {
     mFinish?: SortOrderInput | SortOrder
     mGsm?: SortOrderInput | SortOrder
     mLycra?: SortOrderInput | SortOrder
+    fabricAiAttributes?: SortOrderInput | SortOrder
     fabricArticleNumber?: SortOrderInput | SortOrder
     fabricArticleDescription?: SortOrderInput | SortOrder
     flatId?: SortOrderInput | SortOrder
@@ -101411,6 +101425,7 @@ export namespace Prisma {
     mFinish?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     mGsm?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     mLycra?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
+    fabricAiAttributes?: JsonNullableWithAggregatesFilter<"FabricArticleData">
     fabricArticleNumber?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     fabricArticleDescription?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     flatId?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
@@ -112366,6 +112381,7 @@ export namespace Prisma {
     mFinish?: string | null
     mGsm?: string | null
     mLycra?: string | null
+    fabricAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     fabricArticleNumber?: string | null
     fabricArticleDescription?: string | null
     flatId?: string | null
@@ -112413,6 +112429,7 @@ export namespace Prisma {
     mFinish?: string | null
     mGsm?: string | null
     mLycra?: string | null
+    fabricAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     fabricArticleNumber?: string | null
     fabricArticleDescription?: string | null
     flatId?: string | null
@@ -112460,6 +112477,7 @@ export namespace Prisma {
     mFinish?: NullableStringFieldUpdateOperationsInput | string | null
     mGsm?: NullableStringFieldUpdateOperationsInput | string | null
     mLycra?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     flatId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -112507,6 +112525,7 @@ export namespace Prisma {
     mFinish?: NullableStringFieldUpdateOperationsInput | string | null
     mGsm?: NullableStringFieldUpdateOperationsInput | string | null
     mLycra?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     flatId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -112554,6 +112573,7 @@ export namespace Prisma {
     mFinish?: string | null
     mGsm?: string | null
     mLycra?: string | null
+    fabricAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     fabricArticleNumber?: string | null
     fabricArticleDescription?: string | null
     flatId?: string | null
@@ -112601,6 +112621,7 @@ export namespace Prisma {
     mFinish?: NullableStringFieldUpdateOperationsInput | string | null
     mGsm?: NullableStringFieldUpdateOperationsInput | string | null
     mLycra?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     flatId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -112648,6 +112669,7 @@ export namespace Prisma {
     mFinish?: NullableStringFieldUpdateOperationsInput | string | null
     mGsm?: NullableStringFieldUpdateOperationsInput | string | null
     mLycra?: NullableStringFieldUpdateOperationsInput | string | null
+    fabricAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     fabricArticleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     fabricArticleDescription?: NullableStringFieldUpdateOperationsInput | string | null
     flatId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -122146,6 +122168,7 @@ export namespace Prisma {
     mFinish?: SortOrder
     mGsm?: SortOrder
     mLycra?: SortOrder
+    fabricAiAttributes?: SortOrder
     fabricArticleNumber?: SortOrder
     fabricArticleDescription?: SortOrder
     flatId?: SortOrder

@@ -1,5 +1,7 @@
 import { prismaClient as prisma } from '../utils/prisma';
 import { storageService } from './storageService';
+import { extractIntoFabricArticle, extractionToJson, isFabricVlmEnabled } from './fabricVlmService';
+import { mapWithConcurrency } from '../utils/concurrency';
 
 const BATCH_SIZE = 40;
 
@@ -15,7 +17,7 @@ export async function getFabricRawPipelineStatus(): Promise<{
   }
   return result;
 }
-const LOCK_MINUTES = 10;
+const LOCK_MINUTES = 20; // covers the Gemini step (4 parallel, ~5-15s each)
 
 let _isRunning = false;
 
@@ -81,6 +83,7 @@ async function processRow(row: {
   price: any;
   presentationsType: string | null;
   source: string | null;
+  fabric?: string | null;
 }): Promise<{ success: boolean }> {
   let finalImageUrl: string | null = row.imageUrl;
   let imageUploaded = false;
@@ -133,9 +136,22 @@ async function processRow(row: {
         source:            'SRM',
         imageUrl:          finalImageUrl,
         backImageUrl:      finalBackImageUrl,
-        // All m_* construction fields left null — filled in by user later
+        // m_* FAB fields: filled by the Gemini step below (fabricVlmService); user edits later.
       },
     });
+
+    // Step 2b: Gemini fabric extraction → fills the empty m_* columns. Never fails the row:
+    // the article stays visible with empty FAB fields if Gemini or the image fetch fails.
+    let extractedData: any = undefined;
+    if (isFabricVlmEnabled() && finalImageUrl) {
+      try {
+        const ex = await extractIntoFabricArticle(fabricArticle.id, { hints: { fabricText: row.fabric ?? null } });
+        extractedData = extractionToJson(ex);
+      } catch (vlmErr: any) {
+        console.warn(`[FabricRaw] Gemini extraction failed for ${fabricArticle.id}: ${vlmErr.message}`);
+        extractedData = { vlm: { ok: false, error: String(vlmErr.message).slice(0, 500), at: new Date().toISOString() } };
+      }
+    }
 
     // Step 3: Mark fabric_raw_data as COMPLETED or FAILED based on image upload
     await prisma.fabricRawData.update({
@@ -146,6 +162,7 @@ async function processRow(row: {
         errorMessage: imageUploaded ? null : 'Cloudflare R2 image upload failed; original SRM URL used',
         extractedAt:  new Date(),
         lockedUntil:  null,
+        ...(extractedData !== undefined ? { extractedData } : {}),
       },
     });
 
@@ -208,11 +225,13 @@ export async function runFabricRawDataProcessing(triggeredBy = 'CRON'): Promise<
         id: true, imageUrl: true, backImageUrl: true, vendorCode: true, vendorName: true,
         division: true, subDivision: true, majorCategory: true,
         designNumber: true, presentationNo: true, price: true, presentationsType: true, source: true,
+        fabric: true,
       },
     });
 
-    for (const row of rows) {
-      const { success } = await processRow(row);
+    // 4 rows at a time (the Gemini step is the slow part), like the FG raw worker.
+    const outcomes = await mapWithConcurrency(rows, 4, (row) => processRow(row));
+    for (const { success } of outcomes) {
       if (success) result.completed++;
       else result.failed++;
     }
