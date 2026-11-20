@@ -948,3 +948,8 @@ Upstream `main` keeps re-committing junk that should be gitignored — `Backend/
 - Cron in `index.ts`: daily 00:00 IST when `SNOWFLAKE_SYNC_CRON=true`, or by default in production; needs env.
 - Env: `SNOWFLAKE_ACCOUNT`, `SNOWFLAKE_USER`, `SNOWFLAKE_PRIVATE_KEY_B64` (base64 of unencrypted .p8), `SNOWFLAKE_ROLE`, `SNOWFLAKE_WAREHOUSE`. Without them the card shows "Not configured".
 - Windows task "Article Flat to Snowflake" stays until prod has the code + env, then disable it.
+
+### 2026-11-20 — Fabric New page duplicate check adds design number
+- `submitFabricArticles(ids, approvedById, { matchDesignNumber })` in `zmmFabArtCreationService.ts`. With the flag, the duplicate block needs the same description AND the same design number (case-insensitive); if the row's design number is blank, it falls back to description-only.
+- Only `POST /approver/fabric-article-data/submit` (Fabric Article tab Save & Submit) passes the flag. FG "Create Fabric Article" (`createFabricArticleNumber`, its own 409 pre-check plus the service call) is unchanged: description only.
+- Trigger: CAMBAY 55211 (`485acc13…`) was blocked by CAMBAY 55210 → 2111083412 (same PPT, same 7-attribute description).

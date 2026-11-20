@@ -6581,7 +6581,8 @@ export class ApproverController {
             return res.status(400).json({ error: 'ids array is required' });
         }
         const { submitFabricArticles } = await import('../services/zmmFabArtCreationService');
-        const result = await submitFabricArticles(ids, req.user?.id);
+        // Fabric Article New page: duplicate = same description AND same design number.
+        const result = await submitFabricArticles(ids, req.user?.id, { matchDesignNumber: true });
         const allOk = result.results.every(r => r.success);
         return res.status(allOk ? 200 : 207).json(result);
     };

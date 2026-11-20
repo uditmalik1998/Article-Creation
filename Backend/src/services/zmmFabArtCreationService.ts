@@ -182,8 +182,17 @@ export async function submitFabricVariants(
     }
 }
 
-/** `approvedById` = the user submitting; saved to approved_by when SAP creates the article. */
-export async function submitFabricArticles(ids: string[], approvedById?: number): Promise<{
+/**
+ * `approvedById` = the user submitting; saved to approved_by when SAP creates the article.
+ * `opts.matchDesignNumber` — Fabric Article New page only (2026-11-20): the duplicate check
+ * also needs the same design number, so two designs with the same attribute description can
+ * both be created. Other callers (FG "Create Fabric Article") keep the description-only check.
+ */
+export async function submitFabricArticles(
+    ids: string[],
+    approvedById?: number,
+    opts: { matchDesignNumber?: boolean } = {},
+): Promise<{
     results: { id: string; success: boolean; sapArticleNumber?: string; message?: string }[];
 }> {
     const rows = await prisma.fabricArticleData.findMany({
@@ -244,18 +253,24 @@ export async function submitFabricArticles(ids: string[], approvedById?: number)
 
         // Duplicate check: same majorCategory + fabricArticleDescription already has an article number
         // Duplicate check: fabricArticleDescription is unique across all categories
+        // New page (opts.matchDesignNumber): description + design number must both match.
+        // A blank design number falls back to the description-only check.
         const desc = str(row.fabricArticleDescription);
+        const designNo = opts.matchDesignNumber ? str(row.designNumber) : '';
         if (desc) {
             const duplicate = await prisma.fabricArticleData.findFirst({
                 where: {
                     id: { not: row.id },
                     fabricArticleDescription: { equals: desc, mode: 'insensitive' },
                     fabricArticleNumber: { not: null },
+                    ...(designNo ? { designNumber: { equals: designNo, mode: 'insensitive' as const } } : {}),
                 },
                 select: { id: true, fabricArticleNumber: true },
             });
             if (duplicate) {
-                const msg = `Fabric Article already created for this description (existing: ${duplicate.fabricArticleNumber}).`;
+                const msg = designNo
+                    ? `Fabric Article already created for this description and design number ${designNo} (existing: ${duplicate.fabricArticleNumber}).`
+                    : `Fabric Article already created for this description (existing: ${duplicate.fabricArticleNumber}).`;
                 console.warn(`[ZMM_FAB_RFC] Duplicate blocked id=${row.id} — ${msg}`);
                 await prisma.fabricArticleData.update({
                     where: { id: row.id },
