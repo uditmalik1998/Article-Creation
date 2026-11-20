@@ -4490,9 +4490,18 @@ export class ApproverController {
     static async duplicateItem(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            const { designNumber } = req.body as { designNumber?: string };
+            const { designNumber, imageUrl: newImageUrlRaw } = req.body as { designNumber?: string; imageUrl?: string };
             if (!designNumber || !designNumber.trim()) {
                 return res.status(400).json({ error: 'Design Number is required to duplicate an article.' });
+            }
+            // Optional new photo for the copy (uploaded first via POST /approver/upload-image?purpose=duplicate
+            // to the primary R2 bucket). Only accept URLs from our own public R2 base.
+            const newImageUrl = typeof newImageUrlRaw === 'string' ? newImageUrlRaw.trim() : '';
+            if (newImageUrl) {
+                const base = (process.env.R2_PUBLIC_URL_BASE || '').trim().replace(/\/+$/, '');
+                if (!/^https:\/\//i.test(newImageUrl) || (base && !newImageUrl.startsWith(base))) {
+                    return res.status(400).json({ error: 'The uploaded image URL is not valid. Please upload the image again.' });
+                }
             }
             const source = await prisma.extractionResultFlat.findUnique({ where: { id } });
             if (!source) return res.status(404).json({ error: 'Article not found' });
@@ -4532,11 +4541,16 @@ export class ApproverController {
                 ? (source.sourceImageUrl || source.imageUrl)
                 : source.imageUrl;
 
+            // A new uploaded photo replaces both image_url and the clean source_image_url (it is
+            // un-watermarked); the back photo of the original no longer matches, so drop it.
             const newRecord = await prisma.extractionResultFlat.create({
                 data: {
                     ...rest,
-                    imageUrl: copyImageUrl,
-                    sourceImageUrl: fromCreatedKids ? (source.sourceImageUrl || null) : (rest.sourceImageUrl ?? source.imageUrl),
+                    imageUrl: newImageUrl || copyImageUrl,
+                    sourceImageUrl: newImageUrl
+                        ? newImageUrl
+                        : fromCreatedKids ? (source.sourceImageUrl || null) : (rest.sourceImageUrl ?? source.imageUrl),
+                    ...(newImageUrl ? { backImageUrl: null } : {}),
                     vaddPrintJson: rest.vaddPrintJson ?? Prisma.DbNull,
                     vaddEmpJson: rest.vaddEmpJson ?? Prisma.DbNull,
                     creatorUser: Prisma.DbNull, modifyUser: Prisma.DbNull, // a copy starts with no editors
@@ -4692,11 +4706,13 @@ export class ApproverController {
         try {
             const file = (req as any).file as { buffer: Buffer; originalname: string; mimetype: string } | undefined;
             if (!file) return res.status(400).json({ error: 'No image file provided' });
+            // ?purpose=duplicate → photo for a Duplicate copy; default folder is the Add Color one.
+            const folder = req.query.purpose === 'duplicate' ? 'duplicate-images' : 'variant-colors';
             const result = await storageService.uploadFile(
                 file.buffer,
                 file.originalname || 'color.jpg',
                 file.mimetype || 'image/jpeg',
-                'variant-colors',
+                folder,
             );
             return res.json({ url: result.url });
         } catch (err: any) {

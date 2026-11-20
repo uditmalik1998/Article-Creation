@@ -1932,14 +1932,15 @@ const ArticleCard = React.memo(
                   ),
                 })}
                 <div className="flex flex-col gap-2 p-3">
-                  {/* Height follows the photo so it fills the card width (no empty side bands). */}
-                  <div className="relative w-full overflow-hidden rounded-lg bg-slate-100">
+                  {/* Fixed 480px height; the photo fills the full width (object-cover) and may crop a
+                      little top/bottom. The expand button / click shows the whole photo. */}
+                  <div className="relative h-[480px] w-full overflow-hidden rounded-lg bg-slate-100">
                     {shownImgUrl ? (
                       <>
                         <img
                           src={shownImgUrl}
                           alt=""
-                          className="block h-auto max-h-[680px] w-full cursor-zoom-in object-contain"
+                          className="block h-full w-full cursor-zoom-in object-cover object-center"
                           onError={showingBack ? () => setBackImgFailed(true) : handleImgError}
                           onClick={() => setImgModalOpen(true)}
                         />
@@ -1953,7 +1954,7 @@ const ArticleCard = React.memo(
                         </button>
                       </>
                     ) : (
-                      <div className="flex h-[420px] w-full items-center justify-center text-xs text-slate-500">
+                      <div className="flex h-full w-full items-center justify-center text-xs text-slate-500">
                         {showingBack ? 'Back photo unavailable' : 'No image'}
                       </div>
                     )}
