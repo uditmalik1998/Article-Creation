@@ -5,6 +5,29 @@
 
 ---
 
+## 2026-11-20 — Fabric Article Image: full width (cover), blur fill removed
+
+- User prefers the photo using the full width even if it crops a little: Fabric box stays `h-[480px]`, photo back to `object-cover object-center`; blurred background copy removed. Expand/click still shows the whole photo. FG unchanged.
+
+## 2026-11-20 — FG Duplicate popup: slate focus + optional new image
+
+- Design-number input focus was the coral theme ring (`--primary`); now `bg-white` with slate border/ring (`focus-visible:border-slate-700 ring-slate-900/10`).
+- New optional **IMAGE** field (dashed "Upload a different image", thumbnail + remove). Image only, max 15 MB.
+- Flow (`handleDuplicate`): file → `POST /approver/upload-image?purpose=duplicate` (primary R2 bucket `articlecreation`, folder `duplicate-images/YYYY/MM/<uuid>.<ext>`) → `POST /approver/items/:id/duplicate` with `{ designNumber, imageUrl }`.
+- Backend `duplicateItem`: `imageUrl` must be https and start with `R2_PUBLIC_URL_BASE`; when given, the copy's `image_url` **and** `source_image_url` (the clean, un-watermarked image — correct column) are set to it and `back_image_url` is cleared. Without an image nothing changes.
+- Type-checks; not checked live (no login).
+
+## 2026-11-20 — Fabric Article Image: no crop, blurred fill, 480px
+
+- Cover crop cut too much of the photo. Fabric box is now `h-[480px]` (was 420px); the photo is `object-contain` (whole photo, no crop) on top of a blurred `object-cover` copy of the same photo (`blur-2xl opacity-70`, aria-hidden) that fills the side space.
+- FG pages unchanged (original square box).
+
+## 2026-11-20 — Article Image: original height back, photo fills the width (cover)
+
+- Replaces the "height follows the photo" change: tall photos made the card too high.
+- Fabric (`FabricArticleList.tsx`): box back to fixed `h-[420px]`; photo is `object-cover`, so it fills the full width and is cropped top/bottom; the expand button / click still opens the whole photo.
+- FG (`ApproverArticleList.tsx`): fully back to the original — square box, whole photo shown (`object-contain p-2`), user's choice.
+
 ## 2026-11-20 — Fabric FAB card: read-only AI result column + 2px bigger text
 
 - Canvas (4 designs): https://claude.ai/artifact/XgPqFPZyNRBbW5f9WYHEMQ — user picked **A · plain grey AI column, without the tick**.

@@ -518,7 +518,7 @@ export interface ApproverArticleListProps {
   onCreateFabricArticle: (item: ApproverItem) => void;
   onCreateBodyArticle: (item: ApproverItem) => void;
   onProceedFGArticle: (item: ApproverItem) => void;
-  onDuplicate: (item: ApproverItem, designNumber: string) => Promise<string | void>;
+  onDuplicate: (item: ApproverItem, designNumber: string, imageFile?: File | null) => Promise<string | void>;
   /**
    * Modify an already-created (SAP-synced) article. Receives only the changed
    * fields. Used by the "Modify" button on the Created Articles page; pushes to
@@ -586,7 +586,7 @@ const ArticleCard = React.memo(
     onCreateFabricArticle: (item: ApproverItem) => void;
     onCreateBodyArticle: (item: ApproverItem) => void;
     onProceedFGArticle: (item: ApproverItem) => void;
-    onDuplicate: (item: ApproverItem, designNumber: string) => Promise<string | void>;
+    onDuplicate: (item: ApproverItem, designNumber: string, imageFile?: File | null) => Promise<string | void>;
     onModify?: (item: ApproverItem, changes: Record<string, unknown>) => Promise<void>;
     onRefresh: () => void;
     cardGroups: CardGroup[];
@@ -609,6 +609,10 @@ const ArticleCard = React.memo(
     const [dupConfirmOpen, setDupConfirmOpen] = useState(false);
     const [duplicating, setDuplicating] = useState(false);
     const [dupDesignNo, setDupDesignNo] = useState('');
+    // Optional new photo for the Duplicate copy (goes to image_url + source_image_url).
+    const [dupImage, setDupImage] = useState<File | null>(null);
+    const dupImagePreview = useMemo(() => (dupImage ? URL.createObjectURL(dupImage) : null), [dupImage]);
+    useEffect(() => () => { if (dupImagePreview) URL.revokeObjectURL(dupImagePreview); }, [dupImagePreview]);
     const [dupDoneId, setDupDoneId] = useState<string | null>(null);
     const [dupDoneNo, setDupDoneNo] = useState('');
     const [dupError, setDupError] = useState<string | null>(null);
@@ -3337,14 +3341,13 @@ const ArticleCard = React.memo(
                         </>
                       ) : (
                         <>
-                          {/* Height follows the photo so it fills the card width (no empty side bands). */}
-                          <div className="relative w-full overflow-hidden rounded-lg bg-slate-100">
+                          <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-slate-100">
                             {shownImgUrl ? (
                               <>
                                 <img
                                   src={shownImgUrl}
                                   alt=""
-                                  className="block h-auto max-h-[680px] w-full cursor-zoom-in object-contain"
+                                  className="block h-full w-full cursor-zoom-in object-contain p-2"
                                   onError={
                                     activeImgView.key === 'old'
                                       ? () => setOldImgFailed(true)
@@ -3364,7 +3367,7 @@ const ArticleCard = React.memo(
                                 </button>
                               </>
                             ) : (
-                              <div className="flex aspect-square w-full items-center justify-center text-xs text-slate-500">
+                              <div className="flex h-full w-full items-center justify-center text-xs text-slate-500">
                                 {activeImgView.key === 'front' ? 'No image' : `${activeImgView.label} image unavailable`}
                               </div>
                             )}
@@ -5406,19 +5409,19 @@ const ArticleCard = React.memo(
           onOpenChange={(o) => {
             if (duplicating) return;
             setDupConfirmOpen(o);
-            if (!o) { setDupDesignNo(''); setDupError(null); setDupDoneId(null); setDupDoneNo(''); }
+            if (!o) { setDupDesignNo(''); setDupError(null); setDupDoneId(null); setDupDoneNo(''); setDupImage(null); }
           }}
         >
           <DialogContent showClose={false} className="max-w-[440px] gap-0 p-0 outline-none">
             {(() => {
-              const closeDup = () => { setDupConfirmOpen(false); setDupDesignNo(''); setDupError(null); setDupDoneId(null); setDupDoneNo(''); };
+              const closeDup = () => { setDupConfirmOpen(false); setDupDesignNo(''); setDupError(null); setDupDoneId(null); setDupDoneNo(''); setDupImage(null); };
               const runDup = async () => {
                 const designNo = dupDesignNo.trim();
                 if (!designNo || duplicating) return;
                 setDuplicating(true);
                 setDupError(null);
                 try {
-                  const newId = await onDuplicate(item, designNo);
+                  const newId = await onDuplicate(item, designNo, dupImage);
                   setDupDoneNo(designNo);
                   setDupDoneId(newId || '');
                 } catch (err) {
@@ -5495,9 +5498,60 @@ const ArticleCard = React.memo(
                         onKeyDown={(e) => { if (e.key === 'Enter') void runDup(); }}
                         disabled={duplicating}
                         aria-invalid={!!dupError}
-                        className={cn('h-[42px] font-mono font-semibold', dupError && 'border-red-600')}
+                        className={cn(
+                          'h-[42px] bg-white font-mono font-semibold focus-visible:border-slate-700 focus-visible:ring-slate-900/10',
+                          dupError && 'border-red-600',
+                        )}
                       />
                       {dupError && <p className="m-0 text-xs text-red-700">{dupError}</p>}
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-[11.5px] font-bold tracking-[0.06em] text-slate-700">
+                        IMAGE <span className="font-medium normal-case tracking-normal text-slate-500">(optional — keeps the same photo if empty)</span>
+                      </span>
+                      {dupImage && dupImagePreview ? (
+                        <div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-2">
+                          <img src={dupImagePreview} alt="" className="h-14 w-11 shrink-0 rounded-md border border-slate-200 bg-white object-contain" />
+                          <div className="flex min-w-0 flex-1 flex-col">
+                            <span className="truncate text-[13px] font-semibold text-slate-900">{dupImage.name}</span>
+                            <span className="text-[11.5px] text-slate-500">{(dupImage.size / 1024 / 1024).toFixed(1)} MB · used for the copy</span>
+                          </div>
+                          <button
+                            type="button"
+                            aria-label="Remove image"
+                            disabled={duplicating}
+                            onClick={() => setDupImage(null)}
+                            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-200 hover:text-slate-800 disabled:opacity-40"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <label
+                          className={cn(
+                            'flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 bg-white px-3 py-3 text-[13px] font-semibold text-slate-600 hover:border-slate-500 hover:bg-slate-50',
+                            duplicating && 'pointer-events-none opacity-50',
+                          )}
+                        >
+                          <Upload className="h-4 w-4" />
+                          Upload a different image
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="sr-only"
+                            disabled={duplicating}
+                            onChange={(e) => {
+                              const f = e.target.files?.[0] ?? null;
+                              e.target.value = '';
+                              if (!f) return;
+                              if (!f.type.startsWith('image/')) { setDupError('Please choose an image file.'); return; }
+                              if (f.size > 15 * 1024 * 1024) { setDupError('Image is larger than 15 MB.'); return; }
+                              setDupError(null);
+                              setDupImage(f);
+                            }}
+                          />
+                        </label>
+                      )}
                     </div>
                     {pathType === 'created' && (
                       <details className="text-[12.5px] text-slate-600">
@@ -5653,12 +5707,26 @@ export const ApproverArticleList: React.FC<ApproverArticleListProps> = ({
   }, [items, selectedRowKeys, onSelectionChange]);
 
   const handleDuplicate = useCallback(
-    async (item: ApproverItem, designNumber: string): Promise<string | undefined> => {
+    async (item: ApproverItem, designNumber: string, imageFile?: File | null): Promise<string | undefined> => {
       const token = localStorage.getItem('authToken');
+      // Optional new photo: upload it to R2 (articlecreation bucket) first, then send its URL.
+      let imageUrl: string | undefined;
+      if (imageFile) {
+        const fd = new FormData();
+        fd.append('image', imageFile);
+        const up = await fetch(`${APP_CONFIG.api.baseURL}/approver/upload-image?purpose=duplicate`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          body: fd,
+        });
+        const upData = await up.json().catch(() => null);
+        if (!up.ok || !upData?.url) throw new Error(upData?.error || 'Image upload failed. Please try again.');
+        imageUrl = String(upData.url);
+      }
       const res = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${item.id}/duplicate`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ designNumber }),
+        body: JSON.stringify({ designNumber, ...(imageUrl ? { imageUrl } : {}) }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => null);
