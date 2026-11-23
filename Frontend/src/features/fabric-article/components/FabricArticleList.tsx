@@ -184,6 +184,18 @@ const HIDDEN_CARD_SCHEMA_KEYS = new Set([
   'weight',
 ]);
 
+/**
+ * FAB rows hidden by the picked M_FAB_DIV (2026-11-23, Fabric pages only):
+ * K / RFD_K (Knits) and W / RFD_W (Woven) → no M_OUNZ; DNM (Denim) → no M_GSM.
+ */
+export const isFabRowHiddenByDiv = (schemaKey: string, fabDiv: string | null | undefined): boolean => {
+  const div = String(fabDiv ?? '').trim().toUpperCase();
+  if (!div) return false;
+  if (schemaKey === 'f_ounce') return ['K', 'RFD_K', 'W', 'RFD_W'].includes(div);
+  if (schemaKey === 'gsm') return div === 'DNM';
+  return false;
+};
+
 const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string; schemaKey: string; freeText?: boolean }[] }[] = [
   {
     group: 'FAB',
@@ -530,6 +542,8 @@ const ArticleCard = React.memo(
         if (BOM_ONLY_SCHEMA_KEYS.has(af.schemaKey)) continue;
         // Fields explicitly hidden from the card (shade, weight)
         if (HIDDEN_CARD_SCHEMA_KEYS.has(af.schemaKey)) continue;
+        // M_OUNZ / M_GSM hidden by the picked M_FAB_DIV (unsaved pick counts too)
+        if (isFabRowHiddenByDiv(af.schemaKey, 'fabDiv' in localValues ? localValues['fabDiv'] : (item as any).fabDiv)) continue;
 
         // freeText fields (shade, weight, segment…) are always visible.
         // They CAN be mandatory if the mandatory grid marks them as active — check the grid.
