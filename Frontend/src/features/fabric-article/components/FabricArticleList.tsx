@@ -182,15 +182,25 @@ const HIDDEN_CARD_SCHEMA_KEYS = new Set([
   'weight',
 ]);
 
+/** M_FAB_DIV values whose fabric needs M_GSM (Knits): GSM is shown and required only for these. */
+const GSM_FAB_DIVS = ['K', 'RFD_K'];
+
+/** True when the picked M_FAB_DIV makes M_GSM required (K / RFD_K). */
+export const isGsmRequiredForDiv = (fabDiv: string | null | undefined): boolean =>
+  GSM_FAB_DIVS.includes(String(fabDiv ?? '').trim().toUpperCase());
+
 /**
- * FAB rows hidden by the picked M_FAB_DIV (2026-11-23, Fabric pages only):
- * K / RFD_K (Knits) and W / RFD_W (Woven) → no M_OUNZ; DNM (Denim) → no M_GSM.
+ * FAB rows hidden by the picked M_FAB_DIV (Fabric pages only):
+ * - M_GSM is shown only for K / RFD_K, where it is required. It is hidden for
+ *   W, RFD_W, DNM and while no M_FAB_DIV is picked. Hiding never clears a
+ *   stored GSM value (decision 2026-11-23).
+ * - M_OUNZ: K / RFD_K (Knits) and W / RFD_W (Woven) → hidden (2026-11-23).
  */
 export const isFabRowHiddenByDiv = (schemaKey: string, fabDiv: string | null | undefined): boolean => {
+  if (schemaKey === 'gsm') return !isGsmRequiredForDiv(fabDiv);
   const div = String(fabDiv ?? '').trim().toUpperCase();
   if (!div) return false;
   if (schemaKey === 'f_ounce') return ['K', 'RFD_K', 'W', 'RFD_W'].includes(div);
-  if (schemaKey === 'gsm') return div === 'DNM';
   return false;
 };
 
@@ -495,7 +505,8 @@ const ArticleCard = React.memo(
     );
 
     // FAB card rows. Fabric has no mandatory grid (2026-11-23): every FAB row is shown
-    // (except BOM-only / hidden / M_FAB_DIV-hidden rows) and none is grid-mandatory.
+    // (except BOM-only / hidden / M_FAB_DIV-hidden rows) and none is grid-mandatory,
+    // except M_GSM, which is required whenever it is shown (K / RFD_K).
     // Dropdown values: fabric_maj_cat_grid_values only (no garment maj-cat grid call).
     type AttrValue = { shortForm: string; fullForm: string };
     const { visibleAttrs, mandatoryKeys } = useMemo(() => {
@@ -535,8 +546,10 @@ const ArticleCard = React.memo(
           groupColor: af.groupColor,
           values,
           freeText: af.freeText,
-          isMandatory: false,
+          // GSM is only visible for K / RFD_K, and required there.
+          isMandatory: af.schemaKey === 'gsm',
         });
+        if (af.schemaKey === 'gsm') mandatory.add(af.schemaKey);
       }
 
       return { visibleAttrs: visible, mandatoryKeys: mandatory };
