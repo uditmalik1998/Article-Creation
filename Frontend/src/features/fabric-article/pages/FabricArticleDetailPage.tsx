@@ -15,21 +15,10 @@ import {
   Tooltip,
 } from '@/shared/components/ui-tw';
 import { message } from '@/lib/message';
-import { FabricArticleList, isFabRowHiddenByDiv, type ApproverArticleListProps } from '../components/FabricArticleList';
+import { FabricArticleList, type ApproverArticleListProps } from '../components/FabricArticleList';
 import type { ApproverItem } from '../types';
 import { APP_CONFIG } from '../../../constants/app/config';
 import { getMcCodeByMajorCategory } from '../../../data/majorCategoryMcCodeMap';
-import {
-  SAP_NAME_TO_SCHEMA_KEY,
-  SCHEMA_KEY_TO_DB_FIELD,
-  SCHEMA_KEY_TO_EXCEL_ATTR,
-} from '../../../data/majCatAttributeMap';
-import {
-  preloadMandatoryGridFor,
-  isMandatoryGridFieldActive,
-  getMandatoryGridFieldLabel,
-  getMajCatGridEntry,
-} from '../../../services/articleConfigService';
 import { formatDivisionLabel } from '../../../shared/utils/ui/formatters';
 import { canApproveFabricByType } from '../../../shared/utils/articleTypeAccess';
 
@@ -37,46 +26,12 @@ import { canApproveFabricByType } from '../../../shared/utils/articleTypeAccess'
 
 const inferMcCode = (majorCategory?: string | null) => getMcCodeByMajorCategory(majorCategory);
 
-// Maps schemaKey → all SAP key aliases for mandatory-grid lookups
-const SCHEMA_KEY_TO_ALL_SAP_KEYS: Record<string, string[]> = Object.entries(SAP_NAME_TO_SCHEMA_KEY).reduce(
-  (acc, [sapKey, schemaKey]) => {
-    if (!acc[schemaKey]) acc[schemaKey] = [];
-    acc[schemaKey].push(sapKey);
-    return acc;
-  },
-  {} as Record<string, string[]>,
-);
-
-function hasGridDropdownValues(majorCat: string, schemaKey: string): boolean {
-  const excelAttr = SCHEMA_KEY_TO_EXCEL_ATTR[schemaKey];
-  if (!excelAttr) return false;
-  return (getMajCatGridEntry(majorCat, excelAttr)?.length ?? 0) > 0;
-}
-
 function getMissingMandatoryFields(item: any, isFGMode = false): string[] {
   const missing: string[] = [];
   if (!item.vendorName) missing.push('VENDOR NAME');
   if (!isFGMode && !item.mrp) missing.push('MRP');
   if (isFGMode && !item.articleFashionType) missing.push('ARTICLE FASHION TYPE');
-  const majorCat = item.majorCategory || '';
-  if (!majorCat) return missing;
-  for (const [schemaKey, dbField] of Object.entries(SCHEMA_KEY_TO_DB_FIELD)) {
-    // M_FAB_VDR isn't on the Fabric FAB card (removed 2026-11-20) — never require it here.
-    if (schemaKey === 'fab_vdr') continue;
-    // M_OUNZ (Knits/Woven) and M_GSM (Denim) are hidden by M_FAB_DIV — don't require them.
-    if (isFabRowHiddenByDiv(schemaKey, item.fabDiv)) continue;
-    const sapKeys = SCHEMA_KEY_TO_ALL_SAP_KEYS[schemaKey] ?? [];
-    if (sapKeys.length === 0) continue;
-    // Only validate when mandatory in the grid AND has dropdown values (i.e. visible in UI)
-    const isActive = sapKeys.some((sk) => isMandatoryGridFieldActive(majorCat, sk) === true);
-    if (!isActive) continue;
-    if (!hasGridDropdownValues(majorCat, schemaKey)) continue;
-    const value = item[dbField as string];
-    if (!value) {
-      const activeSapKey = sapKeys.find((sk) => isMandatoryGridFieldActive(majorCat, sk) === true)!;
-      missing.push(getMandatoryGridFieldLabel(activeSapKey) || activeSapKey);
-    }
-  }
+  // Fabric has no mandatory grid (2026-11-23): FAB attributes are not grid-required.
   return missing;
 }
 
@@ -255,10 +210,6 @@ export default function ArticleDetailPage({
   const [infoDialog, setInfoDialog] = useState<InfoDialog>(null);
   const [approving, setApproving] = useState(false);
   const [confirmingCreator, setConfirmingCreator] = useState(false);
-  // Bumped once the per-category mandatory grid finishes loading, so the
-  // Save & Submit gate recomputes against real grid data (fixes the hard-refresh
-  // race where the gate ran before the grid cache was populated).
-  const [gridVersion, setGridVersion] = useState(0);
 
   // Fabric article master hierarchy (div → sub_div → maj_cat)
   const [fabHierarchy, setFabHierarchy] = useState<{
@@ -312,18 +263,6 @@ export default function ArticleDetailPage({
       .finally(() => setLoadingItem(false));
   }, [id]);
 
-  // Ensure the mandatory grid for every loaded article's major category is cached,
-  // then bump gridVersion so the Save & Submit gate recomputes with real data.
-  // Without this, a hard refresh runs the gate against an empty grid (every field
-  // reads as "not mandatory") and the button stays enabled despite empty Required fields.
-  useEffect(() => {
-    const cats = Array.from(
-      new Set(items.map(i => (i.majorCategory || '').trim()).filter(Boolean)),
-    );
-    if (cats.length === 0) return;
-    Promise.all(cats.map(c => preloadMandatoryGridFor(c).catch(() => {})))
-      .then(() => setGridVersion(v => v + 1));
-  }, [items]);
 
   // ─── Navigation ─────────────────────────────────────────────────────────────
 
@@ -497,7 +436,7 @@ export default function ArticleDetailPage({
       return acc;
     }, []);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingSelectedKeys, items, gridVersion, pathType, skipMandatoryFieldsCheck, isFGMode]);
+  }, [pendingSelectedKeys, items, pathType, skipMandatoryFieldsCheck, isFGMode]);
 
   const handleApproveClick = () => {
     if (pendingSelectedKeys.length === 0) return;

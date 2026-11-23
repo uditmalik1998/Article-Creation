@@ -19,15 +19,6 @@ import type { ApproverItem } from '../types';
 import { APP_CONFIG } from '../../../constants/app/config';
 import { getMcCodeByMajorCategory } from '../../../data/majorCategoryMcCodeMap';
 import {
-  SAP_NAME_TO_SCHEMA_KEY,
-  SCHEMA_KEY_TO_DB_FIELD,
-  SCHEMA_KEY_TO_EXCEL_ATTR,
-} from '../../../data/majCatAttributeMap';
-import {
-  preloadMandatoryGridFor,
-  isMandatoryGridFieldActive,
-  getMandatoryGridFieldLabel,
-  getMajCatGridEntry,
   preloadGMGridFor,
   getCachedGMGrid,
 } from '../../../services/articleConfigService';
@@ -37,42 +28,12 @@ import { formatDivisionLabel } from '../../../shared/utils/ui/formatters';
 
 const inferMcCode = (majorCategory?: string | null) => getMcCodeByMajorCategory(majorCategory);
 
-// Maps schemaKey → all SAP key aliases for mandatory-grid lookups
-const SCHEMA_KEY_TO_ALL_SAP_KEYS: Record<string, string[]> = Object.entries(SAP_NAME_TO_SCHEMA_KEY).reduce(
-  (acc, [sapKey, schemaKey]) => {
-    if (!acc[schemaKey]) acc[schemaKey] = [];
-    acc[schemaKey].push(sapKey);
-    return acc;
-  },
-  {} as Record<string, string[]>,
-);
-
-function hasGridDropdownValues(majorCat: string, schemaKey: string): boolean {
-  const excelAttr = SCHEMA_KEY_TO_EXCEL_ATTR[schemaKey];
-  if (!excelAttr) return false;
-  return (getMajCatGridEntry(majorCat, excelAttr)?.length ?? 0) > 0;
-}
-
 function getMissingMandatoryFields(item: any, isFGMode = false): string[] {
   const missing: string[] = [];
   if (!item.vendorName) missing.push('VENDOR NAME');
   if (!isFGMode && !item.mrp) missing.push('MRP');
   if (isFGMode && !item.articleFashionType) missing.push('ARTICLE FASHION TYPE');
-  const majorCat = item.majorCategory || '';
-  if (!majorCat) return missing;
-  for (const [schemaKey, dbField] of Object.entries(SCHEMA_KEY_TO_DB_FIELD)) {
-    const sapKeys = SCHEMA_KEY_TO_ALL_SAP_KEYS[schemaKey] ?? [];
-    if (sapKeys.length === 0) continue;
-    // Only validate when mandatory in the grid AND has dropdown values (i.e. visible in UI)
-    const isActive = sapKeys.some((sk) => isMandatoryGridFieldActive(majorCat, sk) === true);
-    if (!isActive) continue;
-    if (!hasGridDropdownValues(majorCat, schemaKey)) continue;
-    const value = item[dbField as string];
-    if (!value) {
-      const activeSapKey = sapKeys.find((sk) => isMandatoryGridFieldActive(majorCat, sk) === true)!;
-      missing.push(getMandatoryGridFieldLabel(activeSapKey) || activeSapKey);
-    }
-  }
+  // GM uses its own GM grid, not the FG mandatory grid (removed 2026-11-23).
   return missing;
 }
 
@@ -283,17 +244,15 @@ export default function ArticleDetailPage({
       .finally(() => setLoadingItem(false));
   }, [id]);
 
-  // Ensure the mandatory grid + GM attribute grid for every loaded article's major
-  // category is cached, then bump gridVersion so the Save & Submit gate recomputes.
+  // Ensure the GM attribute grid for every loaded article's major category is
+  // cached, then bump gridVersion so the Save & Submit gate recomputes.
   useEffect(() => {
     const cats = Array.from(
       new Set(items.map(i => (i.majorCategory || '').trim()).filter(Boolean)),
     );
     if (cats.length === 0) return;
-    Promise.all([
-      ...cats.map(c => preloadMandatoryGridFor(c).catch(() => {})),
-      ...cats.map(c => preloadGMGridFor(c).catch(() => {})),
-    ]).then(() => setGridVersion(v => v + 1));
+    Promise.all(cats.map(c => preloadGMGridFor(c).catch(() => {})))
+      .then(() => setGridVersion(v => v + 1));
   }, [items]);
 
   // ─── Navigation ─────────────────────────────────────────────────────────────

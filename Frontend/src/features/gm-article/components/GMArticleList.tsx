@@ -48,14 +48,6 @@ import {
 } from '../../../data/majCatAttributeMap';
 import { getMajorCategoriesByDivision, getMcCodeByMajorCategory } from '../../../data/majorCategoryMcCodeMap';
 import {
-  preloadMajCatGridFor,
-  isMajCatGridLoadedFor,
-  getMajCatGridEntry,
-  isMajCatInGrid,
-  preloadMandatoryGridFor,
-  isMandatoryGridLoadedFor,
-  isMandatoryGridFieldActive,
-  isMajCatInMandatoryGrid,
   preloadGMGridFor,
   getCachedGMGrid,
   type GmGridAttr,
@@ -68,24 +60,6 @@ import { formatDivisionLabel } from '../../../shared/utils/ui/formatters';
 import { SIMPLIFIED_HIERARCHY } from '../../extraction/components/SimplifiedCategorySelector';
 import GMVariantTable from './GMVariantTable';
 import { ImagePreviewDialog } from '@/shared/components/articles/ArticleSpecCard';
-
-// Module-level fabric grid values cache — fetched once for all cards
-// Shape: { [excelAttrName: string]: { code: string; fullForm: string }[] }
-// e.g. { M_FAB_DIV: [{code:'K', fullForm:'KNIT'}, ...], M_YARN: [...], ... }
-type FabGridValues = Record<string, { code: string; fullForm: string }[]>;
-let fabricGridPromise: Promise<FabGridValues> | null = null;
-const fetchFabricGridValues = (): Promise<FabGridValues> => {
-  if (!fabricGridPromise) {
-    const token = localStorage.getItem('authToken');
-    fabricGridPromise = fetch(`${APP_CONFIG.api.baseURL}/approver/fabric-grid-values`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    })
-      .then((r) => r.json())
-      .then((res) => (res?.data as FabGridValues) ?? {})
-      .catch(() => ({}));
-  }
-  return fabricGridPromise;
-};
 
 // Module-level segment range cache (shared across card instances, keyed by UPPER major category)
 // BOM cost fields saved to gm_article_data NUMERIC(10,2) columns.
@@ -427,14 +401,6 @@ const ArticleCard = React.memo(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [segmentRanges]);
 
-    // Tracks when the major-category grid JSON (for THIS article's category) has loaded
-    const [gridReady, setGridReady] = useState(() => isMajCatGridLoadedFor(effectiveMajCat));
-    // Tracks when the mandatory grid (for THIS article's category) has loaded
-    const [mandatoryGridReady, setMandatoryGridReady] = useState(() => isMandatoryGridLoadedFor(effectiveMajCat));
-    // Fabric attribute grid values from fabric_maj_cat_grid_values table
-    const [fabricGrid, setFabricGrid] = useState<FabGridValues>({});
-    const [fabricGridReady, setFabricGridReady] = useState(false);
-
     // GM attribute grid values for this article's major category
     const [gmFamilyAttrs, setGmFamilyAttrs] = useState<GmFamilyAttr[]>([]);
     const [gmGridLoaded, setGmGridLoaded] = useState(false);
@@ -447,153 +413,6 @@ const ArticleCard = React.memo(
         .finally(() => setGmGridLoaded(true));
     }, [effectiveMajCat]);
 
-    const attributeFields = useMemo(
-      () =>
-        cardGroups.flatMap((g) =>
-          g.fields.map((a) => ({ ...a, label: f(a.schemaKey), group: g.group, groupColor: g.color, freeText: a.freeText ?? false })),
-        ),
-      [cardGroups],
-    );
-
-    // Compute attributes per-card from this article's own majorCategory.
-    //
-    // 3-tier visibility (applied once either grid is loaded AND the major category
-    // has any grid data):
-    //   MANDATORY  — Mandatory Grid = 1   → shown with bold label + * (required for approve)
-    //   OPTIONAL   — Maj-Cat Grid has dropdown values for this major category → shown plain
-    //   HIDDEN     — neither grid has this field for this major category → not shown at all
-    //
-    // While grids are still loading OR category has no grid data: show all fields as
-    // graceful fallback so the card doesn't look broken.
-    type AttrValue = { shortForm: string; fullForm: string };
-    const { visibleAttrs, mandatoryKeys } = useMemo(() => {
-      if (!effectiveMajCat) return { visibleAttrs: [], mandatoryKeys: new Set<string>() };
-
-      const visible: Array<{
-        field: string;
-        label: string;
-        schemaKey: string;
-        group: string;
-        groupColor: string;
-        values: AttrValue[];
-        freeText: boolean;
-        isMandatory: boolean;
-      }> = [];
-      const mandatory = new Set<string>();
-
-      // At least one grid must be ready before we apply filtering.
-      const gridsReady = gridReady || mandatoryGridReady;
-
-      // Graceful degradation: if the major category has NO entries in EITHER grid
-      // (e.g. not yet configured in the admin panel), fall back to showing ALL fields.
-      // Uses direct category key-existence checks — reliable regardless of field name variations.
-      const catHasAnyGridData =
-        gridsReady &&
-        ((mandatoryGridReady && isMajCatInMandatoryGrid(effectiveMajCat)) ||
-          (gridReady && isMajCatInGrid(effectiveMajCat)));
-
-      for (const af of attributeFields) {
-        // BOM-only fields never appear in attribute groups
-        if (BOM_ONLY_SCHEMA_KEYS.has(af.schemaKey)) continue;
-        // Fields explicitly hidden from the card (shade, weight)
-        if (HIDDEN_CARD_SCHEMA_KEYS.has(af.schemaKey)) continue;
-
-        // freeText fields (shade, weight, segment…) are always visible.
-        // They CAN be mandatory if the mandatory grid marks them as active — check the grid.
-        if (af.freeText) {
-          const sapKeys = SCHEMA_KEY_TO_ALL_SAP_KEYS[af.schemaKey] ?? [];
-          const isMandatory =
-            gridsReady &&
-            !!catHasAnyGridData &&
-            mandatoryGridReady &&
-            sapKeys.some((sk) => isMandatoryGridFieldActive(effectiveMajCat, sk) === true);
-          if (isMandatory) mandatory.add(af.schemaKey);
-          visible.push({
-            field: af.field,
-            label: af.label,
-            schemaKey: af.schemaKey,
-            group: af.group,
-            groupColor: af.groupColor,
-            values: [],
-            freeText: true,
-            isMandatory,
-          });
-          continue;
-        }
-
-        // Dropdown values come STRICTLY from the Maj-Cat Grid (maj_cat_grid_values).
-        // No global / division-level (attribute_allowed_values) fallback — if the
-        // grid has no values for this category+attribute the dropdown stays empty
-        // (and the field is hidden unless the mandatory grid forces it).
-        const gridExcelAttr = SCHEMA_KEY_TO_EXCEL_ATTR[af.schemaKey];
-        // FAB group: values come from fabric_maj_cat_grid_values (universal, not per-major-category)
-        // Other groups: values come from the garment maj_cat_grid per major category
-        const fabGridVals = af.group === 'FAB' && gridExcelAttr && fabricGridReady
-          ? (fabricGrid[gridExcelAttr] ?? null)
-          : null;
-        const gridOnlyVals = fabGridVals ?? (gridExcelAttr ? getMajCatGridEntry(effectiveMajCat, gridExcelAttr) : null);
-        const values: AttrValue[] = fabGridVals
-          ? fabGridVals.map((v) => ({ shortForm: v.code, fullForm: v.fullForm }))
-          : (gridOnlyVals ?? []).map((v) => ({ shortForm: v as string, fullForm: v as string }));
-
-        if (gridsReady && catHasAnyGridData) {
-          // ── Grids loaded AND category is configured: apply 3-tier filtering ──
-          // Check ALL SAP key aliases — uploaded Excel may use any variant
-          const sapKeys = SCHEMA_KEY_TO_ALL_SAP_KEYS[af.schemaKey] ?? [];
-          const isActiveMandatory =
-            mandatoryGridReady &&
-            sapKeys.some((sk) => isMandatoryGridFieldActive(effectiveMajCat, sk) === true);
-
-          const excelAttr = SCHEMA_KEY_TO_EXCEL_ATTR[af.schemaKey];
-          const hasDropdownValues =
-            gridReady && excelAttr ? (getMajCatGridEntry(effectiveMajCat, excelAttr)?.length ?? 0) > 0 : false;
-
-          if (isActiveMandatory) {
-            // TIER 1: Mandatory — bold + * in card, required for approve
-            mandatory.add(af.schemaKey);
-            visible.push({
-              field: af.field,
-              label: af.label,
-              schemaKey: af.schemaKey,
-              group: af.group,
-              groupColor: af.groupColor,
-              values,
-              freeText: false,
-              isMandatory: true,
-            });
-          } else if (hasDropdownValues) {
-            // TIER 2: Optional — has dropdown values but not mandatory
-            visible.push({
-              field: af.field,
-              label: af.label,
-              schemaKey: af.schemaKey,
-              group: af.group,
-              groupColor: af.groupColor,
-              values,
-              freeText: false,
-              isMandatory: false,
-            });
-          }
-          // TIER 3: Neither → skip (completely hidden for configured categories)
-        } else {
-          // ── Grids not yet loaded OR category has no grid data: graceful fallback ──
-          visible.push({
-            field: af.field,
-            label: af.label,
-            schemaKey: af.schemaKey,
-            group: af.group,
-            groupColor: af.groupColor,
-            values,
-            freeText: false,
-            isMandatory: false,
-          });
-        }
-      }
-
-      return { visibleAttrs: visible, mandatoryKeys: mandatory };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [effectiveMajCat, gridReady, mandatoryGridReady, attributeFields, localValues, fabricGrid, fabricGridReady]);
-
     const [editingField, setEditingField] = useState<string | null>(null);
 
     // Vendor autocomplete state
@@ -602,42 +421,6 @@ const ArticleCard = React.memo(
     const [vendorOptions, setVendorOptions] = useState<AutocompleteOption[]>([]);
     const [vendorSearching, setVendorSearching] = useState(false);
     const vendorDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    // Fetch fabric attribute grid values (M_FAB_DIV, M_YARN, etc.) from fabric_maj_cat_grid_values
-    useEffect(() => {
-      fetchFabricGridValues().then((grid) => {
-        setFabricGrid(grid);
-        setFabricGridReady(true);
-      });
-    }, []);
-
-    // Preload the major-category grid (dropdown values) for THIS article's
-    // category only — not the entire grid. Re-runs if the category changes.
-    useEffect(() => {
-      if (!effectiveMajCat) return;
-      if (isMajCatGridLoadedFor(effectiveMajCat)) {
-        setGridReady(true);
-        return;
-      }
-      setGridReady(false);
-      preloadMajCatGridFor(effectiveMajCat)
-        .then(() => setGridReady(true))
-        .catch(() => setGridReady(true));
-    }, [effectiveMajCat]);
-
-    // Preload the mandatory grid (field visibility / required) for THIS
-    // article's category only — not the entire grid. Re-runs on category change.
-    useEffect(() => {
-      if (!effectiveMajCat) return;
-      if (isMandatoryGridLoadedFor(effectiveMajCat)) {
-        setMandatoryGridReady(true);
-        return;
-      }
-      setMandatoryGridReady(false);
-      preloadMandatoryGridFor(effectiveMajCat)
-        .then(() => setMandatoryGridReady(true))
-        .catch(() => setMandatoryGridReady(true));
-    }, [effectiveMajCat]);
 
     const [failedImg, setFailedImg] = useState(false);
     const [refreshedUrl, setRefreshedUrl] = useState<string | null>(null);

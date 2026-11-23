@@ -5,6 +5,28 @@
 
 ---
 
+## 2026-11-23 — GM pages: FG/Fabric grid calls removed
+
+- GM pages no longer call `/approver/fabric-grid-values`, `/article-config/majcat-grid` or `/article-config/mandatory-grid`. GM uses its own GM grid (`preloadGMGridFor`), which stays.
+- `GMArticleList.tsx`: removed dead FG-style attribute logic (`visibleAttrs` memo, never rendered), the fabric-grid fetch helper, and the maj-cat / mandatory grid preload effects.
+- `GMArticleDetailPage.tsx`: Save & Submit gate no longer runs the FG mandatory-grid loop (it checked FG fields not on the GM card); preload effect now loads only the GM grid. VENDOR NAME / MRP checks unchanged.
+- Frontend only.
+
+## 2026-11-23 — Fabric pages: mandatory grid removed
+
+- Fabric has no mandatory-grid concept, so the Fabric pages no longer call `GET /article-config/mandatory-grid?majorCategory=…`.
+- `FabricArticleList.tsx`: FAB card shows every FAB row (minus Shade/Weight, BOM-only, and the M_FAB_DIV-hidden M_OUNZ/M_GSM); no grid `*`/Required marks. Values still from `fabric_maj_cat_grid_values` (maj-cat grid fallback, unchanged).
+- `FabricArticleDetailPage.tsx`: preload effect + `gridVersion` removed; `getMissingMandatoryFields` keeps only VENDOR NAME / MRP / ARTICLE FASHION TYPE (other Save & Submit checks — Division, Sub-Division, Major Category, MC desc, SRM segment/fashion type — unchanged). FAB attributes are no longer required by the grid.
+- FG / GM pages untouched. Frontend only.
+- Follow-up: garment maj-cat grid call (`GET /article-config/majcat-grid?majorCategory=…`) also removed from the Fabric card. FAB dropdowns now come only from `fabric_maj_cat_grid_values`; `fabric-article/` no longer imports `articleConfigService`.
+
+## 2026-11-23 — Fabric FAB card: M_MVGR_1 auto-filled from M_MVGR_2
+
+- Fabric New + Created pages (`FabricArticleList.tsx`): picking M_MVGR_2 looks up `m_fabric_main_mvgr_mapping` via `GET /approver/fabric-main-mvgr1/:mvgr2` (same as FG FAB card) and saves M_MVGR_1 with it in one update. Created page: both staged for Modify.
+- M_MVGR_1 is now read-only (tooltip "Auto-filled from M_MVGR_2"). Cleared MVGR-2 or no mapping row → MVGR-1 cleared (warning names the missing mapping); lookup error → MVGR-2 saved, MVGR-1 unchanged.
+- Frontend only.
+- Fix: an M_MVGR_2 change sent 2 PUTs to `/approver/fabric-article-data/:id` (+ CORS preflight = 3 in Network tab). The instant `setLocalValues` before the lookup fired the FABRIC ARTICLE DESC auto-save effect. The MVGR-2 branch now marks the new description in `autoSavedFabDescRef`, so only the single combined PUT (MVGR-2 + MVGR-1 + desc) is sent.
+
 ## 2026-11-23 — Fabric FAB card: M_OUNZ / M_GSM hidden by M_FAB_DIV
 
 - Fabric pages (`FabricArticleList.tsx`, new `isFabRowHiddenByDiv`): M_FAB_DIV = K / RFD_K / W / RFD_W → M_OUNZ row hidden; DNM → M_GSM row hidden. Reacts to the unsaved pick too.
