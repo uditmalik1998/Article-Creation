@@ -5,6 +5,13 @@
 
 ---
 
+## 2026-11-23 — Expenses Analytics table: row key = flat row id
+
+- `getDetailedExpenses` (`GET /admin/analytics/expenses/detailed`, reads `extraction_results_flat`) now returns `key = id` instead of `key = job_id`; `jobId` still returned as its own field.
+- Why: Duplicate-button copies have `job_id` NULL (tokens/cost cleared on purpose, so they show 0 / 0 / $0), so several rows shared one key. Backend only.
+- Also: the table and its total count now skip rows with `api_cost` NULL or 0 (`apiCost: { gt: 0 }`) — at the time 12,891 hidden, 66,615 shown. Summary cards unchanged.
+- Also: the table now loads 250 rows per call (was one call of 500). Pager uses the backend `total` (all rows); moving past the loaded rows fetches the next 250 with `offset` and appends. `api.getDetailedExpenses` now returns `{ rows, total }` (only used by `Admin.tsx`).
+
 ## 2026-11-23 — GM pages: FG/Fabric grid calls removed
 
 - GM pages no longer call `/approver/fabric-grid-values`, `/article-config/majcat-grid` or `/article-config/mandatory-grid`. GM uses its own GM grid (`preloadGMGridFor`), which stays.

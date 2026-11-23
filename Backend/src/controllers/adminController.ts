@@ -1336,6 +1336,7 @@ export const getDetailedExpenses = async (req: Request, res: Response): Promise<
     const whereClause = {
       extractionStatus: 'COMPLETED', // Only show completed extractions
       isGeneric: true,               // Exclude variants — they are DB copies, never extracted by Gemini
+      apiCost: { gt: 0 },            // Hide rows with no AI cost (Duplicate copies, manual rows: NULL/0)
     } as const;
 
     // Fetch detailed expense data from flat table (paginated)
@@ -1345,6 +1346,7 @@ export const getDetailedExpenses = async (req: Request, res: Response): Promise<
       take,
       ...(parsedOffset > 0 ? { skip: parsedOffset } : {}),
       select: {
+        id: true,
         jobId: true,
         articleNumber: true,
         imageUrl: true,
@@ -1359,7 +1361,10 @@ export const getDetailedExpenses = async (req: Request, res: Response): Promise<
 
     // Format the data for frontend
     const formattedExpenses = expenses.map((expense) => ({
-      key: expense.jobId,
+      // Row id, not job_id: duplicates have job_id NULL (and KIDS copies can share
+      // a job), which gave several table rows the same key.
+      key: expense.id,
+      jobId: expense.jobId,
       imageName: expense.designNumber || 'Unknown', // display label (image_name column dropped)
       articleNumber: expense.articleNumber, // Include article number
       imageUrl: expense.imageUrl,
