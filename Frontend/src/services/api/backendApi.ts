@@ -387,7 +387,8 @@ export class BackendApiService {
     if (!resp.ok) throw new Error(`Failed to fetch detailed expenses: ${resp.status}`);
     const json = await resp.json();
     if (!json.success) throw new Error(json.error || 'Failed to get detailed expenses');
-    return json.data;
+    // total = all matching rows in the DB (for the pager), rows = this chunk only
+    return { rows: (json.data || []) as any[], total: Number(json.total) || 0 };
   }
 
   async login(email: string, password: string) {

@@ -273,11 +273,21 @@ interface TestApiResult {
 
 const RAW_ARTICLES_MIN_DATE = dayjs('2026-05-27');
 
+// Rows per API call for the Detailed Image Expenses table.
+const DETAILED_CHUNK = 250;
+
 export default function Admin() {
   const navigate = useNavigate();
   const [expenseData, setExpenseData] = useState<any>(null);
   const [imageData, setImageData] = useState<any>(null);
   const [detailedExpenses, setDetailedExpenses] = useState<any[]>([]);
+  // Detailed Image Expenses: rows come 250 per API call; the next 250 load only when
+  // the pager moves past what is already loaded.
+  const [detailedTotal, setDetailedTotal] = useState(0);
+  const [detailedPage, setDetailedPage] = useState(1);
+  const [detailedPageSize, setDetailedPageSize] = useState(20);
+  const [detailedLoadingMore, setDetailedLoadingMore] = useState(false);
+  const detailedFetchingRef = useRef(false);
   const [loading, setLoading] = useState(false);
   // Vendor
   const [vendorStatus, setVendorStatus] = useState<VendorMasterStatus | null>(null);
@@ -2829,16 +2839,45 @@ export default function Admin() {
       const [expenses, images, detailed] = await Promise.all([
         api.getExpenseAnalytics(),
         api.getImageUsageAnalytics(),
-        api.getDetailedExpenses({ limit: 500 }),
+        api.getDetailedExpenses({ limit: DETAILED_CHUNK }),
       ]);
       setExpenseData(expenses);
       setImageData(images);
-      setDetailedExpenses(detailed || []);
+      setDetailedExpenses(detailed.rows);
+      setDetailedTotal(detailed.total);
+      setDetailedPage(1);
     } catch (error) {
       message.error('Failed to load admin data');
       console.error('Error loading admin data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Pager moved: if the new page needs rows not loaded yet, fetch the next 250-row
+  // chunk(s) from offset = rows already loaded, then show the page.
+  const handleDetailedPageChange = async (page: number, pageSize: number) => {
+    setDetailedPage(page);
+    setDetailedPageSize(pageSize);
+    const needed = Math.min(page * pageSize, detailedTotal);
+    if (needed <= detailedExpenses.length || detailedFetchingRef.current) return;
+    detailedFetchingRef.current = true;
+    setDetailedLoadingMore(true);
+    try {
+      let loaded = detailedExpenses;
+      while (loaded.length < needed) {
+        const chunk = await api.getDetailedExpenses({ limit: DETAILED_CHUNK, offset: loaded.length });
+        if (chunk.rows.length === 0) break;
+        loaded = [...loaded, ...chunk.rows];
+        setDetailedTotal(chunk.total);
+      }
+      setDetailedExpenses(loaded);
+    } catch (error) {
+      message.error('Failed to load more expense rows');
+      console.error('Error loading more detailed expenses:', error);
+    } finally {
+      detailedFetchingRef.current = false;
+      setDetailedLoadingMore(false);
     }
   };
 
@@ -5727,8 +5766,15 @@ export default function Admin() {
             {detailedExpenses.length > 0 ? (
               <DataTable
                 columns={detailedExpenseColumns}
-                dataSource={detailedExpenses}
-                pagination={{ pageSize: 20, showSizeChanger: true }}
+                dataSource={detailedExpenses.slice((detailedPage - 1) * detailedPageSize, detailedPage * detailedPageSize)}
+                loading={detailedLoadingMore}
+                pagination={{
+                  current: detailedPage,
+                  pageSize: detailedPageSize,
+                  total: detailedTotal, // server-paged mode: pager counts all rows, not just the loaded ones
+                  showSizeChanger: true,
+                  onChange: handleDetailedPageChange,
+                }}
                 size="small"
                 rowKey="key"
                 scroll={{ x: 800 }}
