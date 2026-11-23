@@ -1147,3 +1147,75 @@ export async function importNationalGridRows(
 }
 
 export default adminApi;
+
+// ═══════════════════════════════════════════════════════
+// FG -> FABRIC MAPPING (read-only, Expense Data audience)
+// ═══════════════════════════════════════════════════════
+
+export interface FgFabricMappingRow {
+  fgArtNo: string;
+  fgArtDesc: string | null;
+  fgDiv: string | null;
+  fgSubDiv: string | null;
+  fgMajCat: string | null;
+  fgVendor: string | null;
+  fgCreatedDate: string | null;
+  fgImageUrl: string | null;
+  bodyArticle: string | null;
+  createdBy: string | null;
+  fabricMapped: 'YES' | 'NO';
+  fabArtNo: string | null;
+  fabArtDesc: string | null;
+  fabDiv: string | null;
+  fabUom: string | null;
+  fabVendor: string | null;
+  fabRate: string | null;
+  fabImageUrl: string | null;
+  fabricInApp: boolean;
+}
+
+export interface FgFabricMappingFilters {
+  search?: string;
+  fgDiv?: string;
+  fgMajCat?: string;
+  fabricMapped?: 'YES' | 'NO';
+  fabDiv?: string;
+  fabVendor?: string;
+  month?: string;
+}
+
+export interface FgFabricMappingResult {
+  rows: FgFabricMappingRow[];
+  total: number;
+  stats: { fgArticles: number; withFabric: number; withoutFabric: number; distinctFabrics: number };
+  options: { fgDivs: string[]; fgMajCats: string[]; fabDivs: string[]; fabVendors: string[]; months: string[] };
+  loadedAt: string;
+}
+
+function fgFabricQuery(filters: FgFabricMappingFilters, extra: Record<string, string> = {}): string {
+  const q = new URLSearchParams(extra);
+  for (const [k, v] of Object.entries(filters)) if (v) q.set(k, v);
+  return q.toString();
+}
+
+export async function getFgFabricMapping(
+  filters: FgFabricMappingFilters,
+  page: number,
+  pageSize: number,
+  fresh = false
+): Promise<FgFabricMappingResult> {
+  const extra: Record<string, string> = { page: String(page), pageSize: String(pageSize) };
+  if (fresh) extra.fresh = '1';
+  const res = await expenseApi.get<{ success: boolean; data: FgFabricMappingResult }>(
+    `/fg-fabric-mapping?${fgFabricQuery(filters, extra)}`
+  );
+  return res.data.data;
+}
+
+export async function downloadFgFabricMapping(filters: FgFabricMappingFilters): Promise<Blob> {
+  const res = await expenseApi.get(`/fg-fabric-mapping/export?${fgFabricQuery(filters)}`, {
+    responseType: 'blob',
+    timeout: 5 * 60 * 1000,
+  });
+  return res.data as Blob;
+}

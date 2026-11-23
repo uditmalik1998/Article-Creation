@@ -15,6 +15,7 @@ import {
   Download,
   ClipboardList,
   History,
+  Link2,
 } from 'lucide-react';
 import {
   Alert,
@@ -2983,6 +2984,15 @@ export default function Admin() {
           >
             <History />
             Audit Log
+          </Button>
+          <Button
+            onClick={() => navigate('/admin/fg-fabric-mapping')}
+            variant="outline"
+            className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+            title="Every approved FG article and the fabric article it uses"
+          >
+            <Link2 />
+            FG to Fabric
           </Button>
           <Button onClick={loadData} disabled={loading} className="bg-white font-bold text-slate-800 hover:bg-slate-100">
             <RotateCw className={loading ? 'animate-spin' : ''} />
