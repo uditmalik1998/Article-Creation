@@ -54,6 +54,9 @@
  *     manages grants/stages/the audit log (those routes require the ADMIN
  *     role directly, unrelated to this file) — only the "approve a specific
  *     request" action lost its automatic ADMIN bypass.
+ *     UPDATE 2026-11-23: reversed at the user's request — ADMIN can act at
+ *     EVERY stage again (canActOnExpenseRequestStage, getExpenseAccess,
+ *     the "Pending my action" filter).
  *   - A stage with no role/division to bind to (an extra stage an admin adds
  *     to any chain) falls back entirely to `expense_access_grants` (see
  *     /admin/expense-access) — specific email addresses ADMIN maintains.
@@ -369,6 +372,11 @@ export async function getExpenseAccess(user: AuthLikeUser, tableKey?: string): P
   // on one request also needs to be THAT request's routed approver.
   const contribution = await getContributionScope(user.email);
   if (contribution.approver.length > 0) approverLevels.add(CONT_APPROVER_STAGE);
+  // ADMIN can approve at every stage (2026-11-23) — see canActOnExpenseRequestStage.
+  if (isAdmin) {
+    for (const st of await getAllApprovalStages()) if (st.isActive) approverLevels.add(st.key);
+    approverLevels.add(CONT_APPROVER_STAGE);
+  }
 
   // First layer: CREATOR/APPROVER/CATEGORY_HEAD get requester rights on every
   // table simply by holding that role — no grant needed. A REQUESTER_LEVEL
@@ -428,13 +436,16 @@ export type ExpenseRequestStageContext = {
  *     still works as an ADDITION on top of the two rules above (e.g.
  *     temporary cover for someone on leave).
  *
- * ADMIN holds no automatic bypass here — see the module doc comment.
+ * ADMIN may act at EVERY stage (Category Head, Planning, MDM, contribution
+ * approver) — turned on 2026-11-23 at the user's request, reversing the
+ * earlier "no ADMIN bypass" rule described in the module doc comment.
  */
 export async function canActOnExpenseRequestStage(
   user: AuthLikeUser,
   request: ExpenseRequestStageContext
 ): Promise<boolean> {
   const role = String(user.role);
+  if (role === 'ADMIN') return true;
   const businessDivision = user.businessDivision ? String(user.businessDivision) : null;
 
   if (

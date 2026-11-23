@@ -38,6 +38,9 @@ interface RowChangeRequestDialogProps {
   onSubmitted: () => void;
   /** 'dialog' (default) is a modal; 'panel' renders the same form inline as a side panel. */
   variant?: 'dialog' | 'panel';
+  /** Delete mode only: propose deleting all these rows at once (one request
+   * per row, same reason and date). `row` may be null when this is set. */
+  bulkRows?: Record<string, any>[];
 }
 
 const MODE_COPY: Record<RowChangeMode, { title: string; submit: string; reasonLabel: string; reasonHint: string }> = {
@@ -78,7 +81,7 @@ function displayValue(value: any): string {
  * never drift from the field, and stays capped to a handful of rows with
  * its own scrollbar.
  */
-function ExistingValuePicker({
+export function ExistingValuePicker({
   value,
   onChange,
   options,
@@ -104,8 +107,10 @@ function ExistingValuePicker({
   }, [open]);
 
   const query = value.trim().toLowerCase();
+  // Every match is listed (was capped at 50, which hid most of the 359 major
+  // categories); the list scrolls.
   const filtered = useMemo(
-    () => (query ? options.filter((o) => o.toLowerCase().includes(query)) : options).slice(0, 50),
+    () => (query ? options.filter((o) => o.toLowerCase().includes(query)) : options),
     [options, query]
   );
 
@@ -119,9 +124,16 @@ function ExistingValuePicker({
           setOpen(true);
         }}
         onClick={() => setOpen(true)}
+        onFocus={() => setOpen(true)}
+        className="bg-white focus-visible:border-slate-600 focus-visible:ring-2 focus-visible:ring-slate-900/10 dark:bg-slate-900"
       />
       {open && (
-        <div className="absolute z-50 mt-1 max-h-48 w-full overflow-y-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md">
+        <div className="absolute z-50 mt-1 max-h-64 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white p-1 text-slate-900 shadow-lg dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+          {filtered.length > 0 && (
+            <div className="sticky top-0 z-10 -mx-1 -mt-1 mb-1 border-b border-slate-100 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-500 dark:border-slate-800 dark:bg-slate-900">
+              {query ? `${filtered.length} of ${options.length} match` : `${options.length} values`}
+            </div>
+          )}
           {filtered.length === 0 ? (
             <div className="px-2 py-1.5 text-sm text-muted-foreground">
               {loading ? 'Loading…' : 'No match — you can still type a new value.'}
@@ -136,7 +148,7 @@ function ExistingValuePicker({
                   onChange(opt);
                   setOpen(false);
                 }}
-                className="w-full rounded px-2 py-1.5 text-left text-sm hover:bg-accent"
+                className={`w-full rounded px-2 py-1.5 text-left text-sm hover:bg-slate-100 dark:hover:bg-slate-800 ${opt === value ? 'bg-slate-100 font-semibold dark:bg-slate-800' : ''}`}
               >
                 {opt}
               </button>
@@ -157,8 +169,12 @@ export function RowChangeRequestDialog({
   row,
   onSubmitted,
   variant = 'dialog',
+  bulkRows,
 }: RowChangeRequestDialogProps) {
+  const isBulk = mode === 'delete' && !!bulkRows && bulkRows.length > 0;
   const editableColumns = useMemo(() => config.columns.filter((c) => c.editable !== false), [config]);
+  const rowLabel = (r: Record<string, any>) =>
+    config.columns.filter((c) => c.dataIndex !== 'id').slice(0, 3).map((c) => displayValue(r[c.dataIndex])).join(' · ');
   const requiredKeys = useMemo(() => new Set(config.requiredOnCreate ?? []), [config]);
   const pickColumns = useMemo(() => editableColumns.filter((c) => c.pickFromExisting), [editableColumns]);
 
@@ -228,9 +244,16 @@ export function RowChangeRequestDialog({
     });
   };
 
-  if (mode !== 'create' && !row) return null;
+  if (mode !== 'create' && !row && !isBulk) return null;
 
-  const copy = MODE_COPY[mode];
+  const copy = isBulk
+    ? {
+        title: `Propose Deleting ${bulkRows!.length} Rows`,
+        submit: `Submit ${bulkRows!.length} Deletions for Approval`,
+        reasonLabel: 'Reason for deleting these rows (required)',
+        reasonHint: 'Why should these rows be removed?',
+      }
+    : MODE_COPY[mode];
 
   const submit = async () => {
     if (!reason.trim()) {
@@ -282,6 +305,28 @@ export function RowChangeRequestDialog({
     }
 
     setSubmitting(true);
+    if (isBulk) {
+      // One request per row, in order; a failure (e.g. a row that already has
+      // a pending request) doesn't stop the rest.
+      let ok = 0;
+      const failed: string[] = [];
+      for (const r of bulkRows!) {
+        try {
+          await createExpenseDeleteRequest(tableKey, String(r[config.rowKey]), meta);
+          ok += 1;
+        } catch (err: any) {
+          failed.push(`${rowLabel(r)}: ${err?.response?.data?.error || 'failed'}`);
+        }
+      }
+      setSubmitting(false);
+      if (ok > 0) message.success(`${ok} deletion request${ok === 1 ? '' : 's'} submitted — now pending approval.`);
+      if (failed.length > 0) message.error(`${failed.length} not submitted — ${failed.slice(0, 3).join('; ')}${failed.length > 3 ? '…' : ''}`);
+      if (ok > 0) {
+        onOpenChange(false);
+        onSubmitted();
+      }
+      return;
+    }
     try {
       if (mode === 'create') {
         await createExpenseAddRequest(tableKey, { ...meta, values: payloadCheck! });
@@ -302,7 +347,24 @@ export function RowChangeRequestDialog({
 
   const body = (
         <div className="space-y-3 mt-2">
-          {mode === 'delete' ? (
+          {isBulk ? (
+            <div className="space-y-3">
+              <div className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                <span>
+                  These {bulkRows!.length} rows will be permanently removed once MDM gives final approval. Each becomes its own
+                  request with the reason and date below. Nothing is deleted before then.
+                </span>
+              </div>
+              <ul className="max-h-64 divide-y overflow-y-auto rounded-md border text-sm">
+                {bulkRows!.map((r) => (
+                  <li key={String(r[config.rowKey])} className="truncate px-2.5 py-1.5" title={rowLabel(r)}>
+                    {rowLabel(r)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : mode === 'delete' ? (
             <div className="space-y-3">
               <div className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
@@ -414,7 +476,8 @@ export function RowChangeRequestDialog({
         <div className="flex items-start gap-2 border-b border-border px-4 py-3">
           <div className="min-w-0 flex-1">
             <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">{copy.title}</span>
-            {row && (
+            {isBulk && <p className="m-0 text-[13px] font-semibold">{bulkRows!.length} rows selected</p>}
+            {row && !isBulk && (
               <p className="m-0 truncate text-[13px] font-semibold" title={config.columns.slice(0, 3).map((c) => displayValue(row[c.dataIndex])).join(' · ')}>
                 {config.columns.filter((c) => c.dataIndex !== 'id').slice(0, 2).map((c) => displayValue(row[c.dataIndex])).join(' · ')}
               </p>
@@ -432,12 +495,19 @@ export function RowChangeRequestDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{copy.title}</DialogTitle>
+      <DialogContent className="flex max-h-[88vh] max-w-xl flex-col gap-0 overflow-hidden p-0">
+        <DialogHeader className="space-y-1 border-b border-slate-200 px-6 pb-3.5 pt-5 text-left dark:border-slate-700">
+          <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-slate-500">{copy.title}</span>
+          <DialogTitle className="break-words pr-8 text-[17px] font-bold leading-snug">
+            {isBulk
+              ? `${bulkRows!.length} rows selected`
+              : row
+                ? config.columns.filter((c) => c.dataIndex !== 'id').slice(0, 3).map((c) => displayValue(row[c.dataIndex])).join(' · ')
+                : config.title.split(' (')[0]}
+          </DialogTitle>
         </DialogHeader>
-        {body}
-        <DialogFooter>{actions}</DialogFooter>
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-5">{body}</div>
+        <DialogFooter className="border-t border-slate-200 bg-slate-50 px-6 py-3 dark:border-slate-700 dark:bg-slate-900/60">{actions}</DialogFooter>
       </DialogContent>
     </Dialog>
   );

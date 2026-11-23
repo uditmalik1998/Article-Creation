@@ -320,6 +320,7 @@ router.delete('/expense-approval-stages/:id',    h(expenseAccessController.delet
 // ORDER MATTERS: the bare list must come before /:requestId would swallow it.
 // ═══════════════════════════════════════════════════════
 router.get('/expense-audit-log',              h(expenseAuditLogController.getExpenseAuditLog));
+router.get('/expense-audit-log/requests',     h(expenseAuditLogController.getExpenseAuditRequests));
 router.get('/expense-audit-log/:requestId',   h(expenseAuditLogController.getExpenseAuditLogForRequest));
 
 // ═══════════════════════════════════════════════════════

@@ -1,13 +1,10 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
+import { useQueries, useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import { ArrowLeft, Search, ChevronRight } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, ArrowRight, CalendarDays, Check, ChevronRight, Clock, History, Search, X } from 'lucide-react';
 import {
-  Badge,
   Button,
-  Card,
-  CardContent,
   DataTable,
   Dialog,
   DialogContent,
@@ -15,17 +12,12 @@ import {
   DialogTitle,
   DialogFooter,
   Input,
-  Label,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
   Switch,
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
   Textarea,
   type DataTableColumn,
 } from '@/shared/components/ui-tw';
@@ -57,17 +49,6 @@ function formatValue(v: any): string {
   return String(v);
 }
 
-const TERMINAL_STATUS_META: Record<'APPROVED' | 'REJECTED', { label: string; className: string }> = {
-  APPROVED: { label: 'Approved', className: 'bg-green-100 text-green-700 border-green-200' },
-  REJECTED: { label: 'Rejected', className: 'bg-red-100 text-red-700 border-red-200' },
-};
-
-const OPERATION_META: Record<ExpenseChangeOperation, { label: string; className: string }> = {
-  CREATE: { label: 'Add Row', className: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
-  UPDATE: { label: 'Edit', className: 'bg-slate-100 text-slate-700 border-slate-200' },
-  DELETE: { label: 'Delete Row', className: 'bg-red-100 text-red-700 border-red-200' },
-};
-
 /** The full stage catalog spans every table's chain at once — a same-named
  * key (e.g. 'CATEGORY_HEAD') appears once per chain. This narrows it down
  * to just the one `tableKey` actually walks: its own dedicated rows if it
@@ -82,62 +63,69 @@ function chainForTable(stages: ExpenseApprovalStage[], tableKey: string): Expens
 /** Contribution % requests walk their own chain (paired approver -> MDM),
  * not their table's — mirrors approvalChainKey in gridContributionService.ts. */
 function chainKeyOf(request: ExpenseChangeRequest): string {
-  return request.requestKind ? 'major-category-grid#contribution' : request.tableKey;
+  return request.requestKind === 'BGT_CONT' || request.requestKind === 'PD_CONT' ? 'major-category-grid#contribution' : request.tableKey;
 }
 
 const CONTRIBUTION_REQUEST_KIND: Record<'BGT_CONT' | 'PD_CONT', 'BGT' | 'PD'> = { BGT_CONT: 'BGT', PD_CONT: 'PD' };
 
-/** PENDING has no fixed label — it shows the CURRENT stage's own name, which
- * only exists once the stage catalog has loaded. */
-function StatusBadge({ request, stages }: { request: ExpenseChangeRequest; stages: ExpenseApprovalStage[] }) {
-  if (request.status === 'APPROVED' || request.status === 'REJECTED') {
-    const meta = TERMINAL_STATUS_META[request.status];
-    return <Badge className={meta.className}>{meta.label}</Badge>;
-  }
-  const stageLabel =
-    chainForTable(stages, chainKeyOf(request)).find((s) => s.key === request.currentStageKey)?.label ?? request.currentStageKey ?? '—';
-  return <Badge className="bg-amber-100 text-amber-700 border-amber-200">Pending: {stageLabel}</Badge>;
+/** Rows of a BULK_ADD request (changes.__bulkRows.new). */
+function bulkRowsOf(request: { changes: Record<string, any> | null }): Record<string, any>[] {
+  const rows = (request.changes as any)?.__bulkRows?.new;
+  return Array.isArray(rows) ? rows : [];
 }
 
-function OperationBadge({ operation }: { operation: ExpenseChangeOperation }) {
-  const meta = OPERATION_META[operation] ?? OPERATION_META.UPDATE;
-  return <Badge className={meta.className}>{meta.label}</Badge>;
+/** A bulk add, grouped by its second column (Major Category Grid: attribute → values). */
+function BulkRowsView({ request }: { request: ExpenseChangeRequest }) {
+  const rows = bulkRowsOf(request);
+  const cols = (EXPENSE_TABLE_CONFIGS[request.tableKey]?.columns ?? []).filter((c) => c.editable !== false && c.dataIndex !== 'id');
+  const keyCol = cols[0]?.dataIndex;
+  const groupCol = cols[1]?.dataIndex;
+  const valueCol = cols[2]?.dataIndex;
+  const keys = [...new Set(rows.map((r) => String(r[keyCol ?? ''] ?? '')))];
+  const groups = new Map<string, string[]>();
+  for (const r of rows) {
+    const g = String(r[groupCol ?? ''] ?? '');
+    if (!groups.has(g)) groups.set(g, []);
+    groups.get(g)!.push(valueCol ? String(r[valueCol] ?? '') : '');
+  }
+  return (
+    <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
+      <div className="flex flex-wrap items-center gap-2 bg-slate-50 px-3 py-2 text-[12px] dark:bg-slate-800/60">
+        <span className="font-semibold">{rows.length} new rows</span>
+        {keyCol && keys.length > 0 && (
+          <span className="text-slate-500">
+            {cols[0].title}: <span className="font-mono font-semibold text-slate-800 dark:text-slate-200">{keys.join(', ')}</span>
+          </span>
+        )}
+        <span className="ml-auto text-slate-500">{groups.size} {cols[1]?.title?.toLowerCase() ?? 'groups'}</span>
+      </div>
+      <div className="max-h-72 divide-y divide-slate-100 overflow-y-auto dark:divide-slate-800">
+        {[...groups.entries()].map(([g, vals]) => (
+          <div key={g} className="px-3 py-2">
+            <div className="flex items-baseline gap-2">
+              <span className="font-mono text-[12.5px] font-bold">{g}</span>
+              <span className="text-[11px] text-slate-500">{vals.length}</span>
+            </div>
+            {valueCol && (
+              <div className="mt-1 flex flex-wrap gap-1">
+                {vals.map((v, i) => (
+                  <span key={`${v}-${i}`} className="rounded bg-emerald-50 px-1.5 py-0.5 font-mono text-[11.5px] font-semibold text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-300">
+                    {v}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
-/** A contribution % request shows its column (Bgt / Pd Cont%) instead of "Edit". */
-function RequestTypeBadge({ request }: { request: ExpenseChangeRequest }) {
-  if (request.requestKind) {
-    return (
-      <Badge className="bg-sky-100 text-sky-700 border-sky-200">{CONTRIBUTION_KIND_LABEL[CONTRIBUTION_REQUEST_KIND[request.requestKind]]}</Badge>
-    );
-  }
-  return <OperationBadge operation={request.operation} />;
-}
 
 const BUSINESS_DIVISION_LABELS: Record<AdminUserBusinessDivision, string> = {
   MENS: 'Mens', KIDS: 'Kids', LADIES: 'Ladies', PD: 'PD', MDM: 'MDM',
 };
-
-/** Which Category Head this request is routed to — the whole point of the
- * business-division segregation. Absent for requesters with no division set
- * (their request has no automatic Category Head match, see the backend). */
-function BusinessDivisionBadge({ division }: { division: AdminUserBusinessDivision | null }) {
-  if (!division) return <span className="text-muted-foreground italic text-xs">No division</span>;
-  return <Badge className="bg-indigo-100 text-indigo-700 border-indigo-200">{BUSINESS_DIVISION_LABELS[division]}</Badge>;
-}
-
-/** The requester's deadline, flagged red once it has passed on a still-open request. */
-function DueDate({ request, className }: { request: ExpenseChangeRequest; className?: string }) {
-  if (!request.dueDate) return <span className="text-muted-foreground italic text-xs">—</span>;
-  const due = dayjs(request.dueDate);
-  const overdue = request.status === 'PENDING' && due.endOf('day').isBefore(dayjs());
-  return (
-    <span className={`text-xs whitespace-nowrap ${overdue ? 'font-semibold text-red-600' : ''} ${className ?? ''}`}>
-      {due.format('YYYY-MM-DD')}
-      {overdue ? ' · overdue' : ''}
-    </span>
-  );
-}
 
 type TabKey = 'pending-mine' | 'mine' | 'overdue' | 'all';
 
@@ -175,13 +163,15 @@ function DetailDialog({ request, stages, onClose, onActed }: DetailDialogProps) 
   // CONT_APPROVER (contribution %) is narrower still: only the approver the
   // request was routed to, by email.
   const myEmail = (getCurrentUser()?.email ?? '').trim().toLowerCase();
+  // ADMIN can act at every stage (2026-11-23) — mirrors the server.
   const canAct =
     !!request &&
     request.status === 'PENDING' &&
     !!request.currentStageKey &&
-    !!access?.approvableStageKeys.includes(request.currentStageKey) &&
-    (request.currentStageKey !== 'CATEGORY_HEAD' || access?.businessDivision === request.requesterBusinessDivision) &&
-    (request.currentStageKey !== 'CONT_APPROVER' || (request.routedApproverEmail ?? '').toLowerCase() === myEmail);
+    (!!access?.isAdmin ||
+      (!!access?.approvableStageKeys.includes(request.currentStageKey) &&
+        (request.currentStageKey !== 'CATEGORY_HEAD' || access?.businessDivision === request.requesterBusinessDivision) &&
+        (request.currentStageKey !== 'CONT_APPROVER' || (request.routedApproverEmail ?? '').toLowerCase() === myEmail)));
   // A deletion has nothing to edit — only a row to remove; a contribution
   // block is approved or rejected as a whole (the server refuses edits).
   const canEditValues = canAct && request?.operation !== 'DELETE' && !request?.requestKind;
@@ -237,59 +227,150 @@ function DetailDialog({ request, stages, onClose, onActed }: DetailDialogProps) 
   // An add has no "current" side and a delete has no "proposed" side, so only
   // an edit earns the three-column before/after layout.
   const isUpdate = request.operation === 'UPDATE';
-  const changeHeading = request.requestKind
+  const isDelete = request.operation === 'DELETE';
+  const isBulk = request.requestKind === 'BULK_ADD';
+  const changeHeading = isBulk
+    ? 'New rows (approved or rejected together)'
+    : request.requestKind
     ? `Proposed ${CONTRIBUTION_KIND_LABEL[CONTRIBUTION_REQUEST_KIND[request.requestKind]]} (by value)`
-    : request.operation === 'CREATE' ? 'New Row' : request.operation === 'DELETE' ? 'Row To Be Deleted' : 'Proposed Changes';
+    : request.operation === 'CREATE' ? 'New row' : isDelete ? 'Row to be deleted' : 'Proposed changes';
+  const shortTable = tableTitle.split(' (')[0];
+  const changeEntries = Object.entries(request.changes).filter(([f]) => !['id', 'createdAt', 'created_at', 'updatedAt', 'updated_at'].includes(f));
+
+  // Approval path: Requested → this table's active stages → Applied.
+  const activeStages = tableStages.filter((s) => s.isActive);
+  const rejectedEntry = request.approvalTrail.find((e) => e.action === 'REJECT');
+  const path: { label: string; state: 'done' | 'current' | 'rejected' | 'todo'; you?: boolean }[] = [{ label: 'Requested', state: 'done' }];
+  for (const s of activeStages) {
+    const approved = request.approvalTrail.some((e) => e.action === 'APPROVE' && e.stageKey === s.key);
+    const rejected = rejectedEntry?.stageKey === s.key;
+    path.push({
+      label: s.label,
+      state: rejected ? 'rejected' : approved || request.status === 'APPROVED' ? 'done' : request.status === 'PENDING' && request.currentStageKey === s.key ? 'current' : 'todo',
+      you: canAct && request.currentStageKey === s.key,
+    });
+  }
+  path.push({ label: 'Applied', state: request.status === 'APPROVED' ? 'done' : 'todo' });
+
+  const sectionLabel = 'mb-1.5 text-[10.5px] font-bold uppercase tracking-wider text-slate-500';
+  const editedCount = canEditValues
+    ? changeEntries.filter(([f, d]) => String(d.new ?? '') !== String(editedValues[f] ?? '')).length
+    : 0;
 
   return (
     <Dialog open={!!request} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {tableTitle}
-            {request.rowLabel ? ` — ${request.rowLabel}` : ''}
+      <DialogContent className="flex max-h-[88vh] max-w-2xl flex-col gap-0 overflow-hidden p-0">
+        {/* Header */}
+        <DialogHeader className="space-y-2 border-b border-slate-200 px-6 pb-4 pt-5 text-left dark:border-slate-700">
+          <div className="flex items-center gap-2 pr-8">
+            <TypePill request={request} />
+            <span className="truncate text-[13px] font-semibold text-slate-600 dark:text-slate-300">{shortTable}</span>
+          </div>
+          <DialogTitle className="break-words pr-8 font-mono text-[18px] font-bold leading-snug">
+            {request.rowLabel || (request.rowId ? `Row ${request.rowId}` : 'New row')}
           </DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-4 mt-2 text-sm">
-          <div className="flex flex-wrap items-center gap-2">
-            <RequestTypeBadge request={request} />
-            <StatusBadge request={request} stages={stages} />
-            <BusinessDivisionBadge division={request.requesterBusinessDivision} />
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+            <StatusPill request={request} stages={stages} />
             {request.dueDate && (
-              <span className="text-xs text-muted-foreground">
-                Needed by <DueDate request={request} />
+              <span className="inline-flex items-center gap-1 text-[12px] text-slate-500">
+                Needed by <NeededBy request={request} />
               </span>
             )}
           </div>
+        </DialogHeader>
 
+        {/* Body */}
+        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-5 text-sm">
+          {/* Who + why */}
+          <div className="flex gap-3 rounded-xl bg-slate-50 p-3.5 dark:bg-slate-800/50">
+            <span
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-200 text-[12px] font-bold text-slate-700 dark:bg-slate-700 dark:text-slate-200"
+              aria-hidden="true"
+            >
+              {initialsOf(request.requestedByName)}
+            </span>
+            <div className="min-w-0">
+              <div className="text-[13px]">
+                <span className="font-semibold">{request.requestedByName}</span>
+                <span className="text-slate-500">
+                  {' '}· {request.requesterBusinessDivision ? `${BUSINESS_DIVISION_LABELS[request.requesterBusinessDivision]} division` : 'No division'} ·{' '}
+                  {dayjs(request.requestedAt).format('D MMM YYYY, HH:mm')}
+                </span>
+              </div>
+              <div className="truncate text-[11.5px] text-slate-400">{request.requestedByEmail}</div>
+              <p className="mt-1.5 break-words text-[14px] text-slate-900 dark:text-slate-100">“{request.reason}”</p>
+            </div>
+          </div>
+
+          {/* Approval path */}
           <div>
-            <div className="font-semibold mb-1.5">{changeHeading}</div>
-            {canEditValues && (
-              <p className="mb-1.5 text-xs text-muted-foreground">
-                You can adjust the proposed values below before approving.
+            <div className={sectionLabel}>Approval path</div>
+            <ol className="flex flex-wrap items-center gap-y-2" aria-label="Approval path">
+              {path.map((p, i) => (
+                <li key={`${p.label}-${i}`} className="flex items-center">
+                  <span
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-[1.5px] text-[10px] font-bold ${
+                      p.state === 'done'
+                        ? 'border-slate-800 bg-slate-800 text-white dark:border-slate-200 dark:bg-slate-200 dark:text-slate-900'
+                        : p.state === 'current'
+                          ? 'border-amber-500 bg-amber-100 text-amber-800'
+                          : p.state === 'rejected'
+                            ? 'border-red-500 bg-red-100 text-red-700'
+                            : 'border-slate-300 bg-white text-slate-400 dark:border-slate-600 dark:bg-slate-900'
+                    }`}
+                  >
+                    {p.state === 'done' ? <Check className="h-3 w-3" strokeWidth={3} /> : p.state === 'rejected' ? <X className="h-3 w-3" strokeWidth={3} /> : i + 1}
+                  </span>
+                  <span
+                    className={`ml-1.5 whitespace-nowrap text-[12px] font-semibold ${
+                      p.state === 'todo' ? 'text-slate-400' : p.state === 'rejected' ? 'text-red-700' : p.state === 'current' ? 'text-amber-800' : 'text-slate-900 dark:text-slate-100'
+                    }`}
+                  >
+                    {p.label}
+                    {p.you ? ' (you)' : ''}
+                  </span>
+                  {i < path.length - 1 && <span aria-hidden="true" className="mx-2 h-0.5 w-6 rounded bg-slate-200 dark:bg-slate-700" />}
+                </li>
+              ))}
+            </ol>
+            {request.routedApproverEmail && (
+              <p className="mt-1.5 text-[11.5px] text-slate-500">
+                Routed to <span className="font-medium text-slate-700 dark:text-slate-300">{request.routedApproverEmail}</span>, then MDM.
               </p>
             )}
-            <div className="rounded-md border divide-y">
+          </div>
+
+          {/* Changes */}
+          <div>
+            <div className="mb-1.5 flex items-baseline justify-between gap-2">
+              <span className="text-[10.5px] font-bold uppercase tracking-wider text-slate-500">{changeHeading}</span>
+              {canEditValues && (
+                <span className="text-[11.5px] text-slate-500">
+                  {editedCount > 0 ? `${editedCount} value${editedCount === 1 ? '' : 's'} adjusted` : 'You can adjust values before approving'}
+                </span>
+              )}
+            </div>
+            {isBulk ? <BulkRowsView request={request} /> : (
+            <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
               <div
-                className={`grid ${isUpdate ? 'grid-cols-3' : 'grid-cols-2'} gap-2 p-2 text-xs font-medium text-muted-foreground bg-muted/40`}
+                className={`grid ${isUpdate ? 'grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.3fr)]' : 'grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]'} gap-3 bg-slate-50 px-3 py-2 text-[10.5px] font-bold uppercase tracking-wider text-slate-500 dark:bg-slate-800/60`}
               >
                 <span>{request.requestKind ? 'Value' : 'Field'}</span>
-                {isUpdate ? (
-                  <>
-                    <span>Current</span>
-                    <span>Proposed</span>
-                  </>
-                ) : (
-                  <span>Value</span>
-                )}
+                {isUpdate && <span>Current</span>}
+                <span>{isUpdate ? 'Proposed' : isDelete ? 'Value being removed' : 'Value'}</span>
               </div>
-              {Object.entries(request.changes).map(([field, diff]) => {
+              {changeEntries.map(([field, diff]) => {
                 const col = columnMeta(field);
+                const adjusted = canEditValues && String(diff.new ?? '') !== String(editedValues[field] ?? '');
                 return (
-                  <div key={field} className={`grid ${isUpdate ? 'grid-cols-3' : 'grid-cols-2'} gap-2 p-2 items-center`}>
-                    <span className="text-muted-foreground">{col?.title ?? field}</span>
-                    {isUpdate && <span className="text-red-600 break-all">{formatValue(diff.old)}</span>}
+                  <div
+                    key={field}
+                    className={`grid ${isUpdate ? 'grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.3fr)]' : 'grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]'} items-center gap-3 border-t border-slate-100 px-3 py-2 dark:border-slate-800`}
+                  >
+                    <span className="truncate text-[13px] text-slate-600 dark:text-slate-400" title={field}>{col?.title ?? field}</span>
+                    {isUpdate && (
+                      <span className="break-all font-mono text-[12.5px] text-red-700 line-through decoration-red-300 dark:text-red-400">{formatValue(diff.old)}</span>
+                    )}
                     {canEditValues ? (
                       col?.type === 'boolean' ? (
                         <div className="flex items-center gap-2">
@@ -297,89 +378,228 @@ function DetailDialog({ request, stages, onClose, onActed }: DetailDialogProps) 
                             checked={editedValues[field] === 'true'}
                             onCheckedChange={(checked) => setEditedValues((v) => ({ ...v, [field]: checked ? 'true' : 'false' }))}
                           />
-                          <span className="text-xs text-muted-foreground">{editedValues[field] === 'true' ? 'Yes' : 'No'}</span>
+                          <span className="text-[12.5px] font-semibold">{editedValues[field] === 'true' ? 'Yes' : 'No'}</span>
+                          {adjusted && <span className="text-[11px] font-semibold text-amber-700">adjusted</span>}
                         </div>
                       ) : (
-                        <Input
-                          className="h-8"
-                          value={editedValues[field] ?? ''}
-                          onChange={(e) => setEditedValues((v) => ({ ...v, [field]: e.target.value }))}
-                        />
+                        <div className="flex items-center gap-1.5">
+                          <Input
+                            aria-label={col?.title ?? field}
+                            className={`h-8 bg-white font-mono text-[12.5px] focus-visible:border-slate-600 focus-visible:ring-slate-900/10 dark:bg-slate-900 ${adjusted ? 'border-amber-400' : ''}`}
+                            value={editedValues[field] ?? ''}
+                            onChange={(e) => setEditedValues((v) => ({ ...v, [field]: e.target.value }))}
+                          />
+                          {adjusted && (
+                            <button
+                              type="button"
+                              onClick={() => setEditedValues((v) => ({ ...v, [field]: diff.new == null ? '' : String(diff.new) }))}
+                              className="shrink-0 rounded px-1.5 py-0.5 text-[11px] font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                              title={`Back to the requested value: ${formatValue(diff.new)}`}
+                            >
+                              Undo
+                            </button>
+                          )}
+                        </div>
                       )
                     ) : (
-                      <span className={`break-all ${request.operation === 'DELETE' ? 'text-red-600' : 'text-green-600'}`}>
-                        {formatValue(request.operation === 'DELETE' ? diff.old : diff.new)}
+                      <span
+                        className={`break-all font-mono text-[12.5px] font-semibold ${
+                          isDelete ? 'text-red-700 dark:text-red-400' : 'text-emerald-700 dark:text-emerald-400'
+                        }`}
+                      >
+                        {formatValue(isDelete ? diff.old : diff.new)}
                       </span>
                     )}
                   </div>
                 );
               })}
             </div>
-          </div>
-
-          <div>
-            <div className="font-semibold mb-1">Reason</div>
-            <p className="text-muted-foreground">{request.reason}</p>
-          </div>
-
-          <div className="space-y-1.5 text-xs text-muted-foreground">
-            <div>
-              Requested by <span className="font-medium text-foreground">{request.requestedByName}</span> ({request.requestedByEmail}) ·{' '}
-              {dayjs(request.requestedAt).format('YYYY-MM-DD HH:mm')}
-            </div>
-            {request.routedApproverEmail && (
-              <div>
-                Routed to approver <span className="font-medium text-foreground">{request.routedApproverEmail}</span>, then MDM
-              </div>
             )}
-            {request.approvalTrail.map((entry, i) => (
-              <div key={i}>
-                {entry.action === 'APPROVE' ? 'Approved' : 'Rejected'} at{' '}
-                <span className="font-medium text-foreground">{entry.stageLabel}</span> by{' '}
-                <span className="font-medium text-foreground">{entry.byName}</span> · {dayjs(entry.at).format('YYYY-MM-DD HH:mm')}
-                {entry.comment ? ` — "${entry.comment}"` : ''}
-                {entry.editedFields && entry.editedFields.length > 0
-                  ? ` (adjusted: ${entry.editedFields.map((f) => columnMeta(f)?.title ?? f).join(', ')})`
-                  : ''}
-              </div>
-            ))}
-            {request.operation === 'CREATE' && request.appliedRowId && (
-              <div>
-                Created as row <span className="font-mono text-foreground">{request.appliedRowId}</span>
-              </div>
-            )}
-          </div>
-
-          {canAct && (
-            <div className="space-y-1.5 pt-2 border-t">
-              <Label className="text-xs">Review comment (required to reject)</Label>
-              <Textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={2} />
-              <p className="text-xs text-muted-foreground">
-                {isLastStage
-                  ? 'Approving here applies this change to the master straight away.'
-                  : 'Approving passes this on to the next stage of the chain.'}
+            {isDelete && (
+              <p className="mt-1.5 flex items-center gap-1.5 text-[11.5px] text-red-700">
+                <AlertTriangle className="h-3 w-3" /> This row is removed from the master once the last stage approves.
               </p>
+            )}
+          </div>
+
+          {/* History */}
+          {(request.approvalTrail.length > 0 || (request.operation === 'CREATE' && request.appliedRowId)) && (
+            <div>
+              <div className={sectionLabel}>History</div>
+              <ul className="space-y-2">
+                {request.approvalTrail.map((entry, i) => (
+                  <li key={i} className="flex gap-2.5">
+                    <span
+                      className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
+                        entry.action === 'APPROVE' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                      }`}
+                    >
+                      {entry.action === 'APPROVE' ? <Check className="h-3 w-3" strokeWidth={3} /> : <X className="h-3 w-3" strokeWidth={3} />}
+                    </span>
+                    <div className="min-w-0 text-[12.5px]">
+                      <div>
+                        <span className="font-semibold">{entry.byName}</span>{' '}
+                        <span className="text-slate-500">
+                          {entry.action === 'APPROVE' ? 'approved' : 'rejected'} at {entry.stageLabel} · {dayjs(entry.at).format('D MMM YYYY, HH:mm')}
+                        </span>
+                      </div>
+                      {entry.comment && <p className="break-words text-slate-700 dark:text-slate-300">“{entry.comment}”</p>}
+                      {entry.editedFields && entry.editedFields.length > 0 && (
+                        <p className="text-[11.5px] text-amber-700">
+                          Adjusted: {entry.editedFields.map((f) => columnMeta(f)?.title ?? f).join(', ')}
+                        </p>
+                      )}
+                    </div>
+                  </li>
+                ))}
+                {request.operation === 'CREATE' && request.appliedRowId && (
+                  <li className="text-[12px] text-slate-500">
+                    Created as row <span className="font-mono text-slate-800 dark:text-slate-200">{request.appliedRowId}</span>
+                  </li>
+                )}
+              </ul>
             </div>
           )}
         </div>
 
-        {canAct && (
-          <DialogFooter>
-            <Button variant="outline" onClick={() => act('REJECT')} disabled={submitting}>
-              Reject
-            </Button>
-            <Button onClick={() => act('APPROVE')} disabled={submitting}>
-              {submitting ? 'Submitting…' : isLastStage ? 'Approve & Apply' : 'Approve'}
-            </Button>
-          </DialogFooter>
-        )}
+        {/* Footer */}
+        <div className="border-t border-slate-200 bg-slate-50 px-6 py-3.5 dark:border-slate-700 dark:bg-slate-900/60">
+          {canAct ? (
+            <div className="space-y-2.5">
+              <label className="block">
+                <span className="mb-1 block text-[11.5px] font-semibold text-slate-600 dark:text-slate-300">
+                  Comment <span className="font-normal text-slate-400">(needed to reject)</span>
+                </span>
+                <Textarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  rows={2}
+                  placeholder="A note for the requester…"
+                  className="resize-none bg-white text-[13px] focus-visible:border-slate-600 focus-visible:ring-slate-900/10 dark:bg-slate-900"
+                />
+              </label>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="mr-auto text-[11.5px] text-slate-500">
+                  {isLastStage ? 'Approving applies this change to the master straight away.' : 'Approving passes it to the next stage.'}
+                </span>
+                <Button
+                  variant="outline"
+                  onClick={() => act('REJECT')}
+                  disabled={submitting}
+                  className="border-red-200 bg-white text-red-700 hover:bg-red-50 hover:text-red-800"
+                >
+                  <X className="h-4 w-4" /> Reject
+                </Button>
+                <Button
+                  onClick={() => act('APPROVE')}
+                  disabled={submitting}
+                  className="bg-slate-800 text-white hover:bg-slate-700 dark:bg-slate-200 dark:text-slate-900 dark:hover:bg-slate-300"
+                >
+                  <Check className="h-4 w-4" />
+                  {submitting ? 'Submitting…' : isLastStage ? 'Approve & apply' : 'Approve'}
+                  {!submitting && editedCount > 0 ? ` (${editedCount} adjusted)` : ''}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[11.5px] text-slate-500">
+                {request.status === 'PENDING' ? 'You can’t act on this stage — it’s waiting for someone else.' : 'This request is closed.'}
+              </span>
+              <Button variant="outline" onClick={onClose} className="bg-white dark:bg-slate-900">
+                Close
+              </Button>
+            </div>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
 }
 
+/** Option A (picked 2026-11-23) cell helpers — table view only; the detail
+ * dialog keeps its own badges above. */
+const TYPE_PILL: Record<ExpenseChangeOperation, string> = {
+  CREATE: 'border-emerald-200 text-emerald-700 dark:border-emerald-800 dark:text-emerald-400',
+  UPDATE: 'border-slate-300 text-slate-700 dark:border-slate-600 dark:text-slate-300',
+  DELETE: 'border-red-200 text-red-700 dark:border-red-900 dark:text-red-400',
+};
+const TYPE_LABEL: Record<ExpenseChangeOperation, string> = { CREATE: 'Add row', UPDATE: 'Edit', DELETE: 'Delete row' };
+
+function initialsOf(name: string | null | undefined) {
+  if (!name) return '?';
+  const p = name.trim().split(/\s+/);
+  return ((p[0]?.[0] ?? '') + (p.length > 1 ? p[p.length - 1][0] : '')).toUpperCase();
+}
+
+function TypePill({ request }: { request: ExpenseChangeRequest }) {
+  const isBulk = request.requestKind === 'BULK_ADD';
+  const label = isBulk
+    ? 'Bulk add'
+    : request.requestKind
+    ? CONTRIBUTION_KIND_LABEL[CONTRIBUTION_REQUEST_KIND[request.requestKind]]
+    : TYPE_LABEL[request.operation] ?? 'Edit';
+  const cls = isBulk ? 'border-emerald-300 text-emerald-800' : request.requestKind ? 'border-sky-200 text-sky-700' : TYPE_PILL[request.operation] ?? TYPE_PILL.UPDATE;
+  return <span className={`inline-flex shrink-0 whitespace-nowrap rounded-md border bg-white px-2 py-0.5 text-[11.5px] font-semibold dark:bg-transparent ${cls}`}>{label}</span>;
+}
+
+/** One changed field shows old → new; more show a count (DELETE: the row removed). */
+function ChangeSummary({ request }: { request: ExpenseChangeRequest }) {
+  const entries = Object.entries(request.changes ?? {}).filter(([k]) => !['id', 'createdAt', 'created_at', 'updatedAt', 'updated_at'].includes(k));
+  const colTitle = (f: string) => EXPENSE_TABLE_CONFIGS[request.tableKey]?.columns.find((c) => c.dataIndex === f)?.title ?? f;
+  if (request.operation === 'DELETE') return <span className="text-[12.5px] text-slate-600 dark:text-slate-400">Removes the row</span>;
+  if (request.requestKind === 'BULK_ADD') return <span className="text-[12.5px] font-semibold text-emerald-700 dark:text-emerald-400">+{bulkRowsOf(request).length} rows</span>;
+  if (entries.length === 1) {
+    const [f, d] = entries[0];
+    return (
+      <span className="inline-flex min-w-0 items-center gap-1.5 text-[12px]">
+        <span className="text-slate-500">{colTitle(f)}:</span>
+        {d?.old !== null && d?.old !== undefined && d?.old !== '' && (
+          <span className="truncate font-mono text-red-700 line-through dark:text-red-400">{formatValue(d.old)}</span>
+        )}
+        <ArrowRight className="h-3 w-3 shrink-0 text-slate-400" aria-hidden="true" />
+        <span className="truncate font-mono font-semibold text-emerald-700 dark:text-emerald-400">{formatValue(d?.new)}</span>
+      </span>
+    );
+  }
+  return <span className="text-[12.5px] text-slate-600 dark:text-slate-400">{entries.length} fields</span>;
+}
+
+function StatusPill({ request, stages }: { request: ExpenseChangeRequest; stages: ExpenseApprovalStage[] }) {
+  const base = 'inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-0.5 text-[11.5px] font-bold';
+  if (request.status === 'APPROVED')
+    return <span className={`${base} bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300`}><Check className="h-3 w-3" strokeWidth={3} />Applied</span>;
+  if (request.status === 'REJECTED')
+    return <span className={`${base} bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300`}><X className="h-3 w-3" strokeWidth={3} />Rejected</span>;
+  const stageLabel =
+    chainForTable(stages, chainKeyOf(request)).find((s) => s.key === request.currentStageKey)?.label ?? request.currentStageKey ?? '—';
+  return <span className={`${base} bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300`}><Clock className="h-3 w-3" />Waiting · {stageLabel}</span>;
+}
+
+/** Needed-by date: red "Nd late" when an open request is past it, amber
+ * "today / in N days" when it is within 3 days. */
+function NeededBy({ request }: { request: ExpenseChangeRequest }) {
+  if (!request.dueDate) return <span className="text-sm text-slate-300">—</span>;
+  const due = dayjs(request.dueDate).startOf('day');
+  const label = due.format('D MMM YYYY');
+  if (request.status !== 'PENDING') return <span className="whitespace-nowrap text-[12.5px] text-slate-500">{label}</span>;
+  const days = due.diff(dayjs().startOf('day'), 'day');
+  if (days < 0)
+    return (
+      <span className="inline-flex items-center gap-1 whitespace-nowrap text-[12px] font-bold text-red-700 dark:text-red-400" title={label}>
+        <AlertTriangle className="h-3 w-3" />{label} · {-days}d late
+      </span>
+    );
+  if (days <= 3)
+    return (
+      <span className="inline-flex items-center gap-1 whitespace-nowrap text-[12px] font-semibold text-amber-800 dark:text-amber-300">
+        <CalendarDays className="h-3 w-3" />{label} · {days === 0 ? 'today' : `in ${days} day${days === 1 ? '' : 's'}`}
+      </span>
+    );
+  return <span className="whitespace-nowrap text-[12.5px] text-slate-600 dark:text-slate-400">{label}</span>;
+}
+
 export default function ExpenseChangeRequestsPage() {
-  const user = getCurrentUser();
   const queryClient = useQueryClient();
 
   const { data: stages = [] } = useQuery({
@@ -423,17 +643,17 @@ export default function ExpenseChangeRequestsPage() {
 
   const availableTabs = useMemo(() => {
     const tabs: { key: TabKey; label: string }[] = [];
-    if ((access?.approvableStageKeys.length ?? 0) > 0) tabs.push({ key: 'pending-mine', label: 'Pending My Action' });
-    if (access?.canCreate || access?.canUpdate || access?.canDelete) tabs.push({ key: 'mine', label: 'My Requests' });
+    if ((access?.approvableStageKeys.length ?? 0) > 0) tabs.push({ key: 'pending-mine', label: 'Pending my action' });
+    if (access?.canCreate || access?.canUpdate || access?.canDelete) tabs.push({ key: 'mine', label: 'My requests' });
     tabs.push({ key: 'overdue', label: 'Overdue' });
     if (canSeeBroaderThanOwnRequests) {
       tabs.push({
         key: 'all',
         label: canSeeEveryonesRequests
-          ? 'All Requests'
+          ? 'All requests'
           : isTableRestrictedApprover
-          ? `${restrictedTableLabels} Requests`
-          : `${BUSINESS_DIVISION_LABELS[access!.businessDivision!]} Requests`,
+          ? `${restrictedTableLabels} requests`
+          : `${BUSINESS_DIVISION_LABELS[access!.businessDivision!]} requests`,
       });
     }
     return tabs;
@@ -465,28 +685,32 @@ export default function ExpenseChangeRequestsPage() {
     setDefaultedTab(true);
   }
 
+  const filterParams = {
+    search: appliedSearch || undefined,
+    tableKey: tableFilter === '__ALL__' ? undefined : tableFilter,
+    operation: operationFilter === '__ALL__' ? undefined : (operationFilter as ExpenseChangeOperation),
+    requesterBusinessDivision: divisionFilter === '__ALL__' ? undefined : (divisionFilter as AdminUserBusinessDivision),
+  };
+
   const { data, isLoading, isError } = useQuery({
     queryKey: ['expense-change-requests', activeTab, page, appliedSearch, tableFilter, operationFilter, divisionFilter],
-    queryFn: () =>
-      getExpenseChangeRequests({
-        page,
-        limit: PAGE_SIZE,
-        search: appliedSearch || undefined,
-        tableKey: tableFilter === '__ALL__' ? undefined : tableFilter,
-        operation: operationFilter === '__ALL__' ? undefined : (operationFilter as ExpenseChangeOperation),
-        requesterBusinessDivision: divisionFilter === '__ALL__' ? undefined : (divisionFilter as AdminUserBusinessDivision),
-        ...tabParams[activeTab],
-      }),
+    queryFn: () => getExpenseChangeRequests({ page, limit: PAGE_SIZE, ...filterParams, ...tabParams[activeTab] }),
     placeholderData: keepPreviousData,
   });
 
+  // A count per tab (same filters) — one row each, just for `total`.
+  const countQueries = useQueries({
+    queries: availableTabs.map((t) => ({
+      queryKey: ['expense-change-requests', 'count', t.key, appliedSearch, tableFilter, operationFilter, divisionFilter],
+      queryFn: () => getExpenseChangeRequests({ page: 1, limit: 1, ...filterParams, ...tabParams[t.key] }),
+      staleTime: 30_000,
+      enabled: !accessLoading,
+    })),
+  });
+  const tabCount = (key: TabKey) => countQueries[availableTabs.findIndex((t) => t.key === key)]?.data?.total;
+
   const rows = data?.data ?? [];
   const total = data?.total ?? 0;
-
-  const handleApplySearch = () => {
-    setPage(1);
-    setAppliedSearch(draftSearch);
-  };
 
   const handleActed = () => {
     queryClient.invalidateQueries({ queryKey: ['expense-change-requests'] });
@@ -495,63 +719,89 @@ export default function ExpenseChangeRequestsPage() {
 
   const columns: DataTableColumn<ExpenseChangeRequest>[] = [
     {
-      title: 'Table',
-      key: 'tableKey',
-      width: 190,
-      render: (_v, r) => (EXPENSE_TABLE_CONFIGS[r.tableKey]?.title ?? r.tableKey).split(' (')[0],
+      title: 'Request',
+      key: 'request',
+      width: 300,
+      render: (_v, r) => (
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <TypePill request={r} />
+            <span className="truncate text-[13px] font-bold">{(EXPENSE_TABLE_CONFIGS[r.tableKey]?.title ?? r.tableKey).split(' (')[0]}</span>
+          </div>
+          <div className="mt-0.5 truncate font-mono text-[11.5px] text-slate-500" title={r.rowLabel ?? undefined}>
+            {r.rowLabel || (r.rowId ? `row ${r.rowId}` : 'new row')}
+          </div>
+        </div>
+      ),
     },
-    { title: 'Type', key: 'operation', width: 100, render: (_v, r) => <RequestTypeBadge request={r} /> },
+    { title: 'Change', key: 'changes', width: 210, render: (_v, r) => <ChangeSummary request={r} /> },
     {
-      title: 'Row',
-      key: 'rowLabel',
-      render: (_v, r) => r.rowLabel || <span className="text-muted-foreground italic">—</span>,
-    },
-    { title: 'Requested By', key: 'requestedByName', width: 150 },
-    {
-      title: 'Division',
-      key: 'requesterBusinessDivision',
-      width: 110,
-      render: (_v, r) => <BusinessDivisionBadge division={r.requesterBusinessDivision} />,
+      title: 'Requested by',
+      key: 'requestedByName',
+      width: 220,
+      render: (_v, r) => (
+        <div className="flex min-w-0 items-center gap-2" title={r.requestedByEmail}>
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-200 text-[10.5px] font-bold text-slate-700 dark:bg-slate-700 dark:text-slate-200">
+            {initialsOf(r.requestedByName)}
+          </span>
+          <div className="min-w-0">
+            <div className="truncate text-[13px] font-semibold">{r.requestedByName}</div>
+            <div className="truncate text-[11.5px] text-slate-500">
+              {r.requesterBusinessDivision ? BUSINESS_DIVISION_LABELS[r.requesterBusinessDivision] : 'No division'} · {dayjs(r.requestedAt).format('D MMM, HH:mm')}
+            </div>
+          </div>
+        </div>
+      ),
     },
     {
       title: 'Reason',
       key: 'reason',
-      render: (_v, r) => <span className="line-clamp-1">{r.reason}</span>,
+      render: (_v, r) => <span className="line-clamp-1 text-[13px] text-slate-700 dark:text-slate-300" title={r.reason}>{r.reason}</span>,
     },
-    { title: 'Status', key: 'status', width: 190, render: (_v, r) => <StatusBadge request={r} stages={stages} /> },
-    { title: 'Needed By', key: 'dueDate', width: 120, render: (_v, r) => <DueDate request={r} /> },
-    {
-      title: 'Requested At',
-      key: 'requestedAt',
-      width: 150,
-      render: (_v, r) => <span className="text-xs whitespace-nowrap">{dayjs(r.requestedAt).format('YYYY-MM-DD HH:mm')}</span>,
-    },
+    { title: 'Status', key: 'status', width: 190, render: (_v, r) => <StatusPill request={r} stages={stages} /> },
+    { title: 'Needed by', key: 'dueDate', width: 170, render: (_v, r) => <NeededBy request={r} /> },
     {
       title: '',
       key: 'action',
-      width: 48,
+      width: 44,
       align: 'center',
       render: (_v, r) => (
-        <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setSelected(r)} title="View details">
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-7 w-7 p-0 text-slate-400 hover:text-slate-800"
+          onClick={(e) => {
+            e.stopPropagation();
+            setSelected(r);
+          }}
+          aria-label="Open request"
+        >
           <ChevronRight className="h-4 w-4" />
         </Button>
       ),
     },
   ];
 
+  const trigger = 'h-9 bg-white text-[13px] dark:bg-slate-900';
+
   return (
-    <div className="p-6 space-y-4">
+    <div className="min-h-full space-y-4 bg-slate-50 p-6 dark:bg-slate-950">
       <div className="flex items-center justify-between">
         <Link to="/admin/expenses" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Back to Expense Admin
         </Link>
+        {access?.isAdmin && (
+          <Link to="/admin/expense-audit-log" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+            <History className="h-4 w-4" /> Audit log
+          </Link>
+        )}
       </div>
 
       <div>
         <h1 className="text-2xl font-bold">Expense Change Requests</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
+        <p className="mt-0.5 max-w-4xl text-sm text-muted-foreground">
           {canSeeEveryonesRequests
-            ? 'Every add, edit and deletion requested across the Expense Data tables — routed by Business Division to that division’s Category Head (then, for Segment Master and Size Master, to Planning) before final approval from whoever is tagged MDM.'
+            ? 'Adds, edits and deletes on Expense Data tables. Each goes to the requester’s division Category Head (Segment Master and Size Master also to Planning), then MDM, before it changes the master.'
             : isTableRestrictedApprover
             ? `Every add, edit and deletion requested on ${restrictedTableLabels}, and where each one stands before it reaches the master.`
             : canSeeOwnDivisionRequests
@@ -560,105 +810,123 @@ export default function ExpenseChangeRequestsPage() {
         </p>
       </div>
 
-      <Tabs
-        value={activeTab}
-        onValueChange={(v) => {
-          setActiveTab(v as TabKey);
-          setPage(1);
-        }}
-      >
-        <TabsList>
-          {availableTabs.map((t) => (
-            <TabsTrigger key={t.key} value={t.key}>
-              {t.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div role="tablist" aria-label="Request lists" className="inline-flex flex-wrap gap-0.5 rounded-lg bg-slate-200 p-1 dark:bg-slate-800">
+          {availableTabs.map((t) => {
+            const on = activeTab === t.key;
+            const count = tabCount(t.key);
+            const overdue = t.key === 'overdue';
+            return (
+              <button
+                key={t.key}
+                type="button"
+                role="tab"
+                aria-selected={on}
+                onClick={() => {
+                  setActiveTab(t.key);
+                  setPage(1);
+                }}
+                className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[13px] font-semibold transition ${
+                  on ? 'bg-slate-800 text-white shadow-sm dark:bg-slate-100 dark:text-slate-900' : 'text-slate-700 hover:bg-white/70 dark:text-slate-300 dark:hover:bg-slate-700'
+                }`}
+              >
+                {t.label}
+                {count !== undefined && (
+                  <span
+                    className={`rounded-full px-1.5 text-[11px] font-bold ${
+                      on ? 'bg-white/20 text-white dark:bg-slate-900/15 dark:text-slate-900'
+                      : overdue && count > 0 ? 'bg-red-100 text-red-800'
+                      : 'bg-white text-slate-700 dark:bg-slate-700 dark:text-slate-200'
+                    }`}
+                  >
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
 
-        <TabsContent value={activeTab} className="space-y-4">
-          <Card>
-            <CardContent className="flex flex-col gap-3 md:flex-row md:items-end pt-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                <Input
-                  className="pl-9"
-                  placeholder="Search reason, row, requester…"
-                  value={draftSearch}
-                  onChange={(e) => setDraftSearch(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleApplySearch(); }}
-                />
-              </div>
-              <div className="w-full md:w-64">
-                <Select value={tableFilter} onValueChange={(v) => { setTableFilter(v); setPage(1); }}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All tables" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__ALL__">All tables</SelectItem>
-                    {Object.entries(EXPENSE_TABLE_CONFIGS)
-                      .filter(([key]) => !access?.allowedTableKeys || access.allowedTableKeys.includes(key))
-                      .map(([key, cfg]) => (
-                        <SelectItem key={key} value={key}>
-                          {cfg.title.split(' (')[0]}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="w-full md:w-44">
-                <Select value={operationFilter} onValueChange={(v) => { setOperationFilter(v); setPage(1); }}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All types" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__ALL__">All types</SelectItem>
-                    <SelectItem value="CREATE">Add Row</SelectItem>
-                    <SelectItem value="UPDATE">Edit</SelectItem>
-                    <SelectItem value="DELETE">Delete Row</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              {canSeeEveryonesRequests && (
-                <div className="w-full md:w-44">
-                  <Select value={divisionFilter} onValueChange={(v) => { setDivisionFilter(v); setPage(1); }}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="All divisions" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__ALL__">All divisions</SelectItem>
-                      {(Object.keys(BUSINESS_DIVISION_LABELS) as AdminUserBusinessDivision[]).map((d) => (
-                        <SelectItem key={d} value={d}>
-                          {BUSINESS_DIVISION_LABELS[d]}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-              <Button onClick={handleApplySearch}>Apply</Button>
-            </CardContent>
-          </Card>
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="relative w-full sm:w-64">
+            <span className="sr-only">Search requests</span>
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              className="h-9 bg-white pl-9 text-[13px] focus-visible:border-slate-600 focus-visible:ring-slate-900/10 dark:bg-slate-900"
+              placeholder="Search reason, row, requester… (Enter)"
+              value={draftSearch}
+              onChange={(e) => setDraftSearch(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  setPage(1);
+                  setAppliedSearch(draftSearch.trim());
+                }
+              }}
+            />
+          </label>
+          <Select value={tableFilter} onValueChange={(v) => { setTableFilter(v); setPage(1); }}>
+            <SelectTrigger className={`${trigger} w-48`} aria-label="Table">
+              <SelectValue placeholder="All tables" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__ALL__">All tables</SelectItem>
+              {Object.entries(EXPENSE_TABLE_CONFIGS)
+                .filter(([key]) => !access?.allowedTableKeys || access.allowedTableKeys.includes(key))
+                .map(([key, cfg]) => (
+                  <SelectItem key={key} value={key}>
+                    {cfg.title.split(' (')[0]}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+          <Select value={operationFilter} onValueChange={(v) => { setOperationFilter(v); setPage(1); }}>
+            <SelectTrigger className={`${trigger} w-32`} aria-label="Type">
+              <SelectValue placeholder="All types" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__ALL__">All types</SelectItem>
+              <SelectItem value="CREATE">Add row</SelectItem>
+              <SelectItem value="UPDATE">Edit</SelectItem>
+              <SelectItem value="DELETE">Delete row</SelectItem>
+            </SelectContent>
+          </Select>
+          {canSeeEveryonesRequests && (
+            <Select value={divisionFilter} onValueChange={(v) => { setDivisionFilter(v); setPage(1); }}>
+              <SelectTrigger className={`${trigger} w-36`} aria-label="Division">
+                <SelectValue placeholder="All divisions" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__ALL__">All divisions</SelectItem>
+                {(Object.keys(BUSINESS_DIVISION_LABELS) as AdminUserBusinessDivision[]).map((d) => (
+                  <SelectItem key={d} value={d}>
+                    {BUSINESS_DIVISION_LABELS[d]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
+      </div>
 
-          <Card>
-            <CardContent className="p-0">
-              {isError ? (
-                <div className="py-10 text-center text-red-500 text-sm">Failed to load change requests.</div>
-              ) : (
-                <DataTable
-                  columns={columns}
-                  dataSource={rows}
-                  loading={isLoading}
-                  rowKey="id"
-                  size="small"
-                  scroll={{ x: 1200 }}
-                  pagination={{ current: page, pageSize: PAGE_SIZE, total, onChange: (p) => setPage(p) }}
-                  locale={{ emptyText: 'No change requests found.' }}
-                />
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      {/* White table: the shared DataTable's beige theme tokens are re-pointed
+          to white / slate here (same trick as the Expense table page). */}
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white [--color-background:#ffffff] [--color-border:#e2e8f0] [--color-muted:#f1f5f9] [&_thead]:bg-white dark:border-slate-700 dark:bg-slate-900 dark:[--color-background:hsl(220_14%_12%)] dark:[--color-border:hsl(220_10%_22%)] dark:[--color-muted:hsl(220_10%_18%)] dark:[&_thead]:bg-[hsl(220_14%_12%)]">
+        {isError ? (
+          <div className="py-10 text-center text-sm text-red-600">Failed to load change requests.</div>
+        ) : (
+          <DataTable
+            columns={columns}
+            dataSource={rows}
+            loading={isLoading}
+            rowKey="id"
+            size="middle"
+            scroll={{ x: 1250 }}
+            onRow={(r) => ({ onClick: () => setSelected(r), className: 'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/40' })}
+            pagination={{ current: page, pageSize: PAGE_SIZE, total, onChange: (p) => setPage(p) }}
+            locale={{ emptyText: 'No change requests here.' }}
+          />
+        )}
+      </div>
 
       <DetailDialog key={selected?.id ?? 'none'} request={selected} stages={stages} onClose={() => setSelected(null)} onActed={handleActed} />
     </div>
