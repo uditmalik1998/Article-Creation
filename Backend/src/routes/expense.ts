@@ -24,6 +24,15 @@ const router = Router();
 // What the caller themselves may do — drives which buttons the UI renders.
 router.get('/my-access', h(expenseAccessController.getMyExpenseAccess));
 
+// Row count / last change / pending requests per table — Expense Data landing page.
+router.get('/table-stats', h(requireExpenseView), h(adminController.getExpenseTableStats));
+
+router.get('/table/:tableKey/pending-rows', h(requireExpenseView), h(adminController.getExpenseTablePendingRows));
+
+// Every row with column = value (e.g. one major category's whole attribute
+// grid) — source for "Copy major category" bulk add.
+router.get('/table/:tableKey/rows-by', h(requireExpenseView), h(adminController.getExpenseRowsByColumn));
+
 router.get('/table/:tableKey', h(requireExpenseView), h(adminController.getExpenseTableData));
 
 // Distinct existing values for one column — powers the add/edit form's
@@ -51,6 +60,11 @@ router.post(
   '/table/:tableKey/add-requests',
   h(requireExpenseOperation('create')),
   h(expenseChangeRequestController.createExpenseAddRequest)
+);
+router.post(
+  '/table/:tableKey/bulk-add-requests',
+  h(requireExpenseOperation('create')),
+  h(expenseChangeRequestController.createExpenseBulkAddRequest)
 );
 router.post(
   '/table/:tableKey/:rowId/change-requests',

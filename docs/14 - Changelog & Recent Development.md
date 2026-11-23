@@ -5,6 +5,59 @@
 
 ---
 
+## 2026-11-23 — Expense tables: request form is a modal + "Copy major category" bulk add
+
+- Propose edit / new row / delete (and bulk delete) now open as a centred modal (`RowChangeRequestDialog` variant `dialog`, header with the row, scrolling body, fixed footer) instead of the side panel.
+- **Copy major category** (Major Category Grid, users who can add): `CopyMajorCategoryDialog.tsx` — pick a source major category, type the new name (warns if it already exists / same as source), all its attributes + values load ticked (untick values or whole attributes, filter, collapse), reason + needed-by → ONE request.
+- Value picker (`ExistingValuePicker`) no longer caps at 50 options (Copy from showed only 50 of 359 major categories) — lists all with a "N values / N of M match" header; slate focus + highlight instead of orange.
+- Copy modal redesigned the same day to option B (canvas https://claude.ai/artifact/PVaF68ZEHhr4cVdUq2Gbsy): source → new name on top; left pane = attribute list (tri-state box, n/total, find attribute or value), right pane = the open attribute's values as tick buttons (Select all / None); empty state until a source is picked; reason + needed-by row; footer "Adds N rows to X · M left out".
+- New request kind **`BULK_ADD`** (operation CREATE, `changes.__bulkRows.new` = rows, rowLabel "NEW — copied from SRC (N rows)"): `POST /api/expense/table/:tableKey/bulk-add-requests` (raw tables, max 5000 rows; drops blanks, refuses missing required fields, skips in-batch duplicates and rows already in the table). Walks the table's normal chain (Category Head → MDM). Approvers cannot edit values; final approval re-skips rows that appeared meanwhile and inserts the rest with multi-row INSERTs (500/statement, tx timeout 120 s); APPLIED details { inserted, skippedExisting }.
+- `GET /api/expense/table/:tableKey/rows-by?column=&value=` — all rows of one major category (editable cols, max 5000).
+- Change Requests list: "Bulk add" pill, "+N rows"; popup shows rows grouped by attribute with value chips. Audit log card shows "Bulk add" and per-attribute counts. Contribution-chain checks now test BGT_CONT / PD_CONT explicitly (not "any requestKind").
+
+## 2026-11-23 — Expense requests: ADMIN can approve at every stage
+
+- User asked that ADMIN can approve / reject at Category Head, Planning, MDM and contribution-approver stages (before: ADMIN had no automatic right — only via MDM tag or a grant).
+- Backend: `canActOnExpenseRequestStage` returns true for role ADMIN; `getExpenseAccess` gives ADMIN every active stage key + CONT_APPROVER in `approvableStageKeys`; "Pending my action" (`mineToApprove`) lists every open request for ADMIN.
+- Frontend: request popup shows Reject / Approve to ADMIN on any pending request (`access.isAdmin`). Approving still goes stage by stage (Category Head first, then MDM) — ADMIN approves each step.
+
+## 2026-11-23 — Expense Change Requests: clean table with due dates (Option A)
+
+- Design canvas: https://claude.ai/artifact/JMpp6ALuUJsz8ypPMZ8v9o — user picked **A**.
+- `ExpenseChangeRequestsPage.tsx` (list only; DetailDialog approve/reject unchanged): slate-50 page, white table (beige DataTable tokens re-pointed like the Expense table page), "Audit log" link for admins.
+- Tabs are a slate segmented control with a count each (one `limit=1` query per tab, same filters); Overdue count red when > 0.
+- Filters apply straight away (search on Enter); the Apply button is gone.
+- Request popup restyled (same approve / reject / adjust logic): header with type + table, row label as title, status + needed-by; requester card with reason; approval path stepper (Requested → stages → Applied, "(you)" on your stage); changes table (current struck red, proposed green; editable values highlight "adjusted" with Undo); History list; fixed footer with comment + Reject / Approve (shows "N adjusted"), or Close with a note when you cannot act. Old Badge helpers removed.
+- Columns: Request (type pill + table + row label), Change (one field = old → new, else "N fields", delete = "Removes the row"), Requested by (initials, name, division · time), Reason, Status (Applied / Rejected / Waiting · <stage>), Needed by (red "Nd late" when overdue, amber "today / in N days" within 3 days). Whole row opens the request.
+
+## 2026-11-23 — Expense Audit Log: one card per request (Option B)
+
+- Design canvas: https://claude.ai/artifact/5N5WfJK8CoNrj8ysKwaV82 — user picked **B**.
+- `ExpenseAuditLogPage.tsx` rewritten: slate-50 page; filter bar (search incl. request id, table, type, "Has: <event>", date range) + status chips All / Waiting / Applied / Rejected with counts.
+- Each request is a card: type pill, table, row label / row id, short request id, status badge (Applied / Rejected / Apply failed / Waiting · <stage>), stepper Requested → <table's approval chain> → Applied (done = ink, current = amber, rejected = red), Activity list (initials, actor, action, stage, time, comment, "Edited while approving"), and Changes (old struck red → new green; Delete shows the removed row; Needed by date).
+- New `GET /admin/expense-audit-log/requests` (`getExpenseAuditRequests` in expenseAuditLogController): groups audit events by request (latest activity first), event filters pick the requests, `status` filters on expense_change_requests.status, returns each request's record + all its events + its active chain (`getActiveApprovalStages`, contribution requests use `major-category-grid#contribution`) + `counts` per status. Old `/expense-audit-log` list endpoint kept.
+
+## 2026-11-23 — Expense Data table page: spreadsheet view (Option C)
+
+- Design canvas: https://claude.ai/artifact/CcFAMMycc99XoaEmwT9A3J — user picked **C** (spreadsheet with bulk actions).
+- `ExpenseTableDetailPage.tsx`: slate-50 page, white table. Breadcrumb Expense Data / section / table; header shows rows, DB table, "Updated …", pending badge, "Used for".
+- Toolbar: search, filter chips (ink), sort + Asc/Desc, Compact / Comfortable (localStorage `expenseTableDensity`), Columns chooser (hidden columns per table in localStorage `expenseTableHiddenCols:<key>`), Export = current page's visible columns as CSV.
+- Table: checkbox column (only when the user can delete), row #, data columns, **Request** column (Edit pending / Delete pending), row actions in a ⋯ menu (Fill contribution %, Propose edit, Propose delete — disabled while a request is open on the row). Booleans show as green/red dot + Yes/No.
+- Table header, sticky ⋯ column and borders are white / slate: the page re-points the theme vars (--color-background / --color-border / --color-muted) on the table card, since DataTable paints them beige.
+- Column filter popup (`ColumnCheckboxFilter.tsx`) restyled: white panel, slate/ink (no coral), header "N of M selected", search with match highlight, select-all of matches with tri-state box, applied values listed first, hover "Only" per value, Clear / Cancel / Apply (N) footer, Enter applies, Esc closes; header funnel turns ink with a count when active.
+- Bulk: ticking rows shows an ink bar "N rows selected · Propose delete for N". `RowChangeRequestDialog` got a `bulkRows` prop: one DELETE request per row with the same reason + date; failures (e.g. already pending) are listed, the rest still go.
+- New `GET /api/expense/table/:tableKey/pending-rows` → `{ rowId: 'UPDATE' | 'DELETE' }` (`getExpenseTablePendingRows`).
+- Section/table info moved to `features/admin/config/expenseSections.ts` (shared by both Expense Data pages).
+
+## 2026-11-23 — Expense Data page: sections + table stats (Option C)
+
+- Design canvas: https://claude.ai/artifact/UA6bMisq9u2XTX4h18Gc1U — user picked **C** (summary tiles + section tabs).
+- `ExpenseMastersPage.tsx`: four tiles (Tables, Pending requests, Read-only, Total rows); segmented tabs All / FG / Fabric / GM / Body / Others (remembered in localStorage `expenseDataTab`); search across title, DB table and "used for"; one card per table with Used for, access badge (Add·Edit·Delete / Edit only / Read-only), DB table name, Rows, Updated, pending badge. Whole card is the link.
+- Section + DB table + "used for" text live in `TABLE_META` in the page; a new registry key falls into Others until added there.
+- Follow-up: matched the canvas colours — page on slate-50, cards / tiles / buttons / search white (were theme beige `bg-card` / `bg-background`); tabs read "FG Articles", "Fabric Articles", "GM Articles", "Body Articles".
+- Removed from the cards page (2026-11-23): Broader Menu, Basic Accessories, Hierarchy, Rough CMP Cost Master, Precise Basic Trim Master, then Fabric Article Data + Precise Fabric Article Data, then Raw Articles — `HIDDEN_ON_EXPENSE_DATA_PAGE` in config/expenseSections.ts. Tables, their /admin/expense/:key pages and the admin Expenses page unchanged; tiles and tab counts leave them out.
+- New `GET /api/expense/table-stats` (`getExpenseTableStats` in adminController): per table key `{ rows, updatedAt, pending }`. Rows/updated cached 60 s (max of updated_at / uploaded_at / created_at column found in the config); pending counts from `expense_change_requests` are never cached.
+
 ## 2026-11-23 — Expenses Analytics table: row key = flat row id
 
 - `getDetailedExpenses` (`GET /admin/analytics/expenses/detailed`, reads `extraction_results_flat`) now returns `key = id` instead of `key = job_id`; `jobId` still returned as its own field.

@@ -23,9 +23,9 @@
  * creation as `requesterBusinessDivision`: the CATEGORY_HEAD stage goes only
  * to the Category Head whose own business division matches the requester's
  * (a Mens request only reaches the Mens Category Head), and the MDM stage
- * goes only to whoever is tagged business division MDM — not to ADMIN in
- * general. See services/expenseAccessService.ts (canActOnExpenseRequestStage)
- * for the precise rule and why ADMIN has no automatic approval bypass here.
+ * goes to whoever is tagged business division MDM. ADMIN can act at every
+ * stage (since 2026-11-23). See services/expenseAccessService.ts
+ * (canActOnExpenseRequestStage) for the precise rule.
  */
 
 import { Request, Response } from 'express';
@@ -50,6 +50,9 @@ import {
   applyExpenseRowInsert,
   applyExpenseRowDelete,
   buildExpenseRowLabel,
+  applyExpenseRowsBulkInsert,
+  findExistingExpenseRows,
+  expenseRowSignature,
 } from './adminController';
 import {
   CONT_APPROVER_STAGE,
@@ -347,6 +350,122 @@ export async function createExpenseAddRequest(req: Request, res: Response) {
     return res.status(201).json({ success: true, data: created });
   } catch (error: any) {
     console.error(`[ExpenseChangeRequest] add-request error for "${tableKey}":`, error);
+    return res.status(500).json({ success: false, error: error.message });
+  }
+}
+
+/** requestKind of a bulk add (many new rows, one request — e.g. a whole
+ * major category copied from another). `changes.__bulkRows.new` holds the
+ * rows; approved or rejected as one, never edited. */
+export const BULK_ADD_KIND = 'BULK_ADD';
+const MAX_BULK_ROWS = 5000;
+
+/**
+ * POST /expense/table/:tableKey/bulk-add-requests — one CREATE request for
+ * many rows (raw tables only). Body: { rows, reason, dueDate, label? }.
+ * Blank values are dropped, rows missing a required field are refused,
+ * in-batch duplicates and rows that already exist in the table are skipped.
+ */
+export async function createExpenseBulkAddRequest(req: Request, res: Response) {
+  const { tableKey } = req.params;
+  const config = EXPENSE_TABLE_REGISTRY[tableKey];
+  if (!config) return res.status(404).json({ success: false, error: `Unknown table key: ${tableKey}` });
+  if (!config.allowCreate || config.kind !== 'raw') {
+    return res.status(400).json({ success: false, error: 'Bulk add is not supported for this table.' });
+  }
+  const { rows, reason, dueDate: rawDueDate, label } = req.body as { rows?: Record<string, any>[]; reason?: string; dueDate?: string; label?: string };
+  const trimmedReason = requireReason(reason);
+  if (!trimmedReason) return res.status(400).json({ success: false, error: 'A reason is required.' });
+  const due = parseDueDate(rawDueDate);
+  if ('error' in due) return res.status(400).json({ success: false, error: due.error });
+  if (!Array.isArray(rows) || rows.length === 0) return res.status(400).json({ success: false, error: 'No rows were submitted.' });
+  if (rows.length > MAX_BULK_ROWS) return res.status(400).json({ success: false, error: `At most ${MAX_BULK_ROWS} rows per request.` });
+
+  const editableColumns = config.columns.filter((c) => c.editable !== false);
+  const editableKeys = editableColumns.map((c) => c.key);
+  const required = config.requiredOnCreate ?? [];
+  const cleanedRows: Record<string, any>[] = [];
+  const seen = new Set<string>();
+  let duplicatesInBatch = 0;
+  for (const [i, raw] of rows.entries()) {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return res.status(400).json({ success: false, error: `Row ${i + 1} is not valid.` });
+    const bad = Object.keys(raw).filter((k) => !editableKeys.includes(k));
+    if (bad.length) return res.status(400).json({ success: false, error: `Row ${i + 1}: these fields cannot be set: ${bad.join(', ')}` });
+    const cleaned: Record<string, any> = {};
+    for (const [k, v] of Object.entries(raw)) {
+      if (v === null || v === undefined || (typeof v === 'string' && v.trim() === '')) continue;
+      cleaned[k] = typeof v === 'string' ? v.trim() : v;
+    }
+    const missing = required.filter((k) => cleaned[k] === undefined);
+    if (missing.length) {
+      const labels = missing.map((k) => editableColumns.find((c) => c.key === k)?.label ?? k);
+      return res.status(400).json({ success: false, error: `Row ${i + 1}: missing ${labels.join(', ')}` });
+    }
+    const sig = expenseRowSignature(cleaned, editableKeys);
+    if (seen.has(sig)) {
+      duplicatesInBatch += 1;
+      continue;
+    }
+    seen.add(sig);
+    cleanedRows.push(cleaned);
+  }
+
+  const existing = await withPrismaRetry(() => findExistingExpenseRows(tableKey, cleanedRows, editableKeys));
+  const newRows = cleanedRows.filter((r) => !existing.has(expenseRowSignature(r, editableKeys)));
+  const alreadyInTable = cleanedRows.length - newRows.length;
+  if (newRows.length === 0) {
+    return res.status(400).json({ success: false, error: 'Every submitted row already exists in the table — nothing to add.' });
+  }
+
+  const firstStage = await requireFirstStage(tableKey);
+  if ('error' in firstStage) return res.status(400).json({ success: false, error: firstStage.error });
+
+  try {
+    const user = req.user!;
+    const changes = { __bulkRows: { old: null, new: newRows } };
+    const rowLabel = (typeof label === 'string' && label.trim() ? label.trim() : `${newRows.length} new rows`).slice(0, 300);
+    const created = await withPrismaRetry(() =>
+      prisma.$transaction(async (tx) => {
+        const row = await tx.expenseChangeRequest.create({
+          data: {
+            tableKey,
+            operation: 'CREATE',
+            rowId: null,
+            rowLabel,
+            requestKind: BULK_ADD_KIND,
+            changes,
+            reason: trimmedReason,
+            dueDate: due.dueDate,
+            currentStageKey: firstStage.key,
+            requestedById: user.id,
+            requestedByName: user.name,
+            requestedByEmail: user.email,
+            requesterBusinessDivision: user.businessDivision ?? null,
+          },
+        });
+        await logExpenseAuditEvent(
+          {
+            requestId: row.id,
+            tableKey,
+            rowId: null,
+            operation: 'CREATE',
+            eventType: 'REQUESTED',
+            stageKey: firstStage.key,
+            stageLabel: firstStage.label,
+            actorId: user.id,
+            actorName: user.name,
+            actorEmail: user.email,
+            comment: trimmedReason,
+            details: { requestKind: BULK_ADD_KIND, label: rowLabel, rowCount: newRows.length, rows: newRows },
+          },
+          tx
+        );
+        return row;
+      })
+    );
+    return res.status(201).json({ success: true, data: created, rowCount: newRows.length, skipped: { duplicatesInBatch, alreadyInTable } });
+  } catch (error: any) {
+    console.error(`[ExpenseChangeRequest] bulk-add error for "${tableKey}":`, error);
     return res.status(500).json({ success: false, error: error.message });
   }
 }
@@ -695,6 +814,12 @@ export async function getExpenseChangeRequests(req: Request, res: Response) {
   if (mineToApprove === 'true' && req.user) {
     const or: object[] = [];
 
+    // ADMIN can approve at every stage (2026-11-23), so every open request
+    // is "pending my action" for them.
+    if (String(req.user.role) === 'ADMIN') {
+      or.push({ status: 'PENDING', currentStageKey: { not: null } });
+    }
+
     // CATEGORY_HEAD stage: only this approver's own division's requests.
     if (String(req.user.role) === 'CATEGORY_HEAD' && req.user.businessDivision) {
       or.push({ currentStageKey: 'CATEGORY_HEAD', requesterBusinessDivision: req.user.businessDivision });
@@ -861,6 +986,9 @@ export async function actOnExpenseChangeRequest(req: Request, res: Response) {
       }
       if (existingRequest.operation === 'DELETE') {
         return res.status(400).json({ success: false, error: "A deletion request has no proposed values to edit — approve or reject it as-is." });
+      }
+      if (existingRequest.requestKind === BULK_ADD_KIND) {
+        return res.status(400).json({ success: false, error: 'A bulk add is approved or rejected as a whole — reject it with a comment to have it resubmitted.' });
       }
       const config = EXPENSE_TABLE_REGISTRY[existingRequest.tableKey];
       const editableKeys = new Set(config.columns.filter((c) => c.editable !== false).map((c) => c.key));
@@ -1030,6 +1158,47 @@ export async function actOnExpenseChangeRequest(req: Request, res: Response) {
       );
       return res.status(409).json({ success: false, error: systemComment, data: rejected });
     };
+
+    if (existingRequest.requestKind === BULK_ADD_KIND) {
+      // Bulk add: skip rows that appeared in the table meanwhile, insert the
+      // rest in one transaction (multi-row INSERTs).
+      const config = EXPENSE_TABLE_REGISTRY[existingRequest.tableKey];
+      const editableKeys = config.columns.filter((c) => c.editable !== false).map((c) => c.key);
+      const bulkRows = ((changes as any).__bulkRows?.new ?? []) as Record<string, any>[];
+      const already = await findExistingExpenseRows(existingRequest.tableKey, bulkRows, editableKeys);
+      const toInsert = bulkRows.filter((r) => !already.has(expenseRowSignature(r, editableKeys)));
+      if (toInsert.length === 0) return autoReject('Every row in this bulk add already exists in the table — nothing left to add.');
+      const approved = await withPrismaRetry(() =>
+        prisma.$transaction(
+          async (tx) => {
+            const inserted = await applyExpenseRowsBulkInsert(existingRequest.tableKey, toInsert, tx);
+            await logExpenseAuditEvent(
+              {
+                requestId: id,
+                tableKey: existingRequest.tableKey,
+                rowId: null,
+                operation: 'CREATE',
+                eventType: 'APPLIED',
+                stageKey: entry.stageKey,
+                stageLabel: entry.stageLabel,
+                actorId: actingUser.id,
+                actorName: actingUser.name,
+                actorEmail: actingUser.email,
+                comment: entry.comment,
+                details: { requestKind: BULK_ADD_KIND, inserted, skippedExisting: bulkRows.length - toInsert.length },
+              },
+              tx
+            );
+            return tx.expenseChangeRequest.update({
+              where: { id },
+              data: { status: 'APPROVED', currentStageKey: null, approvalTrail: appendTrail() },
+            });
+          },
+          { timeout: 120_000, maxWait: 20_000 }
+        )
+      );
+      return res.json({ success: true, data: approved });
+    }
 
     if (contributionKind) {
       // Contribution block: re-check every value's live % still equals the
