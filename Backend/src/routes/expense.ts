@@ -15,6 +15,7 @@ import * as adminController from '../controllers/adminController';
 import * as expenseChangeRequestController from '../controllers/expenseChangeRequestController';
 import * as expenseAccessController from '../controllers/expenseAccessController';
 import * as gridContributionController from '../controllers/gridContributionController';
+import * as fgFabricMappingController from '../controllers/fgFabricMappingController';
 import { requireExpenseView, requireExpenseOperation } from '../middleware/expenseAccess';
 import { asyncHandler } from '../middleware/asyncHandler';
 
@@ -82,5 +83,9 @@ router.get('/grid-contribution/block', h(requireExpenseView), h(gridContribution
 router.get('/grid-contribution/template', h(gridContributionController.downloadContributionTemplate));
 router.post('/grid-contribution/requests', h(gridContributionController.createContributionRequest));
 router.post('/grid-contribution/bulk-requests', h(gridContributionController.createContributionBulkRequests));
+
+// FG -> Fabric mapping (read-only): same audience as Expense Data.
+router.get('/fg-fabric-mapping', h(requireExpenseView), h(fgFabricMappingController.listFgFabricMapping));
+router.get('/fg-fabric-mapping/export', h(requireExpenseView), h(fgFabricMappingController.exportFgFabricMapping));
 
 export default router;

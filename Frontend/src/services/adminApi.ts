@@ -1147,3 +1147,34 @@ export async function importNationalGridRows(
 }
 
 export default adminApi;
+
+// ═══════════════════════════════════════════════════════
+// FG -> FABRIC MAPPING (read-only, Expense Data audience)
+// ═══════════════════════════════════════════════════════
+
+export interface FgFabricMappingRow {
+  fgArtNo: string;
+  fabArtNo: string | null;
+}
+
+export interface FgFabricMappingResult {
+  rows: FgFabricMappingRow[];
+  total: number;
+  withFabric: number;
+  loadedAt: string;
+}
+
+export async function getFgFabricMapping(search: string, page: number, pageSize: number, fresh = false): Promise<FgFabricMappingResult> {
+  const q = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+  if (search) q.set('search', search);
+  if (fresh) q.set('fresh', '1');
+  const res = await expenseApi.get<{ success: boolean; data: FgFabricMappingResult }>(`/fg-fabric-mapping?${q.toString()}`);
+  return res.data.data;
+}
+
+export async function downloadFgFabricMapping(search: string): Promise<Blob> {
+  const q = new URLSearchParams();
+  if (search) q.set('search', search);
+  const res = await expenseApi.get(`/fg-fabric-mapping/export?${q.toString()}`, { responseType: 'blob', timeout: 5 * 60 * 1000 });
+  return res.data as Blob;
+}

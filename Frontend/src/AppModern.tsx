@@ -24,6 +24,7 @@ import ExpenseTableDetailPage from './features/admin/pages/ExpenseTableDetailPag
 import ExpenseMastersPage from './features/admin/pages/ExpenseMastersPage';
 import ExpenseChangeRequestsPage from './features/admin/pages/ExpenseChangeRequestsPage';
 import ExpenseAuditLogPage from './features/admin/pages/ExpenseAuditLogPage';
+import FgFabricMappingPage from './features/admin/pages/FgFabricMappingPage';
 import ApproverDashboard from './features/approver/pages/ApproverDashboard'; // Approver Dashboard
 import ArticleDetailPage from './features/approver/pages/ArticleDetailPage'; // Article detail view
 import FabricArticleDashboard from './features/fabric-article/pages/FabricArticleDashboard'; // Fabric Article Dashboard
@@ -330,6 +331,16 @@ const App: React.FC = () => {
                   <ExpenseRoute>
                     <MainLayout>
                       <ExpenseChangeRequestsPage />
+                    </MainLayout>
+                  </ExpenseRoute>
+                }
+              />
+              <Route
+                path="/admin/fg-fabric-mapping"
+                element={
+                  <ExpenseRoute>
+                    <MainLayout>
+                      <FgFabricMappingPage />
                     </MainLayout>
                   </ExpenseRoute>
                 }

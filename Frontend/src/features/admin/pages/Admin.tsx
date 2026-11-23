@@ -38,6 +38,7 @@ import {
 import { message } from '@/lib/message';
 import { BackendApiService } from '../../../services/api/backendApi';
 import { APP_CONFIG } from '../../../constants/app/config';
+import { downloadFgFabricMapping, getFgFabricMapping } from '../../../services/adminApi';
 
 const api = new BackendApiService();
 
@@ -244,8 +245,8 @@ interface GmMctMeta {
   familyCodesCount?: number;
 }
 
-/** Master-data upload cards on this page (Attributes 7, GM 3, Fabric & body 5, Precise 3, Costs and Broader Menu 3). */
-const MASTER_DATA_COUNT = 22;
+/** Master-data upload cards on this page (Attributes 7, GM 3, Fabric & body 6, Precise 3, Costs and Broader Menu 3). */
+const MASTER_DATA_COUNT = 23;
 
 interface PipelineStatusData {
   PENDING: number;
@@ -278,6 +279,35 @@ const DETAILED_CHUNK = 250;
 
 export default function Admin() {
   const navigate = useNavigate();
+  // FG -> Fabric mapping card (read live from FG articles, nothing to upload).
+  const [fgFabricTotal, setFgFabricTotal] = useState<number | null>(null);
+  const [fgFabricLoading, setFgFabricLoading] = useState(false);
+  const loadFgFabricStatus = useCallback(async (fresh = false) => {
+    setFgFabricLoading(true);
+    try {
+      const r = await getFgFabricMapping('', 1, 10, fresh);
+      setFgFabricTotal(r.total);
+    } catch {
+      setFgFabricTotal(null);
+    } finally {
+      setFgFabricLoading(false);
+    }
+  }, []);
+  useEffect(() => {
+    loadFgFabricStatus();
+  }, [loadFgFabricStatus]);
+  const downloadFgFabric = async () => {
+    try {
+      const blob = await downloadFgFabricMapping('');
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `FG_FABRIC_MAPPING_${dayjs().format('YYYY-MM-DD')}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } catch (err: any) {
+      message.error(err?.message || 'Could not download the FG to fabric mapping.');
+    }
+  };
   const [expenseData, setExpenseData] = useState<any>(null);
   const [imageData, setImageData] = useState<any>(null);
   const [detailedExpenses, setDetailedExpenses] = useState<any[]>([]);
@@ -4490,7 +4520,7 @@ export default function Admin() {
               }
             />
           </MasterGroup>
-          <MasterGroup title="Fabric & body" count={6} notUploaded={((fabricArticleDataMeta ? (fabricArticleDataMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((fabricArticleMasterMeta ? (fabricArticleMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((fabricGridMeta ? (fabricGridMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((bodyFabConsTotal ? bodyFabConsTotal.total : null) === 0 ? 1 : 0) + ((bodyArticleDataMeta ? (bodyArticleDataMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((cmpCostMasterMeta ? (cmpCostMasterMeta.total ?? 0) : null) === 0 ? 1 : 0)}>
+          <MasterGroup title="Fabric & body" count={7} notUploaded={((fabricArticleDataMeta ? (fabricArticleDataMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((fabricArticleMasterMeta ? (fabricArticleMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((fabricGridMeta ? (fabricGridMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((bodyFabConsTotal ? bodyFabConsTotal.total : null) === 0 ? 1 : 0) + ((bodyArticleDataMeta ? (bodyArticleDataMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((cmpCostMasterMeta ? (cmpCostMasterMeta.total ?? 0) : null) === 0 ? 1 : 0)}>
             <MasterDataCard
               title="Fabric Article Data"
               description="Bulk Insert"
@@ -5111,6 +5141,16 @@ export default function Admin() {
                   </div>
                 </>
               }
+            />
+            <MasterDataCard
+              title="FG to Fabric Mapping"
+              description="Approved FG article no. and its fabric article no."
+              rowsLabel="FG articles"
+              rows={fgFabricTotal}
+              loading={fgFabricLoading}
+              onView={() => navigate('/admin/fg-fabric-mapping')}
+              onDownload={downloadFgFabric}
+              onRefresh={() => loadFgFabricStatus(true)}
             />
           </MasterGroup>
           <MasterGroup title="Precise" count={3} notUploaded={((preciseBodyArticleTotal ? preciseBodyArticleTotal.total : null) === 0 ? 1 : 0) + ((basicTrimMasterMeta ? (basicTrimMasterMeta.total ?? 0) : null) === 0 ? 1 : 0) + ((preciseFabricArticleMeta ? preciseFabricArticleMeta.total : null) === 0 ? 1 : 0)}>

@@ -31,6 +31,7 @@ import {
   Shirt,
   Package,
   MoreVertical,
+  Link2,
 } from 'lucide-react';
 import {
   Avatar,
@@ -285,6 +286,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
   if (!isPdDesigner && !isAdmin && expenseAccess?.canView) {
     items.push({ key: '/admin/expense-masters', Icon: ShoppingBag, label: 'Expense Data', section: 'ADMIN' });
     items.push({ key: '/admin/expense-change-requests', Icon: ClipboardList, label: 'Expense Change Requests', section: 'ADMIN' });
+    items.push({ key: '/admin/fg-fabric-mapping', Icon: Link2, label: 'FG to Fabric Mapping', section: 'ADMIN' });
   }
 
   if (!isPdDesigner && isAdmin) {

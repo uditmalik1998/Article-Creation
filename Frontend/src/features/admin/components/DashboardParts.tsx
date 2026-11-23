@@ -172,13 +172,16 @@ export function MasterDataCard({
   onDownload?: () => unknown;
   onTemplate?: () => unknown;
   onRefresh?: () => void;
-  details: ReactNode;
-  upload: ReactNode;
+  details?: ReactNode;
+  /** Omit for a read-only dataset (e.g. a mapping read live from other
+   * tables): no Upload button, no expandable area. */
+  upload?: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const [downloadLoading, setDownloadLoading] = useState(false);
   const [templateLoading, setTemplateLoading] = useState(false);
-  const expanded = open || busy;
+  const readOnly = upload === undefined;
+  const expanded = !readOnly && (open || busy);
 
   const handleDownload = async () => {
     if (!onDownload || downloadLoading) return;
@@ -193,7 +196,7 @@ export function MasterDataCard({
   };
   const known = rows !== null && rows !== undefined;
   const empty = known && rows === 0;
-  const status = !known ? (loading ? 'Loading' : 'Unknown') : empty ? 'Not uploaded' : 'Uploaded';
+  const status = !known ? (loading ? 'Loading' : 'Unknown') : readOnly ? 'Live' : empty ? 'Not uploaded' : 'Uploaded';
   const uploaded = formatUploadDate(lastUpload);
 
   return (
@@ -229,10 +232,12 @@ export function MasterDataCard({
       </div>
 
       <div className="flex flex-wrap items-center gap-1.5">
-        <Button size="sm" onClick={() => setOpen((o) => !o)} disabled={busy} className={SLATE_PRIMARY_BTN} aria-expanded={expanded}>
-          {expanded ? <X /> : <Upload />}
-          {expanded ? 'Close' : empty ? 'Upload first file' : 'Upload'}
-        </Button>
+        {!readOnly && (
+          <Button size="sm" onClick={() => setOpen((o) => !o)} disabled={busy} className={SLATE_PRIMARY_BTN} aria-expanded={expanded}>
+            {expanded ? <X /> : <Upload />}
+            {expanded ? 'Close' : empty ? 'Upload first file' : 'Upload'}
+          </Button>
+        )}
         {onView && <Button size="sm" variant="outline" onClick={onView}><Eye />View</Button>}
         {onDownload && (
           <Button size="sm" variant="outline" onClick={handleDownload} disabled={downloadLoading}>
