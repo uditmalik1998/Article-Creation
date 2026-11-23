@@ -72,7 +72,7 @@ select
   case upper(trim(coalesce(f.m_fab_div, g.fab_div)))
     when 'K' then 'KG' when 'RFD_K' then 'KG'
     when 'W' then 'MTR' when 'RFD_W' then 'MTR' when 'DNM' then 'MTR' end as "fabUom",
-  coalesce(f.vendor_name, g.fab_vdr)                        as "fabVendor",
+  coalesce(f.vendor_name, g.m_fab_vdr)                      as "fabVendor",
   coalesce(f.fabric_rate::text, g.vendor_fabric_rate::text) as "fabRate",
   f.image_url                                               as "fabImageUrl",
   (f.id is not null)                                        as "fabricInApp"
