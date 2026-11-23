@@ -15,7 +15,7 @@ import {
   Tooltip,
 } from '@/shared/components/ui-tw';
 import { message } from '@/lib/message';
-import { FabricArticleList, type ApproverArticleListProps } from '../components/FabricArticleList';
+import { FabricArticleList, isGsmRequiredForDiv, type ApproverArticleListProps } from '../components/FabricArticleList';
 import type { ApproverItem } from '../types';
 import { APP_CONFIG } from '../../../constants/app/config';
 import { getMcCodeByMajorCategory } from '../../../data/majorCategoryMcCodeMap';
@@ -31,7 +31,11 @@ function getMissingMandatoryFields(item: any, isFGMode = false): string[] {
   if (!item.vendorName) missing.push('VENDOR NAME');
   if (!isFGMode && !item.mrp) missing.push('MRP');
   if (isFGMode && !item.articleFashionType) missing.push('ARTICLE FASHION TYPE');
-  // Fabric has no mandatory grid (2026-11-23): FAB attributes are not grid-required.
+  // Fabric has no mandatory grid (2026-11-23): FAB attributes are not grid-required,
+  // except M_GSM for Knits — required when M_FAB_DIV is K or RFD_K.
+  if (!isFGMode && isGsmRequiredForDiv(item.fabDiv) && !String(item.gsm ?? '').trim()) {
+    missing.push('M_GSM');
+  }
   return missing;
 }
 
