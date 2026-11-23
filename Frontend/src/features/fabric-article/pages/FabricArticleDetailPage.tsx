@@ -15,7 +15,7 @@ import {
   Tooltip,
 } from '@/shared/components/ui-tw';
 import { message } from '@/lib/message';
-import { FabricArticleList, type ApproverArticleListProps } from '../components/FabricArticleList';
+import { FabricArticleList, isFabRowHiddenByDiv, type ApproverArticleListProps } from '../components/FabricArticleList';
 import type { ApproverItem } from '../types';
 import { APP_CONFIG } from '../../../constants/app/config';
 import { getMcCodeByMajorCategory } from '../../../data/majorCategoryMcCodeMap';
@@ -63,6 +63,8 @@ function getMissingMandatoryFields(item: any, isFGMode = false): string[] {
   for (const [schemaKey, dbField] of Object.entries(SCHEMA_KEY_TO_DB_FIELD)) {
     // M_FAB_VDR isn't on the Fabric FAB card (removed 2026-11-20) — never require it here.
     if (schemaKey === 'fab_vdr') continue;
+    // M_OUNZ (Knits/Woven) and M_GSM (Denim) are hidden by M_FAB_DIV — don't require them.
+    if (isFabRowHiddenByDiv(schemaKey, item.fabDiv)) continue;
     const sapKeys = SCHEMA_KEY_TO_ALL_SAP_KEYS[schemaKey] ?? [];
     if (sapKeys.length === 0) continue;
     // Only validate when mandatory in the grid AND has dropdown values (i.e. visible in UI)

@@ -5,6 +5,12 @@
 
 ---
 
+## 2026-11-23 — Fabric FAB card: M_OUNZ / M_GSM hidden by M_FAB_DIV
+
+- Fabric pages (`FabricArticleList.tsx`, new `isFabRowHiddenByDiv`): M_FAB_DIV = K / RFD_K / W / RFD_W → M_OUNZ row hidden; DNM → M_GSM row hidden. Reacts to the unsaved pick too.
+- Save & Submit mandatory check (`FabricArticleDetailPage` `getMissingMandatoryFields`) skips the hidden row.
+- Display only: an existing value in the hidden field is not cleared. FG pages unchanged.
+
 ## 2026-11-20 — Fabric Article Image: full width (cover), blur fill removed
 
 - User prefers the photo using the full width even if it crops a little: Fabric box stays `h-[480px]`, photo back to `object-cover object-center`; blurred background copy removed. Expand/click still shows the whole photo. FG unchanged.
