@@ -86,6 +86,7 @@ import { formatDivisionLabel } from '../../../shared/utils/ui/formatters';
 import { SIMPLIFIED_HIERARCHY } from '../../extraction/components/SimplifiedCategorySelector';
 import VariantSubTable from './VariantSubTable';
 import { variantCreatingIds } from '../../fabric-article/variantCreationState';
+import { isGsmRequiredForDiv } from '../../fabric-article/components/FabricArticleList';
 import { ImagePreviewDialog } from '@/shared/components/articles/ArticleSpecCard';
 
 // Alias so the combobox trigger can use a distinct name from the plain icon
@@ -1510,6 +1511,28 @@ const ArticleCard = React.memo(
             freeText: false,
             isMandatory: true,
             mandatory: true,
+          });
+          continue;
+        }
+
+        // M_GSM on FG cards follows M_FAB_DIV, same as the Fabric article page:
+        // K / RFD_K (Knits) → shown and required; W / RFD_W / DNM / no M_FAB_DIV → hidden.
+        // Overrides the category grids. Hiding never clears a stored GSM value.
+        if (af.schemaKey === 'gsm' && !allowGroups) {
+          const fabDiv = localValues['fabDiv'] !== undefined ? localValues['fabDiv'] : (item as any).fabDiv;
+          if (!isGsmRequiredForDiv(fabDiv)) continue;
+          const gsmExcelAttr = SCHEMA_KEY_TO_EXCEL_ATTR[af.schemaKey];
+          const gsmVals = gsmExcelAttr ? getMajCatGridEntry(attrMajCat, gsmExcelAttr) : null;
+          mandatory.add(af.schemaKey);
+          visible.push({
+            field: af.field,
+            label: af.label,
+            schemaKey: af.schemaKey,
+            group: af.group,
+            groupColor: af.groupColor,
+            values: (gsmVals ?? []).map((v) => ({ shortForm: v, fullForm: v })),
+            freeText: false,
+            isMandatory: true,
           });
           continue;
         }
