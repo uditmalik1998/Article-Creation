@@ -8,21 +8,80 @@ import { createExpenseBulkAddRequest, getExpenseColumnOptions, getExpenseRowsByC
 import { ExistingValuePicker } from './RowChangeRequestDialog';
 
 /**
- * Major Category Grid — "Copy major category" (2026-11-23, design option B:
- * attribute list + values pane). Pick a source major category, name the new
- * (or an existing) one; every attribute value starts ticked — untick what the
- * new one shouldn't have — then submit ONE bulk-add change request.
- * Rows that already exist are skipped by the server.
+ * "Copy major category" (2026-11-23, design option B: list + values pane).
+ * Pick a source major category, name the new (or an existing) one; every
+ * value starts ticked — untick what the new one shouldn't have — then submit
+ * ONE bulk-add change request. Rows that already exist are skipped by the
+ * server. Works for any table in COPY_CONFIGS:
+ *   - Major Category Grid: attribute list (left) + its values (right).
+ *   - Size Master: no grouping, just the sizes; Division / Sub Division /
+ *     MC Code are carried from the source and can be changed for the new one.
  */
 
-const TABLE_KEY = 'major-category-grid';
-const KEY = 'major_category';
-const GROUP = 'attribute_name';
-const VALUE = 'value';
+interface CopyConfig {
+  /** Column holding the major category. */
+  key: string;
+  /** Column to group by (left pane), or null for a single list. */
+  group: string | null;
+  /** Column shown as the tickable value. */
+  value: string;
+  /** Heading for the list ("attributes") or the single group ("Sizes"). */
+  groupLabel: string;
+  /** Plural noun for values ("values", "sizes"). */
+  valueNoun: string;
+  /** Columns copied from the source rows that the user may change for the new major category. */
+  carry: { column: string; label: string }[];
+  /** Extra columns shown next to each value (e.g. Segment Master Min – Max). */
+  detail?: string[];
+}
+
+const COPY_CONFIGS: Record<string, CopyConfig> = {
+  'major-category-grid': { key: 'major_category', group: 'attribute_name', value: 'value', groupLabel: 'attributes', valueNoun: 'values', carry: [] },
+  'size-master': {
+    key: 'major_category',
+    group: null,
+    value: 'size',
+    groupLabel: 'Sizes',
+    valueNoun: 'sizes',
+    carry: [
+      { column: 'division', label: 'Division' },
+      { column: 'sub_division', label: 'Sub Division' },
+      { column: 'mc_code', label: 'MC Code' },
+    ],
+  },
+  'mandatory-grid': {
+    key: 'major_category',
+    group: null,
+    value: 'sap_key',
+    groupLabel: 'Fields',
+    valueNoun: 'fields',
+    carry: [
+      { column: 'div', label: 'Division' },
+      { column: 'sub_div', label: 'Sub Division' },
+    ],
+    detail: ['is_active'],
+  },
+  'segment-master': {
+    key: 'major_category',
+    group: null,
+    value: 'segment_type',
+    groupLabel: 'Segments',
+    valueNoun: 'segments',
+    carry: [{ column: 'sub_division', label: 'Sub Division' }],
+    detail: ['min', 'max'],
+  },
+};
+
+/** Tables that get the "Copy major category" button. */
+export const COPYABLE_TABLES = new Set(Object.keys(COPY_CONFIGS));
+
+/** Detail cell text — booleans read as Active / Inactive (Mandatory Grid). */
+const fmtDetail = (v: unknown) => (v === true || v === 'true' ? 'Active' : v === false || v === 'false' ? 'Inactive' : v == null || v === '' ? '—' : String(v));
 
 const rowId = (attr: string, value: string) => `${attr}\u0001${value}`;
 
 interface Props {
+  tableKey: string;
   open: boolean;
   onClose: () => void;
   onSubmitted: () => void;
@@ -44,7 +103,13 @@ function Box({ state }: { state: 'on' | 'off' | 'some' }) {
   );
 }
 
-export function CopyMajorCategoryDialog({ open, onClose, onSubmitted }: Props) {
+export function CopyMajorCategoryDialog({ tableKey, open, onClose, onSubmitted }: Props) {
+  const cfg = COPY_CONFIGS[tableKey] ?? COPY_CONFIGS['major-category-grid'];
+  const TABLE_KEY = tableKey;
+  const KEY = cfg.key;
+  const VALUE = cfg.value;
+  const single = !cfg.group;
+  const [carry, setCarry] = useState<Record<string, string>>({});
   const [source, setSource] = useState('');
   const [target, setTarget] = useState('');
   const [excluded, setExcluded] = useState<Set<string>>(new Set());
@@ -69,19 +134,31 @@ export function CopyMajorCategoryDialog({ open, onClose, onSubmitted }: Props) {
     staleTime: 60_000,
   });
 
-  // attribute → values, in the order the server returned them.
-  const groups = useMemo(() => {
+  // group → values (in server order), plus the source row behind each value.
+  const { groups, sourceById } = useMemo(() => {
     const map = new Map<string, string[]>();
+    const byId = new Map<string, Record<string, any>>();
     for (const r of sourceRows) {
-      const a = String(r[GROUP] ?? '');
+      const a = cfg.group ? String(r[cfg.group] ?? '') : cfg.groupLabel;
       const v = String(r[VALUE] ?? '');
       if (!a || !v) continue;
       if (!map.has(a)) map.set(a, []);
       const list = map.get(a)!;
-      if (!list.includes(v)) list.push(v);
+      if (!list.includes(v)) {
+        list.push(v);
+        byId.set(rowId(a, v), r);
+      }
     }
-    return [...map.entries()];
-  }, [sourceRows]);
+    return { groups: [...map.entries()], sourceById: byId };
+  }, [sourceRows, cfg, VALUE]);
+
+  // Pre-fill the carried columns (e.g. Division / Sub Division / MC Code)
+  // from the source major category; the user can change them.
+  useEffect(() => {
+    if (!cfg.carry.length || !sourceRows.length) return;
+    const first = sourceRows[0];
+    setCarry(Object.fromEntries(cfg.carry.map((c) => [c.column, first[c.column] == null ? '' : String(first[c.column])])));
+  }, [sourceRows, cfg]);
 
   // Attribute list filter: matches the attribute name or any of its values.
   const q = search.trim().toLowerCase();
@@ -126,6 +203,7 @@ export function CopyMajorCategoryDialog({ open, onClose, onSubmitted }: Props) {
   const reset = () => {
     setSource('');
     setTarget('');
+    setCarry({});
     setExcluded(new Set());
     setActive(null);
     setSearch('');
@@ -141,13 +219,21 @@ export function CopyMajorCategoryDialog({ open, onClose, onSubmitted }: Props) {
     if (!sourceValid) return message.warning('Pick the major category to copy from.');
     if (!targetName) return message.warning('Type the new major category name.');
     if (sameAsSource) return message.warning('The new major category must be different from the one you copy.');
-    if (selectedCount === 0) return message.warning('Tick at least one value.');
+    if (selectedCount === 0) return message.warning(`Tick at least one ${cfg.valueNoun.replace(/s$/, '')} — nothing is selected.`);
     if (!reason.trim()) return message.warning('Please explain why you are adding these rows.');
     if (!dueDate) return message.warning('Please pick the date you need this done by.');
     if (dueDate.isBefore(dayjs().startOf('day'))) return message.warning('The "needed by" date cannot be in the past.');
 
-    const rows: Record<string, string>[] = [];
-    for (const [a, vals] of groups) for (const v of vals) if (!excluded.has(rowId(a, v))) rows.push({ [KEY]: targetName, [GROUP]: a, [VALUE]: v });
+    // Each new row = its source row with the new major category and any
+    // changed carried columns (blank carried fields keep the source value).
+    const overrides = Object.fromEntries(Object.entries(carry).filter(([, v]) => v.trim() !== '').map(([k, v]) => [k, v.trim()]));
+    const rows: Record<string, any>[] = [];
+    for (const [a, vals] of groups)
+      for (const v of vals) {
+        const id = rowId(a, v);
+        if (excluded.has(id)) continue;
+        rows.push({ ...(sourceById.get(id) ?? {}), [KEY]: targetName, ...overrides });
+      }
 
     setSubmitting(true);
     try {
@@ -180,7 +266,9 @@ export function CopyMajorCategoryDialog({ open, onClose, onSubmitted }: Props) {
           </span>
           <div className="min-w-0 pr-8">
             <DialogTitle className="text-[16px] font-bold">Copy a major category</DialogTitle>
-            <p className="mt-0.5 text-[12.5px] text-slate-500">All attributes and values of one major category, sent for approval as one request.</p>
+            <p className="mt-0.5 text-[12.5px] text-slate-500">
+              {single ? `All ${cfg.valueNoun} of one major category` : `All ${cfg.groupLabel} and ${cfg.valueNoun} of one major category`}, sent for approval as one request.
+            </p>
           </div>
         </DialogHeader>
 
@@ -220,18 +308,34 @@ export function CopyMajorCategoryDialog({ open, onClose, onSubmitted }: Props) {
           </label>
         </div>
 
+        {/* Carried columns (Size Master: Division / Sub Division / MC Code) */}
+        {cfg.carry.length > 0 && sourceValid && (
+          <div className="grid gap-3 border-b border-slate-200 bg-slate-50/60 px-6 py-3 dark:border-slate-700 dark:bg-slate-800/30 sm:grid-cols-3">
+            {cfg.carry.map((c) => (
+              <label key={c.column} className="space-y-1">
+                <span className={label}>{c.label} <span className="font-normal text-slate-400">(for the new one)</span></span>
+                <Input
+                  value={carry[c.column] ?? ''}
+                  onChange={(e) => setCarry((prev) => ({ ...prev, [c.column]: e.target.value }))}
+                  className="bg-white font-mono focus-visible:border-slate-600 focus-visible:ring-2 focus-visible:ring-slate-900/10 dark:bg-slate-900"
+                />
+              </label>
+            ))}
+          </div>
+        )}
+
         {/* Two panes */}
         <div className="flex min-h-0 flex-1">
           {!sourceValid ? (
             <div className="flex flex-1 flex-col items-center justify-center gap-2 px-6 py-16 text-center">
               <Copy className="h-6 w-6 text-slate-300" />
               <p className="text-[13px] font-semibold text-slate-700 dark:text-slate-300">Pick a major category to copy from</p>
-              <p className="max-w-sm text-[12.5px] text-slate-500">Its attributes and values load here, all ticked. Untick what the new one shouldn’t have.</p>
+              <p className="max-w-sm text-[12.5px] text-slate-500">Its {single ? cfg.valueNoun : `${cfg.groupLabel} and ${cfg.valueNoun}`} load here, all ticked. Untick what the new one shouldn’t have.</p>
             </div>
           ) : (
             <>
-              {/* Attribute list */}
-              <aside className="flex w-[280px] shrink-0 flex-col border-r border-slate-200 dark:border-slate-700">
+              {/* Attribute list (hidden for single-list tables like Size Master) */}
+              <aside className={`${single ? 'hidden' : 'flex'} w-[280px] shrink-0 flex-col border-r border-slate-200 dark:border-slate-700`}>
                 <div className="space-y-2 p-3 pb-1.5">
                   <label className="relative block">
                     <span className="sr-only">Find attribute or value</span>
@@ -327,13 +431,18 @@ export function CopyMajorCategoryDialog({ open, onClose, onSubmitted }: Props) {
                             >
                               <Box state={sel ? 'on' : 'off'} />
                               {v}
+                              {cfg.detail && (
+                                <span className="font-sans text-[11.5px] font-medium text-slate-500">
+                                  {cfg.detail.map((d) => fmtDetail(sourceById.get(rowId(activeGroup[0], v))?.[d])).join(' – ')}
+                                </span>
+                              )}
                             </button>
                           );
                         })}
                       </div>
                     </div>
                     <p className="mx-5 mb-3 flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-[12px] text-slate-600 dark:bg-slate-800/50 dark:text-slate-400">
-                      <Info className="h-3.5 w-3.5 shrink-0" /> Untick values the new major category should not have. Everything else is copied.
+                      <Info className="h-3.5 w-3.5 shrink-0" /> Untick {cfg.valueNoun} the new major category should not have. Everything else is copied.
                     </p>
                   </>
                 ) : (

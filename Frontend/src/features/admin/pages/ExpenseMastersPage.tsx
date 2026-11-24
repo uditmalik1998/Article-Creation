@@ -20,6 +20,14 @@ const TAB_KEY = 'expenseDataTab';
 type TabKey = 'ALL' | SectionKey;
 
 function readTab(): TabKey {
+  // ?section=FG (from a table page's breadcrumb) wins over the remembered tab.
+  try {
+    const fromUrl = new URLSearchParams(window.location.search).get('section');
+    if (fromUrl && (fromUrl === 'ALL' || SECTIONS.some((s) => s.key === fromUrl))) {
+      try { localStorage.setItem(TAB_KEY, fromUrl); } catch { /* storage blocked */ }
+      return fromUrl as TabKey;
+    }
+  } catch { /* no window */ }
   try {
     const v = localStorage.getItem(TAB_KEY);
     if (v === 'ALL' || SECTIONS.some((s) => s.key === v)) return v as TabKey;
@@ -168,7 +176,7 @@ export default function ExpenseMastersPage() {
         </Link>
         <Card>
           <CardContent className="py-10 text-center text-sm text-muted-foreground">
-            You don't have access to Expense Data. Ask an admin to set your Business Division on the Users page.
+            You don't have access to Grid Data. Ask an admin to set your Business Division on the Users page.
           </CardContent>
         </Card>
       </div>
@@ -200,7 +208,7 @@ export default function ExpenseMastersPage() {
       </div>
 
       <div>
-        <h1 className="text-2xl font-bold">Expense Data</h1>
+        <h1 className="text-2xl font-bold">Grid Data</h1>
         <p className="text-sm text-muted-foreground mt-0.5 max-w-2xl">
           Every master table behind the article pages. Open one to browse it, or to propose an add, edit or delete —
           each proposal needs a reason and a date, then goes through approval before it changes anything.

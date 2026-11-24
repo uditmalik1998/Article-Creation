@@ -5,11 +5,53 @@
 
 ---
 
+## 2026-11-24 — Renamed: Expense Data → Grid Data, Expense Change Requests → Grid Change Requests
+
+- Labels only: sidebar items, page titles (Grid Data, Grid Change Requests), breadcrumb / back links ("Back to Grid Data"), Change Requests description, no-access messages (frontend + backend `requireExpenseView`, "no approval stages configured for Grid Data changes").
+- Unchanged on purpose: routes (/admin/expense-masters, /admin/expense-change-requests), API paths (/api/expense/…), DB tables, code names, and the admin-only "Expense Audit Log" / Expenses admin page.
+- Later the same day: Admin Panel › "Expense Audit Log" renamed to **"Grid Change Request"** (sidebar item + page title; route /admin/expense-audit-log unchanged).
+
+## 2026-11-24 — Propose new row: sectioned form (Option A)
+
+- Design canvas: https://claude.ai/artifact/UWJXtQPET9RszXVDHfDzDc — user picked **A**.
+- `RowChangeRequestDialog` create mode on Major Category Grid / Size / Segment / Mandatory Grid: **1 · Where** (Major Category first, then the carry columns — Size: Division / Sub Division / MC Code; Segment: Sub Division; Mandatory: Division / Sub Division — auto-filled from that major category's existing rows via rows-by, tagged "auto-filled", still editable), **2 · Row** (other fields in 2 columns; the value field shows "Already has: …" chips for that major category (+ attribute on Major Category Grid) and warns in amber on a duplicate), **3 · Why** (reason + needed-by side by side).
+- All tables: white inputs with slate focus, `status` as an ACT / INACT switch (defaults ACT on a new row), reason now a one-line input. Carry columns per table live in `BULK_ADD_LAYOUT.carry` (config/expenseSections.ts).
+
+## 2026-11-24 — Bulk delete: one request, new modal (Option A)
+
+- Design canvas: https://claude.ai/artifact/UoeGjtoM5u8L9uYCznrHYz — user picked **A**.
+- New request kind **`BULK_DELETE`** (operation DELETE, row snapshots incl. id in `changes.__bulkRows.new`): `POST /api/expense/table/:tableKey/bulk-delete-requests` { rowIds, reason, dueDate, label } (requireExpenseOperation('delete')). Refuses rows already under an open request (409 + busyRowIds); drops rows that no longer exist. Was: one request per row (200 rows = 200 requests).
+- Final approval deletes whichever rows still exist in one statement (`applyExpenseRowsBulkDelete`, 120 s tx); APPLIED details { deleted, alreadyGone }. Approver may keep rows back (send the smaller list); history "N rows kept (not deleted)".
+- Rows inside a pending bulk delete show "Delete pending" on the table page and are locked against other edit/delete requests (`idsInPendingBulkDeletes`).
+- New `BulkDeleteDialog.tsx` (RowChangeRequestDialog hands over when several rows are ticked): header "Delete N rows from <table>", tiles (rows to delete / attributes / kept back), rows grouped by attribute as red struck chips — click to keep, Keep all / Delete all per group, reason + needed-by side by side, red note, footer "N rows · sent as one request" + red "Submit N deletions".
+- **Delete major category** (same 4 tables as Copy: Major Category Grid, Size, Segment, Mandatory Grid): red-outline button for users with delete rights → `DeleteMajorCategoryDialog.tsx` (pick a major category, shows its row count) → "Review rows" opens the bulk-delete modal with all its rows (keep some back) → one BULK_DELETE request. `rows-by?includeId=1` returns ids; registry flag `allowBulkDelete` lets Mandatory Grid do this while single "Delete Row" stays off.
+- Change Requests: "Bulk delete" pill, "−N rows"; popup lists rows grouped with the same keep-back chips for the approver. Audit log: "Bulk delete", "N rows deleted", "−N" per attribute.
+
+## 2026-11-24 — Expense Data page: three GM master cards
+
+- GM section now also shows **GM Major Category Details** (`gm_major_category_details`, key `gm-major-category-details`), **GM Major Category Grid Values** (`gm_major_category_grid_values`, `gm-major-category-grid-values`) and **GM Article Description Format** (`gm_article_description_formate`, `gm-article-description-format`), next to GM Size Master.
+- Backend `EXPENSE_TABLE_REGISTRY` (raw tables, all columns, add/delete allowed — required on add: details div/sub_div/maj_cat_nm; grid maj_cat_nm/family_code/grid_val; desc format all five NOT NULL cols). Frontend `expenseTables.ts` + `TABLE_META` in `expenseSections.ts`.
+- Changes go through the default approval chain (no table-specific stages). Non-admin users need access granted for the new keys. Needs backend deploy (else the table page 404s on the new keys).
+
+## 2026-11-24 — Expense requests need the requester's Business Division
+
+- Why: a CREATOR with no Business Division raised a National Grid add; the request was stored with no division, so no Category Head (who only see their own division) could see or approve it.
+- Backend `requireExpenseOperation` (add / bulk add / edit / delete routes) now refuses non-ADMIN users with no Business Division — 403 `NO_BUSINESS_DIVISION`, "Ask an admin to set it on the Users page".
+- Table page: for such users the propose buttons (new row, edit, delete, copy major category) are hidden and an amber note explains why; they can still view.
+- Approver can edit a bulk add (option A, canvas https://claude.ai/artifact/LxbbjGpgdD9mYqKpnrz4ur): in the request popup, value chips get × (removed = red, struck, undo), "Remove all / Keep all" per group, "+ Add" types a new value (blue NEW; row copied from a sibling in that group), find box for big lists; summary "470 → 467 rows · 4 removed · 1 added"; Approve shows "(N changes)". Sent as changes.__bulkRows (whole list); backend actOnExpenseChangeRequest cleans/validates like a new bulk add, saves it on the request, history shows "4 rows removed, 1 row added". Removing every row is refused (reject instead).
+- Approval chain for non-admins: the popup read stages from ADMIN-only /api/admin/expense-approval-stages, so MDM / Category Head saw only "Requested → Applied" and "passes it to the next stage" even at the last stage. New read-only `GET /api/expense/approval-stages` (requireExpenseView); `getExpenseApprovalStages` now calls it.
+- Request popup fonts: title in Inter 17px semibold (was 18px monospace), bulk-add attribute names Inter 13px, value chips Inter 12.5px with border; header row 13px.
+- Table page breadcrumb: the section crumb (e.g. "FG Articles") was plain text — now a link to /admin/expense-masters?section=FG; ExpenseMastersPage opens that tab from the `section` param (and remembers it). Current table crumb has aria-current.
+- Data fix: the pending "Test" request (national-grid, M_AGE_GROUP / TEST, id 1c1e2a5d…) moved to requester_business_division = MENS so the Mens Category Head sees it. The Test user's own division is still unset (set it on Admin › Users).
+
 ## 2026-11-23 — Expense tables: request form is a modal + "Copy major category" bulk add
 
 - Propose edit / new row / delete (and bulk delete) now open as a centred modal (`RowChangeRequestDialog` variant `dialog`, header with the row, scrolling body, fixed footer) instead of the side panel.
 - **Copy major category** (Major Category Grid, users who can add): `CopyMajorCategoryDialog.tsx` — pick a source major category, type the new name (warns if it already exists / same as source), all its attributes + values load ticked (untick values or whole attributes, filter, collapse), reason + needed-by → ONE request.
 - Value picker (`ExistingValuePicker`) no longer caps at 50 options (Copy from showed only 50 of 359 major categories) — lists all with a "N values / N of M match" header; slate focus + highlight instead of orange.
+- **Mandatory Grid** also gets "Copy major category" (2026-11-23): new registry flag `allowBulkAdd` (bulk add allowed while single "Add Row" stays off); requiredOnCreate major_category + sap_key; list = SAP keys with Active / Inactive; Division (div) + Sub Division (sub_div) carried + editable; on apply the mandatory-grid + field-visibility caches are cleared. Copy button now shows for anyone with create rights on a COPYABLE table (not tied to allowCreate).
+- **Segment Master** also gets "Copy major category" (2026-11-23): segments (E/V/P/SP) as the list with their Min – Max shown; Sub Division carried + editable; min/max copied as-is.
+- **Size Master** also gets "Copy major category" (2026-11-23): same dialog driven by `COPY_CONFIGS` in CopyMajorCategoryDialog.tsx — no left list, just the sizes; Division / Sub Division / MC Code pre-filled from the source and editable for the new one; each new row = source row + new major category + those overrides. Popup / audit log group bulk rows via `BULK_ADD_LAYOUT` (config/expenseSections.ts).
 - Copy modal redesigned the same day to option B (canvas https://claude.ai/artifact/PVaF68ZEHhr4cVdUq2Gbsy): source → new name on top; left pane = attribute list (tri-state box, n/total, find attribute or value), right pane = the open attribute's values as tick buttons (Select all / None); empty state until a source is picked; reason + needed-by row; footer "Adds N rows to X · M left out".
 - New request kind **`BULK_ADD`** (operation CREATE, `changes.__bulkRows.new` = rows, rowLabel "NEW — copied from SRC (N rows)"): `POST /api/expense/table/:tableKey/bulk-add-requests` (raw tables, max 5000 rows; drops blanks, refuses missing required fields, skips in-batch duplicates and rows already in the table). Walks the table's normal chain (Category Head → MDM). Approvers cannot edit values; final approval re-skips rows that appeared meanwhile and inserts the rest with multi-row INSERTs (500/statement, tx timeout 120 s); APPLIED details { inserted, skippedExisting }.
 - `GET /api/expense/table/:tableKey/rows-by?column=&value=` — all rows of one major category (editable cols, max 5000).
@@ -35,6 +77,7 @@
 - Design canvas: https://claude.ai/artifact/5N5WfJK8CoNrj8ysKwaV82 — user picked **B**.
 - `ExpenseAuditLogPage.tsx` rewritten: slate-50 page; filter bar (search incl. request id, table, type, "Has: <event>", date range) + status chips All / Waiting / Applied / Rejected with counts.
 - Each request is a card: type pill, table, row label / row id, short request id, status badge (Applied / Rejected / Apply failed / Waiting · <stage>), stepper Requested → <table's approval chain> → Applied (done = ink, current = amber, rejected = red), Activity list (initials, actor, action, stage, time, comment, "Edited while approving"), and Changes (old struck red → new green; Delete shows the removed row; Needed by date).
+- Cards are accordions (option A, canvas https://claude.ai/artifact/DxNxJGdj2ryUKXQhZPY6zk): closed = one line (type, table, row, change summary, mini progress bar, last action, status); open = stepper + activity + changes; Expand all / Collapse all; all start closed. Bulk add changes = 3-column grid of "+N" per attribute, 12 shown + "Show all".
 - New `GET /admin/expense-audit-log/requests` (`getExpenseAuditRequests` in expenseAuditLogController): groups audit events by request (latest activity first), event filters pick the requests, `status` filters on expense_change_requests.status, returns each request's record + all its events + its active chain (`getActiveApprovalStages`, contribution requests use `major-category-grid#contribution`) + `counts` per status. Old `/expense-audit-log` list endpoint kept.
 
 ## 2026-11-23 — Expense Data table page: spreadsheet view (Option C)
@@ -55,7 +98,7 @@
 - `ExpenseMastersPage.tsx`: four tiles (Tables, Pending requests, Read-only, Total rows); segmented tabs All / FG / Fabric / GM / Body / Others (remembered in localStorage `expenseDataTab`); search across title, DB table and "used for"; one card per table with Used for, access badge (Add·Edit·Delete / Edit only / Read-only), DB table name, Rows, Updated, pending badge. Whole card is the link.
 - Section + DB table + "used for" text live in `TABLE_META` in the page; a new registry key falls into Others until added there.
 - Follow-up: matched the canvas colours — page on slate-50, cards / tiles / buttons / search white (were theme beige `bg-card` / `bg-background`); tabs read "FG Articles", "Fabric Articles", "GM Articles", "Body Articles".
-- Removed from the cards page (2026-11-23): Broader Menu, Basic Accessories, Hierarchy, Rough CMP Cost Master, Precise Basic Trim Master, then Fabric Article Data + Precise Fabric Article Data, then Raw Articles — `HIDDEN_ON_EXPENSE_DATA_PAGE` in config/expenseSections.ts. Tables, their /admin/expense/:key pages and the admin Expenses page unchanged; tiles and tab counts leave them out.
+- Removed from the cards page (2026-11-23): Broader Menu, Basic Accessories, Hierarchy, Rough CMP Cost Master, Precise Basic Trim Master, then Fabric Article Data + Precise Fabric Article Data, then Raw Articles, then Vendor Master + Body Article Data — `HIDDEN_ON_EXPENSE_DATA_PAGE` in config/expenseSections.ts. Tables, their /admin/expense/:key pages and the admin Expenses page unchanged; tiles and tab counts leave them out.
 - New `GET /api/expense/table-stats` (`getExpenseTableStats` in adminController): per table key `{ rows, updatedAt, pending }`. Rows/updated cached 60 s (max of updated_at / uploaded_at / created_at column found in the config); pending counts from `expense_change_requests` are never cached.
 
 ## 2026-11-23 — Expenses Analytics table: row key = flat row id

@@ -33,7 +33,7 @@ export async function requireExpenseView(req: Request, res: Response, next: Next
   if (!access.canView) {
     res.status(403).json({
       success: false,
-      error: 'You do not have access to Expense Data. Ask an admin to grant your email address access.',
+      error: 'You do not have access to Grid Data. Ask an admin to grant your email address access.',
       code: 'NO_EXPENSE_ACCESS',
     });
     return;
@@ -61,6 +61,19 @@ export function requireExpenseOperation(operation: Operation) {
         success: false,
         error: `You are not allowed to ${OPERATION_LABEL[operation]} this table. Ask an admin to grant your email address sub-division access.`,
         code: 'NO_EXPENSE_ACCESS',
+      });
+      return;
+    }
+
+    // A request is routed to the Category Head of the requester's own
+    // Business Division (captured on the request at creation). With none set
+    // it would reach no Category Head at all, so it is refused up front —
+    // ADMIN excepted (2026-11-24).
+    if (String(req.user.role) !== 'ADMIN' && !req.user.businessDivision) {
+      res.status(403).json({
+        success: false,
+        error: 'Your Business Division is not set, so this request could not reach a Category Head. Ask an admin to set it on the Users page, then try again.',
+        code: 'NO_BUSINESS_DIVISION',
       });
       return;
     }

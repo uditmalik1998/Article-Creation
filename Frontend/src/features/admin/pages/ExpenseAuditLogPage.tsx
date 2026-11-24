@@ -13,6 +13,7 @@ import {
   type ExpenseRequestStatus,
 } from '../../../services/adminApi';
 import { EXPENSE_TABLE_CONFIGS } from '../config/expenseTables';
+import { BULK_ADD_LAYOUT } from '../config/expenseSections';
 
 /**
  * Expense Audit Log — one card per change request (design option B, picked
@@ -70,9 +71,11 @@ function fmtVal(v: unknown): string {
 function changesOf(r: ExpenseAuditRequest): { field: string; old: string; next: string }[] {
   // Bulk add: one line per group (2nd column) with its value count.
   const bulk = (r.changes as any)?.__bulkRows?.new;
-  if (r.requestKind === 'BULK_ADD' && Array.isArray(bulk)) {
+  if ((r.requestKind === 'BULK_ADD' || r.requestKind === 'BULK_DELETE') && Array.isArray(bulk)) {
     const cols = (EXPENSE_TABLE_CONFIGS[r.tableKey]?.columns ?? []).filter((c) => c.editable !== false && c.dataIndex !== 'id');
-    const g = cols[1]?.dataIndex ?? '';
+    const layout = BULK_ADD_LAYOUT[r.tableKey];
+    const g = layout ? layout.group ?? layout.value : cols[1]?.dataIndex ?? '';
+    if (layout && !layout.group) return [{ field: cols.find((c) => c.dataIndex === layout.value)?.title ?? 'Values', old: '', next: `${bulk.length} values` }];
     const counts = new Map<string, number>();
     for (const row of bulk) counts.set(String(row[g] ?? ''), (counts.get(String(row[g] ?? '')) ?? 0) + 1);
     return [...counts.entries()].map(([field, n]) => ({ field, old: '', next: `${n} value${n === 1 ? '' : 's'}` }));
@@ -212,72 +215,158 @@ function EventLine({ e }: { e: ExpenseAuditLogEntry }) {
   );
 }
 
-function RequestCard({ r }: { r: ExpenseAuditRequest }) {
+/** Collapsed-row summary of what the request changes. */
+function changeSummary(r: ExpenseAuditRequest, changes: { field: string; old: string; next: string }[]): string {
+  if (r.requestKind === 'BULK_ADD' || r.requestKind === 'BULK_DELETE') {
+    const n = ((r.changes as any)?.__bulkRows?.new ?? []).length;
+    if (r.requestKind === 'BULK_DELETE') return `${n} rows deleted`;
+    const layout = BULK_ADD_LAYOUT[r.tableKey];
+    return layout && !layout.group ? `${n} ${layout.groupTitle}` : `${changes.length} ${layout?.groupTitle ?? 'attributes'} · ${n} rows`;
+  }
+  if (r.operation === 'DELETE') return 'Removes the row';
+  if (changes.length === 1) {
+    const c = changes[0];
+    return `${columnTitle(r.tableKey, c.field)}: ${c.old ? `${c.old} → ` : ''}${c.next || '—'}`;
+  }
+  return `${changes.length} fields`;
+}
+
+/** Mini progress bar for the collapsed row — one segment per step. */
+function MiniProgress({ r }: { r: ExpenseAuditRequest }) {
+  const steps = stepsOf(r);
+  return (
+    <span className="hidden items-center gap-[3px] sm:inline-flex" aria-label={steps.map((s) => `${s.label}: ${s.state}`).join(', ')}>
+      {steps.map((s, i) => (
+        <span
+          key={i}
+          className={`h-[5px] w-[18px] rounded-full ${
+            s.state === 'done' ? 'bg-slate-800 dark:bg-slate-200' : s.state === 'current' ? 'bg-amber-500' : s.state === 'rejected' ? 'bg-red-600' : 'bg-slate-200 dark:bg-slate-700'
+          }`}
+        />
+      ))}
+    </span>
+  );
+}
+
+const BULK_PREVIEW = 12;
+
+/** Accordion card (design option A, 2026-11-23): one line when closed, full
+ * trail + changes when open. A bulk add shows its attributes as a compact
+ * grid of "+N" counts with "Show all". */
+function RequestCard({ r, open, onToggle }: { r: ExpenseAuditRequest; open: boolean; onToggle: () => void }) {
+  const [showAllBulk, setShowAllBulk] = useState(false);
   const op = OP_META[r.operation] ?? OP_META.UPDATE;
   const changes = changesOf(r);
+  const isBulkDelete = r.requestKind === 'BULK_DELETE';
+  const isBulk = r.requestKind === 'BULK_ADD' || isBulkDelete;
   const rowText = r.rowLabel || (r.rowId ? `row ${r.rowId}` : 'new row');
+  const last = r.events[r.events.length - 1];
+  const lastText = last ? `${last.actorName ?? 'System'} ${EVENT_LABEL[last.eventType]} · ${dayjs(last.occurredAt).format('D MMM')}` : '';
+  const panelId = `req-${r.requestId}`;
+
   return (
-    <article className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
-      <header className="flex flex-wrap items-center gap-2.5 border-b border-slate-200 px-4 py-3 dark:border-slate-700">
-        <span className={`rounded-md border bg-white px-2 py-0.5 text-[11.5px] font-semibold dark:bg-transparent ${op.className}`}>
-          {r.requestKind === 'BULK_ADD' ? 'Bulk add' : r.requestKind ? 'Contribution %' : op.label}
+    <article
+      className={`overflow-hidden rounded-xl border bg-white transition dark:bg-slate-900 ${
+        open ? 'border-slate-400 shadow-[0_6px_18px_-8px_rgba(15,23,42,0.25)] dark:border-slate-500' : 'border-slate-200 hover:border-slate-300 dark:border-slate-700'
+      }`}
+    >
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        aria-controls={panelId}
+        className={`flex w-full flex-wrap items-center gap-x-3 gap-y-1.5 px-4 py-3 text-left ${open ? 'border-b border-slate-200 dark:border-slate-700' : ''}`}
+      >
+        <ChevronRight className={`h-4 w-4 shrink-0 transition-transform ${open ? 'rotate-90 text-slate-800 dark:text-slate-200' : 'text-slate-400'}`} />
+        <span className={`rounded-md border bg-white px-2 py-0.5 text-[11.5px] font-semibold dark:bg-transparent ${isBulkDelete ? 'border-red-300 text-red-700' : isBulk ? 'border-emerald-300 text-emerald-800' : op.className}`}>
+          {isBulkDelete ? 'Bulk delete' : isBulk ? 'Bulk add' : r.requestKind ? 'Contribution %' : op.label}
         </span>
-        <span className="text-[14.5px] font-bold">{tableTitle(r.tableKey)}</span>
-        <span className="min-w-0 max-w-[420px] truncate font-mono text-[12px] text-slate-500" title={rowText}>
+        <span className="text-[14px] font-bold">{tableTitle(r.tableKey)}</span>
+        <span className="min-w-0 max-w-[340px] truncate font-mono text-[12px] text-slate-500" title={rowText}>
           {rowText}
         </span>
+        {!open && <span className="min-w-0 max-w-[260px] truncate text-[12.5px] text-slate-600 dark:text-slate-400">{changeSummary(r, changes)}</span>}
         <span className="ml-auto flex items-center gap-3">
-          <span className="hidden font-mono text-[11px] text-slate-400 sm:inline" title={r.requestId}>
-            #{r.requestId.slice(0, 8)}
-          </span>
+          {!open && <MiniProgress r={r} />}
+          {!open && lastText && <span className="hidden text-[12px] text-slate-500 lg:inline">{lastText}</span>}
+          {open && (
+            <span className="hidden font-mono text-[11px] text-slate-400 sm:inline" title={r.requestId}>
+              #{r.requestId.slice(0, 8)}
+            </span>
+          )}
           <StatusBadge r={r} />
         </span>
-      </header>
+      </button>
 
-      <div className="px-4 py-3">
-        <Stepper r={r} />
-      </div>
-
-      <div className="grid gap-5 px-4 pb-4 md:grid-cols-2">
-        <div>
-          <div className="mb-1 text-[10.5px] font-bold uppercase tracking-wider text-slate-500">Activity</div>
-          <ul>
-            {r.events.map((e) => (
-              <EventLine key={e.id} e={e} />
-            ))}
-          </ul>
-        </div>
-        <div>
-          <div className="mb-1 flex items-baseline justify-between gap-2">
-            <span className="text-[10.5px] font-bold uppercase tracking-wider text-slate-500">
-              {r.operation === 'DELETE' ? 'Row being removed' : 'Changes'}
-            </span>
-            {r.dueDate && <span className="text-[11.5px] text-slate-500">Needed by {dayjs(r.dueDate).format('D MMM YYYY')}</span>}
+      {open && (
+        <div id={panelId}>
+          <div className="px-4 py-3">
+            <Stepper r={r} />
           </div>
-          {changes.length === 0 ? (
-            <p className="py-2 text-[12px] text-slate-500">No field changes recorded.</p>
-          ) : (
-            <ul className="divide-y divide-slate-100 dark:divide-slate-800">
-              {changes.map((c) => (
-                <li key={c.field} className="grid grid-cols-[minmax(0,130px)_minmax(0,1fr)_14px_minmax(0,1fr)] items-center gap-2 py-1.5">
-                  <span className="truncate text-[12px] text-slate-500" title={c.field}>{columnTitle(r.tableKey, c.field)}</span>
-                  {c.old ? (
-                    <span className="truncate rounded bg-red-50 px-1.5 font-mono text-[12px] text-red-800 line-through dark:bg-red-500/10 dark:text-red-300" title={c.old}>{c.old}</span>
-                  ) : (
-                    <span className="text-slate-300">—</span>
+
+          <div className="grid gap-6 px-4 pb-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
+            <div>
+              <div className="mb-1 text-[10.5px] font-bold uppercase tracking-wider text-slate-500">Activity</div>
+              <ul>
+                {r.events.map((e) => (
+                  <EventLine key={e.id} e={e} />
+                ))}
+              </ul>
+            </div>
+            <div>
+              <div className="mb-1.5 flex items-baseline justify-between gap-2">
+                <span className="text-[10.5px] font-bold uppercase tracking-wider text-slate-500">
+                  {isBulk ? `Changes · ${changeSummary(r, changes)}` : r.operation === 'DELETE' ? 'Row being removed' : 'Changes'}
+                </span>
+                {r.dueDate && <span className="text-[11.5px] text-slate-500">Needed by {dayjs(r.dueDate).format('D MMM YYYY')}</span>}
+              </div>
+              {changes.length === 0 ? (
+                <p className="py-2 text-[12px] text-slate-500">No field changes recorded.</p>
+              ) : isBulk ? (
+                <>
+                  <div className="grid grid-cols-2 gap-1.5 lg:grid-cols-3">
+                    {(showAllBulk ? changes : changes.slice(0, BULK_PREVIEW)).map((c) => (
+                      <div key={c.field} className="flex items-center justify-between gap-2 rounded-md bg-slate-50 px-2.5 py-1.5 dark:bg-slate-800/60">
+                        <span className="truncate font-mono text-[12px] font-semibold" title={c.field}>{c.field}</span>
+                        <span className={`shrink-0 text-[12px] font-bold ${isBulkDelete ? 'text-red-700 dark:text-red-400' : 'text-emerald-700 dark:text-emerald-400'}`}>{isBulkDelete ? '−' : '+'}{parseInt(c.next, 10) || 0}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {changes.length > BULK_PREVIEW && (
+                    <button
+                      type="button"
+                      onClick={() => setShowAllBulk((v) => !v)}
+                      className="mt-2 inline-flex items-center gap-1 text-[12px] font-semibold text-slate-800 hover:underline dark:text-slate-200"
+                    >
+                      {showAllBulk ? 'Show fewer' : `Show all ${changes.length} attributes`}
+                      <ChevronRight className={`h-3 w-3 transition-transform ${showAllBulk ? '-rotate-90' : 'rotate-90'}`} />
+                    </button>
                   )}
-                  <ArrowRight className="h-3 w-3 text-slate-400" aria-hidden="true" />
-                  {c.next ? (
-                    <span className="truncate rounded bg-emerald-50 px-1.5 font-mono text-[12px] font-semibold text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-300" title={c.next}>{c.next}</span>
-                  ) : (
-                    <span className="text-[12px] text-red-700">removed</span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
+                </>
+              ) : (
+                <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {changes.map((c) => (
+                    <li key={c.field} className="grid grid-cols-[minmax(0,130px)_minmax(0,1fr)_14px_minmax(0,1fr)] items-center gap-2 py-1.5">
+                      <span className="truncate text-[12px] text-slate-500" title={c.field}>{columnTitle(r.tableKey, c.field)}</span>
+                      {c.old ? (
+                        <span className="truncate rounded bg-red-50 px-1.5 font-mono text-[12px] text-red-800 line-through dark:bg-red-500/10 dark:text-red-300" title={c.old}>{c.old}</span>
+                      ) : (
+                        <span className="text-slate-300">—</span>
+                      )}
+                      <ArrowRight className="h-3 w-3 text-slate-400" aria-hidden="true" />
+                      {c.next ? (
+                        <span className="truncate rounded bg-emerald-50 px-1.5 font-mono text-[12px] font-semibold text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-300" title={c.next}>{c.next}</span>
+                      ) : (
+                        <span className="text-[12px] text-red-700">removed</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </article>
   );
 }
@@ -292,6 +381,8 @@ export default function ExpenseAuditLogPage() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [page, setPage] = useState(1);
+  // Which request cards are open (accordion). All start closed.
+  const [openIds, setOpenIds] = useState<Set<string>>(new Set());
 
   const { data, isLoading, isError, isFetching } = useQuery({
     queryKey: ['expense-audit-requests', page, appliedSearch, status, tableFilter, eventFilter, operationFilter, dateFrom, dateTo],
@@ -339,7 +430,7 @@ export default function ExpenseAuditLogPage() {
       </div>
 
       <div>
-        <h1 className="text-2xl font-bold">Expense Audit Log</h1>
+        <h1 className="text-2xl font-bold">Grid Change Request</h1>
         <p className="mt-0.5 max-w-3xl text-sm text-muted-foreground">
           Every change request with its full trail: who raised it, each stage&rsquo;s approve or reject, and the write to the
           master. Only <strong className="text-foreground">Applied</strong> changes Supabase data.
@@ -464,9 +555,33 @@ export default function ExpenseAuditLogPage() {
           No requests match these filters.
         </div>
       ) : (
-        <div className={`space-y-3 transition-opacity ${isFetching ? 'opacity-60' : ''}`}>
+        <div className={`space-y-2.5 transition-opacity ${isFetching ? 'opacity-60' : ''}`}>
+          <div className="flex items-center gap-2 px-1 text-[12.5px]">
+            <span className="font-semibold text-slate-700 dark:text-slate-300">
+              {data?.total ?? requests.length} request{(data?.total ?? requests.length) === 1 ? '' : 's'}
+            </span>
+            <button type="button" onClick={() => setOpenIds(new Set(requests.map((r) => r.requestId)))} className="ml-auto font-semibold text-slate-800 hover:underline dark:text-slate-200">
+              Expand all
+            </button>
+            <span className="text-slate-300" aria-hidden="true">·</span>
+            <button type="button" onClick={() => setOpenIds(new Set())} className="font-semibold text-slate-500 hover:underline">
+              Collapse all
+            </button>
+          </div>
           {requests.map((r) => (
-            <RequestCard key={r.requestId} r={r} />
+            <RequestCard
+              key={r.requestId}
+              r={r}
+              open={openIds.has(r.requestId)}
+              onToggle={() =>
+                setOpenIds((prev) => {
+                  const next = new Set(prev);
+                  if (next.has(r.requestId)) next.delete(r.requestId);
+                  else next.add(r.requestId);
+                  return next;
+                })
+              }
+            />
           ))}
         </div>
       )}

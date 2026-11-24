@@ -284,8 +284,8 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
   // `canView` from /expense/my-access folds both in. Admin reaches the same
   // tables via the full Admin → Expenses page instead.
   if (!isPdDesigner && !isAdmin && expenseAccess?.canView) {
-    items.push({ key: '/admin/expense-masters', Icon: ShoppingBag, label: 'Expense Data', section: 'ADMIN' });
-    items.push({ key: '/admin/expense-change-requests', Icon: ClipboardList, label: 'Expense Change Requests', section: 'ADMIN' });
+    items.push({ key: '/admin/expense-masters', Icon: ShoppingBag, label: 'Grid Data', section: 'ADMIN' });
+    items.push({ key: '/admin/expense-change-requests', Icon: ClipboardList, label: 'Grid Change Requests', section: 'ADMIN' });
     items.push({ key: '/admin/fg-fabric-mapping', Icon: Link2, label: 'FG to Fabric Mapping', section: 'ADMIN' });
   }
 
@@ -300,7 +300,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
         { key: '/admin/hierarchy', Icon: Globe, label: 'Hierarchy' },
         { key: '/admin/users', Icon: User, label: 'Users' },
         { key: '/admin/expenses', Icon: ShoppingBag, label: 'Expenses' },
-        { key: '/admin/expense-audit-log', Icon: History, label: 'Expense Audit Log' },
+        { key: '/admin/expense-audit-log', Icon: History, label: 'Grid Change Request' },
 
         { key: '/admin/poolb-uploader', Icon: Upload, label: 'Pool B Uploader' },
         { key: '/admin/ksml-uploader', Icon: Upload, label: 'KSML Uploader' },

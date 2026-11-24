@@ -53,6 +53,9 @@ import {
   applyExpenseRowsBulkInsert,
   findExistingExpenseRows,
   expenseRowSignature,
+  fetchExpenseRowsByIds,
+  applyExpenseRowsBulkDelete,
+  idsInPendingBulkDeletes,
 } from './adminController';
 import {
   CONT_APPROVER_STAGE,
@@ -114,9 +117,13 @@ function requireReason(reason: unknown): string | null {
 }
 
 async function findOpenRequestForRow(tableKey: string, rowId: string) {
-  return withPrismaRetry(() =>
+  const single = await withPrismaRetry(() =>
     prisma.expenseChangeRequest.findFirst({ where: { tableKey, rowId, status: 'PENDING' } })
   );
+  if (single) return single;
+  // A row inside a pending bulk delete is locked as well.
+  const bulkId = (await idsInPendingBulkDeletes(tableKey)).get(String(rowId));
+  return bulkId ? withPrismaRetry(() => prisma.expenseChangeRequest.findUnique({ where: { id: bulkId } })) : null;
 }
 
 /** The stage every new request on `tableKey` starts at. Creation is refused
@@ -126,7 +133,7 @@ async function requireFirstStage(tableKey: string): Promise<{ key: string; label
   const stage = await getFirstApprovalStage(tableKey);
   if (!stage) {
     return {
-      error: 'No approval stages are configured for Expense Data changes yet.',
+      error: 'No approval stages are configured for Grid Data changes yet.',
     };
   }
   return { key: stage.key, label: stage.label };
@@ -370,7 +377,7 @@ export async function createExpenseBulkAddRequest(req: Request, res: Response) {
   const { tableKey } = req.params;
   const config = EXPENSE_TABLE_REGISTRY[tableKey];
   if (!config) return res.status(404).json({ success: false, error: `Unknown table key: ${tableKey}` });
-  if (!config.allowCreate || config.kind !== 'raw') {
+  if (!(config.allowCreate || config.allowBulkAdd) || config.kind !== 'raw') {
     return res.status(400).json({ success: false, error: 'Bulk add is not supported for this table.' });
   }
   const { rows, reason, dueDate: rawDueDate, label } = req.body as { rows?: Record<string, any>[]; reason?: string; dueDate?: string; label?: string };
@@ -470,6 +477,96 @@ export async function createExpenseBulkAddRequest(req: Request, res: Response) {
   }
 }
 
+/** requestKind of a bulk delete (many rows removed in one request). The
+ * rows' snapshots (incl. their id) are in `changes.__bulkRows.new`. */
+export const BULK_DELETE_KIND = 'BULK_DELETE';
+
+/**
+ * POST /expense/table/:tableKey/bulk-delete-requests — one DELETE request for
+ * many rows. Body: { rowIds, reason, dueDate, label? }. Rows that no longer
+ * exist are dropped; rows already under another open request are refused.
+ */
+export async function createExpenseBulkDeleteRequest(req: Request, res: Response) {
+  const { tableKey } = req.params;
+  const config = EXPENSE_TABLE_REGISTRY[tableKey];
+  if (!config) return res.status(404).json({ success: false, error: `Unknown table key: ${tableKey}` });
+  if (!(config.allowDelete || config.allowBulkDelete) || config.kind === 'hierarchy') {
+    return res.status(400).json({ success: false, error: 'Deleting rows is not supported for this table.' });
+  }
+  const { rowIds, reason, dueDate: rawDueDate, label } = req.body as { rowIds?: unknown[]; reason?: string; dueDate?: string; label?: string };
+  const trimmedReason = requireReason(reason);
+  if (!trimmedReason) return res.status(400).json({ success: false, error: 'A reason for deleting these rows is required.' });
+  const due = parseDueDate(rawDueDate);
+  if ('error' in due) return res.status(400).json({ success: false, error: due.error });
+  if (!Array.isArray(rowIds) || rowIds.length === 0) return res.status(400).json({ success: false, error: 'No rows were selected.' });
+  if (rowIds.length > MAX_BULK_ROWS) return res.status(400).json({ success: false, error: `At most ${MAX_BULK_ROWS} rows per request.` });
+  const ids = [...new Set(rowIds.map((x) => String(x)))];
+
+  // Not while another request is open on any of these rows.
+  const singleOpen = await withPrismaRetry(() =>
+    prisma.expenseChangeRequest.findMany({ where: { tableKey, status: 'PENDING', rowId: { in: ids } }, select: { rowId: true } })
+  );
+  const inBulk = await idsInPendingBulkDeletes(tableKey);
+  const busy = new Set([...singleOpen.map((r) => String(r.rowId)), ...ids.filter((id) => inBulk.has(id))]);
+  if (busy.size > 0) {
+    return res.status(409).json({ success: false, error: `${busy.size} of these rows already have a pending request — untick them and try again.`, busyRowIds: [...busy] });
+  }
+
+  const live = await withPrismaRetry(() => fetchExpenseRowsByIds(tableKey, ids));
+  if (live.length === 0) return res.status(400).json({ success: false, error: 'None of these rows exist any more.' });
+  const firstStage = await requireFirstStage(tableKey);
+  if ('error' in firstStage) return res.status(400).json({ success: false, error: firstStage.error });
+
+  try {
+    const user = req.user!;
+    const changes = { __bulkRows: { old: null, new: live } };
+    const rowLabel = (typeof label === 'string' && label.trim() ? label.trim() : `${live.length} rows`).slice(0, 300);
+    const created = await withPrismaRetry(() =>
+      prisma.$transaction(async (tx) => {
+        const row = await tx.expenseChangeRequest.create({
+          data: {
+            tableKey,
+            operation: 'DELETE',
+            rowId: null,
+            rowLabel,
+            requestKind: BULK_DELETE_KIND,
+            changes,
+            reason: trimmedReason,
+            dueDate: due.dueDate,
+            currentStageKey: firstStage.key,
+            requestedById: user.id,
+            requestedByName: user.name,
+            requestedByEmail: user.email,
+            requesterBusinessDivision: user.businessDivision ?? null,
+          },
+        });
+        await logExpenseAuditEvent(
+          {
+            requestId: row.id,
+            tableKey,
+            rowId: null,
+            operation: 'DELETE',
+            eventType: 'REQUESTED',
+            stageKey: firstStage.key,
+            stageLabel: firstStage.label,
+            actorId: user.id,
+            actorName: user.name,
+            actorEmail: user.email,
+            comment: trimmedReason,
+            details: { requestKind: BULK_DELETE_KIND, label: rowLabel, rowCount: live.length, rows: live },
+          },
+          tx
+        );
+        return row;
+      })
+    );
+    return res.status(201).json({ success: true, data: created, rowCount: live.length, missing: ids.length - live.length });
+  } catch (error: any) {
+    console.error(`[ExpenseChangeRequest] bulk-delete error for "${tableKey}":`, error);
+    return res.status(500).json({ success: false, error: error.message });
+  }
+}
+
 /**
  * Where a DELETE request raised by `user` themselves should start, on
  * `tableKey`'s own chain — unlike an add or edit, a deletion the requester
@@ -500,7 +597,7 @@ async function resolveDeleteRequestStart(
 > {
   const stages = await getActiveApprovalStages(tableKey);
   if (stages.length === 0) {
-    return { error: 'No approval stages are configured for Expense Data changes yet.' };
+    return { error: 'No approval stages are configured for Grid Data changes yet.' };
   }
   const asRef = (s: { key: string; label: string }) => ({ key: s.key, label: s.label });
 
@@ -977,7 +1074,66 @@ export async function actOnExpenseChangeRequest(req: Request, res: Response) {
     let effectiveChanges = existingRequest.changes as Record<string, { old: any; new: any }>;
     let editedFields: string[] | undefined;
     const contributionKind = kindFromRequestKind(existingRequest.requestKind);
-    if (action === 'APPROVE' && editedValues && Object.keys(editedValues).length > 0) {
+    // Bulk add: the approver may remove rows or add rows (design option A,
+    // 2026-11-24). They send the WHOLE new row list as `changes.__bulkRows`;
+    // it is cleaned and checked exactly like a new bulk-add request.
+    if (action === 'APPROVE' && existingRequest.requestKind === BULK_DELETE_KIND && editedValues && Array.isArray((editedValues as any).__bulkRows)) {
+      // Bulk delete: the approver may keep rows back (send the smaller list).
+      const idCol = EXPENSE_TABLE_REGISTRY[existingRequest.tableKey].idColumn;
+      const before = (((effectiveChanges as any).__bulkRows?.new ?? []) as Record<string, any>[]);
+      const wanted = new Set(((editedValues as any).__bulkRows as any[]).map((r) => String(r?.[idCol])));
+      const next = before.filter((r) => wanted.has(String(r[idCol])));
+      if (next.length === 0) return res.status(400).json({ success: false, error: 'Every row was kept back — reject the request instead.' });
+      const kept = before.length - next.length;
+      if (kept > 0) {
+        effectiveChanges = { __bulkRows: { old: null, new: next } } as any;
+        editedFields = [`${kept} row${kept === 1 ? '' : 's'} kept (not deleted)`];
+      }
+    } else if (action === 'APPROVE' && existingRequest.requestKind === BULK_ADD_KIND && editedValues && Array.isArray((editedValues as any).__bulkRows)) {
+      const config = EXPENSE_TABLE_REGISTRY[existingRequest.tableKey];
+      const editableCols = config.columns.filter((c) => c.editable !== false);
+      const keys = editableCols.map((c) => c.key);
+      const required = config.requiredOnCreate ?? [];
+      const before = (((effectiveChanges as any).__bulkRows?.new ?? []) as Record<string, any>[]);
+      const beforeSigs = new Set(before.map((r) => expenseRowSignature(r, keys)));
+      const seen = new Set<string>();
+      const next: Record<string, any>[] = [];
+      for (const [i, raw] of ((editedValues as any).__bulkRows as any[]).entries()) {
+        if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return res.status(400).json({ success: false, error: `Row ${i + 1} is not valid.` });
+        const bad = Object.keys(raw).filter((k) => !keys.includes(k));
+        if (bad.length) return res.status(400).json({ success: false, error: `Row ${i + 1}: these fields cannot be set: ${bad.join(', ')}` });
+        const cleaned: Record<string, any> = {};
+        for (const [k, v] of Object.entries(raw)) {
+          if (v === null || v === undefined || (typeof v === 'string' && v.trim() === '')) continue;
+          cleaned[k] = typeof v === 'string' ? v.trim() : v;
+        }
+        const missing = required.filter((k) => cleaned[k] === undefined);
+        if (missing.length) {
+          const labels = missing.map((k) => editableCols.find((c) => c.key === k)?.label ?? k);
+          return res.status(400).json({ success: false, error: `Row ${i + 1}: missing ${labels.join(', ')}` });
+        }
+        const sig = expenseRowSignature(cleaned, keys);
+        if (seen.has(sig)) continue;
+        seen.add(sig);
+        next.push(cleaned);
+      }
+      if (next.length === 0) {
+        return res.status(400).json({ success: false, error: 'Every row was removed — reject the request instead.' });
+      }
+      if (next.length > MAX_BULK_ROWS) {
+        return res.status(400).json({ success: false, error: `At most ${MAX_BULK_ROWS} rows per request.` });
+      }
+      const nextSigs = new Set(next.map((r) => expenseRowSignature(r, keys)));
+      const removed = before.filter((r) => !nextSigs.has(expenseRowSignature(r, keys))).length;
+      const added = next.filter((r) => !beforeSigs.has(expenseRowSignature(r, keys))).length;
+      if (removed > 0 || added > 0) {
+        effectiveChanges = { __bulkRows: { old: null, new: next } } as any;
+        editedFields = [
+          ...(removed ? [`${removed} row${removed === 1 ? '' : 's'} removed`] : []),
+          ...(added ? [`${added} row${added === 1 ? '' : 's'} added`] : []),
+        ];
+      }
+    } else if (action === 'APPROVE' && editedValues && Object.keys(editedValues).length > 0) {
       if (contributionKind) {
         return res.status(400).json({
           success: false,
@@ -988,7 +1144,7 @@ export async function actOnExpenseChangeRequest(req: Request, res: Response) {
         return res.status(400).json({ success: false, error: "A deletion request has no proposed values to edit — approve or reject it as-is." });
       }
       if (existingRequest.requestKind === BULK_ADD_KIND) {
-        return res.status(400).json({ success: false, error: 'A bulk add is approved or rejected as a whole — reject it with a comment to have it resubmitted.' });
+        return res.status(400).json({ success: false, error: 'To change a bulk add, send the full row list as changes.__bulkRows.' });
       }
       const config = EXPENSE_TABLE_REGISTRY[existingRequest.tableKey];
       const editableKeys = new Set(config.columns.filter((c) => c.editable !== false).map((c) => c.key));
@@ -1158,6 +1314,47 @@ export async function actOnExpenseChangeRequest(req: Request, res: Response) {
       );
       return res.status(409).json({ success: false, error: systemComment, data: rejected });
     };
+
+    if (existingRequest.requestKind === BULK_DELETE_KIND) {
+      // Bulk delete: remove whichever of the rows still exist, in one go.
+      const config = EXPENSE_TABLE_REGISTRY[existingRequest.tableKey];
+      const idCol = config.idColumn;
+      const snap = ((changes as any).__bulkRows?.new ?? []) as Record<string, any>[];
+      const ids = snap.map((r) => String(r[idCol])).filter((x) => x && x !== 'undefined');
+      const stillThere = await fetchExpenseRowsByIds(existingRequest.tableKey, ids);
+      if (stillThere.length === 0) return autoReject('Every row in this bulk delete is already gone — nothing left to remove.');
+      const liveIds = stillThere.map((r) => String(r[idCol]));
+      const approved = await withPrismaRetry(() =>
+        prisma.$transaction(
+          async (tx) => {
+            const deleted = await applyExpenseRowsBulkDelete(existingRequest.tableKey, liveIds, tx);
+            await logExpenseAuditEvent(
+              {
+                requestId: id,
+                tableKey: existingRequest.tableKey,
+                rowId: null,
+                operation: 'DELETE',
+                eventType: 'APPLIED',
+                stageKey: entry.stageKey,
+                stageLabel: entry.stageLabel,
+                actorId: actingUser.id,
+                actorName: actingUser.name,
+                actorEmail: actingUser.email,
+                comment: entry.comment,
+                details: { requestKind: BULK_DELETE_KIND, deleted, alreadyGone: ids.length - liveIds.length },
+              },
+              tx
+            );
+            return tx.expenseChangeRequest.update({
+              where: { id },
+              data: { status: 'APPROVED', currentStageKey: null, approvalTrail: appendTrail() },
+            });
+          },
+          { timeout: 120_000, maxWait: 20_000 }
+        )
+      );
+      return res.json({ success: true, data: approved });
+    }
 
     if (existingRequest.requestKind === BULK_ADD_KIND) {
       // Bulk add: skip rows that appeared in the table meanwhile, insert the

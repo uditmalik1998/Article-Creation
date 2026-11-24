@@ -25,6 +25,11 @@ const router = Router();
 // What the caller themselves may do — drives which buttons the UI renders.
 router.get('/my-access', h(expenseAccessController.getMyExpenseAccess));
 
+// Read-only approval chain for every viewer — the change-request popup needs
+// it to draw the path and know the last stage. (The /api/admin copy is
+// ADMIN-only, which left non-admin approvers with an empty chain.)
+router.get('/approval-stages', h(requireExpenseView), h(expenseAccessController.getExpenseApprovalStages));
+
 // Row count / last change / pending requests per table — Expense Data landing page.
 router.get('/table-stats', h(requireExpenseView), h(adminController.getExpenseTableStats));
 
@@ -61,6 +66,11 @@ router.post(
   '/table/:tableKey/add-requests',
   h(requireExpenseOperation('create')),
   h(expenseChangeRequestController.createExpenseAddRequest)
+);
+router.post(
+  '/table/:tableKey/bulk-delete-requests',
+  h(requireExpenseOperation('delete')),
+  h(expenseChangeRequestController.createExpenseBulkDeleteRequest)
 );
 router.post(
   '/table/:tableKey/bulk-add-requests',

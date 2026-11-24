@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useQueries } from '@tanstack/react-query';
+import { useQueries, useQuery } from '@tanstack/react-query';
 import dayjs, { type Dayjs } from 'dayjs';
-import { AlertTriangle, X } from 'lucide-react';
+import { AlertTriangle, Sparkles, X } from 'lucide-react';
 import {
   Button,
   DatePicker,
@@ -22,8 +22,11 @@ import {
   createExpenseDeleteRequest,
   getExpenseColumnMapping,
   getExpenseColumnOptions,
+  getExpenseRowsByColumn,
 } from '../../../services/adminApi';
-import type { ExpenseTableConfig } from '../config/expenseTables';
+import type { ExpenseTableColumnConfig, ExpenseTableConfig } from '../config/expenseTables';
+import { BulkDeleteDialog } from './BulkDeleteDialog';
+import { BULK_ADD_LAYOUT } from '../config/expenseSections';
 
 export type RowChangeMode = 'create' | 'update' | 'delete';
 
@@ -220,7 +223,8 @@ export function RowChangeRequestDialog({
   const [values, setValues] = useState<Record<string, any>>(() => {
     const initial: Record<string, any> = {};
     for (const col of editableColumns) {
-      initial[col.dataIndex] = mode === 'create' ? (col.type === 'boolean' ? true : '') : row?.[col.dataIndex] ?? '';
+      initial[col.dataIndex] =
+        mode === 'create' ? (col.type === 'boolean' ? true : col.dataIndex === 'status' ? 'ACT' : '') : row?.[col.dataIndex] ?? '';
     }
     return initial;
   });
@@ -228,11 +232,63 @@ export function RowChangeRequestDialog({
   const [dueDate, setDueDate] = useState<Dayjs | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // New-row form (design option A, 2026-11-24): the major category comes
+  // first; its other rows fill the "carry" columns (Division, Sub Division,
+  // MC Code …) and show which values it already has, so duplicates are
+  // visible before submitting.
+  const mcLayout = BULK_ADD_LAYOUT[tableKey];
+  const mcCol = mode === 'create' && mcLayout && editableColumns.some((c) => c.dataIndex === mcLayout.key) ? mcLayout.key : null;
+  const carryCols = useMemo(
+    () => (mcCol ? (mcLayout?.carry ?? []).filter((k) => editableColumns.some((c) => c.dataIndex === k)) : []),
+    [mcCol, mcLayout, editableColumns]
+  );
+  const { data: mcOptions = [] } = useQuery({
+    queryKey: ['expense-column-options', tableKey, mcCol],
+    queryFn: () => getExpenseColumnOptions(tableKey, mcCol!),
+    enabled: !!mcCol,
+    staleTime: 5 * 60_000,
+  });
+  const mcValue = mcCol ? String(values[mcCol] ?? '').trim() : '';
+  const mcKnown = !!mcValue && mcOptions.includes(mcValue);
+  const { data: mcRows = [] } = useQuery({
+    queryKey: ['expense-rows-by', tableKey, mcCol, mcValue],
+    queryFn: () => getExpenseRowsByColumn(tableKey, mcCol!, mcValue),
+    enabled: !!mcCol && mcKnown,
+    staleTime: 60_000,
+  });
+  const [autoFilled, setAutoFilled] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    if (!carryCols.length || !mcRows.length) return;
+    const first = mcRows[0];
+    setValues((prev) => {
+      const next = { ...prev };
+      const filled = new Set<string>();
+      for (const k of carryCols) {
+        const v = first[k];
+        if (v == null || v === '') continue;
+        if (String(prev[k] ?? '') === '' || autoFilled.has(k)) {
+          next[k] = String(v);
+          filled.add(k);
+        }
+      }
+      setAutoFilled(filled);
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mcRows, carryCols]);
+
   // Every field's onChange goes through this — besides setting its own
   // value, it fills in any OTHER column whose autoFillFrom names this one,
   // if the mapping has an entry for the value just picked. Still a plain
   // editable field afterward, not locked to the auto-filled value.
   const updateValue = (key: string, value: any) => {
+    if (autoFilled.has(key)) {
+      setAutoFilled((prev) => {
+        const next = new Set(prev);
+        next.delete(key);
+        return next;
+      });
+    }
     setValues((prev) => {
       const next = { ...prev, [key]: value };
       for (const col of autoFillColumns) {
@@ -243,6 +299,11 @@ export function RowChangeRequestDialog({
       return next;
     });
   };
+
+  // Several rows to delete → the dedicated bulk-delete modal (one request).
+  if (isBulk) {
+    return <BulkDeleteDialog open={open} onOpenChange={onOpenChange} tableKey={tableKey} config={config} rows={bulkRows!} onSubmitted={onSubmitted} />;
+  }
 
   if (mode !== 'create' && !row && !isBulk) return null;
 
@@ -345,6 +406,105 @@ export function RowChangeRequestDialog({
     }
   };
 
+  const INPUT_CLS = 'h-10 bg-white text-[13.5px] focus-visible:border-slate-600 focus-visible:ring-2 focus-visible:ring-slate-900/10 dark:bg-slate-900';
+
+  /** Values the chosen major category already has for the "value" column
+   * (narrowed to the chosen group, e.g. attribute, when the table has one). */
+  const existingValues = (() => {
+    if (!mcCol || !mcLayout || !mcRows.length) return [] as string[];
+    const g = mcLayout.group;
+    const gv = g ? String(values[g] ?? '').trim() : '';
+    if (g && !gv) return [];
+    return [...new Set(mcRows.filter((r) => !g || String(r[g] ?? '') === gv).map((r) => String(r[mcLayout.value] ?? '')))].filter(Boolean);
+  })();
+
+  const renderField = (col: ExpenseTableColumnConfig, hint?: string) => {
+    const isAuto = autoFilled.has(col.dataIndex);
+    const isValueCol = mode === 'create' && !!mcLayout && col.dataIndex === mcLayout.value;
+    const typed = String(values[col.dataIndex] ?? '').trim().toUpperCase();
+    const dup = isValueCol && !!typed && existingValues.some((v) => v.toUpperCase() === typed);
+    return (
+      <div key={col.dataIndex} className="space-y-1.5">
+        <Label className="flex items-center gap-1.5 text-[12.5px] font-semibold text-slate-700 dark:text-slate-300">
+          {col.title}
+          {mode === 'create' && requiredKeys.has(col.dataIndex) && <span className="text-red-500">*</span>}
+          {isAuto && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-1.5 text-[10.5px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+              <Sparkles className="h-2.5 w-2.5" /> auto-filled
+            </span>
+          )}
+        </Label>
+        {col.type === 'boolean' ? (
+          <div className="flex h-10 items-center gap-2">
+            <Switch
+              checked={values[col.dataIndex] === true || values[col.dataIndex] === 'true'}
+              onCheckedChange={(checked) => updateValue(col.dataIndex, checked)}
+            />
+            <span className="text-sm text-muted-foreground">
+              {values[col.dataIndex] === true || values[col.dataIndex] === 'true' ? 'Yes' : 'No'}
+            </span>
+          </div>
+        ) : col.dataIndex === 'status' ? (
+          <div role="radiogroup" aria-label={col.title} className="inline-flex rounded-lg bg-slate-200 p-0.5 dark:bg-slate-800">
+            {['ACT', 'INACT'].map((o) => {
+              const on = String(values[col.dataIndex] ?? '').toUpperCase() === o;
+              return (
+                <button
+                  key={o}
+                  type="button"
+                  role="radio"
+                  aria-checked={on}
+                  onClick={() => updateValue(col.dataIndex, o)}
+                  className={`rounded-md px-4 py-1.5 text-[12.5px] font-semibold transition ${on ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-600 dark:text-white' : 'text-slate-600 hover:text-slate-900 dark:text-slate-300'}`}
+                >
+                  {o}
+                </button>
+              );
+            })}
+          </div>
+        ) : col.pickFromExisting || col.dataIndex === mcCol ? (
+          <ExistingValuePicker
+            value={values[col.dataIndex] ?? ''}
+            onChange={(v) => updateValue(col.dataIndex, v)}
+            options={col.dataIndex === mcCol && !col.pickFromExisting ? mcOptions : optionsByColumn[col.dataIndex] ?? []}
+            loading={(col.dataIndex === mcCol && !col.pickFromExisting ? mcOptions : optionsByColumn[col.dataIndex] ?? []).length === 0}
+            placeholder={`Search or type a ${col.title.toLowerCase()}…`}
+          />
+        ) : (
+          <Input
+            value={values[col.dataIndex] ?? ''}
+            onChange={(e) => updateValue(col.dataIndex, e.target.value)}
+            className={`${INPUT_CLS} ${isAuto ? 'bg-slate-50' : ''} ${dup ? 'border-amber-400' : ''}`}
+          />
+        )}
+        {hint && <p className="text-[11.5px] text-slate-500">{hint}</p>}
+        {isValueCol && existingValues.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+            <span className="text-[11.5px] text-slate-500">Already has:</span>
+            {existingValues.slice(0, 24).map((v) => (
+              <span
+                key={v}
+                className={`rounded-md border px-1.5 py-0.5 text-[11.5px] font-medium ${v.toUpperCase() === typed ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'}`}
+              >
+                {v}
+              </span>
+            ))}
+            {existingValues.length > 24 && <span className="text-[11.5px] text-slate-500">+{existingValues.length - 24} more</span>}
+          </div>
+        )}
+        {dup && <p className="text-[11.5px] font-semibold text-amber-700">This value already exists for {mcValue}.</p>}
+        {mode === 'update' && row && (
+          <p className="text-[11.5px] text-muted-foreground">
+            Current: <span className="font-mono">{displayValue(row[col.dataIndex])}</span>
+            {String(values[col.dataIndex] ?? '') !== String(row[col.dataIndex] ?? '') && (
+              <span className="font-semibold text-slate-800 dark:text-slate-200"> · changed</span>
+            )}
+          </p>
+        )}
+      </div>
+    );
+  };
+
   const body = (
         <div className="space-y-3 mt-2">
           {isBulk ? (
@@ -381,72 +541,61 @@ export function RowChangeRequestDialog({
                 ))}
               </div>
             </div>
+          ) : mode === 'create' ? (
+            <>
+              {mcCol && (
+                <section className="space-y-3 pt-1">
+                  <div className="text-[10.5px] font-bold uppercase tracking-wider text-slate-500">1 · Where</div>
+                  {renderField(editableColumns.find((c) => c.dataIndex === mcCol)!, `Pick first${carryCols.length ? ' — ' + carryCols.map((k) => editableColumns.find((c) => c.dataIndex === k)?.title ?? k).join(', ') + ' fill in from it.' : '.'}`)}
+                  {carryCols.length > 0 && (
+                    <div className={`grid gap-3 ${carryCols.length >= 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
+                      {carryCols.map((k) => renderField(editableColumns.find((c) => c.dataIndex === k)!))}
+                    </div>
+                  )}
+                </section>
+              )}
+              <section className={`space-y-3 ${mcCol ? 'border-t border-slate-200 pt-4 dark:border-slate-700' : 'pt-1'}`}>
+                {mcCol && <div className="text-[10.5px] font-bold uppercase tracking-wider text-slate-500">2 · Row</div>}
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {editableColumns
+                    .filter((c) => c.dataIndex !== mcCol && !carryCols.includes(c.dataIndex))
+                    .map((col) => (
+                      <div key={col.dataIndex} className={col.dataIndex === mcLayout?.value || col.dataIndex === mcLayout?.group ? 'sm:col-span-2' : ''}>
+                        {renderField(col)}
+                      </div>
+                    ))}
+                </div>
+              </section>
+            </>
           ) : (
-            editableColumns.map((col) => (
-              <div key={col.dataIndex} className="space-y-1">
-                <Label className="text-xs">
-                  {col.title}
-                  {mode === 'create' && requiredKeys.has(col.dataIndex) && <span className="text-red-500"> *</span>}
-                </Label>
-                {col.type === 'boolean' ? (
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={values[col.dataIndex] === true || values[col.dataIndex] === 'true'}
-                      onCheckedChange={(checked) => updateValue(col.dataIndex, checked)}
-                    />
-                    <span className="text-sm text-muted-foreground">
-                      {values[col.dataIndex] === true || values[col.dataIndex] === 'true' ? 'Yes' : 'No'}
-                    </span>
-                  </div>
-                ) : col.pickFromExisting ? (
-                  <ExistingValuePicker
-                    value={values[col.dataIndex] ?? ''}
-                    onChange={(v) => updateValue(col.dataIndex, v)}
-                    options={optionsByColumn[col.dataIndex] ?? []}
-                    loading={(optionsByColumn[col.dataIndex] ?? []).length === 0}
-                    placeholder={`Search or type a ${col.title.toLowerCase()}…`}
-                  />
-                ) : (
-                  <Input
-                    value={values[col.dataIndex] ?? ''}
-                    onChange={(e) => updateValue(col.dataIndex, e.target.value)}
-                  />
-                )}
-                {mode === 'update' && row && (
-                  <p className="text-[11.5px] text-muted-foreground">
-                    Current: <span className="font-mono">{displayValue(row[col.dataIndex])}</span>
-                    {String(values[col.dataIndex] ?? '') !== String(row[col.dataIndex] ?? '') && (
-                      <span className="font-semibold text-slate-800 dark:text-slate-200"> · changed</span>
-                    )}
-                  </p>
-                )}
-              </div>
-            ))
+            editableColumns.map((col) => renderField(col))
           )}
 
-          <div className="space-y-1 pt-2">
-            <Label className="text-xs">{copy.reasonLabel}</Label>
-            <Textarea
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder={copy.reasonHint}
-              rows={3}
-            />
-          </div>
-
-          <div className="space-y-1">
-            <Label className="text-xs">Needed by (required)</Label>
-            <DatePicker value={dueDate} onChange={setDueDate} />
-            <p className="text-xs text-muted-foreground">
-              The date you need this done by. Every approver in the chain sees it, so they can tell what is running
-              late.
+          <section className="space-y-3 border-t border-slate-200 pt-4 dark:border-slate-700">
+            {mode === 'create' && mcCol && <div className="text-[10.5px] font-bold uppercase tracking-wider text-slate-500">3 · Why</div>}
+            <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_200px]">
+              <div className="space-y-1.5">
+                <Label className="text-[12.5px] font-semibold text-slate-700 dark:text-slate-300">
+                  Reason <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  placeholder={copy.reasonHint}
+                  className={INPUT_CLS}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-[12.5px] font-semibold text-slate-700 dark:text-slate-300">
+                  Needed by <span className="text-red-500">*</span>
+                </Label>
+                <DatePicker value={dueDate} onChange={setDueDate} />
+              </div>
+            </div>
+            <p className="text-[12px] text-slate-500">
+              Nothing changes until every approval stage signs off — then it is applied to the master (and so visible to SAP).
             </p>
-          </div>
-
-          <p className="text-xs text-muted-foreground">
-            This won't take effect immediately — it goes through the approval chain, and is applied to the master
-            (and so visible to SAP) only once every stage has signed off.
-          </p>
+          </section>
         </div>
   );
 

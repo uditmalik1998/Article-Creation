@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueries, useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import { AlertTriangle, ArrowLeft, ArrowRight, CalendarDays, Check, ChevronRight, Clock, History, Search, X } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, ArrowRight, CalendarDays, Check, ChevronRight, Clock, History, Plus, Search, Undo2, X } from 'lucide-react';
 import {
   Button,
   DataTable,
@@ -35,6 +35,7 @@ import {
   type ExpenseChangeStatus,
 } from '../../../services/adminApi';
 import { EXPENSE_TABLE_CONFIGS } from '../config/expenseTables';
+import { BULK_ADD_LAYOUT } from '../config/expenseSections';
 
 const PAGE_SIZE = 50;
 
@@ -74,54 +75,247 @@ function bulkRowsOf(request: { changes: Record<string, any> | null }): Record<st
   return Array.isArray(rows) ? rows : [];
 }
 
-/** A bulk add, grouped by its second column (Major Category Grid: attribute → values). */
-function BulkRowsView({ request }: { request: ExpenseChangeRequest }) {
+/** Shape of the bulk-add editor state kept in DetailDialog. */
+interface BulkEdit {
+  /** Indexes (into the request's rows) the approver removed. */
+  removed: Set<number>;
+  /** Rows the approver added. */
+  added: Record<string, any>[];
+}
+
+const fmtBool = (x: unknown) => (x === true || x === 'true' ? 'Active' : x === false || x === 'false' ? 'Inactive' : String(x ?? '—'));
+
+/** A bulk add, grouped per BULK_ADD_LAYOUT (Major Category Grid:
+ * attribute → values; Size Master: one list of sizes). With `edit`, the
+ * approver can remove values (× / undo), remove a whole group and add
+ * missing values (design option A, 2026-11-24). */
+function BulkRowsView({
+  request,
+  edit,
+  onChange,
+}: {
+  request: ExpenseChangeRequest;
+  edit?: BulkEdit;
+  onChange?: (next: BulkEdit) => void;
+}) {
+  const [adding, setAdding] = useState<string | null>(null);
+  const [draft, setDraft] = useState('');
+  const [find, setFind] = useState('');
   const rows = bulkRowsOf(request);
+  // BULK_DELETE: chips are rows to delete; "removed" in the edit state means
+  // KEPT BACK (not deleted), and nothing can be added.
+  const deleting = request.requestKind === 'BULK_DELETE';
   const cols = (EXPENSE_TABLE_CONFIGS[request.tableKey]?.columns ?? []).filter((c) => c.editable !== false && c.dataIndex !== 'id');
-  const keyCol = cols[0]?.dataIndex;
-  const groupCol = cols[1]?.dataIndex;
-  const valueCol = cols[2]?.dataIndex;
+  const layout = BULK_ADD_LAYOUT[request.tableKey];
+  const keyCol = layout?.key ?? cols[0]?.dataIndex;
+  const groupCol = layout ? layout.group : cols[1]?.dataIndex;
+  const valueCol = layout?.value ?? cols[2]?.dataIndex;
+  const keyTitle = cols.find((c) => c.dataIndex === keyCol)?.title ?? 'Major Category';
+  const singleTitle = cols.find((c) => c.dataIndex === valueCol)?.title ?? 'Values';
   const keys = [...new Set(rows.map((r) => String(r[keyCol ?? ''] ?? '')))];
-  const groups = new Map<string, string[]>();
-  for (const r of rows) {
-    const g = String(r[groupCol ?? ''] ?? '');
+  const groupOf = (r: Record<string, any>) => (groupCol ? String(r[groupCol] ?? '') : singleTitle);
+  const label = (r: Record<string, any>) => {
+    const detail = layout?.detail ? ` (${layout.detail.map((d) => fmtBool(r[d])).join('–')})` : '';
+    return `${String(r[valueCol ?? ''] ?? '')}${detail}`;
+  };
+
+  // group → original row indexes, plus added rows per group.
+  const groups = new Map<string, number[]>();
+  rows.forEach((r, i) => {
+    const g = groupOf(r);
     if (!groups.has(g)) groups.set(g, []);
-    groups.get(g)!.push(valueCol ? String(r[valueCol] ?? '') : '');
-  }
+    groups.get(g)!.push(i);
+  });
+  const addedByGroup = new Map<string, number[]>();
+  (edit?.added ?? []).forEach((r, i) => {
+    const g = groupOf(r);
+    if (!groups.has(g)) groups.set(g, []);
+    if (!addedByGroup.has(g)) addedByGroup.set(g, []);
+    addedByGroup.get(g)!.push(i);
+  });
+
+  const q = find.trim().toLowerCase();
+  const visible = [...groups.entries()].filter(([g, idxs]) => !q || g.toLowerCase().includes(q) || idxs.some((i) => label(rows[i]).toLowerCase().includes(q)));
+  const removedCount = edit?.removed.size ?? 0;
+  const addedCount = edit?.added.length ?? 0;
+  const total = rows.length - removedCount + addedCount;
+
+  const toggle = (i: number) => {
+    if (!edit || !onChange) return;
+    const removed = new Set(edit.removed);
+    if (removed.has(i)) removed.delete(i);
+    else removed.add(i);
+    onChange({ ...edit, removed });
+  };
+  const toggleGroup = (idxs: number[]) => {
+    if (!edit || !onChange) return;
+    const removed = new Set(edit.removed);
+    const allOut = idxs.every((i) => removed.has(i));
+    for (const i of idxs) {
+      if (allOut) removed.delete(i);
+      else removed.add(i);
+    }
+    onChange({ ...edit, removed });
+  };
+  const addValue = (g: string) => {
+    if (!edit || !onChange || !valueCol) return;
+    const v = draft.trim().toUpperCase();
+    setDraft('');
+    setAdding(null);
+    if (!v) return;
+    const idxs = groups.get(g) ?? [];
+    const exists = idxs.some((i) => String(rows[i][valueCol] ?? '').toUpperCase() === v) || (addedByGroup.get(g) ?? []).some((i) => String(edit.added[i][valueCol] ?? '').toUpperCase() === v);
+    if (exists) return;
+    // New row = a sibling row of the same group with the new value.
+    const template = rows[idxs[0]] ?? rows[0] ?? {};
+    onChange({ ...edit, added: [...edit.added, { ...template, [valueCol]: v }] });
+  };
+  const dropAdded = (i: number) => {
+    if (!edit || !onChange) return;
+    onChange({ ...edit, added: edit.added.filter((_, j) => j !== i) });
+  };
+
+  const chipBase = 'inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[12.5px] font-medium';
+
   return (
     <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
-      <div className="flex flex-wrap items-center gap-2 bg-slate-50 px-3 py-2 text-[12px] dark:bg-slate-800/60">
-        <span className="font-semibold">{rows.length} new rows</span>
+      <div className="flex flex-wrap items-center gap-2 bg-slate-50 px-3 py-2 text-[13px] dark:bg-slate-800/60">
+        <span className="font-semibold">{total} {deleting ? 'rows to delete' : 'new rows'}</span>
         {keyCol && keys.length > 0 && (
           <span className="text-slate-500">
-            {cols[0].title}: <span className="font-mono font-semibold text-slate-800 dark:text-slate-200">{keys.join(', ')}</span>
+            {keyTitle}: <span className="font-semibold text-slate-800 dark:text-slate-200">{keys.join(', ')}</span>
           </span>
         )}
-        <span className="ml-auto text-slate-500">{groups.size} {cols[1]?.title?.toLowerCase() ?? 'groups'}</span>
+        <span className="ml-auto flex items-center gap-2">
+          {groupCol && <span className="text-slate-500">{groups.size} {layout?.groupTitle ?? 'groups'}</span>}
+          {edit && groups.size > 6 && (
+            <input
+              value={find}
+              onChange={(e) => setFind(e.target.value)}
+              placeholder="Find value…"
+              aria-label="Find value"
+              className="h-7 w-36 rounded-md border border-slate-300 bg-white px-2 text-[12px] outline-none focus:border-slate-700 dark:border-slate-600 dark:bg-slate-900"
+            />
+          )}
+        </span>
       </div>
-      <div className="max-h-72 divide-y divide-slate-100 overflow-y-auto dark:divide-slate-800">
-        {[...groups.entries()].map(([g, vals]) => (
-          <div key={g} className="px-3 py-2">
-            <div className="flex items-baseline gap-2">
-              <span className="font-mono text-[12.5px] font-bold">{g}</span>
-              <span className="text-[11px] text-slate-500">{vals.length}</span>
-            </div>
-            {valueCol && (
-              <div className="mt-1 flex flex-wrap gap-1">
-                {vals.map((v, i) => (
-                  <span key={`${v}-${i}`} className="rounded bg-emerald-50 px-1.5 py-0.5 font-mono text-[11.5px] font-semibold text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-300">
-                    {v}
-                  </span>
-                ))}
+      <div className="max-h-80 divide-y divide-slate-100 overflow-y-auto dark:divide-slate-800">
+        {visible.map(([g, idxs]) => {
+          const out = idxs.filter((i) => edit?.removed.has(i)).length;
+          const addIdx = addedByGroup.get(g) ?? [];
+          return (
+            <div key={g} className="px-3 py-2.5">
+              <div className="flex items-baseline gap-2">
+                <span className="text-[13px] font-semibold tracking-tight text-slate-900 dark:text-slate-100">{g}</span>
+                <span className="text-[11.5px] text-slate-500">
+                  {idxs.length - out + addIdx.length}
+                  {out > 0 || addIdx.length > 0 ? ` of ${idxs.length}` : ''}
+                </span>
+                {edit && idxs.length > 0 && (
+                  <button type="button" onClick={() => toggleGroup(idxs)} className="ml-auto text-[11.5px] font-semibold text-slate-500 hover:text-slate-900 hover:underline">
+                    {deleting
+                      ? idxs.every((i) => edit.removed.has(i)) ? 'Delete all' : 'Keep all'
+                      : idxs.every((i) => edit.removed.has(i)) ? 'Keep all' : 'Remove all'}
+                  </button>
+                )}
               </div>
-            )}
-          </div>
-        ))}
+              {valueCol && (
+                <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                  {idxs.map((i) => {
+                    const off = !!edit?.removed.has(i);
+                    const text = label(rows[i]);
+                    if (!edit) {
+                      return (
+                        <span
+                          key={i}
+                          className={`${chipBase} ${
+                            deleting
+                              ? 'border-red-200 bg-red-50 text-red-800 line-through dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300'
+                              : 'border-emerald-100 bg-emerald-50 text-emerald-800 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300'
+                          }`}
+                        >
+                          {text}
+                        </span>
+                      );
+                    }
+                    return (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => toggle(i)}
+                        aria-pressed={!off}
+                        title={deleting ? (off ? 'Kept — click to delete it too' : 'Will be deleted — click to keep it') : off ? 'Undo — keep this value' : 'Remove this value'}
+                        className={`${chipBase} transition ${
+                          deleting
+                            ? off
+                              ? 'border-dashed border-slate-300 bg-white text-slate-500 dark:border-slate-600 dark:bg-slate-900'
+                              : 'border-red-200 bg-red-50 text-red-800 line-through hover:border-red-300 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300'
+                            : off
+                              ? 'border-dashed border-red-300 bg-red-50 text-red-700 line-through dark:bg-red-500/10 dark:text-red-300'
+                              : 'border-emerald-100 bg-emerald-50 text-emerald-800 hover:border-emerald-300 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300'
+                        }`}
+                      >
+                        {text}
+                        {off ? <Undo2 className="h-3 w-3 text-slate-500" /> : <X className="h-3 w-3 opacity-50" />}
+                      </button>
+                    );
+                  })}
+                  {addIdx.map((i) => (
+                    <button
+                      key={`a${i}`}
+                      type="button"
+                      onClick={() => dropAdded(i)}
+                      title="Remove this added value"
+                      className={`${chipBase} border-blue-200 bg-blue-50 font-semibold text-blue-800 dark:bg-blue-500/10 dark:text-blue-300`}
+                    >
+                      {label(edit!.added[i])}
+                      <span className="rounded bg-blue-100 px-1 text-[10px] font-bold dark:bg-blue-500/20">NEW</span>
+                      <X className="h-3 w-3 opacity-60" />
+                    </button>
+                  ))}
+                  {edit &&
+                    !deleting &&
+                    (adding === g ? (
+                      <input
+                        autoFocus
+                        value={draft}
+                        onChange={(e) => setDraft(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            addValue(g);
+                          } else if (e.key === 'Escape') {
+                            setAdding(null);
+                            setDraft('');
+                          }
+                        }}
+                        onBlur={() => addValue(g)}
+                        placeholder="New value, Enter"
+                        aria-label={`Add a value to ${g}`}
+                        className="h-7 w-36 rounded-md border border-slate-400 bg-white px-2 text-[12.5px] uppercase outline-none focus:border-slate-700 focus:ring-2 focus:ring-slate-900/10 dark:bg-slate-900"
+                      />
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAdding(g);
+                          setDraft('');
+                        }}
+                        className={`${chipBase} border-dashed border-slate-300 text-slate-600 hover:border-slate-500 hover:text-slate-900 dark:border-slate-600 dark:text-slate-300`}
+                      >
+                        <Plus className="h-3 w-3" /> Add
+                      </button>
+                    ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+        {visible.length === 0 && <p className="p-4 text-center text-[12.5px] text-slate-500">Nothing matches “{find}”.</p>}
       </div>
     </div>
   );
 }
-
 
 const BUSINESS_DIVISION_LABELS: Record<AdminUserBusinessDivision, string> = {
   MENS: 'Mens', KIDS: 'Kids', LADIES: 'Ladies', PD: 'PD', MDM: 'MDM',
@@ -185,6 +379,9 @@ function DetailDialog({ request, stages, onClose, onActed }: DetailDialogProps) 
     return init;
   });
 
+  // Bulk add: what the approver removed / added (only used when they can act).
+  const [bulkEdit, setBulkEdit] = useState<BulkEdit>({ removed: new Set(), added: [] });
+
   if (!request) return null;
 
   const tableTitle = EXPENSE_TABLE_CONFIGS[request.tableKey]?.title ?? request.tableKey;
@@ -210,6 +407,16 @@ function DetailDialog({ request, stages, onClose, onActed }: DetailDialogProps) 
       }
       if (Object.keys(override).length > 0) changesOverride = override;
     }
+    // Bulk add edited by the approver: send the whole new row list.
+    if (action === 'APPROVE' && canAct && (request.requestKind === 'BULK_ADD' || request.requestKind === 'BULK_DELETE') && (bulkEdit.removed.size > 0 || bulkEdit.added.length > 0)) {
+      const kept = bulkRowsOf(request).filter((_, i) => !bulkEdit.removed.has(i));
+      const next = [...kept, ...bulkEdit.added];
+      if (next.length === 0) {
+        message.warning('Every row was removed — reject the request instead.');
+        return;
+      }
+      changesOverride = { __bulkRows: next };
+    }
 
     setSubmitting(true);
     try {
@@ -228,9 +435,15 @@ function DetailDialog({ request, stages, onClose, onActed }: DetailDialogProps) 
   // an edit earns the three-column before/after layout.
   const isUpdate = request.operation === 'UPDATE';
   const isDelete = request.operation === 'DELETE';
-  const isBulk = request.requestKind === 'BULK_ADD';
-  const changeHeading = isBulk
-    ? 'New rows (approved or rejected together)'
+  const isBulk = request.requestKind === 'BULK_ADD' || request.requestKind === 'BULK_DELETE';
+  const changeHeading = request.requestKind === 'BULK_DELETE'
+    ? canAct
+      ? 'Rows to delete · click a value to keep it'
+      : 'Rows to delete (approved or rejected together)'
+    : isBulk
+    ? canAct
+      ? 'New rows · remove or add values before approving'
+      : 'New rows (approved or rejected together)'
     : request.requestKind
     ? `Proposed ${CONTRIBUTION_KIND_LABEL[CONTRIBUTION_REQUEST_KIND[request.requestKind]]} (by value)`
     : request.operation === 'CREATE' ? 'New row' : isDelete ? 'Row to be deleted' : 'Proposed changes';
@@ -253,9 +466,10 @@ function DetailDialog({ request, stages, onClose, onActed }: DetailDialogProps) 
   path.push({ label: 'Applied', state: request.status === 'APPROVED' ? 'done' : 'todo' });
 
   const sectionLabel = 'mb-1.5 text-[10.5px] font-bold uppercase tracking-wider text-slate-500';
+  const bulkChanges = isBulk && canAct ? bulkEdit.removed.size + bulkEdit.added.length : 0;
   const editedCount = canEditValues
     ? changeEntries.filter(([f, d]) => String(d.new ?? '') !== String(editedValues[f] ?? '')).length
-    : 0;
+    : bulkChanges;
 
   return (
     <Dialog open={!!request} onOpenChange={(open) => { if (!open) onClose(); }}>
@@ -266,7 +480,7 @@ function DetailDialog({ request, stages, onClose, onActed }: DetailDialogProps) 
             <TypePill request={request} />
             <span className="truncate text-[13px] font-semibold text-slate-600 dark:text-slate-300">{shortTable}</span>
           </div>
-          <DialogTitle className="break-words pr-8 font-mono text-[18px] font-bold leading-snug">
+          <DialogTitle className="break-words pr-8 text-[17px] font-semibold leading-snug tracking-tight">
             {request.rowLabel || (request.rowId ? `Row ${request.rowId}` : 'New row')}
           </DialogTitle>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
@@ -350,7 +564,7 @@ function DetailDialog({ request, stages, onClose, onActed }: DetailDialogProps) 
                 </span>
               )}
             </div>
-            {isBulk ? <BulkRowsView request={request} /> : (
+            {isBulk ? <BulkRowsView request={request} edit={canAct ? bulkEdit : undefined} onChange={setBulkEdit} /> : (
             <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
               <div
                 className={`grid ${isUpdate ? 'grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.3fr)]' : 'grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]'} gap-3 bg-slate-50 px-3 py-2 text-[10.5px] font-bold uppercase tracking-wider text-slate-500 dark:bg-slate-800/60`}
@@ -480,6 +694,9 @@ function DetailDialog({ request, stages, onClose, onActed }: DetailDialogProps) 
               </label>
               <div className="flex flex-wrap items-center gap-2">
                 <span className="mr-auto text-[11.5px] text-slate-500">
+                  {isBulk && bulkChanges > 0
+                    ? `${bulkRowsOf(request).length} → ${bulkRowsOf(request).length - bulkEdit.removed.size + bulkEdit.added.length} rows · ${request.requestKind === 'BULK_DELETE' ? `${bulkEdit.removed.size} kept back` : `${bulkEdit.removed.size} removed · ${bulkEdit.added.length} added`}. `
+                    : ''}
                   {isLastStage ? 'Approving applies this change to the master straight away.' : 'Approving passes it to the next stage.'}
                 </span>
                 <Button
@@ -497,7 +714,7 @@ function DetailDialog({ request, stages, onClose, onActed }: DetailDialogProps) 
                 >
                   <Check className="h-4 w-4" />
                   {submitting ? 'Submitting…' : isLastStage ? 'Approve & apply' : 'Approve'}
-                  {!submitting && editedCount > 0 ? ` (${editedCount} adjusted)` : ''}
+                  {!submitting && editedCount > 0 ? (isBulk ? ` (${editedCount} change${editedCount === 1 ? '' : 's'})` : ` (${editedCount} adjusted)`) : ''}
                 </Button>
               </div>
             </div>
@@ -534,6 +751,9 @@ function initialsOf(name: string | null | undefined) {
 
 function TypePill({ request }: { request: ExpenseChangeRequest }) {
   const isBulk = request.requestKind === 'BULK_ADD';
+  if (request.requestKind === 'BULK_DELETE') {
+    return <span className="inline-flex shrink-0 whitespace-nowrap rounded-md border border-red-300 bg-white px-2 py-0.5 text-[11.5px] font-semibold text-red-700 dark:bg-transparent">Bulk delete</span>;
+  }
   const label = isBulk
     ? 'Bulk add'
     : request.requestKind
@@ -547,6 +767,7 @@ function TypePill({ request }: { request: ExpenseChangeRequest }) {
 function ChangeSummary({ request }: { request: ExpenseChangeRequest }) {
   const entries = Object.entries(request.changes ?? {}).filter(([k]) => !['id', 'createdAt', 'created_at', 'updatedAt', 'updated_at'].includes(k));
   const colTitle = (f: string) => EXPENSE_TABLE_CONFIGS[request.tableKey]?.columns.find((c) => c.dataIndex === f)?.title ?? f;
+  if (request.requestKind === 'BULK_DELETE') return <span className="text-[12.5px] font-semibold text-red-700 dark:text-red-400">−{bulkRowsOf(request).length} rows</span>;
   if (request.operation === 'DELETE') return <span className="text-[12.5px] text-slate-600 dark:text-slate-400">Removes the row</span>;
   if (request.requestKind === 'BULK_ADD') return <span className="text-[12.5px] font-semibold text-emerald-700 dark:text-emerald-400">+{bulkRowsOf(request).length} rows</span>;
   if (entries.length === 1) {
@@ -798,10 +1019,10 @@ export default function ExpenseChangeRequestsPage() {
       </div>
 
       <div>
-        <h1 className="text-2xl font-bold">Expense Change Requests</h1>
+        <h1 className="text-2xl font-bold">Grid Change Requests</h1>
         <p className="mt-0.5 max-w-4xl text-sm text-muted-foreground">
           {canSeeEveryonesRequests
-            ? 'Adds, edits and deletes on Expense Data tables. Each goes to the requester’s division Category Head (Segment Master and Size Master also to Planning), then MDM, before it changes the master.'
+            ? 'Adds, edits and deletes on Grid Data tables. Each goes to the requester’s division Category Head (Segment Master and Size Master also to Planning), then MDM, before it changes the master.'
             : isTableRestrictedApprover
             ? `Every add, edit and deletion requested on ${restrictedTableLabels}, and where each one stands before it reaches the master.`
             : canSeeOwnDivisionRequests
