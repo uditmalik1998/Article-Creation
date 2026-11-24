@@ -162,7 +162,7 @@ const PkgCostCard: React.FC<PkgCostCardProps> = ({ collapsed, onToggleCollapse, 
           onClick={onToggleCollapse}
           className="flex w-full items-center justify-between px-2 py-1.5 transition-colors hover:brightness-95"
         >
-          <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider" style={{ color: style.fg }}>
+          <span className="flex items-center gap-1 text-[11.5px] font-bold uppercase tracking-wider" style={{ color: style.fg }}>
             <Package className="h-3.5 w-3.5" />
             PKG COST
           </span>
@@ -185,7 +185,7 @@ const PkgCostCard: React.FC<PkgCostCardProps> = ({ collapsed, onToggleCollapse, 
                     aria-selected={active}
                     onClick={() => setTab(t)}
                     className={cn(
-                      'flex h-8 items-center gap-1.5 px-3 text-[12.5px] font-bold tracking-wide transition-colors',
+                      'flex h-8 items-center gap-1.5 px-3 text-[14px] font-bold tracking-wide transition-colors',
                       active ? 'rounded-t-md bg-white text-slate-900 shadow-[inset_0_-2px_0_#1e293b]' : 'opacity-80 hover:opacity-100',
                     )}
                     style={active ? undefined : { color: style.fg }}
@@ -194,7 +194,7 @@ const PkgCostCard: React.FC<PkgCostCardProps> = ({ collapsed, onToggleCollapse, 
                     {savedTab === t && (
                       <span
                         className={cn(
-                          'rounded px-1 py-px text-[10px] font-semibold tracking-wider',
+                          'rounded px-1 py-px text-[11.5px] font-semibold tracking-wider',
                           active ? 'bg-slate-200 text-slate-700' : 'bg-white/20',
                         )}
                         title="This tab's values are the ones saved"
@@ -209,7 +209,7 @@ const PkgCostCard: React.FC<PkgCostCardProps> = ({ collapsed, onToggleCollapse, 
             {onSaveTab && (
               <div className="flex items-center gap-2 pb-1">
                 {dirty && (
-                  <span className="text-[10.5px] font-medium" style={{ color: style.fg, opacity: 0.8 }}>
+                  <span className="text-[12px] font-medium" style={{ color: style.fg, opacity: 0.8 }}>
                     Unsaved changes
                   </span>
                 )}
@@ -217,7 +217,7 @@ const PkgCostCard: React.FC<PkgCostCardProps> = ({ collapsed, onToggleCollapse, 
                   type="button"
                   onClick={() => { handleSave().catch(() => {}); }}
                   disabled={locked}
-                  className="flex h-7 items-center gap-1.5 rounded-md bg-white px-3 text-[12.5px] font-bold text-slate-900 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-7 items-center gap-1.5 rounded-md bg-white px-3 text-[14px] font-bold text-slate-900 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Save className="h-3.5 w-3.5" />
                   Save {tab}
@@ -235,7 +235,7 @@ const PkgCostCard: React.FC<PkgCostCardProps> = ({ collapsed, onToggleCollapse, 
       {!collapsed && (
         <div className="overflow-x-auto px-1.5 pb-2 pt-1">
           <div className="min-w-[640px]">
-            <div className={cn(GRID, 'border-b border-slate-200 text-[11px] font-semibold tracking-wider text-slate-600')}>
+            <div className={cn(GRID, 'border-b border-slate-200 text-[12.5px] font-semibold tracking-wider text-slate-600')}>
               <div className="px-2.5 py-2">MAT. DESC</div>
               <div className="px-2.5 py-2">ARTICLE NO</div>
               <div className="px-2.5 py-2">ARTICLE DESC</div>
@@ -243,7 +243,7 @@ const PkgCostCard: React.FC<PkgCostCardProps> = ({ collapsed, onToggleCollapse, 
             </div>
             {ROWS.map((r) => (
               <div key={r} className={cn(GRID, 'items-center border-b border-slate-100')}>
-                <div className="px-2.5 py-1.5 text-[12.5px] font-semibold text-slate-800">{r}</div>
+                <div className="px-2.5 py-1.5 text-[14px] font-semibold text-slate-800">{r}</div>
                 <div className="px-1 py-1.5">
                   <TextCell value={val(r, 'artNo')} disabled={locked} placeholder="Enter" onChange={(v) => setVal(r, 'artNo', v)} />
                 </div>
@@ -256,10 +256,10 @@ const PkgCostCard: React.FC<PkgCostCardProps> = ({ collapsed, onToggleCollapse, 
               </div>
             ))}
             <div className={cn(GRID, 'items-center bg-slate-50')}>
-              <div className="col-[1/4] px-2.5 py-2 text-right text-[11px] font-semibold tracking-wider text-slate-600">
+              <div className="col-[1/4] px-2.5 py-2 text-right text-[12.5px] font-semibold tracking-wider text-slate-600">
                 TOTAL NET RATE · {tab}
               </div>
-              <div className="px-2.5 py-2 text-right font-mono text-[12.5px] font-semibold tabular-nums text-slate-900">
+              <div className="px-2.5 py-2 text-right font-mono text-[14px] font-semibold tabular-nums text-slate-900">
                 {total.toFixed(2)}
               </div>
             </div>

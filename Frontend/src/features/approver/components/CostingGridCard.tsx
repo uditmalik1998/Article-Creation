@@ -289,7 +289,7 @@ const SelectCell: React.FC<{
         <button
           type="button"
           disabled={disabled}
-          className="flex h-7 w-full items-center justify-between gap-1 rounded-md border border-slate-200 bg-white px-2 text-[12.5px] hover:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-700 disabled:cursor-default disabled:bg-slate-50 disabled:hover:border-slate-200"
+          className="flex h-8 w-full items-center justify-between gap-1 rounded-md border border-slate-200 bg-white px-2 text-[14px] hover:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-700 disabled:cursor-default disabled:bg-slate-50 disabled:hover:border-slate-200"
         >
           <span className={cn('truncate', empty ? 'text-slate-400' : 'font-medium text-slate-900')}>
             {empty ? (disabled ? '—' : 'Select') : value}
@@ -305,7 +305,7 @@ const SelectCell: React.FC<{
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search..."
-            className="flex-1 bg-transparent text-[12px] outline-none placeholder:text-muted-foreground"
+            className="flex-1 bg-transparent text-[13.5px] outline-none placeholder:text-muted-foreground"
           />
         </div>
         {!empty && (
@@ -315,7 +315,7 @@ const SelectCell: React.FC<{
               onPick(null);
               setOpen(false);
             }}
-            className="flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left text-[12px] font-medium text-red-600 hover:bg-red-50"
+            className="flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left text-[13.5px] font-medium text-red-600 hover:bg-red-50"
           >
             <X className="h-3 w-3 shrink-0" />
             Clear selection
@@ -323,7 +323,7 @@ const SelectCell: React.FC<{
         )}
         <div className="max-h-56 overflow-y-auto py-1">
           {matches.length === 0 ? (
-            <div className="px-3 py-2 text-[12px] text-muted-foreground">No options found</div>
+            <div className="px-3 py-2 text-[13.5px] text-muted-foreground">No options found</div>
           ) : (
             matches.map((o) => (
               <button
@@ -334,13 +334,13 @@ const SelectCell: React.FC<{
                   setOpen(false);
                 }}
                 className={cn(
-                  'flex w-full flex-col px-3 py-1.5 text-left text-[12px] hover:bg-slate-100',
+                  'flex w-full flex-col px-3 py-1.5 text-left text-[13.5px] hover:bg-slate-100',
                   o.shortForm === value && 'bg-slate-100',
                 )}
               >
                 <span className="font-medium">{o.shortForm}</span>
                 {o.fullForm && o.fullForm !== o.shortForm && (
-                  <span className="truncate text-[11px] text-muted-foreground">{o.fullForm}</span>
+                  <span className="truncate text-[12.5px] text-muted-foreground">{o.fullForm}</span>
                 )}
               </button>
             ))
@@ -366,7 +366,7 @@ export const TextCell: React.FC<{
     placeholder={disabled ? '—' : placeholder}
     onChange={(e) => onChange(numeric ? e.target.value.replace(/[^0-9.]/g, '') : e.target.value)}
     className={cn(
-      'h-7 rounded-md border-slate-200 px-2 text-[12.5px] focus-visible:ring-1 focus-visible:ring-slate-700',
+      'h-8 rounded-md border-slate-200 px-2 text-[14px] focus-visible:ring-1 focus-visible:ring-slate-700',
       numeric && 'text-right font-mono tabular-nums',
       strong && 'border-slate-300 font-semibold',
     )}
@@ -862,6 +862,8 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
     return () => { liveCostActTotals.delete(liveActKey); bumpLiveCostAct(); };
   }, [liveActKey, editableTotals, liveActTotal]);
 
+  // Soft zebra on alternate item rows (FG cards "Refined rows", 2026-11-24).
+  const zebra: Record<string, boolean> = Object.fromEntries(fixedRows.map((r, i) => [r, i % 2 === 1]));
   const renderRow = (row: string, last: boolean, withCheck = false) => {
     // DESC is auto-built: STYLE-TYPE (e.g. KUNDI_BTN-26L)
     const desc = [cellVal(row, 'style'), cellVal(row, 'type')].filter((p) => p && !/^-+$/.test(p)).join('-');
@@ -870,9 +872,9 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
     const bgtLoading = autoBgtLoading[row];
     const off = withCheck && !isChecked(row);
     return (
-      <div key={row} className={cn(GRID, 'items-center', !last && 'border-b border-slate-100', off && 'opacity-60')}>
+      <div key={row} className={cn(GRID, 'items-center transition-colors hover:bg-slate-100/70', zebra[row] && 'bg-slate-50/80', !last && 'border-b border-slate-100', off && 'opacity-60')}>
         {withCheck ? (
-          <label className="flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-[12.5px] font-semibold text-slate-800">
+          <label className="flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-[14px] font-semibold text-slate-800">
             <input
               type="checkbox"
               checked={!off}
@@ -883,7 +885,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
             <span className="truncate">{row}</span>
           </label>
         ) : isRepeatCopy(row) ? (
-          <div className="flex items-center justify-between gap-1 py-1.5 pl-2.5 pr-1 text-[12.5px] font-semibold text-slate-700">
+          <div className="flex items-center justify-between gap-1 py-1.5 pl-2.5 pr-1 text-[14px] font-semibold text-slate-700">
             <span className="truncate">{row}</span>
             {!locked && (
               <button
@@ -898,19 +900,19 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
             )}
           </div>
         ) : config.repeatable?.includes(row) ? (
-          <div className="flex items-center gap-1.5 px-2.5 py-1.5 text-[12.5px] font-semibold text-slate-800">
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 text-[14px] font-semibold text-slate-800">
             <span className="truncate">{row}</span>
-            <span className="rounded-full bg-slate-200 px-1.5 py-px text-[11px] font-bold text-slate-700" title={`${1 + (repeats[row]?.length ?? 0)} ${row} row(s)`}>
+            <span className="rounded-full bg-slate-200 px-1.5 py-px text-[12.5px] font-bold text-slate-700" title={`${1 + (repeats[row]?.length ?? 0)} ${row} row(s)`}>
               ×{1 + (repeats[row]?.length ?? 0)}
             </span>
           </div>
         ) : (
-          <div className="px-2.5 py-1.5 text-[12.5px] font-semibold text-slate-800">{row}</div>
+          <div className="px-2.5 py-1.5 text-[14px] font-semibold text-slate-800">{row}</div>
         )}
         <div className="px-1 py-1.5">{renderSpecCell(row, 'type')}</div>
         <div className="px-1 py-1.5">{renderSpecCell(row, 'style')}</div>
         <div className="px-1 py-1.5">{renderSpecCell(row, 'c3')}</div>
-        <div className={cn('truncate px-2.5 py-1.5 font-mono text-[12px]', desc ? 'text-slate-900' : 'text-slate-400')}>
+        <div className={cn('truncate px-2.5 py-1.5 font-mono text-[13.5px]', desc ? 'text-slate-900' : 'text-slate-400')}>
           {desc || '—'}
         </div>
         {config.rateQty && (
@@ -930,7 +932,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
         ) : (
           <div
             className={cn(
-              'px-2.5 py-1.5 text-right font-mono text-[12px]',
+              'px-2.5 py-1.5 text-right font-mono text-[13.5px]',
               bgtLoading ? 'text-slate-300' : autoBgtVal ? 'font-semibold text-slate-900' : 'text-slate-400',
             )}
             title={autoBgtVal ? `AUTO-BGT (BT-${tabIdx + 1})` : 'Auto budget — select a spec value'}
@@ -959,7 +961,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
           <button
             type="button"
             onClick={onToggleCollapse}
-            className="flex flex-1 items-center gap-1 self-stretch px-2 py-1.5 text-left text-[10px] font-bold uppercase tracking-wider transition-colors hover:brightness-95"
+            className="flex flex-1 items-center gap-1 self-stretch px-2 py-1.5 text-left text-[11.5px] font-bold uppercase tracking-wider transition-colors hover:brightness-95"
             style={{ color: style.fg }}
           >
             {icon}
@@ -968,7 +970,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
           {tabSave && tabs.length === 1 && !collapsed && (
             <div className="flex items-center gap-2">
               {dirty && (
-                <span className="text-[10.5px] font-medium" style={{ color: style.fg, opacity: 0.8 }}>
+                <span className="text-[12px] font-medium" style={{ color: style.fg, opacity: 0.8 }}>
                   Unsaved changes
                 </span>
               )}
@@ -976,7 +978,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
                 type="button"
                 onClick={() => { handleSaveTab().catch(() => {}); }}
                 disabled={locked}
-                className="flex h-6 items-center gap-1 rounded-md bg-white px-2.5 text-[11px] font-bold text-slate-900 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-6 items-center gap-1 rounded-md bg-white px-2.5 text-[12.5px] font-bold text-slate-900 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Save className="h-3 w-3" />
                 Save
@@ -1009,7 +1011,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
                     aria-selected={active}
                     onClick={() => selectTab(t)}
                     className={cn(
-                      'flex h-8 items-center gap-1.5 px-3 text-[12.5px] font-bold tracking-wide transition-colors',
+                      'flex h-8 items-center gap-1.5 px-3 text-[14px] font-bold tracking-wide transition-colors',
                       active ? 'rounded-t-md bg-white text-slate-900 shadow-[inset_0_-2px_0_#1e293b]' : 'opacity-80 hover:opacity-100',
                     )}
                     style={active ? undefined : { color: style.fg }}
@@ -1018,7 +1020,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
                     {tabSave && savedTab === t && (
                       <span
                         className={cn(
-                          'rounded px-1 py-px text-[10px] font-semibold tracking-wider',
+                          'rounded px-1 py-px text-[11.5px] font-semibold tracking-wider',
                           active ? 'bg-slate-200 text-slate-700' : 'bg-white/20',
                         )}
                         title="This tab's values are the ones saved"
@@ -1033,7 +1035,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
             {tabSave && (
               <div className="flex items-center gap-2 pb-1">
                 {dirty && (
-                  <span className="text-[10.5px] font-medium" style={{ color: style.fg, opacity: 0.8 }}>
+                  <span className="text-[12px] font-medium" style={{ color: style.fg, opacity: 0.8 }}>
                     Unsaved changes
                   </span>
                 )}
@@ -1041,7 +1043,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
                   type="button"
                   onClick={() => { handleSaveTab().catch(() => {}); }}
                   disabled={locked}
-                  className="flex h-7 items-center gap-1.5 rounded-md bg-white px-3 text-[12.5px] font-bold text-slate-900 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-7 items-center gap-1.5 rounded-md bg-white px-3 text-[14px] font-bold text-slate-900 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Save className="h-3.5 w-3.5" />
                   Save {tab}
@@ -1062,15 +1064,15 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
             <div className={config.rateQty ? 'min-w-[1150px]' : 'min-w-[1000px]'}>
               {/* Column groups */}
               <div className={cn(GRID, 'pt-1.5')}>
-                <div className="flex h-6 items-center px-2.5 text-[10.5px] font-bold tracking-[0.1em] text-slate-500">ITEM</div>
-                <div className={cn(config.rateQty ? 'col-[2/8]' : 'col-[2/6]', 'mx-0.5 flex h-6 items-center rounded-t-md bg-slate-100 px-2.5 text-[10.5px] font-bold tracking-[0.1em] text-slate-700')}>
+                <div className="flex h-6 items-center px-2.5 text-[12px] font-bold tracking-[0.1em] text-slate-500">ITEM</div>
+                <div className={cn(config.rateQty ? 'col-[2/8]' : 'col-[2/6]', 'mx-0.5 flex h-6 items-center rounded-t-md bg-slate-100 px-2.5 text-[12px] font-bold tracking-[0.1em] text-slate-700')}>
                   SPECIFICATION
                 </div>
-                <div className={cn(config.rateQty ? 'col-[8/12]' : 'col-[6/10]', 'mx-0.5 flex h-6 items-center rounded-t-md bg-slate-800 px-2.5 text-[10.5px] font-bold tracking-[0.1em] text-slate-50')}>
+                <div className={cn(config.rateQty ? 'col-[8/12]' : 'col-[6/10]', 'mx-0.5 flex h-6 items-center rounded-t-md bg-slate-800 px-2.5 text-[12px] font-bold tracking-[0.1em] text-slate-50')}>
                   COSTING
                 </div>
               </div>
-              <div className={cn(GRID, 'border-b border-slate-200 text-[11px] font-semibold tracking-wider text-slate-600')}>
+              <div className={cn(GRID, 'border-b border-slate-200 text-[12.5px] font-semibold tracking-wider text-slate-600')}>
                 <div className="px-2.5 py-2">{config.itemLabel}</div>
                 <div className="px-2.5 py-2">TYPE</div>
                 <div className="px-2.5 py-2">STYLE</div>
@@ -1105,7 +1107,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
                         <button
                           type="button"
                           onClick={() => addRepeat(r)}
-                          className="inline-flex h-7 items-center gap-1.5 rounded-md border border-dashed border-slate-400 bg-white px-3 text-[12px] font-semibold text-slate-800 hover:border-slate-600 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-700"
+                          className="inline-flex h-7 items-center gap-1.5 rounded-md border border-dashed border-slate-400 bg-white px-3 text-[13.5px] font-semibold text-slate-800 hover:border-slate-600 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-700"
                         >
                           <Plus className="h-3.5 w-3.5" />
                           Add {r}
@@ -1129,16 +1131,16 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
                   onClick={() => setOtherOpen((o) => !o)}
                   className="flex h-full min-w-0 flex-1 items-center justify-between gap-3 px-3 text-left"
                 >
-                  <span className="flex items-center gap-2 text-[12px] font-bold tracking-wider text-slate-700">
+                  <span className="flex items-center gap-2 text-[13.5px] font-bold tracking-wider text-slate-700">
                     <ChevronRight className={cn('h-3.5 w-3.5 transition-transform', otherOpen && 'rotate-90')} />
                     {other.label}
-                    <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[11.5px] font-medium tracking-normal text-slate-600">
+                    <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[13px] font-medium tracking-normal text-slate-600">
                       {checkable
                         ? `${other.rows.filter(isChecked).length} / ${other.rows.length} selected`
                         : `${filledCount(other.rows)} / ${other.rows.length} filled`}
                     </span>
                   </span>
-                  <span className="hidden truncate text-[12px] text-slate-500 sm:inline">
+                  <span className="hidden truncate text-[13.5px] text-slate-500 sm:inline">
                     {otherOpen ? 'Click to collapse' : other.rows.join(' · ')}
                   </span>
                 </button>
@@ -1149,7 +1151,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
                       type="button"
                       onClick={() => setAllChecked(!all)}
                       disabled={locked}
-                      className="mr-2 h-7 shrink-0 rounded-md border border-slate-300 bg-white px-2.5 text-[12px] font-semibold text-slate-800 hover:border-slate-400 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="mr-2 h-7 shrink-0 rounded-md border border-slate-300 bg-white px-2.5 text-[13.5px] font-semibold text-slate-800 hover:border-slate-400 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {all ? 'Clear all' : 'Select all'}
                     </button>
@@ -1175,8 +1177,8 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
               <div className={config.rateQty ? 'min-w-[1150px]' : 'min-w-[1000px]'}>
                 <div className={cn(GRID, 'items-center py-2')}>
                   <div className={cn(config.rateQty ? 'col-[1/8]' : 'col-[1/6]', 'flex flex-col px-2.5')}>
-                    <span className="text-[13px] font-extrabold tracking-wider">TOTAL · {tab}</span>
-                    <span className="text-[11.5px] text-slate-300">
+                    <span className="text-[14.5px] font-extrabold tracking-wider">TOTAL · {tab}</span>
+                    <span className="text-[13px] text-slate-300">
                       {fixedRows.length} items
                       {(() => {
                         const copies = fixedRows.reduce((n, r) => n + (repeats[r]?.length ?? 0), 0);
@@ -1196,11 +1198,11 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
                           aria-label={`Total ${c === 'rough' ? config.roughLabel ?? 'ROUGH-V2' : c === 'vdr' ? 'VDR COST' : 'FINAL COST'}`}
                           title="Sum of the rows — type to override, clear to go back to the sum"
                           onChange={(e) => setLocalVal(TOTAL_ROW, c, e.target.value)}
-                          className="h-7 w-full rounded-md border border-slate-600 bg-slate-800 px-2 text-right font-mono text-[13.5px] font-extrabold tabular-nums text-white outline-none placeholder:text-slate-500 focus:border-slate-300 disabled:opacity-70"
+                          className="h-7 w-full rounded-md border border-slate-600 bg-slate-800 px-2 text-right font-mono text-[15px] font-extrabold tabular-nums text-white outline-none placeholder:text-slate-500 focus:border-slate-300 disabled:opacity-70"
                         />
                       </div>
                     ) : (
-                      <div key={c} className="px-2.5 text-right font-mono text-[13.5px] font-extrabold tabular-nums">
+                      <div key={c} className="px-2.5 text-right font-mono text-[15px] font-extrabold tabular-nums">
                         {totalOf(c)}
                       </div>
                     ),
