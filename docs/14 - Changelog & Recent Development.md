@@ -5,6 +5,14 @@
 
 ---
 
+## 2026-11-24 — FG FAB / BODY cards: AI result column
+
+- Same idea as the Fabric FAB card: a read-only grey "AI result" column between Attribute and Value on the FG New + Created pages (FAB and BODY cards, `ApproverArticleList.tsx`; header row Attribute / AI result / Value). "—" when empty (costing rows, Shade, M_FAB_VDR, M_FAB_DIV / Set are never extracted).
+- DB (applied 2026-11-24): `extraction_results_flat.fg_ai_attributes JSONB` — flat, keyed by card schema key, all 31 keys present: `{"yarn_01":"C","weave":"POP","neck":"RN","fit":null,…}`. Prisma `fgAiAttributes Json?`.
+- Written only at extraction time: SRM / raw-articles VLM (`enrichSrmRowWithVlm`, same grid-snapped values it writes to the columns) and the manual extraction page (`enhancedExtractionController`, snapshot of the flat row after flatten + direct fill, before watcher overrides). Helper `services/fgAiAttributes.ts` (FG_AI_FIELDS field ↔ schema key). Page saves can't touch it (not in the update whitelist).
+- Added to the 5 FG explicit selects in ApproverController; Duplicate + KIDS duplicate copy it (`?? Prisma.DbNull`).
+- No backfill: only articles extracted after the backend deploy get values; older rows show "—". Backend needs restart (new Prisma client).
+
 ## 2026-11-24 — Renamed: Expense Data → Grid Data, Expense Change Requests → Grid Change Requests
 
 - Labels only: sidebar items, page titles (Grid Data, Grid Change Requests), breadcrumb / back links ("Back to Grid Data"), Change Requests description, no-access messages (frontend + backend `requireExpenseView`, "no approval stages configured for Grid Data changes").

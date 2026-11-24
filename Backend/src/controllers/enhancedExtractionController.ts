@@ -436,6 +436,21 @@ export class EnhancedExtractionController {
           if (Object.keys(directFill).length > 0) {
             await prisma.extractionResultFlat.update({ where: { id: flatId }, data: directFill });
           }
+
+          // FG FAB / BODY card "AI result" column: snapshot the AI values just written
+          // (before any watcher override below), kept apart from the editable columns.
+          try {
+            const { FG_AI_SELECT, buildFgAiAttributes } = await import('../services/fgAiAttributes');
+            const aiRow = await prisma.extractionResultFlat.findUnique({ where: { id: flatId }, select: FG_AI_SELECT as any });
+            if (aiRow) {
+              await prisma.extractionResultFlat.update({
+                where: { id: flatId },
+                data: { fgAiAttributes: buildFgAiAttributes(aiRow as Record<string, unknown>) },
+              });
+            }
+          } catch (e: any) {
+            console.warn('[FG AI attrs] snapshot failed:', e?.message);
+          }
         }
       } catch (flatError) {
         console.warn('Failed to flatten extraction results:', flatError);

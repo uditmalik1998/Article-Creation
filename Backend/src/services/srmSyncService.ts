@@ -31,6 +31,7 @@ import { storageService } from './storageService';
 import { upsertRawArticleFromSrm, RAW_PIPELINE_CUTOFF } from './rawArticleExtractionService';
 import { hierarchyService } from './hierarchyService';
 import { snapValueToGrid } from '../utils/gridSnap';
+import { buildFgAiAttributes } from './fgAiAttributes';
 
 const SRM_API_BASE = 'https://pymdqnnwwxrgeolvgvgv.supabase.co/functions/v1/srm-presentation-images-api';
 const SRM_API_KEY = process.env.SRM_API_KEY || 'v2@123';
@@ -618,6 +619,9 @@ async function enrichSrmRowWithVlm(
       if (aiSam?.stitching != null) updates.aiCmpCostStitching = aiSam.stitching;
       if (aiSam?.ironing != null) updates.aiCmpCostIroning = aiSam.ironing;
       if (aiSam?.finishing != null) updates.aiCmpCostFinishing = aiSam.finishing;
+
+      // FG FAB / BODY card "AI result" column — copy of the AI codes, never edited later.
+      updates.fgAiAttributes = buildFgAiAttributes(updates);
 
       // ── Save to DB ─────────────────────────────────────────────────────────
       const updatedRow = await prisma.extractionResultFlat.update({ where: { id: flatId }, data: updates });

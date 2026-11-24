@@ -132,6 +132,8 @@ export interface ApproverItem {
   aiCmpCostStitching?: number | string | null;
   aiCmpCostIroning?: number | string | null;
   aiCmpCostFinishing?: number | string | null;
+  /** FAB / BODY "AI result" column (read-only): AI value per card schema key, e.g. {"yarn_01":"C"}. */
+  fgAiAttributes?: Record<string, string | null> | null;
   cuttingBgtPrVal: number | string | null;
   cuttingActPrVal: number | string | null;
   cuttingVendorPrVal: number | string | null;

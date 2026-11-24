@@ -17343,6 +17343,7 @@ export namespace Prisma {
     srmOriginalDesignNumber: number
     srmUniqueId: number
     imageExtractionRawData: number
+    fgAiAttributes: number
     _all: number
   }
 
@@ -18848,6 +18849,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: true
     srmUniqueId?: true
     imageExtractionRawData?: true
+    fgAiAttributes?: true
     _all?: true
   }
 
@@ -19288,6 +19290,7 @@ export namespace Prisma {
     srmOriginalDesignNumber: string | null
     srmUniqueId: string | null
     imageExtractionRawData: JsonValue | null
+    fgAiAttributes: JsonValue | null
     _count: ExtractionResultFlatCountAggregateOutputType | null
     _avg: ExtractionResultFlatAvgAggregateOutputType | null
     _sum: ExtractionResultFlatSumAggregateOutputType | null
@@ -19660,6 +19663,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: boolean
     srmUniqueId?: boolean
     imageExtractionRawData?: boolean
+    fgAiAttributes?: boolean
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     comboParent?: boolean | ExtractionResultFlat$comboParentArgs<ExtArgs>
     comboChildren?: boolean | ExtractionResultFlat$comboChildrenArgs<ExtArgs>
@@ -20019,6 +20023,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: boolean
     srmUniqueId?: boolean
     imageExtractionRawData?: boolean
+    fgAiAttributes?: boolean
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     comboParent?: boolean | ExtractionResultFlat$comboParentArgs<ExtArgs>
     job?: boolean | ExtractionResultFlat$jobArgs<ExtArgs>
@@ -20375,6 +20380,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: boolean
     srmUniqueId?: boolean
     imageExtractionRawData?: boolean
+    fgAiAttributes?: boolean
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     comboParent?: boolean | ExtractionResultFlat$comboParentArgs<ExtArgs>
     job?: boolean | ExtractionResultFlat$jobArgs<ExtArgs>
@@ -20731,9 +20737,10 @@ export namespace Prisma {
     srmOriginalDesignNumber?: boolean
     srmUniqueId?: boolean
     imageExtractionRawData?: boolean
+    fgAiAttributes?: boolean
   }
 
-  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageUrl" | "oldImageUrl" | "sourceImageUrl" | "aiCmpCostCutting" | "aiCmpCostStitching" | "aiCmpCostIroning" | "aiCmpCostFinishing" | "backImageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "creatorUser" | "modifyUser" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "mainMvgr" | "mFab2" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "totalBgtPrVal" | "totalActPrVal" | "totalVendorPrVal" | "totalFinalPrVal" | "bTrimType" | "bTrimTotalAutoBgt" | "bTrimTotalRoughV2" | "bTrimTotalVdrCost" | "bTrimTotalFinalCost" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "elasticAutoBgt" | "elasticRoughV2" | "elasticVdrCost" | "elasticFinalCost" | "fusingAutoBgt" | "fusingRoughV2" | "fusingVdrCost" | "fusingFinalCost" | "badgeAutoBgt" | "badgeRoughV2" | "badgeVdrCost" | "badgeFinalCost" | "rivetAutoBgt" | "rivetRoughV2" | "rivetVdrCost" | "rivetFinalCost" | "tapeAutoBgt" | "tapeRoughV2" | "tapeVdrCost" | "tapeFinalCost" | "otherAutoBgt" | "otherRoughV2" | "otherVdrCost" | "otherFinalCost" | "adjusterAutoBgt" | "adjusterRoughV2" | "adjusterVdrCost" | "adjusterFinalCost" | "brotchAutoBgt" | "brotchRoughV2" | "brotchVdrCost" | "brotchFinalCost" | "buckleAutoBgt" | "buckleRoughV2" | "buckleVdrCost" | "buckleFinalCost" | "eyeletsAutoBgt" | "eyeletsRoughV2" | "eyeletsVdrCost" | "eyeletsFinalCost" | "hangingDRingAutoBgt" | "hangingDRingRoughV2" | "hangingDRingVdrCost" | "hangingDRingFinalCost" | "hookAutoBgt" | "hookRoughV2" | "hookVdrCost" | "hookFinalCost" | "labelAutoBgt" | "labelRoughV2" | "labelVdrCost" | "labelFinalCost" | "laceAutoBgt" | "laceRoughV2" | "laceVdrCost" | "laceFinalCost" | "pockettingFabricAutoBgt" | "pockettingFabricRoughV2" | "pockettingFabricVdrCost" | "pockettingFabricFinalCost" | "pockettingReadymadeAutoBgt" | "pockettingReadymadeRoughV2" | "pockettingReadymadeVdrCost" | "pockettingReadymadeFinalCost" | "santaAutoBgt" | "santaRoughV2" | "santaVdrCost" | "santaFinalCost" | "stopperAutoBgt" | "stopperRoughV2" | "stopperVdrCost" | "stopperFinalCost" | "tagAutoBgt" | "tagRoughV2" | "tagVdrCost" | "tagFinalCost" | "tasselsAutoBgt" | "tasselsRoughV2" | "tasselsVdrCost" | "tasselsFinalCost" | "mBtnRate" | "mBtnQty" | "dcRate" | "dcQty" | "zipRate" | "zipQty" | "patchRate" | "patchQty" | "hTrfRate" | "hTrfQty" | "elasticRate" | "elasticQty" | "fusingRate" | "fusingQty" | "badgeRate" | "badgeQty" | "rivetRate" | "rivetQty" | "tapeRate" | "tapeQty" | "otherRate" | "otherQty" | "adjusterRate" | "adjusterQty" | "brotchRate" | "brotchQty" | "buckleRate" | "buckleQty" | "eyeletsRate" | "eyeletsQty" | "hangingDRingRate" | "hangingDRingQty" | "hookRate" | "hookQty" | "labelRate" | "labelQty" | "laceRate" | "laceQty" | "pockettingFabricRate" | "pockettingFabricQty" | "pockettingReadymadeRate" | "pockettingReadymadeQty" | "santaRate" | "santaQty" | "stopperRate" | "stopperQty" | "tagRate" | "tagQty" | "tasselsRate" | "tasselsQty" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "vaddPrintJson" | "vaddEmpJson" | "vaddTotalAutoBgt" | "vaddTotalRoughV2" | "vaddTotalVendorCost" | "vaddTotalFinalCost" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "presentationsType" | "approvalStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "setLinkStatus" | "setLinkMessage" | "setLinkAttempts" | "setLinkedAt" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData", ExtArgs["result"]["extractionResultFlat"]>
+  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageUrl" | "oldImageUrl" | "sourceImageUrl" | "aiCmpCostCutting" | "aiCmpCostStitching" | "aiCmpCostIroning" | "aiCmpCostFinishing" | "backImageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "creatorUser" | "modifyUser" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "mainMvgr" | "mFab2" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "totalBgtPrVal" | "totalActPrVal" | "totalVendorPrVal" | "totalFinalPrVal" | "bTrimType" | "bTrimTotalAutoBgt" | "bTrimTotalRoughV2" | "bTrimTotalVdrCost" | "bTrimTotalFinalCost" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "elasticAutoBgt" | "elasticRoughV2" | "elasticVdrCost" | "elasticFinalCost" | "fusingAutoBgt" | "fusingRoughV2" | "fusingVdrCost" | "fusingFinalCost" | "badgeAutoBgt" | "badgeRoughV2" | "badgeVdrCost" | "badgeFinalCost" | "rivetAutoBgt" | "rivetRoughV2" | "rivetVdrCost" | "rivetFinalCost" | "tapeAutoBgt" | "tapeRoughV2" | "tapeVdrCost" | "tapeFinalCost" | "otherAutoBgt" | "otherRoughV2" | "otherVdrCost" | "otherFinalCost" | "adjusterAutoBgt" | "adjusterRoughV2" | "adjusterVdrCost" | "adjusterFinalCost" | "brotchAutoBgt" | "brotchRoughV2" | "brotchVdrCost" | "brotchFinalCost" | "buckleAutoBgt" | "buckleRoughV2" | "buckleVdrCost" | "buckleFinalCost" | "eyeletsAutoBgt" | "eyeletsRoughV2" | "eyeletsVdrCost" | "eyeletsFinalCost" | "hangingDRingAutoBgt" | "hangingDRingRoughV2" | "hangingDRingVdrCost" | "hangingDRingFinalCost" | "hookAutoBgt" | "hookRoughV2" | "hookVdrCost" | "hookFinalCost" | "labelAutoBgt" | "labelRoughV2" | "labelVdrCost" | "labelFinalCost" | "laceAutoBgt" | "laceRoughV2" | "laceVdrCost" | "laceFinalCost" | "pockettingFabricAutoBgt" | "pockettingFabricRoughV2" | "pockettingFabricVdrCost" | "pockettingFabricFinalCost" | "pockettingReadymadeAutoBgt" | "pockettingReadymadeRoughV2" | "pockettingReadymadeVdrCost" | "pockettingReadymadeFinalCost" | "santaAutoBgt" | "santaRoughV2" | "santaVdrCost" | "santaFinalCost" | "stopperAutoBgt" | "stopperRoughV2" | "stopperVdrCost" | "stopperFinalCost" | "tagAutoBgt" | "tagRoughV2" | "tagVdrCost" | "tagFinalCost" | "tasselsAutoBgt" | "tasselsRoughV2" | "tasselsVdrCost" | "tasselsFinalCost" | "mBtnRate" | "mBtnQty" | "dcRate" | "dcQty" | "zipRate" | "zipQty" | "patchRate" | "patchQty" | "hTrfRate" | "hTrfQty" | "elasticRate" | "elasticQty" | "fusingRate" | "fusingQty" | "badgeRate" | "badgeQty" | "rivetRate" | "rivetQty" | "tapeRate" | "tapeQty" | "otherRate" | "otherQty" | "adjusterRate" | "adjusterQty" | "brotchRate" | "brotchQty" | "buckleRate" | "buckleQty" | "eyeletsRate" | "eyeletsQty" | "hangingDRingRate" | "hangingDRingQty" | "hookRate" | "hookQty" | "labelRate" | "labelQty" | "laceRate" | "laceQty" | "pockettingFabricRate" | "pockettingFabricQty" | "pockettingReadymadeRate" | "pockettingReadymadeQty" | "santaRate" | "santaQty" | "stopperRate" | "stopperQty" | "tagRate" | "tagQty" | "tasselsRate" | "tasselsQty" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "vaddPrintJson" | "vaddEmpJson" | "vaddTotalAutoBgt" | "vaddTotalRoughV2" | "vaddTotalVendorCost" | "vaddTotalFinalCost" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "presentationsType" | "approvalStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "setLinkStatus" | "setLinkMessage" | "setLinkAttempts" | "setLinkedAt" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData" | "fgAiAttributes", ExtArgs["result"]["extractionResultFlat"]>
   export type ExtractionResultFlatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     comboParent?: boolean | ExtractionResultFlat$comboParentArgs<ExtArgs>
@@ -21113,6 +21120,7 @@ export namespace Prisma {
       srmOriginalDesignNumber: string | null
       srmUniqueId: string | null
       imageExtractionRawData: Prisma.JsonValue | null
+      fgAiAttributes: Prisma.JsonValue | null
     }, ExtArgs["result"]["extractionResultFlat"]>
     composites: {}
   }
@@ -21891,6 +21899,7 @@ export namespace Prisma {
     readonly srmOriginalDesignNumber: FieldRef<"ExtractionResultFlat", 'String'>
     readonly srmUniqueId: FieldRef<"ExtractionResultFlat", 'String'>
     readonly imageExtractionRawData: FieldRef<"ExtractionResultFlat", 'Json'>
+    readonly fgAiAttributes: FieldRef<"ExtractionResultFlat", 'Json'>
   }
     
 
@@ -92248,7 +92257,8 @@ export namespace Prisma {
     sapSyncMessage: 'sapSyncMessage',
     srmOriginalDesignNumber: 'srmOriginalDesignNumber',
     srmUniqueId: 'srmUniqueId',
-    imageExtractionRawData: 'imageExtractionRawData'
+    imageExtractionRawData: 'imageExtractionRawData',
+    fgAiAttributes: 'fgAiAttributes'
   };
 
   export type ExtractionResultFlatScalarFieldEnum = (typeof ExtractionResultFlatScalarFieldEnum)[keyof typeof ExtractionResultFlatScalarFieldEnum]
@@ -96346,6 +96356,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     srmUniqueId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     imageExtractionRawData?: JsonNullableFilter<"ExtractionResultFlat">
+    fgAiAttributes?: JsonNullableFilter<"ExtractionResultFlat">
     approver?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     comboParent?: XOR<ExtractionResultFlatNullableScalarRelationFilter, ExtractionResultFlatWhereInput> | null
     comboChildren?: ExtractionResultFlatListRelationFilter
@@ -96704,6 +96715,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: SortOrderInput | SortOrder
     srmUniqueId?: SortOrderInput | SortOrder
     imageExtractionRawData?: SortOrderInput | SortOrder
+    fgAiAttributes?: SortOrderInput | SortOrder
     approver?: UserOrderByWithRelationInput
     comboParent?: ExtractionResultFlatOrderByWithRelationInput
     comboChildren?: ExtractionResultFlatOrderByRelationAggregateInput
@@ -97066,6 +97078,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     srmUniqueId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     imageExtractionRawData?: JsonNullableFilter<"ExtractionResultFlat">
+    fgAiAttributes?: JsonNullableFilter<"ExtractionResultFlat">
     approver?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     comboParent?: XOR<ExtractionResultFlatNullableScalarRelationFilter, ExtractionResultFlatWhereInput> | null
     comboChildren?: ExtractionResultFlatListRelationFilter
@@ -97424,6 +97437,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: SortOrderInput | SortOrder
     srmUniqueId?: SortOrderInput | SortOrder
     imageExtractionRawData?: SortOrderInput | SortOrder
+    fgAiAttributes?: SortOrderInput | SortOrder
     _count?: ExtractionResultFlatCountOrderByAggregateInput
     _avg?: ExtractionResultFlatAvgOrderByAggregateInput
     _max?: ExtractionResultFlatMaxOrderByAggregateInput
@@ -97785,6 +97799,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     srmUniqueId?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     imageExtractionRawData?: JsonNullableWithAggregatesFilter<"ExtractionResultFlat">
+    fgAiAttributes?: JsonNullableWithAggregatesFilter<"ExtractionResultFlat">
   }
 
   export type ModelGenerationResultWhereInput = {
@@ -106179,6 +106194,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     approver?: UserCreateNestedOneWithoutApprovedItemsInput
     comboParent?: ExtractionResultFlatCreateNestedOneWithoutComboChildrenInput
     comboChildren?: ExtractionResultFlatCreateNestedManyWithoutComboParentInput
@@ -106537,6 +106553,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     comboChildren?: ExtractionResultFlatUncheckedCreateNestedManyWithoutComboParentInput
     srmSyncRunItems?: SrmSyncRunItemUncheckedCreateNestedManyWithoutFlatInput
   }
@@ -106889,6 +106906,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     approver?: UserUpdateOneWithoutApprovedItemsNestedInput
     comboParent?: ExtractionResultFlatUpdateOneWithoutComboChildrenNestedInput
     comboChildren?: ExtractionResultFlatUpdateManyWithoutComboParentNestedInput
@@ -107247,6 +107265,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     comboChildren?: ExtractionResultFlatUncheckedUpdateManyWithoutComboParentNestedInput
     srmSyncRunItems?: SrmSyncRunItemUncheckedUpdateManyWithoutFlatNestedInput
   }
@@ -107602,6 +107621,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ExtractionResultFlatUpdateManyMutationInput = {
@@ -107952,6 +107972,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ExtractionResultFlatUncheckedUpdateManyInput = {
@@ -108305,6 +108326,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ModelGenerationResultCreateInput = {
@@ -118459,6 +118481,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: SortOrder
     srmUniqueId?: SortOrder
     imageExtractionRawData?: SortOrder
+    fgAiAttributes?: SortOrder
   }
 
   export type ExtractionResultFlatAvgOrderByAggregateInput = {
@@ -128206,6 +128229,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     approver?: UserCreateNestedOneWithoutApprovedItemsInput
     comboParent?: ExtractionResultFlatCreateNestedOneWithoutComboChildrenInput
     comboChildren?: ExtractionResultFlatCreateNestedManyWithoutComboParentInput
@@ -128562,6 +128586,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     comboChildren?: ExtractionResultFlatUncheckedCreateNestedManyWithoutComboParentInput
     srmSyncRunItems?: SrmSyncRunItemUncheckedCreateNestedManyWithoutFlatInput
   }
@@ -129026,6 +129051,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     approver?: UserUpdateOneWithoutApprovedItemsNestedInput
     comboParent?: ExtractionResultFlatUpdateOneWithoutComboChildrenNestedInput
     comboChildren?: ExtractionResultFlatUpdateManyWithoutComboParentNestedInput
@@ -129382,6 +129408,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     comboChildren?: ExtractionResultFlatUncheckedUpdateManyWithoutComboParentNestedInput
     srmSyncRunItems?: SrmSyncRunItemUncheckedUpdateManyWithoutFlatNestedInput
   }
@@ -129778,6 +129805,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     approver?: UserCreateNestedOneWithoutApprovedItemsInput
     comboParent?: ExtractionResultFlatCreateNestedOneWithoutComboChildrenInput
     job?: ExtractionJobCreateNestedOneWithoutFlatResultInput
@@ -130135,6 +130163,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     srmSyncRunItems?: SrmSyncRunItemUncheckedCreateNestedManyWithoutFlatInput
   }
 
@@ -130491,6 +130520,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     approver?: UserCreateNestedOneWithoutApprovedItemsInput
     comboChildren?: ExtractionResultFlatCreateNestedManyWithoutComboParentInput
     job?: ExtractionJobCreateNestedOneWithoutFlatResultInput
@@ -130847,6 +130877,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     comboChildren?: ExtractionResultFlatUncheckedCreateNestedManyWithoutComboParentInput
     srmSyncRunItems?: SrmSyncRunItemUncheckedCreateNestedManyWithoutFlatInput
   }
@@ -131359,6 +131390,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     approver?: UserUpdateOneWithoutApprovedItemsNestedInput
     comboParent?: ExtractionResultFlatUpdateOneWithoutComboChildrenNestedInput
     job?: ExtractionJobUpdateOneWithoutFlatResultNestedInput
@@ -131716,6 +131748,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     srmSyncRunItems?: SrmSyncRunItemUncheckedUpdateManyWithoutFlatNestedInput
   }
 
@@ -132089,6 +132122,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     srmUniqueId?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     imageExtractionRawData?: JsonNullableFilter<"ExtractionResultFlat">
+    fgAiAttributes?: JsonNullableFilter<"ExtractionResultFlat">
   }
 
   export type ExtractionJobUpsertWithoutFlatResultInput = {
@@ -132662,6 +132696,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     comboParent?: ExtractionResultFlatCreateNestedOneWithoutComboChildrenInput
     comboChildren?: ExtractionResultFlatCreateNestedManyWithoutComboParentInput
     job?: ExtractionJobCreateNestedOneWithoutFlatResultInput
@@ -133018,6 +133053,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     comboChildren?: ExtractionResultFlatUncheckedCreateNestedManyWithoutComboParentInput
     srmSyncRunItems?: SrmSyncRunItemUncheckedCreateNestedManyWithoutFlatInput
   }
@@ -134916,6 +134952,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     approver?: UserCreateNestedOneWithoutApprovedItemsInput
     comboParent?: ExtractionResultFlatCreateNestedOneWithoutComboChildrenInput
     comboChildren?: ExtractionResultFlatCreateNestedManyWithoutComboParentInput
@@ -135273,6 +135310,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     comboChildren?: ExtractionResultFlatUncheckedCreateNestedManyWithoutComboParentInput
   }
 
@@ -135677,6 +135715,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     approver?: UserUpdateOneWithoutApprovedItemsNestedInput
     comboParent?: ExtractionResultFlatUpdateOneWithoutComboChildrenNestedInput
     comboChildren?: ExtractionResultFlatUpdateManyWithoutComboParentNestedInput
@@ -136034,6 +136073,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     comboChildren?: ExtractionResultFlatUncheckedUpdateManyWithoutComboParentNestedInput
   }
 
@@ -137007,6 +137047,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type SrmSyncRunItemCreateManyFlatInput = {
@@ -137367,6 +137408,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     approver?: UserUpdateOneWithoutApprovedItemsNestedInput
     comboChildren?: ExtractionResultFlatUpdateManyWithoutComboParentNestedInput
     job?: ExtractionJobUpdateOneWithoutFlatResultNestedInput
@@ -137723,6 +137765,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     comboChildren?: ExtractionResultFlatUncheckedUpdateManyWithoutComboParentNestedInput
     srmSyncRunItems?: SrmSyncRunItemUncheckedUpdateManyWithoutFlatNestedInput
   }
@@ -138077,6 +138120,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type SrmSyncRunItemUpdateWithoutFlatInput = {
@@ -138497,6 +138541,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: string | null
     srmUniqueId?: string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type ApiKeyUpdateWithoutUserInput = {
@@ -138962,6 +139007,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     comboParent?: ExtractionResultFlatUpdateOneWithoutComboChildrenNestedInput
     comboChildren?: ExtractionResultFlatUpdateManyWithoutComboParentNestedInput
     job?: ExtractionJobUpdateOneWithoutFlatResultNestedInput
@@ -139318,6 +139364,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
     comboChildren?: ExtractionResultFlatUncheckedUpdateManyWithoutComboParentNestedInput
     srmSyncRunItems?: SrmSyncRunItemUncheckedUpdateManyWithoutFlatNestedInput
   }
@@ -139672,6 +139719,7 @@ export namespace Prisma {
     srmOriginalDesignNumber?: NullableStringFieldUpdateOperationsInput | string | null
     srmUniqueId?: NullableStringFieldUpdateOperationsInput | string | null
     imageExtractionRawData?: NullableJsonNullValueInput | InputJsonValue
+    fgAiAttributes?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type SapAttributeValueCreateManyFieldConfigInput = {
