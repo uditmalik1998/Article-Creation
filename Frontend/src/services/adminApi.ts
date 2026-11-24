@@ -777,7 +777,7 @@ export interface ExpenseChangeRequest {
    * attribute VALUE ({ REG_FIT: { old: 50, new: 60 } }). */
   /** BGT_CONT / PD_CONT = contribution % block; BULK_ADD = many new rows in one
    * request (changes.__bulkRows.new holds them). */
-  requestKind: 'BGT_CONT' | 'PD_CONT' | 'BULK_ADD' | null;
+  requestKind: 'BGT_CONT' | 'PD_CONT' | 'BULK_ADD' | 'BULK_DELETE' | null;
   /** "<major_category>||<attribute_name>" for a contribution request. */
   blockKey: string | null;
   /** The creator's paired approver — the only one who can act at CONT_APPROVER. */
@@ -840,6 +840,18 @@ export async function createExpenseChangeRequest(
 }
 
 /** Propose a brand-new row. */
+/** One request that deletes many rows (row snapshots kept on the request). */
+export async function createExpenseBulkDeleteRequest(
+  tableKey: string,
+  payload: ExpenseRequestMeta & { rowIds: (string | number)[]; label?: string },
+): Promise<{ data: ExpenseChangeRequest; rowCount: number; missing: number }> {
+  const res = await expenseApi.post<{ success: boolean; data: ExpenseChangeRequest; rowCount: number; missing: number }>(
+    `/table/${encodeURIComponent(tableKey)}/bulk-delete-requests`,
+    payload,
+  );
+  return { data: res.data.data, rowCount: res.data.rowCount, missing: res.data.missing };
+}
+
 /** One request that adds many rows (raw tables, e.g. a whole major category
  * copied from another). Duplicates and rows already in the table are skipped. */
 export async function createExpenseBulkAddRequest(
@@ -854,8 +866,8 @@ export async function createExpenseBulkAddRequest(
 }
 
 /** Every row whose `column` equals `value` (editable columns only, max 5000). */
-export async function getExpenseRowsByColumn(tableKey: string, column: string, value: string): Promise<Record<string, any>[]> {
-  const q = new URLSearchParams({ column, value });
+export async function getExpenseRowsByColumn(tableKey: string, column: string, value: string, includeId = false): Promise<Record<string, any>[]> {
+  const q = new URLSearchParams({ column, value, ...(includeId ? { includeId: '1' } : {}) });
   const res = await expenseApi.get<{ success: boolean; data: Record<string, any>[] }>(
     `/table/${encodeURIComponent(tableKey)}/rows-by?${q.toString()}`,
   );
@@ -1096,7 +1108,9 @@ export async function getExpenseTablePendingRows(tableKey: string): Promise<Reco
 /** The full chain, active and retired, in walk order. Read-only from the
  * frontend — used only to label a request's current stage. */
 export async function getExpenseApprovalStages(): Promise<ExpenseApprovalStage[]> {
-  const res = await adminApi.get<{ success: boolean; data: ExpenseApprovalStage[] }>('/expense-approval-stages');
+  // /api/expense/approval-stages: readable by every Expense Data viewer (the
+  // /api/admin copy is ADMIN-only, so approvers used to get an empty chain).
+  const res = await expenseApi.get<{ success: boolean; data: ExpenseApprovalStage[] }>('/approval-stages');
   return res.data.data;
 }
 

@@ -97,7 +97,7 @@ export default function FgFabricMappingPage() {
         </Link>
         <Card>
           <CardContent className="py-10 text-center text-sm text-muted-foreground">
-            You don't have access to this page. Ask an admin for Expense Data access.
+            You don't have access to this page. Ask an admin for Grid Data access.
           </CardContent>
         </Card>
       </div>
@@ -107,7 +107,7 @@ export default function FgFabricMappingPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-4 p-6">
       <Link to={backTo} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-        <ArrowLeft className="h-4 w-4" /> {isAdmin ? 'Back to Expenses' : 'Back to Expense Data'}
+        <ArrowLeft className="h-4 w-4" /> {isAdmin ? 'Back to Expenses' : 'Back to Grid Data'}
       </Link>
 
       <div className="flex flex-wrap items-end justify-between gap-3">

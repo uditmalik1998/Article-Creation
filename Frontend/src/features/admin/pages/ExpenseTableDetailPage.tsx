@@ -54,7 +54,8 @@ import { EXPENSE_TABLE_CONFIGS, type ExpenseTableColumnConfig } from '../config/
 import { TABLE_META, sectionLabel } from '../config/expenseSections';
 import { RowChangeRequestDialog, type RowChangeMode } from '../components/RowChangeRequestDialog';
 import { GridContributionPanel } from '../components/GridContributionPanel';
-import { CopyMajorCategoryDialog } from '../components/CopyMajorCategoryDialog';
+import { CopyMajorCategoryDialog, COPYABLE_TABLES } from '../components/CopyMajorCategoryDialog';
+import { DeleteMajorCategoryDialog } from '../components/DeleteMajorCategoryDialog';
 import { ColumnCheckboxFilter } from '../components/ColumnCheckboxFilter';
 import { SLATE_PRIMARY_BTN } from '../components/DashboardParts';
 
@@ -151,6 +152,8 @@ export default function ExpenseTableDetailPage() {
   const [dialog, setDialog] = useState<RowDialog | null>(null);
   // Major Category Grid: copy a whole major category as one bulk-add request.
   const [copyOpen, setCopyOpen] = useState(false);
+  // Same tables: delete a whole major category as one bulk-delete request.
+  const [deleteMcOpen, setDeleteMcOpen] = useState(false);
   // Major Category Grid only: the Bgt / Pd Cont% block panel (replaces the
   // row panel while open — only one side panel at a time).
   const [contribution, setContribution] = useState<{ majorCategory: string; attributeName: string } | null | undefined>(undefined);
@@ -201,9 +204,14 @@ export default function ExpenseTableDetailPage() {
   const backHref = access?.isAdmin ? '/admin/expenses' : '/admin/expense-masters';
 
   const hasEditableColumns = !!config?.columns.some((c) => c.editable !== false);
-  const canAdd = !!config?.allowCreate && !!access?.canCreate;
-  const canEdit = hasEditableColumns && !!access?.canUpdate;
-  const canDelete = !!config?.allowDelete && !!access?.canDelete;
+  // A request is routed to the Category Head of the requester's own Business
+  // Division; with none set the server refuses it (ADMIN excepted), so the
+  // propose buttons are hidden and a note explains why (2026-11-24).
+  const wouldRequest = !!access && (access.canCreate || access.canUpdate || access.canDelete);
+  const noDivision = !!access && !access.isAdmin && !access.businessDivision && wouldRequest;
+  const canAdd = !noDivision && !!config?.allowCreate && !!access?.canCreate;
+  const canEdit = !noDivision && hasEditableColumns && !!access?.canUpdate;
+  const canDelete = !noDivision && !!config?.allowDelete && !!access?.canDelete;
   const canFillContribution = tableKey === 'major-category-grid' && (access?.contribution?.creator.length ?? 0) > 0;
   const openContribution = (block: { majorCategory: string; attributeName: string } | null) => {
     setDialog(null);
@@ -308,7 +316,7 @@ export default function ExpenseTableDetailPage() {
     return (
       <div className="p-6 space-y-4">
         <Link to="/admin/expense-masters" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-4 w-4" /> Back to Expense Data
+          <ArrowLeft className="h-4 w-4" /> Back to Grid Data
         </Link>
         <Card>
           <CardContent className="py-10 text-center text-sm text-muted-foreground">
@@ -327,7 +335,7 @@ export default function ExpenseTableDetailPage() {
         </Link>
         <Card>
           <CardContent className="py-10 text-center text-sm text-muted-foreground">
-            You don't have access to Expense Data. Ask an admin to set your Business Division on the Users page.
+            You don't have access to Grid Data. Ask an admin to set your Business Division on the Users page.
           </CardContent>
         </Card>
       </div>
@@ -541,12 +549,18 @@ export default function ExpenseTableDetailPage() {
       <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5 text-[13px] text-muted-foreground">
         <Link to={backHref} className="inline-flex items-center gap-1 hover:text-foreground">
           <ArrowLeft className="h-3.5 w-3.5" />
-          {access?.isAdmin ? 'Admin Dashboard' : 'Expense Data'}
+          {access?.isAdmin ? 'Admin Dashboard' : 'Grid Data'}
         </Link>
         <span aria-hidden="true" className="text-slate-300">/</span>
-        <span className="text-slate-700 dark:text-slate-300">{sectionLabel(tableKey)}</span>
+        {/* Section crumb opens Expense Data on that section's tab. */}
+        <Link
+          to={`/admin/expense-masters?section=${TABLE_META[tableKey]?.section ?? 'OTHERS'}`}
+          className="text-slate-700 underline-offset-2 hover:text-foreground hover:underline dark:text-slate-300"
+        >
+          {sectionLabel(tableKey)}
+        </Link>
         <span aria-hidden="true" className="text-slate-300">/</span>
-        <span className="font-semibold text-foreground">{shortTitle}</span>
+        <span aria-current="page" className="font-semibold text-foreground">{shortTitle}</span>
       </nav>
 
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -609,7 +623,18 @@ export default function ExpenseTableDetailPage() {
               Fill contribution %
             </Button>
           )}
-          {canAdd && tableKey === 'major-category-grid' && (
+          {!noDivision && !!access?.canDelete && COPYABLE_TABLES.has(tableKey) && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-red-200 bg-white text-red-700 hover:bg-red-50 hover:text-red-800 dark:bg-slate-900"
+              onClick={() => setDeleteMcOpen(true)}
+            >
+              <Trash2 className="h-4 w-4" />
+              Delete major category
+            </Button>
+          )}
+          {!noDivision && !!access?.canCreate && COPYABLE_TABLES.has(tableKey) && (
             <Button size="sm" variant="outline" className="bg-white dark:bg-slate-900" onClick={() => setCopyOpen(true)}>
               <Copy className="h-4 w-4" />
               Copy major category
@@ -623,6 +648,16 @@ export default function ExpenseTableDetailPage() {
           )}
         </div>
       </div>
+
+      {noDivision && (
+        <div role="alert" className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[12.5px] text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+          <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          <span>
+            Your <strong>Business Division</strong> is not set, so you can view this table but not propose changes — a request
+            would not reach any Category Head. Ask an admin to set it on the Users page.
+          </span>
+        </div>
+      )}
 
       {(canAdd || canEdit || canDelete) && (
         <div role="note" className="flex items-start gap-2 rounded-lg bg-slate-100 px-3 py-2 text-[12.5px] text-slate-600 dark:bg-slate-800/60 dark:text-slate-300">
@@ -852,8 +887,21 @@ export default function ExpenseTableDetailPage() {
           />
         )}
 
-        {tableKey === 'major-category-grid' && (
+        {COPYABLE_TABLES.has(tableKey) && (
+          <DeleteMajorCategoryDialog
+            tableKey={tableKey}
+            config={config}
+            open={deleteMcOpen}
+            onClose={() => setDeleteMcOpen(false)}
+            onSubmitted={() => {
+              setDeleteMcOpen(false);
+              onRequestSubmitted();
+            }}
+          />
+        )}
+        {COPYABLE_TABLES.has(tableKey) && (
           <CopyMajorCategoryDialog
+            tableKey={tableKey}
             open={copyOpen}
             onClose={() => setCopyOpen(false)}
             onSubmitted={() => {

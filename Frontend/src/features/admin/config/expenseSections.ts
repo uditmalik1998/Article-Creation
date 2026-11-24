@@ -33,6 +33,9 @@ export const TABLE_META: Record<string, { section: SectionKey; table: string; us
   'fabric-article-master': { section: 'FABRIC', table: 'fabric_article_master', usedFor: 'Fabric division › sub-division › major category' },
   'fabric-main-mvgr-mapping': { section: 'FABRIC', table: 'm_fabric_main_mvgr_mapping', usedFor: 'MVGR-2 fills MVGR-1' },
   'gm-size-master': { section: 'GM', table: 'gm_size_master', usedFor: 'Sizes for GM colours' },
+  'gm-major-category-details': { section: 'GM', table: 'gm_major_category_details', usedFor: 'GM hierarchy, MC code, HSN + families' },
+  'gm-major-category-grid-values': { section: 'GM', table: 'gm_major_category_grid_values', usedFor: 'General merchandise grid dropdowns' },
+  'gm-article-description-format': { section: 'GM', table: 'gm_article_description_formate', usedFor: 'GM article description order' },
   'body-article-data': { section: 'BODY', table: 'body_article_data', usedFor: 'Body article pages' },
   'body-fabric-consumption': { section: 'BODY', table: 'body_fabric_consumption', usedFor: 'Fab cons / width / GSM per major category' },
   'precise-body-article': { section: 'BODY', table: 'precise_body_article_consumption', usedFor: 'Exact consumption — re-upload the Excel to refresh' },
@@ -51,6 +54,8 @@ export const HIDDEN_ON_EXPENSE_DATA_PAGE = new Set([
   'fabric-article-data',
   'precise-fabric-article-data',
   'raw-articles',
+  'vendor-master',
+  'body-article-data',
 ]);
 
 /** Kept up to date by a sync or an Excel re-upload — no change requests. */
@@ -58,3 +63,13 @@ export const READ_ONLY_KEYS = new Set(['precise-body-article', 'raw-articles', '
 
 export const sectionLabel = (tableKey: string): string =>
   SECTIONS.find((s) => s.key === (TABLE_META[tableKey]?.section ?? 'OTHERS'))?.label ?? 'Others';
+
+/** How a BULK_ADD request's rows are shown (request popup, audit log):
+ * `key` = the major category column, `group` = what rows are grouped by
+ * (null = one list), `value` = the value shown per row. */
+export const BULK_ADD_LAYOUT: Record<string, { key: string; group: string | null; value: string; groupTitle: string; detail?: string[]; carry?: string[] }> = {
+  'major-category-grid': { key: 'major_category', group: 'attribute_name', value: 'value', groupTitle: 'attributes' },
+  'size-master': { key: 'major_category', group: null, value: 'size', groupTitle: 'sizes', carry: ['division', 'sub_division', 'mc_code'] },
+  'segment-master': { key: 'major_category', group: null, value: 'segment_type', groupTitle: 'segments', detail: ['min', 'max'], carry: ['sub_division'] },
+  'mandatory-grid': { key: 'major_category', group: null, value: 'sap_key', groupTitle: 'fields', detail: ['is_active'], carry: ['div', 'sub_div'] },
+};

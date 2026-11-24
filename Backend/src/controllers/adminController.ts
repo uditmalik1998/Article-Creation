@@ -8151,6 +8151,12 @@ export type ExpenseTableColumn = {
 export interface ExpenseTableCapabilities {
   /** Allow "Add Row" change requests. */
   allowCreate?: boolean;
+  /** Allow ONLY bulk-add requests ("Copy major category") even when single
+   * "Add Row" is off — e.g. Mandatory Grid (2026-11-23). */
+  allowBulkAdd?: boolean;
+  /** Allow ONLY bulk-delete requests ("Delete major category") even when
+   * single "Delete Row" is off — e.g. Mandatory Grid (2026-11-24). */
+  allowBulkDelete?: boolean;
   /** Allow "Delete Row" change requests. */
   allowDelete?: boolean;
   /** Editable column keys that must be non-empty on a CREATE. */
@@ -8267,6 +8273,81 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
     displayColumns: ['maj_cat', 'size'],
     defaultSort: { column: 'id', dir: 'desc' },
   },
+  // GM masters on the Expense Data page, GM section (2026-11-24).
+  'gm-major-category-details': {
+    kind: 'raw',
+    tableName: 'gm_major_category_details',
+    idColumn: 'id',
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['div', 'sub_div', 'maj_cat_nm'],
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'seg', label: 'Segment' },
+      { key: 'div', label: 'Division' },
+      { key: 'sub_div', label: 'Sub Division' },
+      { key: 'maj_cat_nm', label: 'Major Category' },
+      { key: 'mc_cd', label: 'MC Code' },
+      { key: 'maj_cat_desc', label: 'MC Description' },
+      { key: 'mj_status', label: 'MJ Status' },
+      { key: 'archetype', label: 'Archetype' },
+      { key: 'archetype_nm', label: 'Archetype Name' },
+      { key: 'family_code', label: 'Family Code' },
+      { key: 'family_name', label: 'Family Name' },
+      { key: 'status', label: 'Status' },
+      { key: 'hsn_cd', label: 'HSN Code' },
+      { key: 'created_at', label: 'Created At', editable: false },
+    ],
+    searchColumns: ['seg', 'div', 'sub_div', 'maj_cat_nm', 'mc_cd', 'maj_cat_desc', 'archetype_nm', 'family_code', 'family_name', 'hsn_cd'],
+    displayColumns: ['maj_cat_nm', 'family_code'],
+    defaultSort: { column: 'id', dir: 'desc' },
+  },
+  'gm-major-category-grid-values': {
+    kind: 'raw',
+    tableName: 'gm_major_category_grid_values',
+    idColumn: 'id',
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['maj_cat_nm', 'family_code', 'grid_val'],
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'seg', label: 'Segment' },
+      { key: 'div', label: 'Division' },
+      { key: 'sub_div', label: 'Sub Division' },
+      { key: 'maj_cat_nm', label: 'Major Category' },
+      { key: 'family_code', label: 'Family Code' },
+      { key: 'family_name', label: 'Family Name' },
+      { key: 'mandatory', label: 'Mandatory' },
+      { key: 'grid_val', label: 'Grid Value' },
+      { key: 'uom', label: 'UOM' },
+      { key: 'status', label: 'Status' },
+      { key: 'created_at', label: 'Created At', editable: false },
+    ],
+    searchColumns: ['seg', 'div', 'sub_div', 'maj_cat_nm', 'family_code', 'family_name', 'grid_val', 'uom', 'status'],
+    displayColumns: ['maj_cat_nm', 'family_code', 'grid_val'],
+    defaultSort: { column: 'id', dir: 'desc' },
+  },
+  'gm-article-description-format': {
+    kind: 'raw',
+    tableName: 'gm_article_description_formate',
+    idColumn: 'id',
+    allowCreate: true,
+    allowDelete: true,
+    requiredOnCreate: ['key', 'archetype_nm', 'desc_seq', 'family_code', 'family_name'],
+    columns: [
+      { key: 'id', label: 'ID', editable: false },
+      { key: 'key', label: 'Key' },
+      { key: 'archetype_nm', label: 'Archetype Name' },
+      { key: 'desc_seq', label: 'Desc Seq' },
+      { key: 'family_code', label: 'Family Code' },
+      { key: 'family_name', label: 'Family Name' },
+      { key: 'created_at', label: 'Created At', editable: false },
+      { key: 'updated_at', label: 'Updated At', editable: false },
+    ],
+    searchColumns: ['key', 'archetype_nm', 'desc_seq', 'family_code', 'family_name'],
+    displayColumns: ['archetype_nm', 'family_code', 'desc_seq'],
+    defaultSort: { column: 'id', dir: 'desc' },
+  },
   'color-master': {
     kind: 'raw',
     tableName: 'color_master',
@@ -8285,6 +8366,11 @@ export const EXPENSE_TABLE_REGISTRY: Record<string, ExpenseTableConfig> = {
     kind: 'raw',
     tableName: 'maj_cat_mandatory_grid',
     idColumn: 'id',
+    // No single "Add Row", but a whole major category can be copied from
+    // another one (bulk add) — 2026-11-23.
+    allowBulkAdd: true,
+    allowBulkDelete: true,
+    requiredOnCreate: ['major_category', 'sap_key'],
     columns: [
       { key: 'id', label: 'ID', editable: false },
       { key: 'major_category', label: 'Major Category' },
@@ -8943,6 +9029,8 @@ export async function getExpenseTablePendingRows(req: Request, res: Response) {
   );
   const data: Record<string, 'UPDATE' | 'DELETE'> = {};
   for (const r of rows) if (r.rowId && r.operation !== 'CREATE') data[r.rowId] = r.operation as 'UPDATE' | 'DELETE';
+  // Rows inside a pending bulk delete count as "Delete pending" too.
+  for (const id of (await idsInPendingBulkDeletes(tableKey)).keys()) data[id] = 'DELETE';
   return res.json({ success: true, data });
 }
 
@@ -11174,7 +11262,7 @@ export async function applyExpenseRowsBulkInsert(
 ): Promise<number> {
   const config = EXPENSE_TABLE_REGISTRY[tableKey];
   if (!config) throw new Error(`Unknown table key: ${tableKey}`);
-  if (!config.allowCreate) throw new Error(`Adding rows is not supported for "${tableKey}".`);
+  if (!config.allowCreate && !config.allowBulkAdd) throw new Error(`Adding rows is not supported for "${tableKey}".`);
   if (config.kind !== 'raw') throw new Error(`Bulk add is only supported for raw tables ("${tableKey}" is not).`);
   if (rows.length === 0) return 0;
   const keys = [...new Set(rows.flatMap((r) => Object.keys(r)))];
@@ -11190,6 +11278,11 @@ export async function applyExpenseRowsBulkInsert(
     );
     inserted += await client.$executeRaw(Prisma.sql`INSERT INTO ${tableSql} (${colsSql}) VALUES ${valuesSql}`);
   }
+  // New mandatory-grid rows change which fields the article pages show.
+  if (tableKey === 'mandatory-grid') {
+    invalidateMandatoryGridCache();
+    invalidateFieldVisibilityCache();
+  }
   return inserted;
 }
 
@@ -11198,11 +11291,16 @@ export async function applyExpenseRowsBulkInsert(
  * attribute/value rows of one major category, to copy into a bulk add. */
 export async function getExpenseRowsByColumn(req: Request, res: Response) {
   const { tableKey } = req.params;
-  const { column, value } = req.query as Record<string, string | undefined>;
+  const { column, value, includeId } = req.query as Record<string, string | undefined>;
   const config = EXPENSE_TABLE_REGISTRY[tableKey];
   if (!config) return res.status(404).json({ success: false, error: `Unknown table key: ${tableKey}` });
   if (config.kind !== 'raw') return res.status(400).json({ success: false, error: 'Only supported for raw tables.' });
-  const editable = config.columns.filter((c) => c.editable !== false).map((c) => c.key);
+  // includeId=1 adds the row id (for "Delete major category"); the copy
+  // flow leaves it out because ids can't be sent on new rows.
+  const editable = [
+    ...(includeId === '1' ? [config.idColumn] : []),
+    ...config.columns.filter((c) => c.editable !== false).map((c) => c.key),
+  ];
   if (!column || !config.columns.some((c) => c.key === column) || value === undefined) {
     return res.status(400).json({ success: false, error: 'column and value are required.' });
   }
@@ -11217,4 +11315,66 @@ export async function getExpenseRowsByColumn(req: Request, res: Response) {
   } catch (error: any) {
     return res.status(500).json({ success: false, error: error.message });
   }
+}
+
+
+// ── Bulk delete (one request for many rows, 2026-11-24) ─────────────────────
+
+/** Current rows (all columns) for these ids. Raw + prisma tables only. */
+export async function fetchExpenseRowsByIds(tableKey: string, ids: string[]): Promise<Record<string, any>[]> {
+  const config = EXPENSE_TABLE_REGISTRY[tableKey];
+  if (!config || ids.length === 0) return [];
+  if (config.kind === 'prisma') {
+    const delegate = (prisma as any)[config.delegateName];
+    const rows = await delegate.findMany({ where: { [config.idColumn]: { in: ids.map((id) => coercePrismaId(config, id)) } } });
+    return serializeBigInts(rows);
+  }
+  if (config.kind === 'raw') {
+    const nums = ids.map((id) => Number(id)).filter((n) => Number.isFinite(n));
+    const rows = await prisma.$queryRaw<any[]>(
+      Prisma.sql`SELECT * FROM ${Prisma.raw(`"${config.tableName}"`)} WHERE ${Prisma.raw(`"${config.idColumn}"`)} = ANY(${nums})`
+    );
+    return serializeBigInts(rows);
+  }
+  return [];
+}
+
+/** Deletes these ids in one statement; returns how many went. */
+export async function applyExpenseRowsBulkDelete(tableKey: string, ids: string[], client: PrismaOrTx = prisma): Promise<number> {
+  const config = EXPENSE_TABLE_REGISTRY[tableKey];
+  if (!config) throw new Error(`Unknown table key: ${tableKey}`);
+  if (!config.allowDelete && !config.allowBulkDelete) throw new Error(`Deleting rows is not supported for "${tableKey}".`);
+  if (ids.length === 0) return 0;
+  if (config.kind === 'prisma') {
+    const delegate = (client as any)[config.delegateName];
+    const r = await delegate.deleteMany({ where: { [config.idColumn]: { in: ids.map((id) => coercePrismaId(config, id)) } } });
+    return r.count;
+  }
+  if (config.kind === 'raw') {
+    const nums = ids.map((id) => Number(id)).filter((n) => Number.isFinite(n));
+    const n = await client.$executeRaw(
+      Prisma.sql`DELETE FROM ${Prisma.raw(`"${config.tableName}"`)} WHERE ${Prisma.raw(`"${config.idColumn}"`)} = ANY(${nums})`
+    );
+    if (tableKey === 'mandatory-grid') {
+      invalidateMandatoryGridCache();
+      invalidateFieldVisibilityCache();
+    }
+    return n;
+  }
+  throw new Error('Deleting rows is not supported for the hierarchy view.');
+}
+
+/** Row ids (as strings) held by PENDING bulk-delete requests on a table. */
+export async function idsInPendingBulkDeletes(tableKey: string): Promise<Map<string, string>> {
+  const config = EXPENSE_TABLE_REGISTRY[tableKey];
+  const reqs = await withPrismaRetry(() =>
+    prisma.expenseChangeRequest.findMany({ where: { tableKey, status: 'PENDING', requestKind: 'BULK_DELETE' }, select: { id: true, changes: true } })
+  );
+  const out = new Map<string, string>();
+  const idCol = config?.idColumn ?? 'id';
+  for (const r of reqs) {
+    const rows = ((r.changes as any)?.__bulkRows?.new ?? []) as Record<string, any>[];
+    for (const row of rows) if (row[idCol] != null) out.set(String(row[idCol]), r.id);
+  }
+  return out;
 }
