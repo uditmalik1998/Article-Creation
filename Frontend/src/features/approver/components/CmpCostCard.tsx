@@ -189,7 +189,7 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
   })();
   const aiCell = (v: string | undefined, bold = false) =>
     toNum(v) !== null
-      ? <span className={cn('block text-center font-mono text-[12.5px] text-slate-900', bold ? 'font-extrabold' : 'font-bold')}>{v}</span>
+      ? <span className={cn('block text-center font-mono text-[14px] text-slate-900', bold ? 'font-extrabold' : 'font-bold')}>{v}</span>
       : <span className="block text-center text-slate-400">—</span>;
   const AI_COL = 'w-[96px] border-l-2 border-l-slate-300 bg-slate-50';
 
@@ -282,7 +282,7 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
           type="button"
           onClick={onToggleCollapse}
           aria-expanded={!collapsed}
-          className="flex flex-1 items-center gap-1 self-stretch px-2 py-1.5 text-left text-[10px] font-bold uppercase tracking-wider transition-colors hover:brightness-110"
+          className="flex flex-1 items-center gap-1 self-stretch px-2 py-1.5 text-left text-[11.5px] font-bold uppercase tracking-wider transition-colors hover:brightness-110"
         >
           <Scissors className="h-3.5 w-3.5" />
           CMP COST
@@ -290,7 +290,7 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
         {onSave && !collapsed && (
           <div className="flex items-center gap-2">
             {unsaved && (
-              <span className="text-[10.5px] font-medium" style={{ opacity: 0.8 }}>
+              <span className="text-[12px] font-medium" style={{ opacity: 0.8 }}>
                 Unsaved changes
               </span>
             )}
@@ -298,7 +298,7 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
               type="button"
               onClick={() => { handleSave().catch(() => {}); }}
               disabled={locked}
-              className="flex h-6 items-center gap-1 rounded-md bg-white px-2.5 text-[11px] font-bold text-slate-900 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-6 items-center gap-1 rounded-md bg-white px-2.5 text-[12.5px] font-bold text-slate-900 transition-colors hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Save className="h-3 w-3" />
               Save
@@ -322,9 +322,9 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
       {!collapsed && (
         <>
           <div className="overflow-x-auto px-1.5 pb-1 pt-1">
-            <table className="w-full min-w-[956px] border-collapse text-[12.5px]">
+            <table className="w-full min-w-[956px] border-collapse text-[14px]">
               <thead>
-                <tr className="text-[11px] font-semibold tracking-wider text-slate-700">
+                <tr className="text-[12.5px] font-semibold tracking-wider text-slate-700">
                   <th rowSpan={2} className="w-[110px] border-b border-slate-300 bg-slate-100 px-2.5 py-2 text-left">
                     PROCESS
                   </th>
@@ -333,7 +333,7 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
                       <Sparkles className="h-3 w-3" aria-hidden="true" />
                       AI SAM
                     </span>
-                    <span className="block text-[9.5px] font-medium normal-case tracking-normal text-slate-500">read-only</span>
+                    <span className="block text-[11px] font-medium normal-case tracking-normal text-slate-500">read-only</span>
                     <button
                       type="button"
                       role="switch"
@@ -342,7 +342,7 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
                       title="ON: AUTO-BGT PR VAL = AI SAM (CUTTING), × 3.25 (STITCHING), × 2.50 (IRONING), × 3.00 (FINISHING). OFF: back to the previous values."
                       onClick={toggleAiBgt}
                       disabled={locked || (!aiBgtOn && !hasAiSam)}
-                      className="mx-auto mt-1 flex items-center gap-1 text-[9.5px] font-semibold normal-case tracking-normal text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="mx-auto mt-1 flex items-center gap-1 text-[11px] font-semibold normal-case tracking-normal text-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <span className={cn('relative h-3.5 w-6 rounded-full transition-colors', aiBgtOn ? 'bg-slate-800' : 'bg-slate-300')}>
                         <span className={cn('absolute top-0.5 h-2.5 w-2.5 rounded-full bg-white shadow transition-all', aiBgtOn ? 'left-3' : 'left-0.5')} />
@@ -364,7 +364,7 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
                     </th>
                   ))}
                 </tr>
-                <tr className="text-[10.5px] font-semibold tracking-wider text-slate-600">
+                <tr className="text-[12px] font-semibold tracking-wider text-slate-600">
                   {STAGES.map((stage, si) =>
                     MEASURES.map((measure, mi) => (
                       <th
@@ -437,7 +437,7 @@ const CmpCostCard: React.FC<CmpCostCardProps> = ({
               </tbody>
             </table>
           </div>
-          <div className="border-t border-slate-100 px-2.5 py-1.5 text-[11.5px] text-slate-500">
+          <div className="border-t border-slate-100 px-2.5 py-1.5 text-[13px] text-slate-500">
             Cutting has no SAM — only PR VAL. AI SAM toggle ON fills AUTO-BGT PR VAL: CUTTING = AI SAM, STITCHING × 3.25, IRONING × 2.50, FINISHING × 3.00 (OFF puts the old values back). All other cells are required. TOTAL = sum of PR VAL (type to override, clear to go back to the sum).
           </div>
         </>

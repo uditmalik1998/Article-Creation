@@ -38,8 +38,12 @@ const normCode = (code: unknown): string => String(code ?? '').trim().replace(/^
 
 /** All v2srm vendors → Map(normalised code → purchasing_blocked). */
 export async function fetchV2srmBlockedFlags(): Promise<Map<string, boolean>> {
-  const key = process.env.SRM_SUPABASE_SERVICE_KEY || process.env.SRM_SUPABASE_ANON_KEY;
-  if (!key) throw new Error('SRM_SUPABASE_SERVICE_KEY is not set');
+  // Same key order as articleModelSourceService: service key, then anon key, then the public
+  // v2srm anon key also hard-coded in srmSyncService — so prod needs no new setting
+  // (the anon key can read v2srm `vendors`, checked 2026-11-24).
+  const key = process.env.SRM_SUPABASE_SERVICE_KEY
+    || process.env.SRM_SUPABASE_ANON_KEY
+    || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5bWRxbm53d3hyZ2VvbHZndmd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMzMzU0NzYsImV4cCI6MjA2ODkxMTQ3Nn0.jUrb0jIg6qjj2Rlh9DxYesSnbstoD4uoDCswqOqAkUM';
 
   const flags = new Map<string, boolean>();
   for (let offset = 0; ; offset += PAGE_SIZE) {

@@ -2669,8 +2669,10 @@ const ArticleCard = React.memo(
     }, big = false, plus1: boolean | 2 = false) => {
       // plus1 = B TRIM extra rows: everything 1 px bigger than the default;
       // plus1 = 2 = FG OTH GRID-1 rows: 2 px bigger.
-      // big = FG FAB and BODY cards (design "Option A", -1 px): 13 px names, 14 px values, 30 px rows.
-      const valueText = big ? 'text-[14px]' : plus1 === 2 ? 'text-[13px]' : plus1 ? 'text-[12px]' : 'text-[11px]';
+      // big = FG FAB and BODY cards — "Refined rows" (option A, 2026-11-24):
+      // 14.5 px names, 15 px bold values, 34 px rows, soft zebra, missing
+      // mandatory rows light amber with an amber "Required".
+      const valueText = big ? 'text-[15px]' : plus1 === 2 ? 'text-[14.5px]' : plus1 ? 'text-[13.5px]' : 'text-[11px]';
       _attrCounter += 1;
       const num = _attrCounter;
       const currentValue = getValue(attr.field);
@@ -2687,10 +2689,23 @@ const ArticleCard = React.memo(
           data-field-label={attr.label}
           data-item-id={item.id}
           title={attr.field === 'mainMvgr' ? 'Auto-filled from M_FAB_MAIN_MVGR_2 (Fabric Main MVGR Mapping)' : undefined}
-          className={cn('group flex items-center rounded transition-colors hover:bg-muted/40', big ? 'mb-0.5 min-h-[26px] gap-2 px-2 py-0.5' : 'gap-1.5 px-1 py-0.5')}
+          className={cn(
+            'group flex items-center transition-colors',
+            big ? 'min-h-[34px] gap-3 border-b border-slate-100 px-3 py-1 hover:!bg-slate-100 dark:border-slate-800' : plus1 ? 'min-h-[30px] gap-2 rounded px-2 py-0.5 hover:bg-muted/40' : 'gap-1.5 rounded px-1 py-0.5 hover:bg-muted/40',
+          )}
           style={{
             cursor: attrLocked ? 'default' : 'pointer',
-            background: isEditing
+            background: big
+              ? isEditing
+                ? '#e0f2fe'
+                : isEmpty && isMandatory
+                ? '#fffbeb'
+                : isUserEdited
+                ? '#f0fdf4'
+                : num % 2 === 0
+                ? '#f8fafc'
+                : '#ffffff'
+              : isEditing
               ? '#e0f2fe'
               : isUserEdited
               ? '#ecfdf5'
@@ -2704,11 +2719,11 @@ const ArticleCard = React.memo(
             if (!attrLocked && !isEditing) setEditingField(attr.field);
           }}
         >
-          <span className={cn('shrink-0 text-right font-bold tabular-nums text-muted-foreground', big ? 'w-6 text-[12px]' : plus1 === 2 ? 'w-5 text-[12px]' : plus1 ? 'w-4 text-[11px]' : 'w-4 text-[10px]')}>{num}.</span>
+          <span className={cn('shrink-0 text-right tabular-nums text-muted-foreground', big ? 'w-7 text-[13px] font-medium' : 'font-bold', big ? '' : plus1 === 2 ? 'w-6 text-[13px]' : plus1 ? 'w-5 text-[12.5px]' : 'w-4 text-[10px]')}>{num}.</span>
           <span
             className={cn(
               'flex-1 truncate leading-snug',
-              big ? 'basis-0 text-[13px]' : plus1 === 2 ? 'text-[12.5px]' : plus1 ? 'text-[11.5px]' : 'text-[10.5px]',
+              big ? 'basis-0 text-[14.5px] font-medium' : plus1 === 2 ? 'text-[14px]' : plus1 ? 'text-[13px]' : 'text-[10.5px]',
               isMandatory ? 'key-field text-foreground' : 'font-semibold text-foreground/80',
             )}
           >
@@ -2720,7 +2735,7 @@ const ArticleCard = React.memo(
             const ai = fgAiValueFor(attr.schemaKey);
             return (
               <span
-                className="w-[100px] shrink-0 truncate text-center font-mono text-[13px] font-semibold text-slate-500"
+                className="w-[110px] shrink-0 truncate text-center font-mono text-[14.5px] font-semibold text-slate-600"
                 title={ai ? `AI result: ${ai}` : 'No AI result'}
               >
                 {ai || <span className="text-slate-300">—</span>}
@@ -2735,7 +2750,7 @@ const ArticleCard = React.memo(
                 <Input
                   autoFocus
                   defaultValue={isEffectivelyEmpty ? '' : currentValue || ''}
-                  className={big ? 'h-7 px-2 text-[13px]' : plus1 === 2 ? 'h-6 px-1 text-[13px]' : plus1 ? 'h-6 px-1 text-[12px]' : 'h-6 px-1 text-[11px]'}
+                  className={big ? 'h-8 px-2 text-[14.5px]' : plus1 === 2 ? 'h-7 px-1.5 text-[14px]' : plus1 ? 'h-7 px-1.5 text-[13px]' : 'h-6 px-1 text-[11px]'}
                   onKeyDown={(e) =>
                     e.key === 'Enter' && handleSave(attr.field, (e.target as HTMLInputElement).value || null)
                   }
@@ -2744,11 +2759,18 @@ const ArticleCard = React.memo(
               ) : (
                 <span
                   className={cn('block truncate text-right', valueText)}
-                  style={{
-                    color: isEffectivelyEmpty ? (isMandatory ? '#dc2626' : '#9ca3af') : '#111827',
-                    fontStyle: isEffectivelyEmpty && !isMandatory ? 'italic' : 'normal',
-                    fontWeight: isMandatory && isEffectivelyEmpty ? 700 : 600,
-                  }}
+                  style={
+                    big
+                      ? {
+                          color: isEffectivelyEmpty ? (isMandatory ? '#b45309' : '#94a3b8') : '#0f172a',
+                          fontWeight: isEffectivelyEmpty ? (isMandatory ? 600 : 500) : 700,
+                        }
+                      : {
+                          color: isEffectivelyEmpty ? (isMandatory ? '#dc2626' : '#9ca3af') : '#111827',
+                          fontStyle: isEffectivelyEmpty && !isMandatory ? 'italic' : 'normal',
+                          fontWeight: isMandatory && isEffectivelyEmpty ? 700 : 600,
+                        }
+                  }
                 >
                   {isEffectivelyEmpty
                     ? isMandatory && !isLocked
@@ -2774,7 +2796,7 @@ const ArticleCard = React.memo(
                     type="button"
                     className={cn(
                       'flex w-full items-center justify-between rounded border border-input bg-background hover:border-ring focus:outline-none focus:ring-1 focus:ring-ring',
-                      big ? 'h-7 px-2 text-[13px]' : plus1 === 2 ? 'h-6 px-1.5 text-[13px]' : plus1 ? 'h-6 px-1.5 text-[12px]' : 'h-6 px-1.5 text-[11px]',
+                      big ? 'h-8 px-2 text-[14.5px]' : plus1 === 2 ? 'h-7 px-2 text-[14px]' : plus1 ? 'h-7 px-2 text-[13px]' : 'h-6 px-1.5 text-[11px]',
                     )}
                   >
                     <span className="truncate text-left">
@@ -2853,17 +2875,25 @@ const ArticleCard = React.memo(
               </Popover>
             ) : (
               <span
-                className={cn('flex items-center justify-end gap-1 text-right', valueText)}
-                style={{
-                  color: isEffectivelyEmpty ? (isMandatory ? '#dc2626' : '#9ca3af') : '#111827',
-                  fontStyle: isEffectivelyEmpty && !isMandatory ? 'italic' : 'normal',
-                  fontWeight: isMandatory && isEffectivelyEmpty ? 700 : 600,
-                }}
+                className={cn('flex items-center justify-end gap-1.5 text-right', valueText)}
+                style={
+                  big
+                    ? {
+                        color: isEffectivelyEmpty ? (isMandatory ? '#b45309' : '#cbd5e1') : '#0f172a',
+                        fontWeight: isEffectivelyEmpty ? (isMandatory ? 600 : 500) : 700,
+                        fontSize: isEffectivelyEmpty && isMandatory ? '14.5px' : undefined,
+                      }
+                    : {
+                        color: isEffectivelyEmpty ? (isMandatory ? '#dc2626' : '#9ca3af') : '#111827',
+                        fontStyle: isEffectivelyEmpty && !isMandatory ? 'italic' : 'normal',
+                        fontWeight: isMandatory && isEffectivelyEmpty ? 700 : 600,
+                      }
+                }
               >
                 <span className="truncate">
                   {isEffectivelyEmpty ? (isMandatory ? 'Required' : '—') : currentValue}
                 </span>
-                <ChevronDown className={cn('shrink-0 opacity-40', big ? 'h-4 w-4' : 'h-3 w-3')} />
+                <ChevronDown className={cn('shrink-0', big ? 'h-3.5 w-3.5 text-slate-400' : 'h-3 w-3 opacity-40')} />
               </span>
             )}
           </div>
@@ -3773,11 +3803,11 @@ const ArticleCard = React.memo(
                         <button
                           type="button"
                           onClick={() => toggleGroupCollapse(g.group)}
-                          className="flex w-full items-center justify-between border-b-2 px-2 py-1.5 transition-colors hover:brightness-95"
+                          className={cn('flex w-full items-center justify-between border-b-2 transition-colors hover:brightness-95', !allowGroups && (g.group === 'FAB' || g.group === 'BODY') ? 'px-3 py-2' : 'px-2 py-1.5')}
                           style={{ background: style.bg, borderColor: style.bg }}
                         >
                           <span
-                            className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider"
+                            className={cn('flex items-center font-bold uppercase tracking-wider', !allowGroups && (g.group === 'FAB' || g.group === 'BODY') ? 'gap-1.5 text-[13.5px] [&_svg]:h-4 [&_svg]:w-4' : 'gap-1 text-[10px]')}
                             style={{ color: style.fg }}
                           >
                             {GROUP_ICONS[g.group]}
@@ -3790,12 +3820,12 @@ const ArticleCard = React.memo(
                           )}
                         </button>
                         {!collapsed && (
-                          <div className="space-y-0 p-1">
+                          <div className={cn('space-y-0', !allowGroups && (g.group === 'FAB' || g.group === 'BODY') ? 'p-0' : 'p-1')}>
                             {!allowGroups && (g.group === 'FAB' || g.group === 'BODY') && (
-                              <div className="flex items-center gap-2 border-b border-slate-200 px-2 pb-1 pt-0.5 text-[11px] font-bold uppercase tracking-[0.07em] text-slate-500">
-                                <span className="w-6 shrink-0" />
+                              <div className="flex items-center gap-3 border-b border-slate-200 bg-slate-50 px-3 py-2 text-[12.5px] font-bold uppercase tracking-[0.07em] text-slate-500 dark:border-slate-700 dark:bg-slate-800/60">
+                                <span className="w-7 shrink-0" />
                                 <span className="flex-1 basis-0">Attribute</span>
-                                <span className="w-[100px] shrink-0 text-center">AI result</span>
+                                <span className="w-[110px] shrink-0 text-center">AI result</span>
                                 <span className="flex-1 basis-0 text-right">Value</span>
                               </div>
                             )}
@@ -3997,7 +4027,7 @@ const ArticleCard = React.memo(
                                     {/* FABRIC ARTICLE NO. — search dropdown from fabric_article_data */}
                                     <div
                                       key="fabricArticleNumber"
-                                      className="mt-1 border-t border-border bg-muted/30 px-2 py-1.5"
+                                      className="border-t border-border bg-slate-50 px-3 py-2 dark:bg-slate-800/40"
                                       style={{ cursor: isLocked ? 'default' : 'pointer' }}
                                       onClick={() => {
                                         if (!isLocked && !isFabNoEditing) {
@@ -4008,7 +4038,7 @@ const ArticleCard = React.memo(
                                       }}
                                     >
                                       <div className="mb-0.5 flex items-center justify-between gap-1">
-                                        <span className={cn('font-semibold uppercase tracking-wider text-muted-foreground', !allowGroups ? 'text-[11px]' : 'text-[9px]')}>
+                                        <span className={cn('font-semibold uppercase tracking-wider text-muted-foreground', !allowGroups ? 'text-[11.5px]' : 'text-[9px]')}>
                                           FABRIC ARTICLE NO.
                                         </span>
                                       </div>
@@ -4134,7 +4164,7 @@ const ArticleCard = React.memo(
                                         </div>
                                       ) : (
                                         <div
-                                          className={cn('truncate', !allowGroups ? 'text-[14px] font-semibold' : 'text-[11px]')}
+                                          className={cn('truncate', !allowGroups ? 'text-[15px] font-semibold' : 'text-[11px]')}
                                           style={{
                                             color: fabNoDisplayVal ? '#111827' : '#9ca3af',
                                             fontWeight: 600,
@@ -4230,7 +4260,7 @@ const ArticleCard = React.memo(
                                       return (
                                         <div
                                           key="fabricArticleDescription"
-                                          className="mt-1 border-t border-border bg-muted/30 px-2 py-1.5"
+                                          className="border-t border-border bg-slate-50 px-3 py-2 dark:bg-slate-800/40"
                                           style={{ cursor: isLocked ? 'default' : 'pointer' }}
                                           onClick={() => {
                                             if (!isLocked && !isFabDescEditing) {
@@ -4245,7 +4275,7 @@ const ArticleCard = React.memo(
                                           }}
                                         >
                                           <div className="mb-0.5 flex items-center justify-between gap-1">
-                                            <span className={cn('font-semibold uppercase tracking-wider text-muted-foreground', !allowGroups ? 'text-[11px]' : 'text-[9px]')}>
+                                            <span className={cn('font-semibold uppercase tracking-wider text-muted-foreground', !allowGroups ? 'text-[11.5px]' : 'text-[9px]')}>
                                               FABRIC ARTICLE DESC
                                             </span>
                                             {!isFabDescEditing && !isLocked && (
@@ -4368,7 +4398,7 @@ const ArticleCard = React.memo(
                                             </Popover>
                                           ) : (
                                             <div
-                                              className={cn('truncate', !allowGroups ? 'text-[14px] font-semibold' : 'text-[11px]')}
+                                              className={cn('truncate', !allowGroups ? 'text-[15px] font-semibold' : 'text-[11px]')}
                                               style={{ color: fabDescDisplayVal ? '#111827' : '#9ca3af' }}
                                             >
                                               {fabDescDisplayVal || (isLocked ? '—' : 'Click to fill')}
@@ -4378,7 +4408,7 @@ const ArticleCard = React.memo(
                                       );
                                     })()}
                                     {SHOW_CREATE_FABRIC_ARTICLE_BTN && (
-                                    <div className="border-t border-border px-2 py-1.5">
+                                    <div className="border-t border-border px-3 py-2">
                                       <Button
                                         size="sm"
                                         disabled={fabricCreating || isFabVdrNominated}
@@ -4616,7 +4646,7 @@ const ArticleCard = React.memo(
                                     {/* BODY ARTICLE NO. — Smart search (precise_body_article_consumption) */}
                                     <div
                                       key="bodyArticle"
-                                      className="mt-1 border-t border-border bg-muted/30 px-2 py-1.5"
+                                      className="border-t border-border bg-slate-50 px-3 py-2 dark:bg-slate-800/40"
                                       style={{ cursor: isLocked ? 'default' : 'pointer' }}
                                       onClick={() => {
                                         if (!isLocked && !isBodyNoEditing) {
@@ -4628,7 +4658,7 @@ const ArticleCard = React.memo(
                                       }}
                                     >
                                       <div className="mb-0.5 flex items-center justify-between gap-1">
-                                        <span className={cn('font-semibold uppercase tracking-wider text-muted-foreground', !allowGroups ? 'text-[11px]' : 'text-[9px]')}>
+                                        <span className={cn('font-semibold uppercase tracking-wider text-muted-foreground', !allowGroups ? 'text-[11.5px]' : 'text-[9px]')}>
                                           BODY ARTICLE NO.
                                         </span>
                                       </div>
@@ -4714,7 +4744,7 @@ const ArticleCard = React.memo(
                                           </Popover>
                                       ) : (
                                         <div
-                                          className={cn('truncate', !allowGroups ? 'text-[14px] font-semibold' : 'text-[11px]')}
+                                          className={cn('truncate', !allowGroups ? 'text-[15px] font-semibold' : 'text-[11px]')}
                                           style={{ color: bodyNoDisplayVal ? '#111827' : '#9ca3af' }}
                                         >
                                           {bodyNoDisplayVal || (isLocked ? '—' : 'Click to fill')}
@@ -4724,7 +4754,7 @@ const ArticleCard = React.memo(
                                     {/* BODY ARTICLE DESC — Smart (attribute-based) */}
                                     <div
                                       key="bodyArticleDescription"
-                                      className="mt-1 border-t border-border bg-muted/30 px-2 py-1.5"
+                                      className="border-t border-border bg-slate-50 px-3 py-2 dark:bg-slate-800/40"
                                       style={{ cursor: isLocked ? 'default' : 'pointer' }}
                                       onClick={() => {
                                         if (!isLocked && !isBodyDescEditing) {
@@ -4736,7 +4766,7 @@ const ArticleCard = React.memo(
                                       }}
                                     >
                                       <div className="mb-0.5 flex items-center justify-between gap-1">
-                                        <span className={cn('font-semibold uppercase tracking-wider text-muted-foreground', !allowGroups ? 'text-[11px]' : 'text-[9px]')}>
+                                        <span className={cn('font-semibold uppercase tracking-wider text-muted-foreground', !allowGroups ? 'text-[11.5px]' : 'text-[9px]')}>
                                           BODY ARTICLE DESC
                                         </span>
                                         <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
@@ -4814,7 +4844,7 @@ const ArticleCard = React.memo(
                                           </Popover>
                                       ) : (
                                         <div
-                                          className={cn('truncate', !allowGroups ? 'text-[14px] font-semibold' : 'text-[11px]')}
+                                          className={cn('truncate', !allowGroups ? 'text-[15px] font-semibold' : 'text-[11px]')}
                                           style={{ color: bodyDescDisplayVal ? '#111827' : '#9ca3af' }}
                                         >
                                           {bodyDescDisplayVal || (isLocked ? '—' : 'Click to fill')}
@@ -4822,7 +4852,7 @@ const ArticleCard = React.memo(
                                       )}
                                     </div>
                                     {!hideCreateBody && (
-                                    <div className="border-t border-border px-2 py-1.5">
+                                    <div className="border-t border-border px-3 py-2">
                                       <Button
                                         size="sm"
                                         onClick={() => {
@@ -4913,7 +4943,7 @@ const ArticleCard = React.memo(
                             }}
                           >
                             <span
-                              className={cn('flex-1 truncate', isBodyArticle ? 'text-[11px]' : 'text-[13px]')}
+                              className={cn('flex-1 truncate', isBodyArticle ? 'text-[12.5px]' : 'text-[14.5px]')}
                               style={{
                                 color: bom.mandatory && isEmpty && !isLocked ? '#dc2626' : '#374151',
                                 // FG: every name semibold, like the M_AGE_GROUP … SEGMENT rows below.
@@ -4924,7 +4954,7 @@ const ArticleCard = React.memo(
                               {bom.label}
                               {/* While typing an FG MRP, show the range that will be accepted. */}
                               {isEditingBom && bom.field === 'mrp' && !isBodyArticle && !isNaN(rateNum) && rateNum > 0 && (
-                                <span className="ml-2 text-[12px] font-normal text-slate-500">
+                                <span className="ml-2 text-[13.5px] font-normal text-slate-500">
                                   Allowed {fmtRs(fgMrpRange(rateNum).min)} – {fmtRs(fgMrpRange(rateNum).max)}
                                   {' '}(markdown {FG_MARKDOWN_MIN}–{FG_MARKDOWN_MAX}%)
                                 </span>
@@ -4938,7 +4968,7 @@ const ArticleCard = React.memo(
                                 >
                                   <PopoverAnchor asChild>
                                     <span
-                                      className={cn('flex items-center justify-end gap-1 text-right', isBodyArticle ? 'text-[11px]' : 'text-[13px]')}
+                                      className={cn('flex items-center justify-end gap-1 text-right', isBodyArticle ? 'text-[12.5px]' : 'text-[14.5px]')}
                                       style={{
                                         color: isEmpty ? '#9ca3af' : '#111827',
                                         fontStyle: isEmpty ? 'italic' : 'normal',
@@ -4959,7 +4989,7 @@ const ArticleCard = React.memo(
                                         <button
                                           type="button"
                                           onClick={() => { handleSave('width', null); setEditingField(null); }}
-                                          className={`flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left ${allowGroups ? 'text-[11px]' : 'text-[13px]'} font-medium text-red-600 hover:bg-red-50`}
+                                          className={`flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left ${allowGroups ? 'text-[12.5px]' : 'text-[14.5px]'} font-medium text-red-600 hover:bg-red-50`}
                                         >
                                           <X className="h-3 w-3 shrink-0" />
                                           Clear selection
@@ -4984,12 +5014,12 @@ const ArticleCard = React.memo(
                                               onSave({ ...item, ...updates } as any, updates);
                                             }}
                                             className={cn(
-                                              `flex w-full items-center justify-between px-3 py-1.5 text-left ${allowGroups ? 'text-[11px]' : 'text-[13px]'} hover:bg-accent hover:text-accent-foreground`,
+                                              `flex w-full items-center justify-between px-3 py-1.5 text-left ${allowGroups ? 'text-[12.5px]' : 'text-[14.5px]'} hover:bg-accent hover:text-accent-foreground`,
                                               val === String(opt.fabWidth) && 'bg-accent/60',
                                             )}
                                           >
                                             <span className="font-medium">{opt.fabWidth}</span>
-                                            <span className={`${allowGroups ? 'text-[10px]' : 'text-[12px]'} text-muted-foreground`}>→ {opt.fabConsumption}</span>
+                                            <span className={`${allowGroups ? 'text-[11.5px]' : 'text-[13.5px]'} text-muted-foreground`}>→ {opt.fabConsumption}</span>
                                           </button>
                                         ))}
                                       </div>
@@ -5003,7 +5033,7 @@ const ArticleCard = React.memo(
                                 >
                                   <PopoverAnchor asChild>
                                     <span
-                                      className={cn('flex items-center justify-end gap-1 text-right', isBodyArticle ? 'text-[11px]' : 'text-[13px]')}
+                                      className={cn('flex items-center justify-end gap-1 text-right', isBodyArticle ? 'text-[12.5px]' : 'text-[14.5px]')}
                                       style={{
                                         color: isEmpty ? '#9ca3af' : '#111827',
                                         fontStyle: isEmpty ? 'italic' : 'normal',
@@ -5024,7 +5054,7 @@ const ArticleCard = React.memo(
                                         <button
                                           type="button"
                                           onClick={() => { handleSave(bom.field, null); setEditingField(null); }}
-                                          className={`flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left ${allowGroups ? 'text-[11px]' : 'text-[13px]'} font-medium text-red-600 hover:bg-red-50`}
+                                          className={`flex w-full items-center gap-1.5 border-b px-3 py-1.5 text-left ${allowGroups ? 'text-[12.5px]' : 'text-[14.5px]'} font-medium text-red-600 hover:bg-red-50`}
                                         >
                                           <X className="h-3 w-3 shrink-0" />
                                           Clear selection
@@ -5037,7 +5067,7 @@ const ArticleCard = React.memo(
                                             type="button"
                                             onClick={() => { handleSave(bom.field, opt); setEditingField(null); }}
                                             className={cn(
-                                              `flex w-full px-3 py-1.5 text-left ${allowGroups ? 'text-[11px]' : 'text-[13px]'} hover:bg-accent hover:text-accent-foreground`,
+                                              `flex w-full px-3 py-1.5 text-left ${allowGroups ? 'text-[12.5px]' : 'text-[14.5px]'} hover:bg-accent hover:text-accent-foreground`,
                                               val === opt && 'bg-accent/60',
                                             )}
                                           >
@@ -5060,7 +5090,7 @@ const ArticleCard = React.memo(
                                   defaultValue={val === '—' ? undefined : val}
                                   onValueChange={(v) => handleSave(bom.field, v ?? null)}
                                 >
-                                  <SelectTrigger className={cn('h-6 w-full', isBodyArticle ? 'text-[11px]' : 'text-[13px]')}>
+                                  <SelectTrigger className={cn('h-6 w-full', isBodyArticle ? 'text-[12.5px]' : 'text-[14.5px]')}>
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -5075,7 +5105,7 @@ const ArticleCard = React.memo(
                                 <Input
                                   autoFocus
                                   defaultValue={val === '—' ? '' : val}
-                                  className={cn('h-6 px-1', isBodyArticle ? 'text-[11px]' : 'text-[13px]')}
+                                  className={cn('h-6 px-1', isBodyArticle ? 'text-[12.5px]' : 'text-[14.5px]')}
                                   onKeyDown={(e) =>
                                     e.key === 'Enter' &&
                                     handleSave(bom.field, (e.target as HTMLInputElement).value || null)
@@ -5084,7 +5114,7 @@ const ArticleCard = React.memo(
                                 />
                               ) : (
                                 <span
-                                  className={cn('block truncate', isBodyArticle ? 'text-[11px]' : 'text-[13px]')}
+                                  className={cn('block truncate', isBodyArticle ? 'text-[12.5px]' : 'text-[14.5px]')}
                                   style={{
                                     color: bom.isMarkdown
                                       ? '#7c3aed'
@@ -5168,10 +5198,10 @@ const ArticleCard = React.memo(
                         const COLS = 'grid grid-cols-[110px_repeat(4,minmax(0,1fr))] gap-2';
                         return (
                           <div className="mx-1 mb-1 mt-2 overflow-hidden rounded-lg border border-slate-200" role="table" aria-label="Cost summary">
-                            <div className="border-b border-slate-200 bg-slate-50 px-2.5 py-1.5 text-[11px] font-extrabold tracking-[0.08em] text-slate-800">
+                            <div className="border-b border-slate-200 bg-slate-50 px-2.5 py-1.5 text-[12.5px] font-extrabold tracking-[0.08em] text-slate-800">
                               COST SUMMARY
                             </div>
-                            <div role="row" className={cn(COLS, 'px-2.5 py-1.5 text-[11px] font-bold tracking-wider text-slate-500')}>
+                            <div role="row" className={cn(COLS, 'px-2.5 py-1.5 text-[12.5px] font-bold tracking-wider text-slate-500')}>
                               <span role="columnheader">COST SOURCE</span>
                               {['AUTO-BGT', 'ACT-V2', 'VDR COST', 'FINAL COST'].map((h) => (
                                 <span key={h} role="columnheader" className="text-right">{h}</span>
@@ -5179,26 +5209,26 @@ const ArticleCard = React.memo(
                             </div>
                             {rows.map((r) => (
                               <div key={r.label} role="row" className={cn(COLS, 'items-center border-t border-slate-100 px-2.5 py-1.5')} title={r.title}>
-                                <span role="rowheader" className="text-[13px] font-bold text-slate-900">{r.label}</span>
+                                <span role="rowheader" className="text-[14.5px] font-bold text-slate-900">{r.label}</span>
                                 {r.vals.map((v, i) => (
-                                  <span key={i} role="cell" className={cn('text-right font-mono text-[13px] font-semibold tabular-nums', v == null ? 'text-slate-400' : 'text-slate-900')}>
+                                  <span key={i} role="cell" className={cn('text-right font-mono text-[14.5px] font-semibold tabular-nums', v == null ? 'text-slate-400' : 'text-slate-900')}>
                                     {fmt(v)}
                                   </span>
                                 ))}
                               </div>
                             ))}
                             <div role="row" className={cn(COLS, 'items-center border-t border-slate-200 bg-slate-50 px-2.5 py-1.5')} title={`${MARGIN_PCT}% of the sum of the rows above`}>
-                              <span role="rowheader" className="text-[13px] font-bold text-slate-700">MARGIN {MARGIN_PCT}%</span>
+                              <span role="rowheader" className="text-[14.5px] font-bold text-slate-700">MARGIN {MARGIN_PCT}%</span>
                               {margins.map((v, i) => (
-                                <span key={i} role="cell" className={cn('text-right font-mono text-[13px] font-semibold tabular-nums', v == null ? 'text-slate-400' : 'text-slate-700')}>
+                                <span key={i} role="cell" className={cn('text-right font-mono text-[14.5px] font-semibold tabular-nums', v == null ? 'text-slate-400' : 'text-slate-700')}>
                                   {fmt(v)}
                                 </span>
                               ))}
                             </div>
                             <div role="row" className={cn(COLS, 'items-center bg-[#1e293b] px-2.5 py-2 text-white')} title={`Sum of costs + ${MARGIN_PCT}% margin`}>
-                              <span role="rowheader" className="text-[13px] font-extrabold tracking-wider">TOTAL</span>
+                              <span role="rowheader" className="text-[14.5px] font-extrabold tracking-wider">TOTAL</span>
                               {totals.map((v, i) => (
-                                <span key={i} role="cell" className="text-right font-mono text-[13.5px] font-extrabold tabular-nums">{fmt(v)}</span>
+                                <span key={i} role="cell" className="text-right font-mono text-[15px] font-extrabold tabular-nums">{fmt(v)}</span>
                               ))}
                             </div>
                           </div>
@@ -5253,7 +5283,7 @@ const ArticleCard = React.memo(
                   {/* AUTO-BGT CONSUMPTION card (was ROUGH CONSUMPTION; rough_consumption_* fields) — FG Articles, BODY tab only */}
                   {!isBodyArticle && selectedGroupKeys.has('BODY') && (
                     <div className="overflow-hidden rounded-lg border bg-white" style={{ borderColor: CARD_THEME.border }}>
-                      {renderCollapsibleHeader('ROUGH', 'AUTO-BGT CONSUMPTION', 'text-[11px]')}
+                      {renderCollapsibleHeader('ROUGH', 'AUTO-BGT CONSUMPTION', 'text-[12.5px]')}
                       <div className={cn('space-y-0 p-1', isGroupCollapsed('ROUGH') && 'hidden')}>
                         {([
                           { label: 'Ratio',               field: 'roughRatio' },
@@ -5273,18 +5303,18 @@ const ArticleCard = React.memo(
                               className="flex cursor-pointer items-center justify-between rounded px-1.5 py-1 hover:bg-muted/40"
                               onClick={() => { if (!isEditingR) setEditingField(`rough_${field}`); }}
                             >
-                              <span className="text-[13.5px] text-slate-600">{label}{label === 'Consumption in Meter' && <span className="mandatory-mark">*</span>}</span>
+                              <span className="text-[15px] text-slate-600">{label}{label === 'Consumption in Meter' && <span className="mandatory-mark">*</span>}</span>
                               {isEditingR ? (
                                 <input
                                   autoFocus
                                   type="number"
-                                  className="w-24 rounded border border-border px-1 text-right text-[13.5px]"
+                                  className="w-24 rounded border border-border px-1 text-right text-[15px]"
                                   defaultValue={isEmpty ? '' : displayVal}
                                   onBlur={(e) => { handleSave(field, e.target.value || null); setEditingField(null); }}
                                   onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingField(null); }}
                                 />
                               ) : (
-                                <span className="text-[13.5px]" style={{ color: isEmpty ? '#9ca3af' : '#111827' }}>{displayVal}</span>
+                                <span className="text-[15px]" style={{ color: isEmpty ? '#9ca3af' : '#111827' }}>{displayVal}</span>
                               )}
                             </div>
                           );
@@ -5296,7 +5326,7 @@ const ArticleCard = React.memo(
                   {/* ACT-V2 CONSUMPTION card (was PRECISE CONSUMPTION; precise_consumption_* fields) — FG Articles, BODY tab only */}
                   {!isBodyArticle && selectedGroupKeys.has('BODY') && (
                     <div className="overflow-hidden rounded-lg border bg-white" style={{ borderColor: CARD_THEME.border }}>
-                      {renderCollapsibleHeader('PRECISE', 'ACT-V2 CONSUMPTION', 'text-[11px]')}
+                      {renderCollapsibleHeader('PRECISE', 'ACT-V2 CONSUMPTION', 'text-[12.5px]')}
                       <div className={cn('space-y-0 p-1', isGroupCollapsed('PRECISE') && 'hidden')}>
                         {([
                           { label: 'Ratio',               field: 'preciseRatio' },
@@ -5316,18 +5346,18 @@ const ArticleCard = React.memo(
                               className="flex cursor-pointer items-center justify-between rounded px-1.5 py-1 hover:bg-muted/40"
                               onClick={() => { if (!isEditingP) setEditingField(`fgprecise_${field}`); }}
                             >
-                              <span className="text-[13.5px] text-slate-600">{label}{label === 'Consumption in Meter' && <span className="mandatory-mark">*</span>}</span>
+                              <span className="text-[15px] text-slate-600">{label}{label === 'Consumption in Meter' && <span className="mandatory-mark">*</span>}</span>
                               {isEditingP ? (
                                 <input
                                   autoFocus
                                   type="number"
-                                  className="w-24 rounded border border-border px-1 text-right text-[13.5px]"
+                                  className="w-24 rounded border border-border px-1 text-right text-[15px]"
                                   defaultValue={isEmpty ? '' : displayVal}
                                   onBlur={(e) => { handleSave(field, e.target.value || null); setEditingField(null); }}
                                   onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditingField(null); }}
                                 />
                               ) : (
-                                <span className="text-[13.5px]" style={{ color: isEmpty ? '#9ca3af' : '#111827' }}>{displayVal}</span>
+                                <span className="text-[15px]" style={{ color: isEmpty ? '#9ca3af' : '#111827' }}>{displayVal}</span>
                               )}
                             </div>
                           );

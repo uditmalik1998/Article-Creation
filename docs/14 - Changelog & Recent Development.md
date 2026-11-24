@@ -5,6 +5,19 @@
 
 ---
 
+## 2026-11-24 — FG FAB + BODY card heading + AI result bigger
+
+- FAB / BODY card title bar: 10px → 13.5px, icon 16px, more padding (other cards' title bars unchanged).
+- Column header (ATTRIBUTE / AI RESULT / VALUE): 11.5px → 12.5px.
+- AI result values (e.g. M_YARN = P): 13px → 14.5px, semibold, slate-600.
+
+## 2026-11-24 — FG FAB + BODY cards: "Refined rows" (Option A)
+
+- Design canvas: https://claude.ai/artifact/2aeCehrq27XgsQVNz5aBJk — user picked **A**. Same structure (Attribute | AI result | Value).
+- `renderAttributeRow(…, big)` in ApproverArticleList.tsx (FG FAB + BODY only): rows 34 px, flush with thin dividers; number 13 px, name 14.5 px, AI result 13 px mono grey (110 px column), value 15 px bold; empty optional "—" in light grey, missing mandatory row light amber with amber "Required"; soft zebra (#f8fafc) on other rows, user-edited rows faint green, editing row light blue; editors 32 px / 14.5 px. Column header on slate-50 at 11.5 px.
+- FAB / BODY footers (Fabric / Body Article No. + Desc): labels 11.5 px, values 15 px, padding px-3 py-2 on slate-50.
+- Same day, the other FG cards matched (~+1.5 px everywhere, same layouts): B TRIM + V. ADD (CostingGridCard: all text +1.5 px, 32 px cell editors, soft zebra on item rows), PKG COST, CMP COST, OTH GRID-1 rows (names 14 / values 14.5, 28 px editors, 30 px rows) + its cost summary, BOM card, AUTO-BGT / ACT-V2 CONSUMPTION cards, B TRIM extra rows (13 / 13.5). Body Article's own PRECISE CONSUMPTION card not touched.
+
 ## 2026-11-24 — Blocked vendors hidden from Vendor Name / Vendor Code pickers
 
 - `GET /approver/vendor-search` (used by FG New/Created, Fabric and GM pages — Vendor Name and Vendor Code dropdowns) now returns only vendors with `purchasing_blocked` false or NULL (NULL = new DAB vendor not yet synced from v2srm; shown).
@@ -15,7 +28,7 @@
 ## 2026-11-24 — master_vendor_details: purchasing_blocked columns
 
 - DB (applied 2026-11-24, migration `add_master_vendor_purchasing_blocked`): `purchasing_blocked BOOLEAN` (NULL = not synced yet, not "unblocked"). Prisma `MasterVendorDetail.purchasingBlocked`. `purchasing_blocked_synced_at TIMESTAMPTZ` kept (user decided after a declined drop): each 06:00 / 12:00 run stamps `now()` on every matched vendor (changed or not); vendors not in v2srm get NULL for both. Prisma `purchasingBlockedSyncedAt`.
-- Filled daily at **06:00 and 12:00 IST** from v2srm `vendors.purchasing_blocked` (`services/vendorBlockedSyncService.ts`, scheduler in index.ts next to the 02:00 DAB vendor sync, which is unchanged). Reads v2srm REST with the existing `SRM_SUPABASE_SERVICE_KEY` (1000/page). Match on `ltrim(code,'0')` (v2srm has leading zeros, ours not; its ~66 duplicate codes agree, blocked wins). Updates existing rows only; vendors missing in v2srm → NULL. Raw SQL so `synced_at` (@updatedAt) isn't bumped. Dry-run fetch 2026-11-24: 10,334 codes, 1,775 blocked. First real run 2026-11-24 (manual, 5 s): all 10,323 vendors matched — 1,775 blocked, 8,548 not blocked, 0 unknown; synced_at untouched. No UI yet. DAB vendor sync (`vendorMasterSyncService`) only writes its named fields, so it never overwrites these.
+- Filled daily at **06:00 and 12:00 IST** from v2srm `vendors.purchasing_blocked` (`services/vendorBlockedSyncService.ts`, scheduler in index.ts next to the 02:00 DAB vendor sync, which is unchanged). Reads v2srm REST (1000/page) with `SRM_SUPABASE_SERVICE_KEY` → `SRM_SUPABASE_ANON_KEY` → the public v2srm anon key hard-coded like srmSyncService, so prod needs no new env setting (anon read of `vendors` tested OK). Match on `ltrim(code,'0')` (v2srm has leading zeros, ours not; its ~66 duplicate codes agree, blocked wins). Updates existing rows only; vendors missing in v2srm → NULL. Raw SQL so `synced_at` (@updatedAt) isn't bumped. Dry-run fetch 2026-11-24: 10,334 codes, 1,775 blocked. First real run 2026-11-24 (manual, 5 s): all 10,323 vendors matched — 1,775 blocked, 8,548 not blocked, 0 unknown; synced_at untouched. No UI yet. DAB vendor sync (`vendorMasterSyncService`) only writes its named fields, so it never overwrites these.
 - Note: `synced_at` is Prisma `@updatedAt`, so a future Prisma write of purchasing_blocked would also bump synced_at — use raw SQL or accept it.
 
 ## 2026-11-24 — Workspace (Extraction + Model Generation) for Category Head / Sub-division Head
