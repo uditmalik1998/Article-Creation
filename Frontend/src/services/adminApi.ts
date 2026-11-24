@@ -775,7 +775,9 @@ export interface ExpenseChangeRequest {
   /** Null for an ordinary row change; 'BGT_CONT' / 'PD_CONT' for a Major
    * Category Grid contribution-% block, whose `changes` are keyed by
    * attribute VALUE ({ REG_FIT: { old: 50, new: 60 } }). */
-  requestKind: 'BGT_CONT' | 'PD_CONT' | null;
+  /** BGT_CONT / PD_CONT = contribution % block; BULK_ADD = many new rows in one
+   * request (changes.__bulkRows.new holds them). */
+  requestKind: 'BGT_CONT' | 'PD_CONT' | 'BULK_ADD' | null;
   /** "<major_category>||<attribute_name>" for a contribution request. */
   blockKey: string | null;
   /** The creator's paired approver — the only one who can act at CONT_APPROVER. */
@@ -838,6 +840,28 @@ export async function createExpenseChangeRequest(
 }
 
 /** Propose a brand-new row. */
+/** One request that adds many rows (raw tables, e.g. a whole major category
+ * copied from another). Duplicates and rows already in the table are skipped. */
+export async function createExpenseBulkAddRequest(
+  tableKey: string,
+  payload: ExpenseRequestMeta & { rows: Record<string, any>[]; label?: string },
+): Promise<{ data: ExpenseChangeRequest; rowCount: number; skipped: { duplicatesInBatch: number; alreadyInTable: number } }> {
+  const res = await expenseApi.post<{ success: boolean; data: ExpenseChangeRequest; rowCount: number; skipped: { duplicatesInBatch: number; alreadyInTable: number } }>(
+    `/table/${encodeURIComponent(tableKey)}/bulk-add-requests`,
+    payload,
+  );
+  return { data: res.data.data, rowCount: res.data.rowCount, skipped: res.data.skipped };
+}
+
+/** Every row whose `column` equals `value` (editable columns only, max 5000). */
+export async function getExpenseRowsByColumn(tableKey: string, column: string, value: string): Promise<Record<string, any>[]> {
+  const q = new URLSearchParams({ column, value });
+  const res = await expenseApi.get<{ success: boolean; data: Record<string, any>[] }>(
+    `/table/${encodeURIComponent(tableKey)}/rows-by?${q.toString()}`,
+  );
+  return res.data.data;
+}
+
 export async function createExpenseAddRequest(
   tableKey: string,
   payload: ExpenseRequestMeta & { values: Record<string, any> },
@@ -1049,6 +1073,26 @@ export async function getMyExpenseAccess(tableKey?: string): Promise<MyExpenseAc
   return res.data.data;
 }
 
+export interface ExpenseTableStat {
+  rows: number;
+  updatedAt: string | null;
+  pending: number;
+}
+
+/** Row count, last change time and pending change requests per table key. */
+export async function getExpenseTableStats(): Promise<Record<string, ExpenseTableStat>> {
+  const res = await expenseApi.get<{ success: boolean; data: Record<string, ExpenseTableStat> }>('/table-stats');
+  return res.data.data;
+}
+
+/** rowId → 'UPDATE' | 'DELETE' for rows with an open change request. */
+export async function getExpenseTablePendingRows(tableKey: string): Promise<Record<string, 'UPDATE' | 'DELETE'>> {
+  const res = await expenseApi.get<{ success: boolean; data: Record<string, 'UPDATE' | 'DELETE'> }>(
+    `/table/${encodeURIComponent(tableKey)}/pending-rows`
+  );
+  return res.data.data;
+}
+
 /** The full chain, active and retired, in walk order. Read-only from the
  * frontend — used only to label a request's current stage. */
 export async function getExpenseApprovalStages(): Promise<ExpenseApprovalStage[]> {
@@ -1109,6 +1153,51 @@ export async function getExpenseAuditLog(params: ExpenseAuditLogParams = {}): Pr
     if (v !== undefined && v !== null && v !== '') query.set(k, String(v));
   });
   const res = await adminApi.get<ExpenseAuditLogResponse>(`/expense-audit-log?${query.toString()}`);
+  return res.data;
+}
+
+export type ExpenseRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+
+/** One change request with its whole audit trail — the request-card view. */
+export interface ExpenseAuditRequest {
+  requestId: string;
+  tableKey: string;
+  operation: ExpenseChangeOperation;
+  rowId: string | null;
+  rowLabel: string | null;
+  status: ExpenseRequestStatus | null;
+  currentStageKey: string | null;
+  currentStageLabel: string | null;
+  /** { field: { old, new } } (DELETE: full snapshot with new = null). */
+  changes: Record<string, { old?: unknown; new?: unknown }> | null;
+  reason: string | null;
+  dueDate: string | null;
+  requestedByName: string | null;
+  requestedAt: string | null;
+  requestKind: string | null;
+  lastActivityAt: string | null;
+  chain: { key: string; label: string }[];
+  /** Oldest first. */
+  events: ExpenseAuditLogEntry[];
+}
+
+export interface ExpenseAuditRequestsResponse {
+  data: ExpenseAuditRequest[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  counts: { ALL: number; PENDING: number; APPROVED: number; REJECTED: number };
+}
+
+export async function getExpenseAuditRequests(
+  params: Omit<ExpenseAuditLogParams, 'requestId' | 'rowId' | 'actorEmail'> & { status?: ExpenseRequestStatus } = {}
+): Promise<ExpenseAuditRequestsResponse> {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== '') query.set(k, String(v));
+  });
+  const res = await adminApi.get<ExpenseAuditRequestsResponse>(`/expense-audit-log/requests?${query.toString()}`);
   return res.data;
 }
 

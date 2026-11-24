@@ -8864,6 +8864,88 @@ function parseExpenseColumnFilters(raw: string | undefined, validKeys: Set<strin
   return result;
 }
 
+// ── Expense Data page stats ─────────────────────────────────────────────────
+// Row count, last change time and open change requests per master table, for
+// the Expense Data landing page. Counts hit big tables (maj_cat_grid_values
+// is 200k+ rows), so the result is cached for a minute.
+const EXPENSE_STATS_TTL_MS = 60_000;
+let expenseStatsCache: { at: number; data: Record<string, { rows: number; updatedAt: string | null }> } | null = null;
+const STATS_TIME_KEYS = ['updated_at', 'updatedAt', 'uploaded_at', 'uploadedAt', 'created_at', 'createdAt', 'syncedAt', 'synced_at'];
+
+async function computeExpenseTableStat(config: ExpenseTableConfig): Promise<{ rows: number; updatedAt: string | null }> {
+  const keys = new Set(config.columns.map((c) => c.key));
+  const timeKey = STATS_TIME_KEYS.find((k) => keys.has(k)) ?? null;
+  const toIso = (v: unknown) => (v instanceof Date ? v.toISOString() : v ? new Date(String(v)).toISOString() : null);
+
+  if (config.kind === 'prisma') {
+    const delegate = (prisma as any)[config.delegateName];
+    const where = config.baseWhere ?? {};
+    const [rows, agg] = await Promise.all([
+      delegate.count({ where }),
+      timeKey ? delegate.aggregate({ where, _max: { [timeKey]: true } }) : Promise.resolve(null),
+    ]);
+    return { rows: Number(rows), updatedAt: timeKey ? toIso(agg?._max?.[timeKey]) : null };
+  }
+  if (config.kind === 'raw') {
+    const tableSql = Prisma.raw(`"${config.tableName}"`);
+    const maxSql = timeKey ? Prisma.raw(`MAX("${timeKey}")`) : Prisma.raw('NULL');
+    const r = await prisma.$queryRaw<{ total: bigint; last: Date | null }[]>(
+      Prisma.sql`SELECT COUNT(*)::bigint AS total, ${maxSql} AS last FROM ${tableSql}`
+    );
+    return { rows: Number(r[0]?.total ?? 0), updatedAt: toIso(r[0]?.last) };
+  }
+  const r = await prisma.$queryRaw<{ total: bigint; last: Date | null }[]>(
+    Prisma.sql`SELECT COUNT(*)::bigint AS total, MAX(c.updated_at) AS last FROM categories c
+      JOIN sub_departments sd ON sd.id = c.sub_department_id
+      JOIN departments d ON d.id = sd.department_id`
+  );
+  return { rows: Number(r[0]?.total ?? 0), updatedAt: toIso(r[0]?.last) };
+}
+
+export async function getExpenseTableStats(_req: Request, res: Response) {
+  if (!expenseStatsCache || Date.now() - expenseStatsCache.at > EXPENSE_STATS_TTL_MS) {
+    const entries = await Promise.all(
+      Object.entries(EXPENSE_TABLE_REGISTRY).map(async ([key, config]) => {
+        try {
+          return [key, await withPrismaRetry(() => computeExpenseTableStat(config))] as const;
+        } catch (err) {
+          console.warn(`[expense-stats] ${key} failed:`, (err as Error).message);
+          return [key, { rows: 0, updatedAt: null }] as const;
+        }
+      })
+    );
+    expenseStatsCache = { at: Date.now(), data: Object.fromEntries(entries) };
+  }
+  // Pending requests change often and the query is cheap — never cached.
+  const pendingGroups = await withPrismaRetry(() =>
+    prisma.expenseChangeRequest.groupBy({ by: ['tableKey'], where: { status: 'PENDING' }, _count: { _all: true } })
+  );
+  const pending: Record<string, number> = {};
+  for (const g of pendingGroups) pending[g.tableKey] = g._count._all;
+
+  const data: Record<string, { rows: number; updatedAt: string | null; pending: number }> = {};
+  for (const [key, s] of Object.entries(expenseStatsCache.data)) data[key] = { ...s, pending: pending[key] ?? 0 };
+  return res.json({ success: true, data });
+}
+
+/** Rows of one table that have an open change request — drives the table
+ * page's "Request" column and stops a second request being raised there. */
+export async function getExpenseTablePendingRows(req: Request, res: Response) {
+  const { tableKey } = req.params;
+  if (!EXPENSE_TABLE_REGISTRY[tableKey]) {
+    return res.status(404).json({ success: false, error: `Unknown table key: ${tableKey}` });
+  }
+  const rows = await withPrismaRetry(() =>
+    prisma.expenseChangeRequest.findMany({
+      where: { tableKey, status: 'PENDING', rowId: { not: null } },
+      select: { rowId: true, operation: true },
+    })
+  );
+  const data: Record<string, 'UPDATE' | 'DELETE'> = {};
+  for (const r of rows) if (r.rowId && r.operation !== 'CREATE') data[r.rowId] = r.operation as 'UPDATE' | 'DELETE';
+  return res.json({ success: true, data });
+}
+
 export async function getExpenseTableData(req: Request, res: Response) {
   const { tableKey } = req.params;
   const config = EXPENSE_TABLE_REGISTRY[tableKey];
@@ -11053,3 +11135,86 @@ export const uploadFabricMainMvgrMapping = async (req: Request, res: Response): 
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+// ── Bulk add (copy a whole major category, 2026-11-23) ──────────────────────
+
+/** Whole-row signature over `keys`, for duplicate checks. */
+export function expenseRowSignature(row: Record<string, any>, keys: string[]): string {
+  return keys.map((k) => String(row[k] ?? '').trim().toUpperCase()).join('\u0001');
+}
+
+/**
+ * Of `rows` (raw tables only), which already exist in the table with exactly
+ * the same values on `keys`? Looks them up by the first key's values, so it
+ * is one query however many rows there are. Returns their signatures.
+ */
+export async function findExistingExpenseRows(
+  tableKey: string,
+  rows: Record<string, any>[],
+  keys: string[],
+  client: PrismaOrTx = prisma
+): Promise<Set<string>> {
+  const config = EXPENSE_TABLE_REGISTRY[tableKey];
+  if (!config || config.kind !== 'raw' || rows.length === 0 || keys.length === 0) return new Set();
+  const lead = keys[0];
+  const leadValues = [...new Set(rows.map((r) => String(r[lead] ?? '')))];
+  const cols = Prisma.join(keys.map((k) => Prisma.raw(`"${k}"`)), ', ');
+  const existing = await client.$queryRaw<Record<string, any>[]>(
+    Prisma.sql`SELECT ${cols} FROM ${Prisma.raw(`"${config.tableName}"`)} WHERE ${Prisma.raw(`"${lead}"`)}::text = ANY(${leadValues})`
+  );
+  return new Set(existing.map((r) => expenseRowSignature(r, keys)));
+}
+
+/** Inserts many rows into a raw table with multi-row INSERTs (500 per
+ * statement). Returns how many were inserted. */
+export async function applyExpenseRowsBulkInsert(
+  tableKey: string,
+  rows: Record<string, any>[],
+  client: PrismaOrTx = prisma
+): Promise<number> {
+  const config = EXPENSE_TABLE_REGISTRY[tableKey];
+  if (!config) throw new Error(`Unknown table key: ${tableKey}`);
+  if (!config.allowCreate) throw new Error(`Adding rows is not supported for "${tableKey}".`);
+  if (config.kind !== 'raw') throw new Error(`Bulk add is only supported for raw tables ("${tableKey}" is not).`);
+  if (rows.length === 0) return 0;
+  const keys = [...new Set(rows.flatMap((r) => Object.keys(r)))];
+  const colTypes = await getRawColumnTypes(client, config.tableName, keys);
+  const tableSql = Prisma.raw(`"${config.tableName}"`);
+  const colsSql = Prisma.join(keys.map((k) => Prisma.raw(`"${k}"`)), ', ');
+  let inserted = 0;
+  for (let i = 0; i < rows.length; i += 500) {
+    const chunk = rows.slice(i, i + 500);
+    const valuesSql = Prisma.join(
+      chunk.map((r) => Prisma.sql`(${Prisma.join(keys.map((k) => (r[k] === undefined ? Prisma.sql`DEFAULT` : castRawValue(r[k], colTypes.get(k)))), ', ')})`),
+      ', '
+    );
+    inserted += await client.$executeRaw(Prisma.sql`INSERT INTO ${tableSql} (${colsSql}) VALUES ${valuesSql}`);
+  }
+  return inserted;
+}
+
+/** GET /expense/table/:tableKey/rows-by?column=&value= — every row whose
+ * `column` equals `value` (editable columns only, max 5000), e.g. all
+ * attribute/value rows of one major category, to copy into a bulk add. */
+export async function getExpenseRowsByColumn(req: Request, res: Response) {
+  const { tableKey } = req.params;
+  const { column, value } = req.query as Record<string, string | undefined>;
+  const config = EXPENSE_TABLE_REGISTRY[tableKey];
+  if (!config) return res.status(404).json({ success: false, error: `Unknown table key: ${tableKey}` });
+  if (config.kind !== 'raw') return res.status(400).json({ success: false, error: 'Only supported for raw tables.' });
+  const editable = config.columns.filter((c) => c.editable !== false).map((c) => c.key);
+  if (!column || !config.columns.some((c) => c.key === column) || value === undefined) {
+    return res.status(400).json({ success: false, error: 'column and value are required.' });
+  }
+  try {
+    const cols = Prisma.join(editable.map((k) => Prisma.raw(`"${k}"`)), ', ');
+    const rows = await withPrismaRetry(() =>
+      prisma.$queryRaw<Record<string, any>[]>(
+        Prisma.sql`SELECT ${cols} FROM ${Prisma.raw(`"${config.tableName}"`)} WHERE ${Prisma.raw(`"${column}"`)}::text = ${value} ORDER BY ${cols} LIMIT 5000`
+      )
+    );
+    return res.json({ success: true, data: serializeBigInts(rows), columns: editable });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+}
