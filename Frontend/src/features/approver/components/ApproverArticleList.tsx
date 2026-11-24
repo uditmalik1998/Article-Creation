@@ -2642,6 +2642,21 @@ const ArticleCard = React.memo(
       );
     };
 
+    // AI value for a FAB / BODY row from fg_ai_attributes (JSON keyed by card schema key).
+    const fgAiAttrs: Record<string, unknown> = (() => {
+      const raw = (item as any).fgAiAttributes;
+      if (!raw) return {};
+      if (typeof raw === 'object') return raw as Record<string, unknown>;
+      try {
+        return JSON.parse(String(raw)) ?? {};
+      } catch {
+        return {};
+      }
+    })();
+    const fgAiValueFor = (schemaKey: string): string => {
+      const v = fgAiAttrs[schemaKey];
+      return v == null ? '' : String(v).trim();
+    };
     const renderAttributeRow = (attr: {
       field: string;
       label: string;
@@ -2693,14 +2708,28 @@ const ArticleCard = React.memo(
           <span
             className={cn(
               'flex-1 truncate leading-snug',
-              big ? 'text-[13px]' : plus1 === 2 ? 'text-[12.5px]' : plus1 ? 'text-[11.5px]' : 'text-[10.5px]',
+              big ? 'basis-0 text-[13px]' : plus1 === 2 ? 'text-[12.5px]' : plus1 ? 'text-[11.5px]' : 'text-[10.5px]',
               isMandatory ? 'key-field text-foreground' : 'font-semibold text-foreground/80',
             )}
           >
             {isMandatory && <span className="mandatory-mark">*</span>}
             {attr.label}
           </span>
-          <div className={cn('shrink-0', big ? 'w-[180px]' : 'w-[110px]')}>
+          {big && (() => {
+            // AI extraction result (fg_ai_attributes) — read-only, never saved from here.
+            const ai = fgAiValueFor(attr.schemaKey);
+            return (
+              <span
+                className="w-[100px] shrink-0 truncate text-center font-mono text-[13px] font-semibold text-slate-500"
+                title={ai ? `AI result: ${ai}` : 'No AI result'}
+              >
+                {ai || <span className="text-slate-300">—</span>}
+              </span>
+            );
+          })()}
+          {/* FAB / BODY cards: name and value halves equal, so AI result sits mid-row. */}
+          <div className={cn(big ? 'flex min-w-0 flex-1 basis-0 justify-end' : 'w-[110px] shrink-0')}>
+          <div className={big ? 'w-[180px] max-w-full' : 'contents'}>
             {attr.freeText ? (
               isEditing ? (
                 <Input
@@ -2837,6 +2866,7 @@ const ArticleCard = React.memo(
                 <ChevronDown className={cn('shrink-0 opacity-40', big ? 'h-4 w-4' : 'h-3 w-3')} />
               </span>
             )}
+          </div>
           </div>
         </div>
       );
@@ -3761,6 +3791,14 @@ const ArticleCard = React.memo(
                         </button>
                         {!collapsed && (
                           <div className="space-y-0 p-1">
+                            {!allowGroups && (g.group === 'FAB' || g.group === 'BODY') && (
+                              <div className="flex items-center gap-2 border-b border-slate-200 px-2 pb-1 pt-0.5 text-[11px] font-bold uppercase tracking-[0.07em] text-slate-500">
+                                <span className="w-6 shrink-0" />
+                                <span className="flex-1 basis-0">Attribute</span>
+                                <span className="w-[100px] shrink-0 text-center">AI result</span>
+                                <span className="flex-1 basis-0 text-right">Value</span>
+                              </div>
+                            )}
                             {groupMap[g.group].attrs.map((attr) => renderAttributeRow(attr, !allowGroups && (g.group === 'FAB' || g.group === 'BODY')))}
 
                             {/* Costing Type, CMP Cost, Basic Trim Cost, CMTP Cost — Body Article only,

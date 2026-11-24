@@ -590,6 +590,8 @@ model ExtractionResultFlat {
 
   // Raw Gemini response: full JSON output from VLM including all_extracted_attributes
   imageExtractionRawData Json? @map("image_extraction_raw_data")
+  // AI result per FAB / BODY attribute at extraction time ({"yarn_01":"C","neck":"RN",…}), never edited (2026-11-24)
+  fgAiAttributes         Json? @map("fg_ai_attributes")
 
   job             ExtractionJob?   @relation(fields: [jobId], references: [id], onDelete: Cascade)
   srmSyncRunItems SrmSyncRunItem[]

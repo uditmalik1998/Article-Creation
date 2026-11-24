@@ -585,7 +585,8 @@ exports.Prisma.ExtractionResultFlatScalarFieldEnum = {
   sapSyncMessage: 'sapSyncMessage',
   srmOriginalDesignNumber: 'srmOriginalDesignNumber',
   srmUniqueId: 'srmUniqueId',
-  imageExtractionRawData: 'imageExtractionRawData'
+  imageExtractionRawData: 'imageExtractionRawData',
+  fgAiAttributes: 'fgAiAttributes'
 };
 
 exports.Prisma.ModelGenerationResultScalarFieldEnum = {
