@@ -102,7 +102,6 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
   const userData = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : null;
   const isAdmin = userData?.role === 'ADMIN';
   const role = userData?.role;
-  const isApproverSide = role === 'APPROVER' || role === 'CATEGORY_HEAD';
 
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
@@ -160,9 +159,9 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
   if (!isPdDesigner && !isGmOnly) {
     if (isAdmin) {
     }
-    // Extraction is available to creator-side roles and to APPROVER.
-    // (CATEGORY_HEAD and PD remain approval-only and do not get it.)
-    if ((!isApproverSide && !isPd) || role === 'APPROVER') {
+    // Extraction: every role except PD (approval-only). CATEGORY_HEAD and
+    // SUB_DIVISION_HEAD get it too (2026-11-24).
+    if (!isPd) {
       items.push({
         key: '/extraction-group',
         Icon: FileSearch,
@@ -173,8 +172,9 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({ collapsed, onCollapsedCh
         ],
       });
     }
-    // Model Generation — ADMIN, CREATOR, APPROVER (PD_DESIGNER already has it via the items init above).
-    if (isAdmin || role === 'CREATOR' || role === 'APPROVER') {
+    // Model Generation — ADMIN, CREATOR, APPROVER, CATEGORY_HEAD, SUB_DIVISION_HEAD
+    // (PD_DESIGNER already has it via the items init above).
+    if (isAdmin || ['CREATOR', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD'].includes(role)) {
       items.push({ key: '/model-generation', Icon: Camera, label: 'Model Generation', section: 'WORKSPACE' });
     }
   }
