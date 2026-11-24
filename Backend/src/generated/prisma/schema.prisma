@@ -688,16 +688,20 @@ model MvgrLookup {
 
 /// Vendor Master: Synced from DAB API (ET_Supplier_Master)
 model MasterVendorDetail {
-  id                Int      @id @default(autoincrement())
-  vendorCode        String   @unique @map("vendor_code") @db.VarChar(20)
-  vendorName        String?  @map("vendor_name") @db.VarChar(200)
-  vendorCity        String?  @map("vendor_city") @db.VarChar(100)
-  vendorRegion      String?  @map("vendor_region") @db.VarChar(50)
-  mergeVendorCode   String?  @map("merge_vendor_code") @db.VarChar(20)
-  mergeVendorName   String?  @map("merge_vendor_name") @db.VarChar(200)
-  mergeVendorCity   String?  @map("merge_vendor_city") @db.VarChar(100)
-  mergeVendorRegion String?  @map("merge_vendor_region") @db.VarChar(50)
-  syncedAt          DateTime @default(now()) @updatedAt @map("synced_at")
+  id                        Int       @id @default(autoincrement())
+  vendorCode                String    @unique @map("vendor_code") @db.VarChar(20)
+  vendorName                String?   @map("vendor_name") @db.VarChar(200)
+  vendorCity                String?   @map("vendor_city") @db.VarChar(100)
+  vendorRegion              String?   @map("vendor_region") @db.VarChar(50)
+  mergeVendorCode           String?   @map("merge_vendor_code") @db.VarChar(20)
+  mergeVendorName           String?   @map("merge_vendor_name") @db.VarChar(200)
+  mergeVendorCity           String?   @map("merge_vendor_city") @db.VarChar(100)
+  mergeVendorRegion         String?   @map("merge_vendor_region") @db.VarChar(50)
+  syncedAt                  DateTime  @default(now()) @updatedAt @map("synced_at")
+  // From v2srm vendors.purchasing_blocked (2026-11-24); null = not synced yet. Not written by the DAB sync.
+  purchasingBlocked         Boolean?  @map("purchasing_blocked")
+  // When the 06:00 / 12:00 v2srm sync last checked this vendor's flag.
+  purchasingBlockedSyncedAt DateTime? @map("purchasing_blocked_synced_at") @db.Timestamptz(6)
 
   @@index([vendorName])
   @@map("master_vendor_details")

@@ -157,11 +157,7 @@ const ExtractionRoute: React.FC<{ children: React.ReactNode }> = ({ children }) 
 
   if (user) {
     const userData = JSON.parse(user);
-    // CATEGORY_HEAD has no extraction access; PD_DESIGNER is single-purpose.
-    // APPROVER is explicitly allowed (in addition to the creator-side roles).
-    if (userData.role === 'CATEGORY_HEAD') {
-      return <Navigate to="/approver" replace />;
-    }
+    // PD_DESIGNER is single-purpose. CATEGORY_HEAD has extraction since 2026-11-24.
     if (userData.role === 'PD_DESIGNER') {
       return <Navigate to="/model-generation" replace />;
     }
@@ -181,7 +177,7 @@ const ModelGenerationRoute: React.FC<{ children: React.ReactNode }> = ({ childre
 
   if (user) {
     const userData = JSON.parse(user);
-    const allowed = ['PD_DESIGNER', 'ADMIN', 'CREATOR', 'APPROVER'];
+    const allowed = ['PD_DESIGNER', 'ADMIN', 'CREATOR', 'APPROVER', 'CATEGORY_HEAD', 'SUB_DIVISION_HEAD'];
     if (!allowed.includes(userData.role)) {
       return <Navigate to="/dashboard" replace />;
     }

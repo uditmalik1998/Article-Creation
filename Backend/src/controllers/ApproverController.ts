@@ -3021,9 +3021,12 @@ export class ApproverController {
                     return res.status(400).json({ error: 'Vendor Code must be exactly 6 digits.' });
                 }
                 const code = normalizeVendorCode(changes.vendorCode) ?? '';
-                const vendor = await prisma.masterVendorDetail.findUnique({ where: { vendorCode: code }, select: { vendorCode: true } });
+                const vendor = await prisma.masterVendorDetail.findUnique({ where: { vendorCode: code }, select: { vendorCode: true, purchasingBlocked: true } });
                 if (!vendor) {
                     return res.status(400).json({ error: `Vendor code ${code} was not found in the vendor master.` });
+                }
+                if (vendor.purchasingBlocked === true) {
+                    return res.status(400).json({ error: `Vendor code ${code} is blocked for purchasing.` });
                 }
             }
 
@@ -3182,10 +3185,13 @@ export class ApproverController {
                 } else {
                     const vendor = await prisma.masterVendorDetail.findUnique({
                         where: { vendorCode: data.vendorCode },
-                        select: { vendorName: true },
+                        select: { vendorName: true, purchasingBlocked: true },
                     });
                     if (!vendor?.vendorName) {
                         return res.status(400).json({ error: `Vendor code ${data.vendorCode} was not found in the vendor master.` });
+                    }
+                    if (vendor.purchasingBlocked === true) {
+                        return res.status(400).json({ error: `Vendor code ${data.vendorCode} is blocked for purchasing.` });
                     }
                     data.vendorName = vendor.vendorName;
                     vendorCodeChanged = true;
@@ -3451,6 +3457,17 @@ export class ApproverController {
                 for (const w of setMcWrites) {
                     await prisma.extractionResultFlat.update({ where: { id: w.id }, data: { mcCode: w.mcCode, hsnTaxCode: w.hsnCode } });
                 }
+            }
+
+            // Purchasing-blocked vendor (v2srm flag) → nothing is approved.
+            {
+                const { blockedVendorSubmitMessage } = await import('../services/vendorBlockedSyncService');
+                const rows = await prisma.extractionResultFlat.findMany({
+                    where: { id: { in: ids } },
+                    select: { id: true, vendorCode: true, designNumber: true },
+                });
+                const msg = await blockedVendorSubmitMessage(rows);
+                if (msg) return res.status(422).json({ error: 'VENDOR_BLOCKED', detail: msg });
             }
 
             // ── Auto-generate color variants from the BOM colour ──────────────────
@@ -4965,10 +4982,13 @@ export class ApproverController {
             return res.json({ success: true, data: [] });
         }
 
+        // Purchasing-blocked vendors (v2srm flag, synced 06:00/12:00) are never offered —
+        // FG, Fabric and GM pages all pick vendors from here. NULL = not synced yet → shown.
+        const notBlocked = { OR: [{ purchasingBlocked: false }, { purchasingBlocked: null }] };
         const results = await prisma.masterVendorDetail.findMany({
             where: byCode
-                ? { vendorCode: { startsWith: q.replace(/^0+/, '') || q } }
-                : { vendorName: { contains: q, mode: 'insensitive' } },
+                ? { vendorCode: { startsWith: q.replace(/^0+/, '') || q }, ...notBlocked }
+                : { vendorName: { contains: q, mode: 'insensitive' }, ...notBlocked },
             select: {
                 vendorCode: true,
                 vendorName: true,
@@ -6586,6 +6606,16 @@ export class ApproverController {
         if (!Array.isArray(ids) || ids.length === 0) {
             return res.status(400).json({ error: 'ids array is required' });
         }
+        // Purchasing-blocked vendor (v2srm flag) → nothing is submitted.
+        {
+            const { blockedVendorSubmitMessage } = await import('../services/vendorBlockedSyncService');
+            const rows = await prisma.fabricArticleData.findMany({
+                where: { id: { in: ids } },
+                select: { id: true, vendorCode: true, designNumber: true },
+            });
+            const msg = await blockedVendorSubmitMessage(rows);
+            if (msg) return res.status(422).json({ error: 'VENDOR_BLOCKED', detail: msg });
+        }
         const { submitFabricArticles } = await import('../services/zmmFabArtCreationService');
         // Fabric Article New page: duplicate = same description AND same design number.
         const result = await submitFabricArticles(ids, req.user?.id, { matchDesignNumber: true });
@@ -7640,6 +7670,19 @@ export class ApproverController {
         if (!Array.isArray(ids) || ids.length === 0) {
             res.status(400).json({ error: 'ids array is required' });
             return;
+        }
+        // Purchasing-blocked vendor (v2srm flag) → nothing is submitted.
+        {
+            const { blockedVendorSubmitMessage } = await import('../services/vendorBlockedSyncService');
+            const rows = await prisma.gmArticleData.findMany({
+                where: { id: { in: ids } },
+                select: { id: true, vendorCode: true, designNumber: true },
+            });
+            const msg = await blockedVendorSubmitMessage(rows);
+            if (msg) {
+                res.status(422).json({ error: 'VENDOR_BLOCKED', detail: msg });
+                return;
+            }
         }
         const { submitGmArticles } = await import('../services/zmmGMArtCreationService');
         const result = await submitGmArticles(ids, (req as any).user?.name ?? null, req.user?.id);

@@ -5,6 +5,25 @@
 
 ---
 
+## 2026-11-24 — Blocked vendors hidden from Vendor Name / Vendor Code pickers
+
+- `GET /approver/vendor-search` (used by FG New/Created, Fabric and GM pages — Vendor Name and Vendor Code dropdowns) now returns only vendors with `purchasing_blocked` false or NULL (NULL = new DAB vendor not yet synced from v2srm; shown).
+- FG Created page admin vendor change (both modify paths in ApproverController) refuses a blocked vendor: "Vendor code X is blocked for purchasing."
+- Articles that already have a blocked vendor keep it (not cleared). Backend only.
+- **Save & Submit blocked** when an article's vendor is purchasing-blocked: FG `POST /approver/approve` (+ `/gm-approve`, checked after set parts are added), Fabric `POST /approver/fabric-article-data/submit`, GM `POST /approver/gm-articles/submit` → 422 `VENDOR_BLOCKED`, nothing approved / sent to SAP; detail lists design no. + vendor code + name (`blockedVendorSubmitMessage` in vendorBlockedSyncService; match on ltrim zeros; NULL flag allowed). The pages already show `detail` in the error toast. FG "Create Fabric Article" (hidden button) not guarded. At the time 24 pending FG articles had a blocked vendor (Fabric 0, GM 0).
+
+## 2026-11-24 — master_vendor_details: purchasing_blocked columns
+
+- DB (applied 2026-11-24, migration `add_master_vendor_purchasing_blocked`): `purchasing_blocked BOOLEAN` (NULL = not synced yet, not "unblocked"). Prisma `MasterVendorDetail.purchasingBlocked`. `purchasing_blocked_synced_at TIMESTAMPTZ` kept (user decided after a declined drop): each 06:00 / 12:00 run stamps `now()` on every matched vendor (changed or not); vendors not in v2srm get NULL for both. Prisma `purchasingBlockedSyncedAt`.
+- Filled daily at **06:00 and 12:00 IST** from v2srm `vendors.purchasing_blocked` (`services/vendorBlockedSyncService.ts`, scheduler in index.ts next to the 02:00 DAB vendor sync, which is unchanged). Reads v2srm REST with the existing `SRM_SUPABASE_SERVICE_KEY` (1000/page). Match on `ltrim(code,'0')` (v2srm has leading zeros, ours not; its ~66 duplicate codes agree, blocked wins). Updates existing rows only; vendors missing in v2srm → NULL. Raw SQL so `synced_at` (@updatedAt) isn't bumped. Dry-run fetch 2026-11-24: 10,334 codes, 1,775 blocked. First real run 2026-11-24 (manual, 5 s): all 10,323 vendors matched — 1,775 blocked, 8,548 not blocked, 0 unknown; synced_at untouched. No UI yet. DAB vendor sync (`vendorMasterSyncService`) only writes its named fields, so it never overwrites these.
+- Note: `synced_at` is Prisma `@updatedAt`, so a future Prisma write of purchasing_blocked would also bump synced_at — use raw SQL or accept it.
+
+## 2026-11-24 — Workspace (Extraction + Model Generation) for Category Head / Sub-division Head
+
+- Sidebar (`AppSidebar.tsx`): Extraction now shows for every role except PD (was hidden for CATEGORY_HEAD); Model Generation adds CATEGORY_HEAD + SUB_DIVISION_HEAD.
+- Routes (`AppModern.tsx`): `ExtractionRoute` no longer redirects CATEGORY_HEAD to /approver; `ModelGenerationRoute` allows CATEGORY_HEAD + SUB_DIVISION_HEAD.
+- Backend unchanged — `requireUser` already allowed both roles on extraction and /api/model-generation. Frontend only.
+
 ## 2026-11-24 — FG FAB / BODY cards: AI result column
 
 - Same idea as the Fabric FAB card: a read-only grey "AI result" column between Attribute and Value on the FG New + Created pages (FAB and BODY cards, `ApproverArticleList.tsx`; header row Attribute / AI result / Value). "—" when empty (costing rows, Shade, M_FAB_VDR, M_FAB_DIV / Set are never extracted).

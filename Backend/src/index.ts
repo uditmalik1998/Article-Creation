@@ -41,6 +41,7 @@ import testApiRoutes from './routes/testApi';
 import ksmlRoutes from './routes/ksml';
 import poolBRoutes from './routes/poolB';
 import { syncVendorMaster } from './services/vendorMasterSyncService';
+import { syncVendorPurchasingBlocked } from './services/vendorBlockedSyncService';
 import { syncFlatToSnowflake, isSnowflakeSyncConfigured } from './services/snowflakeFlatSyncService';
 import { runRawArticleExtraction, isExtractionRunning } from './services/rawArticleExtractionService';
 import { runFabricRawDataProcessing, isFabricRawRunning } from './services/fabricRawDataService';
@@ -447,6 +448,22 @@ app.use(errorHandler);
           syncVendorMaster()
             .then(r => console.log(`[VendorMaster Cron] Sync complete — upserted:${r.upserted} pages:${r.pages} duration:${r.durationMs}ms`))
             .catch(err => console.error('[VendorMaster Cron] Sync failed:', err?.message));
+        }
+      }
+    }, 60_000);
+
+    // Vendor purchasing_blocked from v2srm `vendors` — daily at 06:00 and 12:00 IST (2026-11-24).
+    // Updates master_vendor_details.purchasing_blocked only; the 02:00 DAB sync is unchanged.
+    let lastVendorBlockedKey = '';
+    setInterval(() => {
+      const istNow = new Date(Date.now() + 5.5 * 60 * 60 * 1000);
+      const h = istNow.getUTCHours();
+      if ((h === 6 || h === 12) && istNow.getUTCMinutes() === 0) {
+        const key = `${istNow.toISOString().slice(0, 10)}-${h}`; // one run per slot per day
+        if (key !== lastVendorBlockedKey) {
+          lastVendorBlockedKey = key;
+          console.log(`[VendorBlocked Cron] Starting scheduled sync at IST ${String(h).padStart(2, '0')}:00`);
+          syncVendorPurchasingBlocked().catch(() => { /* logged in the service */ });
         }
       }
     }, 60_000);

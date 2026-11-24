@@ -25727,6 +25727,8 @@ export namespace Prisma {
     mergeVendorCity: string | null
     mergeVendorRegion: string | null
     syncedAt: Date | null
+    purchasingBlocked: boolean | null
+    purchasingBlockedSyncedAt: Date | null
   }
 
   export type MasterVendorDetailMaxAggregateOutputType = {
@@ -25740,6 +25742,8 @@ export namespace Prisma {
     mergeVendorCity: string | null
     mergeVendorRegion: string | null
     syncedAt: Date | null
+    purchasingBlocked: boolean | null
+    purchasingBlockedSyncedAt: Date | null
   }
 
   export type MasterVendorDetailCountAggregateOutputType = {
@@ -25753,6 +25757,8 @@ export namespace Prisma {
     mergeVendorCity: number
     mergeVendorRegion: number
     syncedAt: number
+    purchasingBlocked: number
+    purchasingBlockedSyncedAt: number
     _all: number
   }
 
@@ -25776,6 +25782,8 @@ export namespace Prisma {
     mergeVendorCity?: true
     mergeVendorRegion?: true
     syncedAt?: true
+    purchasingBlocked?: true
+    purchasingBlockedSyncedAt?: true
   }
 
   export type MasterVendorDetailMaxAggregateInputType = {
@@ -25789,6 +25797,8 @@ export namespace Prisma {
     mergeVendorCity?: true
     mergeVendorRegion?: true
     syncedAt?: true
+    purchasingBlocked?: true
+    purchasingBlockedSyncedAt?: true
   }
 
   export type MasterVendorDetailCountAggregateInputType = {
@@ -25802,6 +25812,8 @@ export namespace Prisma {
     mergeVendorCity?: true
     mergeVendorRegion?: true
     syncedAt?: true
+    purchasingBlocked?: true
+    purchasingBlockedSyncedAt?: true
     _all?: true
   }
 
@@ -25902,6 +25914,8 @@ export namespace Prisma {
     mergeVendorCity: string | null
     mergeVendorRegion: string | null
     syncedAt: Date
+    purchasingBlocked: boolean | null
+    purchasingBlockedSyncedAt: Date | null
     _count: MasterVendorDetailCountAggregateOutputType | null
     _avg: MasterVendorDetailAvgAggregateOutputType | null
     _sum: MasterVendorDetailSumAggregateOutputType | null
@@ -25934,6 +25948,8 @@ export namespace Prisma {
     mergeVendorCity?: boolean
     mergeVendorRegion?: boolean
     syncedAt?: boolean
+    purchasingBlocked?: boolean
+    purchasingBlockedSyncedAt?: boolean
   }, ExtArgs["result"]["masterVendorDetail"]>
 
   export type MasterVendorDetailSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -25947,6 +25963,8 @@ export namespace Prisma {
     mergeVendorCity?: boolean
     mergeVendorRegion?: boolean
     syncedAt?: boolean
+    purchasingBlocked?: boolean
+    purchasingBlockedSyncedAt?: boolean
   }, ExtArgs["result"]["masterVendorDetail"]>
 
   export type MasterVendorDetailSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -25960,6 +25978,8 @@ export namespace Prisma {
     mergeVendorCity?: boolean
     mergeVendorRegion?: boolean
     syncedAt?: boolean
+    purchasingBlocked?: boolean
+    purchasingBlockedSyncedAt?: boolean
   }, ExtArgs["result"]["masterVendorDetail"]>
 
   export type MasterVendorDetailSelectScalar = {
@@ -25973,9 +25993,11 @@ export namespace Prisma {
     mergeVendorCity?: boolean
     mergeVendorRegion?: boolean
     syncedAt?: boolean
+    purchasingBlocked?: boolean
+    purchasingBlockedSyncedAt?: boolean
   }
 
-  export type MasterVendorDetailOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "vendorCode" | "vendorName" | "vendorCity" | "vendorRegion" | "mergeVendorCode" | "mergeVendorName" | "mergeVendorCity" | "mergeVendorRegion" | "syncedAt", ExtArgs["result"]["masterVendorDetail"]>
+  export type MasterVendorDetailOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "vendorCode" | "vendorName" | "vendorCity" | "vendorRegion" | "mergeVendorCode" | "mergeVendorName" | "mergeVendorCity" | "mergeVendorRegion" | "syncedAt" | "purchasingBlocked" | "purchasingBlockedSyncedAt", ExtArgs["result"]["masterVendorDetail"]>
 
   export type $MasterVendorDetailPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "MasterVendorDetail"
@@ -25991,6 +26013,8 @@ export namespace Prisma {
       mergeVendorCity: string | null
       mergeVendorRegion: string | null
       syncedAt: Date
+      purchasingBlocked: boolean | null
+      purchasingBlockedSyncedAt: Date | null
     }, ExtArgs["result"]["masterVendorDetail"]>
     composites: {}
   }
@@ -26424,6 +26448,8 @@ export namespace Prisma {
     readonly mergeVendorCity: FieldRef<"MasterVendorDetail", 'String'>
     readonly mergeVendorRegion: FieldRef<"MasterVendorDetail", 'String'>
     readonly syncedAt: FieldRef<"MasterVendorDetail", 'DateTime'>
+    readonly purchasingBlocked: FieldRef<"MasterVendorDetail", 'Boolean'>
+    readonly purchasingBlockedSyncedAt: FieldRef<"MasterVendorDetail", 'DateTime'>
   }
     
 
@@ -92321,7 +92347,9 @@ export namespace Prisma {
     mergeVendorName: 'mergeVendorName',
     mergeVendorCity: 'mergeVendorCity',
     mergeVendorRegion: 'mergeVendorRegion',
-    syncedAt: 'syncedAt'
+    syncedAt: 'syncedAt',
+    purchasingBlocked: 'purchasingBlocked',
+    purchasingBlockedSyncedAt: 'purchasingBlockedSyncedAt'
   };
 
   export type MasterVendorDetailScalarFieldEnum = (typeof MasterVendorDetailScalarFieldEnum)[keyof typeof MasterVendorDetailScalarFieldEnum]
@@ -98053,6 +98081,8 @@ export namespace Prisma {
     mergeVendorCity?: StringNullableFilter<"MasterVendorDetail"> | string | null
     mergeVendorRegion?: StringNullableFilter<"MasterVendorDetail"> | string | null
     syncedAt?: DateTimeFilter<"MasterVendorDetail"> | Date | string
+    purchasingBlocked?: BoolNullableFilter<"MasterVendorDetail"> | boolean | null
+    purchasingBlockedSyncedAt?: DateTimeNullableFilter<"MasterVendorDetail"> | Date | string | null
   }
 
   export type MasterVendorDetailOrderByWithRelationInput = {
@@ -98066,6 +98096,8 @@ export namespace Prisma {
     mergeVendorCity?: SortOrderInput | SortOrder
     mergeVendorRegion?: SortOrderInput | SortOrder
     syncedAt?: SortOrder
+    purchasingBlocked?: SortOrderInput | SortOrder
+    purchasingBlockedSyncedAt?: SortOrderInput | SortOrder
     _relevance?: MasterVendorDetailOrderByRelevanceInput
   }
 
@@ -98083,6 +98115,8 @@ export namespace Prisma {
     mergeVendorCity?: StringNullableFilter<"MasterVendorDetail"> | string | null
     mergeVendorRegion?: StringNullableFilter<"MasterVendorDetail"> | string | null
     syncedAt?: DateTimeFilter<"MasterVendorDetail"> | Date | string
+    purchasingBlocked?: BoolNullableFilter<"MasterVendorDetail"> | boolean | null
+    purchasingBlockedSyncedAt?: DateTimeNullableFilter<"MasterVendorDetail"> | Date | string | null
   }, "id" | "vendorCode">
 
   export type MasterVendorDetailOrderByWithAggregationInput = {
@@ -98096,6 +98130,8 @@ export namespace Prisma {
     mergeVendorCity?: SortOrderInput | SortOrder
     mergeVendorRegion?: SortOrderInput | SortOrder
     syncedAt?: SortOrder
+    purchasingBlocked?: SortOrderInput | SortOrder
+    purchasingBlockedSyncedAt?: SortOrderInput | SortOrder
     _count?: MasterVendorDetailCountOrderByAggregateInput
     _avg?: MasterVendorDetailAvgOrderByAggregateInput
     _max?: MasterVendorDetailMaxOrderByAggregateInput
@@ -98117,6 +98153,8 @@ export namespace Prisma {
     mergeVendorCity?: StringNullableWithAggregatesFilter<"MasterVendorDetail"> | string | null
     mergeVendorRegion?: StringNullableWithAggregatesFilter<"MasterVendorDetail"> | string | null
     syncedAt?: DateTimeWithAggregatesFilter<"MasterVendorDetail"> | Date | string
+    purchasingBlocked?: BoolNullableWithAggregatesFilter<"MasterVendorDetail"> | boolean | null
+    purchasingBlockedSyncedAt?: DateTimeNullableWithAggregatesFilter<"MasterVendorDetail"> | Date | string | null
   }
 
   export type UserWhereInput = {
@@ -108602,6 +108640,8 @@ export namespace Prisma {
     mergeVendorCity?: string | null
     mergeVendorRegion?: string | null
     syncedAt?: Date | string
+    purchasingBlocked?: boolean | null
+    purchasingBlockedSyncedAt?: Date | string | null
   }
 
   export type MasterVendorDetailUncheckedCreateInput = {
@@ -108615,6 +108655,8 @@ export namespace Prisma {
     mergeVendorCity?: string | null
     mergeVendorRegion?: string | null
     syncedAt?: Date | string
+    purchasingBlocked?: boolean | null
+    purchasingBlockedSyncedAt?: Date | string | null
   }
 
   export type MasterVendorDetailUpdateInput = {
@@ -108627,6 +108669,8 @@ export namespace Prisma {
     mergeVendorCity?: NullableStringFieldUpdateOperationsInput | string | null
     mergeVendorRegion?: NullableStringFieldUpdateOperationsInput | string | null
     syncedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    purchasingBlocked?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    purchasingBlockedSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type MasterVendorDetailUncheckedUpdateInput = {
@@ -108640,6 +108684,8 @@ export namespace Prisma {
     mergeVendorCity?: NullableStringFieldUpdateOperationsInput | string | null
     mergeVendorRegion?: NullableStringFieldUpdateOperationsInput | string | null
     syncedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    purchasingBlocked?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    purchasingBlockedSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type MasterVendorDetailCreateManyInput = {
@@ -108653,6 +108699,8 @@ export namespace Prisma {
     mergeVendorCity?: string | null
     mergeVendorRegion?: string | null
     syncedAt?: Date | string
+    purchasingBlocked?: boolean | null
+    purchasingBlockedSyncedAt?: Date | string | null
   }
 
   export type MasterVendorDetailUpdateManyMutationInput = {
@@ -108665,6 +108713,8 @@ export namespace Prisma {
     mergeVendorCity?: NullableStringFieldUpdateOperationsInput | string | null
     mergeVendorRegion?: NullableStringFieldUpdateOperationsInput | string | null
     syncedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    purchasingBlocked?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    purchasingBlockedSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type MasterVendorDetailUncheckedUpdateManyInput = {
@@ -108678,6 +108728,8 @@ export namespace Prisma {
     mergeVendorCity?: NullableStringFieldUpdateOperationsInput | string | null
     mergeVendorRegion?: NullableStringFieldUpdateOperationsInput | string | null
     syncedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    purchasingBlocked?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    purchasingBlockedSyncedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type UserCreateInput = {
@@ -119834,6 +119886,11 @@ export namespace Prisma {
     id?: SortOrder
   }
 
+  export type BoolNullableFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
+  }
+
   export type MasterVendorDetailOrderByRelevanceInput = {
     fields: MasterVendorDetailOrderByRelevanceFieldEnum | MasterVendorDetailOrderByRelevanceFieldEnum[]
     sort: SortOrder
@@ -119851,6 +119908,8 @@ export namespace Prisma {
     mergeVendorCity?: SortOrder
     mergeVendorRegion?: SortOrder
     syncedAt?: SortOrder
+    purchasingBlocked?: SortOrder
+    purchasingBlockedSyncedAt?: SortOrder
   }
 
   export type MasterVendorDetailAvgOrderByAggregateInput = {
@@ -119868,6 +119927,8 @@ export namespace Prisma {
     mergeVendorCity?: SortOrder
     mergeVendorRegion?: SortOrder
     syncedAt?: SortOrder
+    purchasingBlocked?: SortOrder
+    purchasingBlockedSyncedAt?: SortOrder
   }
 
   export type MasterVendorDetailMinOrderByAggregateInput = {
@@ -119881,10 +119942,20 @@ export namespace Prisma {
     mergeVendorCity?: SortOrder
     mergeVendorRegion?: SortOrder
     syncedAt?: SortOrder
+    purchasingBlocked?: SortOrder
+    purchasingBlockedSyncedAt?: SortOrder
   }
 
   export type MasterVendorDetailSumOrderByAggregateInput = {
     id?: SortOrder
+  }
+
+  export type BoolNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedBoolNullableFilter<$PrismaModel>
+    _max?: NestedBoolNullableFilter<$PrismaModel>
   }
 
   export type EnumUserRoleFilter<$PrismaModel = never> = {
@@ -125598,6 +125669,10 @@ export namespace Prisma {
     deleteMany?: SrmSyncRunItemScalarWhereInput | SrmSyncRunItemScalarWhereInput[]
   }
 
+  export type NullableBoolFieldUpdateOperationsInput = {
+    set?: boolean | null
+  }
+
   export type UserCreatearticleTypesInput = {
     set: string[]
   }
@@ -126695,6 +126770,19 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumSapSyncStatusFilter<$PrismaModel>
     _max?: NestedEnumSapSyncStatusFilter<$PrismaModel>
+  }
+
+  export type NestedBoolNullableFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableFilter<$PrismaModel> | boolean | null
+  }
+
+  export type NestedBoolNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel> | null
+    not?: NestedBoolNullableWithAggregatesFilter<$PrismaModel> | boolean | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedBoolNullableFilter<$PrismaModel>
+    _max?: NestedBoolNullableFilter<$PrismaModel>
   }
 
   export type NestedEnumUserRoleFilter<$PrismaModel = never> = {

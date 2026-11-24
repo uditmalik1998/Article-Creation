@@ -698,6 +698,10 @@ model MasterVendorDetail {
   mergeVendorCity  String?  @map("merge_vendor_city") @db.VarChar(100)
   mergeVendorRegion String? @map("merge_vendor_region") @db.VarChar(50)
   syncedAt         DateTime @default(now()) @updatedAt @map("synced_at")
+  // From v2srm vendors.purchasing_blocked (2026-11-24); null = not synced yet. Not written by the DAB sync.
+  purchasingBlocked          Boolean?  @map("purchasing_blocked")
+  // When the 06:00 / 12:00 v2srm sync last checked this vendor's flag.
+  purchasingBlockedSyncedAt  DateTime? @map("purchasing_blocked_synced_at") @db.Timestamptz(6)
 
   @@index([vendorName])
   @@map("master_vendor_details")

@@ -637,7 +637,9 @@ exports.Prisma.MasterVendorDetailScalarFieldEnum = {
   mergeVendorName: 'mergeVendorName',
   mergeVendorCity: 'mergeVendorCity',
   mergeVendorRegion: 'mergeVendorRegion',
-  syncedAt: 'syncedAt'
+  syncedAt: 'syncedAt',
+  purchasingBlocked: 'purchasingBlocked',
+  purchasingBlockedSyncedAt: 'purchasingBlockedSyncedAt'
 };
 
 exports.Prisma.UserScalarFieldEnum = {
