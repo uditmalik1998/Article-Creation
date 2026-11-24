@@ -45,6 +45,7 @@ import {
 } from '../../../services/articleConfigService';
 import { formatDivisionLabel } from '../../../shared/utils/ui/formatters';
 import { variantCreatingIds } from '../../fabric-article/variantCreationState';
+import { isGsmRequiredForDiv } from '../../fabric-article/components/FabricArticleList';
 import { CARD_THEME } from '../components/cardTheme';
 
 // ─── History field display labels (camelCase → human label) ──────────────────
@@ -169,9 +170,13 @@ function getMissingMandatoryFields(item: any, majorCatOverride?: string | null):
   if (item.roughV2 == null || String(item.roughV2).trim() === '') missing.push('ACT-V2');
   // Always required by the SAP creation step (zmmArtCreationService MANDATORY), whatever the category grid says.
   if (!item.impAtrbt2) missing.push('M_IMP_ATBT');
+  // M_GSM follows M_FAB_DIV (same as the Fabric article page): required for K / RFD_K,
+  // not required (and hidden) for W / RFD_W / DNM — whatever the category grid says.
+  if (isGsmRequiredForDiv(item.fabDiv) && !String(item.gsm ?? '').trim()) missing.push('M_GSM');
   const majorCat = majorCatOverride || item.majorCategory || '';
   if (!majorCat) return missing;
   for (const [schemaKey, dbField] of Object.entries(SCHEMA_KEY_TO_DB_FIELD)) {
+    if (schemaKey === 'gsm') continue; // handled above by M_FAB_DIV
     const sapKeys = SCHEMA_KEY_TO_ALL_SAP_KEYS[schemaKey] ?? [];
     if (sapKeys.length === 0) continue;
     // Only validate when mandatory in the grid AND has dropdown values (i.e. visible in UI)
