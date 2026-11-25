@@ -86,6 +86,11 @@ export interface CostingGridConfig {
    * to the sum. AUTO-BGT total is always the sum (read-only) and saved to `auto`.
    */
   totalFields?: { auto: string; rough: string; vdr: string; fin: string };
+  /**
+   * Placeholder rows shown below the fixed rows (B TRIM: COLLAR, AOP, RIB). No SAP field or
+   * DB column backs them yet, so every cell is read-only and they never reach the TOTAL or a save.
+   */
+  placeholderRows?: readonly string[];
 }
 
 /** One saved repeat copy (e.g. PRINT-2) in a repeatJsonFields column. */
@@ -127,6 +132,7 @@ export const BTRIM_CONFIG: CostingGridConfig = {
   roughLabel: 'ACT-V2',
   tabs: ['BT-01', 'BT-02'],
   fixedRows: ['M_BTN', 'DC', 'ZIP', 'PATCH', 'H-TRF'],
+  placeholderRows: ['COLLAR', 'AOP', 'RIB'],
   other: {
     label: 'OTHER ACC',
     rows: [
@@ -704,6 +710,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
     !tabSave && tab === tabs[0] && !isRepeatCopy(row) && !!boundAttr(row, col);
 
   const localVal = (row: string, col: Col) => local[tab]?.[row]?.[col] ?? '';
+  const isPlaceholder = (row: string) => !!config.placeholderRows?.includes(row);
   const setLocalVal = (row: string, col: Col, v: string) => {
     setTabVal(tab, row, col, v);
     setDirty(true);
@@ -825,7 +832,8 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
       );
     }
     // Cells with no spec storage (other-block rows, config.readOnlySpec) are read-only.
-    const readOnly = locked || !!other?.rows.includes(row) || !!config.readOnlySpec?.[baseOf(row)]?.includes(col);
+    const readOnly = locked || !!other?.rows.includes(row) || !!config.readOnlySpec?.[baseOf(row)]?.includes(col)
+      || isPlaceholder(row);
     return (
       <TextCell value={localVal(row, col)} disabled={readOnly} placeholder="Enter" onChange={(v) => setLocalVal(row, col, v)} />
     );
@@ -863,8 +871,11 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
   }, [liveActKey, editableTotals, liveActTotal]);
 
   // Soft zebra on alternate item rows (FG cards "Refined rows", 2026-11-24).
-  const zebra: Record<string, boolean> = Object.fromEntries(fixedRows.map((r, i) => [r, i % 2 === 1]));
+  const zebra: Record<string, boolean> = Object.fromEntries(
+    [...fixedRows, ...(config.placeholderRows ?? [])].map((r, i) => [r, i % 2 === 1]),
+  );
   const renderRow = (row: string, last: boolean, withCheck = false) => {
+    const ph = isPlaceholder(row);
     // DESC is auto-built: STYLE-TYPE (e.g. KUNDI_BTN-26L)
     const desc = [cellVal(row, 'style'), cellVal(row, 'type')].filter((p) => p && !/^-+$/.test(p)).join('-');
     const tabIdx = tabs.indexOf(tab);
@@ -918,16 +929,16 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
         {config.rateQty && (
           <>
             <div className="px-1 py-1.5">
-              <TextCell value={localVal(row, 'rate')} disabled={locked} numeric placeholder="0.00" onChange={(v) => setRateQty(row, 'rate', v)} />
+              <TextCell value={localVal(row, 'rate')} disabled={locked || ph} numeric placeholder="0.00" onChange={(v) => setRateQty(row, 'rate', v)} />
             </div>
             <div className="px-1 py-1.5">
-              <TextCell value={localVal(row, 'qty')} disabled={locked} numeric placeholder="1" onChange={(v) => setRateQty(row, 'qty', v)} />
+              <TextCell value={localVal(row, 'qty')} disabled={locked || ph} numeric placeholder="1" onChange={(v) => setRateQty(row, 'qty', v)} />
             </div>
           </>
         )}
         {config.editableAutoBgt ? (
           <div className="px-1 py-1.5">
-            <TextCell value={autoBgtVal} disabled={locked || !!bgtLoading} numeric placeholder="0.00" onChange={(v) => setLocalVal(row, 'auto', v)} />
+            <TextCell value={autoBgtVal} disabled={locked || ph || !!bgtLoading} numeric placeholder="0.00" onChange={(v) => setLocalVal(row, 'auto', v)} />
           </div>
         ) : (
           <div
@@ -941,13 +952,13 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
           </div>
         )}
         <div className="px-1 py-1.5">
-          <TextCell value={localVal(row, 'rough')} disabled={locked} numeric placeholder="0.00" onChange={(v) => setLocalVal(row, 'rough', v)} />
+          <TextCell value={localVal(row, 'rough')} disabled={locked || ph} numeric placeholder="0.00" onChange={(v) => setLocalVal(row, 'rough', v)} />
         </div>
         <div className="px-1 py-1.5">
-          <TextCell value={localVal(row, 'vdr')} disabled={locked} numeric placeholder="0.00" onChange={(v) => setLocalVal(row, 'vdr', v)} />
+          <TextCell value={localVal(row, 'vdr')} disabled={locked || ph} numeric placeholder="0.00" onChange={(v) => setLocalVal(row, 'vdr', v)} />
         </div>
         <div className="px-1 py-1.5">
-          <TextCell value={localVal(row, 'fin')} disabled={locked} numeric strong placeholder="0.00" onChange={(v) => setLocalVal(row, 'fin', v)} />
+          <TextCell value={localVal(row, 'fin')} disabled={locked || ph} numeric strong placeholder="0.00" onChange={(v) => setLocalVal(row, 'fin', v)} />
         </div>
       </div>
     );
@@ -1092,7 +1103,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
                 <div className="px-2.5 py-2 text-right">FINAL COST</div>
               </div>
               {fixedRows.map((r, i) => {
-                const lastRow = i === fixedRows.length - 1;
+                const lastRow = i === fixedRows.length - 1 && !config.placeholderRows?.length;
                 if (!config.repeatable?.includes(r)) return renderRow(r, lastRow);
                 // Repeat group: base row, its copies, then "Add <ROW>" and a band before the next row.
                 const copies = repeats[r] ?? [];
@@ -1118,6 +1129,7 @@ const CostingGridCard: React.FC<CostingGridCardProps> = ({
                   </div>
                 );
               })}
+              {config.placeholderRows?.map((r, i, all) => renderRow(r, i === all.length - 1))}
             </div>
           </div>
 
