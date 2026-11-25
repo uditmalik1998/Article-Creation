@@ -5,6 +5,28 @@
 
 ---
 
+## 2026-11-25 — FG SAP queue: variants created in the background
+- Symptom: FG Created page cards stuck on "SAP …" (Creating in SAP…) for over an hour (18, then 46 articles waiting).
+- Cause: the approval worker (`runApprovalSyncTick`, batch 10) waited for a whole batch, variants included, before claiming more. Variants of one generic go to SAP one at a time (`ZMM_VAR_ART_CRT_V8`, about 50 s each). So KRN-21 (1116138031, 99 variants) and then KRN-11 (1116138032, 81 variants), both vendor 200703 M_TEES_HS, held the queue for more than an hour each. Variant results were only saved at the end, so finished variants still showed PENDING.
+- Fix (`ApproverController`):
+  - `syncApprovedToSap` no longer awaits variants. Each created generic goes to `queueVariantSync`: one background job per generic, up to `SAP_RFC_CONCURRENCY` (7) generics at once, variants of one generic still sequential. The next tick claims new generics right away.
+  - `syncVariantsToSapViaRfc` got an `onResult` callback, so each variant is saved the moment SAP answers.
+  - PO-Wise handoff is sent per generic when its variants finish.
+  - An exception marks only that generic's still-PENDING, unnumbered variants FAILED.
+- A restart mid-job leaves unanswered variants PENDING; the shutdown log warns about it.
+- Not used: a separate DB-driven variant queue. 1,521 old APPROVED+PENDING variants under SYNCED generics (Jun–Nov) would have been pushed to SAP.
+- "Retry Variants to SAP" (`POST /approver/items/:id/retry-variants`) picks every variant without a SAP number, PENDING ones included. Clicked while the background job runs, it would have sent the same variants to SAP in parallel: SAP lock errors, and FAILED could overwrite a saved result.
+  - It now returns 409 "Variants are being created in SAP right now (X of Y done)…" while a job for that generic runs.
+  - The retry marks the generic busy while it calls SAP, so a double click or a second tab also gets the 409.
+  - The check is per server process (in-memory set `_variantJobs`).
+- Needs backend deploy.
+
+## 2026-11-25 — Snowflake flat sync: fg_ai_attributes kept out
+
+- 25 Nov 00:00 cron (production) failed: "Snowflake table is missing columns (add them first): fg_ai_attributes" — the sync copies every extraction_results_flat column and requires each in Snowflake; the new FG AI result column isn't there.
+- User does not want it in Snowflake: `EXCLUDED_COLUMNS` (`fg_ai_attributes`) in `snowflakeFlatSyncService.buildSelect` — skipped for the column check, export and MERGE. Snowflake table unchanged. Next nightly run (after deploy) or Sync Now picks up the missed changes (watermark not advanced on failure).
+- Old standalone job `C:\jobs\snowflake-sync\sync_flat.py` (last ran 14 Nov) has the same strict check and would fail too if re-enabled — not changed.
+
 ## 2026-11-25 — Data fix: PPT APP-00288 vendor → 203811 PAL FASHIONS PRIVATE LIMITED
 
 - User request: the 33 FG articles of `ppt_number = 'APP-00288'` (1124040413–419, 431–438, 446–463; all APPROVED / SYNCED, were 203450 PAL INTERNATIONAL) + their 264 variants in `fg_variants_article_data` set to vendor_code 203811 / vendor_name PAL FASHIONS PRIVATE LIMITED (direct SQL, updated_at on the generics).

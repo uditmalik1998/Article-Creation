@@ -108,6 +108,10 @@ function sourceName(): string {
 
 // ─── Supabase export ──────────────────────────────────────────────────────────
 
+/** extraction_results_flat columns never sent to Snowflake (and not required there).
+ * fg_ai_attributes = FG card "AI result" JSON (2026-11-25, user: keep out of Snowflake). */
+const EXCLUDED_COLUMNS = new Set(['fg_ai_attributes']);
+
 /** Column list in target order (approver name/email right after approved_by) + select expressions. */
 async function buildSelect(): Promise<{ cols: string[]; select: string }> {
   const info = await prisma.$queryRawUnsafe<{ column_name: string; data_type: string }[]>(
@@ -116,6 +120,7 @@ async function buildSelect(): Promise<{ cols: string[]; select: string }> {
   const cols: string[] = [];
   const exprs: string[] = [];
   for (const { column_name: c, data_type: t } of info) {
+    if (EXCLUDED_COLUMNS.has(c)) continue;
     cols.push(c);
     // timestamptz → plain UTC timestamp so Snowflake stores it as TIMESTAMP_NTZ like the rest.
     exprs.push(t === 'timestamp with time zone'
