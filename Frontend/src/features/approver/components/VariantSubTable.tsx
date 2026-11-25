@@ -507,81 +507,6 @@ const AddColorModal: React.FC<AddColorModalProps> = ({
   );
 };
 
-// ── Inline weight input cell ──────────────────────────────────────────────────
-
-const WeightCell: React.FC<{ variant: ApproverItem; synced: boolean; onSaved: () => void }> = ({ variant, synced, onSaved }) => {
-  const [editing, setEditing] = useState(false);
-  const [value, setValue] = useState(variant.variantWeight ?? '');
-  const [saving, setSaving] = useState(false);
-
-  useEffect(() => { setValue(variant.variantWeight ?? ''); }, [variant.variantWeight]);
-
-  const save = async () => {
-    const trimmed = String(value).trim();
-    setSaving(true);
-    try {
-      const token = localStorage.getItem('authToken');
-      const r = await fetch(`${APP_CONFIG.api.baseURL}/approver/items/${variant.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ variantWeight: trimmed || null }),
-      });
-      if (!r.ok) throw new Error('Failed to save weight');
-      onSaved();
-    } catch {
-      message.error('Failed to save weight');
-    } finally {
-      setSaving(false);
-      setEditing(false);
-    }
-  };
-
-  const isEmpty = !value || String(value).trim() === '';
-
-  // Synced variants: show weight as plain read-only text
-  if (synced) {
-    return (
-      <span className="block pr-2 text-right font-mono text-[11.5px] text-slate-500">
-        {isEmpty ? '—' : `${value} kg`}
-      </span>
-    );
-  }
-
-  if (editing) {
-    return (
-      <input
-        autoFocus
-        inputMode="decimal"
-        className="h-6 w-full rounded border border-slate-400 bg-white px-2 text-right font-mono text-[11.5px] focus:outline-none focus:ring-1 focus:ring-slate-700"
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onBlur={save}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') { e.preventDefault(); save(); }
-          if (e.key === 'Escape') setEditing(false);
-        }}
-        disabled={saving}
-        placeholder="e.g. 0.25"
-      />
-    );
-  }
-
-  return (
-    <button
-      type="button"
-      onClick={() => setEditing(true)}
-      className={cn(
-        'h-6 w-full rounded border px-2 text-right font-mono text-[11.5px]',
-        isEmpty
-          ? 'border-amber-300 bg-amber-50 text-amber-800 hover:border-amber-400'
-          : 'border-slate-200 bg-white text-slate-900 hover:border-slate-400',
-      )}
-    >
-      {isEmpty ? '— kg' : `${value} kg`}
-    </button>
-  );
-};
-
 // ── Main VariantSubTable ──────────────────────────────────────────────────────
 
 const VariantSubTable: React.FC<VariantSubTableProps> = ({
@@ -733,29 +658,6 @@ const VariantSubTable: React.FC<VariantSubTableProps> = ({
   }, [genericId, variants, fetchVariants, onRefresh]);
 
   // ── Grid wiring (shared VariantGrid, design "Option E") ───────────────────
-  const hasWeight = (v: ApproverItem) => String(v.variantWeight ?? '').trim() !== '';
-
-  const handleBulkWeight = async (ids: string[], w: string) => {
-    try {
-      const token = localStorage.getItem('authToken');
-      const results = await Promise.all(
-        ids.map((id) =>
-          fetch(`${APP_CONFIG.api.baseURL}/approver/items/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ variantWeight: w }),
-          }),
-        ),
-      );
-      const failed = results.filter((r) => !r.ok).length;
-      if (failed) message.error(`Weight not saved for ${failed} variant${failed !== 1 ? 's' : ''}`);
-      else message.success(`Weight set for ${ids.length} variant${ids.length !== 1 ? 's' : ''}`);
-      fetchVariants(true);
-    } catch {
-      message.error('Failed to save weight');
-    }
-  };
-
   const handleBulkDelete = async (ids: string[]) => {
     const token = localStorage.getItem('authToken');
     const results = await Promise.all(
@@ -778,7 +680,6 @@ const VariantSubTable: React.FC<VariantSubTableProps> = ({
     if (v.sapSyncStatus === 'FAILED' || v.sapSyncStatus === 'SYNCED') {
       return <StatusPill tone="red" tooltip={v.sapSyncMessage || 'SAP returned an error'}>Failed</StatusPill>;
     }
-    if (!hasWeight(v)) return <StatusPill tone="amber">Needs weight</StatusPill>;
     return <StatusPill tone="slate">Pending SAP</StatusPill>;
   };
 
@@ -819,11 +720,8 @@ const VariantSubTable: React.FC<VariantSubTableProps> = ({
         onDeleteColor={handleDeleteColorVariants}
         deletingColor={deletingColor}
         renderStatus={renderStatus}
-        weight={{
-          renderCell: (v) => <WeightCell variant={v} synced={!!v.sapArticleId} onSaved={() => fetchVariants(true)} />,
-          isMissing: (v) => !v.sapArticleId && !hasWeight(v),
-          onBulkSet: handleBulkWeight,
-        }}
+        fgStyle
+        // No weight column (removed 2026-11-25 — not needed).
         toolbarActions={
           <>
             {pathType === 'created' && retryNeededCount > 0 && (

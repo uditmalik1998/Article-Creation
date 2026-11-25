@@ -112,10 +112,13 @@ interface VariantGridProps<T extends VariantGridRow> {
   renderRowAction?: (v: T) => React.ReactNode;
   /** GM: every text size 2px larger. */
   large?: boolean;
+  /** FG (2026-11-25): text ~1.5px larger and every column (header + cells) centred. */
+  fgStyle?: boolean;
 }
 
 // Text sizes as whole class names so Tailwind generates both sets.
 const FONT = { xs: 'text-[10px]', sm: 'text-[11px]', smd: 'text-[11.5px]', md: 'text-[12px]' } as const;
+const FONT_MD = { xs: 'text-[12.5px]', sm: 'text-[12.5px]', smd: 'text-[13px]', md: 'text-[14px]' } as const;
 const FONT_LG = { xs: 'text-[12px]', sm: 'text-[13px]', smd: 'text-[13.5px]', md: 'text-[14px]' } as const;
 
 type Filter = 'all' | 'missing' | 'unsynced';
@@ -134,8 +137,14 @@ function VariantGrid<T extends VariantGridRow>({
   weight,
   renderRowAction,
   large = false,
+  fgStyle = false,
 }: VariantGridProps<T>) {
-  const fs = large ? FONT_LG : FONT;
+  const fs = large ? FONT_LG : fgStyle ? FONT_MD : FONT;
+  // Column alignment: FG centres every column (header and cells line up);
+  // others keep text left and numbers right.
+  const txt = fgStyle ? 'text-center' : '';
+  const num = fgStyle ? 'text-center' : 'text-right';
+  const cellBox = fgStyle ? 'flex justify-center' : '';
   const [filter, setFilter] = useState<Filter>('all');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkWeight, setBulkWeight] = useState('');
@@ -335,20 +344,20 @@ function VariantGrid<T extends VariantGridRow>({
                     onCheckedChange={() => setSelected(allSelected ? new Set() : new Set(selectableIds))}
                   />
                 </div>
-                <div className="px-2 py-2">SIZE</div>
-                <div className="px-2 py-2">COLOR</div>
-                <div className="px-2 py-2">MAJ. CAT</div>
-                <div className="px-2 py-2">DIV</div>
-                <div className="px-2 py-2">VENDOR</div>
-                <div className="px-2 py-2 text-right">RATE</div>
-                <div className="px-2 py-2 text-right">MRP</div>
+                <div className={cn('px-2 py-2', txt)}>SIZE</div>
+                <div className={cn('px-2 py-2', txt)}>COLOR</div>
+                <div className={cn('px-2 py-2', txt)}>MAJ. CAT</div>
+                <div className={cn('px-2 py-2', txt)}>DIV</div>
+                <div className={cn('px-2 py-2', txt)}>VENDOR</div>
+                <div className={cn('px-2 py-2', num)}>RATE</div>
+                <div className={cn('px-2 py-2', num)}>MRP</div>
                 {weight && (
-                  <div className="px-2 py-2">
+                  <div className={cn('px-2 py-2', txt)}>
                     WEIGHT <span className="text-red-600">*</span>
                   </div>
                 )}
-                <div className="px-2 py-2">SAP ARTICLE #</div>
-                <div className="px-2 py-2">STATUS</div>
+                <div className={cn('px-2 py-2', txt)}>SAP ARTICLE #</div>
+                <div className={cn('px-2 py-2', txt)}>STATUS</div>
                 {renderRowAction && <div />}
               </div>
 
@@ -408,21 +417,21 @@ function VariantGrid<T extends VariantGridRow>({
                               onCheckedChange={() => toggleSelect(v.id)}
                             />
                           </div>
-                          <div className="px-2 font-bold text-slate-900">{v.variantSize || '—'}</div>
-                          <div className="truncate px-2 font-semibold text-slate-800">
+                          <div className={cn('px-2 font-bold text-slate-900', txt)}>{v.variantSize || '—'}</div>
+                          <div className={cn('truncate px-2 font-semibold text-slate-800', txt)}>
                             {v.variantColor || v.colour || fallbackColor || '—'}
                           </div>
                           {/* Inherited from the article — greyed */}
-                          <div className="truncate px-2 text-slate-500">{v.majorCategory || '—'}</div>
-                          <div className="truncate px-2 text-slate-500">{v.division || '—'}</div>
-                          <div className="truncate px-2 text-slate-500">{v.vendorName || v.vendorCode || '—'}</div>
-                          <div className="px-2 text-right font-mono text-slate-500">{v.rate != null ? String(v.rate) : '—'}</div>
-                          <div className="px-2 text-right font-mono text-slate-500">{v.mrp != null ? String(v.mrp) : '—'}</div>
+                          <div className={cn('truncate px-2 text-slate-500', txt)}>{v.majorCategory || '—'}</div>
+                          <div className={cn('truncate px-2 text-slate-500', txt)}>{v.division || '—'}</div>
+                          <div className={cn('truncate px-2 text-slate-500', txt)}>{v.vendorName || v.vendorCode || '—'}</div>
+                          <div className={cn('px-2 font-mono text-slate-500', num)}>{v.rate != null ? String(v.rate) : '—'}</div>
+                          <div className={cn('px-2 font-mono text-slate-500', num)}>{v.mrp != null ? String(v.mrp) : '—'}</div>
                           {weight && <div className="px-1.5">{weight.renderCell(v)}</div>}
-                          <div className={cn('px-2 font-mono text-slate-900', fs.md)}>
+                          <div className={cn('px-2 font-mono text-slate-900', fs.md, txt)}>
                             {v.sapArticleId || <span className="text-slate-400">—</span>}
                           </div>
-                          <div className="px-2">{renderStatus(v)}</div>
+                          <div className={cn('px-2', cellBox)}>{renderStatus(v)}</div>
                           {renderRowAction && <div className="flex justify-end px-2">{renderRowAction(v)}</div>}
                         </div>
                       );
