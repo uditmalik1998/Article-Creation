@@ -69,7 +69,7 @@ const formatEditors = (v: unknown): string =>
 
 export const SIMPLE_APPROVER_EXPORT_HEADERS = [
     'Article Number', 'Division', 'Sub Division', 'Major Category', 'MC Code', 'Status',
-    'Vendor Name', 'Vendor Code', 'Design Number', 'PPT Number', 'Article Description',
+    'Vendor Name', 'Vendor Code', 'Design Number', 'PPT Number', 'PPT Type', 'Article Description',
     'Reference Article Number', 'Reference Article Description', 'Season', 'HSN Tax Code',
     'Year', 'Article Type',
     'Rate', 'MRP',
@@ -103,6 +103,7 @@ function mapVariantExportRow(row: any): Record<string, string | number | undefin
     'Vendor Code': row.vendorCode || '',
     'Design Number': row.designNumber || '',
     'PPT Number': row.pptNumber || '',
+    'PPT Type': row.pptType || '',
     'Article Description': row.articleDescription || '',
     'Reference Article Number': row.referenceArticleNumber || '',
     'Reference Article Description': row.referenceArticleDescription || '',
@@ -378,6 +379,7 @@ export default function ApproverDashboard({ pathType, baseRoute = '/approver', p
         'MC Code': row.mcCode || '', Status: row.approvalStatus || '',
         'Vendor Name': row.vendorName || '', 'Vendor Code': row.vendorCode || '',
         'Design Number': row.designNumber || '', 'PPT Number': row.pptNumber || '',
+        'PPT Type': row.pptType || '',
         'Article Description': row.articleDescription || '',
         'Reference Article Number': row.referenceArticleNumber || '',
         'Reference Article Description': row.referenceArticleDescription || '',
