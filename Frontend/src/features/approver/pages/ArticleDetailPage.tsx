@@ -52,7 +52,7 @@ import { CARD_THEME } from '../components/cardTheme';
 const FIELD_LABELS: Record<string, string> = {
   majorCategory: 'Major Category', mrp: 'MRP', rate: 'Rate / Cost',
   vendorCode: 'Vendor Code', vendorName: 'Vendor Name',
-  designNumber: 'Design Number', pptNumber: 'PPT Number',
+  designNumber: 'Design Number', pptNumber: 'PPT Number', pptType: 'PPT Type',
   articleNumber: 'Article Number', division: 'Division', subDivision: 'Sub Division',
   segment: 'Segment', season: 'Season', year: 'Year',
   fabDiv: 'M_FAB_DIV', yarn1: 'M_YARN', yarn2: 'M_YARN-02',

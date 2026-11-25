@@ -1780,6 +1780,28 @@ const ArticleCard = React.memo(
                   PPT {item.pptNumber}
                 </Badge>
               )}
+              {item.pptNumber && (() => {
+                const pptType = (localValues['pptType'] ?? item.pptType) || '';
+                if (item.approvalStatus !== 'PENDING' && item.sapSyncStatus !== 'FAILED') {
+                  return pptType ? (
+                    <Badge className="border border-white/15 bg-white/10 font-mono text-[12px] font-semibold text-white">{pptType}</Badge>
+                  ) : null;
+                }
+                return (
+                  <Select value={pptType} onValueChange={(val) => handleSave('pptType', val || null)}>
+                    <SelectTrigger className="h-7 w-24 border-white/30 bg-white/10 text-[11px] text-white" title="PPT type">
+                      <SelectValue placeholder="PPT type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {['V2PD', 'RETAIL'].map((t) => (
+                        <SelectItem key={t} value={t}>
+                          {t}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                );
+              })()}
               {isModifyMode && (
                 <Button
                   size="sm"

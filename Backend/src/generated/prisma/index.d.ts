@@ -16327,6 +16327,7 @@ export namespace Prisma {
     vendorName: string | null
     designNumber: string | null
     pptNumber: string | null
+    pptType: string | null
     rate: Decimal | null
     yarn1: string | null
     yarn2: string | null
@@ -16675,6 +16676,7 @@ export namespace Prisma {
     vendorName: string | null
     designNumber: string | null
     pptNumber: string | null
+    pptType: string | null
     rate: Decimal | null
     yarn1: string | null
     yarn2: string | null
@@ -17025,6 +17027,7 @@ export namespace Prisma {
     vendorName: number
     designNumber: number
     pptNumber: number
+    pptType: number
     rate: number
     yarn1: number
     yarn2: number
@@ -17833,6 +17836,7 @@ export namespace Prisma {
     vendorName?: true
     designNumber?: true
     pptNumber?: true
+    pptType?: true
     rate?: true
     yarn1?: true
     yarn2?: true
@@ -18181,6 +18185,7 @@ export namespace Prisma {
     vendorName?: true
     designNumber?: true
     pptNumber?: true
+    pptType?: true
     rate?: true
     yarn1?: true
     yarn2?: true
@@ -18531,6 +18536,7 @@ export namespace Prisma {
     vendorName?: true
     designNumber?: true
     pptNumber?: true
+    pptType?: true
     rate?: true
     yarn1?: true
     yarn2?: true
@@ -18972,6 +18978,7 @@ export namespace Prisma {
     vendorName: string | null
     designNumber: string | null
     pptNumber: string | null
+    pptType: string | null
     rate: Decimal | null
     yarn1: string | null
     yarn2: string | null
@@ -19345,6 +19352,7 @@ export namespace Prisma {
     vendorName?: boolean
     designNumber?: boolean
     pptNumber?: boolean
+    pptType?: boolean
     rate?: boolean
     yarn1?: boolean
     yarn2?: boolean
@@ -19705,6 +19713,7 @@ export namespace Prisma {
     vendorName?: boolean
     designNumber?: boolean
     pptNumber?: boolean
+    pptType?: boolean
     rate?: boolean
     yarn1?: boolean
     yarn2?: boolean
@@ -20062,6 +20071,7 @@ export namespace Prisma {
     vendorName?: boolean
     designNumber?: boolean
     pptNumber?: boolean
+    pptType?: boolean
     rate?: boolean
     yarn1?: boolean
     yarn2?: boolean
@@ -20419,6 +20429,7 @@ export namespace Prisma {
     vendorName?: boolean
     designNumber?: boolean
     pptNumber?: boolean
+    pptType?: boolean
     rate?: boolean
     yarn1?: boolean
     yarn2?: boolean
@@ -20740,7 +20751,7 @@ export namespace Prisma {
     fgAiAttributes?: boolean
   }
 
-  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageUrl" | "oldImageUrl" | "sourceImageUrl" | "aiCmpCostCutting" | "aiCmpCostStitching" | "aiCmpCostIroning" | "aiCmpCostFinishing" | "backImageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "creatorUser" | "modifyUser" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "mainMvgr" | "mFab2" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "totalBgtPrVal" | "totalActPrVal" | "totalVendorPrVal" | "totalFinalPrVal" | "bTrimType" | "bTrimTotalAutoBgt" | "bTrimTotalRoughV2" | "bTrimTotalVdrCost" | "bTrimTotalFinalCost" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "elasticAutoBgt" | "elasticRoughV2" | "elasticVdrCost" | "elasticFinalCost" | "fusingAutoBgt" | "fusingRoughV2" | "fusingVdrCost" | "fusingFinalCost" | "badgeAutoBgt" | "badgeRoughV2" | "badgeVdrCost" | "badgeFinalCost" | "rivetAutoBgt" | "rivetRoughV2" | "rivetVdrCost" | "rivetFinalCost" | "tapeAutoBgt" | "tapeRoughV2" | "tapeVdrCost" | "tapeFinalCost" | "otherAutoBgt" | "otherRoughV2" | "otherVdrCost" | "otherFinalCost" | "adjusterAutoBgt" | "adjusterRoughV2" | "adjusterVdrCost" | "adjusterFinalCost" | "brotchAutoBgt" | "brotchRoughV2" | "brotchVdrCost" | "brotchFinalCost" | "buckleAutoBgt" | "buckleRoughV2" | "buckleVdrCost" | "buckleFinalCost" | "eyeletsAutoBgt" | "eyeletsRoughV2" | "eyeletsVdrCost" | "eyeletsFinalCost" | "hangingDRingAutoBgt" | "hangingDRingRoughV2" | "hangingDRingVdrCost" | "hangingDRingFinalCost" | "hookAutoBgt" | "hookRoughV2" | "hookVdrCost" | "hookFinalCost" | "labelAutoBgt" | "labelRoughV2" | "labelVdrCost" | "labelFinalCost" | "laceAutoBgt" | "laceRoughV2" | "laceVdrCost" | "laceFinalCost" | "pockettingFabricAutoBgt" | "pockettingFabricRoughV2" | "pockettingFabricVdrCost" | "pockettingFabricFinalCost" | "pockettingReadymadeAutoBgt" | "pockettingReadymadeRoughV2" | "pockettingReadymadeVdrCost" | "pockettingReadymadeFinalCost" | "santaAutoBgt" | "santaRoughV2" | "santaVdrCost" | "santaFinalCost" | "stopperAutoBgt" | "stopperRoughV2" | "stopperVdrCost" | "stopperFinalCost" | "tagAutoBgt" | "tagRoughV2" | "tagVdrCost" | "tagFinalCost" | "tasselsAutoBgt" | "tasselsRoughV2" | "tasselsVdrCost" | "tasselsFinalCost" | "mBtnRate" | "mBtnQty" | "dcRate" | "dcQty" | "zipRate" | "zipQty" | "patchRate" | "patchQty" | "hTrfRate" | "hTrfQty" | "elasticRate" | "elasticQty" | "fusingRate" | "fusingQty" | "badgeRate" | "badgeQty" | "rivetRate" | "rivetQty" | "tapeRate" | "tapeQty" | "otherRate" | "otherQty" | "adjusterRate" | "adjusterQty" | "brotchRate" | "brotchQty" | "buckleRate" | "buckleQty" | "eyeletsRate" | "eyeletsQty" | "hangingDRingRate" | "hangingDRingQty" | "hookRate" | "hookQty" | "labelRate" | "labelQty" | "laceRate" | "laceQty" | "pockettingFabricRate" | "pockettingFabricQty" | "pockettingReadymadeRate" | "pockettingReadymadeQty" | "santaRate" | "santaQty" | "stopperRate" | "stopperQty" | "tagRate" | "tagQty" | "tasselsRate" | "tasselsQty" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "vaddPrintJson" | "vaddEmpJson" | "vaddTotalAutoBgt" | "vaddTotalRoughV2" | "vaddTotalVendorCost" | "vaddTotalFinalCost" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "presentationsType" | "approvalStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "setLinkStatus" | "setLinkMessage" | "setLinkAttempts" | "setLinkedAt" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData" | "fgAiAttributes", ExtArgs["result"]["extractionResultFlat"]>
+  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageUrl" | "oldImageUrl" | "sourceImageUrl" | "aiCmpCostCutting" | "aiCmpCostStitching" | "aiCmpCostIroning" | "aiCmpCostFinishing" | "backImageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "creatorUser" | "modifyUser" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "pptType" | "rate" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "mainMvgr" | "mFab2" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "totalBgtPrVal" | "totalActPrVal" | "totalVendorPrVal" | "totalFinalPrVal" | "bTrimType" | "bTrimTotalAutoBgt" | "bTrimTotalRoughV2" | "bTrimTotalVdrCost" | "bTrimTotalFinalCost" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "elasticAutoBgt" | "elasticRoughV2" | "elasticVdrCost" | "elasticFinalCost" | "fusingAutoBgt" | "fusingRoughV2" | "fusingVdrCost" | "fusingFinalCost" | "badgeAutoBgt" | "badgeRoughV2" | "badgeVdrCost" | "badgeFinalCost" | "rivetAutoBgt" | "rivetRoughV2" | "rivetVdrCost" | "rivetFinalCost" | "tapeAutoBgt" | "tapeRoughV2" | "tapeVdrCost" | "tapeFinalCost" | "otherAutoBgt" | "otherRoughV2" | "otherVdrCost" | "otherFinalCost" | "adjusterAutoBgt" | "adjusterRoughV2" | "adjusterVdrCost" | "adjusterFinalCost" | "brotchAutoBgt" | "brotchRoughV2" | "brotchVdrCost" | "brotchFinalCost" | "buckleAutoBgt" | "buckleRoughV2" | "buckleVdrCost" | "buckleFinalCost" | "eyeletsAutoBgt" | "eyeletsRoughV2" | "eyeletsVdrCost" | "eyeletsFinalCost" | "hangingDRingAutoBgt" | "hangingDRingRoughV2" | "hangingDRingVdrCost" | "hangingDRingFinalCost" | "hookAutoBgt" | "hookRoughV2" | "hookVdrCost" | "hookFinalCost" | "labelAutoBgt" | "labelRoughV2" | "labelVdrCost" | "labelFinalCost" | "laceAutoBgt" | "laceRoughV2" | "laceVdrCost" | "laceFinalCost" | "pockettingFabricAutoBgt" | "pockettingFabricRoughV2" | "pockettingFabricVdrCost" | "pockettingFabricFinalCost" | "pockettingReadymadeAutoBgt" | "pockettingReadymadeRoughV2" | "pockettingReadymadeVdrCost" | "pockettingReadymadeFinalCost" | "santaAutoBgt" | "santaRoughV2" | "santaVdrCost" | "santaFinalCost" | "stopperAutoBgt" | "stopperRoughV2" | "stopperVdrCost" | "stopperFinalCost" | "tagAutoBgt" | "tagRoughV2" | "tagVdrCost" | "tagFinalCost" | "tasselsAutoBgt" | "tasselsRoughV2" | "tasselsVdrCost" | "tasselsFinalCost" | "mBtnRate" | "mBtnQty" | "dcRate" | "dcQty" | "zipRate" | "zipQty" | "patchRate" | "patchQty" | "hTrfRate" | "hTrfQty" | "elasticRate" | "elasticQty" | "fusingRate" | "fusingQty" | "badgeRate" | "badgeQty" | "rivetRate" | "rivetQty" | "tapeRate" | "tapeQty" | "otherRate" | "otherQty" | "adjusterRate" | "adjusterQty" | "brotchRate" | "brotchQty" | "buckleRate" | "buckleQty" | "eyeletsRate" | "eyeletsQty" | "hangingDRingRate" | "hangingDRingQty" | "hookRate" | "hookQty" | "labelRate" | "labelQty" | "laceRate" | "laceQty" | "pockettingFabricRate" | "pockettingFabricQty" | "pockettingReadymadeRate" | "pockettingReadymadeQty" | "santaRate" | "santaQty" | "stopperRate" | "stopperQty" | "tagRate" | "tagQty" | "tasselsRate" | "tasselsQty" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "vaddPrintJson" | "vaddEmpJson" | "vaddTotalAutoBgt" | "vaddTotalRoughV2" | "vaddTotalVendorCost" | "vaddTotalFinalCost" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "presentationsType" | "approvalStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "setLinkStatus" | "setLinkMessage" | "setLinkAttempts" | "setLinkedAt" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData" | "fgAiAttributes", ExtArgs["result"]["extractionResultFlat"]>
   export type ExtractionResultFlatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     comboParent?: boolean | ExtractionResultFlat$comboParentArgs<ExtArgs>
@@ -20802,6 +20813,7 @@ export namespace Prisma {
       vendorName: string | null
       designNumber: string | null
       pptNumber: string | null
+      pptType: string | null
       rate: Prisma.Decimal | null
       yarn1: string | null
       yarn2: string | null
@@ -21581,6 +21593,7 @@ export namespace Prisma {
     readonly vendorName: FieldRef<"ExtractionResultFlat", 'String'>
     readonly designNumber: FieldRef<"ExtractionResultFlat", 'String'>
     readonly pptNumber: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly pptType: FieldRef<"ExtractionResultFlat", 'String'>
     readonly rate: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly yarn1: FieldRef<"ExtractionResultFlat", 'String'>
     readonly yarn2: FieldRef<"ExtractionResultFlat", 'String'>
@@ -59084,6 +59097,7 @@ export namespace Prisma {
     vendorCode: string | null
     designNumber: string | null
     pptNumber: string | null
+    pptType: string | null
     fabricRate: Decimal | null
     v2FabricRate: Decimal | null
     valueAddCost: Decimal | null
@@ -59131,6 +59145,7 @@ export namespace Prisma {
     vendorCode: string | null
     designNumber: string | null
     pptNumber: string | null
+    pptType: string | null
     fabricRate: Decimal | null
     v2FabricRate: Decimal | null
     valueAddCost: Decimal | null
@@ -59179,6 +59194,7 @@ export namespace Prisma {
     vendorCode: number
     designNumber: number
     pptNumber: number
+    pptType: number
     fabricRate: number
     v2FabricRate: number
     valueAddCost: number
@@ -59244,6 +59260,7 @@ export namespace Prisma {
     vendorCode?: true
     designNumber?: true
     pptNumber?: true
+    pptType?: true
     fabricRate?: true
     v2FabricRate?: true
     valueAddCost?: true
@@ -59291,6 +59308,7 @@ export namespace Prisma {
     vendorCode?: true
     designNumber?: true
     pptNumber?: true
+    pptType?: true
     fabricRate?: true
     v2FabricRate?: true
     valueAddCost?: true
@@ -59339,6 +59357,7 @@ export namespace Prisma {
     vendorCode?: true
     designNumber?: true
     pptNumber?: true
+    pptType?: true
     fabricRate?: true
     v2FabricRate?: true
     valueAddCost?: true
@@ -59474,6 +59493,7 @@ export namespace Prisma {
     vendorCode: string | null
     designNumber: string | null
     pptNumber: string | null
+    pptType: string | null
     fabricRate: Decimal | null
     v2FabricRate: Decimal | null
     valueAddCost: Decimal | null
@@ -59541,6 +59561,7 @@ export namespace Prisma {
     vendorCode?: boolean
     designNumber?: boolean
     pptNumber?: boolean
+    pptType?: boolean
     fabricRate?: boolean
     v2FabricRate?: boolean
     valueAddCost?: boolean
@@ -59589,6 +59610,7 @@ export namespace Prisma {
     vendorCode?: boolean
     designNumber?: boolean
     pptNumber?: boolean
+    pptType?: boolean
     fabricRate?: boolean
     v2FabricRate?: boolean
     valueAddCost?: boolean
@@ -59637,6 +59659,7 @@ export namespace Prisma {
     vendorCode?: boolean
     designNumber?: boolean
     pptNumber?: boolean
+    pptType?: boolean
     fabricRate?: boolean
     v2FabricRate?: boolean
     valueAddCost?: boolean
@@ -59685,6 +59708,7 @@ export namespace Prisma {
     vendorCode?: boolean
     designNumber?: boolean
     pptNumber?: boolean
+    pptType?: boolean
     fabricRate?: boolean
     v2FabricRate?: boolean
     valueAddCost?: boolean
@@ -59705,7 +59729,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type FabricArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mFabDiv" | "mYarn" | "mFabMainMvgr1" | "mFabMainMvgr2" | "mConstruction" | "mOunz" | "mWidth" | "mWeave02" | "mCount" | "mWeave01" | "mComposition" | "mFinish" | "mGsm" | "mLycra" | "fabricAiAttributes" | "fabricArticleNumber" | "fabricArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "pptNumber" | "fabricRate" | "v2FabricRate" | "valueAddCost" | "rate" | "segment" | "articleFashionType" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "backImageUrl" | "fabricArticleType" | "source" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricArticleData"]>
+  export type FabricArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mFabDiv" | "mYarn" | "mFabMainMvgr1" | "mFabMainMvgr2" | "mConstruction" | "mOunz" | "mWidth" | "mWeave02" | "mCount" | "mWeave01" | "mComposition" | "mFinish" | "mGsm" | "mLycra" | "fabricAiAttributes" | "fabricArticleNumber" | "fabricArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "pptNumber" | "pptType" | "fabricRate" | "v2FabricRate" | "valueAddCost" | "rate" | "segment" | "articleFashionType" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "backImageUrl" | "fabricArticleType" | "source" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricArticleData"]>
 
   export type $FabricArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "FabricArticleData"
@@ -59738,6 +59762,7 @@ export namespace Prisma {
       vendorCode: string | null
       designNumber: string | null
       pptNumber: string | null
+      pptType: string | null
       fabricRate: Prisma.Decimal | null
       v2FabricRate: Prisma.Decimal | null
       valueAddCost: Prisma.Decimal | null
@@ -60206,6 +60231,7 @@ export namespace Prisma {
     readonly vendorCode: FieldRef<"FabricArticleData", 'String'>
     readonly designNumber: FieldRef<"FabricArticleData", 'String'>
     readonly pptNumber: FieldRef<"FabricArticleData", 'String'>
+    readonly pptType: FieldRef<"FabricArticleData", 'String'>
     readonly fabricRate: FieldRef<"FabricArticleData", 'Decimal'>
     readonly v2FabricRate: FieldRef<"FabricArticleData", 'Decimal'>
     readonly valueAddCost: FieldRef<"FabricArticleData", 'Decimal'>
@@ -61999,6 +62025,7 @@ export namespace Prisma {
     vendorCode: string | null
     designNumber: string | null
     pptNumber: string | null
+    pptType: string | null
     rate: Decimal | null
     mrp: Decimal | null
     roughV2: Decimal | null
@@ -62111,6 +62138,7 @@ export namespace Prisma {
     vendorCode: string | null
     designNumber: string | null
     pptNumber: string | null
+    pptType: string | null
     rate: Decimal | null
     mrp: Decimal | null
     roughV2: Decimal | null
@@ -62223,6 +62251,7 @@ export namespace Prisma {
     vendorCode: number
     designNumber: number
     pptNumber: number
+    pptType: number
     rate: number
     mrp: number
     roughV2: number
@@ -62355,6 +62384,7 @@ export namespace Prisma {
     vendorCode?: true
     designNumber?: true
     pptNumber?: true
+    pptType?: true
     rate?: true
     mrp?: true
     roughV2?: true
@@ -62467,6 +62497,7 @@ export namespace Prisma {
     vendorCode?: true
     designNumber?: true
     pptNumber?: true
+    pptType?: true
     rate?: true
     mrp?: true
     roughV2?: true
@@ -62579,6 +62610,7 @@ export namespace Prisma {
     vendorCode?: true
     designNumber?: true
     pptNumber?: true
+    pptType?: true
     rate?: true
     mrp?: true
     roughV2?: true
@@ -62778,6 +62810,7 @@ export namespace Prisma {
     vendorCode: string | null
     designNumber: string | null
     pptNumber: string | null
+    pptType: string | null
     rate: Decimal | null
     mrp: Decimal | null
     roughV2: Decimal | null
@@ -62909,6 +62942,7 @@ export namespace Prisma {
     vendorCode?: boolean
     designNumber?: boolean
     pptNumber?: boolean
+    pptType?: boolean
     rate?: boolean
     mrp?: boolean
     roughV2?: boolean
@@ -63021,6 +63055,7 @@ export namespace Prisma {
     vendorCode?: boolean
     designNumber?: boolean
     pptNumber?: boolean
+    pptType?: boolean
     rate?: boolean
     mrp?: boolean
     roughV2?: boolean
@@ -63133,6 +63168,7 @@ export namespace Prisma {
     vendorCode?: boolean
     designNumber?: boolean
     pptNumber?: boolean
+    pptType?: boolean
     rate?: boolean
     mrp?: boolean
     roughV2?: boolean
@@ -63245,6 +63281,7 @@ export namespace Prisma {
     vendorCode?: boolean
     designNumber?: boolean
     pptNumber?: boolean
+    pptType?: boolean
     rate?: boolean
     mrp?: boolean
     roughV2?: boolean
@@ -63266,7 +63303,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type GmArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "gmAgeGrade" | "gmApplicator" | "gmBaseType" | "gmBatteryType" | "gmBpaFree" | "gmBpcForm" | "gmBrand" | "gmBrandType" | "gmCapacityMl" | "gmCareInstruction" | "gmCertification" | "gmClosureType" | "gmCoating" | "gmColourFamily" | "gmColourShade" | "gmCompartmentCount" | "gmComposition" | "gmCosmeticFinish" | "gmDiameterCm" | "gmDimStandard" | "gmDishwasherSafe" | "gmFoldable" | "gmFoodContactSafe" | "gmFragranceConc" | "gmFragranceFamily" | "gmFreeFrom" | "gmFwHeelHtCm" | "gmFwHeelType" | "gmFwSize" | "gmFwSole" | "gmFwToe" | "gmFwUpper" | "gmGsm" | "gmHeatRetentionHr" | "gmHeightCm" | "gmInsulationType" | "gmKeyIngredient" | "gmLeakProof" | "gmLengthCm" | "gmLicence" | "gmLidType" | "gmLifestage" | "gmLiningMaterial" | "gmManufacturer" | "gmMaterial" | "gmMaterialGroup" | "gmMaterialSecondary" | "gmMicrowaveSafe" | "gmMountType" | "gmNetContent" | "gmNetContentUom" | "gmNetWeightG" | "gmPackQty" | "gmPattern" | "gmPlayPattern" | "gmPlayerCount" | "gmPowerSource" | "gmPriceTier" | "gmPrintTheme" | "gmSeason" | "gmSellUom" | "gmSetContents" | "gmShelfLifeMonths" | "gmSkinType" | "gmSpf" | "gmSport" | "gmStrapType" | "gmSurfaceFinish" | "gmTextileFabric" | "gmThreadCount" | "gmUsageOccasion" | "gmVoltageV" | "gmWarrantyMonths" | "gmWattageW" | "gmWeave" | "gmWheelCount" | "gmWidthCm" | "gmYarn" | "gmArticleNumber" | "gmArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "pptNumber" | "rate" | "mrp" | "roughV2" | "vdrCost" | "finalCost" | "segment" | "articleFashionType" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "backImageUrl" | "gmArticleType" | "source" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["gmArticleData"]>
+  export type GmArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "gmAgeGrade" | "gmApplicator" | "gmBaseType" | "gmBatteryType" | "gmBpaFree" | "gmBpcForm" | "gmBrand" | "gmBrandType" | "gmCapacityMl" | "gmCareInstruction" | "gmCertification" | "gmClosureType" | "gmCoating" | "gmColourFamily" | "gmColourShade" | "gmCompartmentCount" | "gmComposition" | "gmCosmeticFinish" | "gmDiameterCm" | "gmDimStandard" | "gmDishwasherSafe" | "gmFoldable" | "gmFoodContactSafe" | "gmFragranceConc" | "gmFragranceFamily" | "gmFreeFrom" | "gmFwHeelHtCm" | "gmFwHeelType" | "gmFwSize" | "gmFwSole" | "gmFwToe" | "gmFwUpper" | "gmGsm" | "gmHeatRetentionHr" | "gmHeightCm" | "gmInsulationType" | "gmKeyIngredient" | "gmLeakProof" | "gmLengthCm" | "gmLicence" | "gmLidType" | "gmLifestage" | "gmLiningMaterial" | "gmManufacturer" | "gmMaterial" | "gmMaterialGroup" | "gmMaterialSecondary" | "gmMicrowaveSafe" | "gmMountType" | "gmNetContent" | "gmNetContentUom" | "gmNetWeightG" | "gmPackQty" | "gmPattern" | "gmPlayPattern" | "gmPlayerCount" | "gmPowerSource" | "gmPriceTier" | "gmPrintTheme" | "gmSeason" | "gmSellUom" | "gmSetContents" | "gmShelfLifeMonths" | "gmSkinType" | "gmSpf" | "gmSport" | "gmStrapType" | "gmSurfaceFinish" | "gmTextileFabric" | "gmThreadCount" | "gmUsageOccasion" | "gmVoltageV" | "gmWarrantyMonths" | "gmWattageW" | "gmWeave" | "gmWheelCount" | "gmWidthCm" | "gmYarn" | "gmArticleNumber" | "gmArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "pptNumber" | "pptType" | "rate" | "mrp" | "roughV2" | "vdrCost" | "finalCost" | "segment" | "articleFashionType" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "backImageUrl" | "gmArticleType" | "source" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["gmArticleData"]>
 
   export type $GmArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "GmArticleData"
@@ -63362,6 +63399,7 @@ export namespace Prisma {
       vendorCode: string | null
       designNumber: string | null
       pptNumber: string | null
+      pptType: string | null
       rate: Prisma.Decimal | null
       mrp: Prisma.Decimal | null
       roughV2: Prisma.Decimal | null
@@ -63894,6 +63932,7 @@ export namespace Prisma {
     readonly vendorCode: FieldRef<"GmArticleData", 'String'>
     readonly designNumber: FieldRef<"GmArticleData", 'String'>
     readonly pptNumber: FieldRef<"GmArticleData", 'String'>
+    readonly pptType: FieldRef<"GmArticleData", 'String'>
     readonly rate: FieldRef<"GmArticleData", 'Decimal'>
     readonly mrp: FieldRef<"GmArticleData", 'Decimal'>
     readonly roughV2: FieldRef<"GmArticleData", 'Decimal'>
@@ -91966,6 +92005,7 @@ export namespace Prisma {
     vendorName: 'vendorName',
     designNumber: 'designNumber',
     pptNumber: 'pptNumber',
+    pptType: 'pptType',
     rate: 'rate',
     yarn1: 'yarn1',
     yarn2: 'yarn2',
@@ -92990,6 +93030,7 @@ export namespace Prisma {
     vendorCode: 'vendorCode',
     designNumber: 'designNumber',
     pptNumber: 'pptNumber',
+    pptType: 'pptType',
     fabricRate: 'fabricRate',
     v2FabricRate: 'v2FabricRate',
     valueAddCost: 'valueAddCost',
@@ -93134,6 +93175,7 @@ export namespace Prisma {
     vendorCode: 'vendorCode',
     designNumber: 'designNumber',
     pptNumber: 'pptNumber',
+    pptType: 'pptType',
     rate: 'rate',
     mrp: 'mrp',
     roughV2: 'roughV2',
@@ -93860,6 +93902,7 @@ export namespace Prisma {
     vendorName: 'vendorName',
     designNumber: 'designNumber',
     pptNumber: 'pptNumber',
+    pptType: 'pptType',
     yarn1: 'yarn1',
     yarn2: 'yarn2',
     fabricMainMvgr: 'fabricMainMvgr',
@@ -94479,6 +94522,7 @@ export namespace Prisma {
     vendorCode: 'vendorCode',
     designNumber: 'designNumber',
     pptNumber: 'pptNumber',
+    pptType: 'pptType',
     segment: 'segment',
     articleFashionType: 'articleFashionType',
     approvalStatus: 'approvalStatus',
@@ -94610,6 +94654,7 @@ export namespace Prisma {
     vendorCode: 'vendorCode',
     designNumber: 'designNumber',
     pptNumber: 'pptNumber',
+    pptType: 'pptType',
     segment: 'segment',
     articleFashionType: 'articleFashionType',
     approvalStatus: 'approvalStatus',
@@ -96066,6 +96111,7 @@ export namespace Prisma {
     vendorName?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     designNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     pptNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    pptType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     rate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     yarn1?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     yarn2?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -96425,6 +96471,7 @@ export namespace Prisma {
     vendorName?: SortOrderInput | SortOrder
     designNumber?: SortOrderInput | SortOrder
     pptNumber?: SortOrderInput | SortOrder
+    pptType?: SortOrderInput | SortOrder
     rate?: SortOrderInput | SortOrder
     yarn1?: SortOrderInput | SortOrder
     yarn2?: SortOrderInput | SortOrder
@@ -96789,6 +96836,7 @@ export namespace Prisma {
     vendorName?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     designNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     pptNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    pptType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     rate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     yarn1?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     yarn2?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -97147,6 +97195,7 @@ export namespace Prisma {
     vendorName?: SortOrderInput | SortOrder
     designNumber?: SortOrderInput | SortOrder
     pptNumber?: SortOrderInput | SortOrder
+    pptType?: SortOrderInput | SortOrder
     rate?: SortOrderInput | SortOrder
     yarn1?: SortOrderInput | SortOrder
     yarn2?: SortOrderInput | SortOrder
@@ -97509,6 +97558,7 @@ export namespace Prisma {
     vendorName?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     designNumber?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     pptNumber?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    pptType?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     rate?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     yarn1?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     yarn2?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
@@ -101286,6 +101336,7 @@ export namespace Prisma {
     vendorCode?: StringNullableFilter<"FabricArticleData"> | string | null
     designNumber?: StringNullableFilter<"FabricArticleData"> | string | null
     pptNumber?: StringNullableFilter<"FabricArticleData"> | string | null
+    pptType?: StringNullableFilter<"FabricArticleData"> | string | null
     fabricRate?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
     v2FabricRate?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
     valueAddCost?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
@@ -101334,6 +101385,7 @@ export namespace Prisma {
     vendorCode?: SortOrderInput | SortOrder
     designNumber?: SortOrderInput | SortOrder
     pptNumber?: SortOrderInput | SortOrder
+    pptType?: SortOrderInput | SortOrder
     fabricRate?: SortOrderInput | SortOrder
     v2FabricRate?: SortOrderInput | SortOrder
     valueAddCost?: SortOrderInput | SortOrder
@@ -101386,6 +101438,7 @@ export namespace Prisma {
     vendorCode?: StringNullableFilter<"FabricArticleData"> | string | null
     designNumber?: StringNullableFilter<"FabricArticleData"> | string | null
     pptNumber?: StringNullableFilter<"FabricArticleData"> | string | null
+    pptType?: StringNullableFilter<"FabricArticleData"> | string | null
     fabricRate?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
     v2FabricRate?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
     valueAddCost?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
@@ -101434,6 +101487,7 @@ export namespace Prisma {
     vendorCode?: SortOrderInput | SortOrder
     designNumber?: SortOrderInput | SortOrder
     pptNumber?: SortOrderInput | SortOrder
+    pptType?: SortOrderInput | SortOrder
     fabricRate?: SortOrderInput | SortOrder
     v2FabricRate?: SortOrderInput | SortOrder
     valueAddCost?: SortOrderInput | SortOrder
@@ -101490,6 +101544,7 @@ export namespace Prisma {
     vendorCode?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     designNumber?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     pptNumber?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
+    pptType?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     fabricRate?: DecimalNullableWithAggregatesFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
     v2FabricRate?: DecimalNullableWithAggregatesFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
     valueAddCost?: DecimalNullableWithAggregatesFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
@@ -101754,6 +101809,7 @@ export namespace Prisma {
     vendorCode?: StringNullableFilter<"GmArticleData"> | string | null
     designNumber?: StringNullableFilter<"GmArticleData"> | string | null
     pptNumber?: StringNullableFilter<"GmArticleData"> | string | null
+    pptType?: StringNullableFilter<"GmArticleData"> | string | null
     rate?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
     mrp?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
     roughV2?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
@@ -101866,6 +101922,7 @@ export namespace Prisma {
     vendorCode?: SortOrderInput | SortOrder
     designNumber?: SortOrderInput | SortOrder
     pptNumber?: SortOrderInput | SortOrder
+    pptType?: SortOrderInput | SortOrder
     rate?: SortOrderInput | SortOrder
     mrp?: SortOrderInput | SortOrder
     roughV2?: SortOrderInput | SortOrder
@@ -101982,6 +102039,7 @@ export namespace Prisma {
     vendorCode?: StringNullableFilter<"GmArticleData"> | string | null
     designNumber?: StringNullableFilter<"GmArticleData"> | string | null
     pptNumber?: StringNullableFilter<"GmArticleData"> | string | null
+    pptType?: StringNullableFilter<"GmArticleData"> | string | null
     rate?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
     mrp?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
     roughV2?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
@@ -102094,6 +102152,7 @@ export namespace Prisma {
     vendorCode?: SortOrderInput | SortOrder
     designNumber?: SortOrderInput | SortOrder
     pptNumber?: SortOrderInput | SortOrder
+    pptType?: SortOrderInput | SortOrder
     rate?: SortOrderInput | SortOrder
     mrp?: SortOrderInput | SortOrder
     roughV2?: SortOrderInput | SortOrder
@@ -102214,6 +102273,7 @@ export namespace Prisma {
     vendorCode?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
     designNumber?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
     pptNumber?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    pptType?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
     rate?: DecimalNullableWithAggregatesFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
     mrp?: DecimalNullableWithAggregatesFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
     roughV2?: DecimalNullableWithAggregatesFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
@@ -105916,6 +105976,7 @@ export namespace Prisma {
     vendorName?: string | null
     designNumber?: string | null
     pptNumber?: string | null
+    pptType?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
     yarn1?: string | null
     yarn2?: string | null
@@ -106273,6 +106334,7 @@ export namespace Prisma {
     vendorName?: string | null
     designNumber?: string | null
     pptNumber?: string | null
+    pptType?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
     yarn1?: string | null
     yarn2?: string | null
@@ -106628,6 +106690,7 @@ export namespace Prisma {
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptType?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
@@ -106985,6 +107048,7 @@ export namespace Prisma {
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptType?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
@@ -107341,6 +107405,7 @@ export namespace Prisma {
     vendorName?: string | null
     designNumber?: string | null
     pptNumber?: string | null
+    pptType?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
     yarn1?: string | null
     yarn2?: string | null
@@ -107694,6 +107759,7 @@ export namespace Prisma {
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptType?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
@@ -108046,6 +108112,7 @@ export namespace Prisma {
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptType?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
@@ -112467,6 +112534,7 @@ export namespace Prisma {
     vendorCode?: string | null
     designNumber?: string | null
     pptNumber?: string | null
+    pptType?: string | null
     fabricRate?: Decimal | DecimalJsLike | number | string | null
     v2FabricRate?: Decimal | DecimalJsLike | number | string | null
     valueAddCost?: Decimal | DecimalJsLike | number | string | null
@@ -112515,6 +112583,7 @@ export namespace Prisma {
     vendorCode?: string | null
     designNumber?: string | null
     pptNumber?: string | null
+    pptType?: string | null
     fabricRate?: Decimal | DecimalJsLike | number | string | null
     v2FabricRate?: Decimal | DecimalJsLike | number | string | null
     valueAddCost?: Decimal | DecimalJsLike | number | string | null
@@ -112563,6 +112632,7 @@ export namespace Prisma {
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptType?: NullableStringFieldUpdateOperationsInput | string | null
     fabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     v2FabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -112611,6 +112681,7 @@ export namespace Prisma {
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptType?: NullableStringFieldUpdateOperationsInput | string | null
     fabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     v2FabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -112659,6 +112730,7 @@ export namespace Prisma {
     vendorCode?: string | null
     designNumber?: string | null
     pptNumber?: string | null
+    pptType?: string | null
     fabricRate?: Decimal | DecimalJsLike | number | string | null
     v2FabricRate?: Decimal | DecimalJsLike | number | string | null
     valueAddCost?: Decimal | DecimalJsLike | number | string | null
@@ -112707,6 +112779,7 @@ export namespace Prisma {
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptType?: NullableStringFieldUpdateOperationsInput | string | null
     fabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     v2FabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -112755,6 +112828,7 @@ export namespace Prisma {
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptType?: NullableStringFieldUpdateOperationsInput | string | null
     fabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     v2FabricRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     valueAddCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -113055,6 +113129,7 @@ export namespace Prisma {
     vendorCode?: string | null
     designNumber?: string | null
     pptNumber?: string | null
+    pptType?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     roughV2?: Decimal | DecimalJsLike | number | string | null
@@ -113167,6 +113242,7 @@ export namespace Prisma {
     vendorCode?: string | null
     designNumber?: string | null
     pptNumber?: string | null
+    pptType?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     roughV2?: Decimal | DecimalJsLike | number | string | null
@@ -113279,6 +113355,7 @@ export namespace Prisma {
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptType?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -113391,6 +113468,7 @@ export namespace Prisma {
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptType?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -113503,6 +113581,7 @@ export namespace Prisma {
     vendorCode?: string | null
     designNumber?: string | null
     pptNumber?: string | null
+    pptType?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     roughV2?: Decimal | DecimalJsLike | number | string | null
@@ -113615,6 +113694,7 @@ export namespace Prisma {
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptType?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -113727,6 +113807,7 @@ export namespace Prisma {
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptType?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     roughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -118215,6 +118296,7 @@ export namespace Prisma {
     vendorName?: SortOrder
     designNumber?: SortOrder
     pptNumber?: SortOrder
+    pptType?: SortOrder
     rate?: SortOrder
     yarn1?: SortOrder
     yarn2?: SortOrder
@@ -118794,6 +118876,7 @@ export namespace Prisma {
     vendorName?: SortOrder
     designNumber?: SortOrder
     pptNumber?: SortOrder
+    pptType?: SortOrder
     rate?: SortOrder
     yarn1?: SortOrder
     yarn2?: SortOrder
@@ -119142,6 +119225,7 @@ export namespace Prisma {
     vendorName?: SortOrder
     designNumber?: SortOrder
     pptNumber?: SortOrder
+    pptType?: SortOrder
     rate?: SortOrder
     yarn1?: SortOrder
     yarn2?: SortOrder
@@ -122274,6 +122358,7 @@ export namespace Prisma {
     vendorCode?: SortOrder
     designNumber?: SortOrder
     pptNumber?: SortOrder
+    pptType?: SortOrder
     fabricRate?: SortOrder
     v2FabricRate?: SortOrder
     valueAddCost?: SortOrder
@@ -122329,6 +122414,7 @@ export namespace Prisma {
     vendorCode?: SortOrder
     designNumber?: SortOrder
     pptNumber?: SortOrder
+    pptType?: SortOrder
     fabricRate?: SortOrder
     v2FabricRate?: SortOrder
     valueAddCost?: SortOrder
@@ -122376,6 +122462,7 @@ export namespace Prisma {
     vendorCode?: SortOrder
     designNumber?: SortOrder
     pptNumber?: SortOrder
+    pptType?: SortOrder
     fabricRate?: SortOrder
     v2FabricRate?: SortOrder
     valueAddCost?: SortOrder
@@ -122656,6 +122743,7 @@ export namespace Prisma {
     vendorCode?: SortOrder
     designNumber?: SortOrder
     pptNumber?: SortOrder
+    pptType?: SortOrder
     rate?: SortOrder
     mrp?: SortOrder
     roughV2?: SortOrder
@@ -122777,6 +122865,7 @@ export namespace Prisma {
     vendorCode?: SortOrder
     designNumber?: SortOrder
     pptNumber?: SortOrder
+    pptType?: SortOrder
     rate?: SortOrder
     mrp?: SortOrder
     roughV2?: SortOrder
@@ -122889,6 +122978,7 @@ export namespace Prisma {
     vendorCode?: SortOrder
     designNumber?: SortOrder
     pptNumber?: SortOrder
+    pptType?: SortOrder
     rate?: SortOrder
     mrp?: SortOrder
     roughV2?: SortOrder
@@ -128001,6 +128091,7 @@ export namespace Prisma {
     vendorName?: string | null
     designNumber?: string | null
     pptNumber?: string | null
+    pptType?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
     yarn1?: string | null
     yarn2?: string | null
@@ -128356,6 +128447,7 @@ export namespace Prisma {
     vendorName?: string | null
     designNumber?: string | null
     pptNumber?: string | null
+    pptType?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
     yarn1?: string | null
     yarn2?: string | null
@@ -128823,6 +128915,7 @@ export namespace Prisma {
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptType?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
@@ -129178,6 +129271,7 @@ export namespace Prisma {
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptType?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
@@ -129577,6 +129671,7 @@ export namespace Prisma {
     vendorName?: string | null
     designNumber?: string | null
     pptNumber?: string | null
+    pptType?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
     yarn1?: string | null
     yarn2?: string | null
@@ -129933,6 +130028,7 @@ export namespace Prisma {
     vendorName?: string | null
     designNumber?: string | null
     pptNumber?: string | null
+    pptType?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
     yarn1?: string | null
     yarn2?: string | null
@@ -130292,6 +130388,7 @@ export namespace Prisma {
     vendorName?: string | null
     designNumber?: string | null
     pptNumber?: string | null
+    pptType?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
     yarn1?: string | null
     yarn2?: string | null
@@ -130648,6 +130745,7 @@ export namespace Prisma {
     vendorName?: string | null
     designNumber?: string | null
     pptNumber?: string | null
+    pptType?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
     yarn1?: string | null
     yarn2?: string | null
@@ -131162,6 +131260,7 @@ export namespace Prisma {
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptType?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
@@ -131518,6 +131617,7 @@ export namespace Prisma {
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptType?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
@@ -131892,6 +131992,7 @@ export namespace Prisma {
     vendorName?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     designNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     pptNumber?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    pptType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     rate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     yarn1?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     yarn2?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -132468,6 +132569,7 @@ export namespace Prisma {
     vendorName?: string | null
     designNumber?: string | null
     pptNumber?: string | null
+    pptType?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
     yarn1?: string | null
     yarn2?: string | null
@@ -132824,6 +132926,7 @@ export namespace Prisma {
     vendorName?: string | null
     designNumber?: string | null
     pptNumber?: string | null
+    pptType?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
     yarn1?: string | null
     yarn2?: string | null
@@ -134724,6 +134827,7 @@ export namespace Prisma {
     vendorName?: string | null
     designNumber?: string | null
     pptNumber?: string | null
+    pptType?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
     yarn1?: string | null
     yarn2?: string | null
@@ -135080,6 +135184,7 @@ export namespace Prisma {
     vendorName?: string | null
     designNumber?: string | null
     pptNumber?: string | null
+    pptType?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
     yarn1?: string | null
     yarn2?: string | null
@@ -135487,6 +135592,7 @@ export namespace Prisma {
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptType?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
@@ -135843,6 +135949,7 @@ export namespace Prisma {
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptType?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
@@ -136818,6 +136925,7 @@ export namespace Prisma {
     vendorName?: string | null
     designNumber?: string | null
     pptNumber?: string | null
+    pptType?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
     yarn1?: string | null
     yarn2?: string | null
@@ -137180,6 +137288,7 @@ export namespace Prisma {
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptType?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
@@ -137536,6 +137645,7 @@ export namespace Prisma {
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptType?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
@@ -137891,6 +138001,7 @@ export namespace Prisma {
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptType?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138312,6 +138423,7 @@ export namespace Prisma {
     vendorName?: string | null
     designNumber?: string | null
     pptNumber?: string | null
+    pptType?: string | null
     rate?: Decimal | DecimalJsLike | number | string | null
     yarn1?: string | null
     yarn2?: string | null
@@ -138779,6 +138891,7 @@ export namespace Prisma {
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptType?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
@@ -139135,6 +139248,7 @@ export namespace Prisma {
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptType?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null
@@ -139490,6 +139604,7 @@ export namespace Prisma {
     vendorName?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     pptNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    pptType?: NullableStringFieldUpdateOperationsInput | string | null
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     yarn1?: NullableStringFieldUpdateOperationsInput | string | null
     yarn2?: NullableStringFieldUpdateOperationsInput | string | null

@@ -26,7 +26,7 @@ import { linkSetPart, retryPendingSetLinks } from '../services/setLinkService';
 // (ids, status, timestamps, SAP metadata) is never client-writable.
 const ITEM_UPDATE_ALLOWED_FIELDS = [
     'articleNumber', 'division', 'subDivision', 'majorCategory', 'vendorName', 'designNumber',
-    'pptNumber', 'rate', 'yarn1', 'yarn2', 'fabricMainMvgr', 'weave',
+    'pptNumber', 'pptType', 'rate', 'yarn1', 'yarn2', 'fabricMainMvgr', 'weave',
     'composition', 'finish', 'gsm', 'shade', 'weight', 'lycra', 'neck', 'neckDetails',
     // Body fields (full set)
     'collar', 'collarStyle', 'placket', 'sleeve', 'sleeveFold', 'mSet', 'bottomFold',
@@ -924,6 +924,7 @@ export class ApproverController {
                     vendorCode: true,
                     designNumber: true,
                     pptNumber: true,
+                    pptType: true,
                     referenceArticleNumber: true,
                     referenceArticleDescription: true,
                     approvalStatus: true,
@@ -1302,6 +1303,7 @@ export class ApproverController {
                     vendorCode: true,
                     designNumber: true,
                     pptNumber: true,
+                    pptType: true,
                     rate: true,
                     mrp: true,
                     pattern: true,
@@ -1466,6 +1468,7 @@ export class ApproverController {
                 vendorCode: true,
                 designNumber: true,
                 pptNumber: true,
+                pptType: true,
                 rate: true,
                 mrp: true,
                 pattern: true,
@@ -2498,7 +2501,7 @@ export class ApproverController {
                 select: {
                     id: true, imageUrl: true, oldImageUrl: true, backImageUrl: true, imageUncPath: true,
                     articleNumber: true, division: true, subDivision: true, majorCategory: true,
-                    vendorName: true, vendorCode: true, designNumber: true, pptNumber: true,
+                    vendorName: true, vendorCode: true, designNumber: true, pptNumber: true, pptType: true,
                     referenceArticleNumber: true, referenceArticleDescription: true,
                     approvalStatus: true, sapSyncStatus: true, sapSyncMessage: true, sapArticleId: true,
                     createdAt: true, updatedAt: true, userName: true, source: true,
@@ -3341,6 +3344,7 @@ export class ApproverController {
                 presentationsType: parent.presentationsType,
                 source: parent.source,
                 pptNumber: parent.pptNumber,
+                pptType: parent.pptType,
                 vendorName: parent.vendorName,
                 vendorCode: parent.vendorCode,
                 division: parent.division,
@@ -3718,7 +3722,7 @@ export class ApproverController {
                 select: {
                     id: true, articleNumber: true, majorCategory: true, division: true,
                     subDivision: true, vendorCode: true, vendorName: true, designNumber: true,
-                    pptNumber: true, rate: true, mrp: true, macroMvgr: true, mainMvgr: true,
+                    pptNumber: true, pptType: true, rate: true, mrp: true, macroMvgr: true, mainMvgr: true,
                     yarn1: true, fabricMainMvgr: true, weave: true, mFab2: true, composition: true,
                     finish: true, gsm: true, weight: true, lycra: true, shade: true, neck: true,
                     neckDetails: true, sleeve: true, length: true, collar: true, collarStyle: true,
@@ -5297,7 +5301,7 @@ export class ApproverController {
         id: true,
         gmArticleNumber: true, gmArticleDescription: true, gmArticleType: true,
         division: true, subDivision: true, majorCategory: true, mcDescription: true,
-        vendorName: true, vendorCode: true, designNumber: true, pptNumber: true,
+        vendorName: true, vendorCode: true, designNumber: true, pptNumber: true, pptType: true,
         approvalStatus: true, approvedAt: true, approvedBy: true,
         sapSyncStatus: true, sapSyncMessage: true,
         imageUrl: true, backImageUrl: true, source: true, userName: true,
@@ -5348,6 +5352,7 @@ export class ApproverController {
             vendorCode:              r.vendorCode ?? null,
             designNumber:            r.designNumber ?? null,
             pptNumber:               r.pptNumber ?? null,
+            pptType:                 r.pptType ?? null,
             approvalStatus:          (r.approvalStatus ?? 'PENDING') as 'PENDING' | 'APPROVED' | 'REJECTED',
             approvedAt:              r.approvedAt?.toISOString() ?? null,
             approvedBy:              r.approvedBy ?? null,
@@ -5715,7 +5720,7 @@ export class ApproverController {
     private static GM_ARTICLE_UPDATE_FIELDS: Record<string, string> = {
         division: 'division', subDivision: 'subDivision', majorCategory: 'majorCategory',
         mcDescription: 'mcDescription', vendorName: 'vendorName', vendorCode: 'vendorCode',
-        designNumber: 'designNumber', pptNumber: 'pptNumber',
+        designNumber: 'designNumber', pptNumber: 'pptNumber', pptType: 'pptType',
         mrp: 'mrp', rate: 'rate', segment: 'segment', articleFashionType: 'articleFashionType',
         roughV2: 'roughV2', vdrCost: 'vdrCost', finalCost: 'finalCost',
         imageUrl: 'imageUrl', source: 'source', userName: 'userName',
@@ -6818,7 +6823,7 @@ export class ApproverController {
         mConstruction: true, mOunz: true, mWidth: true, mWeave02: true,
         mCount: true, mWeave01: true, mComposition: true, mFinish: true,
         mGsm: true, mLycra: true, fabricRate: true, v2FabricRate: true, valueAddCost: true, articleFashionType: true,
-        designNumber: true, pptNumber: true, mcDescription: true, source: true,
+        designNumber: true, pptNumber: true, pptType: true, mcDescription: true, source: true,
         rate: true, segment: true, fabricAiAttributes: true,
     } as const;
 
@@ -6913,6 +6918,7 @@ export class ApproverController {
         vendorName:               'vendorName',
         vendorCode:               'vendorCode',
         designNumber:             'designNumber',
+        pptType:                  'pptType',
         fabricArticleNumber:      'fabricArticleNumber',
         fabricArticleDescription: 'fabricArticleDescription',
         fabricRate:               'fabricRate',
@@ -7185,6 +7191,7 @@ export class ApproverController {
             articleFashionType: r.articleFashionType ?? null,
             source: r.source ?? null,
             pptNumber: r.pptNumber ?? null,
+            pptType: r.pptType ?? null,
             mrp: r.rate != null ? Number(r.rate) : null,
             segment: r.segment ?? null,
             // AI extraction result {"M_FAB_DIV":"K", ...} — shown read-only next to the FAB values.
@@ -7506,7 +7513,7 @@ export class ApproverController {
         const items = await prisma.extractionResultFlat.findMany({
             where: { id: { in: ids } },
             select: {
-                id: true, articleNumber: true, designNumber: true, pptNumber: true,
+                id: true, articleNumber: true, designNumber: true, pptNumber: true, pptType: true,
                 majorCategory: true, division: true, subDivision: true,
                 vendorName: true, vendorCode: true,
                 imageUrl: true, userName: true,
@@ -7590,6 +7597,7 @@ export class ApproverController {
                 vendorCode:               '200681',
                 designNumber:             item.designNumber,
                 pptNumber:                item.pptNumber,
+                pptType:                  item.pptType,
                 rate:                     item.mrp ?? null,
                 segment:                  item.segment ?? null,
                 imageUrl:                 item.imageUrl,

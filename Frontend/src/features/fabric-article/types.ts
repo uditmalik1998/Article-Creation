@@ -44,6 +44,7 @@ export interface ApproverItem {
   composition: string | null;
   wash: string | null;
   pptNumber: string | null;
+  pptType?: 'V2PD' | 'RETAIL' | null;
   referenceArticleNumber: string | null;
   referenceArticleDescription: string | null;
   bodyArticle: string | null;
