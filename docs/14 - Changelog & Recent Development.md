@@ -5,6 +5,20 @@
 
 ---
 
+## 2026-11-25 — Data fix: PPT APP-00288 vendor → 203811 PAL FASHIONS PRIVATE LIMITED
+
+- User request: the 33 FG articles of `ppt_number = 'APP-00288'` (1124040413–419, 431–438, 446–463; all APPROVED / SYNCED, were 203450 PAL INTERNATIONAL) + their 264 variants in `fg_variants_article_data` set to vendor_code 203811 / vendor_name PAL FASHIONS PRIVATE LIMITED (direct SQL, updated_at on the generics).
+- DB only — SAP still has the old vendor (EXTWG) on these articles; no history_fg_article rows written.
+- 1124025252 (in the user's list) is NOT in APP-00288 (ppt 506415, was vendor_code NULL / PAL INTERNATIONAL, no variants) — changed too after the user confirmed. Total: 34 articles + 264 variants.
+
+## 2026-11-25 — FG Variants table: bigger text, centred columns
+
+- `VariantGrid.tsx` new `fgStyle` prop (only FG `VariantSubTable` passes it): text ~1.5px larger (headers 11.5px, rows 13.5px, colour header 12–12.5px) and every column centred — header and cells line up (SAP ARTICLE # was left-aligned with its data far left of centre; WEIGHT header left while values were right).
+- FG `WeightCell` (VariantSubTable): value / button / input centred, 13px, 28px high.
+- Fabric and GM variant tables unchanged. Frontend only.
+- Follow-up same day: headings 11.5 → 12.5px, rows 13.5 → 14px, colour bar 12.5–13px.
+- **Weight removed** from the FG variants table (user: not needed): no WEIGHT column, no "Missing weight" filter, no "Set weight…" bulk action, no "Needs weight" status (unsynced rows show "Pending SAP"). `WeightCell` + `handleBulkWeight` deleted from VariantSubTable. Weight was not required anywhere (Save & Submit weight check already commented out; no FG variant weight DB column). VariantGrid keeps its optional `weight` prop (no one passes it now).
+
 ## 2026-11-24 — FG FAB + BODY card heading + AI result bigger
 
 - FAB / BODY card title bar: 10px → 13.5px, icon 16px, more padding (other cards' title bars unchanged).
