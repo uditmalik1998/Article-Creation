@@ -224,7 +224,9 @@ function parseVariantRfcResponse(
  */
 export async function syncVariantsToSapViaRfc(
     variantsByGenericId: Map<string, FlatVariant[]>,
-    genericSapArticleMap: Map<string, string>
+    genericSapArticleMap: Map<string, string>,
+    /** Called right after each variant's SAP answer (e.g. to save it at once). Errors are logged, never thrown. */
+    onResult?: (result: SapSyncItemResult) => Promise<unknown> | unknown,
 ): Promise<SapSyncItemResult[]> {
     if (!ZMM_VAR_RFC_ENABLED) {
         console.log('[ZMM_VAR_RFC] Disabled via ZMM_RFC_ENABLED / SAP_SYNC_ENABLED env var');
@@ -247,7 +249,13 @@ export async function syncVariantsToSapViaRfc(
         const genericSapArt = genericSapArticleMap.get(genericId);
         if (!genericSapArt) {
             console.warn(`[ZMM_VAR_RFC] Skipping ${variants.length} variant(s) for genericId=${genericId}: no SAP article number`);
-            return variants.map((v) => ({ id: v.id, success: false, message: 'Generic article SAP number not available; variant skipped' }));
+            const skipped = variants.map((v) => ({ id: v.id, success: false, message: 'Generic article SAP number not available; variant skipped' }));
+            if (onResult) {
+                for (const s of skipped) {
+                    try { await onResult(s); } catch (cbErr) { console.error(`[ZMM_VAR_RFC] onResult failed for variantId=${s.id}:`, (cbErr as Error)?.message); }
+                }
+            }
+            return skipped;
         }
 
         const out: SapSyncItemResult[] = [];
@@ -328,6 +336,10 @@ export async function syncVariantsToSapViaRfc(
                 });
             } finally {
                 clearTimeout(timer);
+            }
+            if (onResult) {
+                try { await onResult(out[out.length - 1]); }
+                catch (cbErr) { console.error(`[ZMM_VAR_RFC] onResult failed for variantId=${variant.id}:`, (cbErr as Error)?.message); }
             }
         }
         return out;

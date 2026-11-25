@@ -3592,6 +3592,114 @@ export class ApproverController {
     // In-process guard so the approval-sync worker never overlaps itself.
     private static _approvalSyncRunning = false;
 
+    // ── Background variant creation (2026-11-25) ─────────────────────────────
+    // Generic ids whose variants are queued or being created in this process.
+    private static _variantJobs = new Set<string>();
+    private static _variantJobsRunning = 0;
+    private static _variantJobQueue: Array<() => Promise<void>> = [];
+    // Generics whose variants are created at the same time. Variants of ONE generic
+    // stay strictly sequential (shared SAP material lock).
+    private static readonly VARIANT_JOB_CONCURRENCY = parseInt(process.env.SAP_RFC_CONCURRENCY || '7', 10);
+
+    /** Queue SAP creation of one created generic's variants. Returns at once. */
+    static queueVariantSync(genericId: string, genericSapNo: string | undefined, generic: any): void {
+        if (ApproverController._variantJobs.has(genericId)) return;
+        ApproverController._variantJobs.add(genericId);
+        ApproverController._variantJobQueue.push(async () => {
+            try {
+                await ApproverController.syncVariantsOfGeneric(genericId, genericSapNo, generic);
+            } finally {
+                ApproverController._variantJobs.delete(genericId);
+            }
+        });
+        ApproverController.pumpVariantJobs();
+    }
+
+    private static pumpVariantJobs(): void {
+        while (ApproverController._variantJobsRunning < ApproverController.VARIANT_JOB_CONCURRENCY
+            && ApproverController._variantJobQueue.length > 0) {
+            const job = ApproverController._variantJobQueue.shift()!;
+            ApproverController._variantJobsRunning++;
+            job()
+                .catch((err: any) => console.error('[VARIANT_RFC] job error:', err?.message))
+                .finally(() => {
+                    ApproverController._variantJobsRunning--;
+                    ApproverController.pumpVariantJobs();
+                });
+        }
+    }
+
+    /** Variant jobs still queued or running in this process (for logs / shutdown). */
+    static variantJobsPending(): number {
+        return ApproverController._variantJobs.size;
+    }
+
+    /**
+     * Create one generic's variants in SAP, one by one. Each variant's result is
+     * saved the moment SAP answers, so the page shows progress and a restart
+     * keeps every variant already created.
+     */
+    private static async syncVariantsOfGeneric(genericId: string, genericSapNo: string | undefined, generic: any): Promise<void> {
+        try {
+            const fgTableVariants = await prisma.fgVariantArticleData.findMany({
+                where: { genericArticleId: genericId },
+                select: {
+                    id: true, genericArticleId: true, variantSize: true,
+                    variantColor: true, vendorCode: true,
+                    rate: true, mrp: true, variantArticleNumber: true,
+                    approvalStatus: true, sapSyncStatus: true, imageUrl: true,
+                },
+            });
+            if (fgTableVariants.length === 0) return;
+
+            const variants = fgTableVariants.map((v) => ({
+                ...v,
+                colour: v.variantColor,
+                sapArticleId: v.variantArticleNumber ?? null,
+                articleNumber: v.variantArticleNumber ?? null,
+            }));
+            const startedAt = Date.now();
+            console.log(`[VARIANT_RFC] ${genericSapNo ?? genericId}: creating ${variants.length} variant(s) in background`);
+
+            const genericSapArticleMap = new Map<string, string>();
+            if (genericSapNo) genericSapArticleMap.set(genericId, genericSapNo);
+
+            const results = await syncVariantsToSapViaRfc(
+                new Map([[genericId, variants]]),
+                genericSapArticleMap,
+                async (vResult: any) => {
+                    const data: any = {
+                        sapSyncStatus: vResult.success ? SapSyncStatus.SYNCED : SapSyncStatus.FAILED,
+                        sapSyncMessage: vResult.message,
+                    };
+                    if (vResult.sapArticleNumber) data.variantArticleNumber = vResult.sapArticleNumber;
+                    await prisma.fgVariantArticleData.update({ where: { id: vResult.id }, data });
+                    ApproverController.itemsCache.clear();
+                },
+            );
+
+            const ok = results.filter((r) => r.success).length;
+            console.log(`[VARIANT_RFC] ${genericSapNo ?? genericId}: ${ok}/${results.length} variant(s) created in ${Math.round((Date.now() - startedAt) / 1000)}s`);
+
+            // Tell PO-Wise now instead of in 2-3 h via Snowflake. Fire-and-forget:
+            // it never throws and never fails article creation.
+            void sendHandoffToPoWise(() => [buildHandoffArticle(generic, genericSapNo, variants, results)]);
+        } catch (varErr: any) {
+            console.error(`[VARIANT_RFC] Variant sync failed for ${genericId} (non-fatal):`, varErr?.message);
+            // Variants not answered yet → FAILED so the retry worker can pick them up.
+            await prisma.fgVariantArticleData.updateMany({
+                where: { genericArticleId: genericId, variantArticleNumber: null, sapSyncStatus: SapSyncStatus.PENDING },
+                data: {
+                    sapSyncStatus: SapSyncStatus.FAILED,
+                    sapSyncMessage: `Variant RFC exception: ${varErr?.message ?? 'unknown'}`,
+                },
+            }).catch(() => {});
+        } finally {
+            ApproverController.itemsCache.clear();
+            ApproverController.countCache.clear();
+        }
+    }
+
     /**
      * Background SAP sync for approved-but-unsynced articles (sapSyncStatus=PENDING).
      * On SAP failure the generic and its variants are reverted to PENDING approval
@@ -3930,93 +4038,19 @@ export class ApproverController {
 
             // ── Variant RFC sync ─────────────────────────────────────────────
             // For each successfully synced generic article, create its color/size
-            // variants in SAP via ZMM_VAR_ART_CREATION_RFC.
-            // Variants are read from fg_variants_article_data.
-            if (successfullyApprovedIds.length > 0) {
-                try {
-                    const fgTableVariants = await prisma.fgVariantArticleData.findMany({
-                        where: { genericArticleId: { in: successfullyApprovedIds } },
-                        select: {
-                            id: true, genericArticleId: true, variantSize: true,
-                            variantColor: true, vendorCode: true,
-                            rate: true, mrp: true, variantArticleNumber: true,
-                            approvalStatus: true, sapSyncStatus: true, imageUrl: true,
-                        },
-                    });
-
-                    const fgVariantIdSet = new Set(fgTableVariants.map((v) => v.id));
-
-                    const allVariants = [
-                        ...fgTableVariants.map((v) => ({
-                            ...v,
-                            colour: v.variantColor,
-                            sapArticleId: v.variantArticleNumber ?? null,
-                            articleNumber: v.variantArticleNumber ?? null,
-                        })),
-                    ];
-
-                    if (allVariants.length > 0) {
-                        const variantsByGenericId = new Map<string, typeof allVariants>();
-                        for (const variant of allVariants) {
-                            const gId = variant.genericArticleId!;
-                            if (!variantsByGenericId.has(gId)) variantsByGenericId.set(gId, []);
-                            variantsByGenericId.get(gId)!.push(variant);
-                        }
-
-                        const genericSapArticleMap = new Map<string, string>();
-                        for (const syncResult of finalizedSyncResults) {
-                            if (syncResult.success && syncResult.sapArticleNumber) {
-                                genericSapArticleMap.set(syncResult.id, syncResult.sapArticleNumber);
-                            }
-                        }
-                        const variantSyncResults = await syncVariantsToSapViaRfc(variantsByGenericId, genericSapArticleMap);
-
-                        const variantSyncUpdates = variantSyncResults.map((vResult: any) => {
-                            const isFgVariant = fgVariantIdSet.has(vResult.id);
-                            const data: any = {
-                                sapSyncStatus: vResult.success ? SapSyncStatus.SYNCED : SapSyncStatus.FAILED,
-                                sapSyncMessage: vResult.message,
-                            };
-                            if (vResult.sapArticleNumber) {
-                                if (isFgVariant) {
-                                    data.variantArticleNumber = vResult.sapArticleNumber;
-                                } else {
-                                    data.sapArticleId = vResult.sapArticleNumber;
-                                    data.articleNumber = vResult.sapArticleNumber;
-                                }
-                            }
-                            if (!isFgVariant) {
-                                if (vResult.success && vResult.fabricArticleNumber) data.fabricArticleNumber = vResult.fabricArticleNumber;
-                                if (vResult.success && vResult.fabricArticleDescription) data.fabricArticleDescription = vResult.fabricArticleDescription;
-                            }
-                            return isFgVariant
-                                ? prisma.fgVariantArticleData.update({ where: { id: vResult.id }, data })
-                                : prisma.extractionResultFlat.update({ where: { id: vResult.id }, data });
-                        });
-
-                        if (variantSyncUpdates.length > 0) {
-                            await Promise.allSettled(variantSyncUpdates);
-                        }
-
-                        // Tell PO-Wise now instead of in 2-3 h via Snowflake. Fire-and-forget:
-                        // it never throws and never fails article creation.
-                        void sendHandoffToPoWise(() => Array.from(variantsByGenericId.entries()).map(([gId, vs]) =>
-                            buildHandoffArticle(approvedItemById.get(gId) ?? {}, genericSapArticleMap.get(gId), vs, variantSyncResults)));
-                    }
-                } catch (varErr: any) {
-                    console.error('[VARIANT_RFC] Variant sync failed (non-fatal):', varErr?.message);
-                    // Mark stuck-PENDING variants as FAILED so the retry worker can pick them up
-                    await prisma.fgVariantArticleData.updateMany({
-                        where: {
-                            genericArticleId: { in: successfullyApprovedIds },
-                            variantArticleNumber: null,
-                        },
-                        data: {
-                            sapSyncStatus: SapSyncStatus.FAILED,
-                            sapSyncMessage: `Variant RFC exception: ${varErr?.message ?? 'unknown'}`,
-                        },
-                    }).catch(() => {});
+            // variants in SAP via ZMM_VAR_ART_CREATION_RFC — in the BACKGROUND, one
+            // job per generic, so a generic with many variants (e.g. 99, ~50 s each)
+            // no longer holds the approval queue: the next tick can claim new
+            // generics while variants are still being created (2026-11-25).
+            const genericSapArticleMap = new Map<string, string>();
+            for (const syncResult of finalizedSyncResults) {
+                if (syncResult.success && syncResult.sapArticleNumber) {
+                    genericSapArticleMap.set(syncResult.id, syncResult.sapArticleNumber);
                 }
+            }
+            for (const gId of successfullyApprovedIds) {
+                // No SAP number → the service marks its variants FAILED ("variant skipped"), as before.
+                ApproverController.queueVariantSync(gId, genericSapArticleMap.get(gId), approvedItemById.get(gId) ?? {});
             }
             // ─────────────────────────────────────────────────────────────────
 
@@ -4313,6 +4347,18 @@ export class ApproverController {
             if (!generic.sapArticleId) {
                 return res.status(400).json({ error: 'Generic article has no SAP article number. Approve the generic first.' });
             }
+            // Variants of this generic are already being created (background job after
+            // approval, or another retry). Sending them again at the same time would hit
+            // SAP's article lock and could overwrite saved results (2026-11-25).
+            if (ApproverController._variantJobs.has(id)) {
+                const [done, total] = await Promise.all([
+                    prisma.fgVariantArticleData.count({ where: { genericArticleId: id, variantArticleNumber: { not: null } } }),
+                    prisma.fgVariantArticleData.count({ where: { genericArticleId: id } }),
+                ]);
+                return res.status(409).json({
+                    error: `Variants are being created in SAP right now (${done} of ${total} done). Wait until it finishes, then retry only if some failed.`,
+                });
+            }
 
             // Human-readable base number: strip leading zeros from generic SAP ID
             // e.g. "0000001110143051" → "1110143051"
@@ -4431,8 +4477,18 @@ export class ApproverController {
             const variantsByGenericId = new Map([[id, allToSync]]);
             const genericSapArticleMap = new Map([[id, generic.sapArticleId]]);
 
-            // 5. Call the existing RFC function
-            const results = await syncVariantsToSapViaRfc(variantsByGenericId, genericSapArticleMap);
+            // 5. Call the existing RFC function. The generic is marked busy meanwhile so a
+            // second retry click (or tab) gets the 409 above instead of a parallel run.
+            if (ApproverController._variantJobs.has(id)) {
+                return res.status(409).json({ error: 'Variants are being created in SAP right now. Wait until it finishes.' });
+            }
+            ApproverController._variantJobs.add(id);
+            let results: Awaited<ReturnType<typeof syncVariantsToSapViaRfc>>;
+            try {
+                results = await syncVariantsToSapViaRfc(variantsByGenericId, genericSapArticleMap);
+            } finally {
+                ApproverController._variantJobs.delete(id);
+            }
 
             // 6. Persist results back to DB — route to correct table
             await Promise.allSettled(results.map(r => {

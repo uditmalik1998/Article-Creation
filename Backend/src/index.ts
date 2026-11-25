@@ -611,6 +611,11 @@ app.use(errorHandler);
       console.log(signal === 'SIGINT'
         ? '\n🔄 SIGINT received, shutting down gracefully...'
         : '🔄 SIGTERM received, shutting down gracefully...');
+      const pendingVariantJobs = ApproverController.variantJobsPending();
+      if (pendingVariantJobs > 0) {
+        // Variants already answered by SAP are saved; the rest stay PENDING.
+        console.warn(`[VARIANT_RFC] shutdown with ${pendingVariantJobs} article(s) still creating variants`);
+      }
 
       // Safety net: never let shutdown hang. If cleanup or a lingering connection
       // stalls, force-exit so the OS releases the port and the next start is clean.
