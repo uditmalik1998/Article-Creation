@@ -262,7 +262,7 @@ const BOM_ONLY_SCHEMA_KEYS = new Set([
 // Card-only row labels (SCHEMA_KEY_TO_EXCEL_ATTR keeps the grid / export names).
 const CARD_LABEL_OVERRIDES: Record<string, string> = {
   rough_v2: 'ACT-V2', // FAB card ROUGH-V2 row
-  buying_type: 'M_BUYING_TYPE',
+  buying_type: 'BUYING_TYPE',
 };
 
 // M_BUYING_TYPE (FG OTH GRID-1 card, below M_IMP_ATBT): fixed options, always shown,

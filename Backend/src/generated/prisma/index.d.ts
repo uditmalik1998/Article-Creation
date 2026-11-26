@@ -43169,6 +43169,7 @@ export namespace Prisma {
     imageUrl: string | null
     backImageUrl: string | null
     presentationsType: string | null
+    buyingType: string | null
     setGroupId: string | null
     setRole: string | null
     setName: string | null
@@ -43201,6 +43202,7 @@ export namespace Prisma {
     imageUrl: string | null
     backImageUrl: string | null
     presentationsType: string | null
+    buyingType: string | null
     setGroupId: string | null
     setRole: string | null
     setName: string | null
@@ -43233,6 +43235,7 @@ export namespace Prisma {
     imageUrl: number
     backImageUrl: number
     presentationsType: number
+    buyingType: number
     setGroupId: number
     setRole: number
     setName: number
@@ -43280,6 +43283,7 @@ export namespace Prisma {
     imageUrl?: true
     backImageUrl?: true
     presentationsType?: true
+    buyingType?: true
     setGroupId?: true
     setRole?: true
     setName?: true
@@ -43312,6 +43316,7 @@ export namespace Prisma {
     imageUrl?: true
     backImageUrl?: true
     presentationsType?: true
+    buyingType?: true
     setGroupId?: true
     setRole?: true
     setName?: true
@@ -43344,6 +43349,7 @@ export namespace Prisma {
     imageUrl?: true
     backImageUrl?: true
     presentationsType?: true
+    buyingType?: true
     setGroupId?: true
     setRole?: true
     setName?: true
@@ -43464,6 +43470,7 @@ export namespace Prisma {
     imageUrl: string | null
     backImageUrl: string | null
     presentationsType: string | null
+    buyingType: string | null
     setGroupId: string | null
     setRole: string | null
     setName: string | null
@@ -43516,6 +43523,7 @@ export namespace Prisma {
     imageUrl?: boolean
     backImageUrl?: boolean
     presentationsType?: boolean
+    buyingType?: boolean
     setGroupId?: boolean
     setRole?: boolean
     setName?: boolean
@@ -43549,6 +43557,7 @@ export namespace Prisma {
     imageUrl?: boolean
     backImageUrl?: boolean
     presentationsType?: boolean
+    buyingType?: boolean
     setGroupId?: boolean
     setRole?: boolean
     setName?: boolean
@@ -43582,6 +43591,7 @@ export namespace Prisma {
     imageUrl?: boolean
     backImageUrl?: boolean
     presentationsType?: boolean
+    buyingType?: boolean
     setGroupId?: boolean
     setRole?: boolean
     setName?: boolean
@@ -43615,6 +43625,7 @@ export namespace Prisma {
     imageUrl?: boolean
     backImageUrl?: boolean
     presentationsType?: boolean
+    buyingType?: boolean
     setGroupId?: boolean
     setRole?: boolean
     setName?: boolean
@@ -43632,7 +43643,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type RawArticleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "presentationNo" | "vendorCode" | "vendorName" | "division" | "subDivision" | "majorCategory" | "presentationReceivedDate" | "designNumber" | "fabric" | "noOfColors" | "price" | "imageUrl" | "backImageUrl" | "presentationsType" | "setGroupId" | "setRole" | "setName" | "uniqueKey" | "source" | "status" | "retryCount" | "errorMessage" | "extractedData" | "extractedAt" | "flatId" | "lockedUntil" | "articleNumber" | "createdAt" | "updatedAt", ExtArgs["result"]["rawArticle"]>
+  export type RawArticleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "presentationNo" | "vendorCode" | "vendorName" | "division" | "subDivision" | "majorCategory" | "presentationReceivedDate" | "designNumber" | "fabric" | "noOfColors" | "price" | "imageUrl" | "backImageUrl" | "presentationsType" | "buyingType" | "setGroupId" | "setRole" | "setName" | "uniqueKey" | "source" | "status" | "retryCount" | "errorMessage" | "extractedData" | "extractedAt" | "flatId" | "lockedUntil" | "articleNumber" | "createdAt" | "updatedAt", ExtArgs["result"]["rawArticle"]>
 
   export type $RawArticlePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "RawArticle"
@@ -43653,6 +43664,7 @@ export namespace Prisma {
       imageUrl: string | null
       backImageUrl: string | null
       presentationsType: string | null
+      buyingType: string | null
       setGroupId: string | null
       setRole: string | null
       setName: string | null
@@ -44106,6 +44118,7 @@ export namespace Prisma {
     readonly imageUrl: FieldRef<"RawArticle", 'String'>
     readonly backImageUrl: FieldRef<"RawArticle", 'String'>
     readonly presentationsType: FieldRef<"RawArticle", 'String'>
+    readonly buyingType: FieldRef<"RawArticle", 'String'>
     readonly setGroupId: FieldRef<"RawArticle", 'String'>
     readonly setRole: FieldRef<"RawArticle", 'String'>
     readonly setName: FieldRef<"RawArticle", 'String'>
@@ -44526,6 +44539,7 @@ export namespace Prisma {
     subDivision: string | null
     majorCategory: string | null
     presentationsType: string | null
+    buyingType: string | null
     designNumber: string | null
     articleNumber: string | null
     fabric: string | null
@@ -44561,6 +44575,7 @@ export namespace Prisma {
     subDivision: string | null
     majorCategory: string | null
     presentationsType: string | null
+    buyingType: string | null
     designNumber: string | null
     articleNumber: string | null
     fabric: string | null
@@ -44596,6 +44611,7 @@ export namespace Prisma {
     subDivision: number
     majorCategory: number
     presentationsType: number
+    buyingType: number
     designNumber: number
     articleNumber: number
     fabric: number
@@ -44650,6 +44666,7 @@ export namespace Prisma {
     subDivision?: true
     majorCategory?: true
     presentationsType?: true
+    buyingType?: true
     designNumber?: true
     articleNumber?: true
     fabric?: true
@@ -44685,6 +44702,7 @@ export namespace Prisma {
     subDivision?: true
     majorCategory?: true
     presentationsType?: true
+    buyingType?: true
     designNumber?: true
     articleNumber?: true
     fabric?: true
@@ -44720,6 +44738,7 @@ export namespace Prisma {
     subDivision?: true
     majorCategory?: true
     presentationsType?: true
+    buyingType?: true
     designNumber?: true
     articleNumber?: true
     fabric?: true
@@ -44843,6 +44862,7 @@ export namespace Prisma {
     subDivision: string | null
     majorCategory: string | null
     presentationsType: string | null
+    buyingType: string | null
     designNumber: string | null
     articleNumber: string | null
     fabric: string | null
@@ -44898,6 +44918,7 @@ export namespace Prisma {
     subDivision?: boolean
     majorCategory?: boolean
     presentationsType?: boolean
+    buyingType?: boolean
     designNumber?: boolean
     articleNumber?: boolean
     fabric?: boolean
@@ -44934,6 +44955,7 @@ export namespace Prisma {
     subDivision?: boolean
     majorCategory?: boolean
     presentationsType?: boolean
+    buyingType?: boolean
     designNumber?: boolean
     articleNumber?: boolean
     fabric?: boolean
@@ -44970,6 +44992,7 @@ export namespace Prisma {
     subDivision?: boolean
     majorCategory?: boolean
     presentationsType?: boolean
+    buyingType?: boolean
     designNumber?: boolean
     articleNumber?: boolean
     fabric?: boolean
@@ -45006,6 +45029,7 @@ export namespace Prisma {
     subDivision?: boolean
     majorCategory?: boolean
     presentationsType?: boolean
+    buyingType?: boolean
     designNumber?: boolean
     articleNumber?: boolean
     fabric?: boolean
@@ -45031,7 +45055,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type FabricRawDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "presentationNo" | "uniqueKey" | "vendorCode" | "vendorName" | "vendorCity" | "division" | "subDivision" | "majorCategory" | "presentationsType" | "designNumber" | "articleNumber" | "fabric" | "noOfColors" | "price" | "imageUrl" | "backImageUrl" | "source" | "season" | "garmentWeight" | "availableQty" | "approvedBy" | "notes" | "status" | "retryCount" | "errorMessage" | "extractedData" | "extractedAt" | "flatId" | "lockedUntil" | "presentationReceivedDate" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricRawData"]>
+  export type FabricRawDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "presentationNo" | "uniqueKey" | "vendorCode" | "vendorName" | "vendorCity" | "division" | "subDivision" | "majorCategory" | "presentationsType" | "buyingType" | "designNumber" | "articleNumber" | "fabric" | "noOfColors" | "price" | "imageUrl" | "backImageUrl" | "source" | "season" | "garmentWeight" | "availableQty" | "approvedBy" | "notes" | "status" | "retryCount" | "errorMessage" | "extractedData" | "extractedAt" | "flatId" | "lockedUntil" | "presentationReceivedDate" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricRawData"]>
 
   export type $FabricRawDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "FabricRawData"
@@ -45047,6 +45071,7 @@ export namespace Prisma {
       subDivision: string | null
       majorCategory: string | null
       presentationsType: string | null
+      buyingType: string | null
       designNumber: string | null
       articleNumber: string | null
       fabric: string | null
@@ -45503,6 +45528,7 @@ export namespace Prisma {
     readonly subDivision: FieldRef<"FabricRawData", 'String'>
     readonly majorCategory: FieldRef<"FabricRawData", 'String'>
     readonly presentationsType: FieldRef<"FabricRawData", 'String'>
+    readonly buyingType: FieldRef<"FabricRawData", 'String'>
     readonly designNumber: FieldRef<"FabricRawData", 'String'>
     readonly articleNumber: FieldRef<"FabricRawData", 'String'>
     readonly fabric: FieldRef<"FabricRawData", 'String'>
@@ -45929,6 +45955,7 @@ export namespace Prisma {
     subDivision: string | null
     majorCategory: string | null
     presentationsType: string | null
+    buyingType: string | null
     designNumber: string | null
     articleNumber: string | null
     fabric: string | null
@@ -45963,6 +45990,7 @@ export namespace Prisma {
     subDivision: string | null
     majorCategory: string | null
     presentationsType: string | null
+    buyingType: string | null
     designNumber: string | null
     articleNumber: string | null
     fabric: string | null
@@ -45997,6 +46025,7 @@ export namespace Prisma {
     subDivision: number
     majorCategory: number
     presentationsType: number
+    buyingType: number
     designNumber: number
     articleNumber: number
     fabric: number
@@ -46047,6 +46076,7 @@ export namespace Prisma {
     subDivision?: true
     majorCategory?: true
     presentationsType?: true
+    buyingType?: true
     designNumber?: true
     articleNumber?: true
     fabric?: true
@@ -46081,6 +46111,7 @@ export namespace Prisma {
     subDivision?: true
     majorCategory?: true
     presentationsType?: true
+    buyingType?: true
     designNumber?: true
     articleNumber?: true
     fabric?: true
@@ -46115,6 +46146,7 @@ export namespace Prisma {
     subDivision?: true
     majorCategory?: true
     presentationsType?: true
+    buyingType?: true
     designNumber?: true
     articleNumber?: true
     fabric?: true
@@ -46236,6 +46268,7 @@ export namespace Prisma {
     subDivision: string | null
     majorCategory: string | null
     presentationsType: string | null
+    buyingType: string | null
     designNumber: string | null
     articleNumber: string | null
     fabric: string | null
@@ -46289,6 +46322,7 @@ export namespace Prisma {
     subDivision?: boolean
     majorCategory?: boolean
     presentationsType?: boolean
+    buyingType?: boolean
     designNumber?: boolean
     articleNumber?: boolean
     fabric?: boolean
@@ -46323,6 +46357,7 @@ export namespace Prisma {
     subDivision?: boolean
     majorCategory?: boolean
     presentationsType?: boolean
+    buyingType?: boolean
     designNumber?: boolean
     articleNumber?: boolean
     fabric?: boolean
@@ -46357,6 +46392,7 @@ export namespace Prisma {
     subDivision?: boolean
     majorCategory?: boolean
     presentationsType?: boolean
+    buyingType?: boolean
     designNumber?: boolean
     articleNumber?: boolean
     fabric?: boolean
@@ -46391,6 +46427,7 @@ export namespace Prisma {
     subDivision?: boolean
     majorCategory?: boolean
     presentationsType?: boolean
+    buyingType?: boolean
     designNumber?: boolean
     articleNumber?: boolean
     fabric?: boolean
@@ -46414,7 +46451,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type GmRawDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "presentationNo" | "uniqueKey" | "vendorCode" | "vendorName" | "vendorCity" | "division" | "subDivision" | "majorCategory" | "presentationsType" | "designNumber" | "articleNumber" | "fabric" | "noOfColors" | "price" | "imageUrl" | "backImageUrl" | "source" | "season" | "garmentWeight" | "availableQty" | "approvedBy" | "notes" | "status" | "errorMessage" | "extractedAt" | "flatId" | "lockedUntil" | "presentationReceivedDate" | "createdAt" | "updatedAt", ExtArgs["result"]["gmRawData"]>
+  export type GmRawDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "presentationNo" | "uniqueKey" | "vendorCode" | "vendorName" | "vendorCity" | "division" | "subDivision" | "majorCategory" | "presentationsType" | "buyingType" | "designNumber" | "articleNumber" | "fabric" | "noOfColors" | "price" | "imageUrl" | "backImageUrl" | "source" | "season" | "garmentWeight" | "availableQty" | "approvedBy" | "notes" | "status" | "errorMessage" | "extractedAt" | "flatId" | "lockedUntil" | "presentationReceivedDate" | "createdAt" | "updatedAt", ExtArgs["result"]["gmRawData"]>
 
   export type $GmRawDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "GmRawData"
@@ -46430,6 +46467,7 @@ export namespace Prisma {
       subDivision: string | null
       majorCategory: string | null
       presentationsType: string | null
+      buyingType: string | null
       designNumber: string | null
       articleNumber: string | null
       fabric: string | null
@@ -46884,6 +46922,7 @@ export namespace Prisma {
     readonly subDivision: FieldRef<"GmRawData", 'String'>
     readonly majorCategory: FieldRef<"GmRawData", 'String'>
     readonly presentationsType: FieldRef<"GmRawData", 'String'>
+    readonly buyingType: FieldRef<"GmRawData", 'String'>
     readonly designNumber: FieldRef<"GmRawData", 'String'>
     readonly articleNumber: FieldRef<"GmRawData", 'String'>
     readonly fabric: FieldRef<"GmRawData", 'String'>
@@ -92714,6 +92753,7 @@ export namespace Prisma {
     imageUrl: 'imageUrl',
     backImageUrl: 'backImageUrl',
     presentationsType: 'presentationsType',
+    buyingType: 'buyingType',
     setGroupId: 'setGroupId',
     setRole: 'setRole',
     setName: 'setName',
@@ -92745,6 +92785,7 @@ export namespace Prisma {
     subDivision: 'subDivision',
     majorCategory: 'majorCategory',
     presentationsType: 'presentationsType',
+    buyingType: 'buyingType',
     designNumber: 'designNumber',
     articleNumber: 'articleNumber',
     fabric: 'fabric',
@@ -92784,6 +92825,7 @@ export namespace Prisma {
     subDivision: 'subDivision',
     majorCategory: 'majorCategory',
     presentationsType: 'presentationsType',
+    buyingType: 'buyingType',
     designNumber: 'designNumber',
     articleNumber: 'articleNumber',
     fabric: 'fabric',
@@ -94302,6 +94344,7 @@ export namespace Prisma {
     imageUrl: 'imageUrl',
     backImageUrl: 'backImageUrl',
     presentationsType: 'presentationsType',
+    buyingType: 'buyingType',
     setGroupId: 'setGroupId',
     setRole: 'setRole',
     setName: 'setName',
@@ -94326,6 +94369,7 @@ export namespace Prisma {
     subDivision: 'subDivision',
     majorCategory: 'majorCategory',
     presentationsType: 'presentationsType',
+    buyingType: 'buyingType',
     designNumber: 'designNumber',
     articleNumber: 'articleNumber',
     fabric: 'fabric',
@@ -94353,6 +94397,7 @@ export namespace Prisma {
     subDivision: 'subDivision',
     majorCategory: 'majorCategory',
     presentationsType: 'presentationsType',
+    buyingType: 'buyingType',
     designNumber: 'designNumber',
     articleNumber: 'articleNumber',
     fabric: 'fabric',
@@ -99788,6 +99833,7 @@ export namespace Prisma {
     imageUrl?: StringNullableFilter<"RawArticle"> | string | null
     backImageUrl?: StringNullableFilter<"RawArticle"> | string | null
     presentationsType?: StringNullableFilter<"RawArticle"> | string | null
+    buyingType?: StringNullableFilter<"RawArticle"> | string | null
     setGroupId?: StringNullableFilter<"RawArticle"> | string | null
     setRole?: StringNullableFilter<"RawArticle"> | string | null
     setName?: StringNullableFilter<"RawArticle"> | string | null
@@ -99821,6 +99867,7 @@ export namespace Prisma {
     imageUrl?: SortOrderInput | SortOrder
     backImageUrl?: SortOrderInput | SortOrder
     presentationsType?: SortOrderInput | SortOrder
+    buyingType?: SortOrderInput | SortOrder
     setGroupId?: SortOrderInput | SortOrder
     setRole?: SortOrderInput | SortOrder
     setName?: SortOrderInput | SortOrder
@@ -99859,6 +99906,7 @@ export namespace Prisma {
     imageUrl?: StringNullableFilter<"RawArticle"> | string | null
     backImageUrl?: StringNullableFilter<"RawArticle"> | string | null
     presentationsType?: StringNullableFilter<"RawArticle"> | string | null
+    buyingType?: StringNullableFilter<"RawArticle"> | string | null
     setGroupId?: StringNullableFilter<"RawArticle"> | string | null
     setRole?: StringNullableFilter<"RawArticle"> | string | null
     setName?: StringNullableFilter<"RawArticle"> | string | null
@@ -99891,6 +99939,7 @@ export namespace Prisma {
     imageUrl?: SortOrderInput | SortOrder
     backImageUrl?: SortOrderInput | SortOrder
     presentationsType?: SortOrderInput | SortOrder
+    buyingType?: SortOrderInput | SortOrder
     setGroupId?: SortOrderInput | SortOrder
     setRole?: SortOrderInput | SortOrder
     setName?: SortOrderInput | SortOrder
@@ -99932,6 +99981,7 @@ export namespace Prisma {
     imageUrl?: StringNullableWithAggregatesFilter<"RawArticle"> | string | null
     backImageUrl?: StringNullableWithAggregatesFilter<"RawArticle"> | string | null
     presentationsType?: StringNullableWithAggregatesFilter<"RawArticle"> | string | null
+    buyingType?: StringNullableWithAggregatesFilter<"RawArticle"> | string | null
     setGroupId?: StringNullableWithAggregatesFilter<"RawArticle"> | string | null
     setRole?: StringNullableWithAggregatesFilter<"RawArticle"> | string | null
     setName?: StringNullableWithAggregatesFilter<"RawArticle"> | string | null
@@ -99963,6 +100013,7 @@ export namespace Prisma {
     subDivision?: StringNullableFilter<"FabricRawData"> | string | null
     majorCategory?: StringNullableFilter<"FabricRawData"> | string | null
     presentationsType?: StringNullableFilter<"FabricRawData"> | string | null
+    buyingType?: StringNullableFilter<"FabricRawData"> | string | null
     designNumber?: StringNullableFilter<"FabricRawData"> | string | null
     articleNumber?: StringNullableFilter<"FabricRawData"> | string | null
     fabric?: StringNullableFilter<"FabricRawData"> | string | null
@@ -99999,6 +100050,7 @@ export namespace Prisma {
     subDivision?: SortOrderInput | SortOrder
     majorCategory?: SortOrderInput | SortOrder
     presentationsType?: SortOrderInput | SortOrder
+    buyingType?: SortOrderInput | SortOrder
     designNumber?: SortOrderInput | SortOrder
     articleNumber?: SortOrderInput | SortOrder
     fabric?: SortOrderInput | SortOrder
@@ -100039,6 +100091,7 @@ export namespace Prisma {
     subDivision?: StringNullableFilter<"FabricRawData"> | string | null
     majorCategory?: StringNullableFilter<"FabricRawData"> | string | null
     presentationsType?: StringNullableFilter<"FabricRawData"> | string | null
+    buyingType?: StringNullableFilter<"FabricRawData"> | string | null
     designNumber?: StringNullableFilter<"FabricRawData"> | string | null
     articleNumber?: StringNullableFilter<"FabricRawData"> | string | null
     fabric?: StringNullableFilter<"FabricRawData"> | string | null
@@ -100075,6 +100128,7 @@ export namespace Prisma {
     subDivision?: SortOrderInput | SortOrder
     majorCategory?: SortOrderInput | SortOrder
     presentationsType?: SortOrderInput | SortOrder
+    buyingType?: SortOrderInput | SortOrder
     designNumber?: SortOrderInput | SortOrder
     articleNumber?: SortOrderInput | SortOrder
     fabric?: SortOrderInput | SortOrder
@@ -100119,6 +100173,7 @@ export namespace Prisma {
     subDivision?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
     majorCategory?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
     presentationsType?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
+    buyingType?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
     designNumber?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
     articleNumber?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
     fabric?: StringNullableWithAggregatesFilter<"FabricRawData"> | string | null
@@ -100158,6 +100213,7 @@ export namespace Prisma {
     subDivision?: StringNullableFilter<"GmRawData"> | string | null
     majorCategory?: StringNullableFilter<"GmRawData"> | string | null
     presentationsType?: StringNullableFilter<"GmRawData"> | string | null
+    buyingType?: StringNullableFilter<"GmRawData"> | string | null
     designNumber?: StringNullableFilter<"GmRawData"> | string | null
     articleNumber?: StringNullableFilter<"GmRawData"> | string | null
     fabric?: StringNullableFilter<"GmRawData"> | string | null
@@ -100192,6 +100248,7 @@ export namespace Prisma {
     subDivision?: SortOrderInput | SortOrder
     majorCategory?: SortOrderInput | SortOrder
     presentationsType?: SortOrderInput | SortOrder
+    buyingType?: SortOrderInput | SortOrder
     designNumber?: SortOrderInput | SortOrder
     articleNumber?: SortOrderInput | SortOrder
     fabric?: SortOrderInput | SortOrder
@@ -100230,6 +100287,7 @@ export namespace Prisma {
     subDivision?: StringNullableFilter<"GmRawData"> | string | null
     majorCategory?: StringNullableFilter<"GmRawData"> | string | null
     presentationsType?: StringNullableFilter<"GmRawData"> | string | null
+    buyingType?: StringNullableFilter<"GmRawData"> | string | null
     designNumber?: StringNullableFilter<"GmRawData"> | string | null
     articleNumber?: StringNullableFilter<"GmRawData"> | string | null
     fabric?: StringNullableFilter<"GmRawData"> | string | null
@@ -100264,6 +100322,7 @@ export namespace Prisma {
     subDivision?: SortOrderInput | SortOrder
     majorCategory?: SortOrderInput | SortOrder
     presentationsType?: SortOrderInput | SortOrder
+    buyingType?: SortOrderInput | SortOrder
     designNumber?: SortOrderInput | SortOrder
     articleNumber?: SortOrderInput | SortOrder
     fabric?: SortOrderInput | SortOrder
@@ -100306,6 +100365,7 @@ export namespace Prisma {
     subDivision?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
     majorCategory?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
     presentationsType?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
+    buyingType?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
     designNumber?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
     articleNumber?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
     fabric?: StringNullableWithAggregatesFilter<"GmRawData"> | string | null
@@ -110680,6 +110740,7 @@ export namespace Prisma {
     imageUrl?: string | null
     backImageUrl?: string | null
     presentationsType?: string | null
+    buyingType?: string | null
     setGroupId?: string | null
     setRole?: string | null
     setName?: string | null
@@ -110713,6 +110774,7 @@ export namespace Prisma {
     imageUrl?: string | null
     backImageUrl?: string | null
     presentationsType?: string | null
+    buyingType?: string | null
     setGroupId?: string | null
     setRole?: string | null
     setName?: string | null
@@ -110746,6 +110808,7 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
     setName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -110779,6 +110842,7 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
     setName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -110812,6 +110876,7 @@ export namespace Prisma {
     imageUrl?: string | null
     backImageUrl?: string | null
     presentationsType?: string | null
+    buyingType?: string | null
     setGroupId?: string | null
     setRole?: string | null
     setName?: string | null
@@ -110845,6 +110910,7 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
     setName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -110878,6 +110944,7 @@ export namespace Prisma {
     imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     backImageUrl?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     setGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     setRole?: NullableStringFieldUpdateOperationsInput | string | null
     setName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -110906,6 +110973,7 @@ export namespace Prisma {
     subDivision?: string | null
     majorCategory?: string | null
     presentationsType?: string | null
+    buyingType?: string | null
     designNumber?: string | null
     articleNumber?: string | null
     fabric?: string | null
@@ -110942,6 +111010,7 @@ export namespace Prisma {
     subDivision?: string | null
     majorCategory?: string | null
     presentationsType?: string | null
+    buyingType?: string | null
     designNumber?: string | null
     articleNumber?: string | null
     fabric?: string | null
@@ -110978,6 +111047,7 @@ export namespace Prisma {
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     fabric?: NullableStringFieldUpdateOperationsInput | string | null
@@ -111014,6 +111084,7 @@ export namespace Prisma {
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     fabric?: NullableStringFieldUpdateOperationsInput | string | null
@@ -111050,6 +111121,7 @@ export namespace Prisma {
     subDivision?: string | null
     majorCategory?: string | null
     presentationsType?: string | null
+    buyingType?: string | null
     designNumber?: string | null
     articleNumber?: string | null
     fabric?: string | null
@@ -111086,6 +111158,7 @@ export namespace Prisma {
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     fabric?: NullableStringFieldUpdateOperationsInput | string | null
@@ -111122,6 +111195,7 @@ export namespace Prisma {
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     fabric?: NullableStringFieldUpdateOperationsInput | string | null
@@ -111158,6 +111232,7 @@ export namespace Prisma {
     subDivision?: string | null
     majorCategory?: string | null
     presentationsType?: string | null
+    buyingType?: string | null
     designNumber?: string | null
     articleNumber?: string | null
     fabric?: string | null
@@ -111192,6 +111267,7 @@ export namespace Prisma {
     subDivision?: string | null
     majorCategory?: string | null
     presentationsType?: string | null
+    buyingType?: string | null
     designNumber?: string | null
     articleNumber?: string | null
     fabric?: string | null
@@ -111226,6 +111302,7 @@ export namespace Prisma {
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     fabric?: NullableStringFieldUpdateOperationsInput | string | null
@@ -111260,6 +111337,7 @@ export namespace Prisma {
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     fabric?: NullableStringFieldUpdateOperationsInput | string | null
@@ -111294,6 +111372,7 @@ export namespace Prisma {
     subDivision?: string | null
     majorCategory?: string | null
     presentationsType?: string | null
+    buyingType?: string | null
     designNumber?: string | null
     articleNumber?: string | null
     fabric?: string | null
@@ -111328,6 +111407,7 @@ export namespace Prisma {
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     fabric?: NullableStringFieldUpdateOperationsInput | string | null
@@ -111362,6 +111442,7 @@ export namespace Prisma {
     subDivision?: NullableStringFieldUpdateOperationsInput | string | null
     majorCategory?: NullableStringFieldUpdateOperationsInput | string | null
     presentationsType?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     designNumber?: NullableStringFieldUpdateOperationsInput | string | null
     articleNumber?: NullableStringFieldUpdateOperationsInput | string | null
     fabric?: NullableStringFieldUpdateOperationsInput | string | null
@@ -121193,6 +121274,7 @@ export namespace Prisma {
     imageUrl?: SortOrder
     backImageUrl?: SortOrder
     presentationsType?: SortOrder
+    buyingType?: SortOrder
     setGroupId?: SortOrder
     setRole?: SortOrder
     setName?: SortOrder
@@ -121232,6 +121314,7 @@ export namespace Prisma {
     imageUrl?: SortOrder
     backImageUrl?: SortOrder
     presentationsType?: SortOrder
+    buyingType?: SortOrder
     setGroupId?: SortOrder
     setRole?: SortOrder
     setName?: SortOrder
@@ -121264,6 +121347,7 @@ export namespace Prisma {
     imageUrl?: SortOrder
     backImageUrl?: SortOrder
     presentationsType?: SortOrder
+    buyingType?: SortOrder
     setGroupId?: SortOrder
     setRole?: SortOrder
     setName?: SortOrder
@@ -121313,6 +121397,7 @@ export namespace Prisma {
     subDivision?: SortOrder
     majorCategory?: SortOrder
     presentationsType?: SortOrder
+    buyingType?: SortOrder
     designNumber?: SortOrder
     articleNumber?: SortOrder
     fabric?: SortOrder
@@ -121357,6 +121442,7 @@ export namespace Prisma {
     subDivision?: SortOrder
     majorCategory?: SortOrder
     presentationsType?: SortOrder
+    buyingType?: SortOrder
     designNumber?: SortOrder
     articleNumber?: SortOrder
     fabric?: SortOrder
@@ -121392,6 +121478,7 @@ export namespace Prisma {
     subDivision?: SortOrder
     majorCategory?: SortOrder
     presentationsType?: SortOrder
+    buyingType?: SortOrder
     designNumber?: SortOrder
     articleNumber?: SortOrder
     fabric?: SortOrder
@@ -121441,6 +121528,7 @@ export namespace Prisma {
     subDivision?: SortOrder
     majorCategory?: SortOrder
     presentationsType?: SortOrder
+    buyingType?: SortOrder
     designNumber?: SortOrder
     articleNumber?: SortOrder
     fabric?: SortOrder
@@ -121482,6 +121570,7 @@ export namespace Prisma {
     subDivision?: SortOrder
     majorCategory?: SortOrder
     presentationsType?: SortOrder
+    buyingType?: SortOrder
     designNumber?: SortOrder
     articleNumber?: SortOrder
     fabric?: SortOrder
@@ -121516,6 +121605,7 @@ export namespace Prisma {
     subDivision?: SortOrder
     majorCategory?: SortOrder
     presentationsType?: SortOrder
+    buyingType?: SortOrder
     designNumber?: SortOrder
     articleNumber?: SortOrder
     fabric?: SortOrder
