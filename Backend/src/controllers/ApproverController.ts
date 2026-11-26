@@ -45,7 +45,7 @@ const ITEM_UPDATE_ALLOWED_FIELDS = [
     // Business
     'ageGroup', 'articleFashionType', 'articleDimension', 'mNoOfSize', 'mNoOfClr',
     'referenceArticleNumber', 'referenceArticleDescription',
-    'impAtrbt2',
+    'impAtrbt2', 'buyingType', // M_BUYING_TYPE (UI/DB only, not sent to SAP)
     // Business / SAP fields
     'macroMvgr', 'mainMvgr', 'mFab2',
     'vendorCode', 'mrp', 'mcCode', 'segment', 'season',
@@ -995,7 +995,7 @@ export class ApproverController {
                     articleDimension: true,
                     mcCode: true,
                     mcDescription: true,
-                    impAtrbt2: true,
+                    impAtrbt2: true, buyingType: true,
                     segment: true,
                     season: true,
                     hsnTaxCode: true,
@@ -1358,7 +1358,7 @@ export class ApproverController {
                     approvedAt: true,
                     sapSyncStatus: true,
                     // BOM
-                    impAtrbt2: true,
+                    impAtrbt2: true, buyingType: true,
                     // FAB extras
                     fCount: true,
                     fConstruction: true,
@@ -1520,7 +1520,7 @@ export class ApproverController {
                 approvedAt: true,
                 sapSyncStatus: true,
                 // BOM
-                impAtrbt2: true,
+                impAtrbt2: true, buyingType: true,
                 // FAB extras
                 fCount: true,
                 fConstruction: true,
@@ -2516,7 +2516,7 @@ export class ApproverController {
                     patches: true, patchesType: true, embroidery: true, embroideryType: true,
                     embPlacement: true, htrfType: true, htrfStyle: true,
                     ageGroup: true, mNoOfSize: true, mNoOfClr: true, articleFashionType: true, articleDimension: true,
-                    mcCode: true, impAtrbt2: true, segment: true, season: true,
+                    mcCode: true, impAtrbt2: true, buyingType: true, segment: true, season: true,
                     hsnTaxCode: true, articleDescription: true, fashionGrid: true,
                     year: true,
                     bodyArticle: true, bodyArticleDescription: true,
@@ -2817,7 +2817,7 @@ export class ApproverController {
                     embPlacement: true,
                     wash: true,
                     ageGroup: true, mNoOfSize: true, mNoOfClr: true,
-                    impAtrbt2: true,
+                    impAtrbt2: true, buyingType: true,
                     // Other fields used for logic/display
                     macroMvgr: true,
                     fatherBelt: true,
@@ -3730,7 +3730,7 @@ export class ApproverController {
                     embroideryType: true, embPlacement: true, htrfType: true, htrfStyle: true,
                     wash: true, fit: true, pattern: true, segment: true, ageGroup: true, mNoOfSize: true, mNoOfClr: true,
                     articleFashionType: true, mvgrBrandVendor: true, fCount: true,
-                    fConstruction: true, fOunce: true, fWidth: true, fabDiv: true, fabVdr: true, impAtrbt2: true,
+                    fConstruction: true, fOunce: true, fWidth: true, fabDiv: true, fabVdr: true, impAtrbt2: true, buyingType: true,
                     autoBgt: true, roughV2: true, vendorFabricRate: true, finalCost: true,
                     roughRatio: true, roughConsumptionKg: true, roughConsumptionMeter: true,
                     preciseRatio: true, preciseConsumptionKg: true, preciseConsumptionMeter: true,
@@ -5302,7 +5302,7 @@ export class ApproverController {
         sapSyncStatus: true, sapSyncMessage: true,
         imageUrl: true, backImageUrl: true, source: true, userName: true,
         rate: true, mrp: true, roughV2: true, vdrCost: true, finalCost: true,
-        segment: true, articleFashionType: true, flatId: true,
+        segment: true, articleFashionType: true, buyingType: true, flatId: true,
         createdAt: true, updatedAt: true,
         // GM attribute columns
         gmAgeGrade: true, gmApplicator: true, gmBaseType: true, gmBatteryType: true,
@@ -5364,6 +5364,7 @@ export class ApproverController {
             finalCost:               r.finalCost != null ? Number(r.finalCost) : null,
             segment:                 r.segment ?? null,
             articleFashionType:      r.articleFashionType ?? null,
+            buyingType:              r.buyingType ?? null,
             flatId:                  r.flatId ?? null,
             // GM attribute fields — keyed by family_code (uppercase) so frontend can use attr.code directly
             GM_AGE_GRADE: r.gmAgeGrade ?? null, GM_APPLICATOR: r.gmApplicator ?? null,
@@ -5716,7 +5717,7 @@ export class ApproverController {
         division: 'division', subDivision: 'subDivision', majorCategory: 'majorCategory',
         mcDescription: 'mcDescription', vendorName: 'vendorName', vendorCode: 'vendorCode',
         designNumber: 'designNumber', pptNumber: 'pptNumber',
-        mrp: 'mrp', rate: 'rate', segment: 'segment', articleFashionType: 'articleFashionType',
+        mrp: 'mrp', rate: 'rate', segment: 'segment', articleFashionType: 'articleFashionType', buyingType: 'buyingType',
         roughV2: 'roughV2', vdrCost: 'vdrCost', finalCost: 'finalCost',
         imageUrl: 'imageUrl', source: 'source', userName: 'userName',
         gmArticleNumber: 'gmArticleNumber', gmArticleDescription: 'gmArticleDescription',
@@ -6817,7 +6818,7 @@ export class ApproverController {
         mFabDiv: true, mYarn: true, mFabMainMvgr1: true, mFabMainMvgr2: true,
         mConstruction: true, mOunz: true, mWidth: true, mWeave02: true,
         mCount: true, mWeave01: true, mComposition: true, mFinish: true,
-        mGsm: true, mLycra: true, fabricRate: true, v2FabricRate: true, valueAddCost: true, articleFashionType: true,
+        mGsm: true, mLycra: true, fabricRate: true, v2FabricRate: true, valueAddCost: true, articleFashionType: true, buyingType: true,
         designNumber: true, pptNumber: true, mcDescription: true, source: true,
         rate: true, segment: true, fabricAiAttributes: true,
     } as const;
@@ -6919,6 +6920,7 @@ export class ApproverController {
         v2FabricRate:             'v2FabricRate',
         valueAddCost:             'valueAddCost',
         articleFashionType:       'articleFashionType',
+        buyingType:               'buyingType',
         mrp:                      'rate',
         segment:                  'segment',
         // Fabric construction fields
@@ -7183,6 +7185,7 @@ export class ApproverController {
             v2FabricRate:       r.v2FabricRate != null ? Number(r.v2FabricRate) : null,
             valueAddCost:       r.valueAddCost != null ? Number(r.valueAddCost) : null,
             articleFashionType: r.articleFashionType ?? null,
+            buyingType: r.buyingType ?? null,
             source: r.source ?? null,
             pptNumber: r.pptNumber ?? null,
             mrp: r.rate != null ? Number(r.rate) : null,

@@ -109,6 +109,7 @@ export interface ApproverItem {
   embPlacement: string | null;
   ageGroup: string | null;
   articleFashionType: string | null;
+  buyingType?: string | null; // M_BUYING_TYPE (PLANNED / READY), DB only
   mvgrBrandVendor: string | null;
   impAtrbt2: string | null;
   isGeneric: boolean;

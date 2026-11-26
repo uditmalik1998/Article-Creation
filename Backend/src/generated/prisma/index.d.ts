@@ -16612,6 +16612,7 @@ export namespace Prisma {
     vendorCode: string | null
     mrp: Decimal | null
     impAtrbt2: string | null
+    buyingType: string | null
     mcCode: string | null
     segment: string | null
     season: string | null
@@ -16960,6 +16961,7 @@ export namespace Prisma {
     vendorCode: string | null
     mrp: Decimal | null
     impAtrbt2: string | null
+    buyingType: string | null
     mcCode: string | null
     segment: string | null
     season: string | null
@@ -17312,6 +17314,7 @@ export namespace Prisma {
     vendorCode: number
     mrp: number
     impAtrbt2: number
+    buyingType: number
     mcCode: number
     segment: number
     season: number
@@ -18118,6 +18121,7 @@ export namespace Prisma {
     vendorCode?: true
     mrp?: true
     impAtrbt2?: true
+    buyingType?: true
     mcCode?: true
     segment?: true
     season?: true
@@ -18466,6 +18470,7 @@ export namespace Prisma {
     vendorCode?: true
     mrp?: true
     impAtrbt2?: true
+    buyingType?: true
     mcCode?: true
     segment?: true
     season?: true
@@ -18818,6 +18823,7 @@ export namespace Prisma {
     vendorCode?: true
     mrp?: true
     impAtrbt2?: true
+    buyingType?: true
     mcCode?: true
     segment?: true
     season?: true
@@ -19259,6 +19265,7 @@ export namespace Prisma {
     vendorCode: string | null
     mrp: Decimal | null
     impAtrbt2: string | null
+    buyingType: string | null
     mcCode: string | null
     segment: string | null
     season: string | null
@@ -19632,6 +19639,7 @@ export namespace Prisma {
     vendorCode?: boolean
     mrp?: boolean
     impAtrbt2?: boolean
+    buyingType?: boolean
     mcCode?: boolean
     segment?: boolean
     season?: boolean
@@ -19992,6 +20000,7 @@ export namespace Prisma {
     vendorCode?: boolean
     mrp?: boolean
     impAtrbt2?: boolean
+    buyingType?: boolean
     mcCode?: boolean
     segment?: boolean
     season?: boolean
@@ -20349,6 +20358,7 @@ export namespace Prisma {
     vendorCode?: boolean
     mrp?: boolean
     impAtrbt2?: boolean
+    buyingType?: boolean
     mcCode?: boolean
     segment?: boolean
     season?: boolean
@@ -20706,6 +20716,7 @@ export namespace Prisma {
     vendorCode?: boolean
     mrp?: boolean
     impAtrbt2?: boolean
+    buyingType?: boolean
     mcCode?: boolean
     segment?: boolean
     season?: boolean
@@ -20740,7 +20751,7 @@ export namespace Prisma {
     fgAiAttributes?: boolean
   }
 
-  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageUrl" | "oldImageUrl" | "sourceImageUrl" | "aiCmpCostCutting" | "aiCmpCostStitching" | "aiCmpCostIroning" | "aiCmpCostFinishing" | "backImageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "creatorUser" | "modifyUser" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "mainMvgr" | "mFab2" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "totalBgtPrVal" | "totalActPrVal" | "totalVendorPrVal" | "totalFinalPrVal" | "bTrimType" | "bTrimTotalAutoBgt" | "bTrimTotalRoughV2" | "bTrimTotalVdrCost" | "bTrimTotalFinalCost" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "elasticAutoBgt" | "elasticRoughV2" | "elasticVdrCost" | "elasticFinalCost" | "fusingAutoBgt" | "fusingRoughV2" | "fusingVdrCost" | "fusingFinalCost" | "badgeAutoBgt" | "badgeRoughV2" | "badgeVdrCost" | "badgeFinalCost" | "rivetAutoBgt" | "rivetRoughV2" | "rivetVdrCost" | "rivetFinalCost" | "tapeAutoBgt" | "tapeRoughV2" | "tapeVdrCost" | "tapeFinalCost" | "otherAutoBgt" | "otherRoughV2" | "otherVdrCost" | "otherFinalCost" | "adjusterAutoBgt" | "adjusterRoughV2" | "adjusterVdrCost" | "adjusterFinalCost" | "brotchAutoBgt" | "brotchRoughV2" | "brotchVdrCost" | "brotchFinalCost" | "buckleAutoBgt" | "buckleRoughV2" | "buckleVdrCost" | "buckleFinalCost" | "eyeletsAutoBgt" | "eyeletsRoughV2" | "eyeletsVdrCost" | "eyeletsFinalCost" | "hangingDRingAutoBgt" | "hangingDRingRoughV2" | "hangingDRingVdrCost" | "hangingDRingFinalCost" | "hookAutoBgt" | "hookRoughV2" | "hookVdrCost" | "hookFinalCost" | "labelAutoBgt" | "labelRoughV2" | "labelVdrCost" | "labelFinalCost" | "laceAutoBgt" | "laceRoughV2" | "laceVdrCost" | "laceFinalCost" | "pockettingFabricAutoBgt" | "pockettingFabricRoughV2" | "pockettingFabricVdrCost" | "pockettingFabricFinalCost" | "pockettingReadymadeAutoBgt" | "pockettingReadymadeRoughV2" | "pockettingReadymadeVdrCost" | "pockettingReadymadeFinalCost" | "santaAutoBgt" | "santaRoughV2" | "santaVdrCost" | "santaFinalCost" | "stopperAutoBgt" | "stopperRoughV2" | "stopperVdrCost" | "stopperFinalCost" | "tagAutoBgt" | "tagRoughV2" | "tagVdrCost" | "tagFinalCost" | "tasselsAutoBgt" | "tasselsRoughV2" | "tasselsVdrCost" | "tasselsFinalCost" | "mBtnRate" | "mBtnQty" | "dcRate" | "dcQty" | "zipRate" | "zipQty" | "patchRate" | "patchQty" | "hTrfRate" | "hTrfQty" | "elasticRate" | "elasticQty" | "fusingRate" | "fusingQty" | "badgeRate" | "badgeQty" | "rivetRate" | "rivetQty" | "tapeRate" | "tapeQty" | "otherRate" | "otherQty" | "adjusterRate" | "adjusterQty" | "brotchRate" | "brotchQty" | "buckleRate" | "buckleQty" | "eyeletsRate" | "eyeletsQty" | "hangingDRingRate" | "hangingDRingQty" | "hookRate" | "hookQty" | "labelRate" | "labelQty" | "laceRate" | "laceQty" | "pockettingFabricRate" | "pockettingFabricQty" | "pockettingReadymadeRate" | "pockettingReadymadeQty" | "santaRate" | "santaQty" | "stopperRate" | "stopperQty" | "tagRate" | "tagQty" | "tasselsRate" | "tasselsQty" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "vaddPrintJson" | "vaddEmpJson" | "vaddTotalAutoBgt" | "vaddTotalRoughV2" | "vaddTotalVendorCost" | "vaddTotalFinalCost" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "presentationsType" | "approvalStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "setLinkStatus" | "setLinkMessage" | "setLinkAttempts" | "setLinkedAt" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData" | "fgAiAttributes", ExtArgs["result"]["extractionResultFlat"]>
+  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageUrl" | "oldImageUrl" | "sourceImageUrl" | "aiCmpCostCutting" | "aiCmpCostStitching" | "aiCmpCostIroning" | "aiCmpCostFinishing" | "backImageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "creatorUser" | "modifyUser" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "mainMvgr" | "mFab2" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "totalBgtPrVal" | "totalActPrVal" | "totalVendorPrVal" | "totalFinalPrVal" | "bTrimType" | "bTrimTotalAutoBgt" | "bTrimTotalRoughV2" | "bTrimTotalVdrCost" | "bTrimTotalFinalCost" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "elasticAutoBgt" | "elasticRoughV2" | "elasticVdrCost" | "elasticFinalCost" | "fusingAutoBgt" | "fusingRoughV2" | "fusingVdrCost" | "fusingFinalCost" | "badgeAutoBgt" | "badgeRoughV2" | "badgeVdrCost" | "badgeFinalCost" | "rivetAutoBgt" | "rivetRoughV2" | "rivetVdrCost" | "rivetFinalCost" | "tapeAutoBgt" | "tapeRoughV2" | "tapeVdrCost" | "tapeFinalCost" | "otherAutoBgt" | "otherRoughV2" | "otherVdrCost" | "otherFinalCost" | "adjusterAutoBgt" | "adjusterRoughV2" | "adjusterVdrCost" | "adjusterFinalCost" | "brotchAutoBgt" | "brotchRoughV2" | "brotchVdrCost" | "brotchFinalCost" | "buckleAutoBgt" | "buckleRoughV2" | "buckleVdrCost" | "buckleFinalCost" | "eyeletsAutoBgt" | "eyeletsRoughV2" | "eyeletsVdrCost" | "eyeletsFinalCost" | "hangingDRingAutoBgt" | "hangingDRingRoughV2" | "hangingDRingVdrCost" | "hangingDRingFinalCost" | "hookAutoBgt" | "hookRoughV2" | "hookVdrCost" | "hookFinalCost" | "labelAutoBgt" | "labelRoughV2" | "labelVdrCost" | "labelFinalCost" | "laceAutoBgt" | "laceRoughV2" | "laceVdrCost" | "laceFinalCost" | "pockettingFabricAutoBgt" | "pockettingFabricRoughV2" | "pockettingFabricVdrCost" | "pockettingFabricFinalCost" | "pockettingReadymadeAutoBgt" | "pockettingReadymadeRoughV2" | "pockettingReadymadeVdrCost" | "pockettingReadymadeFinalCost" | "santaAutoBgt" | "santaRoughV2" | "santaVdrCost" | "santaFinalCost" | "stopperAutoBgt" | "stopperRoughV2" | "stopperVdrCost" | "stopperFinalCost" | "tagAutoBgt" | "tagRoughV2" | "tagVdrCost" | "tagFinalCost" | "tasselsAutoBgt" | "tasselsRoughV2" | "tasselsVdrCost" | "tasselsFinalCost" | "mBtnRate" | "mBtnQty" | "dcRate" | "dcQty" | "zipRate" | "zipQty" | "patchRate" | "patchQty" | "hTrfRate" | "hTrfQty" | "elasticRate" | "elasticQty" | "fusingRate" | "fusingQty" | "badgeRate" | "badgeQty" | "rivetRate" | "rivetQty" | "tapeRate" | "tapeQty" | "otherRate" | "otherQty" | "adjusterRate" | "adjusterQty" | "brotchRate" | "brotchQty" | "buckleRate" | "buckleQty" | "eyeletsRate" | "eyeletsQty" | "hangingDRingRate" | "hangingDRingQty" | "hookRate" | "hookQty" | "labelRate" | "labelQty" | "laceRate" | "laceQty" | "pockettingFabricRate" | "pockettingFabricQty" | "pockettingReadymadeRate" | "pockettingReadymadeQty" | "santaRate" | "santaQty" | "stopperRate" | "stopperQty" | "tagRate" | "tagQty" | "tasselsRate" | "tasselsQty" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "vaddPrintJson" | "vaddEmpJson" | "vaddTotalAutoBgt" | "vaddTotalRoughV2" | "vaddTotalVendorCost" | "vaddTotalFinalCost" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "buyingType" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "presentationsType" | "approvalStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "setLinkStatus" | "setLinkMessage" | "setLinkAttempts" | "setLinkedAt" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData" | "fgAiAttributes", ExtArgs["result"]["extractionResultFlat"]>
   export type ExtractionResultFlatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     comboParent?: boolean | ExtractionResultFlat$comboParentArgs<ExtArgs>
@@ -21089,6 +21100,7 @@ export namespace Prisma {
       vendorCode: string | null
       mrp: Prisma.Decimal | null
       impAtrbt2: string | null
+      buyingType: string | null
       mcCode: string | null
       segment: string | null
       season: string | null
@@ -21868,6 +21880,7 @@ export namespace Prisma {
     readonly vendorCode: FieldRef<"ExtractionResultFlat", 'String'>
     readonly mrp: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly impAtrbt2: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly buyingType: FieldRef<"ExtractionResultFlat", 'String'>
     readonly mcCode: FieldRef<"ExtractionResultFlat", 'String'>
     readonly segment: FieldRef<"ExtractionResultFlat", 'String'>
     readonly season: FieldRef<"ExtractionResultFlat", 'String'>
@@ -59090,6 +59103,7 @@ export namespace Prisma {
     rate: Decimal | null
     segment: string | null
     articleFashionType: string | null
+    buyingType: string | null
     approvalStatus: string | null
     approvedAt: Date | null
     approvedBy: number | null
@@ -59137,6 +59151,7 @@ export namespace Prisma {
     rate: Decimal | null
     segment: string | null
     articleFashionType: string | null
+    buyingType: string | null
     approvalStatus: string | null
     approvedAt: Date | null
     approvedBy: number | null
@@ -59185,6 +59200,7 @@ export namespace Prisma {
     rate: number
     segment: number
     articleFashionType: number
+    buyingType: number
     approvalStatus: number
     approvedAt: number
     approvedBy: number
@@ -59250,6 +59266,7 @@ export namespace Prisma {
     rate?: true
     segment?: true
     articleFashionType?: true
+    buyingType?: true
     approvalStatus?: true
     approvedAt?: true
     approvedBy?: true
@@ -59297,6 +59314,7 @@ export namespace Prisma {
     rate?: true
     segment?: true
     articleFashionType?: true
+    buyingType?: true
     approvalStatus?: true
     approvedAt?: true
     approvedBy?: true
@@ -59345,6 +59363,7 @@ export namespace Prisma {
     rate?: true
     segment?: true
     articleFashionType?: true
+    buyingType?: true
     approvalStatus?: true
     approvedAt?: true
     approvedBy?: true
@@ -59480,6 +59499,7 @@ export namespace Prisma {
     rate: Decimal | null
     segment: string | null
     articleFashionType: string | null
+    buyingType: string | null
     approvalStatus: string
     approvedAt: Date | null
     approvedBy: number | null
@@ -59547,6 +59567,7 @@ export namespace Prisma {
     rate?: boolean
     segment?: boolean
     articleFashionType?: boolean
+    buyingType?: boolean
     approvalStatus?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
@@ -59595,6 +59616,7 @@ export namespace Prisma {
     rate?: boolean
     segment?: boolean
     articleFashionType?: boolean
+    buyingType?: boolean
     approvalStatus?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
@@ -59643,6 +59665,7 @@ export namespace Prisma {
     rate?: boolean
     segment?: boolean
     articleFashionType?: boolean
+    buyingType?: boolean
     approvalStatus?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
@@ -59691,6 +59714,7 @@ export namespace Prisma {
     rate?: boolean
     segment?: boolean
     articleFashionType?: boolean
+    buyingType?: boolean
     approvalStatus?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
@@ -59705,7 +59729,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type FabricArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mFabDiv" | "mYarn" | "mFabMainMvgr1" | "mFabMainMvgr2" | "mConstruction" | "mOunz" | "mWidth" | "mWeave02" | "mCount" | "mWeave01" | "mComposition" | "mFinish" | "mGsm" | "mLycra" | "fabricAiAttributes" | "fabricArticleNumber" | "fabricArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "pptNumber" | "fabricRate" | "v2FabricRate" | "valueAddCost" | "rate" | "segment" | "articleFashionType" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "backImageUrl" | "fabricArticleType" | "source" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricArticleData"]>
+  export type FabricArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "mFabDiv" | "mYarn" | "mFabMainMvgr1" | "mFabMainMvgr2" | "mConstruction" | "mOunz" | "mWidth" | "mWeave02" | "mCount" | "mWeave01" | "mComposition" | "mFinish" | "mGsm" | "mLycra" | "fabricAiAttributes" | "fabricArticleNumber" | "fabricArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "pptNumber" | "fabricRate" | "v2FabricRate" | "valueAddCost" | "rate" | "segment" | "articleFashionType" | "buyingType" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "backImageUrl" | "fabricArticleType" | "source" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["fabricArticleData"]>
 
   export type $FabricArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "FabricArticleData"
@@ -59744,6 +59768,7 @@ export namespace Prisma {
       rate: Prisma.Decimal | null
       segment: string | null
       articleFashionType: string | null
+      buyingType: string | null
       approvalStatus: string
       approvedAt: Date | null
       approvedBy: number | null
@@ -60212,6 +60237,7 @@ export namespace Prisma {
     readonly rate: FieldRef<"FabricArticleData", 'Decimal'>
     readonly segment: FieldRef<"FabricArticleData", 'String'>
     readonly articleFashionType: FieldRef<"FabricArticleData", 'String'>
+    readonly buyingType: FieldRef<"FabricArticleData", 'String'>
     readonly approvalStatus: FieldRef<"FabricArticleData", 'String'>
     readonly approvedAt: FieldRef<"FabricArticleData", 'DateTime'>
     readonly approvedBy: FieldRef<"FabricArticleData", 'Int'>
@@ -62006,6 +62032,7 @@ export namespace Prisma {
     finalCost: Decimal | null
     segment: string | null
     articleFashionType: string | null
+    buyingType: string | null
     approvalStatus: string | null
     approvedAt: Date | null
     approvedBy: number | null
@@ -62118,6 +62145,7 @@ export namespace Prisma {
     finalCost: Decimal | null
     segment: string | null
     articleFashionType: string | null
+    buyingType: string | null
     approvalStatus: string | null
     approvedAt: Date | null
     approvedBy: number | null
@@ -62230,6 +62258,7 @@ export namespace Prisma {
     finalCost: number
     segment: number
     articleFashionType: number
+    buyingType: number
     approvalStatus: number
     approvedAt: number
     approvedBy: number
@@ -62362,6 +62391,7 @@ export namespace Prisma {
     finalCost?: true
     segment?: true
     articleFashionType?: true
+    buyingType?: true
     approvalStatus?: true
     approvedAt?: true
     approvedBy?: true
@@ -62474,6 +62504,7 @@ export namespace Prisma {
     finalCost?: true
     segment?: true
     articleFashionType?: true
+    buyingType?: true
     approvalStatus?: true
     approvedAt?: true
     approvedBy?: true
@@ -62586,6 +62617,7 @@ export namespace Prisma {
     finalCost?: true
     segment?: true
     articleFashionType?: true
+    buyingType?: true
     approvalStatus?: true
     approvedAt?: true
     approvedBy?: true
@@ -62785,6 +62817,7 @@ export namespace Prisma {
     finalCost: Decimal | null
     segment: string | null
     articleFashionType: string | null
+    buyingType: string | null
     approvalStatus: string
     approvedAt: Date | null
     approvedBy: number | null
@@ -62916,6 +62949,7 @@ export namespace Prisma {
     finalCost?: boolean
     segment?: boolean
     articleFashionType?: boolean
+    buyingType?: boolean
     approvalStatus?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
@@ -63028,6 +63062,7 @@ export namespace Prisma {
     finalCost?: boolean
     segment?: boolean
     articleFashionType?: boolean
+    buyingType?: boolean
     approvalStatus?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
@@ -63140,6 +63175,7 @@ export namespace Prisma {
     finalCost?: boolean
     segment?: boolean
     articleFashionType?: boolean
+    buyingType?: boolean
     approvalStatus?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
@@ -63252,6 +63288,7 @@ export namespace Prisma {
     finalCost?: boolean
     segment?: boolean
     articleFashionType?: boolean
+    buyingType?: boolean
     approvalStatus?: boolean
     approvedAt?: boolean
     approvedBy?: boolean
@@ -63266,7 +63303,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type GmArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "gmAgeGrade" | "gmApplicator" | "gmBaseType" | "gmBatteryType" | "gmBpaFree" | "gmBpcForm" | "gmBrand" | "gmBrandType" | "gmCapacityMl" | "gmCareInstruction" | "gmCertification" | "gmClosureType" | "gmCoating" | "gmColourFamily" | "gmColourShade" | "gmCompartmentCount" | "gmComposition" | "gmCosmeticFinish" | "gmDiameterCm" | "gmDimStandard" | "gmDishwasherSafe" | "gmFoldable" | "gmFoodContactSafe" | "gmFragranceConc" | "gmFragranceFamily" | "gmFreeFrom" | "gmFwHeelHtCm" | "gmFwHeelType" | "gmFwSize" | "gmFwSole" | "gmFwToe" | "gmFwUpper" | "gmGsm" | "gmHeatRetentionHr" | "gmHeightCm" | "gmInsulationType" | "gmKeyIngredient" | "gmLeakProof" | "gmLengthCm" | "gmLicence" | "gmLidType" | "gmLifestage" | "gmLiningMaterial" | "gmManufacturer" | "gmMaterial" | "gmMaterialGroup" | "gmMaterialSecondary" | "gmMicrowaveSafe" | "gmMountType" | "gmNetContent" | "gmNetContentUom" | "gmNetWeightG" | "gmPackQty" | "gmPattern" | "gmPlayPattern" | "gmPlayerCount" | "gmPowerSource" | "gmPriceTier" | "gmPrintTheme" | "gmSeason" | "gmSellUom" | "gmSetContents" | "gmShelfLifeMonths" | "gmSkinType" | "gmSpf" | "gmSport" | "gmStrapType" | "gmSurfaceFinish" | "gmTextileFabric" | "gmThreadCount" | "gmUsageOccasion" | "gmVoltageV" | "gmWarrantyMonths" | "gmWattageW" | "gmWeave" | "gmWheelCount" | "gmWidthCm" | "gmYarn" | "gmArticleNumber" | "gmArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "pptNumber" | "rate" | "mrp" | "roughV2" | "vdrCost" | "finalCost" | "segment" | "articleFashionType" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "backImageUrl" | "gmArticleType" | "source" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["gmArticleData"]>
+  export type GmArticleDataOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "gmAgeGrade" | "gmApplicator" | "gmBaseType" | "gmBatteryType" | "gmBpaFree" | "gmBpcForm" | "gmBrand" | "gmBrandType" | "gmCapacityMl" | "gmCareInstruction" | "gmCertification" | "gmClosureType" | "gmCoating" | "gmColourFamily" | "gmColourShade" | "gmCompartmentCount" | "gmComposition" | "gmCosmeticFinish" | "gmDiameterCm" | "gmDimStandard" | "gmDishwasherSafe" | "gmFoldable" | "gmFoodContactSafe" | "gmFragranceConc" | "gmFragranceFamily" | "gmFreeFrom" | "gmFwHeelHtCm" | "gmFwHeelType" | "gmFwSize" | "gmFwSole" | "gmFwToe" | "gmFwUpper" | "gmGsm" | "gmHeatRetentionHr" | "gmHeightCm" | "gmInsulationType" | "gmKeyIngredient" | "gmLeakProof" | "gmLengthCm" | "gmLicence" | "gmLidType" | "gmLifestage" | "gmLiningMaterial" | "gmManufacturer" | "gmMaterial" | "gmMaterialGroup" | "gmMaterialSecondary" | "gmMicrowaveSafe" | "gmMountType" | "gmNetContent" | "gmNetContentUom" | "gmNetWeightG" | "gmPackQty" | "gmPattern" | "gmPlayPattern" | "gmPlayerCount" | "gmPowerSource" | "gmPriceTier" | "gmPrintTheme" | "gmSeason" | "gmSellUom" | "gmSetContents" | "gmShelfLifeMonths" | "gmSkinType" | "gmSpf" | "gmSport" | "gmStrapType" | "gmSurfaceFinish" | "gmTextileFabric" | "gmThreadCount" | "gmUsageOccasion" | "gmVoltageV" | "gmWarrantyMonths" | "gmWattageW" | "gmWeave" | "gmWheelCount" | "gmWidthCm" | "gmYarn" | "gmArticleNumber" | "gmArticleDescription" | "flatId" | "division" | "subDivision" | "majorCategory" | "mcDescription" | "vendorName" | "vendorCode" | "designNumber" | "pptNumber" | "rate" | "mrp" | "roughV2" | "vdrCost" | "finalCost" | "segment" | "articleFashionType" | "buyingType" | "approvalStatus" | "approvedAt" | "approvedBy" | "sapSyncStatus" | "sapSyncMessage" | "imageUrl" | "backImageUrl" | "gmArticleType" | "source" | "userName" | "createdAt" | "updatedAt", ExtArgs["result"]["gmArticleData"]>
 
   export type $GmArticleDataPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "GmArticleData"
@@ -63369,6 +63406,7 @@ export namespace Prisma {
       finalCost: Prisma.Decimal | null
       segment: string | null
       articleFashionType: string | null
+      buyingType: string | null
       approvalStatus: string
       approvedAt: Date | null
       approvedBy: number | null
@@ -63901,6 +63939,7 @@ export namespace Prisma {
     readonly finalCost: FieldRef<"GmArticleData", 'Decimal'>
     readonly segment: FieldRef<"GmArticleData", 'String'>
     readonly articleFashionType: FieldRef<"GmArticleData", 'String'>
+    readonly buyingType: FieldRef<"GmArticleData", 'String'>
     readonly approvalStatus: FieldRef<"GmArticleData", 'String'>
     readonly approvedAt: FieldRef<"GmArticleData", 'DateTime'>
     readonly approvedBy: FieldRef<"GmArticleData", 'Int'>
@@ -92253,6 +92292,7 @@ export namespace Prisma {
     vendorCode: 'vendorCode',
     mrp: 'mrp',
     impAtrbt2: 'impAtrbt2',
+    buyingType: 'buyingType',
     mcCode: 'mcCode',
     segment: 'segment',
     season: 'season',
@@ -92996,6 +93036,7 @@ export namespace Prisma {
     rate: 'rate',
     segment: 'segment',
     articleFashionType: 'articleFashionType',
+    buyingType: 'buyingType',
     approvalStatus: 'approvalStatus',
     approvedAt: 'approvedAt',
     approvedBy: 'approvedBy',
@@ -93141,6 +93182,7 @@ export namespace Prisma {
     finalCost: 'finalCost',
     segment: 'segment',
     articleFashionType: 'articleFashionType',
+    buyingType: 'buyingType',
     approvalStatus: 'approvalStatus',
     approvedAt: 'approvedAt',
     approvedBy: 'approvedBy',
@@ -93937,6 +93979,7 @@ export namespace Prisma {
     mcDescription: 'mcDescription',
     vendorCode: 'vendorCode',
     impAtrbt2: 'impAtrbt2',
+    buyingType: 'buyingType',
     mcCode: 'mcCode',
     segment: 'segment',
     season: 'season',
@@ -94481,6 +94524,7 @@ export namespace Prisma {
     pptNumber: 'pptNumber',
     segment: 'segment',
     articleFashionType: 'articleFashionType',
+    buyingType: 'buyingType',
     approvalStatus: 'approvalStatus',
     sapSyncStatus: 'sapSyncStatus',
     sapSyncMessage: 'sapSyncMessage',
@@ -94612,6 +94656,7 @@ export namespace Prisma {
     pptNumber: 'pptNumber',
     segment: 'segment',
     articleFashionType: 'articleFashionType',
+    buyingType: 'buyingType',
     approvalStatus: 'approvalStatus',
     sapSyncStatus: 'sapSyncStatus',
     sapSyncMessage: 'sapSyncMessage',
@@ -96353,6 +96398,7 @@ export namespace Prisma {
     vendorCode?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     mrp?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    buyingType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     mcCode?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     segment?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     season?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -96712,6 +96758,7 @@ export namespace Prisma {
     vendorCode?: SortOrderInput | SortOrder
     mrp?: SortOrderInput | SortOrder
     impAtrbt2?: SortOrderInput | SortOrder
+    buyingType?: SortOrderInput | SortOrder
     mcCode?: SortOrderInput | SortOrder
     segment?: SortOrderInput | SortOrder
     season?: SortOrderInput | SortOrder
@@ -97076,6 +97123,7 @@ export namespace Prisma {
     vendorCode?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     mrp?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    buyingType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     mcCode?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     segment?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     season?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -97434,6 +97482,7 @@ export namespace Prisma {
     vendorCode?: SortOrderInput | SortOrder
     mrp?: SortOrderInput | SortOrder
     impAtrbt2?: SortOrderInput | SortOrder
+    buyingType?: SortOrderInput | SortOrder
     mcCode?: SortOrderInput | SortOrder
     segment?: SortOrderInput | SortOrder
     season?: SortOrderInput | SortOrder
@@ -97796,6 +97845,7 @@ export namespace Prisma {
     vendorCode?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     mrp?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    buyingType?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     mcCode?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     segment?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
     season?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
@@ -101292,6 +101342,7 @@ export namespace Prisma {
     rate?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
     segment?: StringNullableFilter<"FabricArticleData"> | string | null
     articleFashionType?: StringNullableFilter<"FabricArticleData"> | string | null
+    buyingType?: StringNullableFilter<"FabricArticleData"> | string | null
     approvalStatus?: StringFilter<"FabricArticleData"> | string
     approvedAt?: DateTimeNullableFilter<"FabricArticleData"> | Date | string | null
     approvedBy?: IntNullableFilter<"FabricArticleData"> | number | null
@@ -101340,6 +101391,7 @@ export namespace Prisma {
     rate?: SortOrderInput | SortOrder
     segment?: SortOrderInput | SortOrder
     articleFashionType?: SortOrderInput | SortOrder
+    buyingType?: SortOrderInput | SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrderInput | SortOrder
     approvedBy?: SortOrderInput | SortOrder
@@ -101392,6 +101444,7 @@ export namespace Prisma {
     rate?: DecimalNullableFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
     segment?: StringNullableFilter<"FabricArticleData"> | string | null
     articleFashionType?: StringNullableFilter<"FabricArticleData"> | string | null
+    buyingType?: StringNullableFilter<"FabricArticleData"> | string | null
     approvalStatus?: StringFilter<"FabricArticleData"> | string
     approvedAt?: DateTimeNullableFilter<"FabricArticleData"> | Date | string | null
     approvedBy?: IntNullableFilter<"FabricArticleData"> | number | null
@@ -101440,6 +101493,7 @@ export namespace Prisma {
     rate?: SortOrderInput | SortOrder
     segment?: SortOrderInput | SortOrder
     articleFashionType?: SortOrderInput | SortOrder
+    buyingType?: SortOrderInput | SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrderInput | SortOrder
     approvedBy?: SortOrderInput | SortOrder
@@ -101496,6 +101550,7 @@ export namespace Prisma {
     rate?: DecimalNullableWithAggregatesFilter<"FabricArticleData"> | Decimal | DecimalJsLike | number | string | null
     segment?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     articleFashionType?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
+    buyingType?: StringNullableWithAggregatesFilter<"FabricArticleData"> | string | null
     approvalStatus?: StringWithAggregatesFilter<"FabricArticleData"> | string
     approvedAt?: DateTimeNullableWithAggregatesFilter<"FabricArticleData"> | Date | string | null
     approvedBy?: IntNullableWithAggregatesFilter<"FabricArticleData"> | number | null
@@ -101761,6 +101816,7 @@ export namespace Prisma {
     finalCost?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
     segment?: StringNullableFilter<"GmArticleData"> | string | null
     articleFashionType?: StringNullableFilter<"GmArticleData"> | string | null
+    buyingType?: StringNullableFilter<"GmArticleData"> | string | null
     approvalStatus?: StringFilter<"GmArticleData"> | string
     approvedAt?: DateTimeNullableFilter<"GmArticleData"> | Date | string | null
     approvedBy?: IntNullableFilter<"GmArticleData"> | number | null
@@ -101873,6 +101929,7 @@ export namespace Prisma {
     finalCost?: SortOrderInput | SortOrder
     segment?: SortOrderInput | SortOrder
     articleFashionType?: SortOrderInput | SortOrder
+    buyingType?: SortOrderInput | SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrderInput | SortOrder
     approvedBy?: SortOrderInput | SortOrder
@@ -101989,6 +102046,7 @@ export namespace Prisma {
     finalCost?: DecimalNullableFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
     segment?: StringNullableFilter<"GmArticleData"> | string | null
     articleFashionType?: StringNullableFilter<"GmArticleData"> | string | null
+    buyingType?: StringNullableFilter<"GmArticleData"> | string | null
     approvalStatus?: StringFilter<"GmArticleData"> | string
     approvedAt?: DateTimeNullableFilter<"GmArticleData"> | Date | string | null
     approvedBy?: IntNullableFilter<"GmArticleData"> | number | null
@@ -102101,6 +102159,7 @@ export namespace Prisma {
     finalCost?: SortOrderInput | SortOrder
     segment?: SortOrderInput | SortOrder
     articleFashionType?: SortOrderInput | SortOrder
+    buyingType?: SortOrderInput | SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrderInput | SortOrder
     approvedBy?: SortOrderInput | SortOrder
@@ -102221,6 +102280,7 @@ export namespace Prisma {
     finalCost?: DecimalNullableWithAggregatesFilter<"GmArticleData"> | Decimal | DecimalJsLike | number | string | null
     segment?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
     articleFashionType?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
+    buyingType?: StringNullableWithAggregatesFilter<"GmArticleData"> | string | null
     approvalStatus?: StringWithAggregatesFilter<"GmArticleData"> | string
     approvedAt?: DateTimeNullableWithAggregatesFilter<"GmArticleData"> | Date | string | null
     approvedBy?: IntNullableWithAggregatesFilter<"GmArticleData"> | number | null
@@ -106203,6 +106263,7 @@ export namespace Prisma {
     vendorCode?: string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: string | null
+    buyingType?: string | null
     mcCode?: string | null
     segment?: string | null
     season?: string | null
@@ -106560,6 +106621,7 @@ export namespace Prisma {
     vendorCode?: string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: string | null
+    buyingType?: string | null
     mcCode?: string | null
     segment?: string | null
     season?: string | null
@@ -106915,6 +106977,7 @@ export namespace Prisma {
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     mcCode?: NullableStringFieldUpdateOperationsInput | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
@@ -107272,6 +107335,7 @@ export namespace Prisma {
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     mcCode?: NullableStringFieldUpdateOperationsInput | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
@@ -107628,6 +107692,7 @@ export namespace Prisma {
     vendorCode?: string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: string | null
+    buyingType?: string | null
     mcCode?: string | null
     segment?: string | null
     season?: string | null
@@ -107981,6 +108046,7 @@ export namespace Prisma {
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     mcCode?: NullableStringFieldUpdateOperationsInput | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
@@ -108333,6 +108399,7 @@ export namespace Prisma {
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     mcCode?: NullableStringFieldUpdateOperationsInput | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
@@ -112473,6 +112540,7 @@ export namespace Prisma {
     rate?: Decimal | DecimalJsLike | number | string | null
     segment?: string | null
     articleFashionType?: string | null
+    buyingType?: string | null
     approvalStatus?: string
     approvedAt?: Date | string | null
     approvedBy?: number | null
@@ -112521,6 +112589,7 @@ export namespace Prisma {
     rate?: Decimal | DecimalJsLike | number | string | null
     segment?: string | null
     articleFashionType?: string | null
+    buyingType?: string | null
     approvalStatus?: string
     approvedAt?: Date | string | null
     approvedBy?: number | null
@@ -112569,6 +112638,7 @@ export namespace Prisma {
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -112617,6 +112687,7 @@ export namespace Prisma {
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -112665,6 +112736,7 @@ export namespace Prisma {
     rate?: Decimal | DecimalJsLike | number | string | null
     segment?: string | null
     articleFashionType?: string | null
+    buyingType?: string | null
     approvalStatus?: string
     approvedAt?: Date | string | null
     approvedBy?: number | null
@@ -112713,6 +112785,7 @@ export namespace Prisma {
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -112761,6 +112834,7 @@ export namespace Prisma {
     rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -113062,6 +113136,7 @@ export namespace Prisma {
     finalCost?: Decimal | DecimalJsLike | number | string | null
     segment?: string | null
     articleFashionType?: string | null
+    buyingType?: string | null
     approvalStatus?: string
     approvedAt?: Date | string | null
     approvedBy?: number | null
@@ -113174,6 +113249,7 @@ export namespace Prisma {
     finalCost?: Decimal | DecimalJsLike | number | string | null
     segment?: string | null
     articleFashionType?: string | null
+    buyingType?: string | null
     approvalStatus?: string
     approvedAt?: Date | string | null
     approvedBy?: number | null
@@ -113286,6 +113362,7 @@ export namespace Prisma {
     finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -113398,6 +113475,7 @@ export namespace Prisma {
     finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -113510,6 +113588,7 @@ export namespace Prisma {
     finalCost?: Decimal | DecimalJsLike | number | string | null
     segment?: string | null
     articleFashionType?: string | null
+    buyingType?: string | null
     approvalStatus?: string
     approvedAt?: Date | string | null
     approvedBy?: number | null
@@ -113622,6 +113701,7 @@ export namespace Prisma {
     finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -113734,6 +113814,7 @@ export namespace Prisma {
     finalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     articleFashionType?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     approvalStatus?: StringFieldUpdateOperationsInput | string
     approvedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     approvedBy?: NullableIntFieldUpdateOperationsInput | number | null
@@ -118502,6 +118583,7 @@ export namespace Prisma {
     vendorCode?: SortOrder
     mrp?: SortOrder
     impAtrbt2?: SortOrder
+    buyingType?: SortOrder
     mcCode?: SortOrder
     segment?: SortOrder
     season?: SortOrder
@@ -119079,6 +119161,7 @@ export namespace Prisma {
     vendorCode?: SortOrder
     mrp?: SortOrder
     impAtrbt2?: SortOrder
+    buyingType?: SortOrder
     mcCode?: SortOrder
     segment?: SortOrder
     season?: SortOrder
@@ -119427,6 +119510,7 @@ export namespace Prisma {
     vendorCode?: SortOrder
     mrp?: SortOrder
     impAtrbt2?: SortOrder
+    buyingType?: SortOrder
     mcCode?: SortOrder
     segment?: SortOrder
     season?: SortOrder
@@ -122280,6 +122364,7 @@ export namespace Prisma {
     rate?: SortOrder
     segment?: SortOrder
     articleFashionType?: SortOrder
+    buyingType?: SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrder
     approvedBy?: SortOrder
@@ -122335,6 +122420,7 @@ export namespace Prisma {
     rate?: SortOrder
     segment?: SortOrder
     articleFashionType?: SortOrder
+    buyingType?: SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrder
     approvedBy?: SortOrder
@@ -122382,6 +122468,7 @@ export namespace Prisma {
     rate?: SortOrder
     segment?: SortOrder
     articleFashionType?: SortOrder
+    buyingType?: SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrder
     approvedBy?: SortOrder
@@ -122663,6 +122750,7 @@ export namespace Prisma {
     finalCost?: SortOrder
     segment?: SortOrder
     articleFashionType?: SortOrder
+    buyingType?: SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrder
     approvedBy?: SortOrder
@@ -122784,6 +122872,7 @@ export namespace Prisma {
     finalCost?: SortOrder
     segment?: SortOrder
     articleFashionType?: SortOrder
+    buyingType?: SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrder
     approvedBy?: SortOrder
@@ -122896,6 +122985,7 @@ export namespace Prisma {
     finalCost?: SortOrder
     segment?: SortOrder
     articleFashionType?: SortOrder
+    buyingType?: SortOrder
     approvalStatus?: SortOrder
     approvedAt?: SortOrder
     approvedBy?: SortOrder
@@ -128288,6 +128378,7 @@ export namespace Prisma {
     vendorCode?: string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: string | null
+    buyingType?: string | null
     mcCode?: string | null
     segment?: string | null
     season?: string | null
@@ -128643,6 +128734,7 @@ export namespace Prisma {
     vendorCode?: string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: string | null
+    buyingType?: string | null
     mcCode?: string | null
     segment?: string | null
     season?: string | null
@@ -129110,6 +129202,7 @@ export namespace Prisma {
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     mcCode?: NullableStringFieldUpdateOperationsInput | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
@@ -129465,6 +129558,7 @@ export namespace Prisma {
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     mcCode?: NullableStringFieldUpdateOperationsInput | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
@@ -129864,6 +129958,7 @@ export namespace Prisma {
     vendorCode?: string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: string | null
+    buyingType?: string | null
     mcCode?: string | null
     segment?: string | null
     season?: string | null
@@ -130220,6 +130315,7 @@ export namespace Prisma {
     vendorCode?: string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: string | null
+    buyingType?: string | null
     mcCode?: string | null
     segment?: string | null
     season?: string | null
@@ -130579,6 +130675,7 @@ export namespace Prisma {
     vendorCode?: string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: string | null
+    buyingType?: string | null
     mcCode?: string | null
     segment?: string | null
     season?: string | null
@@ -130935,6 +131032,7 @@ export namespace Prisma {
     vendorCode?: string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: string | null
+    buyingType?: string | null
     mcCode?: string | null
     segment?: string | null
     season?: string | null
@@ -131449,6 +131547,7 @@ export namespace Prisma {
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     mcCode?: NullableStringFieldUpdateOperationsInput | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
@@ -131805,6 +131904,7 @@ export namespace Prisma {
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     mcCode?: NullableStringFieldUpdateOperationsInput | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
@@ -132179,6 +132279,7 @@ export namespace Prisma {
     vendorCode?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     mrp?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    buyingType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     mcCode?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     segment?: StringNullableFilter<"ExtractionResultFlat"> | string | null
     season?: StringNullableFilter<"ExtractionResultFlat"> | string | null
@@ -132755,6 +132856,7 @@ export namespace Prisma {
     vendorCode?: string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: string | null
+    buyingType?: string | null
     mcCode?: string | null
     segment?: string | null
     season?: string | null
@@ -133111,6 +133213,7 @@ export namespace Prisma {
     vendorCode?: string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: string | null
+    buyingType?: string | null
     mcCode?: string | null
     segment?: string | null
     season?: string | null
@@ -135011,6 +135114,7 @@ export namespace Prisma {
     vendorCode?: string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: string | null
+    buyingType?: string | null
     mcCode?: string | null
     segment?: string | null
     season?: string | null
@@ -135367,6 +135471,7 @@ export namespace Prisma {
     vendorCode?: string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: string | null
+    buyingType?: string | null
     mcCode?: string | null
     segment?: string | null
     season?: string | null
@@ -135774,6 +135879,7 @@ export namespace Prisma {
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     mcCode?: NullableStringFieldUpdateOperationsInput | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
@@ -136130,6 +136236,7 @@ export namespace Prisma {
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     mcCode?: NullableStringFieldUpdateOperationsInput | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
@@ -137105,6 +137212,7 @@ export namespace Prisma {
     vendorCode?: string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: string | null
+    buyingType?: string | null
     mcCode?: string | null
     segment?: string | null
     season?: string | null
@@ -137467,6 +137575,7 @@ export namespace Prisma {
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     mcCode?: NullableStringFieldUpdateOperationsInput | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
@@ -137823,6 +137932,7 @@ export namespace Prisma {
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     mcCode?: NullableStringFieldUpdateOperationsInput | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138178,6 +138288,7 @@ export namespace Prisma {
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     mcCode?: NullableStringFieldUpdateOperationsInput | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
@@ -138599,6 +138710,7 @@ export namespace Prisma {
     vendorCode?: string | null
     mrp?: Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: string | null
+    buyingType?: string | null
     mcCode?: string | null
     segment?: string | null
     season?: string | null
@@ -139066,6 +139178,7 @@ export namespace Prisma {
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     mcCode?: NullableStringFieldUpdateOperationsInput | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
@@ -139422,6 +139535,7 @@ export namespace Prisma {
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     mcCode?: NullableStringFieldUpdateOperationsInput | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null
@@ -139777,6 +139891,7 @@ export namespace Prisma {
     vendorCode?: NullableStringFieldUpdateOperationsInput | string | null
     mrp?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     impAtrbt2?: NullableStringFieldUpdateOperationsInput | string | null
+    buyingType?: NullableStringFieldUpdateOperationsInput | string | null
     mcCode?: NullableStringFieldUpdateOperationsInput | string | null
     segment?: NullableStringFieldUpdateOperationsInput | string | null
     season?: NullableStringFieldUpdateOperationsInput | string | null

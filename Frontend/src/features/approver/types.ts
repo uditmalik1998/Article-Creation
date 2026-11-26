@@ -114,6 +114,7 @@ export interface ApproverItem {
   articleFashionType: string | null;
   mvgrBrandVendor: string | null;
   impAtrbt2: string | null;
+  buyingType?: string | null; // M_BUYING_TYPE (PLANNED / READY), DB only
   vendorFabricRate: number | string | null;
   valueAddCost: number | string | null;
   roughCmpCost: number | string | null;
