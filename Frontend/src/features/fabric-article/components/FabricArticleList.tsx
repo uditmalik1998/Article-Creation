@@ -2189,7 +2189,7 @@ const ArticleCard = React.memo(
                         ] : []),
                         { label: 'ARTICLE FASHION TYPE', field: 'articleFashionType', editable: true, mandatory: true, isDropdown: true, isColor: false, isMarkdown: false, boldLabel: true },
                         // M_BUYING_TYPE: fixed PLANNED / READY, optional, DB only (not sent to SAP).
-                        { label: 'M_BUYING_TYPE', field: 'buyingType', editable: true, mandatory: false, isDropdown: true, isColor: false, isMarkdown: false, boldLabel: true },
+                        { label: 'BUYING_TYPE', field: 'buyingType', editable: true, mandatory: false, isDropdown: true, isColor: false, isMarkdown: false, boldLabel: true },
                         ...(!isFGMode ? [
                           { label: 'SEGMENT', field: 'segment', editable: false, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false, boldLabel: true },
                         ] : []),

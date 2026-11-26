@@ -5,6 +5,18 @@
 
 ---
 
+## 2026-11-26 — buying_type on the SRM raw tables
+
+- New `buying_type VARCHAR(50)` on `raw_articles`, `fabric_raw_data`, `gm_raw_data` (SQL `Backend/prisma/migrations/20261126_add_raw_buying_type.sql`, applied 2026-11-26, migration `add_raw_buying_type`). Prisma `buyingType` on RawArticle / FabricRawData / GmRawData.
+- Filled by the SRM writer (v2srm side — they need to start writing it). When the raw cron creates the article it copies the value: raw_articles → `srmSyncService.insertRow` (SrmRow.buying_type) → extraction_results_flat.buying_type; fabric_raw_data → fabric_article_data; gm_raw_data → gm_article_data.
+- `utils/buyingType.ts` `normalizeBuyingType`: planned/Planned → PLANNED, ready → READY, other text kept (trimmed, max 50), empty → null (user picks on the page).
+- User decisions: value stays editable on the page; no backfill — only rows processed after the deploy.
+- Deploy order: SQL first (raw_articles is read with a full-row findMany), then backend.
+
+## 2026-11-26 — Buying type label: BUYING_TYPE
+
+- User: show the new field as **BUYING_TYPE** (not M_BUYING_TYPE / "Buying type") everywhere — FG OTH GRID-1 (`CARD_LABEL_OVERRIDES`), Fabric BOM row, GM BOM field. Label only; DB column `buying_type` / field `buyingType` / values PLANNED / READY unchanged.
+
 ## 2026-11-26 — Fabric + GM: M_BUYING_TYPE in the BOM card
 
 - Fabric pages (`FabricArticleList.tsx` BOM card): row **M_BUYING_TYPE** right below ARTICLE FASHION TYPE, dropdown PLANNED / READY (`BUYING_TYPE_OPTIONS`), optional, all Fabric modes (incl. FG New Articles under Fabric).

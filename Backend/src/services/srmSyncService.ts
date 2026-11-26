@@ -22,6 +22,7 @@
  */
 
 import { prismaClient as prisma } from '../utils/prisma';
+import { normalizeBuyingType } from '../utils/buyingType';
 import { getHsnCodeByMcCode, getMcCodeByMajorCategory } from '../utils/mcCodeMapper';
 import { getSegmentFromMaster } from './segmentMasterService';
 import { buildArticleDescription } from '../utils/articleDescriptionBuilder';
@@ -55,6 +56,8 @@ interface SrmRow {
   /** Back photo of the design (optional; front stays in image_url). */
   back_image_url?: string | null;
   presentations_type?: string | null;
+  /** raw buying_type (PLANNED / READY, any casing) → flat.buying_type. */
+  buying_type?: string | null;
   /** SRM set article: shared by every photo of one set; role is PARENT | TOP | PIECE. */
   set_group_id?: string | null;
   set_role?: string | null;
@@ -746,6 +749,7 @@ async function insertRow(row: SrmRow, rawArticleId?: string): Promise<{ id: stri
       segment,
       extractionDate:    now,
       presentationsType: row.presentations_type || null,
+      buyingType:        normalizeBuyingType(row.buying_type),
       setGroupId:        row.set_group_id || null,
       setRole:           row.set_role     || null,
       setName:           row.set_name     || null,

@@ -7,6 +7,7 @@
 
 import { prismaClient as prisma } from '../utils/prisma';
 import { storageService } from './storageService';
+import { normalizeBuyingType } from '../utils/buyingType';
 
 const BATCH_SIZE  = 40;
 const LOCK_MINUTES = 20;
@@ -86,6 +87,7 @@ async function processRow(row: {
   source: string | null;
   presentationsType: string | null;
   season: string | null;
+  buyingType: string | null;
 }): Promise<{ success: boolean }> {
   let finalImageUrl: string | null = row.imageUrl;
   let imageUploaded = false;
@@ -134,6 +136,7 @@ async function processRow(row: {
         backImageUrl:  finalBackImageUrl,
         gmArticleType: row.presentationsType ?? null,
         gmSeason:      row.season ?? null,
+        buyingType:    normalizeBuyingType(row.buyingType),
         // All other GM attribute fields left null — filled in by user later
       },
     });
@@ -206,7 +209,7 @@ export async function runGmRawDataProcessing(triggeredBy = 'CRON'): Promise<GmRa
         id: true, imageUrl: true, backImageUrl: true, vendorCode: true, vendorName: true,
         division: true, subDivision: true, majorCategory: true,
         designNumber: true, presentationNo: true, price: true, source: true,
-        presentationsType: true, season: true,
+        presentationsType: true, season: true, buyingType: true,
       },
     });
 

@@ -1,4 +1,5 @@
 import { prismaClient as prisma } from '../utils/prisma';
+import { normalizeBuyingType } from '../utils/buyingType';
 import { storageService } from './storageService';
 import { extractIntoFabricArticle, extractionToJson, isFabricVlmEnabled } from './fabricVlmService';
 import { mapWithConcurrency } from '../utils/concurrency';
@@ -82,6 +83,7 @@ async function processRow(row: {
   presentationNo: string | null;
   price: any;
   presentationsType: string | null;
+  buyingType: string | null;
   source: string | null;
   fabric?: string | null;
 }): Promise<{ success: boolean }> {
@@ -133,6 +135,7 @@ async function processRow(row: {
         fabricRate:        row.price ?? null,
         rate:              row.price ?? null, // SRM price also fills rate (same as the uploader's Fabric Rate)
         fabricArticleType: row.presentationsType || 'Fabric Article', // SRM rows: default when SRM sends none
+        buyingType:        normalizeBuyingType(row.buyingType),
         source:            'SRM',
         imageUrl:          finalImageUrl,
         backImageUrl:      finalBackImageUrl,
@@ -224,7 +227,7 @@ export async function runFabricRawDataProcessing(triggeredBy = 'CRON'): Promise<
       select: {
         id: true, imageUrl: true, backImageUrl: true, vendorCode: true, vendorName: true,
         division: true, subDivision: true, majorCategory: true,
-        designNumber: true, presentationNo: true, price: true, presentationsType: true, source: true,
+        designNumber: true, presentationNo: true, price: true, presentationsType: true, buyingType: true, source: true,
         fabric: true,
       },
     });

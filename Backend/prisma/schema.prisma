@@ -1255,6 +1255,7 @@ model RawArticle {
   imageUrl                   String?           @map("image_url")
   backImageUrl               String?           @map("back_image_url")
   presentationsType          String?           @map("Presentations_type") @db.VarChar(200)
+  buyingType                 String?           @map("buying_type") @db.VarChar(50) // from SRM; copied to the created article
 
   // SRM set article (see ExtractionResultFlat.setGroupId). NULL = normal article.
   setGroupId String? @map("set_group_id") @db.VarChar(64)
@@ -1311,6 +1312,7 @@ model FabricRawData {
   subDivision              String?          @map("sub_division") @db.VarChar(100)
   majorCategory            String?          @map("major_category") @db.VarChar(200)
   presentationsType        String?          @map("presentations_type")
+  buyingType                 String?           @map("buying_type") @db.VarChar(50) // from SRM; copied to the created article
 
   // Article details
   designNumber             String?          @map("design_number") @db.VarChar(255)
@@ -1371,6 +1373,7 @@ model GmRawData {
   subDivision              String?          @map("sub_division") @db.VarChar(100)
   majorCategory            String?          @map("major_category") @db.VarChar(200)
   presentationsType        String?          @map("presentations_type")
+  buyingType                 String?           @map("buying_type") @db.VarChar(50) // from SRM; copied to the created article
 
   // Article details
   designNumber             String?          @map("design_number") @db.VarChar(255)
