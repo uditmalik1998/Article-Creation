@@ -5,6 +5,28 @@
 
 ---
 
+## 2026-11-26 — Fabric + GM: M_BUYING_TYPE in the BOM card
+
+- Fabric pages (`FabricArticleList.tsx` BOM card): row **M_BUYING_TYPE** right below ARTICLE FASHION TYPE, dropdown PLANNED / READY (`BUYING_TYPE_OPTIONS`), optional, all Fabric modes (incl. FG New Articles under Fabric).
+- GM pages (`GMArticleList.tsx` BOM grid): **Buying type** pick next to Fashion type, PLANNED / READY, optional (not in the Required x/y count).
+- DB: `fabric_article_data.buying_type` + `gm_article_data.buying_type` VARCHAR(50) — SQL `Backend/prisma/migrations/20261126_add_fabric_gm_buying_type.sql`, applied 2026-11-26 (migration `add_fabric_gm_buying_type`). Prisma `buyingType` on both models; added to FABRIC_ARTICLE_DATA_SELECT / FIELD_MAP / row-to-item and GM_ARTICLE_DATA_SELECT / GM_ARTICLE_UPDATE_FIELDS / row-to-item.
+- Not sent to SAP, not in Excel exports. Snowflake unaffected (only the flat table is copied).
+- Deploy order: SQL first, then backend, then frontend.
+
+## 2026-11-26 — FG: new attribute M_BUYING_TYPE (PLANNED / READY)
+
+- FG New + Created pages, OTH GRID-1 card: new row **M_BUYING_TYPE** right below M_IMP_ATBT, dropdown PLANNED / READY, always shown, optional (not required for Save & Submit). Not on Body Article pages.
+- `ApproverArticleList.tsx`: BUSINESS group field `buyingType` / schema key `buying_type`, `BUYING_TYPE_OPTIONS`, label override, `OTH_GRID_1_ORDER`. `types.ts` `buyingType`.
+- DB: `extraction_results_flat.buying_type VARCHAR(50)` — SQL in `Backend/prisma/migrations/20261126_add_flat_buying_type.sql`, applied 2026-11-26 (migration `add_flat_buying_type`). Snowflake: `"buying_type" VARCHAR(50)` added to V2RETAIL.BRONZE.ARTICLE_CREATION_EXTRACTION_RESULTS_FLAT the same day (lowercase quoted like the other columns) so the nightly flat sync keeps working. Prisma `ExtractionResultFlat.buyingType`; added to `ITEM_UPDATE_ALLOWED_FIELDS` + the 6 FG explicit selects in ApproverController.
+- Not sent to SAP (no SAP characteristic; not in flatToRfcMap / patch lists), not in Excel exports, not extracted by AI.
+- Deploy order: run the SQL first, then backend (Prisma would fail selecting a missing column), then frontend.
+
+## 2026-11-26 — Manual R2 upload: GM 1240064882 image (+ 4 more)
+
+- Same day, same way: 1240064834, 1240064831, 1240064829, 1240064823 (`<no>.jpg`, none existed before, all 200 OK on articlemaster.v2retail.net; none in our GM tables).
+- User request: uploaded `Downloads\1240064882.jpg` (1024×768, 125 KB) to R2 bucket `article-master` as `1240064882.jpg` (same key the GM create flow writes) → https://articlemaster.v2retail.net/1240064882.jpg (200 OK). No earlier object existed, nothing overwritten, no watermark.
+- 1240064882 is not in gm_article_data / gm_variants_article_data / extraction_results_flat, so no DB row was changed. The photo carries phone EXIF incl. GPS (kept as is).
+
 ## 2026-11-25 — FG SAP queue: variants created in the background
 - Symptom: FG Created page cards stuck on "SAP …" (Creating in SAP…) for over an hour (18, then 46 articles waiting).
 - Cause: the approval worker (`runApprovalSyncTick`, batch 10) waited for a whole batch, variants included, before claiming more. Variants of one generic go to SAP one at a time (`ZMM_VAR_ART_CRT_V8`, about 50 s each). So KRN-21 (1116138031, 99 variants) and then KRN-11 (1116138032, 81 variants), both vendor 200703 M_TEES_HS, held the queue for more than an hour each. Variant results were only saved at the end, so finished variants still showed PENDING.

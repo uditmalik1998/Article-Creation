@@ -262,7 +262,12 @@ const BOM_ONLY_SCHEMA_KEYS = new Set([
 // Card-only row labels (SCHEMA_KEY_TO_EXCEL_ATTR keeps the grid / export names).
 const CARD_LABEL_OVERRIDES: Record<string, string> = {
   rough_v2: 'ACT-V2', // FAB card ROUGH-V2 row
+  buying_type: 'M_BUYING_TYPE',
 };
+
+// M_BUYING_TYPE (FG OTH GRID-1 card, below M_IMP_ATBT): fixed options, always shown,
+// optional. Saved to extraction_results_flat.buying_type only — not sent to SAP.
+const BUYING_TYPE_OPTIONS = ['PLANNED', 'READY'];
 
 // M_FAB_VDR (FG FAB card): fixed options, always shown, mandatory; empty → NON-NOMINATED.
 const FAB_VDR_OPTIONS = ['NOMINATED', 'NON-NOMINATED'];
@@ -375,6 +380,7 @@ const ATTRIBUTE_GROUPS: { group: string; color: string; fields: { field: string;
       { field: 'mNoOfSize', schemaKey: 'no_of_size' },
       { field: 'mNoOfClr', schemaKey: 'no_of_clr' },
       { field: 'impAtrbt2', schemaKey: 'imp_atrbt2' },
+      { field: 'buyingType', schemaKey: 'buying_type' },
       { field: 'segment', schemaKey: 'segment', freeText: true, mandatory: true },
       { field: 'weight', schemaKey: 'fab_weight', freeText: true },
     ],
@@ -474,7 +480,7 @@ const ColorSelect: React.FC<{
 
 // FG OTH GRID-1 card: BUSINESS attrs shown under Rate/MRP/Colours in this order
 // (M_AGE_GROUP → M_IMP_ATBT → ARTICLE FASHION TYPE → SEGMENT), rest after.
-const OTH_GRID_1_ORDER = ['age_group', 'imp_atrbt2', 'article_fashion_type', 'segment'];
+const OTH_GRID_1_ORDER = ['age_group', 'imp_atrbt2', 'buying_type', 'article_fashion_type', 'segment'];
 
 // Hidden from the FG cards only (UI). The attrs still exist in the DB/admin
 // fab_weight is hidden from the FG card grid (OTH GRID-1 card).
@@ -1511,6 +1517,22 @@ const ArticleCard = React.memo(
             freeText: false,
             isMandatory: true,
             mandatory: true,
+          });
+          continue;
+        }
+
+        // M_BUYING_TYPE: FG cards only (not Body Article), always visible, two fixed values.
+        if (af.schemaKey === 'buying_type') {
+          if (allowGroups) continue;
+          visible.push({
+            field: af.field,
+            label: af.label,
+            schemaKey: af.schemaKey,
+            group: af.group,
+            groupColor: af.groupColor,
+            values: BUYING_TYPE_OPTIONS.map((v) => ({ shortForm: v, fullForm: v })),
+            freeText: false,
+            isMandatory: false,
           });
           continue;
         }

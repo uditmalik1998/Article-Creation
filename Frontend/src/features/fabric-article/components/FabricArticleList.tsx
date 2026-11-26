@@ -61,6 +61,9 @@ import FabricVariantSubTable from './FabricVariantSubTable';
 import FabricArticleVariantSubTable from './FabricArticleVariantSubTable';
 import { ImagePreviewDialog } from '@/shared/components/articles/ArticleSpecCard';
 
+// M_BUYING_TYPE (BOM card): fixed options, same as the FG OTH GRID-1 row.
+const BUYING_TYPE_OPTIONS = ['PLANNED', 'READY'];
+
 // localStorage key for the folded left panel (Option A dark rail).
 const LEFT_PANEL_KEY = 'fabricLeftPanelCollapsed';
 // FAB row field → key in fabric_article_data.fabric_ai_attributes ({"M_FAB_DIV":"K", ...}).
@@ -2185,6 +2188,8 @@ const ArticleCard = React.memo(
                           ] : []),
                         ] : []),
                         { label: 'ARTICLE FASHION TYPE', field: 'articleFashionType', editable: true, mandatory: true, isDropdown: true, isColor: false, isMarkdown: false, boldLabel: true },
+                        // M_BUYING_TYPE: fixed PLANNED / READY, optional, DB only (not sent to SAP).
+                        { label: 'M_BUYING_TYPE', field: 'buyingType', editable: true, mandatory: false, isDropdown: true, isColor: false, isMarkdown: false, boldLabel: true },
                         ...(!isFGMode ? [
                           { label: 'SEGMENT', field: 'segment', editable: false, mandatory: true, isDropdown: false, isColor: false, isMarkdown: false, boldLabel: true },
                         ] : []),
@@ -2206,6 +2211,8 @@ const ArticleCard = React.memo(
                                 const opts = (fabricGrid['ARTICLE_FASHION_TYPE'] ?? []).filter((g) => g.code);
                                 return opts.length > 0 ? opts : [{ code: 'C', fullForm: '' }];
                               })()
+                            : bom.field === 'buyingType'
+                            ? BUYING_TYPE_OPTIONS.map((v) => ({ code: v, fullForm: '' }))
                             : []
                           : [];
                         return (

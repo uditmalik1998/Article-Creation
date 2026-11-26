@@ -528,6 +528,7 @@ model ExtractionResultFlat {
   vendorCode         String?  @map("vendor_code") @db.VarChar(100)
   mrp                Decimal? @db.Decimal(10, 2)
   impAtrbt2          String?  @map("imp_atrbt_2") @db.VarChar(200)
+  buyingType         String?  @map("buying_type") @db.VarChar(50) // FG M_BUYING_TYPE: PLANNED / READY (not sent to SAP)
   mcCode             String?  @map("mc_code") @db.VarChar(100)
   segment            String?  @db.VarChar(100)
   season             String?  @db.VarChar(100)
@@ -1739,6 +1740,7 @@ model FabricArticleData {
   rate               Decimal? @map("rate") @db.Decimal(10, 2)
   segment            String?  @map("segment") @db.VarChar(100)
   articleFashionType String?  @map("article_fashion_type") @db.VarChar(100)
+  buyingType         String?  @map("buying_type") @db.VarChar(50) // M_BUYING_TYPE: PLANNED / READY (not sent to SAP)
 
   // Workflow
   approvalStatus String    @default("PENDING") @map("approval_status") @db.VarChar(20)
@@ -1910,6 +1912,7 @@ model GmArticleData {
   finalCost          Decimal? @map("final_cost") @db.Decimal(10, 2)
   segment            String?  @map("segment") @db.VarChar(100)
   articleFashionType String?  @map("article_fashion_type") @db.VarChar(100)
+  buyingType         String?  @map("buying_type") @db.VarChar(50) // M_BUYING_TYPE: PLANNED / READY (not sent to SAP)
 
   // Workflow
   approvalStatus String    @default("PENDING") @map("approval_status") @db.VarChar(20)
