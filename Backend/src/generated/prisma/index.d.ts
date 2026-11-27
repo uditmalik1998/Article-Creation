@@ -15991,6 +15991,18 @@ export namespace Prisma {
     tasselsRoughV2: Decimal | null
     tasselsVdrCost: Decimal | null
     tasselsFinalCost: Decimal | null
+    collarAutoBgt: Decimal | null
+    collarRoughV2: Decimal | null
+    collarVdrCost: Decimal | null
+    collarFinalCost: Decimal | null
+    aopAutoBgt: Decimal | null
+    aopRoughV2: Decimal | null
+    aopVdrCost: Decimal | null
+    aopFinalCost: Decimal | null
+    ribAutoBgt: Decimal | null
+    ribRoughV2: Decimal | null
+    ribVdrCost: Decimal | null
+    ribFinalCost: Decimal | null
     mBtnRate: Decimal | null
     mBtnQty: Decimal | null
     dcRate: Decimal | null
@@ -16041,6 +16053,12 @@ export namespace Prisma {
     tagQty: Decimal | null
     tasselsRate: Decimal | null
     tasselsQty: Decimal | null
+    collarRate: Decimal | null
+    collarQty: Decimal | null
+    aopRate: Decimal | null
+    aopQty: Decimal | null
+    ribRate: Decimal | null
+    ribQty: Decimal | null
     printAutoBgt: Decimal | null
     printRoughV2: Decimal | null
     printVendorCost: Decimal | null
@@ -16218,6 +16236,18 @@ export namespace Prisma {
     tasselsRoughV2: Decimal | null
     tasselsVdrCost: Decimal | null
     tasselsFinalCost: Decimal | null
+    collarAutoBgt: Decimal | null
+    collarRoughV2: Decimal | null
+    collarVdrCost: Decimal | null
+    collarFinalCost: Decimal | null
+    aopAutoBgt: Decimal | null
+    aopRoughV2: Decimal | null
+    aopVdrCost: Decimal | null
+    aopFinalCost: Decimal | null
+    ribAutoBgt: Decimal | null
+    ribRoughV2: Decimal | null
+    ribVdrCost: Decimal | null
+    ribFinalCost: Decimal | null
     mBtnRate: Decimal | null
     mBtnQty: Decimal | null
     dcRate: Decimal | null
@@ -16268,6 +16298,12 @@ export namespace Prisma {
     tagQty: Decimal | null
     tasselsRate: Decimal | null
     tasselsQty: Decimal | null
+    collarRate: Decimal | null
+    collarQty: Decimal | null
+    aopRate: Decimal | null
+    aopQty: Decimal | null
+    ribRate: Decimal | null
+    ribQty: Decimal | null
     printAutoBgt: Decimal | null
     printRoughV2: Decimal | null
     printVendorCost: Decimal | null
@@ -16529,6 +16565,18 @@ export namespace Prisma {
     tasselsRoughV2: Decimal | null
     tasselsVdrCost: Decimal | null
     tasselsFinalCost: Decimal | null
+    collarAutoBgt: Decimal | null
+    collarRoughV2: Decimal | null
+    collarVdrCost: Decimal | null
+    collarFinalCost: Decimal | null
+    aopAutoBgt: Decimal | null
+    aopRoughV2: Decimal | null
+    aopVdrCost: Decimal | null
+    aopFinalCost: Decimal | null
+    ribAutoBgt: Decimal | null
+    ribRoughV2: Decimal | null
+    ribVdrCost: Decimal | null
+    ribFinalCost: Decimal | null
     mBtnRate: Decimal | null
     mBtnQty: Decimal | null
     dcRate: Decimal | null
@@ -16579,6 +16627,21 @@ export namespace Prisma {
     tagQty: Decimal | null
     tasselsRate: Decimal | null
     tasselsQty: Decimal | null
+    btCollarType: string | null
+    btCollarStyle: string | null
+    btCollarClr: string | null
+    collarRate: Decimal | null
+    collarQty: Decimal | null
+    btAopType: string | null
+    btAopStyle: string | null
+    btAopClr: string | null
+    aopRate: Decimal | null
+    aopQty: Decimal | null
+    btRibType: string | null
+    btRibStyle: string | null
+    btRibClr: string | null
+    ribRate: Decimal | null
+    ribQty: Decimal | null
     printAutoBgt: Decimal | null
     printRoughV2: Decimal | null
     printVendorCost: Decimal | null
@@ -16878,6 +16941,18 @@ export namespace Prisma {
     tasselsRoughV2: Decimal | null
     tasselsVdrCost: Decimal | null
     tasselsFinalCost: Decimal | null
+    collarAutoBgt: Decimal | null
+    collarRoughV2: Decimal | null
+    collarVdrCost: Decimal | null
+    collarFinalCost: Decimal | null
+    aopAutoBgt: Decimal | null
+    aopRoughV2: Decimal | null
+    aopVdrCost: Decimal | null
+    aopFinalCost: Decimal | null
+    ribAutoBgt: Decimal | null
+    ribRoughV2: Decimal | null
+    ribVdrCost: Decimal | null
+    ribFinalCost: Decimal | null
     mBtnRate: Decimal | null
     mBtnQty: Decimal | null
     dcRate: Decimal | null
@@ -16928,6 +17003,21 @@ export namespace Prisma {
     tagQty: Decimal | null
     tasselsRate: Decimal | null
     tasselsQty: Decimal | null
+    btCollarType: string | null
+    btCollarStyle: string | null
+    btCollarClr: string | null
+    collarRate: Decimal | null
+    collarQty: Decimal | null
+    btAopType: string | null
+    btAopStyle: string | null
+    btAopClr: string | null
+    aopRate: Decimal | null
+    aopQty: Decimal | null
+    btRibType: string | null
+    btRibStyle: string | null
+    btRibClr: string | null
+    ribRate: Decimal | null
+    ribQty: Decimal | null
     printAutoBgt: Decimal | null
     printRoughV2: Decimal | null
     printVendorCost: Decimal | null
@@ -17229,6 +17319,18 @@ export namespace Prisma {
     tasselsRoughV2: number
     tasselsVdrCost: number
     tasselsFinalCost: number
+    collarAutoBgt: number
+    collarRoughV2: number
+    collarVdrCost: number
+    collarFinalCost: number
+    aopAutoBgt: number
+    aopRoughV2: number
+    aopVdrCost: number
+    aopFinalCost: number
+    ribAutoBgt: number
+    ribRoughV2: number
+    ribVdrCost: number
+    ribFinalCost: number
     mBtnRate: number
     mBtnQty: number
     dcRate: number
@@ -17279,6 +17381,21 @@ export namespace Prisma {
     tagQty: number
     tasselsRate: number
     tasselsQty: number
+    btCollarType: number
+    btCollarStyle: number
+    btCollarClr: number
+    collarRate: number
+    collarQty: number
+    btAopType: number
+    btAopStyle: number
+    btAopClr: number
+    aopRate: number
+    aopQty: number
+    btRibType: number
+    btRibStyle: number
+    btRibClr: number
+    ribRate: number
+    ribQty: number
     printAutoBgt: number
     printRoughV2: number
     printVendorCost: number
@@ -17500,6 +17617,18 @@ export namespace Prisma {
     tasselsRoughV2?: true
     tasselsVdrCost?: true
     tasselsFinalCost?: true
+    collarAutoBgt?: true
+    collarRoughV2?: true
+    collarVdrCost?: true
+    collarFinalCost?: true
+    aopAutoBgt?: true
+    aopRoughV2?: true
+    aopVdrCost?: true
+    aopFinalCost?: true
+    ribAutoBgt?: true
+    ribRoughV2?: true
+    ribVdrCost?: true
+    ribFinalCost?: true
     mBtnRate?: true
     mBtnQty?: true
     dcRate?: true
@@ -17550,6 +17679,12 @@ export namespace Prisma {
     tagQty?: true
     tasselsRate?: true
     tasselsQty?: true
+    collarRate?: true
+    collarQty?: true
+    aopRate?: true
+    aopQty?: true
+    ribRate?: true
+    ribQty?: true
     printAutoBgt?: true
     printRoughV2?: true
     printVendorCost?: true
@@ -17727,6 +17862,18 @@ export namespace Prisma {
     tasselsRoughV2?: true
     tasselsVdrCost?: true
     tasselsFinalCost?: true
+    collarAutoBgt?: true
+    collarRoughV2?: true
+    collarVdrCost?: true
+    collarFinalCost?: true
+    aopAutoBgt?: true
+    aopRoughV2?: true
+    aopVdrCost?: true
+    aopFinalCost?: true
+    ribAutoBgt?: true
+    ribRoughV2?: true
+    ribVdrCost?: true
+    ribFinalCost?: true
     mBtnRate?: true
     mBtnQty?: true
     dcRate?: true
@@ -17777,6 +17924,12 @@ export namespace Prisma {
     tagQty?: true
     tasselsRate?: true
     tasselsQty?: true
+    collarRate?: true
+    collarQty?: true
+    aopRate?: true
+    aopQty?: true
+    ribRate?: true
+    ribQty?: true
     printAutoBgt?: true
     printRoughV2?: true
     printVendorCost?: true
@@ -18038,6 +18191,18 @@ export namespace Prisma {
     tasselsRoughV2?: true
     tasselsVdrCost?: true
     tasselsFinalCost?: true
+    collarAutoBgt?: true
+    collarRoughV2?: true
+    collarVdrCost?: true
+    collarFinalCost?: true
+    aopAutoBgt?: true
+    aopRoughV2?: true
+    aopVdrCost?: true
+    aopFinalCost?: true
+    ribAutoBgt?: true
+    ribRoughV2?: true
+    ribVdrCost?: true
+    ribFinalCost?: true
     mBtnRate?: true
     mBtnQty?: true
     dcRate?: true
@@ -18088,6 +18253,21 @@ export namespace Prisma {
     tagQty?: true
     tasselsRate?: true
     tasselsQty?: true
+    btCollarType?: true
+    btCollarStyle?: true
+    btCollarClr?: true
+    collarRate?: true
+    collarQty?: true
+    btAopType?: true
+    btAopStyle?: true
+    btAopClr?: true
+    aopRate?: true
+    aopQty?: true
+    btRibType?: true
+    btRibStyle?: true
+    btRibClr?: true
+    ribRate?: true
+    ribQty?: true
     printAutoBgt?: true
     printRoughV2?: true
     printVendorCost?: true
@@ -18387,6 +18567,18 @@ export namespace Prisma {
     tasselsRoughV2?: true
     tasselsVdrCost?: true
     tasselsFinalCost?: true
+    collarAutoBgt?: true
+    collarRoughV2?: true
+    collarVdrCost?: true
+    collarFinalCost?: true
+    aopAutoBgt?: true
+    aopRoughV2?: true
+    aopVdrCost?: true
+    aopFinalCost?: true
+    ribAutoBgt?: true
+    ribRoughV2?: true
+    ribVdrCost?: true
+    ribFinalCost?: true
     mBtnRate?: true
     mBtnQty?: true
     dcRate?: true
@@ -18437,6 +18629,21 @@ export namespace Prisma {
     tagQty?: true
     tasselsRate?: true
     tasselsQty?: true
+    btCollarType?: true
+    btCollarStyle?: true
+    btCollarClr?: true
+    collarRate?: true
+    collarQty?: true
+    btAopType?: true
+    btAopStyle?: true
+    btAopClr?: true
+    aopRate?: true
+    aopQty?: true
+    btRibType?: true
+    btRibStyle?: true
+    btRibClr?: true
+    ribRate?: true
+    ribQty?: true
     printAutoBgt?: true
     printRoughV2?: true
     printVendorCost?: true
@@ -18738,6 +18945,18 @@ export namespace Prisma {
     tasselsRoughV2?: true
     tasselsVdrCost?: true
     tasselsFinalCost?: true
+    collarAutoBgt?: true
+    collarRoughV2?: true
+    collarVdrCost?: true
+    collarFinalCost?: true
+    aopAutoBgt?: true
+    aopRoughV2?: true
+    aopVdrCost?: true
+    aopFinalCost?: true
+    ribAutoBgt?: true
+    ribRoughV2?: true
+    ribVdrCost?: true
+    ribFinalCost?: true
     mBtnRate?: true
     mBtnQty?: true
     dcRate?: true
@@ -18788,6 +19007,21 @@ export namespace Prisma {
     tagQty?: true
     tasselsRate?: true
     tasselsQty?: true
+    btCollarType?: true
+    btCollarStyle?: true
+    btCollarClr?: true
+    collarRate?: true
+    collarQty?: true
+    btAopType?: true
+    btAopStyle?: true
+    btAopClr?: true
+    aopRate?: true
+    aopQty?: true
+    btRibType?: true
+    btRibStyle?: true
+    btRibClr?: true
+    ribRate?: true
+    ribQty?: true
     printAutoBgt?: true
     printRoughV2?: true
     printVendorCost?: true
@@ -19180,6 +19414,18 @@ export namespace Prisma {
     tasselsRoughV2: Decimal | null
     tasselsVdrCost: Decimal | null
     tasselsFinalCost: Decimal | null
+    collarAutoBgt: Decimal | null
+    collarRoughV2: Decimal | null
+    collarVdrCost: Decimal | null
+    collarFinalCost: Decimal | null
+    aopAutoBgt: Decimal | null
+    aopRoughV2: Decimal | null
+    aopVdrCost: Decimal | null
+    aopFinalCost: Decimal | null
+    ribAutoBgt: Decimal | null
+    ribRoughV2: Decimal | null
+    ribVdrCost: Decimal | null
+    ribFinalCost: Decimal | null
     mBtnRate: Decimal | null
     mBtnQty: Decimal | null
     dcRate: Decimal | null
@@ -19230,6 +19476,21 @@ export namespace Prisma {
     tagQty: Decimal | null
     tasselsRate: Decimal | null
     tasselsQty: Decimal | null
+    btCollarType: string | null
+    btCollarStyle: string | null
+    btCollarClr: string | null
+    collarRate: Decimal | null
+    collarQty: Decimal | null
+    btAopType: string | null
+    btAopStyle: string | null
+    btAopClr: string | null
+    aopRate: Decimal | null
+    aopQty: Decimal | null
+    btRibType: string | null
+    btRibStyle: string | null
+    btRibClr: string | null
+    ribRate: Decimal | null
+    ribQty: Decimal | null
     printAutoBgt: Decimal | null
     printRoughV2: Decimal | null
     printVendorCost: Decimal | null
@@ -19554,6 +19815,18 @@ export namespace Prisma {
     tasselsRoughV2?: boolean
     tasselsVdrCost?: boolean
     tasselsFinalCost?: boolean
+    collarAutoBgt?: boolean
+    collarRoughV2?: boolean
+    collarVdrCost?: boolean
+    collarFinalCost?: boolean
+    aopAutoBgt?: boolean
+    aopRoughV2?: boolean
+    aopVdrCost?: boolean
+    aopFinalCost?: boolean
+    ribAutoBgt?: boolean
+    ribRoughV2?: boolean
+    ribVdrCost?: boolean
+    ribFinalCost?: boolean
     mBtnRate?: boolean
     mBtnQty?: boolean
     dcRate?: boolean
@@ -19604,6 +19877,21 @@ export namespace Prisma {
     tagQty?: boolean
     tasselsRate?: boolean
     tasselsQty?: boolean
+    btCollarType?: boolean
+    btCollarStyle?: boolean
+    btCollarClr?: boolean
+    collarRate?: boolean
+    collarQty?: boolean
+    btAopType?: boolean
+    btAopStyle?: boolean
+    btAopClr?: boolean
+    aopRate?: boolean
+    aopQty?: boolean
+    btRibType?: boolean
+    btRibStyle?: boolean
+    btRibClr?: boolean
+    ribRate?: boolean
+    ribQty?: boolean
     printAutoBgt?: boolean
     printRoughV2?: boolean
     printVendorCost?: boolean
@@ -19915,6 +20203,18 @@ export namespace Prisma {
     tasselsRoughV2?: boolean
     tasselsVdrCost?: boolean
     tasselsFinalCost?: boolean
+    collarAutoBgt?: boolean
+    collarRoughV2?: boolean
+    collarVdrCost?: boolean
+    collarFinalCost?: boolean
+    aopAutoBgt?: boolean
+    aopRoughV2?: boolean
+    aopVdrCost?: boolean
+    aopFinalCost?: boolean
+    ribAutoBgt?: boolean
+    ribRoughV2?: boolean
+    ribVdrCost?: boolean
+    ribFinalCost?: boolean
     mBtnRate?: boolean
     mBtnQty?: boolean
     dcRate?: boolean
@@ -19965,6 +20265,21 @@ export namespace Prisma {
     tagQty?: boolean
     tasselsRate?: boolean
     tasselsQty?: boolean
+    btCollarType?: boolean
+    btCollarStyle?: boolean
+    btCollarClr?: boolean
+    collarRate?: boolean
+    collarQty?: boolean
+    btAopType?: boolean
+    btAopStyle?: boolean
+    btAopClr?: boolean
+    aopRate?: boolean
+    aopQty?: boolean
+    btRibType?: boolean
+    btRibStyle?: boolean
+    btRibClr?: boolean
+    ribRate?: boolean
+    ribQty?: boolean
     printAutoBgt?: boolean
     printRoughV2?: boolean
     printVendorCost?: boolean
@@ -20273,6 +20588,18 @@ export namespace Prisma {
     tasselsRoughV2?: boolean
     tasselsVdrCost?: boolean
     tasselsFinalCost?: boolean
+    collarAutoBgt?: boolean
+    collarRoughV2?: boolean
+    collarVdrCost?: boolean
+    collarFinalCost?: boolean
+    aopAutoBgt?: boolean
+    aopRoughV2?: boolean
+    aopVdrCost?: boolean
+    aopFinalCost?: boolean
+    ribAutoBgt?: boolean
+    ribRoughV2?: boolean
+    ribVdrCost?: boolean
+    ribFinalCost?: boolean
     mBtnRate?: boolean
     mBtnQty?: boolean
     dcRate?: boolean
@@ -20323,6 +20650,21 @@ export namespace Prisma {
     tagQty?: boolean
     tasselsRate?: boolean
     tasselsQty?: boolean
+    btCollarType?: boolean
+    btCollarStyle?: boolean
+    btCollarClr?: boolean
+    collarRate?: boolean
+    collarQty?: boolean
+    btAopType?: boolean
+    btAopStyle?: boolean
+    btAopClr?: boolean
+    aopRate?: boolean
+    aopQty?: boolean
+    btRibType?: boolean
+    btRibStyle?: boolean
+    btRibClr?: boolean
+    ribRate?: boolean
+    ribQty?: boolean
     printAutoBgt?: boolean
     printRoughV2?: boolean
     printVendorCost?: boolean
@@ -20631,6 +20973,18 @@ export namespace Prisma {
     tasselsRoughV2?: boolean
     tasselsVdrCost?: boolean
     tasselsFinalCost?: boolean
+    collarAutoBgt?: boolean
+    collarRoughV2?: boolean
+    collarVdrCost?: boolean
+    collarFinalCost?: boolean
+    aopAutoBgt?: boolean
+    aopRoughV2?: boolean
+    aopVdrCost?: boolean
+    aopFinalCost?: boolean
+    ribAutoBgt?: boolean
+    ribRoughV2?: boolean
+    ribVdrCost?: boolean
+    ribFinalCost?: boolean
     mBtnRate?: boolean
     mBtnQty?: boolean
     dcRate?: boolean
@@ -20681,6 +21035,21 @@ export namespace Prisma {
     tagQty?: boolean
     tasselsRate?: boolean
     tasselsQty?: boolean
+    btCollarType?: boolean
+    btCollarStyle?: boolean
+    btCollarClr?: boolean
+    collarRate?: boolean
+    collarQty?: boolean
+    btAopType?: boolean
+    btAopStyle?: boolean
+    btAopClr?: boolean
+    aopRate?: boolean
+    aopQty?: boolean
+    btRibType?: boolean
+    btRibStyle?: boolean
+    btRibClr?: boolean
+    ribRate?: boolean
+    ribQty?: boolean
     printAutoBgt?: boolean
     printRoughV2?: boolean
     printVendorCost?: boolean
@@ -20751,7 +21120,7 @@ export namespace Prisma {
     fgAiAttributes?: boolean
   }
 
-  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageUrl" | "oldImageUrl" | "sourceImageUrl" | "aiCmpCostCutting" | "aiCmpCostStitching" | "aiCmpCostIroning" | "aiCmpCostFinishing" | "backImageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "creatorUser" | "modifyUser" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "mainMvgr" | "mFab2" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "totalBgtPrVal" | "totalActPrVal" | "totalVendorPrVal" | "totalFinalPrVal" | "bTrimType" | "bTrimTotalAutoBgt" | "bTrimTotalRoughV2" | "bTrimTotalVdrCost" | "bTrimTotalFinalCost" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "elasticAutoBgt" | "elasticRoughV2" | "elasticVdrCost" | "elasticFinalCost" | "fusingAutoBgt" | "fusingRoughV2" | "fusingVdrCost" | "fusingFinalCost" | "badgeAutoBgt" | "badgeRoughV2" | "badgeVdrCost" | "badgeFinalCost" | "rivetAutoBgt" | "rivetRoughV2" | "rivetVdrCost" | "rivetFinalCost" | "tapeAutoBgt" | "tapeRoughV2" | "tapeVdrCost" | "tapeFinalCost" | "otherAutoBgt" | "otherRoughV2" | "otherVdrCost" | "otherFinalCost" | "adjusterAutoBgt" | "adjusterRoughV2" | "adjusterVdrCost" | "adjusterFinalCost" | "brotchAutoBgt" | "brotchRoughV2" | "brotchVdrCost" | "brotchFinalCost" | "buckleAutoBgt" | "buckleRoughV2" | "buckleVdrCost" | "buckleFinalCost" | "eyeletsAutoBgt" | "eyeletsRoughV2" | "eyeletsVdrCost" | "eyeletsFinalCost" | "hangingDRingAutoBgt" | "hangingDRingRoughV2" | "hangingDRingVdrCost" | "hangingDRingFinalCost" | "hookAutoBgt" | "hookRoughV2" | "hookVdrCost" | "hookFinalCost" | "labelAutoBgt" | "labelRoughV2" | "labelVdrCost" | "labelFinalCost" | "laceAutoBgt" | "laceRoughV2" | "laceVdrCost" | "laceFinalCost" | "pockettingFabricAutoBgt" | "pockettingFabricRoughV2" | "pockettingFabricVdrCost" | "pockettingFabricFinalCost" | "pockettingReadymadeAutoBgt" | "pockettingReadymadeRoughV2" | "pockettingReadymadeVdrCost" | "pockettingReadymadeFinalCost" | "santaAutoBgt" | "santaRoughV2" | "santaVdrCost" | "santaFinalCost" | "stopperAutoBgt" | "stopperRoughV2" | "stopperVdrCost" | "stopperFinalCost" | "tagAutoBgt" | "tagRoughV2" | "tagVdrCost" | "tagFinalCost" | "tasselsAutoBgt" | "tasselsRoughV2" | "tasselsVdrCost" | "tasselsFinalCost" | "mBtnRate" | "mBtnQty" | "dcRate" | "dcQty" | "zipRate" | "zipQty" | "patchRate" | "patchQty" | "hTrfRate" | "hTrfQty" | "elasticRate" | "elasticQty" | "fusingRate" | "fusingQty" | "badgeRate" | "badgeQty" | "rivetRate" | "rivetQty" | "tapeRate" | "tapeQty" | "otherRate" | "otherQty" | "adjusterRate" | "adjusterQty" | "brotchRate" | "brotchQty" | "buckleRate" | "buckleQty" | "eyeletsRate" | "eyeletsQty" | "hangingDRingRate" | "hangingDRingQty" | "hookRate" | "hookQty" | "labelRate" | "labelQty" | "laceRate" | "laceQty" | "pockettingFabricRate" | "pockettingFabricQty" | "pockettingReadymadeRate" | "pockettingReadymadeQty" | "santaRate" | "santaQty" | "stopperRate" | "stopperQty" | "tagRate" | "tagQty" | "tasselsRate" | "tasselsQty" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "vaddPrintJson" | "vaddEmpJson" | "vaddTotalAutoBgt" | "vaddTotalRoughV2" | "vaddTotalVendorCost" | "vaddTotalFinalCost" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "buyingType" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "presentationsType" | "approvalStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "setLinkStatus" | "setLinkMessage" | "setLinkAttempts" | "setLinkedAt" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData" | "fgAiAttributes", ExtArgs["result"]["extractionResultFlat"]>
+  export type ExtractionResultFlatOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobId" | "imageUrl" | "oldImageUrl" | "sourceImageUrl" | "aiCmpCostCutting" | "aiCmpCostStitching" | "aiCmpCostIroning" | "aiCmpCostFinishing" | "backImageUrl" | "articleNumber" | "extractionStatus" | "aiModel" | "avgConfidence" | "processingTimeMs" | "totalAttributes" | "extractedCount" | "inputTokens" | "outputTokens" | "totalTokens" | "apiCost" | "userId" | "userName" | "creatorUser" | "modifyUser" | "extractionDate" | "createdAt" | "updatedAt" | "majorCategory" | "vendorName" | "designNumber" | "pptNumber" | "rate" | "yarn1" | "yarn2" | "fabricMainMvgr" | "weave" | "weaveFullForm" | "composition" | "finish" | "gsm" | "macroMvgr" | "mainMvgr" | "mFab2" | "shade" | "weight" | "lycra" | "neck" | "neckDetails" | "collar" | "placket" | "sleeve" | "bottomFold" | "frontOpenStyle" | "pocketType" | "fit" | "pattern" | "length" | "colour" | "secondaryColour" | "drawcord" | "button" | "zipper" | "zipColour" | "printType" | "printStyle" | "printPlacement" | "patches" | "patchesType" | "embroidery" | "embroideryType" | "wash" | "fatherBelt" | "childBelt" | "division" | "subDivision" | "referenceArticleNumber" | "referenceArticleDescription" | "collarStyle" | "sleeveFold" | "mSet" | "noOfPocket" | "extraPocket" | "dcShape" | "btnColour" | "fCount" | "fConstruction" | "fOunce" | "fWidth" | "fabDiv" | "fabVdr" | "htrfType" | "htrfStyle" | "embPlacement" | "ageGroup" | "mNoOfSize" | "mNoOfClr" | "articleFashionType" | "articleDimension" | "autoBgt" | "roughV2" | "vendorFabricRate" | "finalCost" | "roughRatio" | "roughConsumptionKg" | "roughConsumptionMeter" | "preciseRatio" | "preciseConsumptionKg" | "preciseConsumptionMeter" | "cuttingBgtPrVal" | "cuttingActPrVal" | "cuttingVendorPrVal" | "cuttingFinalPrVal" | "stitchingBgtPrVal" | "stitchingActPrVal" | "stitchingVendorPrVal" | "stitchingFinalPrVal" | "ironingBgtPrVal" | "ironingActPrVal" | "ironingVendorPrVal" | "ironingFinalPrVal" | "finishingBgtPrVal" | "finishingActPrVal" | "finishingVendorPrVal" | "finishingFinalPrVal" | "totalBgtPrVal" | "totalActPrVal" | "totalVendorPrVal" | "totalFinalPrVal" | "bTrimType" | "bTrimTotalAutoBgt" | "bTrimTotalRoughV2" | "bTrimTotalVdrCost" | "bTrimTotalFinalCost" | "mBtnAutoBgt" | "mBtnRoughV2" | "mBtnVdrCost" | "mBtnFinalCost" | "dcAutoBgt" | "dcRoughV2" | "dcVdrCost" | "dcFinalCost" | "zipAutoBgt" | "zipRoughV2" | "zipVdrCost" | "zipFinalCost" | "patchAutoBgt" | "patchRoughV2" | "patchVdrCost" | "patchFinalCost" | "hTrfAutoBgt" | "hTrfRoughV2" | "hTrfVdrCost" | "hTrfFinalCost" | "elasticAutoBgt" | "elasticRoughV2" | "elasticVdrCost" | "elasticFinalCost" | "fusingAutoBgt" | "fusingRoughV2" | "fusingVdrCost" | "fusingFinalCost" | "badgeAutoBgt" | "badgeRoughV2" | "badgeVdrCost" | "badgeFinalCost" | "rivetAutoBgt" | "rivetRoughV2" | "rivetVdrCost" | "rivetFinalCost" | "tapeAutoBgt" | "tapeRoughV2" | "tapeVdrCost" | "tapeFinalCost" | "otherAutoBgt" | "otherRoughV2" | "otherVdrCost" | "otherFinalCost" | "adjusterAutoBgt" | "adjusterRoughV2" | "adjusterVdrCost" | "adjusterFinalCost" | "brotchAutoBgt" | "brotchRoughV2" | "brotchVdrCost" | "brotchFinalCost" | "buckleAutoBgt" | "buckleRoughV2" | "buckleVdrCost" | "buckleFinalCost" | "eyeletsAutoBgt" | "eyeletsRoughV2" | "eyeletsVdrCost" | "eyeletsFinalCost" | "hangingDRingAutoBgt" | "hangingDRingRoughV2" | "hangingDRingVdrCost" | "hangingDRingFinalCost" | "hookAutoBgt" | "hookRoughV2" | "hookVdrCost" | "hookFinalCost" | "labelAutoBgt" | "labelRoughV2" | "labelVdrCost" | "labelFinalCost" | "laceAutoBgt" | "laceRoughV2" | "laceVdrCost" | "laceFinalCost" | "pockettingFabricAutoBgt" | "pockettingFabricRoughV2" | "pockettingFabricVdrCost" | "pockettingFabricFinalCost" | "pockettingReadymadeAutoBgt" | "pockettingReadymadeRoughV2" | "pockettingReadymadeVdrCost" | "pockettingReadymadeFinalCost" | "santaAutoBgt" | "santaRoughV2" | "santaVdrCost" | "santaFinalCost" | "stopperAutoBgt" | "stopperRoughV2" | "stopperVdrCost" | "stopperFinalCost" | "tagAutoBgt" | "tagRoughV2" | "tagVdrCost" | "tagFinalCost" | "tasselsAutoBgt" | "tasselsRoughV2" | "tasselsVdrCost" | "tasselsFinalCost" | "collarAutoBgt" | "collarRoughV2" | "collarVdrCost" | "collarFinalCost" | "aopAutoBgt" | "aopRoughV2" | "aopVdrCost" | "aopFinalCost" | "ribAutoBgt" | "ribRoughV2" | "ribVdrCost" | "ribFinalCost" | "mBtnRate" | "mBtnQty" | "dcRate" | "dcQty" | "zipRate" | "zipQty" | "patchRate" | "patchQty" | "hTrfRate" | "hTrfQty" | "elasticRate" | "elasticQty" | "fusingRate" | "fusingQty" | "badgeRate" | "badgeQty" | "rivetRate" | "rivetQty" | "tapeRate" | "tapeQty" | "otherRate" | "otherQty" | "adjusterRate" | "adjusterQty" | "brotchRate" | "brotchQty" | "buckleRate" | "buckleQty" | "eyeletsRate" | "eyeletsQty" | "hangingDRingRate" | "hangingDRingQty" | "hookRate" | "hookQty" | "labelRate" | "labelQty" | "laceRate" | "laceQty" | "pockettingFabricRate" | "pockettingFabricQty" | "pockettingReadymadeRate" | "pockettingReadymadeQty" | "santaRate" | "santaQty" | "stopperRate" | "stopperQty" | "tagRate" | "tagQty" | "tasselsRate" | "tasselsQty" | "btCollarType" | "btCollarStyle" | "btCollarClr" | "collarRate" | "collarQty" | "btAopType" | "btAopStyle" | "btAopClr" | "aopRate" | "aopQty" | "btRibType" | "btRibStyle" | "btRibClr" | "ribRate" | "ribQty" | "printAutoBgt" | "printRoughV2" | "printVendorCost" | "printFinalCost" | "embAutoBgt" | "embRoughV2" | "embVendorCost" | "embFinalCost" | "washingAutoBgt" | "washingRoughV2" | "washingVendorCost" | "washingFinalCost" | "vaddPrintJson" | "vaddEmpJson" | "vaddTotalAutoBgt" | "vaddTotalRoughV2" | "vaddTotalVendorCost" | "vaddTotalFinalCost" | "pkgCostType" | "boppNetPrice" | "ctnNetPrice" | "barcodeNetPrice" | "kimbleNetPrice" | "taftaNetPrice" | "threadNetPrice" | "bodyArticle" | "bodyArticleDescription" | "fabricArticleNumber" | "fabricArticleDescription" | "attrArticleNums" | "mvgrBrandVendor" | "mcDescription" | "vendorCode" | "mrp" | "impAtrbt2" | "buyingType" | "mcCode" | "segment" | "season" | "hsnTaxCode" | "articleDescription" | "fashionGrid" | "year" | "presentationsType" | "approvalStatus" | "approvedBy" | "approvedAt" | "source" | "imageUncPath" | "isOldArticle" | "isGeneric" | "comboRole" | "comboParentId" | "comboChildOrder" | "setGroupId" | "setRole" | "setName" | "setLinkStatus" | "setLinkMessage" | "setLinkAttempts" | "setLinkedAt" | "sapSyncStatus" | "sapArticleId" | "sapSyncMessage" | "srmOriginalDesignNumber" | "srmUniqueId" | "imageExtractionRawData" | "fgAiAttributes", ExtArgs["result"]["extractionResultFlat"]>
   export type ExtractionResultFlatInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     approver?: boolean | ExtractionResultFlat$approverArgs<ExtArgs>
     comboParent?: boolean | ExtractionResultFlat$comboParentArgs<ExtArgs>
@@ -21015,6 +21384,18 @@ export namespace Prisma {
       tasselsRoughV2: Prisma.Decimal | null
       tasselsVdrCost: Prisma.Decimal | null
       tasselsFinalCost: Prisma.Decimal | null
+      collarAutoBgt: Prisma.Decimal | null
+      collarRoughV2: Prisma.Decimal | null
+      collarVdrCost: Prisma.Decimal | null
+      collarFinalCost: Prisma.Decimal | null
+      aopAutoBgt: Prisma.Decimal | null
+      aopRoughV2: Prisma.Decimal | null
+      aopVdrCost: Prisma.Decimal | null
+      aopFinalCost: Prisma.Decimal | null
+      ribAutoBgt: Prisma.Decimal | null
+      ribRoughV2: Prisma.Decimal | null
+      ribVdrCost: Prisma.Decimal | null
+      ribFinalCost: Prisma.Decimal | null
       mBtnRate: Prisma.Decimal | null
       mBtnQty: Prisma.Decimal | null
       dcRate: Prisma.Decimal | null
@@ -21065,6 +21446,21 @@ export namespace Prisma {
       tagQty: Prisma.Decimal | null
       tasselsRate: Prisma.Decimal | null
       tasselsQty: Prisma.Decimal | null
+      btCollarType: string | null
+      btCollarStyle: string | null
+      btCollarClr: string | null
+      collarRate: Prisma.Decimal | null
+      collarQty: Prisma.Decimal | null
+      btAopType: string | null
+      btAopStyle: string | null
+      btAopClr: string | null
+      aopRate: Prisma.Decimal | null
+      aopQty: Prisma.Decimal | null
+      btRibType: string | null
+      btRibStyle: string | null
+      btRibClr: string | null
+      ribRate: Prisma.Decimal | null
+      ribQty: Prisma.Decimal | null
       printAutoBgt: Prisma.Decimal | null
       printRoughV2: Prisma.Decimal | null
       printVendorCost: Prisma.Decimal | null
@@ -21795,6 +22191,18 @@ export namespace Prisma {
     readonly tasselsRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly tasselsVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly tasselsFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly collarAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly collarRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly collarVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly collarFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly aopAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly aopRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly aopVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly aopFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly ribAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly ribRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly ribVdrCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly ribFinalCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly mBtnRate: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly mBtnQty: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly dcRate: FieldRef<"ExtractionResultFlat", 'Decimal'>
@@ -21845,6 +22253,21 @@ export namespace Prisma {
     readonly tagQty: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly tasselsRate: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly tasselsQty: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly btCollarType: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly btCollarStyle: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly btCollarClr: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly collarRate: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly collarQty: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly btAopType: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly btAopStyle: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly btAopClr: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly aopRate: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly aopQty: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly btRibType: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly btRibStyle: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly btRibClr: FieldRef<"ExtractionResultFlat", 'String'>
+    readonly ribRate: FieldRef<"ExtractionResultFlat", 'Decimal'>
+    readonly ribQty: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly printAutoBgt: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly printRoughV2: FieldRef<"ExtractionResultFlat", 'Decimal'>
     readonly printVendorCost: FieldRef<"ExtractionResultFlat", 'Decimal'>
@@ -92246,6 +92669,18 @@ export namespace Prisma {
     tasselsRoughV2: 'tasselsRoughV2',
     tasselsVdrCost: 'tasselsVdrCost',
     tasselsFinalCost: 'tasselsFinalCost',
+    collarAutoBgt: 'collarAutoBgt',
+    collarRoughV2: 'collarRoughV2',
+    collarVdrCost: 'collarVdrCost',
+    collarFinalCost: 'collarFinalCost',
+    aopAutoBgt: 'aopAutoBgt',
+    aopRoughV2: 'aopRoughV2',
+    aopVdrCost: 'aopVdrCost',
+    aopFinalCost: 'aopFinalCost',
+    ribAutoBgt: 'ribAutoBgt',
+    ribRoughV2: 'ribRoughV2',
+    ribVdrCost: 'ribVdrCost',
+    ribFinalCost: 'ribFinalCost',
     mBtnRate: 'mBtnRate',
     mBtnQty: 'mBtnQty',
     dcRate: 'dcRate',
@@ -92296,6 +92731,21 @@ export namespace Prisma {
     tagQty: 'tagQty',
     tasselsRate: 'tasselsRate',
     tasselsQty: 'tasselsQty',
+    btCollarType: 'btCollarType',
+    btCollarStyle: 'btCollarStyle',
+    btCollarClr: 'btCollarClr',
+    collarRate: 'collarRate',
+    collarQty: 'collarQty',
+    btAopType: 'btAopType',
+    btAopStyle: 'btAopStyle',
+    btAopClr: 'btAopClr',
+    aopRate: 'aopRate',
+    aopQty: 'aopQty',
+    btRibType: 'btRibType',
+    btRibStyle: 'btRibStyle',
+    btRibClr: 'btRibClr',
+    ribRate: 'ribRate',
+    ribQty: 'ribQty',
     printAutoBgt: 'printAutoBgt',
     printRoughV2: 'printRoughV2',
     printVendorCost: 'printVendorCost',
@@ -94011,6 +94461,15 @@ export namespace Prisma {
     articleFashionType: 'articleFashionType',
     articleDimension: 'articleDimension',
     bTrimType: 'bTrimType',
+    btCollarType: 'btCollarType',
+    btCollarStyle: 'btCollarStyle',
+    btCollarClr: 'btCollarClr',
+    btAopType: 'btAopType',
+    btAopStyle: 'btAopStyle',
+    btAopClr: 'btAopClr',
+    btRibType: 'btRibType',
+    btRibStyle: 'btRibStyle',
+    btRibClr: 'btRibClr',
     pkgCostType: 'pkgCostType',
     bodyArticle: 'bodyArticle',
     bodyArticleDescription: 'bodyArticleDescription',
@@ -96358,6 +96817,18 @@ export namespace Prisma {
     tasselsRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnQty?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     dcRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -96408,6 +96879,21 @@ export namespace Prisma {
     tagQty?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     tasselsRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     tasselsQty?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    btCollarType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    btCollarStyle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    btCollarClr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    collarRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    collarQty?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    btAopType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    btAopStyle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    btAopClr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    aopRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aopQty?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    btRibType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    btRibStyle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    btRibClr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    ribRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ribQty?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -96718,6 +97204,18 @@ export namespace Prisma {
     tasselsRoughV2?: SortOrderInput | SortOrder
     tasselsVdrCost?: SortOrderInput | SortOrder
     tasselsFinalCost?: SortOrderInput | SortOrder
+    collarAutoBgt?: SortOrderInput | SortOrder
+    collarRoughV2?: SortOrderInput | SortOrder
+    collarVdrCost?: SortOrderInput | SortOrder
+    collarFinalCost?: SortOrderInput | SortOrder
+    aopAutoBgt?: SortOrderInput | SortOrder
+    aopRoughV2?: SortOrderInput | SortOrder
+    aopVdrCost?: SortOrderInput | SortOrder
+    aopFinalCost?: SortOrderInput | SortOrder
+    ribAutoBgt?: SortOrderInput | SortOrder
+    ribRoughV2?: SortOrderInput | SortOrder
+    ribVdrCost?: SortOrderInput | SortOrder
+    ribFinalCost?: SortOrderInput | SortOrder
     mBtnRate?: SortOrderInput | SortOrder
     mBtnQty?: SortOrderInput | SortOrder
     dcRate?: SortOrderInput | SortOrder
@@ -96768,6 +97266,21 @@ export namespace Prisma {
     tagQty?: SortOrderInput | SortOrder
     tasselsRate?: SortOrderInput | SortOrder
     tasselsQty?: SortOrderInput | SortOrder
+    btCollarType?: SortOrderInput | SortOrder
+    btCollarStyle?: SortOrderInput | SortOrder
+    btCollarClr?: SortOrderInput | SortOrder
+    collarRate?: SortOrderInput | SortOrder
+    collarQty?: SortOrderInput | SortOrder
+    btAopType?: SortOrderInput | SortOrder
+    btAopStyle?: SortOrderInput | SortOrder
+    btAopClr?: SortOrderInput | SortOrder
+    aopRate?: SortOrderInput | SortOrder
+    aopQty?: SortOrderInput | SortOrder
+    btRibType?: SortOrderInput | SortOrder
+    btRibStyle?: SortOrderInput | SortOrder
+    btRibClr?: SortOrderInput | SortOrder
+    ribRate?: SortOrderInput | SortOrder
+    ribQty?: SortOrderInput | SortOrder
     printAutoBgt?: SortOrderInput | SortOrder
     printRoughV2?: SortOrderInput | SortOrder
     printVendorCost?: SortOrderInput | SortOrder
@@ -97083,6 +97596,18 @@ export namespace Prisma {
     tasselsRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnQty?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     dcRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -97133,6 +97658,21 @@ export namespace Prisma {
     tagQty?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     tasselsRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     tasselsQty?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    btCollarType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    btCollarStyle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    btCollarClr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    collarRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    collarQty?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    btAopType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    btAopStyle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    btAopClr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    aopRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aopQty?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    btRibType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    btRibStyle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    btRibClr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    ribRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ribQty?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -97442,6 +97982,18 @@ export namespace Prisma {
     tasselsRoughV2?: SortOrderInput | SortOrder
     tasselsVdrCost?: SortOrderInput | SortOrder
     tasselsFinalCost?: SortOrderInput | SortOrder
+    collarAutoBgt?: SortOrderInput | SortOrder
+    collarRoughV2?: SortOrderInput | SortOrder
+    collarVdrCost?: SortOrderInput | SortOrder
+    collarFinalCost?: SortOrderInput | SortOrder
+    aopAutoBgt?: SortOrderInput | SortOrder
+    aopRoughV2?: SortOrderInput | SortOrder
+    aopVdrCost?: SortOrderInput | SortOrder
+    aopFinalCost?: SortOrderInput | SortOrder
+    ribAutoBgt?: SortOrderInput | SortOrder
+    ribRoughV2?: SortOrderInput | SortOrder
+    ribVdrCost?: SortOrderInput | SortOrder
+    ribFinalCost?: SortOrderInput | SortOrder
     mBtnRate?: SortOrderInput | SortOrder
     mBtnQty?: SortOrderInput | SortOrder
     dcRate?: SortOrderInput | SortOrder
@@ -97492,6 +98044,21 @@ export namespace Prisma {
     tagQty?: SortOrderInput | SortOrder
     tasselsRate?: SortOrderInput | SortOrder
     tasselsQty?: SortOrderInput | SortOrder
+    btCollarType?: SortOrderInput | SortOrder
+    btCollarStyle?: SortOrderInput | SortOrder
+    btCollarClr?: SortOrderInput | SortOrder
+    collarRate?: SortOrderInput | SortOrder
+    collarQty?: SortOrderInput | SortOrder
+    btAopType?: SortOrderInput | SortOrder
+    btAopStyle?: SortOrderInput | SortOrder
+    btAopClr?: SortOrderInput | SortOrder
+    aopRate?: SortOrderInput | SortOrder
+    aopQty?: SortOrderInput | SortOrder
+    btRibType?: SortOrderInput | SortOrder
+    btRibStyle?: SortOrderInput | SortOrder
+    btRibClr?: SortOrderInput | SortOrder
+    ribRate?: SortOrderInput | SortOrder
+    ribQty?: SortOrderInput | SortOrder
     printAutoBgt?: SortOrderInput | SortOrder
     printRoughV2?: SortOrderInput | SortOrder
     printVendorCost?: SortOrderInput | SortOrder
@@ -97805,6 +98372,18 @@ export namespace Prisma {
     tasselsRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnRate?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnQty?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     dcRate?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -97855,6 +98434,21 @@ export namespace Prisma {
     tagQty?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     tasselsRate?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     tasselsQty?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    btCollarType?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    btCollarStyle?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    btCollarClr?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    collarRate?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    collarQty?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    btAopType?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    btAopStyle?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    btAopClr?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    aopRate?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aopQty?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    btRibType?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    btRibStyle?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    btRibClr?: StringNullableWithAggregatesFilter<"ExtractionResultFlat"> | string | null
+    ribRate?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ribQty?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: DecimalNullableWithAggregatesFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -106238,6 +106832,18 @@ export namespace Prisma {
     tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnRate?: Decimal | DecimalJsLike | number | string | null
     mBtnQty?: Decimal | DecimalJsLike | number | string | null
     dcRate?: Decimal | DecimalJsLike | number | string | null
@@ -106288,6 +106894,21 @@ export namespace Prisma {
     tagQty?: Decimal | DecimalJsLike | number | string | null
     tasselsRate?: Decimal | DecimalJsLike | number | string | null
     tasselsQty?: Decimal | DecimalJsLike | number | string | null
+    btCollarType?: string | null
+    btCollarStyle?: string | null
+    btCollarClr?: string | null
+    collarRate?: Decimal | DecimalJsLike | number | string | null
+    collarQty?: Decimal | DecimalJsLike | number | string | null
+    btAopType?: string | null
+    btAopStyle?: string | null
+    btAopClr?: string | null
+    aopRate?: Decimal | DecimalJsLike | number | string | null
+    aopQty?: Decimal | DecimalJsLike | number | string | null
+    btRibType?: string | null
+    btRibStyle?: string | null
+    btRibClr?: string | null
+    ribRate?: Decimal | DecimalJsLike | number | string | null
+    ribQty?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -106596,6 +107217,18 @@ export namespace Prisma {
     tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnRate?: Decimal | DecimalJsLike | number | string | null
     mBtnQty?: Decimal | DecimalJsLike | number | string | null
     dcRate?: Decimal | DecimalJsLike | number | string | null
@@ -106646,6 +107279,21 @@ export namespace Prisma {
     tagQty?: Decimal | DecimalJsLike | number | string | null
     tasselsRate?: Decimal | DecimalJsLike | number | string | null
     tasselsQty?: Decimal | DecimalJsLike | number | string | null
+    btCollarType?: string | null
+    btCollarStyle?: string | null
+    btCollarClr?: string | null
+    collarRate?: Decimal | DecimalJsLike | number | string | null
+    collarQty?: Decimal | DecimalJsLike | number | string | null
+    btAopType?: string | null
+    btAopStyle?: string | null
+    btAopClr?: string | null
+    aopRate?: Decimal | DecimalJsLike | number | string | null
+    aopQty?: Decimal | DecimalJsLike | number | string | null
+    btRibType?: string | null
+    btRibStyle?: string | null
+    btRibClr?: string | null
+    ribRate?: Decimal | DecimalJsLike | number | string | null
+    ribQty?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -106952,6 +107600,18 @@ export namespace Prisma {
     tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     dcRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -107002,6 +107662,21 @@ export namespace Prisma {
     tagQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarClr?: NullableStringFieldUpdateOperationsInput | string | null
+    collarRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btAopType?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopClr?: NullableStringFieldUpdateOperationsInput | string | null
+    aopRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btRibType?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibClr?: NullableStringFieldUpdateOperationsInput | string | null
+    ribRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -107310,6 +107985,18 @@ export namespace Prisma {
     tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     dcRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -107360,6 +108047,21 @@ export namespace Prisma {
     tagQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarClr?: NullableStringFieldUpdateOperationsInput | string | null
+    collarRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btAopType?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopClr?: NullableStringFieldUpdateOperationsInput | string | null
+    aopRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btRibType?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibClr?: NullableStringFieldUpdateOperationsInput | string | null
+    ribRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -107667,6 +108369,18 @@ export namespace Prisma {
     tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnRate?: Decimal | DecimalJsLike | number | string | null
     mBtnQty?: Decimal | DecimalJsLike | number | string | null
     dcRate?: Decimal | DecimalJsLike | number | string | null
@@ -107717,6 +108431,21 @@ export namespace Prisma {
     tagQty?: Decimal | DecimalJsLike | number | string | null
     tasselsRate?: Decimal | DecimalJsLike | number | string | null
     tasselsQty?: Decimal | DecimalJsLike | number | string | null
+    btCollarType?: string | null
+    btCollarStyle?: string | null
+    btCollarClr?: string | null
+    collarRate?: Decimal | DecimalJsLike | number | string | null
+    collarQty?: Decimal | DecimalJsLike | number | string | null
+    btAopType?: string | null
+    btAopStyle?: string | null
+    btAopClr?: string | null
+    aopRate?: Decimal | DecimalJsLike | number | string | null
+    aopQty?: Decimal | DecimalJsLike | number | string | null
+    btRibType?: string | null
+    btRibStyle?: string | null
+    btRibClr?: string | null
+    ribRate?: Decimal | DecimalJsLike | number | string | null
+    ribQty?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -108021,6 +108750,18 @@ export namespace Prisma {
     tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     dcRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -108071,6 +108812,21 @@ export namespace Prisma {
     tagQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarClr?: NullableStringFieldUpdateOperationsInput | string | null
+    collarRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btAopType?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopClr?: NullableStringFieldUpdateOperationsInput | string | null
+    aopRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btRibType?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibClr?: NullableStringFieldUpdateOperationsInput | string | null
+    ribRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -108374,6 +109130,18 @@ export namespace Prisma {
     tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     dcRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -108424,6 +109192,21 @@ export namespace Prisma {
     tagQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarClr?: NullableStringFieldUpdateOperationsInput | string | null
+    collarRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btAopType?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopClr?: NullableStringFieldUpdateOperationsInput | string | null
+    aopRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btRibType?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibClr?: NullableStringFieldUpdateOperationsInput | string | null
+    ribRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -118579,6 +119362,18 @@ export namespace Prisma {
     tasselsRoughV2?: SortOrder
     tasselsVdrCost?: SortOrder
     tasselsFinalCost?: SortOrder
+    collarAutoBgt?: SortOrder
+    collarRoughV2?: SortOrder
+    collarVdrCost?: SortOrder
+    collarFinalCost?: SortOrder
+    aopAutoBgt?: SortOrder
+    aopRoughV2?: SortOrder
+    aopVdrCost?: SortOrder
+    aopFinalCost?: SortOrder
+    ribAutoBgt?: SortOrder
+    ribRoughV2?: SortOrder
+    ribVdrCost?: SortOrder
+    ribFinalCost?: SortOrder
     mBtnRate?: SortOrder
     mBtnQty?: SortOrder
     dcRate?: SortOrder
@@ -118629,6 +119424,21 @@ export namespace Prisma {
     tagQty?: SortOrder
     tasselsRate?: SortOrder
     tasselsQty?: SortOrder
+    btCollarType?: SortOrder
+    btCollarStyle?: SortOrder
+    btCollarClr?: SortOrder
+    collarRate?: SortOrder
+    collarQty?: SortOrder
+    btAopType?: SortOrder
+    btAopStyle?: SortOrder
+    btAopClr?: SortOrder
+    aopRate?: SortOrder
+    aopQty?: SortOrder
+    btRibType?: SortOrder
+    btRibStyle?: SortOrder
+    btRibClr?: SortOrder
+    ribRate?: SortOrder
+    ribQty?: SortOrder
     printAutoBgt?: SortOrder
     printRoughV2?: SortOrder
     printVendorCost?: SortOrder
@@ -118848,6 +119658,18 @@ export namespace Prisma {
     tasselsRoughV2?: SortOrder
     tasselsVdrCost?: SortOrder
     tasselsFinalCost?: SortOrder
+    collarAutoBgt?: SortOrder
+    collarRoughV2?: SortOrder
+    collarVdrCost?: SortOrder
+    collarFinalCost?: SortOrder
+    aopAutoBgt?: SortOrder
+    aopRoughV2?: SortOrder
+    aopVdrCost?: SortOrder
+    aopFinalCost?: SortOrder
+    ribAutoBgt?: SortOrder
+    ribRoughV2?: SortOrder
+    ribVdrCost?: SortOrder
+    ribFinalCost?: SortOrder
     mBtnRate?: SortOrder
     mBtnQty?: SortOrder
     dcRate?: SortOrder
@@ -118898,6 +119720,12 @@ export namespace Prisma {
     tagQty?: SortOrder
     tasselsRate?: SortOrder
     tasselsQty?: SortOrder
+    collarRate?: SortOrder
+    collarQty?: SortOrder
+    aopRate?: SortOrder
+    aopQty?: SortOrder
+    ribRate?: SortOrder
+    ribQty?: SortOrder
     printAutoBgt?: SortOrder
     printRoughV2?: SortOrder
     printVendorCost?: SortOrder
@@ -119159,6 +119987,18 @@ export namespace Prisma {
     tasselsRoughV2?: SortOrder
     tasselsVdrCost?: SortOrder
     tasselsFinalCost?: SortOrder
+    collarAutoBgt?: SortOrder
+    collarRoughV2?: SortOrder
+    collarVdrCost?: SortOrder
+    collarFinalCost?: SortOrder
+    aopAutoBgt?: SortOrder
+    aopRoughV2?: SortOrder
+    aopVdrCost?: SortOrder
+    aopFinalCost?: SortOrder
+    ribAutoBgt?: SortOrder
+    ribRoughV2?: SortOrder
+    ribVdrCost?: SortOrder
+    ribFinalCost?: SortOrder
     mBtnRate?: SortOrder
     mBtnQty?: SortOrder
     dcRate?: SortOrder
@@ -119209,6 +120049,21 @@ export namespace Prisma {
     tagQty?: SortOrder
     tasselsRate?: SortOrder
     tasselsQty?: SortOrder
+    btCollarType?: SortOrder
+    btCollarStyle?: SortOrder
+    btCollarClr?: SortOrder
+    collarRate?: SortOrder
+    collarQty?: SortOrder
+    btAopType?: SortOrder
+    btAopStyle?: SortOrder
+    btAopClr?: SortOrder
+    aopRate?: SortOrder
+    aopQty?: SortOrder
+    btRibType?: SortOrder
+    btRibStyle?: SortOrder
+    btRibClr?: SortOrder
+    ribRate?: SortOrder
+    ribQty?: SortOrder
     printAutoBgt?: SortOrder
     printRoughV2?: SortOrder
     printVendorCost?: SortOrder
@@ -119508,6 +120363,18 @@ export namespace Prisma {
     tasselsRoughV2?: SortOrder
     tasselsVdrCost?: SortOrder
     tasselsFinalCost?: SortOrder
+    collarAutoBgt?: SortOrder
+    collarRoughV2?: SortOrder
+    collarVdrCost?: SortOrder
+    collarFinalCost?: SortOrder
+    aopAutoBgt?: SortOrder
+    aopRoughV2?: SortOrder
+    aopVdrCost?: SortOrder
+    aopFinalCost?: SortOrder
+    ribAutoBgt?: SortOrder
+    ribRoughV2?: SortOrder
+    ribVdrCost?: SortOrder
+    ribFinalCost?: SortOrder
     mBtnRate?: SortOrder
     mBtnQty?: SortOrder
     dcRate?: SortOrder
@@ -119558,6 +120425,21 @@ export namespace Prisma {
     tagQty?: SortOrder
     tasselsRate?: SortOrder
     tasselsQty?: SortOrder
+    btCollarType?: SortOrder
+    btCollarStyle?: SortOrder
+    btCollarClr?: SortOrder
+    collarRate?: SortOrder
+    collarQty?: SortOrder
+    btAopType?: SortOrder
+    btAopStyle?: SortOrder
+    btAopClr?: SortOrder
+    aopRate?: SortOrder
+    aopQty?: SortOrder
+    btRibType?: SortOrder
+    btRibStyle?: SortOrder
+    btRibClr?: SortOrder
+    ribRate?: SortOrder
+    ribQty?: SortOrder
     printAutoBgt?: SortOrder
     printRoughV2?: SortOrder
     printVendorCost?: SortOrder
@@ -119773,6 +120655,18 @@ export namespace Prisma {
     tasselsRoughV2?: SortOrder
     tasselsVdrCost?: SortOrder
     tasselsFinalCost?: SortOrder
+    collarAutoBgt?: SortOrder
+    collarRoughV2?: SortOrder
+    collarVdrCost?: SortOrder
+    collarFinalCost?: SortOrder
+    aopAutoBgt?: SortOrder
+    aopRoughV2?: SortOrder
+    aopVdrCost?: SortOrder
+    aopFinalCost?: SortOrder
+    ribAutoBgt?: SortOrder
+    ribRoughV2?: SortOrder
+    ribVdrCost?: SortOrder
+    ribFinalCost?: SortOrder
     mBtnRate?: SortOrder
     mBtnQty?: SortOrder
     dcRate?: SortOrder
@@ -119823,6 +120717,12 @@ export namespace Prisma {
     tagQty?: SortOrder
     tasselsRate?: SortOrder
     tasselsQty?: SortOrder
+    collarRate?: SortOrder
+    collarQty?: SortOrder
+    aopRate?: SortOrder
+    aopQty?: SortOrder
+    ribRate?: SortOrder
+    ribQty?: SortOrder
     printAutoBgt?: SortOrder
     printRoughV2?: SortOrder
     printVendorCost?: SortOrder
@@ -128383,6 +129283,18 @@ export namespace Prisma {
     tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnRate?: Decimal | DecimalJsLike | number | string | null
     mBtnQty?: Decimal | DecimalJsLike | number | string | null
     dcRate?: Decimal | DecimalJsLike | number | string | null
@@ -128433,6 +129345,21 @@ export namespace Prisma {
     tagQty?: Decimal | DecimalJsLike | number | string | null
     tasselsRate?: Decimal | DecimalJsLike | number | string | null
     tasselsQty?: Decimal | DecimalJsLike | number | string | null
+    btCollarType?: string | null
+    btCollarStyle?: string | null
+    btCollarClr?: string | null
+    collarRate?: Decimal | DecimalJsLike | number | string | null
+    collarQty?: Decimal | DecimalJsLike | number | string | null
+    btAopType?: string | null
+    btAopStyle?: string | null
+    btAopClr?: string | null
+    aopRate?: Decimal | DecimalJsLike | number | string | null
+    aopQty?: Decimal | DecimalJsLike | number | string | null
+    btRibType?: string | null
+    btRibStyle?: string | null
+    btRibClr?: string | null
+    ribRate?: Decimal | DecimalJsLike | number | string | null
+    ribQty?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -128739,6 +129666,18 @@ export namespace Prisma {
     tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnRate?: Decimal | DecimalJsLike | number | string | null
     mBtnQty?: Decimal | DecimalJsLike | number | string | null
     dcRate?: Decimal | DecimalJsLike | number | string | null
@@ -128789,6 +129728,21 @@ export namespace Prisma {
     tagQty?: Decimal | DecimalJsLike | number | string | null
     tasselsRate?: Decimal | DecimalJsLike | number | string | null
     tasselsQty?: Decimal | DecimalJsLike | number | string | null
+    btCollarType?: string | null
+    btCollarStyle?: string | null
+    btCollarClr?: string | null
+    collarRate?: Decimal | DecimalJsLike | number | string | null
+    collarQty?: Decimal | DecimalJsLike | number | string | null
+    btAopType?: string | null
+    btAopStyle?: string | null
+    btAopClr?: string | null
+    aopRate?: Decimal | DecimalJsLike | number | string | null
+    aopQty?: Decimal | DecimalJsLike | number | string | null
+    btRibType?: string | null
+    btRibStyle?: string | null
+    btRibClr?: string | null
+    ribRate?: Decimal | DecimalJsLike | number | string | null
+    ribQty?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -129207,6 +130161,18 @@ export namespace Prisma {
     tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     dcRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -129257,6 +130223,21 @@ export namespace Prisma {
     tagQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarClr?: NullableStringFieldUpdateOperationsInput | string | null
+    collarRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btAopType?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopClr?: NullableStringFieldUpdateOperationsInput | string | null
+    aopRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btRibType?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibClr?: NullableStringFieldUpdateOperationsInput | string | null
+    ribRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -129563,6 +130544,18 @@ export namespace Prisma {
     tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     dcRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -129613,6 +130606,21 @@ export namespace Prisma {
     tagQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarClr?: NullableStringFieldUpdateOperationsInput | string | null
+    collarRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btAopType?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopClr?: NullableStringFieldUpdateOperationsInput | string | null
+    aopRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btRibType?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibClr?: NullableStringFieldUpdateOperationsInput | string | null
+    ribRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -129963,6 +130971,18 @@ export namespace Prisma {
     tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnRate?: Decimal | DecimalJsLike | number | string | null
     mBtnQty?: Decimal | DecimalJsLike | number | string | null
     dcRate?: Decimal | DecimalJsLike | number | string | null
@@ -130013,6 +131033,21 @@ export namespace Prisma {
     tagQty?: Decimal | DecimalJsLike | number | string | null
     tasselsRate?: Decimal | DecimalJsLike | number | string | null
     tasselsQty?: Decimal | DecimalJsLike | number | string | null
+    btCollarType?: string | null
+    btCollarStyle?: string | null
+    btCollarClr?: string | null
+    collarRate?: Decimal | DecimalJsLike | number | string | null
+    collarQty?: Decimal | DecimalJsLike | number | string | null
+    btAopType?: string | null
+    btAopStyle?: string | null
+    btAopClr?: string | null
+    aopRate?: Decimal | DecimalJsLike | number | string | null
+    aopQty?: Decimal | DecimalJsLike | number | string | null
+    btRibType?: string | null
+    btRibStyle?: string | null
+    btRibClr?: string | null
+    ribRate?: Decimal | DecimalJsLike | number | string | null
+    ribQty?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -130320,6 +131355,18 @@ export namespace Prisma {
     tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnRate?: Decimal | DecimalJsLike | number | string | null
     mBtnQty?: Decimal | DecimalJsLike | number | string | null
     dcRate?: Decimal | DecimalJsLike | number | string | null
@@ -130370,6 +131417,21 @@ export namespace Prisma {
     tagQty?: Decimal | DecimalJsLike | number | string | null
     tasselsRate?: Decimal | DecimalJsLike | number | string | null
     tasselsQty?: Decimal | DecimalJsLike | number | string | null
+    btCollarType?: string | null
+    btCollarStyle?: string | null
+    btCollarClr?: string | null
+    collarRate?: Decimal | DecimalJsLike | number | string | null
+    collarQty?: Decimal | DecimalJsLike | number | string | null
+    btAopType?: string | null
+    btAopStyle?: string | null
+    btAopClr?: string | null
+    aopRate?: Decimal | DecimalJsLike | number | string | null
+    aopQty?: Decimal | DecimalJsLike | number | string | null
+    btRibType?: string | null
+    btRibStyle?: string | null
+    btRibClr?: string | null
+    ribRate?: Decimal | DecimalJsLike | number | string | null
+    ribQty?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -130680,6 +131742,18 @@ export namespace Prisma {
     tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnRate?: Decimal | DecimalJsLike | number | string | null
     mBtnQty?: Decimal | DecimalJsLike | number | string | null
     dcRate?: Decimal | DecimalJsLike | number | string | null
@@ -130730,6 +131804,21 @@ export namespace Prisma {
     tagQty?: Decimal | DecimalJsLike | number | string | null
     tasselsRate?: Decimal | DecimalJsLike | number | string | null
     tasselsQty?: Decimal | DecimalJsLike | number | string | null
+    btCollarType?: string | null
+    btCollarStyle?: string | null
+    btCollarClr?: string | null
+    collarRate?: Decimal | DecimalJsLike | number | string | null
+    collarQty?: Decimal | DecimalJsLike | number | string | null
+    btAopType?: string | null
+    btAopStyle?: string | null
+    btAopClr?: string | null
+    aopRate?: Decimal | DecimalJsLike | number | string | null
+    aopQty?: Decimal | DecimalJsLike | number | string | null
+    btRibType?: string | null
+    btRibStyle?: string | null
+    btRibClr?: string | null
+    ribRate?: Decimal | DecimalJsLike | number | string | null
+    ribQty?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -131037,6 +132126,18 @@ export namespace Prisma {
     tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnRate?: Decimal | DecimalJsLike | number | string | null
     mBtnQty?: Decimal | DecimalJsLike | number | string | null
     dcRate?: Decimal | DecimalJsLike | number | string | null
@@ -131087,6 +132188,21 @@ export namespace Prisma {
     tagQty?: Decimal | DecimalJsLike | number | string | null
     tasselsRate?: Decimal | DecimalJsLike | number | string | null
     tasselsQty?: Decimal | DecimalJsLike | number | string | null
+    btCollarType?: string | null
+    btCollarStyle?: string | null
+    btCollarClr?: string | null
+    collarRate?: Decimal | DecimalJsLike | number | string | null
+    collarQty?: Decimal | DecimalJsLike | number | string | null
+    btAopType?: string | null
+    btAopStyle?: string | null
+    btAopClr?: string | null
+    aopRate?: Decimal | DecimalJsLike | number | string | null
+    aopQty?: Decimal | DecimalJsLike | number | string | null
+    btRibType?: string | null
+    btRibStyle?: string | null
+    btRibClr?: string | null
+    ribRate?: Decimal | DecimalJsLike | number | string | null
+    ribQty?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -131552,6 +132668,18 @@ export namespace Prisma {
     tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     dcRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -131602,6 +132730,21 @@ export namespace Prisma {
     tagQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarClr?: NullableStringFieldUpdateOperationsInput | string | null
+    collarRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btAopType?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopClr?: NullableStringFieldUpdateOperationsInput | string | null
+    aopRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btRibType?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibClr?: NullableStringFieldUpdateOperationsInput | string | null
+    ribRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -131909,6 +133052,18 @@ export namespace Prisma {
     tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     dcRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -131959,6 +133114,21 @@ export namespace Prisma {
     tagQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarClr?: NullableStringFieldUpdateOperationsInput | string | null
+    collarRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btAopType?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopClr?: NullableStringFieldUpdateOperationsInput | string | null
+    aopRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btRibType?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibClr?: NullableStringFieldUpdateOperationsInput | string | null
+    ribRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -132284,6 +133454,18 @@ export namespace Prisma {
     tasselsRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     mBtnQty?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     dcRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -132334,6 +133516,21 @@ export namespace Prisma {
     tagQty?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     tasselsRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     tasselsQty?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    btCollarType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    btCollarStyle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    btCollarClr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    collarRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    collarQty?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    btAopType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    btAopStyle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    btAopClr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    aopRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    aopQty?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    btRibType?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    btRibStyle?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    btRibClr?: StringNullableFilter<"ExtractionResultFlat"> | string | null
+    ribRate?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
+    ribQty?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: DecimalNullableFilter<"ExtractionResultFlat"> | Decimal | DecimalJsLike | number | string | null
@@ -132861,6 +134058,18 @@ export namespace Prisma {
     tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnRate?: Decimal | DecimalJsLike | number | string | null
     mBtnQty?: Decimal | DecimalJsLike | number | string | null
     dcRate?: Decimal | DecimalJsLike | number | string | null
@@ -132911,6 +134120,21 @@ export namespace Prisma {
     tagQty?: Decimal | DecimalJsLike | number | string | null
     tasselsRate?: Decimal | DecimalJsLike | number | string | null
     tasselsQty?: Decimal | DecimalJsLike | number | string | null
+    btCollarType?: string | null
+    btCollarStyle?: string | null
+    btCollarClr?: string | null
+    collarRate?: Decimal | DecimalJsLike | number | string | null
+    collarQty?: Decimal | DecimalJsLike | number | string | null
+    btAopType?: string | null
+    btAopStyle?: string | null
+    btAopClr?: string | null
+    aopRate?: Decimal | DecimalJsLike | number | string | null
+    aopQty?: Decimal | DecimalJsLike | number | string | null
+    btRibType?: string | null
+    btRibStyle?: string | null
+    btRibClr?: string | null
+    ribRate?: Decimal | DecimalJsLike | number | string | null
+    ribQty?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -133218,6 +134442,18 @@ export namespace Prisma {
     tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnRate?: Decimal | DecimalJsLike | number | string | null
     mBtnQty?: Decimal | DecimalJsLike | number | string | null
     dcRate?: Decimal | DecimalJsLike | number | string | null
@@ -133268,6 +134504,21 @@ export namespace Prisma {
     tagQty?: Decimal | DecimalJsLike | number | string | null
     tasselsRate?: Decimal | DecimalJsLike | number | string | null
     tasselsQty?: Decimal | DecimalJsLike | number | string | null
+    btCollarType?: string | null
+    btCollarStyle?: string | null
+    btCollarClr?: string | null
+    collarRate?: Decimal | DecimalJsLike | number | string | null
+    collarQty?: Decimal | DecimalJsLike | number | string | null
+    btAopType?: string | null
+    btAopStyle?: string | null
+    btAopClr?: string | null
+    aopRate?: Decimal | DecimalJsLike | number | string | null
+    aopQty?: Decimal | DecimalJsLike | number | string | null
+    btRibType?: string | null
+    btRibStyle?: string | null
+    btRibClr?: string | null
+    ribRate?: Decimal | DecimalJsLike | number | string | null
+    ribQty?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -135119,6 +136370,18 @@ export namespace Prisma {
     tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnRate?: Decimal | DecimalJsLike | number | string | null
     mBtnQty?: Decimal | DecimalJsLike | number | string | null
     dcRate?: Decimal | DecimalJsLike | number | string | null
@@ -135169,6 +136432,21 @@ export namespace Prisma {
     tagQty?: Decimal | DecimalJsLike | number | string | null
     tasselsRate?: Decimal | DecimalJsLike | number | string | null
     tasselsQty?: Decimal | DecimalJsLike | number | string | null
+    btCollarType?: string | null
+    btCollarStyle?: string | null
+    btCollarClr?: string | null
+    collarRate?: Decimal | DecimalJsLike | number | string | null
+    collarQty?: Decimal | DecimalJsLike | number | string | null
+    btAopType?: string | null
+    btAopStyle?: string | null
+    btAopClr?: string | null
+    aopRate?: Decimal | DecimalJsLike | number | string | null
+    aopQty?: Decimal | DecimalJsLike | number | string | null
+    btRibType?: string | null
+    btRibStyle?: string | null
+    btRibClr?: string | null
+    ribRate?: Decimal | DecimalJsLike | number | string | null
+    ribQty?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -135476,6 +136754,18 @@ export namespace Prisma {
     tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnRate?: Decimal | DecimalJsLike | number | string | null
     mBtnQty?: Decimal | DecimalJsLike | number | string | null
     dcRate?: Decimal | DecimalJsLike | number | string | null
@@ -135526,6 +136816,21 @@ export namespace Prisma {
     tagQty?: Decimal | DecimalJsLike | number | string | null
     tasselsRate?: Decimal | DecimalJsLike | number | string | null
     tasselsQty?: Decimal | DecimalJsLike | number | string | null
+    btCollarType?: string | null
+    btCollarStyle?: string | null
+    btCollarClr?: string | null
+    collarRate?: Decimal | DecimalJsLike | number | string | null
+    collarQty?: Decimal | DecimalJsLike | number | string | null
+    btAopType?: string | null
+    btAopStyle?: string | null
+    btAopClr?: string | null
+    aopRate?: Decimal | DecimalJsLike | number | string | null
+    aopQty?: Decimal | DecimalJsLike | number | string | null
+    btRibType?: string | null
+    btRibStyle?: string | null
+    btRibClr?: string | null
+    ribRate?: Decimal | DecimalJsLike | number | string | null
+    ribQty?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -135884,6 +137189,18 @@ export namespace Prisma {
     tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     dcRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -135934,6 +137251,21 @@ export namespace Prisma {
     tagQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarClr?: NullableStringFieldUpdateOperationsInput | string | null
+    collarRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btAopType?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopClr?: NullableStringFieldUpdateOperationsInput | string | null
+    aopRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btRibType?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibClr?: NullableStringFieldUpdateOperationsInput | string | null
+    ribRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -136241,6 +137573,18 @@ export namespace Prisma {
     tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     dcRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -136291,6 +137635,21 @@ export namespace Prisma {
     tagQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarClr?: NullableStringFieldUpdateOperationsInput | string | null
+    collarRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btAopType?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopClr?: NullableStringFieldUpdateOperationsInput | string | null
+    aopRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btRibType?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibClr?: NullableStringFieldUpdateOperationsInput | string | null
+    ribRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -137217,6 +138576,18 @@ export namespace Prisma {
     tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnRate?: Decimal | DecimalJsLike | number | string | null
     mBtnQty?: Decimal | DecimalJsLike | number | string | null
     dcRate?: Decimal | DecimalJsLike | number | string | null
@@ -137267,6 +138638,21 @@ export namespace Prisma {
     tagQty?: Decimal | DecimalJsLike | number | string | null
     tasselsRate?: Decimal | DecimalJsLike | number | string | null
     tasselsQty?: Decimal | DecimalJsLike | number | string | null
+    btCollarType?: string | null
+    btCollarStyle?: string | null
+    btCollarClr?: string | null
+    collarRate?: Decimal | DecimalJsLike | number | string | null
+    collarQty?: Decimal | DecimalJsLike | number | string | null
+    btAopType?: string | null
+    btAopStyle?: string | null
+    btAopClr?: string | null
+    aopRate?: Decimal | DecimalJsLike | number | string | null
+    aopQty?: Decimal | DecimalJsLike | number | string | null
+    btRibType?: string | null
+    btRibStyle?: string | null
+    btRibClr?: string | null
+    ribRate?: Decimal | DecimalJsLike | number | string | null
+    ribQty?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -137580,6 +138966,18 @@ export namespace Prisma {
     tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     dcRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -137630,6 +139028,21 @@ export namespace Prisma {
     tagQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarClr?: NullableStringFieldUpdateOperationsInput | string | null
+    collarRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btAopType?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopClr?: NullableStringFieldUpdateOperationsInput | string | null
+    aopRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btRibType?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibClr?: NullableStringFieldUpdateOperationsInput | string | null
+    ribRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -137937,6 +139350,18 @@ export namespace Prisma {
     tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     dcRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -137987,6 +139412,21 @@ export namespace Prisma {
     tagQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarClr?: NullableStringFieldUpdateOperationsInput | string | null
+    collarRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btAopType?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopClr?: NullableStringFieldUpdateOperationsInput | string | null
+    aopRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btRibType?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibClr?: NullableStringFieldUpdateOperationsInput | string | null
+    ribRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -138293,6 +139733,18 @@ export namespace Prisma {
     tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     dcRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -138343,6 +139795,21 @@ export namespace Prisma {
     tagQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarClr?: NullableStringFieldUpdateOperationsInput | string | null
+    collarRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btAopType?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopClr?: NullableStringFieldUpdateOperationsInput | string | null
+    aopRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btRibType?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibClr?: NullableStringFieldUpdateOperationsInput | string | null
+    ribRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -138715,6 +140182,18 @@ export namespace Prisma {
     tasselsRoughV2?: Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: Decimal | DecimalJsLike | number | string | null
     mBtnRate?: Decimal | DecimalJsLike | number | string | null
     mBtnQty?: Decimal | DecimalJsLike | number | string | null
     dcRate?: Decimal | DecimalJsLike | number | string | null
@@ -138765,6 +140244,21 @@ export namespace Prisma {
     tagQty?: Decimal | DecimalJsLike | number | string | null
     tasselsRate?: Decimal | DecimalJsLike | number | string | null
     tasselsQty?: Decimal | DecimalJsLike | number | string | null
+    btCollarType?: string | null
+    btCollarStyle?: string | null
+    btCollarClr?: string | null
+    collarRate?: Decimal | DecimalJsLike | number | string | null
+    collarQty?: Decimal | DecimalJsLike | number | string | null
+    btAopType?: string | null
+    btAopStyle?: string | null
+    btAopClr?: string | null
+    aopRate?: Decimal | DecimalJsLike | number | string | null
+    aopQty?: Decimal | DecimalJsLike | number | string | null
+    btRibType?: string | null
+    btRibStyle?: string | null
+    btRibClr?: string | null
+    ribRate?: Decimal | DecimalJsLike | number | string | null
+    ribQty?: Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: Decimal | DecimalJsLike | number | string | null
     printRoughV2?: Decimal | DecimalJsLike | number | string | null
     printVendorCost?: Decimal | DecimalJsLike | number | string | null
@@ -139183,6 +140677,18 @@ export namespace Prisma {
     tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     dcRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -139233,6 +140739,21 @@ export namespace Prisma {
     tagQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarClr?: NullableStringFieldUpdateOperationsInput | string | null
+    collarRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btAopType?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopClr?: NullableStringFieldUpdateOperationsInput | string | null
+    aopRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btRibType?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibClr?: NullableStringFieldUpdateOperationsInput | string | null
+    ribRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -139540,6 +141061,18 @@ export namespace Prisma {
     tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     dcRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -139590,6 +141123,21 @@ export namespace Prisma {
     tagQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarClr?: NullableStringFieldUpdateOperationsInput | string | null
+    collarRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btAopType?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopClr?: NullableStringFieldUpdateOperationsInput | string | null
+    aopRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btRibType?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibClr?: NullableStringFieldUpdateOperationsInput | string | null
+    ribRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -139896,6 +141444,18 @@ export namespace Prisma {
     tasselsRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribVdrCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribFinalCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     mBtnQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     dcRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
@@ -139946,6 +141506,21 @@ export namespace Prisma {
     tagQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tasselsQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btCollarType?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btCollarClr?: NullableStringFieldUpdateOperationsInput | string | null
+    collarRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    collarQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btAopType?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btAopClr?: NullableStringFieldUpdateOperationsInput | string | null
+    aopRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    aopQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    btRibType?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibStyle?: NullableStringFieldUpdateOperationsInput | string | null
+    btRibClr?: NullableStringFieldUpdateOperationsInput | string | null
+    ribRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    ribQty?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printAutoBgt?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printRoughV2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     printVendorCost?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
