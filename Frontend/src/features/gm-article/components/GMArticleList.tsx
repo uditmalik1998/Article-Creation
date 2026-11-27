@@ -1134,8 +1134,8 @@ const ArticleCard = React.memo(
           ] as BomField[])
         : []),
       { label: 'Fashion type', field: 'articleFashionType', mandatory: true, kind: 'pick', options: ['C'] },
-      // M_BUYING_TYPE: fixed PLANNED / READY, optional, DB only (not sent to SAP).
-      { label: 'BUYING_TYPE', field: 'buyingType', mandatory: false, kind: 'pick', options: ['PLANNED', 'READY'] },
+      // BUYING_TYPE: fixed PLANNED / READY, mandatory, DB only (not sent to SAP).
+      { label: 'BUYING_TYPE', field: 'buyingType', mandatory: true, kind: 'pick', options: ['PLANNED', 'READY'] },
       ...(!isFGMode
         ? ([
             { label: 'Segment', field: 'segment', mandatory: true, kind: 'text' },

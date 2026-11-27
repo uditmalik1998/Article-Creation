@@ -265,8 +265,8 @@ const CARD_LABEL_OVERRIDES: Record<string, string> = {
   buying_type: 'BUYING_TYPE',
 };
 
-// M_BUYING_TYPE (FG OTH GRID-1 card, below M_IMP_ATBT): fixed options, always shown,
-// optional. Saved to extraction_results_flat.buying_type only — not sent to SAP.
+// BUYING_TYPE (FG OTH GRID-1 card, below M_IMP_ATBT): fixed options, always shown,
+// mandatory for Save & Submit. Saved to extraction_results_flat.buying_type only — not sent to SAP.
 const BUYING_TYPE_OPTIONS = ['PLANNED', 'READY'];
 
 // M_FAB_VDR (FG FAB card): fixed options, always shown, mandatory; empty → NON-NOMINATED.
@@ -1521,9 +1521,10 @@ const ArticleCard = React.memo(
           continue;
         }
 
-        // M_BUYING_TYPE: FG cards only (not Body Article), always visible, two fixed values.
+        // BUYING_TYPE: FG cards only (not Body Article), always visible + mandatory, two fixed values.
         if (af.schemaKey === 'buying_type') {
           if (allowGroups) continue;
+          mandatory.add(af.schemaKey);
           visible.push({
             field: af.field,
             label: af.label,
@@ -1532,7 +1533,8 @@ const ArticleCard = React.memo(
             groupColor: af.groupColor,
             values: BUYING_TYPE_OPTIONS.map((v) => ({ shortForm: v, fullForm: v })),
             freeText: false,
-            isMandatory: false,
+            isMandatory: true,
+            mandatory: true,
           });
           continue;
         }

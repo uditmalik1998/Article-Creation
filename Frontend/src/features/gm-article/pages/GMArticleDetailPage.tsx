@@ -33,6 +33,7 @@ function getMissingMandatoryFields(item: any, isFGMode = false): string[] {
   if (!item.vendorName) missing.push('VENDOR NAME');
   if (!isFGMode && !item.mrp) missing.push('MRP');
   if (isFGMode && !item.articleFashionType) missing.push('ARTICLE FASHION TYPE');
+  if (!String(item.buyingType ?? '').trim()) missing.push('BUYING_TYPE');
   // GM uses its own GM grid, not the FG mandatory grid (removed 2026-11-23).
   return missing;
 }

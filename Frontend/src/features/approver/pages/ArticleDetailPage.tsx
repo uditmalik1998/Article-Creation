@@ -170,6 +170,7 @@ function getMissingMandatoryFields(item: any, majorCatOverride?: string | null):
   if (item.roughV2 == null || String(item.roughV2).trim() === '') missing.push('ACT-V2');
   // Always required by the SAP creation step (zmmArtCreationService MANDATORY), whatever the category grid says.
   if (!item.impAtrbt2) missing.push('M_IMP_ATBT');
+  if (!String(item.buyingType ?? '').trim()) missing.push('BUYING_TYPE');
   // M_GSM follows M_FAB_DIV (same as the Fabric article page): required for K / RFD_K,
   // not required (and hidden) for W / RFD_W / DNM — whatever the category grid says.
   if (isGsmRequiredForDiv(item.fabDiv) && !String(item.gsm ?? '').trim()) missing.push('M_GSM');
