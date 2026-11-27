@@ -26,6 +26,7 @@ const BTRIM_KEYS = [
     'mBtn', 'dc', 'zip', 'patch', 'hTrf', 'elastic', 'fusing', 'badge', 'rivet', 'tape', 'other',
     'adjuster', 'brotch', 'buckle', 'eyelets', 'hangingDRing', 'hook', 'label', 'lace',
     'pockettingFabric', 'pockettingReadymade', 'santa', 'stopper', 'tag', 'tassels',
+    'collar', 'aop', 'rib',
 ];
 const CMP_KEYS = ['cutting', 'stitching', 'ironing', 'finishing', 'total'];
 const VADD_KEYS = ['print', 'emb', 'washing', 'vaddTotal'];
