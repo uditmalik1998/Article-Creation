@@ -31,6 +31,7 @@ function getMissingMandatoryFields(item: any, isFGMode = false): string[] {
   if (!item.vendorName) missing.push('VENDOR NAME');
   if (!isFGMode && !item.mrp) missing.push('MRP');
   if (isFGMode && !item.articleFashionType) missing.push('ARTICLE FASHION TYPE');
+  if (!String(item.buyingType ?? '').trim()) missing.push('BUYING_TYPE');
   // Fabric has no mandatory grid (2026-11-23): FAB attributes are not grid-required,
   // except M_GSM for Knits — required when M_FAB_DIV is K or RFD_K.
   if (!isFGMode && isGsmRequiredForDiv(item.fabDiv) && !String(item.gsm ?? '').trim()) {

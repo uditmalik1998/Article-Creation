@@ -5,6 +5,12 @@
 
 ---
 
+## 2026-11-27 — BUYING_TYPE mandatory (FG, Fabric, GM)
+
+- Required for Save & Submit on all three: FG `ArticleDetailPage.getMissingMandatoryFields`, Fabric + GM `getMissingMandatoryFields` (every mode, incl. FG New under Fabric) → "BUYING_TYPE" in the missing list.
+- Cards show it as required (red * / amber "Required" when empty): FG OTH GRID-1 (`mandatory.add('buying_type')`, isMandatory), Fabric BOM row `mandatory: true`, GM BOM field `mandatory: true` (now counted in "Required x/y").
+- Frontend only (backend does not check it). Every pending article is blank today, so each needs a pick before submit until SRM fills raw buying_type.
+
 ## 2026-11-26 — buying_type on the SRM raw tables
 
 - New `buying_type VARCHAR(50)` on `raw_articles`, `fabric_raw_data`, `gm_raw_data` (SQL `Backend/prisma/migrations/20261126_add_raw_buying_type.sql`, applied 2026-11-26, migration `add_raw_buying_type`). Prisma `buyingType` on RawArticle / FabricRawData / GmRawData.
